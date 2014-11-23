@@ -2,19 +2,18 @@ package com.mygdx.game.bees;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.BeeGame;
-import com.mygdx.game.GH;
+import com.mygdx.game.helpers.Constants;
+import com.mygdx.game.helpers.GH;
 import com.mygdx.game.Grid;
 import com.mygdx.game.interfaces.IRenderable;
 import com.mygdx.game.interfaces.IUpdateable;
+import com.mygdx.game.server.ServerPlayer;
 
-import java.io.Console;
-import java.sql.Time;
 import java.util.ArrayList;
 
 /**
@@ -62,7 +61,7 @@ public class Bee implements IUpdateable, IRenderable{
 		shapeRenderer.setColor(this.color);
 		shapeRenderer.rect(this.loc.x - size/2, this.loc.y - size/2, this.size, this.size);
 
-		if(this.caste == BeeGame.QUEEN) {
+		if(this.caste == Constants.QUEEN) {
 			shapeRenderer.end();
 			shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
 			shapeRenderer.setColor(Color.BLACK);
@@ -80,21 +79,21 @@ public class Bee implements IUpdateable, IRenderable{
 		this.age(deltaTime);
 		this.checkCurrCell();
 
-		if(this.caste != BeeGame.LARVA){
+		if(this.caste != Constants.LARVA){
 			this.checkForFood(deltaTime);
 		}
 
-		if(this.caste == BeeGame.WORKER) {
+		if(this.caste == Constants.WORKER) {
 			this.checkForEnemies(deltaTime);
 		}
 
-		if(this.caste == BeeGame.QUEEN) {
+		if(this.caste == Constants.QUEEN) {
 			this.spawnLarva(deltaTime);
 		}
 	}
 
 	public void checkCurrCell(){
-		Grid.Cell tmpCell = BeeGame.grid.getCell(this.loc.x, this.loc.y);
+		Grid.Cell tmpCell = Grid.activeGrid.getCell(this.loc.x, this.loc.y);
 		if((this.currCell == null || this.currCell != tmpCell) && tmpCell != null){
 			if(this.currCell != null) this.currCell.removeFromCell(this);
 			this.currCell = tmpCell;
@@ -121,7 +120,7 @@ public class Bee implements IUpdateable, IRenderable{
 		this.loc.x = this.loc.x + MathUtils.cos(rotation)*this.speed*deltaTime;
 		this.loc.y = this.loc.y + MathUtils.sin(rotation)*this.speed*deltaTime;
 
-		if(this.caste == BeeGame.WORKER){
+		if(this.caste == Constants.WORKER){
 			if(Math.abs(this.loc.x - this.queenRef.loc.x) <= 0.3 && Math.abs(this.loc.y - this.queenRef.loc.y) <= 0.3) {
 				this.queenRef.food += this.food;
 				this.food = 0;
@@ -143,12 +142,12 @@ public class Bee implements IUpdateable, IRenderable{
 			this.setDestCounter -= this.setDestTick;
 
 			//If food is greater than 0 and we are a worker, move to the queen!
-			if(this.food > 0 && this.caste == BeeGame.WORKER){
+			if(this.food > 0 && this.caste == Constants.WORKER){
 				this.dest.x = this.queenRef.loc.x;
 				this.dest.y = this.queenRef.loc.y;
 				return;
 			//Otherwise, we have no food and we should look for the nearest path.
-			}else if(this.caste == BeeGame.WORKER){
+			}else if(this.caste == Constants.WORKER){
 				int startX = this.currCell.getCol() - 1;
 				int startY = this.currCell.getRow() - 1;
 				int endX = this.currCell.getCol() + 1;
@@ -156,12 +155,12 @@ public class Bee implements IUpdateable, IRenderable{
 
 				for(int x=startX; x<=endX;x++){
 					for(int y=startY;y<=endY;y++){
-						Grid.Cell tmpCell = BeeGame.grid.getCell(x,y);
+						Grid.Cell tmpCell = Grid.activeGrid.getCell(x,y);
 						if(tmpCell == null) continue;
 
 						if(tmpCell.trail > 1){
-							this.dest.x = x*BeeGame.grid.squareSize + BeeGame.grid.squareSize/2f;
-							this.dest.y = y*BeeGame.grid.squareSize + BeeGame.grid.squareSize/2f;
+							this.dest.x = x*Grid.activeGrid.squareSize + Grid.activeGrid.squareSize/2f;
+							this.dest.y = y*Grid.activeGrid.squareSize + Grid.activeGrid.squareSize/2f;
 							return;
 						}
 					}
@@ -169,7 +168,7 @@ public class Bee implements IUpdateable, IRenderable{
 			}
 
 			//If the above failed, let's try to move randomly!
-			if(this.caste == BeeGame.QUEEN || Math.random() > 0.10) {
+			if(this.caste == Constants.QUEEN || Math.random() > 0.10) {
 				this.dest.x = this.loc.x + (this.dist * MathUtils.random() - this.dist * 0.4f);
 				this.dest.y = this.loc.y + (this.dist * MathUtils.random() - this.dist * 0.4f);
 
@@ -194,8 +193,8 @@ public class Bee implements IUpdateable, IRenderable{
 	}
 
 	public void morph(float deltaTime){
-		if(caste == BeeGame.LARVA){
-			this.caste = BeeGame.WORKER;
+		if(caste == Constants.LARVA){
+			this.caste = Constants.WORKER;
 			this.speed = 50;
 			this.size *= 1.4;
 			this.age = 0;
@@ -226,7 +225,7 @@ public class Bee implements IUpdateable, IRenderable{
 
 		for(int x = startX; x <= endX; x++){
 			for(int y=startY; y<= endY; y++){
-				Grid.Cell tmpCell = BeeGame.grid.getCell(x,y);
+				Grid.Cell tmpCell = Grid.activeGrid.getCell(x,y);
 				if(tmpCell == null) continue;
 
 				ArrayList<?> list = tmpCell.getObjectList();
@@ -235,7 +234,7 @@ public class Bee implements IUpdateable, IRenderable{
 					if(bee.queenRef != this.queenRef){
 						float combinedSize = bee.size/2 + this.size/2;
 						if(Math.abs(this.loc.x - bee.loc.x) <= combinedSize && Math.abs(this.loc.y - bee.loc.y) <= combinedSize){
-							if(bee.caste == BeeGame.QUEEN){
+							if(bee.caste == Constants.QUEEN){
 								bee.health -= this.damage*deltaTime;
 								this.food = 2;
 							}else{
@@ -257,7 +256,7 @@ public class Bee implements IUpdateable, IRenderable{
 
 			if(this.food >= 5){
 				this.food -= 5;
-				BeeGame.AddBee(new Bee(BeeGame.LARVA, this.color, 0, this.loc.x, this.loc.y, this.size/6, this.speed/5, 5, this, 1, 5));
+				ServerPlayer.AddBee(new Bee(Constants.LARVA, this.color, 0, this.loc.x, this.loc.y, this.size / 6, this.speed / 5, 5, this, 1, 5));
 			}
 		}
 	}

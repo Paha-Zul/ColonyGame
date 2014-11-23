@@ -1,4 +1,4 @@
-package com.mygdx.game;
+package com.mygdx.game.helpers;
 
 /**
  * Created by Bbent_000 on 11/17/2014.
