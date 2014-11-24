@@ -18,7 +18,7 @@ import sun.security.pkcs11.wrapper.Functions;
 import java.util.ArrayList;
 
 public class BeeGame extends Game {
-	public boolean server = true;
+	public boolean server = false;
 
 	ServerPlayer serverPlayer;
 	ClientPlayer clientPlayer;

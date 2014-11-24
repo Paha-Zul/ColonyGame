@@ -6,7 +6,7 @@ package com.mygdx.game.client;
 public class ClientPlayer {
 
 	public ClientPlayer(){
-
+		Client.StartClient("localhost", 1337);
 	}
 
 	public void render(float delta){

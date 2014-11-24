@@ -1,11 +1,13 @@
 package com.mygdx.game.server;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.ServerSocket;
-import java.net.Socket;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Net;
+import com.badlogic.gdx.net.ServerSocket;
+import com.badlogic.gdx.net.Socket;
+import com.mygdx.game.helpers.BytesUtil;
+import com.mygdx.game.helpers.GH;
+
+import java.io.*;
 import java.util.ArrayList;
 
 /**
@@ -33,7 +35,7 @@ public class Server{
 
 		public ServerThread(int port){
 			try {
-				server = new ServerSocket(port);
+				server = Gdx.net.newServerSocket(Net.Protocol.TCP, port, null);
 				System.out.println("Hosting server on port "+port);
 			}catch (Exception e) {
 				e.printStackTrace();
@@ -44,16 +46,21 @@ public class Server{
 		public void run() {
 			while(!this.done) {
 				try {
-					Socket client = server.accept();
+					Socket client = server.accept(null);
 					clients.add(client);
+					System.out.println("New client connected");
+
+					ConnectionThread connThread = new ConnectionThread(client) ;
+					Thread thread = new Thread(connThread);
+					thread.start();
 
 					input = client.getInputStream();
 					String inputString = inputStreamAsString(input);
 
 					System.out.println(inputString);
 
-					client.close();
-					server.close();
+					client.dispose();
+					server.dispose();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -71,6 +78,40 @@ public class Server{
 
 			br.close();
 			return sb.toString();
+		}
+	}
+
+	private static class ConnectionThread implements Runnable{
+		Socket socket;
+
+		public ConnectionThread(Socket socket){
+			this.socket = socket;
+		}
+
+		@Override
+		public void run() {
+			// Again, probably better to store these objects references in the support class
+			InputStream in = socket.getInputStream();
+			DataInputStream dis = new DataInputStream(in);
+
+			while(socket.isConnected()) {
+				try {
+					System.out.println("Server listening");
+					byte[] data = new byte[8192];
+					dis.readFully(data);
+					GH.Message mess = null;
+					try {
+						mess = (GH.Message)BytesUtil.toObject(data);
+					} catch (ClassNotFoundException e) {
+						e.printStackTrace();
+					}
+
+					System.out.println("Got message '"+mess.message+"'");
+				} catch (IOException e) {
+					e.printStackTrace();
+					socket.dispose();
+				}
+			}
 		}
 	}
 }
