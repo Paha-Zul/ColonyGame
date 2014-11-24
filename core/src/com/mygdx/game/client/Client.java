@@ -21,19 +21,16 @@ public class Client {
 	}
 
 	private static class ClientThread implements Runnable{
-		public boolean done;
 		Socket socket;
-		InputStream in;
 		DataInputStream dis;
-		OutputStream out;
 		DataOutputStream dos;
 
 		public ClientThread(String host, int port){
 			socket = Gdx.net.newClientSocket(Net.Protocol.TCP, host, port, null);
-			in = socket.getInputStream();
-			dis = new DataInputStream(in);
-			out = socket.getOutputStream();
-			dos = new DataOutputStream(out);
+			dis = new DataInputStream(socket.getInputStream());
+			dos = new DataOutputStream(socket.getOutputStream());
+
+			System.out.println("Started listening from "+host+" on port "+port);
 
 			GH.Message message = new GH.Message();
 			message.message = "Hello";
@@ -46,21 +43,27 @@ public class Client {
 
 			try {
 				dos.write(obj);
+				dos.flush();
 				System.out.println("Client: I sent the data");
 			}catch(IOException e){
 				e.printStackTrace();
 			}
 
-			System.out.println("Started listening from "+host+" on port "+port);
 		}
 
 		@Override
 		public void run() {
 			while(socket.isConnected()) {
 				try {
+					System.out.println("Client: Client is listening");
 					byte[] data = new byte[8192];
 					dis.readFully(data);
+					GH.Message mess = (GH.Message)BytesUtil.toObject(data);
+					System.out.println("Client: Client received data: "+mess.message);
+
 				} catch (IOException e) {
+					e.printStackTrace();
+				} catch (ClassNotFoundException e) {
 					e.printStackTrace();
 				}
 			}

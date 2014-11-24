@@ -29,14 +29,14 @@ public class Server{
 	private static class ServerThread implements Runnable{
 		public boolean done = false;
 
-		private ArrayList<Socket> clients = new ArrayList<Socket>();
+		private ArrayList<ConnectionThread> clients = new ArrayList<ConnectionThread>();
 		private ServerSocket server;
 		private InputStream input;
 
 		public ServerThread(int port){
 			try {
 				server = Gdx.net.newServerSocket(Net.Protocol.TCP, port, null);
-				System.out.println("Hosting server on port "+port);
+				System.out.println("Server: Hosting server on port "+port);
 			}catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -47,57 +47,47 @@ public class Server{
 			while(!this.done) {
 				try {
 					Socket client = server.accept(null);
-					clients.add(client);
-					System.out.println("New client connected");
-
 					ConnectionThread connThread = new ConnectionThread(client) ;
+					clients.add(connThread);
 					Thread thread = new Thread(connThread);
 					thread.start();
-
-					input = client.getInputStream();
-					String inputString = inputStreamAsString(input);
-
-					System.out.println(inputString);
-
-					client.dispose();
-					server.dispose();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
 		}
-
-		public static String inputStreamAsString(InputStream stream) throws IOException {
-			BufferedReader br = new BufferedReader(new InputStreamReader(stream));
-			StringBuilder sb = new StringBuilder();
-			String line = null;
-
-			while ((line = br.readLine()) != null) {
-				sb.append(line + "\n");
-			}
-
-			br.close();
-			return sb.toString();
-		}
 	}
 
 	private static class ConnectionThread implements Runnable{
 		Socket socket;
+		DataInputStream dis;
+		DataOutputStream dos;
 
 		public ConnectionThread(Socket socket){
+			System.out.println("Server: New client connected");
 			this.socket = socket;
+			dis = new DataInputStream(socket.getInputStream());
+			dos = new DataOutputStream(socket.getOutputStream());
+
+			GH.Message mess = new GH.Message();
+			mess.message = "Hi!";
+
+			try {
+				System.out.println("Sending 'Hi!' to new client");
+				dos.write(BytesUtil.toByteArray(mess));
+				dos.flush();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 
 		@Override
 		public void run() {
-			// Again, probably better to store these objects references in the support class
-			InputStream in = socket.getInputStream();
-			DataInputStream dis = new DataInputStream(in);
 
 			while(socket.isConnected()) {
 				try {
-					System.out.println("Server listening");
-					byte[] data = new byte[8192];
+					System.out.println("Server: Server listening");
+					byte[] data = new byte[16384];
 					dis.readFully(data);
 					GH.Message mess = null;
 					try {
@@ -106,12 +96,13 @@ public class Server{
 						e.printStackTrace();
 					}
 
-					System.out.println("Got message '"+mess.message+"'");
+					System.out.println("Server: Got message '"+mess.message+"'");
 				} catch (IOException e) {
-					e.printStackTrace();
 					socket.dispose();
 				}
 			}
+
+			System.out.println("Server: Client disconnected");
 		}
 	}
 }
