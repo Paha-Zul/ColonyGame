@@ -22,9 +22,7 @@ public class GraphicIdentity extends Component{
 	}
 
 	@Override
-	public void start(Entity owner) {
-		super.start(owner);
-
+	public void start() {
 		Vector2 pos = this.owner.transform.getWorldPosition(); //Cache the owner's position.
 		this.sprite.setPosition(pos.x - this.sprite.getWidth()/2, pos.y - this.sprite.getHeight()/2);
 		this.sprite.setCenter(-this.sprite.getWidth()/2, -this.sprite.getHeight()/2);

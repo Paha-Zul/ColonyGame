@@ -17,8 +17,12 @@ public abstract class Component implements IDestroyable {
 		this.active = active;
 	}
 
-	public void start(Entity owner){
+	public void init(Entity owner){
 		this.owner = owner;
+	}
+
+	public void start(){
+
 	}
 
 	public void update(float delta) {
@@ -30,10 +34,6 @@ public abstract class Component implements IDestroyable {
 	}
 
 	public void lateUpdate(float delta) {
-
-	}
-
-	public void render(SpriteBatch batch) {
 
 	}
 

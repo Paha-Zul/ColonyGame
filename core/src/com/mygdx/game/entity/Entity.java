@@ -82,13 +82,21 @@ public class Entity {
 
 	public void update(float delta){
 		if(this.newComponentList.size() > 0) {
+			//Initialize the component by setting the owner. Also add it to the owner.
 			for (Component comp : this.newComponentList) {
-				comp.start(this);
+				comp.init(this);
 				if(comp.isActive())
 					this.activeComponentList.add(comp);
 				else
 					this.inactiveComponentList.add(comp);
 			}
+
+			//Call start to set up. We can also access other components from the Entity
+			//owner that are being added at the same time.
+			for (Component comp : this.newComponentList) {
+				comp.start();
+			}
+
 			this.newComponentList.clear();
 		}
 

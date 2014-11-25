@@ -8,6 +8,8 @@ import com.mygdx.game.entity.Entity;
  * Created by Bbent_000 on 11/24/2014.
  */
 public class SquareGraphic extends Component {
+	public float size = 30;
+
 	private ShapeRenderer renderer;
 
 	public SquareGraphic(String name, int type, boolean active, ShapeRenderer renderer) {
@@ -17,8 +19,9 @@ public class SquareGraphic extends Component {
 	}
 
 	@Override
-	public void start(Entity owner) {
-		super.start(owner);
+	public void start() {
+		super.start();
+
 	}
 
 	@Override
@@ -27,6 +30,6 @@ public class SquareGraphic extends Component {
 
 		Vector2 pos = this.owner.transform.getWorldPosition();
 
-		this.renderer.rect(pos.x - 5, pos.y - 5, 10, 10);
+		this.renderer.rect(pos.x - size*0.5f, pos.y - size*0.5f, size, size);
 	}
 }

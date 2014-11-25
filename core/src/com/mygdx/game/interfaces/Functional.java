@@ -7,4 +7,8 @@ public class Functional {
 	public interface Perform<T> {
 		void perform(T t);
 	}
+
+	public interface Callback{
+		void callback();
+	}
 }

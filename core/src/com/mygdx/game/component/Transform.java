@@ -29,8 +29,9 @@ public class Transform extends Component implements IDestroyable {
 	}
 
 	@Override
-	public void start(Entity owner) {
-		super.start(owner);
+	public void start() {
+		super.start();
+
 	}
 
 	/**

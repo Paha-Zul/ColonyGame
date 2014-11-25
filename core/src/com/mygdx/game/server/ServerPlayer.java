@@ -9,6 +9,8 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.Grid;
 import com.mygdx.game.bees.Bee;
+import com.mygdx.game.component.Move;
+import com.mygdx.game.component.SetDestination;
 import com.mygdx.game.component.SquareGraphic;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.Constants;
@@ -25,9 +27,6 @@ public class ServerPlayer {
 	ShapeRenderer shapeRenderer;
 	Color screenColor = new Color(163f/255f, 154f/255f, 124f/255f, 1);
 
-//	static ArrayList<Bee> beeList = new ArrayList<Bee>();
-//	static ArrayList<Bee> queenList = new ArrayList<Bee>();
-
 	public ServerPlayer(){
 		//Start the server
 		Server.start(1337);
@@ -37,16 +36,24 @@ public class ServerPlayer {
 		batch = new SpriteBatch();
 		this.shapeRenderer = new ShapeRenderer();
 
-//		//Create 10 queens.
-//		for(int i=0;i<10;i++) {
-//			Color color = new Color(MathUtils.random(), MathUtils.random(), MathUtils.random(), 1);
-//			Bee bee = new Bee(Constants.QUEEN, color, 0, MathUtils.random()*Gdx.graphics.getWidth(), MathUtils.random()*Gdx.graphics.getHeight(), 20, 20, 30, null, 100, 256);
-//			bee.queenRef = bee;
-//			this.queenList.add(bee);
-//		}
 		for(int i=0;i<10;i++) {
 			Entity ent = new Entity("Queen", new Vector2(100,100), 0);
-			ent.addComponent(new SquareGraphic("Square", 0, true, this.shapeRenderer));
+
+			Move move = new Move("Move", 1, true);
+			move.moveSpeed = 50 + MathUtils.random(50);
+			move.threshold = 0.1f;
+
+			SetDestination setDest = new SetDestination("SetDest", 0, true);
+			setDest.moveDis = 100;
+
+			SquareGraphic square = new SquareGraphic("Square", 0, true, this.shapeRenderer);
+			square.size = (float)(5 + Math.random()*15);
+
+			ent.addComponent(move);
+			ent.addComponent(setDest);
+			ent.addComponent(square);
+
+
 			ListHolder.addEntity(0, ent);
 		}
 
