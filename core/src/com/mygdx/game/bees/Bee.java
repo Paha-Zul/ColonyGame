@@ -256,7 +256,7 @@ public class Bee implements IUpdateable, IRenderable{
 
 			if(this.food >= 5){
 				this.food -= 5;
-				ServerPlayer.AddBee(new Bee(Constants.LARVA, this.color, 0, this.loc.x, this.loc.y, this.size / 6, this.speed / 5, 5, this, 1, 5));
+				//ServerPlayer.AddBee(new Bee(Constants.LARVA, this.color, 0, this.loc.x, this.loc.y, this.size / 6, this.speed / 5, 5, this, 1, 5));
 			}
 		}
 	}

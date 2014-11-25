@@ -27,8 +27,6 @@ public class Entity {
 	protected ArrayList<Component> inactiveComponentList;
 	protected boolean destroyed=false;
 
-
-
 	/**
 	 * Creates an Entity that will start with a GraphicIdentity component.
 	 * @param name The name of the Entity.
@@ -41,12 +39,16 @@ public class Entity {
 		this.name = name;
 		this.activeComponentList = new ArrayList<Component>();
 		this.inactiveComponentList = new ArrayList<Component>();
+		this.newComponentList = new ArrayList<Component>();
 
 		this.transform = new Transform(position, rotation);
-		this.identity = new GraphicIdentity(graphic, batch);
-
 		this.newComponentList.add(this.transform);
-		this.newComponentList.add(this.identity);
+
+		if(batch != null && graphic != null) {
+			this.identity = new GraphicIdentity(graphic, batch);
+			this.newComponentList.add(this.identity);
+		}
+
 	}
 
 	/**
@@ -55,10 +57,9 @@ public class Entity {
 	 * such as "Paha's Market". Use as desired.
 	 * @param position The starting X and Y position of this Entity.
 	 * @param rotation The starting rotation of this Entity.
-	 * @param graphic The texture to represent this entity. If null, it will not be drawn.
 	 */
-	public Entity(String name, Vector2 position, float rotation, Texture graphic){
-		this(name, position, rotation, graphic, null);
+	public Entity(String name, Vector2 position, float rotation){
+		this(name, position, rotation, null, null);
 	}
 
 	/**

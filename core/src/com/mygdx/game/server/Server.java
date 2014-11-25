@@ -53,6 +53,7 @@ public class Server{
 					thread.start();
 				} catch (Exception e) {
 					e.printStackTrace();
+					this.done = true;
 				}
 			}
 		}
