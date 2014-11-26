@@ -11,9 +11,7 @@ public abstract class Component implements IDestroyable {
 	private boolean active = false, destroyed = false;
 	protected Entity owner;
 
-	public Component(String name, int type, boolean active) {
-		this.name = name;
-		this.type = type;
+	public Component(boolean active) {
 		this.active = active;
 	}
 

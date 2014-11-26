@@ -2,6 +2,7 @@ package com.mygdx.game.component;
 
 import java.util.ArrayList;
 
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.interfaces.IDestroyable;
@@ -9,9 +10,8 @@ import com.mygdx.game.interfaces.IDestroyable;
 public class Transform extends Component implements IDestroyable {
 	public Entity parent;
 	private Vector2 worldPosition, localPosition;
-	public float worldRotation, localRotation;
+	private float worldRotation, localRotation, rotationOffset=0, distFromParent=0;
 
-	private Entity owner;
 	private ArrayList<Entity> children;
 
 	/**
@@ -20,18 +20,75 @@ public class Transform extends Component implements IDestroyable {
 	 * @param rotation The world rotation of the owner Entity.
 	 */
 	public Transform(Vector2 position, float rotation){
-		super("Transform", 0, true);
+		super(true);
 		this.worldPosition = new Vector2(position.x, position.y);
-		this.localPosition = new Vector2(position.x, position.y);
+		this.localPosition = new Vector2(0, 0);
 		this.worldRotation = rotation;
 		this.localRotation = rotation;
-		this.children = new ArrayList<Entity>();
 	}
 
 	@Override
-	public void start() {
-		super.start();
+	public void init(Entity owner){
+		this.owner = owner;
+		this.children = new ArrayList<Entity>();
 
+		//new Exception().printStackTrace();
+	}
+
+	@Override
+	public void update(float delta){
+		//System.out.println(this.owner.name+" local in update: "+this.localPosition);
+
+		if(this.parent!=null){
+			float ownerRot = this.parent.transform.getRotation();
+			float adjRot = Transform.normalizeAngle(ownerRot + this.rotationOffset)*MathUtils.degreesToRadians;
+
+			//float locX = (float) ((this.localPosition.y * Math.cos(adjRot) - this.localPosition.x * Math.sin(adjRot)) + ownerPos.x);
+			//float locY = (float) ((this.localPosition.y * Math.sin(adjRot) + this.localPosition.x * Math.cos(adjRot)) + ownerPos.y);
+
+			//val locX : Float = ((cos*xAmt - sin*yAmt)) + this.owner.transform.getPosition().x;
+			//val locY : Float = ((sin*xAmt + cos*yAmt)) + this.owner.transform.getPosition().y;
+
+			//System.out.println(owner.name+" rotation (adj): "+adjRot);
+
+			//this.setLocalPosition(this.parent.transform.getPosition().x - this.getPosition().x, this.parent.transform.getPosition().y - this.getPosition().y);
+
+			float locX = (float)Math.cos(adjRot)*this.distFromParent + this.parent.transform.getPosition().x;
+			float locY = (float)Math.sin(adjRot)*this.distFromParent + this.parent.transform.getPosition().y;
+
+			//System.out.println("adj rot: "+adjRot);
+			//System.out.println("dst:  "+this.distFromParent);
+
+			//float locX = (float) ((Math.cos(adjRot)*this.localPosition.x - Math.sin(adjRot)*this.localPosition.y) + ownerPos.x);
+			//float locY = (float) ((Math.sin(adjRot)*this.localPosition.x + Math.cos(adjRot)*this.localPosition.y) + ownerPos.y);
+
+
+			//System.out.println("(Math.cos(adjRot)*this.localPosition.x - Math.sin(adjRot)*this.localPosition.y): "+(Math.cos(adjRot)*this.localPosition.x - Math.sin(adjRot)*this.localPosition.y));
+			//System.out.println("(Math.sin(adjRot)*this.localPosition.x + Math.cos(adjRot)*this.localPosition.y): "+(Math.sin(adjRot)*this.localPosition.x + Math.cos(adjRot)*this.localPosition.y));
+
+			//System.out.println(owner.name+" local1: "+this.localPosition);
+			//System.out.println(owner.name+" world1: "+this.worldPosition);
+
+			this.setPosition(locX, locY);
+
+			//System.out.println(owner.name+" local2: "+this.localPosition);
+			//System.out.println(owner.name+" world2: "+this.worldPosition);
+			//System.out.println("locX/locY: "+locX+" "+locY);
+			//System.out.println(parent.name+" X/Y: "+parent.transform.getPosition());
+
+			this.setRotation(Transform.normalizeAngle(ownerRot + this.localRotation));
+		}
+	}
+
+	public void setRotationOffset(float rotation){
+		this.rotationOffset = rotation;
+	}
+
+	public void setParent(Entity futureParent){
+		futureParent.transform.addChild(this.owner);
+		this.parent = futureParent;
+		this.setPosition(this.getPosition());
+		this.setRotation(this.getRotation());
 	}
 
 	/**
@@ -40,12 +97,26 @@ public class Transform extends Component implements IDestroyable {
 	 * @param child The Entity being added as a child to this transform.
 	 */
 	public void addChild(Entity child){
+		Vector2 thisPos = new Vector2(this.worldPosition.x, this.worldPosition.y);
+		Vector2 childPos = new Vector2(child.transform.getPosition().x, child.transform.getPosition().y);
+
+		float rot = MathUtils.atan2(childPos.y - thisPos.y, childPos.x - thisPos.x)*MathUtils.radDeg;
+		rot = Transform.normalizeAngle(rot);
+
+		child.transform.rotationOffset = rot - this.worldRotation;
+		child.transform.distFromParent = thisPos.dst(childPos);
+		//System.out.println("------offset: "+child.transform.rotationOffset);
+
+		//System.out.println("Added child "+child.name+" rot: "+rot+" parent rot: "+this.worldRotation);
+		//System.out.println("Added child "+child.name+" pos: "+childPos+" parent pos: "+thisPos);
+
 		this.children.add(child); //Add the child to this transform
 		child.transform.parent = this.owner; //Make the child's parent this entity.
-		//Set the local position of the child. This simply recalculates the local position using the world position
-		//and any parent that may exist.
-		child.transform.setPosition(child.transform.getWorldPosition());
-		child.transform.setRotation(child.transform.getWorldRotation());
+
+		//child.transform.setPosition(child.transform.getPosition());
+		//Sets the local position according to the parent's world position.
+		child.transform.setLocalPosition(thisPos.x - childPos.x, thisPos.y - childPos.y);
+
 	}
 
 	/**
@@ -58,8 +129,8 @@ public class Transform extends Component implements IDestroyable {
 			if(child == this.children.get(i)){
 				Entity tempChild = this.children.remove(i); //Removes it from the child list.
 				tempChild.transform.parent = null; //Sets the parent to null.
-				tempChild.transform.setPosition(tempChild.transform.getWorldPosition()); //Reset position.
-				tempChild.transform.setRotation(tempChild.transform.getWorldRotation()); //Reset rotation.
+				tempChild.transform.setPosition(tempChild.transform.getPosition()); //Reset position.
+				tempChild.transform.setRotation(tempChild.transform.getRotation()); //Reset rotation.
 
 				return;
 			}
@@ -80,15 +151,15 @@ public class Transform extends Component implements IDestroyable {
 	 * @return A Vector2 holding the local X and Y coordinate of the transform.
 	 */
 	public Vector2 getPosition(){
-		return this.localPosition;
+		return this.worldPosition;
 	}
 
 	/**
 	 * Gets the world position of this transform.
 	 * @return A Vector2 holding the world X and Y coordinate of this transform.
 	 */
-	public Vector2 getWorldPosition(){
-		return this.worldPosition;
+	public Vector2 getLocalPosition(){
+		return this.localPosition;
 	}
 
 	/**
@@ -96,15 +167,15 @@ public class Transform extends Component implements IDestroyable {
 	 * @return A float which is the rotation.
 	 */
 	public float getRotation(){
-		return this.localRotation;
+		return this.worldRotation;
 	}
 
 	/**
 	 * Gets the world rotation of this transform.
 	 * @return A float which is the rotation.
 	 */
-	public float getWorldRotation(){
-		return this.worldRotation;
+	public float getLocalRotation(){
+		return this.localRotation;
 	}
 
 	/**
@@ -129,11 +200,15 @@ public class Transform extends Component implements IDestroyable {
 			this.localPosition.y = y; //If the parent is null, assign the local the same as the global.
 			return; //If the parent is null, return here.
 		}
+	}
 
-		//Sets the local position according to the parent's world position.
-		Vector2 parentPos = this.parent.transform.getWorldPosition();
-		this.localPosition.x = x - parentPos.x;
-		this.localPosition.y = y - parentPos.y;
+	/**
+	 * Sets the local position of the transform using X and Y float coordinates
+	 * @param x A float which is the X Coordinate.
+	 * @param y A float which is the Y Coordinate.
+	 */
+	public void setLocalPosition(float x, float y){
+		this.localPosition.set(x,y);
 	}
 
 	/**
@@ -141,15 +216,19 @@ public class Transform extends Component implements IDestroyable {
 	 * @param rot A float which is the new world rotation.
 	 */
 	public void setRotation(float rot){
-		this.worldRotation = rot;
-		if(this.parent == null){
-			this.localRotation = rot; //If the parent is null, assign the local the same as the global.
-			return; //If the parent is null, return here.
-		}
+		this.worldRotation = this.normalizeAngle(rot);
 
-		this.localRotation = rot - this.parent.transform.getRotation();
-		if(this.localRotation >= 360) this.localRotation = this.localRotation - 360;
-		if(this.localRotation < 0) this.localRotation = this.localRotation + 360;
+		if(this.parent == null)
+			this.localRotation = this.worldRotation; //If the parent is null, assign the local the same as the global.
+
+	}
+
+	public void rotate(float rot){
+		this.setRotation(this.worldRotation + rot);
+	}
+
+	public void clearParent(){
+		this.parent.transform.removeChild(this.owner);
 	}
 
 	/**
@@ -158,8 +237,23 @@ public class Transform extends Component implements IDestroyable {
 	 * @param y The Y value to move.
 	 */
 	public void translate(float x, float y){
-		this.worldPosition.x += x;
-		this.worldPosition.y += y;
+		this.setPosition(this.worldPosition.x + x, this.worldPosition.y + y);
+	}
+
+	public static float normalizeAngle(float angle)
+	{
+		float newAngle = angle;
+		while (newAngle < 0) newAngle += 360;
+		while (newAngle >= 360) newAngle -= 360;
+		return newAngle;
+	}
+
+	public static float normalizeAngleRadians(float angle)
+	{
+		float newAngle = angle;
+		while (newAngle < 0) newAngle += MathUtils.PI2;
+		while (newAngle >= MathUtils.PI2) newAngle -= MathUtils.PI2;
+		return newAngle;
 	}
 
 	@Override
@@ -169,6 +263,6 @@ public class Transform extends Component implements IDestroyable {
 		this.localPosition = null;
 		this.owner = null;
 		this.children.clear();
-		this.children = null;
+		//this.children = null;
 	}
 }

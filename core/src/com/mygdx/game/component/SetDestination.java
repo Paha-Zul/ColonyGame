@@ -14,8 +14,8 @@ public class SetDestination extends Component{
 	private RepeatingTimer timer;
 	private Move moveComp;
 
-	public SetDestination(String name, int type, boolean active) {
-		super(name, type, active);
+	public SetDestination(boolean active) {
+		super(active);
 	}
 
 	@Override
@@ -23,7 +23,7 @@ public class SetDestination extends Component{
 		super.start();
 
 		moveComp = this.owner.getComponent(Move.class);
-		Vector2 pos = this.owner.transform.getWorldPosition();
+		Vector2 pos = this.owner.transform.getPosition();
 
 		Functional.Callback callback = () ->{
 			float x = pos.x + (MathUtils.random()*moveDis - moveDis/2f);

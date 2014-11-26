@@ -13,8 +13,8 @@ public class Move extends Component{
 
 	private Vector2 dest = new Vector2(0,0);
 
-	public Move(String name, int type, boolean active) {
-		super(name, type, active);
+	public Move(boolean active) {
+		super(active);
 	}
 
 	@Override
@@ -27,7 +27,9 @@ public class Move extends Component{
 	public void update(float delta) {
 		super.update(delta);
 
-		Vector2 pos = owner.transform.getWorldPosition();
+		this.owner.transform.rotate(100*delta);
+
+		Vector2 pos = owner.transform.getPosition();
 
 		//If we are not within the movement threshold, move!
 		if(Math.abs(pos.x - dest.x) > threshold && Math.abs(pos.y - dest.y) > threshold){

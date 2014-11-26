@@ -1,5 +1,6 @@
 package com.mygdx.game.component;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.entity.Entity;
@@ -9,11 +10,12 @@ import com.mygdx.game.entity.Entity;
  */
 public class SquareGraphic extends Component {
 	public float size = 30;
+	public Color color = Color.BLACK;
 
 	private ShapeRenderer renderer;
 
-	public SquareGraphic(String name, int type, boolean active, ShapeRenderer renderer) {
-		super(name, type, active);
+	public SquareGraphic(boolean active, ShapeRenderer renderer) {
+		super(active);
 
 		this.renderer = renderer;
 	}
@@ -28,8 +30,9 @@ public class SquareGraphic extends Component {
 	public void update(float delta) {
 		super.update(delta);
 
-		Vector2 pos = this.owner.transform.getWorldPosition();
+		Vector2 pos = this.owner.transform.getPosition();
 
+		this.renderer.setColor(this.color);
 		this.renderer.rect(pos.x - size*0.5f, pos.y - size*0.5f, size, size);
 	}
 }

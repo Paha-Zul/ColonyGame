@@ -41,11 +41,10 @@ public class Entity {
 		this.inactiveComponentList = new ArrayList<Component>();
 		this.newComponentList = new ArrayList<Component>();
 
-		this.transform = new Transform(position, rotation);
-		this.newComponentList.add(this.transform);
+		this.transform = this.addComponent(new Transform(position, rotation));
 
 		if(batch != null && graphic != null) {
-			this.identity = new GraphicIdentity(graphic, batch);
+			this.identity = this.addComponent(new GraphicIdentity(graphic, batch));
 			this.newComponentList.add(this.identity);
 		}
 
@@ -75,32 +74,23 @@ public class Entity {
 		this.inactiveComponentList = new ArrayList<Component>(); //Init the inactive list.
 		this.newComponentList = new ArrayList<Component>(); //Init the inactive list.
 
-		this.transform = new Transform(position, rotation); //Create the transform.
-		//Loops over the varargs and add them to the component list.
-		Collections.addAll(newComponentList, comps);
+		this.transform = this.addComponent(new Transform(position, rotation));
+		for(Component comp : comps)
+			this.addComponent(comp);
 	}
 
 	public void update(float delta){
 		if(this.newComponentList.size() > 0) {
-			//Initialize the component by setting the owner. Also add it to the owner.
-			for (Component comp : this.newComponentList) {
-				comp.init(this);
-				if(comp.isActive())
-					this.activeComponentList.add(comp);
-				else
-					this.inactiveComponentList.add(comp);
-			}
 
-			//Call start to set up. We can also access other components from the Entity
-			//owner that are being added at the same time.
-			for (Component comp : this.newComponentList) {
+			//Call start on all new Components. This is where the component can access other
+			//components on this Entity.
+			for (Component comp : this.newComponentList)
 				comp.start();
-			}
 
-			this.newComponentList.clear();
+			this.newComponentList.clear(); //Clear the new Component list.
 		}
 
-
+		//Update all Components
 		for(Component comp : this.activeComponentList){
 			comp.update(delta);
 			comp.lateUpdate(delta);
@@ -108,12 +98,18 @@ public class Entity {
 	}
 
 	/**
-	 * Adds a component to this Entity.
-	 * @param comp The Component to add.
+	 * Adds a component to this Entity. The start() method will be called on the next tick for this Entity.
+	 * @param comp The Component to add to this Entity.
+	 * @param <T> The Component class type of the component being added.
+	 * @return The Component that was added.
 	 */
 	@SuppressWarnings("unchecked")
 	public <T extends Component> T addComponent(Component comp){
-		this.newComponentList.add(comp);
+		comp.init(this); //Initialize the component with this Entity as the owner.
+		this.newComponentList.add(comp); //Add it to the new list for the start() method.
+		//Add it to the active or inactive list.
+		if(comp.isActive()) this.activeComponentList.add(comp);
+		else this.inactiveComponentList.add(comp);
 
 		return (T) comp;
 	}

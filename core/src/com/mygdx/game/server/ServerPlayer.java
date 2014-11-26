@@ -37,24 +37,32 @@ public class ServerPlayer {
 		this.shapeRenderer = new ShapeRenderer();
 
 		for(int i=0;i<10;i++) {
-			Entity ent = new Entity("Queen", new Vector2(100,100), 0);
 
-			Move move = new Move("Move", 1, true);
+			Move move = new Move(true);
 			move.moveSpeed = 50 + MathUtils.random(50);
 			move.threshold = 0.1f;
 
-			SetDestination setDest = new SetDestination("SetDest", 0, true);
+			SetDestination setDest = new SetDestination(true);
 			setDest.moveDis = 100;
 
-			SquareGraphic square = new SquareGraphic("Square", 0, true, this.shapeRenderer);
+			SquareGraphic square = new SquareGraphic(true, this.shapeRenderer);
 			square.size = (float)(5 + Math.random()*15);
 
-			ent.addComponent(move);
-			ent.addComponent(setDest);
-			ent.addComponent(square);
+			SquareGraphic square2 = new SquareGraphic(true, this.shapeRenderer);
+			square2.size = (float)(5 + Math.random()*15);
+			square2.color = Color.YELLOW;
 
+			Entity ent = new Entity("Queen", new Vector2(100,100), 0, move, setDest, square);
+
+			Vector2 pos = new Vector2();
+			pos.x = (float)(100 + Math.random()*20 - 10);
+			pos.y = (float)(100 + Math.random()*20 - 10);
+			Entity ent2 = new Entity("Test", pos, 0, square2);
+
+			ent.transform.addChild(ent2);
 
 			ListHolder.addEntity(0, ent);
+			ListHolder.addEntity(0, ent2);
 		}
 
 		//Add random food around the map.
@@ -72,28 +80,6 @@ public class ServerPlayer {
 		shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
 		ListHolder.update(Gdx.graphics.getDeltaTime());
-
-//		for(int i=0;i<beeList.size();i++){
-//			Bee bee = beeList.get(i);
-//			if(bee.isDead()){
-//				bee.kill();
-//				beeList.remove(i);
-//				continue;
-//			}
-//			bee.update(Gdx.graphics.getDeltaTime());
-//			bee.render(this.batch, this.shapeRenderer);
-//		}
-//
-//		for(int i=0;i < queenList.size();i++){
-//			Bee queen = queenList.get(i);
-//			if(queen.isDead()){
-//				queen.kill();
-//				queenList.remove(i);
-//				continue;
-//			}
-//			queen.update(Gdx.graphics.getDeltaTime());
-//			queen.render(this.batch, this.shapeRenderer);
-//		}
 
 		shapeRenderer.end();
 		batch.end();
