@@ -11,6 +11,7 @@ public class Transform extends Component implements IDestroyable {
 	public Entity parent;
 	private Vector2 worldPosition, localPosition;
 	private float worldRotation, localRotation, rotationOffset=0, distFromParent=0;
+	private float scale = 1;
 
 	private ArrayList<Entity> children;
 
@@ -142,6 +143,22 @@ public class Transform extends Component implements IDestroyable {
 	 */
 	public float getLocalRotation(){
 		return this.localRotation;
+	}
+
+	/**
+	 * Gets the scale of this Transform.
+	 * @return A float which is the scale of this Transform
+	 */
+	public float getScale(){
+		return this.scale;
+	}
+
+	/**
+	 * Sets the scale of this Transform
+	 * @param scale The scale for this Transform to be.
+	 */
+	public void setScale(float scale){
+		this.scale = scale;
 	}
 
 	/**

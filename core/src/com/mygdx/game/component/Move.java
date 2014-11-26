@@ -29,15 +29,15 @@ public class Move extends Component{
 
 		this.owner.transform.rotate(100*delta);
 
-		Vector2 pos = owner.transform.getPosition();
-
-		//If we are not within the movement threshold, move!
-		if(Math.abs(pos.x - dest.x) > threshold && Math.abs(pos.y - dest.y) > threshold){
-			float rotation = MathUtils.atan2(this.dest.y - pos.y, this.dest.x - pos.x);
-			float x = MathUtils.cos(rotation)*this.moveSpeed*delta;
-			float y = MathUtils.sin(rotation)*this.moveSpeed*delta;
-			this.owner.transform.translate(x, y);
-		}
+//		Vector2 pos = owner.transform.getPosition();
+//
+//		//If we are not within the movement threshold, move!
+//		if(Math.abs(pos.x - dest.x) > threshold && Math.abs(pos.y - dest.y) > threshold){
+//			float rotation = MathUtils.atan2(this.dest.y - pos.y, this.dest.x - pos.x);
+//			float x = MathUtils.cos(rotation)*this.moveSpeed*delta;
+//			float y = MathUtils.sin(rotation)*this.moveSpeed*delta;
+//			this.owner.transform.translate(x, y);
+//		}
 	}
 
 	public void setDest(float x, float y){

@@ -25,15 +25,17 @@ public class GraphicIdentity extends Component{
 	public void start() {
 		Vector2 pos = this.owner.transform.getPosition(); //Cache the owner's position.
 		this.sprite.setPosition(pos.x - this.sprite.getWidth()/2, pos.y - this.sprite.getHeight()/2);
-		this.sprite.setCenter(-this.sprite.getWidth()/2, -this.sprite.getHeight()/2);
-		this.sprite.setOrigin(-this.sprite.getWidth()/2, -this.sprite.getHeight()/2);
 	}
 
 	@Override
 	public void update(float delta) {
 		Vector2 pos = this.owner.transform.getPosition(); //Cache the owner's position.
 
-		this.sprite.setPosition(pos.x - this.sprite.getWidth()/2, pos.y - this.sprite.getHeight()/2);
+		this.sprite.setScale(this.owner.transform.getScale());
+		this.sprite.setRotation(this.owner.transform.getRotation());
+
+		this.sprite.setPosition(pos.x - (sprite.getWidth())/2, pos.y - (sprite.getHeight())/2);
+
 		this.sprite.draw(this.batch);
 	}
 }
