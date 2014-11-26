@@ -43,38 +43,10 @@ public class Transform extends Component implements IDestroyable {
 			float ownerRot = this.parent.transform.getRotation();
 			float adjRot = Transform.normalizeAngle(ownerRot + this.rotationOffset)*MathUtils.degreesToRadians;
 
-			//float locX = (float) ((this.localPosition.y * Math.cos(adjRot) - this.localPosition.x * Math.sin(adjRot)) + ownerPos.x);
-			//float locY = (float) ((this.localPosition.y * Math.sin(adjRot) + this.localPosition.x * Math.cos(adjRot)) + ownerPos.y);
-
-			//val locX : Float = ((cos*xAmt - sin*yAmt)) + this.owner.transform.getPosition().x;
-			//val locY : Float = ((sin*xAmt + cos*yAmt)) + this.owner.transform.getPosition().y;
-
-			//System.out.println(owner.name+" rotation (adj): "+adjRot);
-
-			//this.setLocalPosition(this.parent.transform.getPosition().x - this.getPosition().x, this.parent.transform.getPosition().y - this.getPosition().y);
-
 			float locX = (float)Math.cos(adjRot)*this.distFromParent + this.parent.transform.getPosition().x;
 			float locY = (float)Math.sin(adjRot)*this.distFromParent + this.parent.transform.getPosition().y;
 
-			//System.out.println("adj rot: "+adjRot);
-			//System.out.println("dst:  "+this.distFromParent);
-
-			//float locX = (float) ((Math.cos(adjRot)*this.localPosition.x - Math.sin(adjRot)*this.localPosition.y) + ownerPos.x);
-			//float locY = (float) ((Math.sin(adjRot)*this.localPosition.x + Math.cos(adjRot)*this.localPosition.y) + ownerPos.y);
-
-
-			//System.out.println("(Math.cos(adjRot)*this.localPosition.x - Math.sin(adjRot)*this.localPosition.y): "+(Math.cos(adjRot)*this.localPosition.x - Math.sin(adjRot)*this.localPosition.y));
-			//System.out.println("(Math.sin(adjRot)*this.localPosition.x + Math.cos(adjRot)*this.localPosition.y): "+(Math.sin(adjRot)*this.localPosition.x + Math.cos(adjRot)*this.localPosition.y));
-
-			//System.out.println(owner.name+" local1: "+this.localPosition);
-			//System.out.println(owner.name+" world1: "+this.worldPosition);
-
 			this.setPosition(locX, locY);
-
-			//System.out.println(owner.name+" local2: "+this.localPosition);
-			//System.out.println(owner.name+" world2: "+this.worldPosition);
-			//System.out.println("locX/locY: "+locX+" "+locY);
-			//System.out.println(parent.name+" X/Y: "+parent.transform.getPosition());
 
 			this.setRotation(Transform.normalizeAngle(ownerRot + this.localRotation));
 		}
@@ -105,16 +77,10 @@ public class Transform extends Component implements IDestroyable {
 
 		child.transform.rotationOffset = rot - this.worldRotation;
 		child.transform.distFromParent = thisPos.dst(childPos);
-		//System.out.println("------offset: "+child.transform.rotationOffset);
-
-		//System.out.println("Added child "+child.name+" rot: "+rot+" parent rot: "+this.worldRotation);
-		//System.out.println("Added child "+child.name+" pos: "+childPos+" parent pos: "+thisPos);
 
 		this.children.add(child); //Add the child to this transform
 		child.transform.parent = this.owner; //Make the child's parent this entity.
 
-		//child.transform.setPosition(child.transform.getPosition());
-		//Sets the local position according to the parent's world position.
 		child.transform.setLocalPosition(thisPos.x - childPos.x, thisPos.y - childPos.y);
 
 	}
