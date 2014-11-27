@@ -20,12 +20,12 @@ public class Transform extends Component implements IDestroyable {
 	 * @param position The world position of the owner Entity.
 	 * @param rotation The world rotation of the owner Entity.
 	 */
-	public Transform(Vector2 position, float rotation){
+	public Transform(Vector2 position, float rotation, Entity owner){
 		super(true);
+		this.owner = owner;
 		this.worldPosition = new Vector2(position.x, position.y);
 		this.localPosition = new Vector2(0, 0);
-		this.worldRotation = rotation;
-		this.localRotation = rotation;
+		this.setRotation(rotation);
 	}
 
 	@Override
@@ -41,15 +41,15 @@ public class Transform extends Component implements IDestroyable {
 		//System.out.println(this.owner.name+" local in update: "+this.localPosition);
 
 		if(this.parent!=null){
-			float ownerRot = this.parent.transform.getRotation();
-			float adjRot = Transform.normalizeAngle(ownerRot + this.rotationOffset)*MathUtils.degreesToRadians;
+			float parentRot = this.parent.transform.getRotation();
+			float adjRot = Transform.normalizeAngle(parentRot + this.rotationOffset)*MathUtils.degreesToRadians;
 
 			float locX = (float)Math.cos(adjRot)*this.distFromParent + this.parent.transform.getPosition().x;
 			float locY = (float)Math.sin(adjRot)*this.distFromParent + this.parent.transform.getPosition().y;
 
 			this.setPosition(locX, locY);
 
-			this.setRotation(Transform.normalizeAngle(ownerRot + this.localRotation));
+			this.setRotation(Transform.normalizeAngle(parentRot + this.localRotation));
 		}
 	}
 
@@ -122,24 +122,24 @@ public class Transform extends Component implements IDestroyable {
 	}
 
 	/**
-	 * Gets the world position of this transform.
-	 * @return A Vector2 holding the world X and Y coordinate of this transform.
+	 * Gets the local position relative to this Transform's parent
+	 * @return A Vector2 which is the local X and Y of this Transform relative to its parent.
 	 */
 	public Vector2 getLocalPosition(){
 		return this.localPosition;
 	}
 
 	/**
-	 * Gets the local rotation of this transform.
-	 * @return A float which is the rotation.
+	 * Gets the world rotation of this Transform.
+	 * @return A float which is the world rotation of this Transform.
 	 */
 	public float getRotation(){
 		return this.worldRotation;
 	}
 
 	/**
-	 * Gets the world rotation of this transform.
-	 * @return A float which is the rotation.
+	 * Gets the local rotation of this Transform.
+	 * @return A float which is the relative rotation of this Transform in relation to its parent.
 	 */
 	public float getLocalRotation(){
 		return this.localRotation;
@@ -203,6 +203,11 @@ public class Transform extends Component implements IDestroyable {
 
 		if(this.parent == null)
 			this.localRotation = this.worldRotation; //If the parent is null, assign the local the same as the global.
+		else {
+			this.localRotation = Transform.normalizeAngle(this.worldRotation - this.parent.transform.worldRotation);
+		}
+
+		if(this.owner != null) System.out.print(this.owner.name);
 
 	}
 

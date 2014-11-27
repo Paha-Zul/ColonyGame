@@ -41,42 +41,45 @@ public class ServerPlayer {
 		for(int i=0;i<1;i++) {
 
 			GraphicIdentity identity = new GraphicIdentity(new Texture("img/bar.png"), batch);
-			GraphicIdentity identity2 = new GraphicIdentity(new Texture("img/bar2.png"), batch);
-			GraphicIdentity identity3 = new GraphicIdentity(new Texture("img/bar2.png"), batch);
-			GraphicIdentity identity4 = new GraphicIdentity(new Texture("img/bar2.png"), batch);
-			GraphicIdentity identity5 = new GraphicIdentity(new Texture("img/bar2.png"), batch);
+			GraphicIdentity turretText = new GraphicIdentity(new Texture("img/turret.png"), batch);
+			GraphicIdentity turretText1 = new GraphicIdentity(new Texture("img/turret.png"), batch);
+			GraphicIdentity turretText2 = new GraphicIdentity(new Texture("img/turret.png"), batch);
 
 			Move move =  new Move(true);
+			move.rotateSpeed = 10;
 
 			Entity ent = new Entity("Queen", new Vector2(200,200), 0, identity, move);
 			ent.transform.setScale(5f);
 
-			Vector2 pos = new Vector2(100,100);
-			Entity ent2 = new Entity("Test", pos, 0, identity2);
-			ent2.transform.setScale(.5f);
+			Move turretMove = new Move(true);
+			turretMove.rotateSpeed = -25;
 
 			Vector2 pos1 = new Vector2(300,300);
-			Entity ent3 = new Entity("Test", pos1, 0, identity3);
-			ent3.transform.setScale(.5f);
+			Entity turret = new Entity("Turret", pos1, 90, turretText, turretMove);
+			turret.transform.setScale(.5f);
 
-			Vector2 pos2 = new Vector2(100,300);
-			Entity ent4 = new Entity("Test", pos2, 0, identity4);
-			ent4.transform.setScale(.5f);
+			Move turretMove2 = new Move(true);
+			turretMove2.rotateSpeed = 0;
 
-			Vector2 pos3 = new Vector2(300,100);
-			Entity ent5 = new Entity("Test", pos3, 0, identity5);
-			ent5.transform.setScale(.5f);
+			Vector2 pos2 = new Vector2(300,100);
+			Entity turret1 = new Entity("Turret1", pos2, 90, turretText1, turretMove2);
+			turret1.transform.setScale(.5f);
 
-			ent.transform.addChild(ent2);
-			ent.transform.addChild(ent3);
-			ent.transform.addChild(ent4);
-			ent.transform.addChild(ent5);
+			Move turretMove3 = new Move(true);
+			turretMove3.rotateSpeed = 25;
+
+			Vector2 pos3 = new Vector2(100,100);
+			Entity turret2 = new Entity("Turret2", pos3, 90, turretText2, turretMove3);
+			turret2.transform.setScale(.5f);
+
+			ent.transform.addChild(turret);
+			ent.transform.addChild(turret1);
+			ent.transform.addChild(turret2);
 
 			ListHolder.addEntity(0, ent);
-			ListHolder.addEntity(1, ent2);
-			ListHolder.addEntity(1, ent3);
-			ListHolder.addEntity(1, ent4);
-			ListHolder.addEntity(1, ent5);
+			ListHolder.addEntity(2, turret);
+			ListHolder.addEntity(2, turret1);
+			ListHolder.addEntity(2, turret2);
 		}
 
 		//Add random food around the map.

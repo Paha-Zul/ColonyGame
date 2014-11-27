@@ -41,7 +41,7 @@ public class Entity {
 		this.inactiveComponentList = new ArrayList<Component>();
 		this.newComponentList = new ArrayList<Component>();
 
-		this.transform = this.addComponent(new Transform(position, rotation));
+		this.transform = this.addComponent(new Transform(position, rotation, this));
 
 		if(batch != null && graphic != null) {
 			this.identity = this.addComponent(new GraphicIdentity(graphic, batch));
@@ -74,7 +74,7 @@ public class Entity {
 		this.inactiveComponentList = new ArrayList<Component>(); //Init the inactive list.
 		this.newComponentList = new ArrayList<Component>(); //Init the inactive list.
 
-		this.transform = this.addComponent(new Transform(position, rotation));
+		this.transform = this.addComponent(new Transform(position, rotation, this));
 		for(Component comp : comps)
 			this.addComponent(comp);
 	}

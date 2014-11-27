@@ -8,6 +8,7 @@ import com.mygdx.game.helpers.timer.RepeatingTimer;
  * Created by Bbent_000 on 11/24/2014.
  */
 public class Move extends Component{
+	public float rotateSpeed = 100;
 	public float moveSpeed;
 	public float threshold = 0.2f;
 
@@ -27,7 +28,7 @@ public class Move extends Component{
 	public void update(float delta) {
 		super.update(delta);
 
-		this.owner.transform.rotate(100*delta);
+		this.owner.transform.rotate(rotateSpeed*delta);
 
 //		Vector2 pos = owner.transform.getPosition();
 //
