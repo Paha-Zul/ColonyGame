@@ -21,6 +21,7 @@ public class Entity {
 	public int entityType, entitySubType, drawLevel;
 	public Transform transform;
 	public GraphicIdentity identity;
+	public boolean active = true;
 
 	protected ArrayList<Component> newComponentList;
 	protected ArrayList<Component> activeComponentList;
@@ -47,7 +48,6 @@ public class Entity {
 			this.identity = this.addComponent(new GraphicIdentity(graphic, batch));
 			this.newComponentList.add(this.identity);
 		}
-
 	}
 
 	/**
@@ -80,20 +80,23 @@ public class Entity {
 	}
 
 	public void update(float delta){
-		if(this.newComponentList.size() > 0) {
+		//Only update if active.
+		if(this.active) {
+			//Start all new components.
+			if (this.newComponentList.size() > 0) {
+				//Call start on all new Components. This is where the component can access other
+				//components on this Entity.
+				for (Component comp : this.newComponentList)
+					comp.start();
 
-			//Call start on all new Components. This is where the component can access other
-			//components on this Entity.
-			for (Component comp : this.newComponentList)
-				comp.start();
+				this.newComponentList.clear(); //Clear the new Component list.
+			}
 
-			this.newComponentList.clear(); //Clear the new Component list.
-		}
-
-		//Update all Components
-		for(Component comp : this.activeComponentList){
-			comp.update(delta);
-			comp.lateUpdate(delta);
+			//Update all Components
+			for (Component comp : this.activeComponentList) {
+				comp.update(delta);
+				comp.lateUpdate(delta);
+			}
 		}
 	}
 
@@ -136,15 +139,26 @@ public class Entity {
 		//return null;
 	}
 
-	public boolean removeComponent(Component comp, boolean active){
-		if(active) return this.inactiveComponentList.remove(comp);
+	/**
+	 * Removes a Component from this Entity.
+	 * @param comp The Component to remove.
+	 * @return True if the Component was removed, fales otherwise.
+	 */
+	public boolean removeComponent(Component comp){
+		if(comp.isActive()) return this.inactiveComponentList.remove(comp);
 		return this.activeComponentList.remove(comp);
 	}
 
+	/**
+	 * @return True if this Entity has been destroyed, false otherwise.
+	 */
 	public boolean isDestroyed(){
 		return this.destroyed;
 	}
 
+	/**
+	 * Destroys this Entity. This will kill all children, components of children, and components of the parent.
+	 */
 	public void destroy(){
 		//Destroy all children
 		for(Entity child : this.transform.getChildren()){
