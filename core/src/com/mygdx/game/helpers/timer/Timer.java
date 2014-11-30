@@ -21,13 +21,35 @@ public abstract class Timer {
 
 	public abstract void update(float delta);
 
+	/**
+	 * Cancels this Timer and stops and further ticking or callback calls.
+	 */
 	public void cancel(){
 		this.expired = true;
 	}
 
+	/**
+	 * @return True if canceled, false otherwise.
+	 */
+	public boolean isCanceled(){
+		return this.expired;
+	}
+
+	/**
+	 * Restarts the timer with the initial length.
+	 */
 	public void restart(){
+		this.restart(this.length);
+	}
+
+	/**
+	 * Restarts the timer with a given length of time.
+	 * @param length The length of time the Timer runs for.
+	 */
+	public void restart(double length){
 		this.currCounter = 0;
 		this.expired = false;
+		this.length = length;
 	}
 
 	/**

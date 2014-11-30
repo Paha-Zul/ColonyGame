@@ -24,10 +24,16 @@ public class BeeGame extends Game {
 	ServerPlayer serverPlayer;
 	ClientPlayer clientPlayer;
 
+	public static SpriteBatch batch;
+	public static ShapeRenderer renderer;
+
 	@Override
 	public void create () {
+		batch = new SpriteBatch();
+		renderer = new ShapeRenderer();
+
 		if(server)
-			serverPlayer = new ServerPlayer();
+			serverPlayer = new ServerPlayer(batch, renderer);
 		else
 			clientPlayer = new ClientPlayer();
 	}

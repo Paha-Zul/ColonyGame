@@ -14,8 +14,8 @@ public class SetDestination extends Component{
 	private RepeatingTimer timer;
 	private Move moveComp;
 
-	public SetDestination(boolean active) {
-		super(active);
+	public SetDestination() {
+		super();
 	}
 
 	@Override

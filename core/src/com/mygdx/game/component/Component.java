@@ -8,11 +8,11 @@ import com.mygdx.game.interfaces.IDestroyable;
 public abstract class Component implements IDestroyable {
 	protected String name;
 	protected int type;
-	private boolean active = false, destroyed = false;
+	private boolean active = true, destroyed = false;
 	protected Entity owner;
 
-	public Component(boolean active) {
-		this.active = active;
+	public Component() {
+
 	}
 
 	/**
@@ -85,6 +85,8 @@ public abstract class Component implements IDestroyable {
 	public void destroy() {
 		this.owner = null;
 		this.destroyed = true;
+		this.active = false;
+		this.name = null;
 	}
 
 	@Override

@@ -14,8 +14,8 @@ public class SquareGraphic extends Component {
 
 	private ShapeRenderer renderer;
 
-	public SquareGraphic(boolean active, ShapeRenderer renderer) {
-		super(active);
+	public SquareGraphic(ShapeRenderer renderer) {
+		super();
 
 		this.renderer = renderer;
 	}

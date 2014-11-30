@@ -11,7 +11,7 @@ public class Transform extends Component implements IDestroyable {
 	public Entity parent;
 	private Vector2 worldPosition, localPosition;
 	private float worldRotation, localRotation, rotationOffset=0, distFromParent=0;
-	private float scale = 1;
+	private float worldScale = 1, localScale = 1;
 
 	private ArrayList<Entity> children;
 
@@ -21,7 +21,7 @@ public class Transform extends Component implements IDestroyable {
 	 * @param rotation The world rotation of the owner Entity.
 	 */
 	public Transform(Vector2 position, float rotation, Entity owner){
-		super(true);
+		super();
 		this.owner = owner;
 		this.worldPosition = new Vector2(position.x, position.y);
 		this.localPosition = new Vector2(0, 0);
@@ -31,7 +31,7 @@ public class Transform extends Component implements IDestroyable {
 	@Override
 	public void init(Entity owner){
 		this.owner = owner;
-		this.children = new ArrayList<Entity>();
+		this.children = new ArrayList<>();
 
 		//new Exception().printStackTrace();
 	}
@@ -51,10 +51,6 @@ public class Transform extends Component implements IDestroyable {
 
 			this.setRotation(Transform.normalizeAngle(parentRot + this.localRotation));
 		}
-	}
-
-	public void setRotationOffset(float rotation){
-		this.rotationOffset = rotation;
 	}
 
 	public void setParent(Entity futureParent){
@@ -87,6 +83,28 @@ public class Transform extends Component implements IDestroyable {
 	}
 
 	/**
+	 * Adds a child to this transform and sets the child's position as the relative position to the parent passed in.
+	 * @param child The child Entity to add as a child.
+	 * @param relative The relative position to the parent that the child should be put at.
+	 */
+	public void addChild(Entity child, Vector2 relative){
+		Vector2 thisPos = new Vector2(this.worldPosition.x, this.worldPosition.y); //Get the current entity's position.
+		child.transform.setPosition(thisPos.x + relative.x, thisPos.y + relative.y); //Set the child's position.
+		Vector2 childPos = new Vector2(child.transform.getPosition().x, child.transform.getPosition().y); //Cache the child's position.
+
+		float rot = MathUtils.atan2(childPos.y - thisPos.y, childPos.x - thisPos.x)*MathUtils.radDeg;
+		rot = Transform.normalizeAngle(rot);
+
+		child.transform.rotationOffset = rot - this.worldRotation;
+		child.transform.distFromParent = thisPos.dst(childPos);
+
+		this.children.add(child); //Add the child to this transform
+		child.transform.parent = this.owner; //Make the child's parent this entity.
+
+		child.transform.setLocalPosition(thisPos.x - childPos.x, thisPos.y - childPos.y);
+	}
+
+	/**
 	 * Removes a child from this transform. The local position and rotation will be updated.
 	 * @param child The Entity child being removed from this transform.
 	 * @throws Exception If the child doesn't exist.
@@ -96,8 +114,8 @@ public class Transform extends Component implements IDestroyable {
 			if(child == this.children.get(i)){
 				Entity tempChild = this.children.remove(i); //Removes it from the child list.
 				tempChild.transform.parent = null; //Sets the parent to null.
-				tempChild.transform.setPosition(tempChild.transform.getPosition()); //Reset position.
-				tempChild.transform.setRotation(tempChild.transform.getRotation()); //Reset rotation.
+//				tempChild.transform.setPosition(tempChild.transform.getPosition()); //Reset position.
+//				tempChild.transform.setRotation(tempChild.transform.getRotation()); //Reset rotation.
 
 				return;
 			}
@@ -150,15 +168,57 @@ public class Transform extends Component implements IDestroyable {
 	 * @return A float which is the scale of this Transform
 	 */
 	public float getScale(){
-		return this.scale;
+		return this.worldScale;
 	}
 
 	/**
-	 * Sets the scale of this Transform
+	 * Gets the local scale of this Transform.
+	 * @return A float which is the local scale of this Transform
+	 */
+	public float getLocalScale(){
+		return this.localScale;
+	}
+
+	/**
+	 * Sets the scale of this Transform.
 	 * @param scale The scale for this Transform to be.
 	 */
 	public void setScale(float scale){
-		this.scale = scale;
+		//If no parent, set the world scale AND localscale
+		if(this.parent == null){
+			this.worldScale = this.localScale = scale;
+		//If we do have a parent, only set the world scale.
+		}else
+			this.worldScale = this.localScale*scale;
+
+
+		//For each child, set a new position and scale.
+		for(Entity child : this.children){
+			Transform childTrans = child.transform;
+			Vector2 childLocal = new Vector2(child.transform.localPosition.x, child.transform.localPosition.y);
+			childTrans.distFromParent = (childLocal.scl(scale).add(this.getPosition()).dst(this.getPosition()));
+			childTrans.setScale(scale);
+		}
+	}
+
+	/**
+	 * Sets the local scale of this Transform. If this Transform has no parent, it also sets the world scale.
+	 * @param scale The value to use as the local scale of this Transform.
+	 */
+	public void setLocalScale(float scale){
+		this.localScale = scale;
+		if(this.parent == null) this.worldScale = scale;
+
+		//For each child, set a new position and scale.
+		for(Entity child : this.children){
+			Transform childTrans = child.transform;
+			Vector2 childLocal = new Vector2(child.transform.localPosition.x, child.transform.localPosition.y);
+			System.out.println(child.name +" localPos before: "+child.transform.distFromParent);
+			childTrans.distFromParent = (childLocal.scl(scale).add(this.getPosition()).dst(this.getPosition()));
+			System.out.println(child.name +" localPos after: "+child.transform.distFromParent);
+
+			childTrans.setScale(scale);
+		}
 	}
 
 	/**
@@ -177,12 +237,6 @@ public class Transform extends Component implements IDestroyable {
 	public void setPosition(float x, float y){
 		this.worldPosition.x = x;
 		this.worldPosition.y = y;
-
-		if(this.parent == null){
-			this.localPosition.x = x; //If the parent is null, assign the local the same as the global.
-			this.localPosition.y = y; //If the parent is null, assign the local the same as the global.
-			return; //If the parent is null, return here.
-		}
 	}
 
 	/**
@@ -206,8 +260,6 @@ public class Transform extends Component implements IDestroyable {
 		else {
 			this.localRotation = Transform.normalizeAngle(this.worldRotation - this.parent.transform.worldRotation);
 		}
-
-		if(this.owner != null) System.out.print(this.owner.name);
 
 	}
 

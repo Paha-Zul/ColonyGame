@@ -14,8 +14,8 @@ public class Move extends Component{
 
 	private Vector2 dest = new Vector2(0,0);
 
-	public Move(boolean active) {
-		super(active);
+	public Move() {
+		super();
 	}
 
 	@Override

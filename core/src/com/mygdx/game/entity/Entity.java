@@ -11,13 +11,14 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.mygdx.game.component.Component;
 import com.mygdx.game.component.GraphicIdentity;
 import com.mygdx.game.component.Transform;
+import com.mygdx.game.helpers.ListHolder;
 
 /**
  * @author Bbent_000
  *
  */
 public class Entity {
-	public String name, tag;
+	public String name = "Entity", tag;
 	public int entityType, entitySubType, drawLevel;
 	public Transform transform;
 	public GraphicIdentity identity;
@@ -30,13 +31,12 @@ public class Entity {
 
 	/**
 	 * Creates an Entity that will start with a GraphicIdentity component.
-	 * @param name The name of the Entity.
 	 * @param position The initial position of the Entity
 	 * @param rotation The initial rotation of the Entity.
 	 * @param graphic The Texture of the Entity
 	 * @param batch The SpriteBatch to draw the Entity.
 	 */
-	public Entity(String name, Vector2 position, float rotation, Texture graphic, SpriteBatch batch){
+	public Entity(Vector2 position, float rotation, Texture graphic, SpriteBatch batch, int drawLevel){
 		this.name = name;
 		this.activeComponentList = new ArrayList<Component>();
 		this.inactiveComponentList = new ArrayList<Component>();
@@ -48,28 +48,27 @@ public class Entity {
 			this.identity = this.addComponent(new GraphicIdentity(graphic, batch));
 			this.newComponentList.add(this.identity);
 		}
+
+		ListHolder.addEntity(drawLevel, this);
 	}
 
 	/**
 	 * Creates an Entity with a transform and identity component.
-	 * @param name The name of this Entity. This could be used as a generic name such as "Building" or a specific name
 	 * such as "Paha's Market". Use as desired.
 	 * @param position The starting X and Y position of this Entity.
 	 * @param rotation The starting rotation of this Entity.
 	 */
-	public Entity(String name, Vector2 position, float rotation){
-		this(name, position, rotation, null, null);
+	public Entity(Vector2 position, float rotation, int drawLevel){
+		this(position, rotation, null, null, drawLevel);
 	}
 
 	/**
 	 * Creates an Entity without a GraphicIdentity, but allows for a variable amount of components to be immediately added.
-	 * @param name The name of the Entity.
 	 * @param position The initial position of the Entity
 	 * @param rotation The initial rotation of the Entity.
 	 * @param comps A variable amount of Components to construct this Entity with.
 	 */
-	public Entity(String name, Vector2 position, float rotation, Component... comps){
-		this.name = name;
+	public Entity(Vector2 position, float rotation, int drawLevel, Component... comps){
 		this.activeComponentList = new ArrayList<Component>(); //Init the active list.
 		this.inactiveComponentList = new ArrayList<Component>(); //Init the inactive list.
 		this.newComponentList = new ArrayList<Component>(); //Init the inactive list.
@@ -77,11 +76,14 @@ public class Entity {
 		this.transform = this.addComponent(new Transform(position, rotation, this));
 		for(Component comp : comps)
 			this.addComponent(comp);
+
+		ListHolder.addEntity(drawLevel, this);
 	}
 
 	public void update(float delta){
+
 		//Only update if active.
-		if(this.active) {
+		if(this.active && !this.destroyed) {
 			//Start all new components.
 			if (this.newComponentList.size() > 0) {
 				//Call start on all new Components. This is where the component can access other
@@ -92,8 +94,9 @@ public class Entity {
 				this.newComponentList.clear(); //Clear the new Component list.
 			}
 
+			ArrayList<Component> activeCompCopy = new ArrayList<>(this.activeComponentList);
 			//Update all Components
-			for (Component comp : this.activeComponentList) {
+			for (Component comp : activeCompCopy) {
 				comp.update(delta);
 				comp.lateUpdate(delta);
 			}
@@ -184,8 +187,10 @@ public class Entity {
 		this.inactiveComponentList.clear();
 
 		//Destroy and clear identity.
-		this.identity.destroy();
-		this.identity = null;
+		if(this.identity != null) {
+			this.identity.destroy();
+			this.identity = null;
+		}
 
 		//Destroy and clear transform.
 		this.transform.destroy();

@@ -10,15 +10,11 @@ public class GraphicIdentity extends Component{
 
 	SpriteBatch batch;
 
-	public GraphicIdentity(boolean active, Texture image, SpriteBatch batch){
-		super(active);
+	public GraphicIdentity(Texture image, SpriteBatch batch){
+		super();
 
 		this.sprite = new Sprite(image);
 		this.batch = batch;
-	}
-
-	public GraphicIdentity(Texture image, SpriteBatch batch){
-		this(true, image, batch);
 	}
 
 	@Override
