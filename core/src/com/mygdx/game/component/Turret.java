@@ -29,8 +29,9 @@ public class Turret extends Component {
 	public void start() {
 		super.start();
 
-		bulletSpawn = new Entity(new Vector2(100,50), 0, 11);
+		bulletSpawn = new Entity(new Vector2(100,50), 0, 20);
 		this.owner.transform.addChild(bulletSpawn, new Vector2(0,50));
+		bulletSpawn.name = "spawn";
 
 		this.owner.transform.setLocalScale(0.5f);
 

@@ -58,19 +58,19 @@ public class ServerPlayer {
 			turret.getComponent(Move.class).rotateSpeed = 0;
 			turret.name = "Turret1";
 
-			Vector2 pos2 = new Vector2(175,225);
-			Entity turret2 = new TurretEnt(pos2, 90, new Texture("img/turret.png"), batch, 11);
-			turret2.getComponent(Move.class).rotateSpeed = 25;
-			turret2.name = "Turret2";
-
-			Vector2 pos3 = new Vector2(225,175);
-			Entity turret3 = new TurretEnt(pos3, 90, new Texture("img/turret.png"), batch, 11);
-			turret3.getComponent(Move.class).rotateSpeed = -25;
-			turret3.name = "Turret3";
+//			Vector2 pos2 = new Vector2(175,225);
+//			Entity turret2 = new TurretEnt(pos2, 90, new Texture("img/turret.png"), batch, 11);
+//			turret2.getComponent(Move.class).rotateSpeed = 25;
+//			turret2.name = "Turret2";
+//
+//			Vector2 pos3 = new Vector2(225,175);
+//			Entity turret3 = new TurretEnt(pos3, 90, new Texture("img/turret.png"), batch, 11);
+//			turret3.getComponent(Move.class).rotateSpeed = -25;
+//			turret3.name = "Turret3";
 
 			ent.transform.addChild(turret);
-			ent.transform.addChild(turret2);
-			ent.transform.addChild(turret3);
+//			ent.transform.addChild(turret2);
+//			ent.transform.addChild(turret3);
 		}
 
 		Vector2 pos4 = new Vector2(400,200);
@@ -95,6 +95,7 @@ public class ServerPlayer {
 
 		this.testTimer.update(delta);
 
+		System.out.println("Setting scale");
 		if(up)
 			this.test.transform.setScale(test.transform.getScale() + delta);
 		else

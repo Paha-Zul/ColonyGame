@@ -188,17 +188,16 @@ public class Transform extends Component implements IDestroyable {
 		if(this.parent == null){
 			this.worldScale = this.localScale = scale;
 		//If we do have a parent, only set the world scale.
-		}else
-			this.worldScale = this.localScale*scale;
-
+		}else {
+			this.worldScale = this.localScale * scale; //Set world scale. We multiply our local scale with the new world scale (ie: 2 * 0.5 = 1 world scale).
+			Vector2 localCopy = new Vector2(localPosition.x, localPosition.y); //Get a copy of our local position to work on (so we don't edit ours!).
+			//Set the distance. We first scale our local position by our world position, add it to our current position
+			this.distFromParent = (localCopy.scl(scale).add(this.parent.transform.getPosition()).dst(this.parent.transform.getPosition()));
+		}
 
 		//For each child, set a new position and scale.
-		for(Entity child : this.children){
-			Transform childTrans = child.transform;
-			Vector2 childLocal = new Vector2(child.transform.localPosition.x, child.transform.localPosition.y);
-			childTrans.distFromParent = (childLocal.scl(scale).add(this.getPosition()).dst(this.getPosition()));
-			childTrans.setScale(scale);
-		}
+		for(Entity child : this.children)
+			child.transform.setScale(scale);
 	}
 
 	/**
@@ -208,17 +207,16 @@ public class Transform extends Component implements IDestroyable {
 	public void setLocalScale(float scale){
 		this.localScale = scale;
 		if(this.parent == null) this.worldScale = scale;
+		else{
+			this.worldScale = this.localScale * scale; //Set world scale. We multiply our local scale with the new world scale (ie: 2 * 0.5 = 1 world scale).
+			Vector2 localCopy = new Vector2(localPosition.x, localPosition.y); //Get a copy of our local position to work on (so we don't edit ours!).
+			//Set the distance. We first scale our local position by our world position, add it to our current position
+			this.distFromParent = (localCopy.scl(scale).add(this.parent.transform.getPosition()).dst(this.parent.transform.getPosition()));
+		}
 
 		//For each child, set a new position and scale.
-		for(Entity child : this.children){
-			Transform childTrans = child.transform;
-			Vector2 childLocal = new Vector2(child.transform.localPosition.x, child.transform.localPosition.y);
-			System.out.println(child.name +" localPos before: "+child.transform.distFromParent);
-			childTrans.distFromParent = (childLocal.scl(scale).add(this.getPosition()).dst(this.getPosition()));
-			System.out.println(child.name +" localPos after: "+child.transform.distFromParent);
-
-			childTrans.setScale(scale);
-		}
+		for(Entity child : this.children)
+			child.transform.setLocalScale(scale);
 	}
 
 	/**
