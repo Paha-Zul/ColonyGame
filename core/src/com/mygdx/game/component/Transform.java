@@ -8,7 +8,7 @@ import com.mygdx.game.entity.Entity;
 import com.mygdx.game.interfaces.IDestroyable;
 
 public class Transform extends Component implements IDestroyable {
-	public Entity parent;
+	public Transform parent;
 	private Vector2 worldPosition, localPosition;
 	private float worldRotation, localRotation, rotationOffset=0, distFromParent=0;
 	private float worldScale = 1, localScale = 1;
@@ -41,11 +41,11 @@ public class Transform extends Component implements IDestroyable {
 		//System.out.println(this.owner.name+" local in update: "+this.localPosition);
 
 		if(this.parent!=null){
-			float parentRot = this.parent.transform.getRotation();
+			float parentRot = this.parent.getRotation();
 			float adjRot = Transform.normalizeAngle(parentRot + this.rotationOffset)*MathUtils.degreesToRadians;
 
-			float locX = (float)Math.cos(adjRot)*this.distFromParent + this.parent.transform.getPosition().x;
-			float locY = (float)Math.sin(adjRot)*this.distFromParent + this.parent.transform.getPosition().y;
+			float locX = (float)Math.cos(adjRot)*this.distFromParent + this.parent.getPosition().x;
+			float locY = (float)Math.sin(adjRot)*this.distFromParent + this.parent.getPosition().y;
 
 			this.setPosition(locX, locY);
 
@@ -55,7 +55,7 @@ public class Transform extends Component implements IDestroyable {
 
 	public void setParent(Entity futureParent){
 		futureParent.transform.addChild(this.owner);
-		this.parent = futureParent;
+		this.parent = futureParent.transform;
 		this.setPosition(this.getPosition());
 		this.setRotation(this.getRotation());
 	}
@@ -76,10 +76,10 @@ public class Transform extends Component implements IDestroyable {
 		child.transform.distFromParent = thisPos.dst(childPos);
 
 		this.children.add(child); //Add the child to this transform
-		child.transform.parent = this.owner; //Make the child's parent this entity.
+		child.transform.parent = this; //Make the child's parent this transform.
 
 		child.transform.setLocalPosition(thisPos.x - childPos.x, thisPos.y - childPos.y);
-
+		child.transform.localScale = child.transform.worldScale/this.getScale();
 	}
 
 	/**
@@ -99,9 +99,11 @@ public class Transform extends Component implements IDestroyable {
 		child.transform.distFromParent = thisPos.dst(childPos);
 
 		this.children.add(child); //Add the child to this transform
-		child.transform.parent = this.owner; //Make the child's parent this entity.
+		child.transform.parent = this; //Make the child's parent this entity.
 
 		child.transform.setLocalPosition(thisPos.x - childPos.x, thisPos.y - childPos.y);
+		child.transform.localScale = child.transform.worldScale/this.getScale();
+
 	}
 
 	/**
@@ -184,16 +186,24 @@ public class Transform extends Component implements IDestroyable {
 	 * @param scale The scale for this Transform to be.
 	 */
 	public void setScale(float scale){
+		System.out.println(this.owner.name+" is setting scale to "+scale+" ,scale before (world/local): "+this.worldScale+" "+this.localScale);
 		//If no parent, set the world scale AND localscale
 		if(this.parent == null){
 			this.worldScale = this.localScale = scale;
 		//If we do have a parent, only set the world scale.
 		}else {
 			this.worldScale = this.localScale * scale; //Set world scale. We multiply our local scale with the new world scale (ie: 2 * 0.5 = 1 world scale).
+
 			Vector2 localCopy = new Vector2(localPosition.x, localPosition.y); //Get a copy of our local position to work on (so we don't edit ours!).
 			//Set the distance. We first scale our local position by our world position, add it to our current position
-			this.distFromParent = (localCopy.scl(scale).add(this.parent.transform.getPosition()).dst(this.parent.transform.getPosition()));
+			System.out.println(this.owner.name+" distance before is "+this.distFromParent);
+			this.distFromParent = (localCopy.scl(scale).add(this.parent.getPosition()).dst(this.parent.getPosition()));
+			System.out.println(this.owner.name+" distance after is  "+this.distFromParent);
+
 		}
+
+		System.out.println(this.owner.name+" scale is now "+this.worldScale);
+
 
 		//For each child, set a new position and scale.
 		for(Entity child : this.children)
@@ -205,18 +215,25 @@ public class Transform extends Component implements IDestroyable {
 	 * @param scale The value to use as the local scale of this Transform.
 	 */
 	public void setLocalScale(float scale){
+		System.out.println(this.owner.name+" is setting local scale to "+scale+" ,scale before (world/local): "+this.worldScale+" "+this.localScale);
+
 		this.localScale = scale;
 		if(this.parent == null) this.worldScale = scale;
 		else{
 			this.worldScale = this.localScale * scale; //Set world scale. We multiply our local scale with the new world scale (ie: 2 * 0.5 = 1 world scale).
 			Vector2 localCopy = new Vector2(localPosition.x, localPosition.y); //Get a copy of our local position to work on (so we don't edit ours!).
+			System.out.println(this.owner.name+" distance before is "+this.distFromParent);
 			//Set the distance. We first scale our local position by our world position, add it to our current position
-			this.distFromParent = (localCopy.scl(scale).add(this.parent.transform.getPosition()).dst(this.parent.transform.getPosition()));
+			this.distFromParent = (localCopy.scl(scale).add(this.parent.getPosition()).dst(this.parent.getPosition()));
+			System.out.println(this.owner.name+" distance after is  "+this.distFromParent);
+
 		}
+
+		System.out.println(this.owner.name+" local scale is now "+this.localScale);
 
 		//For each child, set a new position and scale.
 		for(Entity child : this.children)
-			child.transform.setLocalScale(scale);
+			child.transform.setScale(scale);
 	}
 
 	/**
@@ -256,7 +273,7 @@ public class Transform extends Component implements IDestroyable {
 		if(this.parent == null)
 			this.localRotation = this.worldRotation; //If the parent is null, assign the local the same as the global.
 		else {
-			this.localRotation = Transform.normalizeAngle(this.worldRotation - this.parent.transform.worldRotation);
+			this.localRotation = Transform.normalizeAngle(this.worldRotation - this.parent.worldRotation);
 		}
 
 	}
@@ -266,7 +283,7 @@ public class Transform extends Component implements IDestroyable {
 	}
 
 	public void clearParent(){
-		this.parent.transform.removeChild(this.owner);
+		this.parent.removeChild(this.owner);
 	}
 
 	/**

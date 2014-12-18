@@ -29,11 +29,12 @@ public class Turret extends Component {
 	public void start() {
 		super.start();
 
-		bulletSpawn = new Entity(new Vector2(100,50), 0, new Texture("img/bar.png"), ExploreGame.batch, 20);
+		bulletSpawn = new Entity(new Vector2(100,50), 0, new Texture("img/bar.png"), ExploreGame.batch, 11);
 		this.owner.transform.addChild(bulletSpawn, new Vector2(0,50));
 		bulletSpawn.name = "spawn";
+		bulletSpawn.transform.setLocalScale(0.1f);
 
-		this.owner.transform.setLocalScale(0.5f);
+		this.owner.transform.setLocalScale(.3f);
 
 		Functional.Callback callback = () -> {
 			if(this.target != null && !this.target.isDestroyed()) {

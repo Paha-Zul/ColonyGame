@@ -171,7 +171,7 @@ public class Entity {
 
 		//Remove all children
 		if(this.transform.parent != null){
-			this.transform.parent.transform.removeChild(this);
+			this.transform.parent.removeChild(this);
 			this.transform.parent = null;
 		}
 
