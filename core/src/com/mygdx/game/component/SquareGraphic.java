@@ -14,10 +14,10 @@ public class SquareGraphic extends Component {
 
 	private ShapeRenderer renderer;
 
-	public SquareGraphic(ShapeRenderer renderer) {
+	public SquareGraphic() {
 		super();
 
-		this.renderer = renderer;
+		this.renderer = new ShapeRenderer();
 	}
 
 	@Override
@@ -30,9 +30,13 @@ public class SquareGraphic extends Component {
 	public void update(float delta) {
 		super.update(delta);
 
+		this.renderer.begin(ShapeRenderer.ShapeType.Filled);
+
 		Vector2 pos = this.owner.transform.getPosition();
 
 		this.renderer.setColor(this.color);
 		this.renderer.rect(pos.x - size*0.5f, pos.y - size*0.5f, size, size);
+
+		this.renderer.end();
 	}
 }

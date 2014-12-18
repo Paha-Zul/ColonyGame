@@ -1,5 +1,6 @@
 package com.mygdx.game.entity;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
 
 
@@ -8,6 +9,7 @@ import java.util.Collections;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.mygdx.game.ExploreGame;
 import com.mygdx.game.component.Component;
 import com.mygdx.game.component.GraphicIdentity;
 import com.mygdx.game.component.Transform;
@@ -37,10 +39,9 @@ public class Entity {
 	 * @param batch The SpriteBatch to draw the Entity.
 	 */
 	public Entity(Vector2 position, float rotation, Texture graphic, SpriteBatch batch, int drawLevel){
-		this.name = name;
-		this.activeComponentList = new ArrayList<Component>();
-		this.inactiveComponentList = new ArrayList<Component>();
-		this.newComponentList = new ArrayList<Component>();
+		this.activeComponentList = new ArrayList<>();
+		this.inactiveComponentList = new ArrayList<>();
+		this.newComponentList = new ArrayList<>();
 
 		this.transform = this.addComponent(new Transform(position, rotation, this));
 
@@ -69,9 +70,9 @@ public class Entity {
 	 * @param comps A variable amount of Components to construct this Entity with.
 	 */
 	public Entity(Vector2 position, float rotation, int drawLevel, Component... comps){
-		this.activeComponentList = new ArrayList<Component>(); //Init the active list.
-		this.inactiveComponentList = new ArrayList<Component>(); //Init the inactive list.
-		this.newComponentList = new ArrayList<Component>(); //Init the inactive list.
+		this.activeComponentList = new ArrayList<>(); //Init the active list.
+		this.inactiveComponentList = new ArrayList<>(); //Init the inactive list.
+		this.newComponentList = new ArrayList<>(); //Init the inactive list.
 
 		this.transform = this.addComponent(new Transform(position, rotation, this));
 		for(Component comp : comps)

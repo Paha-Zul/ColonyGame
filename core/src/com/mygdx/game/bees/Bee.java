@@ -6,13 +6,11 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
-import com.mygdx.game.BeeGame;
 import com.mygdx.game.helpers.Constants;
 import com.mygdx.game.helpers.GH;
 import com.mygdx.game.Grid;
 import com.mygdx.game.interfaces.IRenderable;
 import com.mygdx.game.interfaces.IUpdateable;
-import com.mygdx.game.server.ServerPlayer;
 
 import java.util.ArrayList;
 

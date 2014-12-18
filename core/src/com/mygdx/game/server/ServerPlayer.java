@@ -95,7 +95,6 @@ public class ServerPlayer {
 
 		this.testTimer.update(delta);
 
-		System.out.println("Setting scale");
 		if(up)
 			this.test.transform.setScale(test.transform.getScale() + delta);
 		else
