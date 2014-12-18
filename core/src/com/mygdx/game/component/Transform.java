@@ -186,7 +186,6 @@ public class Transform extends Component implements IDestroyable {
 	 * @param scale The scale for this Transform to be.
 	 */
 	public void setScale(float scale){
-		System.out.println(this.owner.name+" is setting scale to "+scale+" ,scale before (world/local): "+this.worldScale+" "+this.localScale);
 		//If no parent, set the world scale AND localscale
 		if(this.parent == null){
 			this.worldScale = this.localScale = scale;
@@ -196,14 +195,10 @@ public class Transform extends Component implements IDestroyable {
 
 			Vector2 localCopy = new Vector2(localPosition.x, localPosition.y); //Get a copy of our local position to work on (so we don't edit ours!).
 			//Set the distance. We first scale our local position by our world position, add it to our current position
-			System.out.println(this.owner.name+" distance before is "+this.distFromParent);
-			this.distFromParent = (localCopy.scl(scale).add(this.parent.getPosition()).dst(this.parent.getPosition()));
-			System.out.println(this.owner.name+" distance after is  "+this.distFromParent);
+			//Calc the distance to the parent. Scale the local position by the parents scale, then add to the parent's position, then get the dst.
+			this.distFromParent = (localCopy.scl(this.parent.getScale()).add(this.parent.getPosition()).dst(this.parent.getPosition()));
 
 		}
-
-		System.out.println(this.owner.name+" scale is now "+this.worldScale);
-
 
 		//For each child, set a new position and scale.
 		for(Entity child : this.children)
@@ -215,21 +210,15 @@ public class Transform extends Component implements IDestroyable {
 	 * @param scale The value to use as the local scale of this Transform.
 	 */
 	public void setLocalScale(float scale){
-		System.out.println(this.owner.name+" is setting local scale to "+scale+" ,scale before (world/local): "+this.worldScale+" "+this.localScale);
-
 		this.localScale = scale;
 		if(this.parent == null) this.worldScale = scale;
 		else{
 			this.worldScale = this.localScale * scale; //Set world scale. We multiply our local scale with the new world scale (ie: 2 * 0.5 = 1 world scale).
 			Vector2 localCopy = new Vector2(localPosition.x, localPosition.y); //Get a copy of our local position to work on (so we don't edit ours!).
-			System.out.println(this.owner.name+" distance before is "+this.distFromParent);
 			//Set the distance. We first scale our local position by our world position, add it to our current position
-			this.distFromParent = (localCopy.scl(scale).add(this.parent.getPosition()).dst(this.parent.getPosition()));
-			System.out.println(this.owner.name+" distance after is  "+this.distFromParent);
+			this.distFromParent = (localCopy.scl(this.parent.getScale()).add(this.parent.getPosition()).dst(this.parent.getPosition()));
 
 		}
-
-		System.out.println(this.owner.name+" local scale is now "+this.localScale);
 
 		//For each child, set a new position and scale.
 		for(Entity child : this.children)

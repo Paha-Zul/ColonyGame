@@ -34,7 +34,7 @@ public class Turret extends Component {
 		bulletSpawn.name = "spawn";
 		bulletSpawn.transform.setLocalScale(0.1f);
 
-		this.owner.transform.setLocalScale(.3f);
+		this.owner.transform.setLocalScale(.5f);
 
 		Functional.Callback callback = () -> {
 			if(this.target != null && !this.target.isDestroyed()) {
