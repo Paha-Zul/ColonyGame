@@ -1,6 +1,6 @@
 package com.mygdx.game;
 
-import com.mygdx.game.bees.Bee;
+import com.mygdx.game.entity.Entity;
 import com.mygdx.game.interfaces.Functional;
 
 import java.util.ArrayList;
@@ -11,14 +11,27 @@ import java.util.HashMap;
  */
 public class Grid {
 	public static GridInstance activeGrid;
+	public static HashMap<String, GridInstance> gridMap = new HashMap<>();
 
-	public static void NewGrid(float sizeX, float sizeY, int squareSize){
-		Grid.activeGrid = new GridInstance(sizeX, sizeY, squareSize);
+	public static void NewGrid(String name, float sizeX, float sizeY, int squareSize){
+		gridMap.put(name, new GridInstance(sizeX, sizeY, squareSize));
+	}
+
+	public static void NewGrid(String name, float sizeX, float sizeY, int squareSize, boolean active){
+		GridInstance grid = new GridInstance(sizeX, sizeY, squareSize);
+		gridMap.put(name, grid);
+		if(active)
+			Grid.activeGrid = grid;
+	}
+
+	public static GridInstance getGrid(String name){
+		return gridMap.get(name);
 	}
 
 	public static class GridInstance{
-		Cell[][] grid;
 		public int squareSize;
+
+		Cell[][] grid;
 
 		private GridInstance(float sizeX, float sizeY, int squareSize){
 			int cols = ((int)sizeX/squareSize) + 1;
@@ -86,9 +99,7 @@ public class Grid {
 	}
 
 	public static class Cell{
-		public float food, trail;
-
-		private HashMap<Double, Bee> map = new HashMap<Double, Bee>();
+		private HashMap<Double, Entity> map = new HashMap<>();
 		private int col, row;
 
 		public Cell(int col, int row){
@@ -96,20 +107,20 @@ public class Grid {
 			this.row = row;
 		}
 
-		public void addToCell(Bee bee) {
-			map.put(bee.id, bee);
+		public void addToCell(Entity Entity) {
+			map.put(Entity.getID(), Entity);
+	}
+
+		public void removeFromCell(Entity Entity){
+			map.remove(Entity.getID());
 		}
 
-		public void removeFromCell(Bee bee){
-			map.remove(bee.id);
+		public Entity getFromCell(Entity Entity){
+			return map.get(Entity.getID());
 		}
 
-		public Bee getFromCell(Bee bee){
-			return map.get(bee.id);
-		}
-
-		public ArrayList<Bee> getObjectList(){
-			return new ArrayList<Bee>(map.values());
+		public ArrayList<Entity> getObjectList(){
+			return new ArrayList<>(map.values());
 		}
 
 		public int getCol(){

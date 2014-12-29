@@ -2,6 +2,8 @@ package com.mygdx.game.helpers;
 
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.interfaces.Functional;
+import com.mygdx.game.interfaces.IGUI;
+import com.sun.java.accessibility.util.GUIInitializedListener;
 
 import java.util.ArrayList;
 
@@ -10,6 +12,7 @@ import java.util.ArrayList;
  */
 public class ListHolder {
 	private static ArrayList<ArrayList<Entity>> entityList = new ArrayList<>();
+	private static ArrayList<IGUI> GUIList = new ArrayList<>();
 
 	public static void addEntity(int drawLevel, Entity e){
 		//If our list doesn't have enough layers to put something at 'drawLevel', add the layers!
@@ -46,5 +49,26 @@ public class ListHolder {
 			}
 		}
 	}
+
+	/**
+	 * Adds a GUI Component that implements IGUI to a list.
+	 * @param GUI the IGUI interface component.
+	 */
+	public static void addInterface(IGUI GUI){
+		GUIList.add(GUI);
+	}
+
+	/**
+	 * Removes a IGUI Component from the list.
+	 * @param GUI The IGUI Component to remove.
+	 */
+	public static void removeInterface(IGUI GUI){
+		GUIList.remove(GUI);
+	}
+
+	public static ArrayList<IGUI> getGUIList(){
+		return GUIList;
+	}
+
 
 }

@@ -26,14 +26,7 @@ public class Transform extends Component implements IDestroyable {
 		this.worldPosition = new Vector2(position.x, position.y);
 		this.localPosition = new Vector2(0, 0);
 		this.setRotation(rotation);
-	}
-
-	@Override
-	public void init(Entity owner){
-		this.owner = owner;
 		this.children = new ArrayList<>();
-
-		//new Exception().printStackTrace();
 	}
 
 	@Override

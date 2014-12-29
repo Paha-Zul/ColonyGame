@@ -1,6 +1,7 @@
 package com.mygdx.game.entity;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 
 
@@ -30,6 +31,7 @@ public class Entity {
 	protected ArrayList<Component> activeComponentList;
 	protected ArrayList<Component> inactiveComponentList;
 	protected boolean destroyed=false;
+	protected double ID;
 
 	/**
 	 * Creates an Entity that will start with a GraphicIdentity component.
@@ -51,6 +53,7 @@ public class Entity {
 		}
 
 		ListHolder.addEntity(drawLevel, this);
+		this.ID = MathUtils.random()*Double.MAX_VALUE;
 	}
 
 	/**
@@ -79,6 +82,7 @@ public class Entity {
 			this.addComponent(comp);
 
 		ListHolder.addEntity(drawLevel, this);
+		this.ID = MathUtils.random()*Double.MAX_VALUE;
 	}
 
 	public void update(float delta){
@@ -158,6 +162,10 @@ public class Entity {
 	 */
 	public boolean isDestroyed(){
 		return this.destroyed;
+	}
+
+	public double getID(){
+		return this.ID;
 	}
 
 	/**

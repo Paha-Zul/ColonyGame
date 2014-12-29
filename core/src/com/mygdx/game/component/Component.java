@@ -20,7 +20,7 @@ public abstract class Component implements IDestroyable {
 	 * set the owner of this Component and other Components of the owner may not be available to access.
 	 * @param owner The Entity owner of this Component.
 	 */
-	public void init(Entity owner){
+	public final void init(Entity owner){
 		this.owner = owner;
 	}
 

@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.mygdx.game.ExploreGame;
 import com.mygdx.game.Grid;
 import com.mygdx.game.bees.Bee;
 import com.mygdx.game.component.*;
@@ -15,10 +16,13 @@ import com.mygdx.game.entity.Entity;
 import com.mygdx.game.entity.TurretEnt;
 import com.mygdx.game.helpers.Constants;
 import com.mygdx.game.helpers.ListHolder;
+import com.mygdx.game.helpers.SimplexNoise;
+import com.mygdx.game.helpers.WorldGen;
 import com.mygdx.game.helpers.timer.OneShotTimer;
 import com.mygdx.game.helpers.timer.RepeatingTimer;
 import com.mygdx.game.helpers.timer.Timer;
 import com.mygdx.game.interfaces.Functional;
+import sun.java2d.pipe.SpanShapeRenderer;
 
 import java.util.ArrayList;
 
@@ -37,56 +41,21 @@ public class ServerPlayer {
 	public ServerPlayer(SpriteBatch batch, ShapeRenderer renderer){
 		//Start the server
 		Server.start(1337);
-		Grid.NewGrid(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), 25);
+		Grid.NewGrid("spatial",Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), 25, true);
 
 		//Make a new spritebatch and shaperenderer.
 		this.batch = batch;
 		this.shapeRenderer = renderer;
 
-		for(int i=0;i<1;i++) {
-			GraphicIdentity identity = new GraphicIdentity(new Texture("img/bar.png"), batch);
+		generateTest();
 
-			Move move =  new Move();
-			move.rotateSpeed = 50;
+		initPlayer();
 
-			Entity ent = new Entity(new Vector2(200,200), 0, 10, identity, move);
-			ent.name = "Square";
-			test = ent;
+		Grid.NewGrid("terrain", Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), 25);
 
-			Vector2 pos1 = new Vector2(225,225);
-			Entity turret = new TurretEnt(pos1, 90, new Texture("img/turret.png"), batch, 11);
-			turret.getComponent(Move.class).rotateSpeed = 0;
-			turret.name = "Turret1";
-
-//			Vector2 pos2 = new Vector2(175,225);
-//			Entity turret2 = new TurretEnt(pos2, 90, new Texture("img/turret.png"), batch, 11);
-//			turret2.getComponent(Move.class).rotateSpeed = 25;
-//			turret2.name = "Turret2";
-//
-//			Vector2 pos3 = new Vector2(225,175);
-//			Entity turret3 = new TurretEnt(pos3, 90, new Texture("img/turret.png"), batch, 11);
-//			turret3.getComponent(Move.class).rotateSpeed = -25;
-//			turret3.name = "Turret3";
-
-			ent.transform.addChild(turret);
-//			ent.transform.addChild(turret2);
-//			ent.transform.addChild(turret3);
-		}
-
-		Vector2 pos4 = new Vector2(400,200);
-		Entity enemy = new Entity(pos4, 90, new Texture("img/turret.png"), batch, 11);
-		Turret.addEnemy(enemy);
-
-		ListHolder.addEntity(2, enemy);
-
-		this.testTimer = new OneShotTimer(10f, ()->{
-			System.out.println("Destroyed");
-			enemy.destroy();
-		});
-
-		//Add random food around the map.
-		Functional.Perform<Grid.Cell> perform = cell -> { if(Math.random() < 0.25) cell.food = (float)(10 + Math.random()*90);};
-		Grid.activeGrid.iterate(perform);
+		WorldGen.tileSize = 50;
+		WorldGen.freq = 20;
+		WorldGen.generateTerrain(12312313l);
 	}
 
 	public void render(float delta){
@@ -105,10 +74,19 @@ public class ServerPlayer {
 		if(this.test.transform.getScale() < 0.5)
 			up = true;
 
-		this.debug();
+		//this.debug();
 
 		batch.begin();
 		shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+
+		WorldGen.TerrainTile[][] map = WorldGen.map;
+		//Loop over the array
+		for(int x=0;x<map.length;x++)
+			for(int y=0;y<map[0].length;y++) {
+				WorldGen.TerrainTile tile = map[x][y];
+				batch.draw(tile.image, tile.position.x, tile.position.y, WorldGen.tileSize/2f, WorldGen.tileSize/2f, WorldGen.tileSize, WorldGen.tileSize, 1, 1, tile.rotation, 0,0, WorldGen.tileSize, WorldGen.tileSize, false, false);
+				//batch.draw(tile.image, tile.position.x, tile.position.y);
+			}
 
 		ListHolder.update(Gdx.graphics.getDeltaTime());
 
@@ -116,6 +94,53 @@ public class ServerPlayer {
 		batch.end();
 	}
 
+	private void generateTest(){
+		GraphicIdentity identity = new GraphicIdentity(new Texture("img/bar.png"), batch);
+
+		Move move =  new Move();
+		move.rotateSpeed = 50;
+
+		Entity ent = new Entity(new Vector2(200,200), 0, 10, identity, move);
+		ent.name = "Square";
+		test = ent;
+
+		Vector2 pos1 = new Vector2(225,225);
+		Entity turret = new TurretEnt(pos1, 90, new Texture("img/turret.png"), batch, 11);
+		turret.getComponent(Move.class).rotateSpeed = 0;
+		turret.name = "Turret1";
+
+//			Vector2 pos2 = new Vector2(175,225);
+//			Entity turret2 = new TurretEnt(pos2, 90, new Texture("img/turret.png"), batch, 11);
+//			turret2.getComponent(Move.class).rotateSpeed = 25;
+//			turret2.name = "Turret2";
+//
+//			Vector2 pos3 = new Vector2(225,175);
+//			Entity turret3 = new TurretEnt(pos3, 90, new Texture("img/turret.png"), batch, 11);
+//			turret3.getComponent(Move.class).rotateSpeed = -25;
+//			turret3.name = "Turret3";
+
+		ent.transform.addChild(turret);
+//			ent.transform.addChild(turret2);
+//			ent.transform.addChild(turret3);
+
+		Vector2 pos4 = new Vector2(400,200);
+		Entity enemy = new Entity(pos4, 90, new Texture("img/turret.png"), batch, 11);
+		Turret.addEnemy(enemy);
+
+		ListHolder.addEntity(2, enemy);
+
+		this.testTimer = new OneShotTimer(10f, ()->{
+			System.out.println("Destroyed");
+			enemy.destroy();
+		});
+	}
+
+	private void initPlayer(){
+		PlayerInterface UI = new PlayerInterface(ExploreGame.batch);
+		Entity playerObj = new Entity(new Vector2(0,0), 0, 20, UI);
+	}
+
+	/*
 	public void debug(){
 		Gdx.gl.glEnable(GL20.GL_BLEND);
 		Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
@@ -132,4 +157,9 @@ public class ServerPlayer {
 		shapeRenderer.end();
 		Gdx.gl.glDisable(GL20.GL_BLEND);
 	}
+	*/
+
+
+
+
 }

@@ -21,8 +21,6 @@ public class ExploreGame extends Game {
 	public static boolean server = true;
 	public static boolean singlePlayer = true;
 
-	ServerPlayer serverPlayer;
-	ClientPlayer clientPlayer;
 
 	public static SpriteBatch batch;
 	public static ShapeRenderer renderer;
@@ -32,19 +30,12 @@ public class ExploreGame extends Game {
 		batch = new SpriteBatch();
 		renderer = new ShapeRenderer();
 
-		if(server)
-			serverPlayer = new ServerPlayer(batch, renderer);
-		else
-			clientPlayer = new ClientPlayer();
+		this.setScreen(new GameScreen());
 	}
 
 	@Override
 	public void render () {
-		float delta = Gdx.graphics.getDeltaTime();
+		super.render();
 
-		if(server)
-			serverPlayer.render(delta);
-		else
-			clientPlayer.render(delta);
 	}
 }
