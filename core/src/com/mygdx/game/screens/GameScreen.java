@@ -1,6 +1,9 @@
-package com.mygdx.game;
+package com.mygdx.game.screens;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Graphics;
 import com.badlogic.gdx.Screen;
+import com.mygdx.game.ColonyGame;
 import com.mygdx.game.client.ClientPlayer;
 import com.mygdx.game.helpers.ListHolder;
 import com.mygdx.game.interfaces.IGUI;
@@ -12,17 +15,20 @@ import java.util.ArrayList;
  * Created by Bbent_000 on 12/25/2014.
  */
 public class GameScreen implements Screen{
-    ServerPlayer serverPlayer;
-    ClientPlayer clientPlayer;
+    private ServerPlayer serverPlayer;
+    private ClientPlayer clientPlayer;
+    private ColonyGame game;
 
     public static float scaleX;
     public static float scaleY;
 
-    public GameScreen(){
-        if(ExploreGame.server)
-            serverPlayer = new ServerPlayer(ExploreGame.batch, ExploreGame.renderer);
+    public GameScreen(final ColonyGame game){
+        if(ColonyGame.server)
+            serverPlayer = new ServerPlayer(ColonyGame.batch, ColonyGame.renderer);
         else
             clientPlayer = new ClientPlayer();
+
+        this.game = game;
     }
 
     @Override
@@ -32,7 +38,7 @@ public class GameScreen implements Screen{
 
     @Override
     public void render(float delta) {
-        if(ExploreGame.server)
+        if(ColonyGame.server)
             serverPlayer.render(delta);
         else
             clientPlayer.render(delta);
@@ -40,7 +46,9 @@ public class GameScreen implements Screen{
 
     @Override
     public void resize(int width, int height) {
-        System.out.println("Resizing from game screen");
+        Gdx.graphics.setDisplayMode(width, height, false);
+        ColonyGame.camera.setToOrtho(false, width, height);
+
         //Resizes all the GUI elements of the game (hopefully!)
         ArrayList<IGUI> list = ListHolder.getGUIList();
         for(int i=0;i< list.size();i++){

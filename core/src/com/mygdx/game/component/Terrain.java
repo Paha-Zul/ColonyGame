@@ -3,7 +3,7 @@ package com.mygdx.game.component;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.mygdx.game.ExploreGame;
+import com.mygdx.game.ColonyGame;
 
 /**
  * Created by Bbent_000 on 12/18/2014.
@@ -21,7 +21,7 @@ public class Terrain extends Component{
     public void start() {
         super.start();
 
-        this.batch = ExploreGame.batch;
+        this.batch = ColonyGame.batch;
         sprite = new Sprite(image);
         sprite.setPosition(this.owner.transform.getPosition().x, this.owner.transform.getPosition().y);
     }

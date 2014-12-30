@@ -3,28 +3,20 @@ package com.mygdx.game.server;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
-import com.mygdx.game.ExploreGame;
+import com.mygdx.game.ColonyGame;
 import com.mygdx.game.Grid;
-import com.mygdx.game.bees.Bee;
 import com.mygdx.game.component.*;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.entity.TurretEnt;
-import com.mygdx.game.helpers.Constants;
 import com.mygdx.game.helpers.ListHolder;
-import com.mygdx.game.helpers.SimplexNoise;
 import com.mygdx.game.helpers.WorldGen;
 import com.mygdx.game.helpers.timer.OneShotTimer;
-import com.mygdx.game.helpers.timer.RepeatingTimer;
-import com.mygdx.game.helpers.timer.Timer;
-import com.mygdx.game.interfaces.Functional;
-import sun.java2d.pipe.SpanShapeRenderer;
-
-import java.util.ArrayList;
+import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 
 /**
  * Created by Bbent_000 on 11/23/2014.
@@ -32,11 +24,13 @@ import java.util.ArrayList;
 public class ServerPlayer {
 	SpriteBatch batch;
 	ShapeRenderer shapeRenderer;
-	Color screenColor = new Color(163f/255f, 154f/255f, 124f/255f, 1);
 
 	OneShotTimer testTimer;
 	Entity test;
 	boolean up = true;
+
+	private Color screenColor = new Color(163f/255f, 154f/255f, 124f/255f, 1);
+
 
 	public ServerPlayer(SpriteBatch batch, ShapeRenderer renderer){
 		//Start the server
@@ -47,50 +41,47 @@ public class ServerPlayer {
 		this.batch = batch;
 		this.shapeRenderer = renderer;
 
-		generateTest();
+		//generateTest();
 
 		initPlayer();
 
 		Grid.NewGrid("terrain", Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), 25);
 
-		WorldGen.tileSize = 50;
-		WorldGen.freq = 20;
-		WorldGen.generateTerrain(12312313l);
+
 	}
 
 	public void render(float delta){
 		Gdx.gl.glClearColor(screenColor.r, screenColor.g, screenColor.b, screenColor.a);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-		this.testTimer.update(delta);
+		if(this.testTimer != null && this.test != null) {
+			this.testTimer.update(delta);
 
-		if(up)
-			this.test.transform.setScale(test.transform.getScale() + delta);
-		else
-			this.test.transform.setScale(test.transform.getScale() + -delta);
+			if (up)
+				this.test.transform.setScale(test.transform.getScale() + delta);
+			else
+				this.test.transform.setScale(test.transform.getScale() + -delta);
 
-		if(this.test.transform.getScale() > 3)
-			up = false;
-		if(this.test.transform.getScale() < 0.5)
-			up = true;
+			if (this.test.transform.getScale() > 3)
+				up = false;
+			if (this.test.transform.getScale() < 0.5)
+				up = true;
+		}
 
 		//this.debug();
 
 		batch.begin();
-		shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
 		WorldGen.TerrainTile[][] map = WorldGen.map;
 		//Loop over the array
-		for(int x=0;x<map.length;x++)
-			for(int y=0;y<map[0].length;y++) {
+		for(int x=0;x<map.length;x++) {
+			for (int y = 0; y < map[0].length; y++) {
 				WorldGen.TerrainTile tile = map[x][y];
-				batch.draw(tile.image, tile.position.x, tile.position.y, WorldGen.tileSize/2f, WorldGen.tileSize/2f, WorldGen.tileSize, WorldGen.tileSize, 1, 1, tile.rotation, 0,0, WorldGen.tileSize, WorldGen.tileSize, false, false);
+				batch.draw(tile.image, tile.position.x, tile.position.y, WorldGen.tileSize / 2f, WorldGen.tileSize / 2f, WorldGen.tileSize, WorldGen.tileSize, 1, 1, tile.rotation, 0, 0, WorldGen.tileSize, WorldGen.tileSize, false, false);
 				//batch.draw(tile.image, tile.position.x, tile.position.y);
 			}
+		}
 
-		ListHolder.update(Gdx.graphics.getDeltaTime());
-
-		shapeRenderer.end();
 		batch.end();
 	}
 
@@ -136,7 +127,7 @@ public class ServerPlayer {
 	}
 
 	private void initPlayer(){
-		PlayerInterface UI = new PlayerInterface(ExploreGame.batch);
+		PlayerInterface UI = new PlayerInterface(ColonyGame.batch);
 		Entity playerObj = new Entity(new Vector2(0,0), 0, 20, UI);
 	}
 

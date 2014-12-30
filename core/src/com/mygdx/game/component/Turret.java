@@ -1,10 +1,9 @@
 package com.mygdx.game.component;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
-import com.mygdx.game.ExploreGame;
+import com.mygdx.game.ColonyGame;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.entity.ProjectileEnt;
 import com.mygdx.game.helpers.timer.RepeatingTimer;
@@ -29,7 +28,7 @@ public class Turret extends Component {
 	public void start() {
 		super.start();
 
-		bulletSpawn = new Entity(new Vector2(100,50), 0, new Texture("img/bar.png"), ExploreGame.batch, 11);
+		bulletSpawn = new Entity(new Vector2(100,50), 0, new Texture("img/bar.png"), ColonyGame.batch, 11);
 		this.owner.transform.addChild(bulletSpawn, new Vector2(0,50));
 		bulletSpawn.name = "spawn";
 		bulletSpawn.transform.setLocalScale(0.1f);
@@ -53,7 +52,7 @@ public class Turret extends Component {
 
 		this.shootTimer = new RepeatingTimer(0.3f, ()->{
 			Vector2 spawn = bulletSpawn.transform.getPosition();
-			Entity proj = new ProjectileEnt(new Vector2(spawn.x, spawn.y), this.owner.transform.getRotation(), new Texture("img/projectile.png"), ExploreGame.batch, 11);
+			Entity proj = new ProjectileEnt(new Vector2(spawn.x, spawn.y), this.owner.transform.getRotation(), new Texture("img/projectile.png"), ColonyGame.batch, 11);
 			proj.transform.setScale(0.1f);
 			proj.getComponent(Projectile.class).speed = 200;
 		});

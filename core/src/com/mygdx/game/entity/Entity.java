@@ -1,16 +1,13 @@
 package com.mygdx.game.entity;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 
 
 import java.util.ArrayList;
-import java.util.Collections;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.mygdx.game.ExploreGame;
 import com.mygdx.game.component.Component;
 import com.mygdx.game.component.GraphicIdentity;
 import com.mygdx.game.component.Transform;

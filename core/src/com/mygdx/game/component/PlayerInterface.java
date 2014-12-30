@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.mygdx.game.helpers.GUI;
 import com.mygdx.game.helpers.ListHolder;
+import com.mygdx.game.helpers.WorldGen;
 import com.mygdx.game.helpers.timer.RepeatingTimer;
 import com.mygdx.game.helpers.timer.Timer;
 import com.mygdx.game.interfaces.Functional;
@@ -48,12 +49,15 @@ public class PlayerInterface extends Component implements IGUI {
         super.update(delta);
         FPSTimer.update(delta);
 
-        if(GUI.Button(this.buttonRect, this.background, "FREAKING SUCHAS", this.batch))
-            Gdx.app.exit();
+//        if(GUI.Button(this.buttonRect, this.background, "FREAKING SUCHAS", this.batch))
+//            Gdx.app.exit();
 
         GUI.Texture(this.infoRect, this.background, this.batch);
 
-        GUI.Text("FPS: "+FPS, this.batch, Gdx.graphics.getWidth() - 70, Gdx.graphics.getHeight() - 0);
+        GUI.Text("FPS: "+FPS, this.batch, 0, Gdx.graphics.getHeight() - 40);
+        GUI.Text("Resolution: "+Gdx.graphics.getDesktopDisplayMode().width+"X"+Gdx.graphics.getDesktopDisplayMode().height, this.batch, 0, Gdx.graphics.getHeight() - 60);
+        GUI.Text("NumTrees: "+ WorldGen.numTrees(), this.batch, 0, Gdx.graphics.getHeight() - 80);
+        GUI.Text("NumTiles: "+WorldGen.numTiles(), this.batch, 0, Gdx.graphics.getHeight() - 100);
     }
 
     @Override

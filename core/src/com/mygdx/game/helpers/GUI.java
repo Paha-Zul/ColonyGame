@@ -17,6 +17,10 @@ public class GUI {
         batch.draw(texture, rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight());
     }
 
+    public static void Texture(float x, float y, float width, float height, Texture texture, SpriteBatch batch){
+        batch.draw(texture, x, y, width, height);
+    }
+
     public static void Text(String text, SpriteBatch batch, float x, float y){
         font.draw(batch, text, x, y);
     }
@@ -40,5 +44,18 @@ public class GUI {
         if(rect.contains(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY()) && Gdx.input.isButtonPressed(Input.Buttons.LEFT))
             return true;
         return false;
+    }
+
+    public static void Label(String text, SpriteBatch batch, float x, float y, boolean centered){
+        if(centered){
+            BitmapFont.TextBounds bounds = font.getBounds(text);
+            font.draw(batch, text, x - bounds.width/2, y + bounds.height/2);
+        }else{
+            font.draw(batch, text, x, y);
+        }
+    }
+
+    public static String TextBox(String text, SpriteBatch batch, float x, float y){
+        return "";
     }
 }
