@@ -8,7 +8,8 @@ import com.mygdx.game.interfaces.Functional;
 public abstract class Timer {
 	protected double length;
 	protected double currCounter;
-	protected boolean expired = false;
+	protected boolean canceled = false;
+	protected boolean finished = false;
 
 	private Functional.Callback callback;
 
@@ -25,15 +26,17 @@ public abstract class Timer {
 	 * Cancels this Timer and stops and further ticking or callback calls.
 	 */
 	public void cancel(){
-		this.expired = true;
+		this.canceled = true;
 	}
 
 	/**
 	 * @return True if canceled, false otherwise.
 	 */
 	public boolean isCanceled(){
-		return this.expired;
+		return this.canceled;
 	}
+
+	public boolean isFinished(){return this.finished;}
 
 	/**
 	 * Restarts the timer with the initial length.
@@ -48,7 +51,8 @@ public abstract class Timer {
 	 */
 	public void restart(double length){
 		this.currCounter = 0;
-		this.expired = false;
+		this.canceled = false;
+		this.finished = false;
 		this.length = length;
 	}
 
@@ -56,7 +60,8 @@ public abstract class Timer {
 	 * This should be called when the timer finishes its current timer. Calls the callback function.
 	 */
 	protected void finish(){
-		this.callback.callback();
+		if(callback != null)
+			this.callback.callback();
 	}
 
 }

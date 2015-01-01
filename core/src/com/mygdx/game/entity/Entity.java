@@ -88,9 +88,10 @@ public class Entity {
 		if(this.active && !this.destroyed) {
 			//Start all new components.
 			if (this.newComponentList.size() > 0) {
+				ArrayList<Component> newCompCopy = new ArrayList<>(this.newComponentList);
 				//Call start on all new Components. This is where the component can access other
 				//components on this Entity.
-				for (Component comp : this.newComponentList)
+				for (Component comp : newCompCopy)
 					comp.start();
 
 				this.newComponentList.clear(); //Clear the new Component list.

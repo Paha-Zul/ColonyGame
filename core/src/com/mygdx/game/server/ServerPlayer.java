@@ -41,7 +41,7 @@ public class ServerPlayer {
 		this.batch = batch;
 		this.shapeRenderer = renderer;
 
-		//generateTest();
+		generateTest();
 
 		initPlayer();
 
@@ -87,11 +87,12 @@ public class ServerPlayer {
 
 	private void generateTest(){
 		GraphicIdentity identity = new GraphicIdentity(new Texture("img/bar.png"), batch);
+		BehaviourManager behaviours = new BehaviourManager();
 
 		Move move =  new Move();
 		move.rotateSpeed = 50;
 
-		Entity ent = new Entity(new Vector2(200,200), 0, 10, identity, move);
+		Entity ent = new Entity(new Vector2(200,200), 0, 10, identity, move, behaviours);
 		ent.name = "Square";
 		test = ent;
 

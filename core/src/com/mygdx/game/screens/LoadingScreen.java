@@ -24,7 +24,7 @@ public class LoadingScreen implements Screen {
     public void show() {
         WorldGen.tileSize = 25;
         WorldGen.freq = 20;
-        WorldGen.init((long)MathUtils.random()*Long.MAX_VALUE);
+        WorldGen.init((long)(MathUtils.random()*Long.MAX_VALUE));
         WorldGen.numStep = 50;
 
         LoadingInterface inter = new LoadingInterface(game.batch);
@@ -37,7 +37,6 @@ public class LoadingScreen implements Screen {
             LoadingInterface.setDone();
             game.setScreen(new GameScreen(this.game));
         }
-
     }
 
     @Override

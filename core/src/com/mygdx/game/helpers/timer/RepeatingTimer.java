@@ -17,7 +17,7 @@ public class RepeatingTimer extends Timer{
 
 	@Override
 	public void update(float delta) {
-		if(!expired) {
+		if(!canceled && !finished) {
 			if (this.currCounter >= this.length) {
 				this.currCounter -= this.length;
 				this.finish();

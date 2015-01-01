@@ -28,15 +28,12 @@ public class WorldGen {
 
     private static int numX, numY, currX = 0, currY = 0;
 
-    //Load up the initial textures
-    static{
-
-    }
-
     public static void init(long seed){
         grassTiles = new Texture[4];
         tallGrassTiles = new Texture[3];
         treeTextures = new Texture[13];
+
+        System.out.println("seed: "+seed);
 
         grassTiles[0] = new Texture("img/grass1.png");
         grassTiles[1] = new Texture("img/grass2.png");
