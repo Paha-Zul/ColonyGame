@@ -3,7 +3,6 @@ package com.mygdx.game.server;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -14,9 +13,8 @@ import com.mygdx.game.component.*;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.entity.TurretEnt;
 import com.mygdx.game.helpers.ListHolder;
-import com.mygdx.game.helpers.WorldGen;
+import com.mygdx.game.helpers.worldgeneration.WorldGen;
 import com.mygdx.game.helpers.timer.OneShotTimer;
-import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 
 /**
  * Created by Bbent_000 on 11/23/2014.

@@ -6,7 +6,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.mygdx.game.helpers.GUI;
 import com.mygdx.game.helpers.ListHolder;
-import com.mygdx.game.helpers.WorldGen;
+import com.mygdx.game.helpers.worldgeneration.WorldGen;
 import com.mygdx.game.helpers.timer.RepeatingTimer;
 import com.mygdx.game.helpers.timer.Timer;
 import com.mygdx.game.interfaces.Functional;

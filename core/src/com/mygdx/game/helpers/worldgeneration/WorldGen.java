@@ -1,4 +1,4 @@
-package com.mygdx.game.helpers;
+package com.mygdx.game.helpers.worldgeneration;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
@@ -28,6 +28,10 @@ public class WorldGen {
 
     private static int numX, numY, currX = 0, currY = 0;
 
+    /**
+     * Initializes the World Generator. For now, most stuff is temporary for prototyping.
+     * @param seed
+     */
     public static void init(long seed){
         grassTiles = new Texture[4];
         tallGrassTiles = new Texture[3];
@@ -35,50 +39,68 @@ public class WorldGen {
 
         System.out.println("seed: "+seed);
 
+        //Loads in some grass.
         grassTiles[0] = new Texture("img/grass1.png");
         grassTiles[1] = new Texture("img/grass2.png");
         grassTiles[2] = new Texture("img/grass3.png");
         grassTiles[3] = new Texture("img/grass4.png");
 
+        //Loads in some tall grass.
         tallGrassTiles[0] = new Texture("img/tallgrass1.png");
         tallGrassTiles[1] = new Texture("img/tallgrass2.png");
         tallGrassTiles[2] = new Texture("img/tallgrass3.png");
 
+        //Loads in all the trees.
         for(int i=2;i<treeTextures.length;i++){
+            //We don't like trees 3, 12, or 13. Skip these.
             if(i!= 3 && i!= 12 && i!=13)
                 treeTextures[i-2] = new Texture("img/trees/Tree"+i+".png");
             else
                 treeTextures[i-2] = new Texture("img/trees/Tree5.png");
         }
 
+        //This randomizes the noise by using the seed passed in.
         SimplexNoise.genGrad(seed);
 
+        //Sets the number of tiles in X (numX) and Y (numY) by getting the screen width/height.
         numX = Gdx.graphics.getWidth()/tileSize + 1;
         numY = Gdx.graphics.getHeight()/tileSize + 1;
 
+        //Initializes a new array
         map = new TerrainTile[numX][numY];
     }
 
-    public static boolean generateTerrain(){
-        int stepLeft = numStep;
+    /**
+     * Called every frame to generate the world. This will return true when the world is fully generated.
+     * @return True when finished, false otherwise.
+     */
+    public static boolean generateWorld(){
+        int stepsLeft = numStep;
         boolean done = true; //Flag for completion.
 
-        while(stepLeft > 0 && currX < numX){
-            TerrainTile tile = map[currX][currY] = new TerrainTile();
+        //If there's steps left and currX is still less than the total num X, generate!
+        while(stepsLeft > 0 && currX < numX){
+            TerrainTile tile = map[currX][currY] = new TerrainTile(); //Initialize a new terrain tile.
             tile.noiseValue = SimplexNoise.noise((double)currX/freq,(double)currY/freq); //Generate the noise for this tile.
             tile.position = new Vector2(currX*tileSize, currY*tileSize); //Set the position.
 
+            //If under this value, generate dark water.
             if(tile.noiseValue < -0.2) {
                 tile.type = 0;
                 tile.image = new Texture("img/DarkWater.png");
+
+            //If between 0 and -0.2, light water.
             }else if (tile.noiseValue < 0) {
                 tile.type = 0;
                 tile.image = new Texture("img/LightWater.png");
 
+            //If between 0 and 0.6, random grass.
             }else if (tile.noiseValue < 0.6){
                 tile.type = 1;
                 tile.image = grassTiles[(int)(MathUtils.random()*grassTiles.length)];
                 tile.rotation = (int)(MathUtils.random()*4)*90;
+
+            //Otherwise, tall grass!
             }else{
                 tile.type = 1;
                 tile.image = tallGrassTiles[(int)(MathUtils.random()*tallGrassTiles.length)];
@@ -95,9 +117,11 @@ public class WorldGen {
 
             }
 
-            done = false;
-            stepLeft--;
-            if(currY < numY-1) currY++;
+            done = false; //Set done to false signifying that we are not finished yet.
+            stepsLeft--; //Decrement the remaining step amount.
+
+            if(currY < numY-1) currY++; //Increment currY
+            //Otherwise, set currY to 0 and increment X.
             else{
                 currY = 0;
                 currX++;
@@ -105,7 +129,7 @@ public class WorldGen {
 
             float currDone = currX + (currX*numY + currY);
             float total = (numX+1)*(numY+1);
-            percentageDone = (float)currDone/(float)total;
+            percentageDone = (float)currDone/(float)total; //Calcs the percentage done so that the player's UI can use this.
         }
 
         return done;

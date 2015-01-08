@@ -7,7 +7,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.component.LoadingInterface;
 import com.mygdx.game.entity.Entity;
-import com.mygdx.game.helpers.WorldGen;
+import com.mygdx.game.helpers.worldgeneration.WorldGen;
 
 /**
  * Created by Bbent_000 on 12/29/2014.

@@ -1,7 +1,10 @@
-package com.mygdx.game.helpers;
+package com.mygdx.game.helpers.worldgeneration;
 
 import java.util.Random;
 
+/**
+ * Black box that I call simple functions from. Don't really know what it does...
+ */
 public class SimplexNoise {
 
     private static int grad3[][] = { {1,1,0},{-1,1,0},{1,-1,0},{-1,-1,0},
