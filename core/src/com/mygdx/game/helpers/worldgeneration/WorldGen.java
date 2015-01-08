@@ -14,6 +14,8 @@ import java.util.ArrayList;
  */
 public class WorldGen {
     public static TerrainTile[][] map;
+
+    //Some default values that can be modified globally.
     public static int tileSize = 25;
     public static float treeScale = 0.3f;
     public static float freq = 5;
@@ -30,14 +32,12 @@ public class WorldGen {
 
     /**
      * Initializes the World Generator. For now, most stuff is temporary for prototyping.
-     * @param seed
+     * @param seed The seed that the world should use for randomly generating.
      */
     public static void init(long seed){
         grassTiles = new Texture[4];
         tallGrassTiles = new Texture[3];
         treeTextures = new Texture[13];
-
-        System.out.println("seed: "+seed);
 
         //Loads in some grass.
         grassTiles[0] = new Texture("img/grass1.png");
