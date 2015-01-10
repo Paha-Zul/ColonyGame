@@ -12,6 +12,7 @@ import com.mygdx.game.component.Component;
 import com.mygdx.game.component.GraphicIdentity;
 import com.mygdx.game.component.Transform;
 import com.mygdx.game.helpers.ListHolder;
+import com.mygdx.game.interfaces.IScalable;
 
 /**
  * @author Bbent_000
@@ -27,6 +28,8 @@ public class Entity {
 	protected ArrayList<Component> newComponentList;
 	protected ArrayList<Component> activeComponentList;
 	protected ArrayList<Component> inactiveComponentList;
+	protected ArrayList<IScalable> scalableComponents;
+
 	protected boolean destroyed=false;
 	protected double ID;
 
@@ -41,6 +44,7 @@ public class Entity {
 		this.activeComponentList = new ArrayList<>();
 		this.inactiveComponentList = new ArrayList<>();
 		this.newComponentList = new ArrayList<>();
+		this.scalableComponents = new ArrayList<>();
 
 		this.transform = this.addComponent(new Transform(position, rotation, this));
 
@@ -73,6 +77,8 @@ public class Entity {
 		this.activeComponentList = new ArrayList<>(); //Init the active list.
 		this.inactiveComponentList = new ArrayList<>(); //Init the inactive list.
 		this.newComponentList = new ArrayList<>(); //Init the inactive list.
+		this.scalableComponents = new ArrayList<>();
+
 
 		this.transform = this.addComponent(new Transform(position, rotation, this));
 		for(Component comp : comps)
@@ -140,15 +146,13 @@ public class Entity {
 				return (T)comp;
 		}
 
-		throw new RuntimeException("Component type *" + c + "* doesn't exist.");
-
-		//return null;
+		return null;
 	}
 
 	/**
 	 * Removes a Component from this Entity.
 	 * @param comp The Component to remove.
-	 * @return True if the Component was removed, fales otherwise.
+	 * @return True if the Component was removed, false otherwise.
 	 */
 	public boolean removeComponent(Component comp){
 		if(comp.isActive()) return this.inactiveComponentList.remove(comp);
@@ -205,5 +209,14 @@ public class Entity {
 
 		//Set destroyed to true.
 		this.destroyed = true;
+	}
+
+	public void registerScalable(IScalable scalable){
+		this.scalableComponents.add(scalable);
+	}
+
+	public void scaleComponents(float scale){
+		for(IScalable scalable : this.scalableComponents)
+			scalable.scale(scale);
 	}
 }

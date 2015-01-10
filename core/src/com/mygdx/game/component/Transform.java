@@ -193,6 +193,7 @@ public class Transform extends Component implements IDestroyable {
 
 		}
 
+		this.owner.scaleComponents(this.worldScale);
 		//For each child, set a new position and scale.
 		for(Entity child : this.children)
 			child.transform.setScale(scale);
@@ -212,6 +213,8 @@ public class Transform extends Component implements IDestroyable {
 			this.distFromParent = (localCopy.scl(this.parent.getScale()).add(this.parent.getPosition()).dst(this.parent.getPosition()));
 
 		}
+
+		this.owner.scaleComponents(this.worldScale);
 
 		//For each child, set a new position and scale.
 		for(Entity child : this.children)

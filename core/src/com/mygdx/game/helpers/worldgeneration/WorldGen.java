@@ -4,8 +4,13 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.CircleShape;
+import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.mygdx.game.ColonyGame;
+import com.mygdx.game.component.collider.Collider;
 import com.mygdx.game.entity.Entity;
+import com.mygdx.game.server.ServerPlayer;
 
 import java.util.ArrayList;
 
@@ -112,7 +117,24 @@ public class WorldGen {
                     Vector2 pos = new Vector2(tile.position.x + MathUtils.random()*tileSize, tile.position.y + MathUtils.random()*tileSize);
                     Entity entity = new Entity(pos, MathUtils.random()*360, treeTextures[(int)(MathUtils.random()*treeTextures.length)], ColonyGame.batch, 11);
                     entity.transform.setScale(treeScale);
+
+                    BodyDef bodyDef = new BodyDef();
+                    bodyDef.type = BodyDef.BodyType.StaticBody;
+
+                    CircleShape circle = new CircleShape();
+                    circle.setRadius(20f);
+
+                    FixtureDef fixtureDef = new FixtureDef();
+                    fixtureDef.shape = circle;
+                    fixtureDef.density = 0;
+                    fixtureDef.friction = 0;
+                    fixtureDef.restitution = 0;
+
+                    entity.addComponent(new Collider(ColonyGame.world, bodyDef, fixtureDef));
+
                     treeList.add(entity);
+
+                    circle.dispose();
                 }
 
             }

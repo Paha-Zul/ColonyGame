@@ -7,12 +7,13 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.*;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.Grid;
 import com.mygdx.game.component.*;
+import com.mygdx.game.component.collider.Collider;
+import com.mygdx.game.component.ui.PlayerInterface;
 import com.mygdx.game.entity.Entity;
-import com.mygdx.game.entity.TurretEnt;
-import com.mygdx.game.helpers.ListHolder;
 import com.mygdx.game.helpers.worldgeneration.WorldGen;
 import com.mygdx.game.helpers.timer.OneShotTimer;
 
@@ -20,15 +21,16 @@ import com.mygdx.game.helpers.timer.OneShotTimer;
  * Created by Bbent_000 on 11/23/2014.
  */
 public class ServerPlayer {
-	SpriteBatch batch;
-	ShapeRenderer shapeRenderer;
+	private SpriteBatch batch;
+	private ShapeRenderer shapeRenderer;
 
-	OneShotTimer testTimer;
-	Entity test;
+	private OneShotTimer testTimer;
+	private Entity test;
 	boolean up = true;
 
-	private Color screenColor = new Color(163f/255f, 154f/255f, 124f/255f, 1);
+	//Box2d stuff
 
+	private Color screenColor = new Color(163f/255f, 154f/255f, 124f/255f, 1);
 
 	public ServerPlayer(SpriteBatch batch, ShapeRenderer renderer){
 		//Start the server
@@ -39,18 +41,23 @@ public class ServerPlayer {
 		this.batch = batch;
 		this.shapeRenderer = renderer;
 
-		generateTest();
+		//Create the Box2D world.
+		ColonyGame.debugRenderer = new Box2DDebugRenderer();
+
+		generateTest(new Vector2(800,500));
+		generateTest(new Vector2(810,500));
 
 		initPlayer();
 
 		Grid.NewGrid("terrain", Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), 25);
-
-
 	}
 
 	public void render(float delta){
 		Gdx.gl.glClearColor(screenColor.r, screenColor.g, screenColor.b, screenColor.a);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+		//Step the Box2D simulation.
+		ColonyGame.world.step(delta, 6, 2);
 
 		if(this.testTimer != null && this.test != null) {
 			this.testTimer.update(delta);
@@ -80,53 +87,27 @@ public class ServerPlayer {
 			}
 		}
 
+		ColonyGame.debugRenderer.render(ColonyGame.world, ColonyGame.camera.combined);
 		batch.end();
 	}
 
-	private void generateTest(){
-		GraphicIdentity identity = new GraphicIdentity(new Texture("img/bar.png"), batch);
-		BehaviourManager behaviours = new BehaviourManager();
+	private void generateTest(Vector2 position){
+		GraphicIdentity graphic = new GraphicIdentity(new Texture("img/BlackSquare.png"), ColonyGame.batch);
+		CircleShape shape = new CircleShape();
+		shape.setRadius(10f);
 
-		Move move =  new Move();
-		move.rotateSpeed = 50;
+		Collider collider = new Collider(ColonyGame.world, shape);
 
-		Entity ent = new Entity(new Vector2(200,200), 0, 10, identity, move, behaviours);
-		ent.name = "Square";
-		test = ent;
+		collider.body.setType(BodyDef.BodyType.DynamicBody);
 
-		Vector2 pos1 = new Vector2(225,225);
-		Entity turret = new TurretEnt(pos1, 90, new Texture("img/turret.png"), batch, 11);
-		turret.getComponent(Move.class).rotateSpeed = 0;
-		turret.name = "Turret1";
+		collider.fixture.setFriction(0.5f);
+		collider.fixture.setDensity(1f);
 
-//			Vector2 pos2 = new Vector2(175,225);
-//			Entity turret2 = new TurretEnt(pos2, 90, new Texture("img/turret.png"), batch, 11);
-//			turret2.getComponent(Move.class).rotateSpeed = 25;
-//			turret2.name = "Turret2";
-//
-//			Vector2 pos3 = new Vector2(225,175);
-//			Entity turret3 = new TurretEnt(pos3, 90, new Texture("img/turret.png"), batch, 11);
-//			turret3.getComponent(Move.class).rotateSpeed = -25;
-//			turret3.name = "Turret3";
-
-		ent.transform.addChild(turret);
-//			ent.transform.addChild(turret2);
-//			ent.transform.addChild(turret3);
-
-		Vector2 pos4 = new Vector2(400,200);
-		Entity enemy = new Entity(pos4, 90, new Texture("img/turret.png"), batch, 11);
-		Turret.addEnemy(enemy);
-
-		ListHolder.addEntity(2, enemy);
-
-		this.testTimer = new OneShotTimer(10f, ()->{
-			System.out.println("Destroyed");
-			enemy.destroy();
-		});
+		Entity ent2 = new Entity(position, 0, 14, graphic, collider);
 	}
 
 	private void initPlayer(){
-		PlayerInterface UI = new PlayerInterface(ColonyGame.batch);
+		PlayerInterface UI = new PlayerInterface(ColonyGame.batch, ColonyGame.world);
 		Entity playerObj = new Entity(new Vector2(0,0), 0, 20, UI);
 	}
 

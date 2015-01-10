@@ -12,6 +12,7 @@ import com.badlogic.gdx.math.Rectangle;
  */
 public class GUI {
     public static BitmapFont font = new BitmapFont();
+    public static Texture defaultTexture = new Texture("img/background.png");
 
     public static void Texture(Rectangle rect, Texture texture, SpriteBatch batch){
         batch.draw(texture, rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight());
@@ -26,7 +27,9 @@ public class GUI {
     }
 
     public static boolean Button(Rectangle rect, Texture texture, SpriteBatch batch){
-        batch.draw(texture, rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight());
+        Texture currTexture = (texture != null) ? texture : defaultTexture;
+
+        batch.draw(currTexture, rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight());
 
         if(rect.contains(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY()) && Gdx.input.isButtonPressed(Input.Buttons.LEFT))
             return true;
@@ -34,7 +37,9 @@ public class GUI {
     }
 
     public static boolean Button(Rectangle rect, Texture texture, String text, SpriteBatch batch){
-        batch.draw(texture, rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight());   //Draw the background texture.
+        Texture currTexture = (texture != null) ? texture : defaultTexture;
+
+        batch.draw(currTexture, rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight());   //Draw the background texture.
         BitmapFont.TextBounds bounds = font.getBounds(text);                                //Get the bounds of the text
         font.draw(batch, text, rect.getX() + rect.getWidth()/2 - bounds.width/2, rect.getY() + rect.getHeight()/2 + bounds.height/2); //Draw the text
         //Vector2 correctMouseCoords = new Vector2(Gdx.input.getX(), Gdx.input.getY());

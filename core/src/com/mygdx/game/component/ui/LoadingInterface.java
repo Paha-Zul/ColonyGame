@@ -1,9 +1,10 @@
-package com.mygdx.game.component;
+package com.mygdx.game.component.ui;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
+import com.mygdx.game.component.Component;
 import com.mygdx.game.helpers.GUI;
 import com.mygdx.game.helpers.ListHolder;
 import com.mygdx.game.helpers.worldgeneration.WorldGen;

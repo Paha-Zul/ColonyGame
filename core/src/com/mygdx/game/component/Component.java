@@ -10,6 +10,7 @@ public abstract class Component implements IDestroyable {
 	protected int type;
 	private boolean active = true, destroyed = false;
 	protected Entity owner;
+	protected boolean initiated = false;
 
 	public Component() {
 
@@ -22,6 +23,7 @@ public abstract class Component implements IDestroyable {
 	 */
 	public final void init(Entity owner){
 		this.owner = owner;
+		this.initiated = true;
 	}
 
 	/**
@@ -60,9 +62,12 @@ public abstract class Component implements IDestroyable {
 		if (val == this.active)
 			return;
 
-		this.owner.removeComponent(this);   //Remove it from the current active/inactive list.
-		this.active = val;                  //Sets it's active value.
-		this.owner.addComponent(this);      //Add it to the correct list.
+		if(this.initiated) {
+			this.owner.removeComponent(this);   //Remove it from the current active/inactive list.
+			this.active = val;                  //Sets it's active value.
+			this.owner.addComponent(this);		//Add it to the correct list.
+		}
+
 	}
 
 	/**

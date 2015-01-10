@@ -11,4 +11,8 @@ public class Functional {
 	public interface Callback{
 		void callback();
 	}
+
+	public interface Test<T>{
+		boolean test(T t);
+	}
 }

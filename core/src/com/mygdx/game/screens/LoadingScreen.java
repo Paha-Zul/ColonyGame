@@ -5,7 +5,7 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.ColonyGame;
-import com.mygdx.game.component.LoadingInterface;
+import com.mygdx.game.component.ui.LoadingInterface;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.worldgeneration.WorldGen;
 
@@ -33,7 +33,7 @@ public class LoadingScreen implements Screen {
 
     @Override
     public void render(float delta) {
-        if(WorldGen.generateTerrain()) {
+        if(WorldGen.generateWorld()) {
             LoadingInterface.setDone();
             game.setScreen(new GameScreen(this.game));
         }

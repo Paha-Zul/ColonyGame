@@ -11,6 +11,8 @@ public class DesktopLauncher {
 		GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
 		int width = gd.getDisplayMode().getWidth();
 		int height = gd.getDisplayMode().getHeight();
+//		int width = 800;
+//		int height = 600;
 
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
 		config.width = width;
