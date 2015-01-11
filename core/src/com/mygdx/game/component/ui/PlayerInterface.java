@@ -7,22 +7,19 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.QueryCallback;
 import com.badlogic.gdx.physics.box2d.World;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.component.Component;
 import com.mygdx.game.component.Interactable;
 import com.mygdx.game.entity.Entity;
-import com.mygdx.game.helpers.GUI;
+import com.mygdx.game.helpers.gui.GUI;
 import com.mygdx.game.helpers.ListHolder;
 import com.mygdx.game.helpers.worldgeneration.WorldGen;
 import com.mygdx.game.helpers.timer.RepeatingTimer;
 import com.mygdx.game.helpers.timer.Timer;
 import com.mygdx.game.interfaces.Functional;
 import com.mygdx.game.interfaces.IGUI;
-
-import java.util.function.Function;
 
 /**
  * Created by Bbent_000 on 12/25/2014.

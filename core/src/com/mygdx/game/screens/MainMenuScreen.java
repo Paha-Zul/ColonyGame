@@ -2,13 +2,10 @@ package com.mygdx.game.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.component.ui.MainMenuInterface;
 import com.mygdx.game.entity.Entity;
-import com.mygdx.game.helpers.GUI;
 
 /**
  * Created by Paha on 1/10/2015.

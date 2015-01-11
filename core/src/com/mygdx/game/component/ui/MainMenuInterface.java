@@ -1,6 +1,5 @@
 package com.mygdx.game.component.ui;
 
-import com.badlogic.gdx.Audio;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Texture;
@@ -8,7 +7,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.component.Component;
-import com.mygdx.game.helpers.GUI;
+import com.mygdx.game.helpers.gui.GUI;
 import com.mygdx.game.helpers.ListHolder;
 import com.mygdx.game.interfaces.IGUI;
 import com.mygdx.game.screens.LoadingScreen;
@@ -19,6 +18,8 @@ import com.mygdx.game.screens.LoadingScreen;
 public class MainMenuInterface extends Component implements IGUI{
     public static Texture mainMenuTexture = new Texture("img/Space2.png");
     public static Music music = Gdx.audio.newMusic(Gdx.files.internal("music/Karkarakacrrot.ogg"));
+
+    private GUI.ButtonStyle buttonStyle;
 
     private SpriteBatch batch;
     private ColonyGame game;
@@ -42,6 +43,8 @@ public class MainMenuInterface extends Component implements IGUI{
         this.quitRect = new Rectangle(Gdx.graphics.getWidth()/2 - 100, Gdx.graphics.getHeight()/2 - 25 - 100, 200, 50);
         music.play();
         music.setLooping(true);
+
+        this.buttonStyle = new GUI.ButtonStyle();
     }
 
     @Override

@@ -16,7 +16,7 @@ public class GUI {
     public static BitmapFont font = new BitmapFont();
     public static Texture defaultTexture = new Texture("img/background.png");
 
-    private static Texture defaultNormalButton = new Texture("img/ui/defaultButton.png");
+    private static Texture defaultNormalButton = new Texture("img/ui/defaultButton_normal.png");
     private static Texture defaultMousedButton = new Texture("img/ui/defaultButton_moused.png");
     private static Texture defaultClickedButton = new Texture("img/ui/defaultButton_clicked.png");
 
@@ -88,6 +88,8 @@ public class GUI {
         }
 
         batch.draw(currTexture, rect.x, rect.y, rect.getWidth(), rect.getHeight());
+        BitmapFont.TextBounds bounds = font.getBounds(text);                                //Get the bounds of the text
+        font.draw(batch, text, rect.getX() + rect.getWidth()/2 - bounds.width/2, rect.getY() + rect.getHeight()/2 + bounds.height/2); //Draw the text
 
         return clicked;
     }
