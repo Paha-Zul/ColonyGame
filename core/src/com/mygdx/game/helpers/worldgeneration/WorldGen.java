@@ -31,7 +31,7 @@ public class WorldGen {
 
     private static Texture[] grassTiles;
     private static Texture[] tallGrassTiles;
-    private static Texture[] treeTextures;
+    private static Texture treeTexture = new Texture("img/trees/tree.png");
 
     private static ArrayList<Entity> treeList = new ArrayList<>();
 
@@ -44,7 +44,6 @@ public class WorldGen {
     public static void init(long seed){
         grassTiles = new Texture[4];
         tallGrassTiles = new Texture[3];
-        treeTextures = new Texture[13];
 
         //Loads in some grass.
         grassTiles[0] = new Texture("img/grass1.png");
@@ -56,15 +55,6 @@ public class WorldGen {
         tallGrassTiles[0] = new Texture("img/tallgrass1.png");
         tallGrassTiles[1] = new Texture("img/tallgrass2.png");
         tallGrassTiles[2] = new Texture("img/tallgrass3.png");
-
-        //Loads in all the trees.
-        for(int i=2;i<treeTextures.length;i++){
-            //We don't like trees 3, 12, or 13. Skip these.
-            if(i!= 3 && i!= 12 && i!=13)
-                treeTextures[i-2] = new Texture("img/trees/Tree"+i+".png");
-            else
-                treeTextures[i-2] = new Texture("img/trees/Tree5.png");
-        }
 
         //This randomizes the noise by using the seed passed in.
         SimplexNoise.genGrad(seed);
@@ -119,7 +109,7 @@ public class WorldGen {
                 //Random chance for a tree to spawn.
                 if(MathUtils.random() < 0.6){
                     Vector2 pos = new Vector2(tile.position.x + MathUtils.random()*tileSize, tile.position.y + MathUtils.random()*tileSize); //Get a random position in the tile.
-                    Entity entity = new Entity(pos, MathUtils.random()*360, treeTextures[(int)(MathUtils.random()*treeTextures.length)], ColonyGame.batch, 11); //Make the Entity
+                    Entity entity = new Entity(pos, 0, treeTexture, ColonyGame.batch, 11); //Make the Entity
                     entity.transform.setScale(treeScale); //Set the scale.
                     entity.name = "Tree"; //Set the name!
 
