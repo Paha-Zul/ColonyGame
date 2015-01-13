@@ -19,15 +19,13 @@ public class ColonyGame extends Game {
 	public static boolean server = true;
 	public static boolean singlePlayer = true;
 	public static OrthographicCamera camera;
-	public static OrthographicCamera UIcamera;
+	public static OrthographicCamera UICamera;
 
 	public static SpriteBatch batch;
 	public static SpriteBatch UIBatch;
 	public static ShapeRenderer renderer;
 	public static World world;
 	public static Box2DDebugRenderer debugRenderer;
-
-
 
 	private Color screenColor = new Color(163f/255f, 154f/255f, 124f/255f, 1);
 
@@ -38,7 +36,7 @@ public class ColonyGame extends Game {
 		UIBatch = new SpriteBatch();
 		renderer = new ShapeRenderer();
 		camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-		this.camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		this.UICamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		world = new World(new Vector2(0,0), true);
 
 		this.setScreen(new MainMenuScreen(this));
@@ -50,18 +48,25 @@ public class ColonyGame extends Game {
 
 		camera.update();
 
+		float delta = Gdx.graphics.getDeltaTime();
+
 //		Gdx.gl.glClearColor(screenColor.r, screenColor.g, screenColor.b, screenColor.a);
 //		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
 		this.batch.setProjectionMatrix(camera.combined);
 
+		//Draw everything that is modified by the regular camera.
 		this.batch.begin();
 
-		ListHolder.update(Gdx.graphics.getDeltaTime());
+		ListHolder.update(delta);
+		ListHolder.updateGUI(delta);
 
 		this.batch.end();
 
+		//Draw the UI Stuff.
 		this.UIBatch.begin();
+
+//		ListHolder.updateGUI(delta);
 
 		this.UIBatch.end();
 	}

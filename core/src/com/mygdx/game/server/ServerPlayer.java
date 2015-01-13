@@ -13,10 +13,9 @@ import com.mygdx.game.ColonyGame;
 import com.mygdx.game.Grid;
 import com.mygdx.game.component.*;
 import com.mygdx.game.component.collider.Collider;
-import com.mygdx.game.component.ui.PlayerInterface;
+import com.mygdx.game.ui.PlayerInterface;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.worldgeneration.WorldGen;
-import com.mygdx.game.helpers.timer.OneShotTimer;
 
 /**
  * Created by Bbent_000 on 11/23/2014.
@@ -24,6 +23,7 @@ import com.mygdx.game.helpers.timer.OneShotTimer;
 public class ServerPlayer {
 	private SpriteBatch batch;
 	private ShapeRenderer shapeRenderer;
+	private ColonyGame game;
 
 	private static String[] names = {"Bobby","Sally","Jimmy","Bradley","Willy","Tommy","Brian","Doug","Ben","Jacob","Sammy","Jason","David","Sarah","Betty","Tom","James"};
 
@@ -31,7 +31,8 @@ public class ServerPlayer {
 
 	private Color screenColor = new Color(163f/255f, 154f/255f, 124f/255f, 1);
 
-	public ServerPlayer(SpriteBatch batch, ShapeRenderer renderer){
+	public ServerPlayer(SpriteBatch batch, ShapeRenderer renderer, ColonyGame game){
+
 		//Start the server
 		Server.start(1337);
 		Grid.NewGrid("spatial",Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), 25, true);
@@ -39,6 +40,7 @@ public class ServerPlayer {
 		//Make a new spritebatch and shaperenderer.
 		this.batch = batch;
 		this.shapeRenderer = renderer;
+		this.game = game;
 
 		//Create the Box2D world.
 		ColonyGame.debugRenderer = new Box2DDebugRenderer();
@@ -96,8 +98,7 @@ public class ServerPlayer {
 	}
 
 	private void initPlayer(){
-		PlayerInterface UI = new PlayerInterface(ColonyGame.batch, ColonyGame.world);
-		Entity playerObj = new Entity(new Vector2(0,0), 0, 20, UI);
+		new PlayerInterface(ColonyGame.batch, this.game, ColonyGame.world);
 	}
 
 	/*

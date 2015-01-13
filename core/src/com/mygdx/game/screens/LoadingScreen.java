@@ -5,11 +5,12 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.ColonyGame;
-import com.mygdx.game.component.ui.LoadingInterface;
+import com.mygdx.game.ui.LoadingInterface;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.ListHolder;
 import com.mygdx.game.helpers.worldgeneration.WorldGen;
 import com.mygdx.game.interfaces.IGUI;
+import com.mygdx.game.ui.UI;
 
 import java.util.ArrayList;
 
@@ -31,8 +32,7 @@ public class LoadingScreen implements Screen {
         WorldGen.init((long)(MathUtils.random()*Long.MAX_VALUE));
         WorldGen.numStep = 50;
 
-        LoadingInterface inter = new LoadingInterface(game.batch);
-        Entity ent = new Entity(new Vector2(0,0), 0, 15, inter);
+        new LoadingInterface(game.batch, this.game);
     }
 
     @Override
@@ -47,9 +47,10 @@ public class LoadingScreen implements Screen {
     public void resize(int width, int height) {
         Gdx.graphics.setDisplayMode(width, height, false);
         ColonyGame.camera.setToOrtho(false, width, height);
+        ColonyGame.UICamera.setToOrtho(false, width, height);
 
         //Resizes all the GUI elements of the game (hopefully!)
-        ArrayList<IGUI> list = ListHolder.getGUIList();
+        ArrayList<UI> list = ListHolder.getGUIList();
         for(int i=0;i< list.size();i++){
             list.get(i).resize(width, height);
         }

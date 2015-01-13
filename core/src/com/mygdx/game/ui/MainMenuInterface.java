@@ -1,4 +1,4 @@
-package com.mygdx.game.component.ui;
+package com.mygdx.game.ui;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
@@ -7,16 +7,14 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.mygdx.game.ColonyGame;
-import com.mygdx.game.component.Component;
 import com.mygdx.game.helpers.gui.GUI;
 import com.mygdx.game.helpers.ListHolder;
-import com.mygdx.game.interfaces.IGUI;
 import com.mygdx.game.screens.LoadingScreen;
 
 /**
  * Created by Paha on 1/10/2015.
  */
-public class MainMenuInterface extends Component implements IGUI{
+public class MainMenuInterface extends UI{
     public static Texture mainMenuTexture = new Texture("img/Space2.png");
     public static Music music = Gdx.audio.newMusic(Gdx.files.internal("music/Karkarakacrrot.ogg"));
 
@@ -25,22 +23,11 @@ public class MainMenuInterface extends Component implements IGUI{
 
     private GUI.ButtonStyle buttonStyle;
 
-    private SpriteBatch batch;
-    private ColonyGame game;
-
     private Rectangle startRect;
     private Rectangle quitRect;
 
     public MainMenuInterface(SpriteBatch batch, ColonyGame game) {
-        super();
-
-        this.batch = batch;
-        this.game = game;
-    }
-
-    @Override
-    public void start() {
-        super.start();
+        super(batch, game);
 
         this.startRect = new Rectangle(Gdx.graphics.getWidth()/2 - 100, Gdx.graphics.getHeight()/2 - 25, 200, 50);
         this.quitRect = new Rectangle(Gdx.graphics.getWidth()/2 - 100, Gdx.graphics.getHeight()/2 - 25 - 100, 200, 50);
@@ -48,13 +35,11 @@ public class MainMenuInterface extends Component implements IGUI{
         music.setLooping(true);
 
         this.buttonStyle = new GUI.ButtonStyle();
-
-        this.addToList();
     }
 
     @Override
-    public void update(float delta) {
-        super.update(delta);
+    public void drawGUI(float delta) {
+        super.drawGUI(delta);
 
         this.batch.draw(mainMenuTexture, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
@@ -68,7 +53,7 @@ public class MainMenuInterface extends Component implements IGUI{
 
         //Start button.
         if(GUI.Button(startRect, null, "Start", this.batch)){
-            this.owner.destroy();
+            this.done = true;
             this.game.setScreen(new LoadingScreen(this.game));
             return;
         }
@@ -78,7 +63,6 @@ public class MainMenuInterface extends Component implements IGUI{
             Gdx.app.exit();
             return;
         }
-
     }
 
     @Override

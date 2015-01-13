@@ -3,6 +3,7 @@ package com.mygdx.game.helpers;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.interfaces.Functional;
 import com.mygdx.game.interfaces.IGUI;
+import com.mygdx.game.ui.UI;
 import com.sun.java.accessibility.util.GUIInitializedListener;
 
 import java.util.ArrayList;
@@ -12,7 +13,7 @@ import java.util.ArrayList;
  */
 public class ListHolder {
 	private static ArrayList<ArrayList<Entity>> entityList = new ArrayList<>();
-	private static ArrayList<IGUI> GUIList = new ArrayList<>();
+	private static ArrayList<UI> GUIList = new ArrayList<>();
 
 	public static void addEntity(int drawLevel, Entity e){
 		//If our list doesn't have enough layers to put something at 'drawLevel', add the layers!
@@ -51,17 +52,25 @@ public class ListHolder {
 	}
 
 	public static void updateGUI(float delta){
-		for (IGUI gui : GUIList) {
+		for (int i=0;i<GUIList.size();i++) {
+			UI gui = GUIList.get(i);
+			if(gui.done){
+				gui.destroy();
+				GUIList.remove(i);
+				i--;
+				continue;
+			}
+
 			gui.drawGUI(delta);
 		}
 	}
 
 	/**
-	 * Adds a GUI Component that implements IGUI to a list.
-	 * @param GUI the IGUI interface component.
+	 * Adds a UI Object to the list.
+	 * @param ui The UI Object.
 	 */
-	public static void addGUI(IGUI GUI){
-		GUIList.add(GUI);
+	public static void addGUI(UI ui){
+		GUIList.add(ui);
 	}
 
 	/**
@@ -72,7 +81,7 @@ public class ListHolder {
 		GUIList.remove(GUI);
 	}
 
-	public static ArrayList<IGUI> getGUIList(){
+	public static ArrayList<UI> getGUIList(){
 		return GUIList;
 	}
 

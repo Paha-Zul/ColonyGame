@@ -1,4 +1,4 @@
-package com.mygdx.game.component.ui;
+package com.mygdx.game.ui;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.QueryCallback;
 import com.badlogic.gdx.physics.box2d.World;
 import com.mygdx.game.ColonyGame;
@@ -24,7 +25,7 @@ import com.mygdx.game.interfaces.IGUI;
 /**
  * Created by Bbent_000 on 12/25/2014.
  */
-public class PlayerInterface extends Component implements IGUI, InputProcessor {
+public class PlayerInterface extends UI implements IGUI, InputProcessor {
     private SpriteBatch batch;
     private Texture background;
     private World world;
@@ -55,16 +56,10 @@ public class PlayerInterface extends Component implements IGUI, InputProcessor {
      * @param batch The SpriteBatch for drawing to the screen.
      * @param world The Box2D world. We need to know about this for clicking on objects.
      */
-    public PlayerInterface(SpriteBatch batch, World world) {
+    public PlayerInterface(SpriteBatch batch, ColonyGame game, World world) {
+        super(batch, game);
         this.batch = batch;
         this.world = world;
-
-        this.addToList();
-    }
-
-    @Override
-    public void start() {
-        super.start();
 
         this.background = new Texture("img/background.png");
 
@@ -75,27 +70,25 @@ public class PlayerInterface extends Component implements IGUI, InputProcessor {
         this.FPSTimer = new RepeatingTimer(0.5d, callback);
 
         Gdx.input.setInputProcessor(this);
-
-        this.interactable = this.owner.getComponent(Interactable.class);
     }
 
     @Override
-    public void update(float delta) {
-        super.update(delta);
+    public void drawGUI(float delta) {
+        super.drawGUI(delta);
+
         FPSTimer.update(delta);
 
         GUI.Texture(this.infoRect, this.background, this.batch);
 
         GUI.Text("FPS: "+FPS, this.batch, 0, Gdx.graphics.getHeight() - 40);
-        GUI.Text("Resolution: "+Gdx.graphics.getDesktopDisplayMode().width+"X"+Gdx.graphics.getDesktopDisplayMode().height, this.batch, 0, Gdx.graphics.getHeight() - 60);
-        GUI.Text("NumTrees: "+ WorldGen.numTrees(), this.batch, 0, Gdx.graphics.getHeight() - 80);
-        GUI.Text("NumTiles: "+WorldGen.numTiles(), this.batch, 0, Gdx.graphics.getHeight() - 100);
+        GUI.Text("Zoom: "+ColonyGame.camera.zoom, this.batch, 0, Gdx.graphics.getHeight() - 60);
+        GUI.Text("Resolution: "+Gdx.graphics.getDesktopDisplayMode().width+"X"+Gdx.graphics.getDesktopDisplayMode().height, this.batch, 0, Gdx.graphics.getHeight() - 80);
+        GUI.Text("NumTrees: "+ WorldGen.numTrees(), this.batch, 0, Gdx.graphics.getHeight() - 100);
+        GUI.Text("NumTiles: "+WorldGen.numTiles(), this.batch, 0, Gdx.graphics.getHeight() - 120);
 
         if(this.selected != null && this.interactable != null){
             this.displaySelected(this.infoRect);
         }
-
-        this.batch.setProjectionMatrix(ColonyGame.camera.combined);
     }
 
     private void displaySelected(Rectangle rect){
@@ -164,12 +157,15 @@ public class PlayerInterface extends Component implements IGUI, InputProcessor {
         this.selected = null;
         this.interactable = null;
 
+        Vector3 worldCoords = ColonyGame.camera.unproject(new Vector3(screenX, screenY, 0));
+
+
 //      System.out.println("There was a click: "+button);
-        int fixedY = Gdx.graphics.getHeight()-screenY;
         if(button == Input.Buttons.LEFT){
+
 //            System.out.println("Inside, X/Y: "+screenX+" "+fixedY);
-            this.testPoint.set(screenX, fixedY);
-            this.world.QueryAABB(this.callback, screenX - 1f, fixedY - 1f, screenX + 1f, fixedY + 1f);
+            this.testPoint.set(worldCoords.x, worldCoords.y);
+            this.world.QueryAABB(this.callback, worldCoords.x - 1f, worldCoords.y - 1f, worldCoords.x + 1f, worldCoords.y + 1f);
             return true;
         }
 

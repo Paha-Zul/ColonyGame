@@ -8,6 +8,7 @@ import com.mygdx.game.client.ClientPlayer;
 import com.mygdx.game.helpers.ListHolder;
 import com.mygdx.game.interfaces.IGUI;
 import com.mygdx.game.server.ServerPlayer;
+import com.mygdx.game.ui.UI;
 
 import java.util.ArrayList;
 
@@ -24,7 +25,7 @@ public class GameScreen implements Screen{
 
     public GameScreen(final ColonyGame game){
         if(ColonyGame.server)
-            serverPlayer = new ServerPlayer(ColonyGame.batch, ColonyGame.renderer);
+            serverPlayer = new ServerPlayer(ColonyGame.batch, ColonyGame.renderer, this.game);
         else
             clientPlayer = new ClientPlayer();
 
@@ -48,9 +49,10 @@ public class GameScreen implements Screen{
     public void resize(int width, int height) {
         Gdx.graphics.setDisplayMode(width, height, false);
         ColonyGame.camera.setToOrtho(false, width, height);
+        ColonyGame.UICamera.setToOrtho(false, width, height);
 
         //Resizes all the GUI elements of the game (hopefully!)
-        ArrayList<IGUI> list = ListHolder.getGUIList();
+        ArrayList<UI> list = ListHolder.getGUIList();
         for(int i=0;i< list.size();i++){
             list.get(i).resize(width, height);
         }
