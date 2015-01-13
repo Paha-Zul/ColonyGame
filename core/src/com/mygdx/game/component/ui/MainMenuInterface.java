@@ -101,7 +101,7 @@ public class MainMenuInterface extends Component implements IGUI{
 
     @Override
     public void addToList() {
-        ListHolder.addInterface(this);
+        ListHolder.addGUI(this);
     }
 
 

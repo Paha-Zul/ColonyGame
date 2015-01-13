@@ -47,7 +47,7 @@ public class LoadingInterface extends Component implements IGUI {
             GUI.Texture(this.square, this.blackSquare, this.batch);
             GUI.Texture(this.loadingBar, this.outline, this.batch);
             GUI.Texture(this.loadingBar.x, this.loadingBar.y, this.loadingBar.width*WorldGen.percentageDone, this.loadingBar.height, this.bar, this.batch);
-            GUI.Label("Loading Terrain", this.batch, Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2 + 50, true);
+            GUI.Label("Loading Terrain", this.batch, this.loadingBar.getX() + this.loadingBar.width/2, this.loadingBar.getY() + 40, true);
 
         }else
             this.owner.destroy();
@@ -59,11 +59,11 @@ public class LoadingInterface extends Component implements IGUI {
 
     @Override
     public void resize(int width, int height) {
-
+        this.loadingBar.set(Gdx.graphics.getWidth()/2 - this.width/2, Gdx.graphics.getHeight()/2 + this.height/2, this.width, this.height);
     }
 
     @Override
     public void addToList() {
-        ListHolder.addInterface(this);
+        ListHolder.addGUI(this);
     }
 }

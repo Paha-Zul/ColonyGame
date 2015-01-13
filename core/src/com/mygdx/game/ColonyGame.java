@@ -19,8 +19,10 @@ public class ColonyGame extends Game {
 	public static boolean server = true;
 	public static boolean singlePlayer = true;
 	public static OrthographicCamera camera;
+	public static OrthographicCamera UIcamera;
 
 	public static SpriteBatch batch;
+	public static SpriteBatch UIBatch;
 	public static ShapeRenderer renderer;
 	public static World world;
 	public static Box2DDebugRenderer debugRenderer;
@@ -33,8 +35,10 @@ public class ColonyGame extends Game {
 	@Override
 	public void create () {
 		batch = new SpriteBatch();
+		UIBatch = new SpriteBatch();
 		renderer = new ShapeRenderer();
 		camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		this.camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		world = new World(new Vector2(0,0), true);
 
 		this.setScreen(new MainMenuScreen(this));
@@ -57,5 +61,8 @@ public class ColonyGame extends Game {
 
 		this.batch.end();
 
+		this.UIBatch.begin();
+
+		this.UIBatch.end();
 	}
 }

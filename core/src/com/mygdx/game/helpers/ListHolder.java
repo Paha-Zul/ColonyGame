@@ -50,11 +50,17 @@ public class ListHolder {
 		}
 	}
 
+	public static void updateGUI(float delta){
+		for (IGUI gui : GUIList) {
+			gui.drawGUI(delta);
+		}
+	}
+
 	/**
 	 * Adds a GUI Component that implements IGUI to a list.
 	 * @param GUI the IGUI interface component.
 	 */
-	public static void addInterface(IGUI GUI){
+	public static void addGUI(IGUI GUI){
 		GUIList.add(GUI);
 	}
 

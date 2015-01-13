@@ -16,4 +16,6 @@ public interface IGUI {
      * Adds this IGUI element to a list where it can be accessed when the screen is resized.
      */
     public void addToList();
+
+    public void drawGUI(float delta);
 }

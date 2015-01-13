@@ -40,7 +40,6 @@ public class PlayerInterface extends Component implements IGUI, InputProcessor {
     private Vector2 testPoint = new Vector2();
     private Entity selected = null;
     private QueryCallback callback = fixture -> {
-        System.out.println("Querying at location: "+fixture.getBody().getPosition());
         if(fixture.testPoint(testPoint.x, testPoint.y)){
             this.selected = (Entity)fixture.getBody().getUserData();
             this.interactable = this.selected.getComponent(Interactable.class);
@@ -85,9 +84,6 @@ public class PlayerInterface extends Component implements IGUI, InputProcessor {
         super.update(delta);
         FPSTimer.update(delta);
 
-//        if(GUI.Button(this.buttonRect, this.background, "FREAKING SUCHAS", this.batch))
-//            Gdx.app.exit();
-
         GUI.Texture(this.infoRect, this.background, this.batch);
 
         GUI.Text("FPS: "+FPS, this.batch, 0, Gdx.graphics.getHeight() - 40);
@@ -99,6 +95,7 @@ public class PlayerInterface extends Component implements IGUI, InputProcessor {
             this.displaySelected(this.infoRect);
         }
 
+        this.batch.setProjectionMatrix(ColonyGame.camera.combined);
     }
 
     private void displaySelected(Rectangle rect){
@@ -144,7 +141,7 @@ public class PlayerInterface extends Component implements IGUI, InputProcessor {
 
     @Override
     public void addToList() {
-        ListHolder.addInterface(this);
+        ListHolder.addGUI(this);
     }
 
     @Override

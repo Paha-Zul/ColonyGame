@@ -24,7 +24,7 @@ public class WorldGen {
 
     //Some default values that can be modified globally.
     public static int tileSize = 25;
-    public static float treeScale = 0.3f;
+    public static float treeScale = 0.8f;
     public static float freq = 5;
     public static int numStep = 1;
     public static float percentageDone = 0;
@@ -32,6 +32,7 @@ public class WorldGen {
     private static Texture[] grassTiles;
     private static Texture[] tallGrassTiles;
     private static Texture treeTexture = new Texture("img/trees/tree.png");
+    private static Texture rockTexture = new Texture("img/rock.png");
 
     private static ArrayList<Entity> treeList = new ArrayList<>();
 
@@ -106,8 +107,9 @@ public class WorldGen {
 
             //If the tile is not water...
             if(tile.type == 1){
+                float rand = MathUtils.random();
                 //Random chance for a tree to spawn.
-                if(MathUtils.random() < 0.6){
+                if(rand < 0.1){
                     Vector2 pos = new Vector2(tile.position.x + MathUtils.random()*tileSize, tile.position.y + MathUtils.random()*tileSize); //Get a random position in the tile.
                     Entity entity = new Entity(pos, 0, treeTexture, ColonyGame.batch, 11); //Make the Entity
                     entity.transform.setScale(treeScale); //Set the scale.
@@ -136,8 +138,30 @@ public class WorldGen {
 
                     //Dispose of the circle.
                     circle.dispose();
-                }
+                }else if(rand < 0.15){
+                    Vector2 pos = new Vector2(tile.position.x + MathUtils.random()*tileSize, tile.position.y + MathUtils.random()*tileSize); //Get a random position in the tile.
+                    Entity entity = new Entity(pos, 0, rockTexture, ColonyGame.batch, 11); //Make the Entity
+                    entity.transform.setScale(0.6f); //Set the scale.
+                    entity.name = "Rock"; //Set the name!
 
+                    //All Box2D stuff below...
+                    BodyDef bodyDef = new BodyDef();
+                    bodyDef.type = BodyDef.BodyType.StaticBody;
+
+                    CircleShape circle = new CircleShape();
+                    circle.setRadius(18f);
+
+                    FixtureDef fixtureDef = new FixtureDef();
+                    fixtureDef.shape = circle;
+                    fixtureDef.density = 0;
+                    fixtureDef.friction = 0;
+                    fixtureDef.restitution = 0;
+
+                    //Add the Collider Component and an Interactable Component.
+                    entity.addComponent(new Collider(ColonyGame.world, bodyDef, fixtureDef));
+                    entity.addComponent(new Interactable("resource"));
+                    entity.addComponent(new Resource("Rocks n Stuff"));
+                }
             }
 
             done = false; //Set done to false signifying that we are not finished yet.

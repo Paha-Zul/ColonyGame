@@ -61,6 +61,7 @@ public class ServerPlayer {
 		//this.debug();
 
 		batch.begin();
+		this.batch.setProjectionMatrix(ColonyGame.camera.combined);
 
 		WorldGen.TerrainTile[][] map = WorldGen.map;
 		//Loop over the array
