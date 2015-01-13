@@ -7,19 +7,27 @@ public class Interactable extends Component{
     public String type;
 
     public Resource resource;
+    public Health health;
 
-    public Interactable() {
+    public Interactable(String type) {
         super();
+        this.type = type;
+    }
 
-
+    public Interactable(){
+        this("NothingType");
     }
 
     @Override
     public void start() {
         super.start();
 
-        if(this.type == "resource");
+        if(this.type == "resource")
             this.resource = this.owner.getComponent(Resource.class);
+
+        if(this.type == "humanoid")
+            this.health = this.owner.getComponent(Health.class);
+
     }
 
     @Override
@@ -30,5 +38,7 @@ public class Interactable extends Component{
     @Override
     public void destroy() {
         super.destroy();
+        this.type = null;
+        this.resource = null;
     }
 }

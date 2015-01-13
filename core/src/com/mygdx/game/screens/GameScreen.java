@@ -54,9 +54,6 @@ public class GameScreen implements Screen{
         for(int i=0;i< list.size();i++){
             list.get(i).resize(width, height);
         }
-
-        scaleX = 1920/width;
-        scaleY = 1080/height;
     }
 
     @Override

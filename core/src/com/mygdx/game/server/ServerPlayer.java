@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.mygdx.game.ColonyGame;
@@ -24,9 +25,7 @@ public class ServerPlayer {
 	private SpriteBatch batch;
 	private ShapeRenderer shapeRenderer;
 
-	private OneShotTimer testTimer;
-	private Entity test;
-	boolean up = true;
+	private static String[] names = {"Bobby","Sally","Jimmy","Bradley","Willy","Tommy","Brian","Doug","Ben","Jacob","Sammy","Jason","David","Sarah","Betty","Tom","James"};
 
 	//Box2d stuff
 
@@ -59,20 +58,6 @@ public class ServerPlayer {
 		//Step the Box2D simulation.
 		ColonyGame.world.step(delta, 6, 2);
 
-		if(this.testTimer != null && this.test != null) {
-			this.testTimer.update(delta);
-
-			if (up)
-				this.test.transform.setScale(test.transform.getScale() + delta);
-			else
-				this.test.transform.setScale(test.transform.getScale() + -delta);
-
-			if (this.test.transform.getScale() > 3)
-				up = false;
-			if (this.test.transform.getScale() < 0.5)
-				up = true;
-		}
-
 		//this.debug();
 
 		batch.begin();
@@ -104,6 +89,9 @@ public class ServerPlayer {
 		collider.fixture.setDensity(1f);
 
 		Entity ent2 = new Entity(position, 0, 14, graphic, collider);
+		ent2.addComponent(new Interactable("humanoid"));
+		ent2.addComponent(new Health(100));
+		ent2.name = names[MathUtils.random(names.length-1)];
 	}
 
 	private void initPlayer(){

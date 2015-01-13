@@ -2,25 +2,29 @@ package com.mygdx.game.helpers.gui;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 
-import java.awt.*;
-
 /**
  * Created by Bbent_000 on 12/25/2014.
  */
 public class GUI {
-    public static BitmapFont font = new BitmapFont();
+    public static BitmapFont font;
     public static Texture defaultTexture = new Texture("img/background.png");
 
+    private static BitmapFont defaultFont = new BitmapFont();
     private static Texture defaultNormalButton = new Texture("img/ui/defaultButton_normal.png");
     private static Texture defaultMousedButton = new Texture("img/ui/defaultButton_moused.png");
     private static Texture defaultClickedButton = new Texture("img/ui/defaultButton_clicked.png");
 
     private static ButtonStyle defaultButtonStyle = new ButtonStyle();
+
+    static{
+        font = defaultFont;
+    }
 
     public static void Texture(Rectangle rect, Texture texture, SpriteBatch batch){
         batch.draw(texture, rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight());
@@ -105,6 +109,11 @@ public class GUI {
 
     public static String TextBox(String text, SpriteBatch batch, float x, float y){
         return "";
+    }
+
+    public static void ResetFont(){
+        GUI.font = defaultFont;
+        GUI.font.setColor(Color.WHITE);
     }
 
     public static class ButtonStyle{

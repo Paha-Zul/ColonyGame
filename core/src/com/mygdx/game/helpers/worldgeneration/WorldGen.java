@@ -8,6 +8,8 @@ import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.mygdx.game.ColonyGame;
+import com.mygdx.game.component.Interactable;
+import com.mygdx.game.component.Resource;
 import com.mygdx.game.component.collider.Collider;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.server.ServerPlayer;
@@ -112,12 +114,16 @@ public class WorldGen {
                 tile.rotation = (int)(MathUtils.random()*4)*90;
             }
 
+            //If the tile is not water...
             if(tile.type == 1){
+                //Random chance for a tree to spawn.
                 if(MathUtils.random() < 0.6){
-                    Vector2 pos = new Vector2(tile.position.x + MathUtils.random()*tileSize, tile.position.y + MathUtils.random()*tileSize);
-                    Entity entity = new Entity(pos, MathUtils.random()*360, treeTextures[(int)(MathUtils.random()*treeTextures.length)], ColonyGame.batch, 11);
-                    entity.transform.setScale(treeScale);
+                    Vector2 pos = new Vector2(tile.position.x + MathUtils.random()*tileSize, tile.position.y + MathUtils.random()*tileSize); //Get a random position in the tile.
+                    Entity entity = new Entity(pos, MathUtils.random()*360, treeTextures[(int)(MathUtils.random()*treeTextures.length)], ColonyGame.batch, 11); //Make the Entity
+                    entity.transform.setScale(treeScale); //Set the scale.
+                    entity.name = "Tree"; //Set the name!
 
+                    //All Box2D stuff below...
                     BodyDef bodyDef = new BodyDef();
                     bodyDef.type = BodyDef.BodyType.StaticBody;
 
@@ -130,10 +136,15 @@ public class WorldGen {
                     fixtureDef.friction = 0;
                     fixtureDef.restitution = 0;
 
+                    //Add the Collider Component and an Interactable Component.
                     entity.addComponent(new Collider(ColonyGame.world, bodyDef, fixtureDef));
+                    entity.addComponent(new Interactable("resource"));
+                    entity.addComponent(new Resource("Wood"));
 
+                    //We add to a tree list for prototyping.
                     treeList.add(entity);
 
+                    //Dispose of the circle.
                     circle.dispose();
                 }
 

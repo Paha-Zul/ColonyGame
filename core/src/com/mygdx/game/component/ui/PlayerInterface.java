@@ -33,7 +33,7 @@ public class PlayerInterface extends Component implements IGUI, InputProcessor {
     private Rectangle infoRect = new Rectangle();
     private float FPS = 0;
 
-    private Interactable interactable;
+    private Interactable interactable = null;
 
     private Timer FPSTimer;
 
@@ -43,6 +43,7 @@ public class PlayerInterface extends Component implements IGUI, InputProcessor {
         System.out.println("Querying at location: "+fixture.getBody().getPosition());
         if(fixture.testPoint(testPoint.x, testPoint.y)){
             this.selected = (Entity)fixture.getBody().getUserData();
+            this.interactable = this.selected.getComponent(Interactable.class);
             System.out.println(this.selected.name+" was selected");
             return false;
         }
@@ -94,12 +95,45 @@ public class PlayerInterface extends Component implements IGUI, InputProcessor {
         GUI.Text("NumTrees: "+ WorldGen.numTrees(), this.batch, 0, Gdx.graphics.getHeight() - 80);
         GUI.Text("NumTiles: "+WorldGen.numTiles(), this.batch, 0, Gdx.graphics.getHeight() - 100);
 
+        if(this.selected != null && this.interactable != null){
+            this.displaySelected(this.infoRect);
+        }
+
+    }
+
+    private void displaySelected(Rectangle rect){
+        float x = rect.getX() + 20;
+        float y = rect.getY() + rect.getHeight() - 10;
+
+        GUI.Text("Name: "+this.interactable.getEntityOwner().name, this.batch, x, y);
+        y-=20;
+        GUI.Text("Type: "+this.interactable.type, this.batch, x, y);
+        y-=20;
+
+        if(this.interactable.type == "resource"){
+            GUI.Text("ResourceType: "+this.interactable.resource.getResourceType(), this.batch, x, y);
+            y-=20;
+            GUI.Text("MaxResources: "+this.interactable.resource.getMaxResources(), this.batch, x, y);
+            y-=20;
+            GUI.Text("CurrResources: "+this.interactable.resource.getCurrResources(), this.batch, x, y);
+            y-=20;
+        }else if(this.interactable.type == "humanoid"){
+            GUI.Text("MaxHealth: "+this.interactable.health.getMaxHealth(), this.batch, x, y);
+            y-=20;
+            GUI.Text("CurrHealth: "+this.interactable.health.getCurrHealth(), this.batch, x, y);
+            y-=20;
+        }
     }
 
     @Override
     public void destroy() {
         super.destroy();
-
+        this.background.dispose();
+        this.batch = null;
+        this.interactable = null;
+        this.world = null;
+        this.buttonRect = null;
+        this.infoRect = null;
     }
 
     @Override
@@ -130,7 +164,10 @@ public class PlayerInterface extends Component implements IGUI, InputProcessor {
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-//        System.out.println("There was a click: "+button);
+        this.selected = null;
+        this.interactable = null;
+
+//      System.out.println("There was a click: "+button);
         int fixedY = Gdx.graphics.getHeight()-screenY;
         if(button == Input.Buttons.LEFT){
 //            System.out.println("Inside, X/Y: "+screenX+" "+fixedY);

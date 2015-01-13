@@ -6,6 +6,10 @@ import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.component.ui.MainMenuInterface;
 import com.mygdx.game.entity.Entity;
+import com.mygdx.game.helpers.ListHolder;
+import com.mygdx.game.interfaces.IGUI;
+
+import java.util.ArrayList;
 
 /**
  * Created by Paha on 1/10/2015.
@@ -35,6 +39,12 @@ public class MainMenuScreen implements Screen {
     public void resize(int width, int height) {
         Gdx.graphics.setDisplayMode(width, height, false);
         ColonyGame.camera.setToOrtho(false, width, height);
+
+        //Resizes all the GUI elements of the game (hopefully!)
+        ArrayList<IGUI> list = ListHolder.getGUIList();
+        for(int i=0;i< list.size();i++){
+            list.get(i).resize(width, height);
+        }
     }
 
     @Override
