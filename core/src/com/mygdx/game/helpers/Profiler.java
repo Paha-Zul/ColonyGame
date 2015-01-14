@@ -75,7 +75,6 @@ public class Profiler {
             if(parentProfile != null){
                 parentProfile.children.add(currProfile);
                 currProfile.parent = parentProfile;
-                System.out.println("added child");
             }
         }
 
@@ -99,8 +98,8 @@ public class Profiler {
         if(!enabled)
             return;
 
-        StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
-        begin("Function: "+stackTraceElements[2].getMethodName());
+        StackTraceElement[] stackTraceElements =new Exception().getStackTrace();
+        begin("Function: "+stackTraceElements[1].getMethodName());
     }
 
     /**
