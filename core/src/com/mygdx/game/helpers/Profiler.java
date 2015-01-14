@@ -9,7 +9,7 @@ import java.text.DecimalFormat;
 import java.util.*;
 
 /**
- * Created by Paha on 1/13/2015.
+ * A Class that can be used to profile parts of game loop code.
  */
 public class Profiler {
     public static double interval = 0.5f; //The interval that the average time should be updated.
@@ -134,7 +134,7 @@ public class Profiler {
 
         //For each record...
         for(Profile profile : sortedList){
-            drawRecord(profile, batch, x, yOffset); //Draw the parent and all children recursively.
+            drawRecord(profile, batch, x); //Draw the parent and all children recursively.
         }
 
         for(Profile profile : sortedList)
@@ -148,7 +148,7 @@ public class Profiler {
      * @param x The X location to draw at.
      * @param y The Y location to draw at.
      */
-    private static void drawRecord(Profile profile, SpriteBatch batch, float x, float y){
+    private static void drawRecord(Profile profile, SpriteBatch batch, float x){
         if(profile.drawn) return;
 
         double d = profile.avgTime/100000000; //Convert time into seconds.
@@ -159,7 +159,7 @@ public class Profiler {
 
         //For each child, call drawRecord again. Recursion!
         for(Profile child : profile.children){
-            drawRecord(child, batch, x+15, yOffset);
+            drawRecord(child, batch, x+15);
         }
     }
 
