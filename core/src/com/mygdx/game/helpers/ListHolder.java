@@ -74,16 +74,36 @@ public class ListHolder {
 	}
 
 	/**
-	 * Removes a IGUI Component from the list.
-	 * @param GUI The IGUI Component to remove.
+	 * Removes a UI Component from the list.
+	 * @param ui The UI Component to remove.
 	 */
-	public static void removeInterface(IGUI GUI){
-		GUIList.remove(GUI);
+	public static void removeGUI(UI ui){
+		GUIList.remove(ui);
 	}
 
+	/**
+	 * Gets the ArrayList for the GUI stuff.
+	 * @return An ArrayList holding GUI elements.
+	 */
 	public static ArrayList<UI> getGUIList(){
 		return GUIList;
 	}
 
+	/**
+	 * Finds an Entity by name from the game. Don't do this every frame for performance reasons.
+	 * @param name The name that the Entity should have.
+	 * @return The first Entity found with 'name', null otherwise.
+	 */
+	public static Entity findEntityByName(String name){
+		for(int i=0; i<entityList.size(); i++){
+			for(int j=0; j<entityList.get(i).size(); j++){
+				Entity ent = entityList.get(i).get(j);
+				if(ent.name == name)
+					return ent;
+			}
+		}
+
+		return null;
+	}
 
 }

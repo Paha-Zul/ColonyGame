@@ -8,10 +8,12 @@ import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.mygdx.game.ColonyGame;
+import com.mygdx.game.component.GridComponent;
 import com.mygdx.game.component.Interactable;
 import com.mygdx.game.component.Resource;
 import com.mygdx.game.component.collider.Collider;
 import com.mygdx.game.entity.Entity;
+import com.mygdx.game.helpers.Constants;
 import com.mygdx.game.server.ServerPlayer;
 
 import java.util.ArrayList;
@@ -111,16 +113,16 @@ public class WorldGen {
                 //Random chance for a tree to spawn.
                 if(rand < 0.1){
                     Vector2 pos = new Vector2(tile.position.x + MathUtils.random()*tileSize, tile.position.y + MathUtils.random()*tileSize); //Get a random position in the tile.
-                    Entity entity = new Entity(pos, 0, treeTexture, ColonyGame.batch, 11); //Make the Entity
-                    entity.transform.setScale(treeScale); //Set the scale.
-                    entity.name = "Tree"; //Set the name!
+                    Entity tree = new Entity(pos, 0, treeTexture, ColonyGame.batch, 11); //Make the Entity
+                    tree.transform.setScale(treeScale); //Set the scale.
+                    tree.name = "Tree"; //Set the name!
 
                     //All Box2D stuff below...
                     BodyDef bodyDef = new BodyDef();
                     bodyDef.type = BodyDef.BodyType.StaticBody;
 
                     CircleShape circle = new CircleShape();
-                    circle.setRadius(20f);
+                    circle.setRadius(15f);
 
                     FixtureDef fixtureDef = new FixtureDef();
                     fixtureDef.shape = circle;
@@ -129,12 +131,13 @@ public class WorldGen {
                     fixtureDef.restitution = 0;
 
                     //Add the Collider Component and an Interactable Component.
-                    entity.addComponent(new Collider(ColonyGame.world, bodyDef, fixtureDef));
-                    entity.addComponent(new Interactable("resource"));
-                    entity.addComponent(new Resource("Wood"));
+                    tree.addComponent(new Collider(ColonyGame.world, bodyDef, fixtureDef));
+                    tree.addComponent(new Interactable("resource"));
+                    tree.addComponent(new Resource("Wood"));
+                    tree.addComponent(new GridComponent(Constants.GRIDSTATIC, ColonyGame.worldGrid));
 
                     //We add to a tree list for prototyping.
-                    treeList.add(entity);
+                    treeList.add(tree);
 
                     //Dispose of the circle.
                     circle.dispose();

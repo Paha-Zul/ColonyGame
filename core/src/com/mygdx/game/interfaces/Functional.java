@@ -1,5 +1,9 @@
 package com.mygdx.game.interfaces;
 
+import com.mygdx.game.entity.Entity;
+
+import java.util.ArrayList;
+
 /**
  * Created by Bbent_000 on 11/17/2014.
  */
@@ -12,7 +16,7 @@ public class Functional {
 		void callback();
 	}
 
-	public interface Test<T>{
-		boolean test(T t);
+	public interface GetEnt{
+		Entity getEnt(ArrayList<Entity> entList);
 	}
 }

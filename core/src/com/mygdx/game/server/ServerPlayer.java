@@ -10,9 +10,11 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.mygdx.game.ColonyGame;
-import com.mygdx.game.Grid;
 import com.mygdx.game.component.*;
 import com.mygdx.game.component.collider.Collider;
+import com.mygdx.game.component.collider.Colony;
+import com.mygdx.game.helpers.Grid;
+import com.mygdx.game.helpers.Profiler;
 import com.mygdx.game.ui.PlayerInterface;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.worldgeneration.WorldGen;
@@ -24,6 +26,7 @@ public class ServerPlayer {
 	private SpriteBatch batch;
 	private ShapeRenderer shapeRenderer;
 	private ColonyGame game;
+	private Grid grid;
 
 	private static String[] names = {"Bobby","Sally","Jimmy","Bradley","Willy","Tommy","Brian","Doug","Ben","Jacob","Sammy","Jason","David","Sarah","Betty","Tom","James"};
 
@@ -35,7 +38,7 @@ public class ServerPlayer {
 
 		//Start the server
 		Server.start(1337);
-		Grid.NewGrid("spatial",Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), 25, true);
+		this.grid = game.worldGrid;
 
 		//Make a new spritebatch and shaperenderer.
 		this.batch = batch;
@@ -48,12 +51,14 @@ public class ServerPlayer {
 		generateTest(new Vector2(800,500));
 		generateTest(new Vector2(810,500));
 
-		initPlayer();
+		generateStart(new Vector2(800,600));
 
-		Grid.NewGrid("terrain", Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), 25);
+		initPlayer();
 	}
 
 	public void render(float delta){
+		Profiler.begin("ServerPlayer Render");
+
 		Gdx.gl.glClearColor(screenColor.r, screenColor.g, screenColor.b, screenColor.a);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
@@ -66,10 +71,14 @@ public class ServerPlayer {
 		this.batch.setProjectionMatrix(ColonyGame.camera.combined);
 
 		WorldGen.TerrainTile[][] map = WorldGen.map;
+		float halfTileSize = ((float)WorldGen.tileSize+20)/2f;
 		//Loop over the array
 		for(int x=0;x<map.length;x++) {
 			for (int y = 0; y < map[0].length; y++) {
 				WorldGen.TerrainTile tile = map[x][y];
+				if(!ColonyGame.camera.frustum.boundsInFrustum(tile.position.x, tile.position.y, 0, halfTileSize, halfTileSize, 0))
+					continue;
+
 				batch.draw(tile.image, tile.position.x, tile.position.y, WorldGen.tileSize / 2f, WorldGen.tileSize / 2f, WorldGen.tileSize, WorldGen.tileSize, 1, 1, tile.rotation, 0, 0, WorldGen.tileSize, WorldGen.tileSize, false, false);
 				//batch.draw(tile.image, tile.position.x, tile.position.y);
 			}
@@ -77,6 +86,10 @@ public class ServerPlayer {
 
 		ColonyGame.debugRenderer.render(ColonyGame.world, ColonyGame.camera.combined);
 		batch.end();
+
+		this.grid.debugDraw();
+
+		Profiler.end();
 	}
 
 	private void generateTest(Vector2 position){
@@ -94,7 +107,16 @@ public class ServerPlayer {
 		Entity ent2 = new Entity(position, 0, 14, graphic, collider);
 		ent2.addComponent(new Interactable("humanoid"));
 		ent2.addComponent(new Health(100));
+		ent2.addComponent(new Move());
 		ent2.name = names[MathUtils.random(names.length-1)];
+	}
+
+	private void generateStart(Vector2 start){
+		Colony colony = new Colony();
+		Entity colonyEnt = new Entity(start, 0, 0, colony);
+
+
+		Entity colonist1 = new Entity(new Vector2(0,0), 0, 0);
 	}
 
 	private void initPlayer(){

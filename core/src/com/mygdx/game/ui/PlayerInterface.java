@@ -14,6 +14,7 @@ import com.mygdx.game.ColonyGame;
 import com.mygdx.game.component.Component;
 import com.mygdx.game.component.Interactable;
 import com.mygdx.game.entity.Entity;
+import com.mygdx.game.helpers.Profiler;
 import com.mygdx.game.helpers.gui.GUI;
 import com.mygdx.game.helpers.ListHolder;
 import com.mygdx.game.helpers.worldgeneration.WorldGen;
@@ -21,6 +22,7 @@ import com.mygdx.game.helpers.timer.RepeatingTimer;
 import com.mygdx.game.helpers.timer.Timer;
 import com.mygdx.game.interfaces.Functional;
 import com.mygdx.game.interfaces.IGUI;
+import javafx.scene.input.KeyCode;
 
 /**
  * Created by Bbent_000 on 12/25/2014.
@@ -29,6 +31,8 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     private SpriteBatch batch;
     private Texture background;
     private World world;
+    private boolean drawingInfo = false;
+    private boolean drawingProfiler = false;
 
     private Rectangle buttonRect = new Rectangle();
     private Rectangle infoRect = new Rectangle();
@@ -75,19 +79,29 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     @Override
     public void drawGUI(float delta) {
         super.drawGUI(delta);
-
+        int height = Gdx.graphics.getHeight();
         FPSTimer.update(delta);
 
         GUI.Texture(this.infoRect, this.background, this.batch);
 
-        GUI.Text("FPS: "+FPS, this.batch, 0, Gdx.graphics.getHeight() - 40);
-        GUI.Text("Zoom: "+ColonyGame.camera.zoom, this.batch, 0, Gdx.graphics.getHeight() - 60);
-        GUI.Text("Resolution: "+Gdx.graphics.getDesktopDisplayMode().width+"X"+Gdx.graphics.getDesktopDisplayMode().height, this.batch, 0, Gdx.graphics.getHeight() - 80);
-        GUI.Text("NumTrees: "+ WorldGen.numTrees(), this.batch, 0, Gdx.graphics.getHeight() - 100);
-        GUI.Text("NumTiles: "+WorldGen.numTiles(), this.batch, 0, Gdx.graphics.getHeight() - 120);
+        this.drawInfo(height);
+
+        if(this.drawingProfiler)
+            Profiler.drawDebug(ColonyGame.batch, 200, height - 20);
 
         if(this.selected != null && this.interactable != null){
             this.displaySelected(this.infoRect);
+        }
+
+    }
+
+    private void drawInfo(int height){
+        if(this.drawingInfo) {
+            GUI.Text("FPS: " + FPS, this.batch, 0, height - 20);
+            GUI.Text("Zoom: " + ColonyGame.camera.zoom, this.batch, 0, height - 40);
+            GUI.Text("Resolution: " + Gdx.graphics.getDesktopDisplayMode().width + "X" + Gdx.graphics.getDesktopDisplayMode().height, this.batch, 0, height - 60);
+            GUI.Text("NumTrees: " + WorldGen.numTrees(), this.batch, 0, height - 80);
+            GUI.Text("NumTiles: " + WorldGen.numTiles(), this.batch, 0, height - 100);
         }
     }
 
@@ -139,7 +153,14 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
     @Override
     public boolean keyDown(int keycode) {
-        return false;
+        if(keycode == Input.Keys.F1)
+            Profiler.enabled = this.drawingInfo = !this.drawingInfo;
+        else if(keycode == Input.Keys.F2)
+            Profiler.enabled = this.drawingProfiler = !this.drawingProfiler;
+        else
+            return false;
+
+        return true;
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.mygdx.game.component;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.mygdx.game.component.collider.Collider;
 import com.mygdx.game.helpers.timer.RepeatingTimer;
 
 /**
@@ -9,36 +10,32 @@ import com.mygdx.game.helpers.timer.RepeatingTimer;
  */
 public class Move extends Component{
 	public float rotateSpeed = 100;
-	public float moveSpeed;
-	public float threshold = 0.2f;
+	public float moveSpeed = 50;
 
 	private Vector2 dest = new Vector2(0,0);
+	private Collider collider;
 
 	public Move() {
 		super();
+	}
+	public Move(float moveSpeed) {
+		super();
+
+		this.moveSpeed = moveSpeed;
 	}
 
 	@Override
 	public void start() {
 		super.start();
 
+		this.collider = this.owner.getComponent(Collider.class);
 	}
 
 	@Override
 	public void update(float delta) {
 		super.update(delta);
 
-		this.owner.transform.rotate(rotateSpeed*delta);
-
-//		Vector2 pos = owner.transform.getPosition();
-//
-//		//If we are not within the movement threshold, move!
-//		if(Math.abs(pos.x - dest.x) > threshold && Math.abs(pos.y - dest.y) > threshold){
-//			float rotation = MathUtils.atan2(this.dest.y - pos.y, this.dest.x - pos.x);
-//			float x = MathUtils.cos(rotation)*this.moveSpeed*delta;
-//			float y = MathUtils.sin(rotation)*this.moveSpeed*delta;
-//			this.owner.transform.translate(x, y);
-//		}
+		this.collider.body.setLinearVelocity(moveSpeed, 0);
 	}
 
 	public void setDest(float x, float y){
