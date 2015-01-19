@@ -12,9 +12,14 @@ import com.badlogic.gdx.physics.box2d.*;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.component.*;
 import com.mygdx.game.component.collider.Collider;
-import com.mygdx.game.component.collider.Colony;
+import com.mygdx.game.component.Colony;
+import com.mygdx.game.entity.ColonistEnt;
+import com.mygdx.game.entity.ColonyEntity;
+import com.mygdx.game.helpers.Constants;
 import com.mygdx.game.helpers.Grid;
+import com.mygdx.game.helpers.ItemManager;
 import com.mygdx.game.helpers.Profiler;
+import com.mygdx.game.interfaces.Functional;
 import com.mygdx.game.ui.PlayerInterface;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.worldgeneration.WorldGen;
@@ -47,9 +52,6 @@ public class ServerPlayer {
 
 		//Create the Box2D world.
 		ColonyGame.debugRenderer = new Box2DDebugRenderer();
-
-		generateTest(new Vector2(800,500));
-		generateTest(new Vector2(810,500));
 
 		generateStart(new Vector2(800,600));
 
@@ -93,30 +95,85 @@ public class ServerPlayer {
 	}
 
 	private void generateTest(Vector2 position){
-		GraphicIdentity graphic = new GraphicIdentity(new Texture("img/BlackSquare.png"), ColonyGame.batch);
-		CircleShape shape = new CircleShape();
-		shape.setRadius(10f);
-
-		Collider collider = new Collider(ColonyGame.world, shape);
-
-		collider.body.setType(BodyDef.BodyType.DynamicBody);
-
-		collider.fixture.setFriction(0.5f);
-		collider.fixture.setDensity(1f);
-
-		Entity ent2 = new Entity(position, 0, 14, graphic, collider);
-		ent2.addComponent(new Interactable("humanoid"));
-		ent2.addComponent(new Health(100));
-		ent2.addComponent(new Move());
-		ent2.name = names[MathUtils.random(names.length-1)];
+		Texture square = new Texture("img/BlackSquare.png");
+		ColonistEnt colonist = new ColonistEnt(position, 0, square, this.batch, 12);
+		colonist.name = names[MathUtils.random(names.length-1)];
 	}
 
 	private void generateStart(Vector2 start){
-		Colony colony = new Colony();
-		Entity colonyEnt = new Entity(start, 0, 0, colony);
+		ColonyEntity colonyEnt = new ColonyEntity(start, 0, new Texture("img/colony.png"), this.batch, 11);
+		Colony colony = colonyEnt.getComponent(Colony.class);
 
+		Texture square = new Texture("img/BlackSquare.png");
 
-		Entity colonist1 = new Entity(new Vector2(0,0), 0, 0);
+		//Make the Entities.
+		Entity c1 = this.makeColonist(start, 75, square);
+		Entity c2 = this.makeColonist(start, 75, square);
+		Entity c3 = this.makeColonist(start, 75, square);
+		Entity c4 = this.makeColonist(start, 75, square);
+
+		//Give them names!
+		c1.name = this.names[MathUtils.random(this.names.length-1)];
+		c2.name = this.names[MathUtils.random(this.names.length-1)];
+		c3.name = this.names[MathUtils.random(this.names.length-1)];
+		c4.name = this.names[MathUtils.random(this.names.length-1)];
+
+		//Add to the colony.
+		colony.addColonist(c1.getComponent(Colonist.class));
+		colony.addColonist(c2.getComponent(Colonist.class));
+		colony.addColonist(c3.getComponent(Colonist.class));
+		colony.addColonist(c4.getComponent(Colonist.class));
+
+		Item item = ItemManager.getItemByName("Wood Log");
+		item.setCurrStack(10);
+		colony.getComponent(Inventory.class).addItem(item);
+		item = ItemManager.getItemByName("Stone");
+		item.setCurrStack(10);
+		colony.getComponent(Inventory.class).addItem(item);
+
+		int radius = 1;
+		Functional.Perform<Grid.Node[][]> destroyNearbyResources = (grid) -> {
+			int[] index= this.grid.getIndex(colonyEnt.transform.getPosition());
+			int startX = index[0]-radius;
+			int endX = index[0]+radius;
+			int startY = index[1]-radius;
+			int endY = index[1]+radius;
+
+			for(int col = startX; col<=endX; col++){
+				for(int row = startY; row <= endY; row++){
+					Grid.Node node = this.grid.getNode(col, row);
+					if(node == null) continue;
+					for(Entity ent : node.getEntityList()){
+						if(ent.getComponent(Resource.class) != null)
+							ent.destroy();
+					}
+				}
+			}
+		};
+
+		Functional.Perform<Grid.Node[][]> detectNearbyResources = (grid) -> {
+			for(int col = 0; col<grid.length; col++){
+				for(int row = 0; row < grid[col].length; row++){
+					Grid.Node node = this.grid.getNode(col, row);
+					if(node == null) continue;
+					for(Entity ent : node.getEntityList()){
+						Resource resource;
+						if((resource = ent.getComponent(Resource.class)) != null)
+							colony.addNearbyResource(resource);
+					}
+				}
+			}
+		};
+
+		this.grid.perform(destroyNearbyResources);
+		this.grid.perform(detectNearbyResources);
+
+		//ColonistEnt colonist1 = new ColonistEnt();
+	}
+
+	private Entity makeColonist(Vector2 start, float offset, Texture texture){
+		Vector2 newPos = new Vector2(start.x + MathUtils.random()*offset*2 - offset, start.y + MathUtils.random()*offset*2 - offset);
+		return new ColonistEnt(newPos, 0, texture, this.batch, 12);
 	}
 
 	private void initPlayer(){

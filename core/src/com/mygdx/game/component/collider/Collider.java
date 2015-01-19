@@ -46,6 +46,7 @@ public class Collider extends Component implements IScalable{
      * @param fixtureDef The definition of the fixture.
      */
     public Collider(World world, BodyDef bodyDef, FixtureDef fixtureDef){
+        this.world = world;
         this.body = world.createBody(bodyDef);
 
         this.fixture = this.body.createFixture(fixtureDef);
@@ -73,6 +74,9 @@ public class Collider extends Component implements IScalable{
     @Override
     public void destroy() {
         super.destroy();
+
+        this.body.destroyFixture(this.fixture);
+        this.world.destroyBody(this.body);
     }
 
     @Override

@@ -42,6 +42,10 @@ public class GridComponent extends Component{
         Profiler.end();
     }
 
+    public Grid.Node getCurrNode(){
+        return this.currNode;
+    }
+
     @Override
     public void destroy() {
         super.destroy();

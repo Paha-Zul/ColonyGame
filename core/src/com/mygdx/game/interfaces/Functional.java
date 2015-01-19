@@ -19,4 +19,5 @@ public class Functional {
 	public interface GetEnt{
 		Entity getEnt(ArrayList<Entity> entList);
 	}
+
 }

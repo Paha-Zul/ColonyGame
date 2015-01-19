@@ -1,7 +1,5 @@
 package com.mygdx.game.component;
 
-import com.mygdx.game.component.collider.Colony;
-
 /**
  * Created by Paha on 1/17/2015.
  */

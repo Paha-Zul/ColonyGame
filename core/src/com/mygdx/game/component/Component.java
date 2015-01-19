@@ -54,6 +54,28 @@ public abstract class Component implements IDestroyable {
 	}
 
 	/**
+	 * A shortcut function to call 'addComponent' on the Entity owner. This cannot be called in the constructor
+	 * as the Entity owner will be null. Use in the 'start' function.
+	 * @param comp The Component to add.
+	 * @param <T> The class.
+	 * @return The Component that was added.
+	 */
+	public final <T extends Component> T addComponent(Component comp){
+		return this.owner.addComponent(comp);
+	}
+
+	/**
+	 * A shortcut function to call 'getComponent' on the Entity owner. This cannot be called in the constructor
+	 * as the Entity owner will be null. Use in the 'start' function.
+	 * @param c The Class type to remove.
+	 * @param <T> The class.
+	 * @return The Component that was retrieved, or null if it could not be found.
+	 */
+	public final <T extends Component> T getComponent(Class<T> c){
+		return this.owner.getComponent(c);
+	}
+
+	/**
 	 * Sets this component to active or inactive.
 	 * @param val A boolean indicating active or inactive.
 	 */

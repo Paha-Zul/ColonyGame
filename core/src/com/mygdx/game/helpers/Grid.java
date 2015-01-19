@@ -31,6 +31,10 @@ public class Grid {
         }
     }
 
+    public void perform(Functional.Perform perform){
+        perform.perform(this.grid);
+    }
+
     /**
      * Checks a Node to see if the Entity is still in the same Node as previously. If not, removes the Entity from the old Node and adds the Entity to the new Node.
      * @param currNode The current Node to check.
@@ -40,22 +44,15 @@ public class Grid {
     public Node checkNode(Node currNode, Entity entity){
         Vector2 pos = entity.transform.getPosition();
 
-        //If the currNode is null, get the Node and return it!.
-        if(currNode == null){
-            currNode = getNode(pos);
-            currNode.addEntity(entity);
-            return currNode;
-        }
-
         //If the currNode still matches our current position, return it.
-        if(pos.x/this.squareSize == currNode.getCol() && pos.y/this.squareSize == currNode.getRow())
+        if(currNode != null && pos.x/this.squareSize == currNode.getCol() && pos.y/this.squareSize == currNode.getRow())
             return currNode;
 
-        //Otherwise, remove from the current node, get a new node, add us, and return the new node.
-        currNode.removeEntity(entity);
-        currNode = getNode(pos);
-        currNode.addEntity(entity);
+        if(currNode != null) currNode.removeEntity(entity); //Remove from the old Node if it's not null.
+        currNode = getNode(pos); //Get the new Node.
+        if(currNode == null) return null; //If it's null, return null.
 
+        currNode.addEntity(entity);
         return currNode;
     }
 
@@ -73,9 +70,7 @@ public class Grid {
      * @return A Node at the Entity's location.
      */
     public Node getNode(Entity entity){
-        int xIndex = (int)(entity.transform.getPosition().x/this.squareSize);
-        int yIndex = (int)(entity.transform.getPosition().y/this.squareSize);
-        return this.grid[xIndex][yIndex];
+        return this.getNode((int)(entity.transform.getPosition().x/this.squareSize), (int)(entity.transform.getPosition().y/this.squareSize));
     }
 
     /**
@@ -84,9 +79,33 @@ public class Grid {
      * @return A Node at the Vector2 position.
      */
     public Node getNode(Vector2 pos){
-        int xIndex = (int)(pos.x/this.squareSize);
-        int yIndex = (int)(pos.y/this.squareSize);
-        return this.grid[xIndex][yIndex];
+        return this.getNode((int)(pos.x/this.squareSize), (int)(pos.y/this.squareSize));
+    }
+
+    /**
+     * Gets a Node by a X and Y index.
+     * @param x The X (col) index to get the Node at.
+     * @param y The Y (row) index to get the Node at.
+     * @return The Node if the index was valid, null otherwise.
+     */
+    public Node getNode(int x, int y){
+        //If the index is not in bounds, return null.
+        if(x < 0 || x >= this.grid.length || y < 0 || y >= this.grid[x].length)
+            return null;
+
+        return this.grid[x][y];
+    }
+
+    /**
+     * Gets a Node by an index.
+     * @param index An integer array containing X and Y index.
+     * @return The Node if the index was valid, null otherwise.
+     */
+    public Node getNode(int[] index){
+        if(index.length < 2)
+            return null;
+
+        return this.getNode(index[0], index[1]);
     }
 
     /**
@@ -113,6 +132,18 @@ public class Grid {
         node.removeEntity(entity);
     }
 
+    public int getNumCols(){
+        return this.numCols;
+    }
+
+    public int getNumRows(){
+        return this.numRows;
+    }
+
+    public int[] getIndex(Vector2 position){
+        return new int[]{(int)position.x/squareSize, (int)position.y/squareSize};
+    }
+
     public void debugDraw(){
         Profiler.begin("Grid debugDraw");
 
@@ -125,7 +156,7 @@ public class Grid {
         for(int col=0; col<grid.length; col++){
             for(int row=0; row<grid[col].length; row++){
                 Node node = grid[col][row];
-                renderer.rect(node.getCol()*squareSize, node.getRow()*squareSize, node.getCol()*squareSize + squareSize, node.getRow()*squareSize + squareSize);
+                renderer.rect(node.getCol()*squareSize, node.getRow()*squareSize, squareSize, squareSize);
             }
         }
 
@@ -150,6 +181,10 @@ public class Grid {
 
         public void removeEntity(Entity entity){
             this.entList.remove(entity);
+        }
+
+        public ArrayList<Entity> getEntityList(){
+            return this.entList;
         }
 
         public Entity getEntity(Functional.GetEnt getEntFunc){

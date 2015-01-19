@@ -143,9 +143,9 @@ public class WorldGen {
                     circle.dispose();
                 }else if(rand < 0.15){
                     Vector2 pos = new Vector2(tile.position.x + MathUtils.random()*tileSize, tile.position.y + MathUtils.random()*tileSize); //Get a random position in the tile.
-                    Entity entity = new Entity(pos, 0, rockTexture, ColonyGame.batch, 11); //Make the Entity
-                    entity.transform.setScale(0.6f); //Set the scale.
-                    entity.name = "Rock"; //Set the name!
+                    Entity rock = new Entity(pos, 0, rockTexture, ColonyGame.batch, 11); //Make the Entity
+                    rock.transform.setScale(0.6f); //Set the scale.
+                    rock.name = "Rock"; //Set the name!
 
                     //All Box2D stuff below...
                     BodyDef bodyDef = new BodyDef();
@@ -161,9 +161,10 @@ public class WorldGen {
                     fixtureDef.restitution = 0;
 
                     //Add the Collider Component and an Interactable Component.
-                    entity.addComponent(new Collider(ColonyGame.world, bodyDef, fixtureDef));
-                    entity.addComponent(new Interactable("resource"));
-                    entity.addComponent(new Resource("Rocks n Stuff"));
+                    rock.addComponent(new Collider(ColonyGame.world, bodyDef, fixtureDef));
+                    rock.addComponent(new Interactable("resource"));
+                    rock.addComponent(new Resource("Rocks n Stuff"));
+                    rock.addComponent(new GridComponent(Constants.GRIDSTATIC, ColonyGame.worldGrid));
                 }
             }
 

@@ -113,13 +113,14 @@ public class Entity {
 	}
 
 	/**
-	 * Adds a component to this Entity. The start() method will be called on the next tick for this Entity.
+	 * Adds a component to this Entity. The Component is immediately added to the Entity but the 'start' method is not called
+	 * until the next update frame for the Entity. This means any values set in the 'start' method are not set in the same frame.
 	 * @param comp The Component to add to this Entity.
 	 * @param <T> The Component class type of the component being added.
 	 * @return The Component that was added.
 	 */
 	@SuppressWarnings("unchecked")
-	public <T extends Component> T addComponent(Component comp){
+	public final <T extends Component> T addComponent(Component comp){
 		comp.init(this); //Initialize the component with this Entity as the owner.
 		this.newComponentList.add(comp); //Add it to the new list for the start() method.
 		//Add it to the active or inactive list.
@@ -135,7 +136,7 @@ public class Entity {
 	 * @return The Component if it was found, otherwise null.
 	 */
 	@SuppressWarnings("unchecked")
-	public <T extends Component> T getComponent(Class<T> c){
+	public final <T extends Component> T getComponent(Class<T> c){
 		for(Component comp : this.inactiveComponentList){
 			if(comp.getClass() == c)
 				return (T)comp;
@@ -154,7 +155,7 @@ public class Entity {
 	 * @param comp The Component to remove.
 	 * @return True if the Component was removed, false otherwise.
 	 */
-	public boolean removeComponent(Component comp){
+	public final boolean removeComponent(Component comp){
 		if(comp.isActive()) return this.inactiveComponentList.remove(comp);
 		return this.activeComponentList.remove(comp);
 	}
@@ -211,11 +212,11 @@ public class Entity {
 		this.destroyed = true;
 	}
 
-	public void registerScalable(IScalable scalable){
+	public final void registerScalable(IScalable scalable){
 		this.scalableComponents.add(scalable);
 	}
 
-	public void scaleComponents(float scale){
+	public final void scaleComponents(float scale){
 		for(IScalable scalable : this.scalableComponents)
 			scalable.scale(scale);
 	}

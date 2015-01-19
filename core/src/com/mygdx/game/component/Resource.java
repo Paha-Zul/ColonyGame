@@ -1,9 +1,14 @@
 package com.mygdx.game.component;
 
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Rectangle;
+import com.mygdx.game.helpers.gui.GUI;
+import com.mygdx.game.interfaces.IDisplayable;
+
 /**
  * Created by Paha on 1/10/2015.
  */
-public class Resource extends Component{
+public class Resource extends Component implements IDisplayable{
     private String resourceType = "";
     private int maxResources = 100;
     private int currResources = 100;
@@ -54,4 +59,18 @@ public class Resource extends Component{
         super.destroy();
     }
 
+    @Override
+    public void display(Rectangle rect, SpriteBatch batch, String name) {
+        float x = rect.getX();
+        float y = rect.getY() + rect.getHeight();
+
+        if(name == "general"){
+            GUI.Text("Name: "+this.owner.name, batch, x, y);
+            y-=20;
+            GUI.Text("MaxResources: "+this.maxResources, batch, x, y);
+            y-=20;
+            GUI.Text("CurrResources: "+this.currResources, batch, x, y);
+            y-=20;
+        }
+    }
 }
