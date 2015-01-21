@@ -12,6 +12,8 @@ import java.util.HashMap;
  * Created by Paha on 1/17/2015.
  */
 public class Colony extends Component implements IDisplayable {
+    private String colonyName = "Colony";
+
     private ArrayList<Colonist> colonistList = new ArrayList<>(20);
     private HashMap<String, ArrayList<Resource>> nearbyResources = new HashMap<>();
     private HashMap<String, ArrayList<Resource>> stockedResource = new HashMap<>();
@@ -21,6 +23,11 @@ public class Colony extends Component implements IDisplayable {
 
     private Inventory inventory;
 
+    public Colony(String colonyName) {
+        super();
+
+        this.colonyName = colonyName;
+    }
     public Colony() {
         super();
     }
@@ -152,23 +159,23 @@ public class Colony extends Component implements IDisplayable {
     @Override
     public void display(Rectangle rect, SpriteBatch batch, String name) {
         float x = rect.x;
-        float y = rect.y + rect.getHeight();
+        float y = rect.y + rect.getHeight() - 5;
 
-        if(name == "general"){
-            GUI.Text("Name: "+this.owner.name, batch, x, y);
-            y-=20;
+        if(name == "general") {
+            GUI.Label("Name: " + this.owner.name, batch, rect.getX() + rect.getWidth() / 2 - 5, y, true);
+            y -= 20;
+        }else if(name == "colony"){
+            GUI.Text("ColonyName: " + this.colonyName, batch, x, y);
+            y -= 20;
             GUI.Text("Type: Colony", batch, x, y);
-            y-=20;
-            GUI.Text("NumResourcesNearby: "+this.getTotalNearbyResources(), batch, x, y);
-            y-=20;
-            GUI.Text("NumStockedResources: "+this.getTotalNearbyResources(), batch, x, y);
+            y -= 20;
+            GUI.Text("NumResourcesNearby: " + this.getTotalNearbyResources(), batch, x, y);
+            y -= 20;
+            GUI.Text("NumStockedResources: " + this.getTotalStockedResources(), batch, x, y);
+            y -= 20;
+            GUI.Text("NumColonists: " + this.getNumColonists(), batch, x, y);
         }else if(name == "inventory"){
-            GUI.Text("Inventory Items", batch, x, y);
-            y-=20;
-            for(Inventory.InventoryItem item : this.inventory.getItemList()){
-                GUI.Text(item.item.getName()+": "+item.amount, batch, x, y);
-                y-=20;
-            }
+            this.inventory.display(rect, batch, name);
         }
     }
 }

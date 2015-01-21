@@ -1,23 +1,46 @@
 package com.mygdx.game.component;
 
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Rectangle;
+import com.mygdx.game.helpers.gui.GUI;
+import com.mygdx.game.interfaces.IDisplayable;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
  * Created by Paha on 1/18/2015.
  */
-public class Inventory extends Component{
-    private String allowedTypes = "";
-    private int totalTypesAllowed = 0;
-    private int totalItemsAllowed = 0;
+public class Inventory extends Component implements IDisplayable{
+    private String allowedTypes = "all";
+    private int totalTypesAllowed = -1;
+    private int totalItemsAllowed = -1;
+    private int totalWeightAllowed = -1;
 
     private HashMap<String, InventoryItem> inventory = new HashMap<>(20);
 
-    public Inventory(String allowedTypes, int totalTypesAllowed, int totalItemsAllowed) {
+    /**
+     * Creates an Inventory Component to hold Items.
+     * @param allowedTypes The allowed types for this inventory. This should be in the form of "resource,furniture,weapons,...etc". Using "all" will
+     *                     indicate that all types can be stored here. (NOT IMPLEMENTED)
+     * @param totalTypesAllowed The total number of different types allowed. For instance, if "all" is used but 'totalTypesAllowed' is 2, then if furniture and weapon types are stored first,
+     *                          no other types can be put in until another type is cleared. -1 indicates infinite. (NOT IMPLEMENTED)
+     * @param totalItemsAllowed The total number of items allowed in this inventory. For instance, maybe a person can only hold 10 items? -1 indicates infinite. (NOT IMPLEMENTED)
+     * @param totalWeightAllowed The total weight allowed for this inventory. For instance, maybe a person can hold a total weight of 50? -1 indicates infinite. (NOT IMPLEMENTED)
+     */
+    public Inventory(String allowedTypes, int totalTypesAllowed, int totalItemsAllowed, int totalWeightAllowed) {
         super();
         this.allowedTypes = allowedTypes;
         this.totalTypesAllowed = totalTypesAllowed;
         this.totalItemsAllowed = totalItemsAllowed;
+        this.totalWeightAllowed = totalWeightAllowed;
+    }
+
+    /**
+     * Creates a default Inventory Component with the default values. This means this inventory can hold unlimited of everything.
+     */
+    public Inventory(){
+        this("all", -1, -1, -1);
     }
 
     @Override
@@ -88,6 +111,19 @@ public class Inventory extends Component{
         public InventoryItem(Item item, int amount){
             this.item = item;
             this.amount = amount;
+        }
+    }
+
+    @Override
+    public void display(Rectangle rect, SpriteBatch batch, String name) {
+        float x = rect.x;
+        float y = rect.y + rect.getHeight() - 5;
+
+        GUI.Text("Inventory Items", batch, x, y);
+        y-=20;
+        for(Inventory.InventoryItem item : this.getItemList()){
+            GUI.Text(item.item.getName()+": "+item.amount, batch, x, y);
+            y-=20;
         }
     }
 }

@@ -116,28 +116,31 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     }
 
     private void displaySelected(Rectangle rect){
+        Profiler.begin("PlayerInterface displaySelected");
+
         float x = rect.getX() + 20;
         float y = rect.getY() + rect.getHeight() - 10;
 
         if(this.interactable.type == "resource"){
-            this.interactable.display(this.centerRect, this.batch, "general");
-            this.interactable.resource.display(this.leftRect, this.batch, "general");
+            this.interactable.resource.display(this.centerRect, this.batch, "general");
+            this.interactable.resource.display(this.leftRect, this.batch, "resource");
         }else if(this.interactable.type == "humanoid"){
-            this.interactable.display(this.centerRect, this.batch, "general");
-            this.interactable.health.display(this.leftRect, this.batch, "general");
+            this.interactable.colonist.display(this.centerRect, this.batch, "general");
+            this.interactable.colonist.display(this.leftRect, this.batch, "health");
+            this.interactable.colonist.display(this.rightRect, this.batch, "inventory");
         }
         else if(this.interactable.type == "colony"){
-            Profiler.begin("PI Colony");
-            this.interactable.display(this.centerRect, this.batch, "general");
-            this.interactable.colony.display(leftRect, this.batch, "general");
-            this.interactable.colony.display(rightRect, this.batch, "inventory");
-            Profiler.end();
+            this.interactable.colony.display(this.centerRect, this.batch, "general");
+            this.interactable.colony.display(this.leftRect, this.batch, "colony");
+            this.interactable.colony.display(this.rightRect, this.batch, "inventory");
         }
 
         if(this.gridComp != null) {
             GUI.Text("Grid Index: " + gridComp.getCurrNode().getCol() + " " + gridComp.getCurrNode().getRow(), this.batch, x + 100, y + 100);
             y -= 20;
         }
+
+        Profiler.end();
     }
 
     @Override

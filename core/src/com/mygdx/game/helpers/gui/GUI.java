@@ -107,6 +107,10 @@ public class GUI {
         }
     }
 
+    public static void Label(String text, SpriteBatch batch, Rectangle rect, boolean centered){
+        GUI.Label(text, batch, rect.getX() + rect.getWidth()/2, rect.getY() + rect.getHeight()/2, centered);
+    }
+
     public static String TextBox(String text, SpriteBatch batch, float x, float y){
         return "";
     }

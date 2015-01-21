@@ -22,6 +22,7 @@ public class ColonistEnt extends Entity{
         this.addComponent(new Interactable("humanoid"));
         this.addComponent(new Health(100));
         this.addComponent(new Move());
+        this.addComponent(new Inventory());
         this.makeCollider();
     }
 

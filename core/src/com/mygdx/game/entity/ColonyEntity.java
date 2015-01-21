@@ -24,7 +24,7 @@ public class ColonyEntity extends Entity{
         this.addComponent(new GridComponent(Constants.GRIDSTATIC, ColonyGame.worldGrid));
         this.addComponent(new Colony());
         this.addComponent(new Interactable("colony"));
-        this.addComponent(new Inventory("all", 100, 100));
+        this.addComponent(new Inventory("all", 100, 100, 100));
         this.makeCollider(position);
     }
 

@@ -51,13 +51,11 @@ public class Health extends Component implements IDisplayable{
     @Override
     public void display(Rectangle rect, SpriteBatch batch, String name) {
         float x = rect.getX();
-        float y = rect.getY() + rect.getHeight();
+        float y = rect.getY() + rect.getHeight() - 5;
 
-        if(name == "general"){
-            GUI.Text("MaxHealth: "+this.maxHealth, batch, x, y);
-            y-=20;
-            GUI.Text("CurrHealth: "+this.maxHealth, batch, x, y);
-            y-=20;
-        }
+        GUI.Text("MaxHealth: "+this.maxHealth, batch, x, y);
+        y-=20;
+        GUI.Text("CurrHealth: "+this.maxHealth, batch, x, y);
+        y-=20;
     }
 }
