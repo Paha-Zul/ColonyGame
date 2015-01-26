@@ -14,6 +14,7 @@ import com.mygdx.game.component.Resource;
 import com.mygdx.game.component.collider.Collider;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.Constants;
+import com.mygdx.game.helpers.Grid;
 import com.mygdx.game.server.ServerPlayer;
 
 import java.util.ArrayList;
@@ -22,7 +23,7 @@ import java.util.ArrayList;
  * Created by Bbent_000 on 12/24/2014.
  */
 public class WorldGen {
-    public static TerrainTile[][] map;
+    public static Grid.TerrainNode[][] map;
 
     //Some default values that can be modified globally.
     public static int tileSize = 25;
@@ -67,7 +68,7 @@ public class WorldGen {
         numY = Gdx.graphics.getHeight()/tileSize + 1;
 
         //Initializes a new array
-        map = new TerrainTile[numX][numY];
+        map = new Grid.TerrainNode[numX][numY];
     }
 
     /**
@@ -80,29 +81,31 @@ public class WorldGen {
 
         //If there's steps left and currX is still less than the total num X, generate!
         while(stepsLeft > 0 && currX < numX){
-            TerrainTile tile = map[currX][currY] = new TerrainTile(); //Initialize a new terrain tile.
+            map[currX][currY] = new Grid.TerrainNode(currX, currY, new TerrainTile()); //Initialize a new terrain tile.
+            TerrainTile tile = map[currX][currY].getTerrainTile();
+
             tile.noiseValue = SimplexNoise.noise((double)currX/freq,(double)currY/freq); //Generate the noise for this tile.
             tile.position = new Vector2(currX*tileSize, currY*tileSize); //Set the position.
 
             //If under this value, generate dark water.
-            if(tile.noiseValue < -0.2) {
-                tile.type = 0;
+            if(tile.noiseValue < -0.6) {
+                tile.type = Constants.TERRAIN_WATER;
                 tile.image = new Texture("img/DarkWater.png");
 
             //If between 0 and -0.2, light water.
-            }else if (tile.noiseValue < 0) {
-                tile.type = 0;
+            }else if (tile.noiseValue < -0.4) {
+                tile.type = Constants.TERRAIN_WATER;
                 tile.image = new Texture("img/LightWater.png");
 
             //If between 0 and 0.6, random grass.
             }else if (tile.noiseValue < 0.6){
-                tile.type = 1;
+                tile.type = Constants.TERRAIN_GRASS;
                 tile.image = grassTiles[(int)(MathUtils.random()*grassTiles.length)];
                 tile.rotation = (int)(MathUtils.random()*4)*90;
 
             //Otherwise, tall grass!
             }else{
-                tile.type = 1;
+                tile.type = Constants.TERRAIN_GRASS;
                 tile.image = tallGrassTiles[(int)(MathUtils.random()*tallGrassTiles.length)];
                 tile.rotation = (int)(MathUtils.random()*4)*90;
             }
@@ -112,7 +115,7 @@ public class WorldGen {
                 float rand = MathUtils.random();
                 //Random chance for a tree to spawn.
                 if(rand < 0.1){
-                    Vector2 pos = new Vector2(tile.position.x + MathUtils.random()*tileSize, tile.position.y + MathUtils.random()*tileSize); //Get a random position in the tile.
+                    Vector2 pos = new Vector2(tile.position.x + tileSize/2, tile.position.y + tileSize/2); //Get a random position in the tile.
                     Entity tree = new Entity(pos, 0, treeTexture, ColonyGame.batch, 11); //Make the Entity
                     tree.transform.setScale(treeScale); //Set the scale.
                     tree.name = "Tree"; //Set the name!
@@ -141,8 +144,8 @@ public class WorldGen {
 
                     //Dispose of the circle.
                     circle.dispose();
-                }else if(rand < 0.15){
-                    Vector2 pos = new Vector2(tile.position.x + MathUtils.random()*tileSize, tile.position.y + MathUtils.random()*tileSize); //Get a random position in the tile.
+                }else if(rand < 0.5){
+                    Vector2 pos = new Vector2(tile.position.x + tileSize/2, tile.position.y + tileSize/2); //Get a random position in the tile.
                     Entity rock = new Entity(pos, 0, rockTexture, ColonyGame.batch, 11); //Make the Entity
                     rock.transform.setScale(0.6f); //Set the scale.
                     rock.name = "Rock"; //Set the name!
