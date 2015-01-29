@@ -39,4 +39,9 @@ public class LeafTask extends Task{
     public TaskController getControl() {
         return this.control;
     }
+
+    @Override
+    public void setBlackBoard(BlackBoard blackBoard) {
+        this.blackBoard = blackBoard;
+    }
 }

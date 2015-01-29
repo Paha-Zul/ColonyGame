@@ -41,5 +41,7 @@ public abstract class Task {
      */
     public abstract TaskController getControl();
 
+    public abstract void setBlackBoard(BlackBoard blackBoard);
+
 
 }

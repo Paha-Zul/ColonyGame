@@ -65,4 +65,11 @@ public abstract class ParentTask extends Task{
     public abstract void childSucceeded();
 
     public abstract void childFailed();
+
+    @Override
+    public void setBlackBoard(BlackBoard blackBoard) {
+        for(Task task : control.getSubTasks()){
+            task.setBlackBoard(blackBoard);
+        }
+    }
 }
