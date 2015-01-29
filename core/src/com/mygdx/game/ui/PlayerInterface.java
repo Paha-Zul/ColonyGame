@@ -136,8 +136,10 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         }
 
         if(this.gridComp != null) {
-            GUI.Text("Grid Index: " + gridComp.getCurrNode().getCol() + " " + gridComp.getCurrNode().getRow(), this.batch, x + 100, y + 100);
-            y -= 20;
+            if(this.gridComp.getCurrNode() != null) {
+                GUI.Text("Grid Index: " + gridComp.getCurrNode().getCol() + " " + gridComp.getCurrNode().getRow(), this.batch, x + 100, y + 100);
+                y -= 20;
+            }
         }
 
         Profiler.end();
@@ -194,14 +196,12 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-        this.selected = null;
-        this.interactable = null;
-
         Vector3 worldCoords = ColonyGame.camera.unproject(new Vector3(screenX, screenY, 0));
-
 
 //      System.out.println("There was a click: "+button);
         if(button == Input.Buttons.LEFT){
+            this.selected = null;
+            this.interactable = null;
 
 //            System.out.println("Inside, X/Y: "+screenX+" "+fixedY);
             this.testPoint.set(worldCoords.x, worldCoords.y);

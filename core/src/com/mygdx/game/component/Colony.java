@@ -1,9 +1,16 @@
 package com.mygdx.game.component;
 
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
+import com.mygdx.game.ColonyGame;
+import com.mygdx.game.entity.ColonistEnt;
+import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.gui.GUI;
 import com.mygdx.game.interfaces.IDisplayable;
+import com.mygdx.game.server.ServerPlayer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,6 +44,20 @@ public class Colony extends Component implements IDisplayable {
         super.start();
 
         this.inventory = this.owner.getComponent(Inventory.class);
+
+        Texture colonistTexture = new Texture("img/BlackSquare.png");
+
+        for(int i=0;i<100;i++){
+            Entity c = this.makeColonist(this.owner.transform.getPosition(), 200, colonistTexture);
+            c.name = ServerPlayer.names[MathUtils.random(ServerPlayer.names.length-1)];
+            this.addColonist(c.getComponent(Colonist.class));
+        }
+
+    }
+
+    private Entity makeColonist(Vector2 start, float offset, Texture texture){
+        Vector2 newPos = new Vector2(start.x + MathUtils.random()*offset*2 - offset, start.y + MathUtils.random()*offset*2 - offset);
+        return new ColonistEnt(newPos, 0, texture, ColonyGame.batch, 12);
     }
 
     @Override

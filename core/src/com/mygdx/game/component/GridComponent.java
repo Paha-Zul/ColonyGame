@@ -10,9 +10,9 @@ import com.mygdx.game.helpers.Profiler;
 public class GridComponent extends Component{
     private int gridType;
     private Grid.Node currNode;
-    private Grid grid;
+    private Grid.GridInstance grid;
 
-    public GridComponent(int gridType, Grid grid) {
+    public GridComponent(int gridType, Grid.GridInstance grid) {
         super();
 
         this.grid = grid;

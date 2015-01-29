@@ -3,18 +3,13 @@ package com.mygdx.game;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
-import com.mygdx.game.helpers.Grid;
-import com.mygdx.game.helpers.ListHolder;
-import com.mygdx.game.helpers.Profiler;
-import com.mygdx.game.screens.GameScreen;
-import com.mygdx.game.screens.LoadingScreen;
+import com.mygdx.game.helpers.*;
 import com.mygdx.game.screens.MainMenuScreen;
 
 public class ColonyGame extends Game {
@@ -22,7 +17,7 @@ public class ColonyGame extends Game {
 	public static boolean singlePlayer = true;
 	public static OrthographicCamera camera;
 	public static OrthographicCamera UICamera;
-	public static Grid worldGrid;
+	public static Grid.GridInstance worldGrid;
 
 	public static SpriteBatch batch;
 	public static ShapeRenderer renderer;
@@ -40,7 +35,7 @@ public class ColonyGame extends Game {
 		this.UICamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		world = new World(new Vector2(0,0), true);
 
-		this.worldGrid = new Grid(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), 100);
+		this.worldGrid = Grid.newGridInstance("grid", Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), Constants.GRID_SIZE);
 
 		this.setScreen(new MainMenuScreen(this));
 	}

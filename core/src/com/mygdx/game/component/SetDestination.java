@@ -12,7 +12,6 @@ public class SetDestination extends Component{
 	public float moveDis = 100;
 
 	private RepeatingTimer timer;
-	private Move moveComp;
 
 	public SetDestination() {
 		super();
@@ -22,7 +21,6 @@ public class SetDestination extends Component{
 	public void start() {
 		super.start();
 
-		moveComp = this.owner.getComponent(Move.class);
 		Vector2 pos = this.owner.transform.getPosition();
 
 		Functional.Callback callback = () ->{
@@ -31,7 +29,6 @@ public class SetDestination extends Component{
 			if(x < 0 || y < 0 || x >= 800 || y >= 800)
 				return;
 
-			moveComp.setDest(x, y);
 		};
 
 		this.timer = new RepeatingTimer(0.2, callback);

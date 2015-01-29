@@ -10,12 +10,11 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.mygdx.game.ColonyGame;
+import com.mygdx.game.behaviourtree.action.FindPath;
 import com.mygdx.game.component.*;
-import com.mygdx.game.component.collider.Collider;
 import com.mygdx.game.component.Colony;
 import com.mygdx.game.entity.ColonistEnt;
 import com.mygdx.game.entity.ColonyEntity;
-import com.mygdx.game.helpers.Constants;
 import com.mygdx.game.helpers.Grid;
 import com.mygdx.game.helpers.ItemManager;
 import com.mygdx.game.helpers.Profiler;
@@ -31,9 +30,10 @@ public class ServerPlayer {
 	private SpriteBatch batch;
 	private ShapeRenderer shapeRenderer;
 	private ColonyGame game;
-	private Grid grid;
+	private Grid.GridInstance grid;
+	private Grid.Node[] path;
 
-	private static String[] names = {"Bobby","Sally","Jimmy","Bradley","Willy","Tommy","Brian","Doug","Ben","Jacob","Sammy","Jason","David","Sarah","Betty","Tom","James"};
+	public static String[] names = {"Bobby","Sally","Jimmy","Bradley","Willy","Tommy","Brian","Doug","Ben","Jacob","Sammy","Jason","David","Sarah","Betty","Tom","James"};
 
 	//Box2d stuff
 
@@ -53,7 +53,7 @@ public class ServerPlayer {
 		//Create the Box2D world.
 		ColonyGame.debugRenderer = new Box2DDebugRenderer();
 
-		generateStart(new Vector2(800,600));
+		generateStart(new Vector2(1400,800));
 
 		initPlayer();
 	}
@@ -87,11 +87,28 @@ public class ServerPlayer {
 		}
 
 		ColonyGame.debugRenderer.render(ColonyGame.world, ColonyGame.camera.combined);
-		batch.end();
+		this.batch.end();
+
+		//this.drawPath();
+
+		this.batch.begin();
+		//this.grid.drawText(this.batch);
+		this.batch.end();
 
 		this.grid.debugDraw();
-
 		Profiler.end();
+	}
+
+	private void drawPath(){
+		ShapeRenderer renderer = new ShapeRenderer();
+		renderer.setProjectionMatrix(ColonyGame.camera.combined);
+		renderer.setColor(Color.BLUE);
+		renderer.begin(ShapeRenderer.ShapeType.Filled);
+		int size = this.game.worldGrid.getSquareSize();
+		for(Grid.Node node : path)
+			renderer.rect(node.getCol()*size, node.getRow()*size, size, size);
+
+		renderer.end();
 	}
 
 	private void generateTest(Vector2 position){
@@ -103,26 +120,6 @@ public class ServerPlayer {
 	private void generateStart(Vector2 start){
 		ColonyEntity colonyEnt = new ColonyEntity(start, 0, new Texture("img/colony.png"), this.batch, 11);
 		Colony colony = colonyEnt.getComponent(Colony.class);
-
-		Texture square = new Texture("img/BlackSquare.png");
-
-		//Make the Entities.
-		Entity c1 = this.makeColonist(start, 75, square);
-		Entity c2 = this.makeColonist(start, 75, square);
-		Entity c3 = this.makeColonist(start, 75, square);
-		Entity c4 = this.makeColonist(start, 75, square);
-
-		//Give them names!
-		c1.name = this.names[MathUtils.random(this.names.length-1)];
-		c2.name = this.names[MathUtils.random(this.names.length-1)];
-		c3.name = this.names[MathUtils.random(this.names.length-1)];
-		c4.name = this.names[MathUtils.random(this.names.length-1)];
-
-		//Add to the colony.
-		colony.addColonist(c1.getComponent(Colonist.class));
-		colony.addColonist(c2.getComponent(Colonist.class));
-		colony.addColonist(c3.getComponent(Colonist.class));
-		colony.addColonist(c4.getComponent(Colonist.class));
 
 		Item item = ItemManager.getItemByName("Wood Log");
 		item.setCurrStack(10);
@@ -167,13 +164,6 @@ public class ServerPlayer {
 
 		this.grid.perform(destroyNearbyResources);
 		this.grid.perform(detectNearbyResources);
-
-		//ColonistEnt colonist1 = new ColonistEnt();
-	}
-
-	private Entity makeColonist(Vector2 start, float offset, Texture texture){
-		Vector2 newPos = new Vector2(start.x + MathUtils.random()*offset*2 - offset, start.y + MathUtils.random()*offset*2 - offset);
-		return new ColonistEnt(newPos, 0, texture, this.batch, 12);
 	}
 
 	private void initPlayer(){
