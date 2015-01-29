@@ -11,4 +11,13 @@ public class Constants {
 
 	//For interactable types...
 
+	//Grid stuff
+	public static int GRID_SIZE = 25;
+
+	//WorldGen stuff
+
+
+	//Terrain stuff
+	public static int TERRAIN_WATER = 0;
+	public static int TERRAIN_GRASS = 1;
 }

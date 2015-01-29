@@ -57,7 +57,7 @@ public class Grid {
          * @param node The Node to get the neighbors of.
          * @return A Node[] array with 4 neighbors. Values could be null to indicate an invalid neighbor.
          */
-        public Node[] getNeihbors4(Node node) {
+        public Node[] getNeighbors4(Node node) {
             int counter = 0;
             Node[] neighbors = new Node[4];
 
@@ -86,7 +86,7 @@ public class Grid {
          * @param node The Node to get the neighbors of.
          * @return A Node array of 8 neighbors. Values could be null to indicate an invalid neighbor.
          */
-        public Node[] getNeihbors8(Node node) {
+        public Node[] getNeighbors8(Node node) {
             int counter = 0;
             Node[] neighbors = new Node[8];
 

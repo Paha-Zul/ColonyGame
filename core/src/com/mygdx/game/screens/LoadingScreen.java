@@ -5,6 +5,7 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.ColonyGame;
+import com.mygdx.game.helpers.Constants;
 import com.mygdx.game.ui.LoadingInterface;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.ListHolder;
@@ -27,7 +28,7 @@ public class LoadingScreen implements Screen {
 
     @Override
     public void show() {
-        WorldGen.tileSize = 25;
+        WorldGen.tileSize = Constants.GRID_SIZE;
         WorldGen.freq = 20;
         WorldGen.init((long)(MathUtils.random()*Long.MAX_VALUE));
         WorldGen.numStep = 50;

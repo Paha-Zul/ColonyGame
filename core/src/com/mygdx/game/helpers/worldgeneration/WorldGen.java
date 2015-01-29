@@ -14,7 +14,6 @@ import com.mygdx.game.component.Resource;
 import com.mygdx.game.component.collider.Collider;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.Constants;
-import com.mygdx.game.helpers.Grid;
 import com.mygdx.game.server.ServerPlayer;
 
 import java.util.ArrayList;
@@ -23,7 +22,7 @@ import java.util.ArrayList;
  * Created by Bbent_000 on 12/24/2014.
  */
 public class WorldGen {
-    public static Grid.TerrainNode[][] map;
+    public static TerrainTile[][] map;
 
     //Some default values that can be modified globally.
     public static int tileSize = 25;
@@ -68,7 +67,7 @@ public class WorldGen {
         numY = Gdx.graphics.getHeight()/tileSize + 1;
 
         //Initializes a new array
-        map = new Grid.TerrainNode[numX][numY];
+        map = new TerrainTile[numX][numY];
     }
 
     /**
@@ -81,9 +80,7 @@ public class WorldGen {
 
         //If there's steps left and currX is still less than the total num X, generate!
         while(stepsLeft > 0 && currX < numX){
-            map[currX][currY] = new Grid.TerrainNode(currX, currY, new TerrainTile()); //Initialize a new terrain tile.
-            TerrainTile tile = map[currX][currY].getTerrainTile();
-
+            TerrainTile tile = map[currX][currY] = new TerrainTile(); //Initialize a new terrain tile.
             tile.noiseValue = SimplexNoise.noise((double)currX/freq,(double)currY/freq); //Generate the noise for this tile.
             tile.position = new Vector2(currX*tileSize, currY*tileSize); //Set the position.
 
@@ -121,20 +118,20 @@ public class WorldGen {
                     tree.name = "Tree"; //Set the name!
 
                     //All Box2D stuff below...
-                    BodyDef bodyDef = new BodyDef();
-                    bodyDef.type = BodyDef.BodyType.StaticBody;
-
-                    CircleShape circle = new CircleShape();
-                    circle.setRadius(15f);
-
-                    FixtureDef fixtureDef = new FixtureDef();
-                    fixtureDef.shape = circle;
-                    fixtureDef.density = 0;
-                    fixtureDef.friction = 0;
-                    fixtureDef.restitution = 0;
-
-                    //Add the Collider Component and an Interactable Component.
-                    tree.addComponent(new Collider(ColonyGame.world, bodyDef, fixtureDef));
+//                    BodyDef bodyDef = new BodyDef();
+//                    bodyDef.type = BodyDef.BodyType.StaticBody;
+//
+//                    CircleShape circle = new CircleShape();
+//                    circle.setRadius(15f);
+//
+//                    FixtureDef fixtureDef = new FixtureDef();
+//                    fixtureDef.shape = circle;
+//                    fixtureDef.density = 0;
+//                    fixtureDef.friction = 0;
+//                    fixtureDef.restitution = 0;
+//
+//                    //Add the Collider Component and an Interactable Component.
+//                    tree.addComponent(new Collider(ColonyGame.world, bodyDef, fixtureDef));
                     tree.addComponent(new Interactable("resource"));
                     tree.addComponent(new Resource("Wood"));
                     tree.addComponent(new GridComponent(Constants.GRIDSTATIC, ColonyGame.worldGrid));
@@ -143,31 +140,32 @@ public class WorldGen {
                     treeList.add(tree);
 
                     //Dispose of the circle.
-                    circle.dispose();
-                }else if(rand < 0.5){
+                    //circle.dispose();
+                }else if(rand < 0.2){
                     Vector2 pos = new Vector2(tile.position.x + tileSize/2, tile.position.y + tileSize/2); //Get a random position in the tile.
                     Entity rock = new Entity(pos, 0, rockTexture, ColonyGame.batch, 11); //Make the Entity
                     rock.transform.setScale(0.6f); //Set the scale.
                     rock.name = "Rock"; //Set the name!
 
                     //All Box2D stuff below...
-                    BodyDef bodyDef = new BodyDef();
-                    bodyDef.type = BodyDef.BodyType.StaticBody;
-
-                    CircleShape circle = new CircleShape();
-                    circle.setRadius(18f);
-
-                    FixtureDef fixtureDef = new FixtureDef();
-                    fixtureDef.shape = circle;
-                    fixtureDef.density = 0;
-                    fixtureDef.friction = 0;
-                    fixtureDef.restitution = 0;
-
-                    //Add the Collider Component and an Interactable Component.
-                    rock.addComponent(new Collider(ColonyGame.world, bodyDef, fixtureDef));
+//                    BodyDef bodyDef = new BodyDef();
+//                    bodyDef.type = BodyDef.BodyType.StaticBody;
+//
+//                    CircleShape circle = new CircleShape();
+//                    circle.setRadius(18f);
+//
+//                    FixtureDef fixtureDef = new FixtureDef();
+//                    fixtureDef.shape = circle;
+//                    fixtureDef.density = 0;
+//                    fixtureDef.friction = 0;
+//                    fixtureDef.restitution = 0;
+//
+//                    //Add the Collider Component and an Interactable Component.
+//                    rock.addComponent(new Collider(ColonyGame.world, bodyDef, fixtureDef));
                     rock.addComponent(new Interactable("resource"));
                     rock.addComponent(new Resource("Rocks n Stuff"));
                     rock.addComponent(new GridComponent(Constants.GRIDSTATIC, ColonyGame.worldGrid));
+                    //circle.dispose();
                 }
             }
 
@@ -187,6 +185,54 @@ public class WorldGen {
         }
 
         return done;
+    }
+
+    /**
+     * Gets the Node at the Entity's location.
+     *
+     * @param entity The Entity to use for a location.
+     * @return A Node at the Entity's location.
+     */
+    public static TerrainTile getNode(Entity entity) {
+        return getNode((int) (entity.transform.getPosition().x / tileSize), (int) (entity.transform.getPosition().y / tileSize));
+    }
+
+    /**
+     * Gets the Node at the Vector2 position.
+     *
+     * @param pos The Vector2 position to get a Node at.
+     * @return A Node at the Vector2 position.
+     */
+    public static TerrainTile getNode(Vector2 pos) {
+        return getNode((int) (pos.x / tileSize), (int) (pos.y / tileSize));
+    }
+
+    /**
+     * Gets a Node by a X and Y index.
+     *
+     * @param x The X (col) index to get the Node at.
+     * @param y The Y (row) index to get the Node at.
+     * @return The Node if the index was valid, null otherwise.
+     */
+    public static TerrainTile getNode(int x, int y) {
+        //If the index is not in bounds, return null.
+        if (x < 0 || x >= map.length || y < 0 || y >= map[x].length)
+            return null;
+
+        return map[x][y];
+    }
+
+    /**
+     * Gets a Node by an index.
+     *
+     * @param index An integer array containing X and Y index.
+     * @return The Node if the index was valid, null otherwise.
+     */
+    public static TerrainTile getNode(int[] index) {
+        if (index.length < 2)
+            return null;
+
+        return getNode(index[0], index[1]);
     }
 
     public static void changeSeed(long seed){
