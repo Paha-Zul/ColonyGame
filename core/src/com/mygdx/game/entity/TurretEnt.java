@@ -3,7 +3,6 @@ package com.mygdx.game.entity;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
-import com.mygdx.game.component.Move;
 import com.mygdx.game.component.Turret;
 
 /**
@@ -13,10 +12,6 @@ public class TurretEnt extends Entity{
 
 	public TurretEnt(Vector2 position, float rotation, Texture graphic, SpriteBatch batch, int drawLevel) {
 		super(position, rotation, graphic, batch, drawLevel);
-
-		Move turretMove = new Move();
-		turretMove.rotateSpeed = -25;
-		this.addComponent(turretMove);
 
 		Turret turret = new Turret();
 		this.addComponent(turret);

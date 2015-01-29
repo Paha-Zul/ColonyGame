@@ -21,14 +21,14 @@ public class ColonistEnt extends Entity{
         this.addComponent(new GridComponent(Constants.GRIDACTIVE, ColonyGame.worldGrid));
         this.addComponent(new Interactable("humanoid"));
         this.addComponent(new Health(100));
-        this.addComponent(new Move());
         this.addComponent(new Inventory());
+        this.addComponent(new BehaviourManagerComp());
         this.makeCollider();
     }
 
     private void makeCollider(){
         CircleShape shape = new CircleShape();
-        shape.setRadius(10f);
+        shape.setRadius(6f);
         Collider collider = this.addComponent(new Collider(ColonyGame.world, shape));
 
         collider.body.setType(BodyDef.BodyType.DynamicBody);
