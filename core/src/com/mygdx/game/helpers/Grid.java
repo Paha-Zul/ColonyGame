@@ -8,9 +8,11 @@ import com.mygdx.game.ColonyGame;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.gui.GUI;
 import com.mygdx.game.interfaces.Functional;
+import com.sun.istack.internal.NotNull;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.function.Function;
 
 /**
  * Created by Paha on 1/17/2015.
@@ -47,8 +49,16 @@ public class Grid {
             }
         }
 
+        /**
+         * Uses a functional interface(lambda/anonymous function) to perform on the grid.
+         * @param perform The Functional interface/lambda/anonymous function to execute.
+         */
         public void perform(Functional.Perform perform) {
             perform.perform(this.grid);
+        }
+
+        public <V extends Object> V performAndGet(Functional.PerformAndGet<V, Node[][]> performAndGet){
+            return performAndGet.performAndGet(this.grid);
         }
 
         /**
@@ -118,8 +128,9 @@ public class Grid {
             Vector2 pos = entity.transform.getPosition();
 
             //If the currNode still matches our current position, return it.
-            if (currNode != null && pos.x / this.squareSize == currNode.getCol() && pos.y / this.squareSize == currNode.getRow())
+            if (currNode != null && (((int)pos.x / this.squareSize) == currNode.getCol() && ((int)pos.y / this.squareSize) == currNode.getRow())) {
                 return currNode;
+            }
 
             if (currNode != null) currNode.removeEntity(entity); //Remove from the old Node if it's not null.
             currNode = getNode(pos); //Get the new Node.
@@ -144,7 +155,10 @@ public class Grid {
          * @param entity The Entity to use for a location.
          * @return A Node at the Entity's location.
          */
-        public Node getNode(Entity entity) {
+        public Node getNode(@NotNull Entity entity) {
+            if(entity.transform == null)
+                return null;
+
             return this.getNode((int) (entity.transform.getPosition().x / this.squareSize), (int) (entity.transform.getPosition().y / this.squareSize));
         }
 
@@ -302,6 +316,7 @@ public class Grid {
 
         public void removeEntity(Entity entity){
             this.entList.remove(entity);
+            //System.out.println("Removed " + entity.name + " ? " + this.entList.remove(entity));
         }
 
         public ArrayList<Entity> getEntityList(){
@@ -320,6 +335,10 @@ public class Grid {
             return this.row;
         }
 
+        @Override
+        public String toString() {
+            return "["+col+","+row+"]";
+        }
     }
 
     public static class PathNode extends Node{
