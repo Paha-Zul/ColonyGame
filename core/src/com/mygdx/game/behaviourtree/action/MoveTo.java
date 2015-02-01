@@ -43,7 +43,9 @@ public class MoveTo extends LeafTask{
         super.update(delta);
 
         if(this.currIndex < 0){
+            this.collider.body.setLinearVelocity(0,0);
             this.control.finishWithSuccess();
+            this.path = null;
             return;
         }
 
@@ -59,7 +61,8 @@ public class MoveTo extends LeafTask{
         this.collider.body.setLinearVelocity(x, y);
 
         if((Math.abs(transform.getPosition().x - nodeX) + Math.abs(transform.getPosition().y - nodeY) < 10)) {
-            currIndex--;
+            this.blackBoard.path[this.currIndex] = null;
+            this.currIndex--;
         }
     }
 

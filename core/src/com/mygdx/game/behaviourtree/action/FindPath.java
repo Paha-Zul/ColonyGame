@@ -2,9 +2,13 @@ package com.mygdx.game.behaviourtree.action;
 
 import com.mygdx.game.behaviourtree.LeafTask;
 import com.mygdx.game.component.BlackBoard;
+import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.Constants;
 import com.mygdx.game.helpers.Grid;
+import com.mygdx.game.helpers.Profiler;
 import com.mygdx.game.helpers.worldgeneration.WorldGen;
+import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
+import sun.java2d.cmm.Profile;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -30,7 +34,9 @@ public class FindPath extends LeafTask {
     public void start() {
         super.start();
 
+        Profiler.begin("FindPath");
         this.path = getPath();
+        Profiler.end();
         this.blackBoard.path = this.path;
         this.control.finishWithSuccess();
     }
@@ -53,21 +59,28 @@ public class FindPath extends LeafTask {
         //If we have a target node in the blackboard, use it.
         if(this.blackBoard.targetNode != null)
             targetNode = (Grid.PathNode)this.blackBoard.targetNode;
+
         //Otherwise, if we have an Entity target, get the node from that.
-        else if(this.blackBoard.targetNode == null)
+        else if(this.blackBoard.target != null)
             targetNode = (Grid.PathNode)this.blackBoard.colonyGrid.getNode(this.blackBoard.target);
+
         //Otherwise, end with failure.
         else{
             this.control.finishWithFailure();
             return new Grid.PathNode[0];
         }
 
-        if(targetNode == null)
-            System.out.println(this.blackBoard.getEntityOwner().name+" target it null");
+        //If our targetNode is still null somehow, fail and return.
+        if(targetNode == null) {
+            System.out.println(this.blackBoard.getEntityOwner().name + " target is null");
+            this.control.finishWithFailure();
+            return null;
+        }
 
-        ArrayList<Grid.Node> path = new ArrayList<>(20);
-        ArrayDeque<Grid.PathNode> closedList = new ArrayDeque<>(20);
+        ArrayList<Grid.Node> path = new ArrayList<>(20); //Will hold the end path.
+        ArrayDeque<Grid.PathNode> closedList = new ArrayDeque<>(20); //Holds already visited nodes.
 
+        //Priority queue that sorts by the lowest F value of the PathNode.
         PriorityQueue<Grid.PathNode> openList = new PriorityQueue<>(new Comparator<Grid.PathNode>() {
             @Override
             public int compare(Grid.PathNode n1, Grid.PathNode n2) {
@@ -155,4 +168,6 @@ public class FindPath extends LeafTask {
         openList.clear();
         return path.toArray(new Grid.Node[path.size()]);
     }
+
+
 }
