@@ -13,6 +13,7 @@ import com.mygdx.game.component.Interactable;
 import com.mygdx.game.component.Resource;
 import com.mygdx.game.component.collider.Collider;
 import com.mygdx.game.entity.Entity;
+import com.mygdx.game.entity.TreeEnt;
 import com.mygdx.game.helpers.Constants;
 import com.mygdx.game.server.ServerPlayer;
 
@@ -113,35 +114,13 @@ public class WorldGen {
                 //Random chance for a tree to spawn.
                 if(rand < 0.1){
                     Vector2 pos = new Vector2(tile.position.x + tileSize/2, tile.position.y + tileSize/2); //Get a random position in the tile.
-                    Entity tree = new Entity(pos, 0, treeTexture, ColonyGame.batch, 11); //Make the Entity
+                    Entity tree = new TreeEnt(pos, 0, treeTexture, ColonyGame.batch, 11); //Make the Entity
                     tree.transform.setScale(treeScale); //Set the scale.
-                    tree.name = "Tree"; //Set the name!
-
-                    //All Box2D stuff below...
-//                    BodyDef bodyDef = new BodyDef();
-//                    bodyDef.type = BodyDef.BodyType.StaticBody;
-//
-//                    CircleShape circle = new CircleShape();
-//                    circle.setRadius(15f);
-//
-//                    FixtureDef fixtureDef = new FixtureDef();
-//                    fixtureDef.shape = circle;
-//                    fixtureDef.density = 0;
-//                    fixtureDef.friction = 0;
-//                    fixtureDef.restitution = 0;
-//
-//                    //Add the Collider Component and an Interactable Component.
-//                    tree.addComponent(new Collider(ColonyGame.world, bodyDef, fixtureDef));
-                    tree.addComponent(new Interactable("resource"));
-                    tree.addComponent(new Resource("Wood"));
-                    tree.addComponent(new GridComponent(Constants.GRIDSTATIC, ColonyGame.worldGrid));
+                    tree.name = "Tree";
 
                     //We add to a tree list for prototyping.
                     treeList.add(tree);
-
-                    //Dispose of the circle.
-                    //circle.dispose();
-                }else if(rand < 0.2){
+                }else if(rand < 0.005){
                     Vector2 pos = new Vector2(tile.position.x + tileSize/2, tile.position.y + tileSize/2); //Get a random position in the tile.
                     Entity rock = new Entity(pos, 0, rockTexture, ColonyGame.batch, 11); //Make the Entity
                     rock.transform.setScale(0.6f); //Set the scale.
@@ -163,7 +142,7 @@ public class WorldGen {
 //                    //Add the Collider Component and an Interactable Component.
 //                    rock.addComponent(new Collider(ColonyGame.world, bodyDef, fixtureDef));
                     rock.addComponent(new Interactable("resource"));
-                    rock.addComponent(new Resource("Rocks n Stuff"));
+                    rock.addComponent(new Resource("Stone"));
                     rock.addComponent(new GridComponent(Constants.GRIDSTATIC, ColonyGame.worldGrid));
                     //circle.dispose();
                 }

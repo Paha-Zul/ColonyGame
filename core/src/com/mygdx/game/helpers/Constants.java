@@ -20,4 +20,7 @@ public class Constants {
 	//Terrain stuff
 	public static int TERRAIN_WATER = 0;
 	public static int TERRAIN_GRASS = 1;
+
+    //Entity types
+    public static int ENTITY_RESOURCE = 0;
 }

@@ -1,5 +1,6 @@
 package com.mygdx.game.helpers;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.mygdx.game.helpers.gui.GUI;
 import com.mygdx.game.helpers.timer.RepeatingTimer;
@@ -27,7 +28,8 @@ public class Profiler {
         sortedList = new ArrayList<>(map.values());
 
         for(Profile profile : sortedList) {
-            profile.avgTime = (profile.time*2)/60;
+            profile.avgTime = (profile.time*2)/ Gdx.graphics.getFramesPerSecond();
+            profile.avgTimePerSecond = (profile.time*2);
             profile.time = 0;
         }
 
@@ -152,8 +154,9 @@ public class Profiler {
         if(profile.drawn) return;
 
         double d = profile.avgTime/100000000; //Convert time into seconds.
+        double d2 = profile.avgTimePerSecond/100000000; //Convert time into seconds.
         DecimalFormat df = new DecimalFormat("#.###"); //Format time.
-        GUI.Text(profile.name+": "+df.format(d)+" ms", batch, x, yOffset); //Draw time of this record.
+        GUI.Text(profile.name+": "+df.format(d)+" ms ("+df.format(d2)+" ms per second)", batch, x, yOffset); //Draw time of this record.
         profile.drawn = true; //Set draw to true.
         yOffset -= 20;
 
@@ -169,7 +172,8 @@ public class Profiler {
         public boolean drawn = false;
         public String name;
         public double time = 0;
-        public double avgTime = 0;
+        public double avgTime = 0; //The avg time PER FRAME
+        public double avgTimePerSecond = 0; //The avg time PER SECOND
         public Profile parent = null;
         public ArrayList<Profile> children = new ArrayList<>();
 

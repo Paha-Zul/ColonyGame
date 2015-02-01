@@ -314,12 +314,12 @@ public class Grid {
             this.entList.add(entity);
         }
 
-        public void removeEntity(Entity entity){
+        public void removeEntity(@NotNull Entity entity){
             this.entList.remove(entity);
-            //System.out.println("Removed " + entity.name + " ? " + this.entList.remove(entity));
         }
 
         public ArrayList<Entity> getEntityList(){
+            //System.out.println(Thread.currentThread().getStackTrace()[3]+" GET THAT ENTITY LIST");
             return this.entList;
         }
 
