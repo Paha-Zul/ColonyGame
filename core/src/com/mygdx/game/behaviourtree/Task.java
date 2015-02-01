@@ -8,9 +8,11 @@ import com.mygdx.game.component.BlackBoard;
  */
 public abstract class Task {
     protected BlackBoard blackBoard;
+    protected String name;
 
     public Task(String name, BlackBoard blackBoard){
         this.blackBoard = blackBoard;
+        this.name = name;
     }
 
     /**
