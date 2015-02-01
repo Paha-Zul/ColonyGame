@@ -2,6 +2,7 @@ package com.mygdx.game.component;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
+import com.mygdx.game.helpers.BehaviourManager;
 import com.mygdx.game.helpers.gui.GUI;
 import com.mygdx.game.interfaces.IDisplayable;
 
@@ -11,7 +12,8 @@ import com.mygdx.game.interfaces.IDisplayable;
 public class Colonist extends Component implements IDisplayable{
     private Colony colony;
     private Inventory inventory;
-    private Health health;
+    private Stats stats;
+    private BehaviourManagerComp manager;
 
     public Colonist() {
         super();
@@ -27,7 +29,8 @@ public class Colonist extends Component implements IDisplayable{
         super.start();
 
         this.inventory = this.getComponent(Inventory.class);
-        this.health = this.getComponent(Health.class);
+        this.stats = this.getComponent(Stats.class);
+        this.manager = this.getComponent(BehaviourManagerComp.class);
     }
 
     @Override
@@ -47,21 +50,28 @@ public class Colonist extends Component implements IDisplayable{
         return this.inventory;
     }
 
-    public Health getHealth(){
-        return this.health;
+    public Stats getStats(){
+        return this.stats;
     }
 
     @Override
     public void display(Rectangle rect, SpriteBatch batch, String name) {
-        float x = rect.getX();
-        float y = rect.getY() + rect.getHeight() - 5;
+        float x = 0;
+        float y = 0;
+
+        if(rect != null){
+            x = rect.getX();
+            y = rect.getY() + rect.getHeight() - 5;
+        }
 
         if(name == "general"){
             GUI.Label("Name: "+this.owner.name, batch, rect.x + rect.getWidth()/2, rect.y + rect.getHeight() - 5, true);
         }else if(name == "health"){
-            health.display(rect, batch, name);
+            stats.display(rect, batch, name);
         }else if(name == "inventory"){
             this.inventory.display(rect, batch, name);
+        }else if(name == "path"){
+            this.manager.display(rect, batch, name);
         }
     }
 }

@@ -8,13 +8,12 @@ import com.mygdx.game.interfaces.IDisplayable;
 /**
  * Created by Paha on 1/12/2015.
  */
-public class Health extends Component implements IDisplayable{
+public class Stats extends Component implements IDisplayable{
     private float maxHealth, currHealth;
 
-    public Health(float maxHealth) {
+    public Stats() {
         super();
 
-        this.maxHealth = this.currHealth = maxHealth;
     }
 
     @Override

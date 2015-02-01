@@ -27,6 +27,8 @@ public class GridComponent extends Component{
     public void start() {
         super.start();
 
+        //System.out.println("[GridComponent]Starting for "+this.owner.name);
+
         //Gets a node to start.
         this.currNode = this.grid.checkNode(this.currNode, this.owner);
     }
@@ -48,6 +50,8 @@ public class GridComponent extends Component{
 
     @Override
     public void destroy() {
+        this.currNode.removeEntity(this.owner);
+
         super.destroy();
     }
 }

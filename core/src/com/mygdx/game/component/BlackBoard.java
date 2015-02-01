@@ -11,6 +11,11 @@ public class BlackBoard extends Component{
     public Grid.Node targetNode;
     public Entity target;
     public Grid.Node[] path;
+    public Resource targetResource;
+    public Inventory transferToInventory;
+
+    //My stuff
+    public Inventory myInventory;
 
     public BlackBoard() {
 

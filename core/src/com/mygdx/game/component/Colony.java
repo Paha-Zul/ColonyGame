@@ -26,7 +26,6 @@ public class Colony extends Component implements IDisplayable {
     private HashMap<String, ArrayList<Resource>> stockedResource = new HashMap<>();
 
     private int totalNearbyResources = 0;
-    private int totalStockedResources = 0;
 
     private Inventory inventory;
 
@@ -84,25 +83,12 @@ public class Colony extends Component implements IDisplayable {
      * @param resource The nearby Resource Component to add.
      */
     public void addNearbyResource(Resource resource){
-        if(this.nearbyResources.get(resource.getResourceType()) == null)
-            this.nearbyResources.put(resource.getResourceType(), new ArrayList<>(20));
+        if(this.nearbyResources.get(resource.getResourceName()) == null)
+            this.nearbyResources.put(resource.getResourceName(), new ArrayList<>(20));
 
-        this.nearbyResources.get(resource.getResourceType()).add(resource);
+        this.nearbyResources.get(resource.getResourceName()).add(resource);
         this.totalNearbyResources++;
     }
-
-    /**
-     * Adds a stocked Resource to this colony.
-     * @param resource The Resource Component to add.
-     */
-    public void addStockedResource(Resource resource){
-        if(stockedResource.get(resource.getResourceType()) == null)
-            stockedResource.put(resource.getResourceType(), new ArrayList<>(20));
-
-        stockedResource.get(resource.getResourceType()).add(resource);
-        this.totalStockedResources++;
-    }
-
 
 
     /**
@@ -110,23 +96,11 @@ public class Colony extends Component implements IDisplayable {
      * @param resource The Resource to remove.
      */
     public void removeNearbyResource(Resource resource){
-        if(this.nearbyResources.get(resource.getResourceType()) == null)
+        if(this.nearbyResources.get(resource.getResourceName()) == null)
             return;
 
         this.nearbyResources.get(type).remove(resource);
         this.totalNearbyResources--;
-    }
-
-    /**
-     * Removes a nearby Resource from this colony.
-     * @param resource The Resource to remove.
-     */
-    public void removeStockedResource(Resource resource){
-        if(this.stockedResource.get(resource.getResourceType()) == null)
-            return;
-
-        this.stockedResource.get(type).remove(resource);
-        this.totalStockedResources--;
     }
 
     /**
@@ -166,7 +140,7 @@ public class Colony extends Component implements IDisplayable {
      * @return An integer which is the total number of stocked resources.
      */
     public int getTotalStockedResources(){
-        return this.totalStockedResources;
+        return this.inventory.getCurrTotalItems();
     }
 
     /**
@@ -175,6 +149,10 @@ public class Colony extends Component implements IDisplayable {
      */
     public int getNumColonists(){
         return this.colonistList.size();
+    }
+
+    public Inventory getInventory(){
+        return this.inventory;
     }
 
     @Override
