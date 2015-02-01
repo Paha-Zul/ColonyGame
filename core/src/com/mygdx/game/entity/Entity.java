@@ -20,7 +20,7 @@ import com.mygdx.game.interfaces.IScalable;
  */
 public class Entity {
 	public String name = "Entity", tag;
-	public int entityType, entitySubType, drawLevel;
+	public int entityType = -1, entitySubType = -1, drawLevel = 0;
 	public Transform transform;
 	public GraphicIdentity identity;
 	public boolean active = true;
@@ -30,7 +30,7 @@ public class Entity {
 	protected ArrayList<Component> inactiveComponentList;
 	protected ArrayList<IScalable> scalableComponents;
 
-	protected boolean destroyed=false;
+	protected boolean destroyed=false, setToDestroy=false;
 	protected double ID;
 
 	/**
@@ -160,6 +160,19 @@ public class Entity {
 		return this.activeComponentList.remove(comp);
 	}
 
+    public void printComponents(){
+        System.out.print("Active: ");
+        for(Component comp : activeComponentList)
+            System.out.print(""+comp.getClass().getSimpleName()+" ");
+
+        System.out.print("Inactive: ");
+
+        for(Component comp : inactiveComponentList)
+            System.out.print(""+comp.getClass().getSimpleName()+ " ");
+
+        System.out.println();
+    }
+
 	/**
 	 * @return True if this Entity has been destroyed, false otherwise.
 	 */
@@ -176,9 +189,7 @@ public class Entity {
 	 */
 	public void destroy(){
 		//Destroy all children
-		for(Entity child : this.transform.getChildren()){
-			child.destroy();
-		}
+        this.transform.getChildren().forEach(com.mygdx.game.entity.Entity::destroy);
 
 		//Remove all children
 		if(this.transform.parent != null){

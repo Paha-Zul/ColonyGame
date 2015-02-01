@@ -20,10 +20,13 @@ public class ColonistEnt extends Entity{
         this.addComponent(new Colonist());
         this.addComponent(new GridComponent(Constants.GRIDACTIVE, ColonyGame.worldGrid));
         this.addComponent(new Interactable("humanoid"));
-        this.addComponent(new Health(100));
+        this.addComponent(new Stats());
+        this.addComponent(new Skills());
         this.addComponent(new Inventory());
-        this.addComponent(new BehaviourManagerComp());
+        this.addComponent(new BehaviourManagerComp("colonist"));
         this.makeCollider();
+
+        this.entityType = 100;
     }
 
     private void makeCollider(){
@@ -32,8 +35,9 @@ public class ColonistEnt extends Entity{
         Collider collider = this.addComponent(new Collider(ColonyGame.world, shape));
 
         collider.body.setType(BodyDef.BodyType.DynamicBody);
+        collider.fixture.setSensor(true);
 
-        collider.fixture.setFriction(0f);
+        collider.fixture.setFriction(0.5f);
         collider.fixture.setDensity(1f);
     }
 }
