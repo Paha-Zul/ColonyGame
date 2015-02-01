@@ -23,6 +23,8 @@ import com.mygdx.game.ui.PlayerInterface;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.worldgeneration.WorldGen;
 
+import java.util.ArrayList;
+
 /**
  * Created by Bbent_000 on 11/23/2014.
  */
@@ -128,7 +130,7 @@ public class ServerPlayer {
 		item.setCurrStack(10);
 		colony.getComponent(Inventory.class).addItem(item);
 
-		int radius = 1;
+		int radius = 5;
 		Functional.Perform<Grid.Node[][]> destroyNearbyResources = (grid) -> {
 			int[] index= this.grid.getIndex(colonyEnt.transform.getPosition());
 			int startX = index[0]-radius;
@@ -140,7 +142,7 @@ public class ServerPlayer {
 				for(int row = startY; row <= endY; row++){
 					Grid.Node node = this.grid.getNode(col, row);
 					if(node == null) continue;
-					for(Entity ent : node.getEntityList()){
+					for(Entity ent : new ArrayList<>(node.getEntityList())){
 						if(ent.getComponent(Resource.class) != null)
 							ent.destroy();
 					}

@@ -20,4 +20,8 @@ public class Functional {
 		Entity getEnt(ArrayList<Entity> entList);
 	}
 
+    public interface PerformAndGet<V, T>{
+        V performAndGet(T t);
+    }
+
 }

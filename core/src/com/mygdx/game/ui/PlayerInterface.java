@@ -11,9 +11,11 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.QueryCallback;
 import com.badlogic.gdx.physics.box2d.World;
 import com.mygdx.game.ColonyGame;
+import com.mygdx.game.component.BehaviourManagerComp;
 import com.mygdx.game.component.GridComponent;
 import com.mygdx.game.component.Interactable;
 import com.mygdx.game.entity.Entity;
+import com.mygdx.game.helpers.BehaviourManager;
 import com.mygdx.game.helpers.Profiler;
 import com.mygdx.game.helpers.gui.GUI;
 import com.mygdx.game.helpers.ListHolder;
@@ -128,6 +130,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
             this.interactable.colonist.display(this.centerRect, this.batch, "general");
             this.interactable.colonist.display(this.leftRect, this.batch, "health");
             this.interactable.colonist.display(this.rightRect, this.batch, "inventory");
+            this.interactable.colonist.display(null, this.batch, "path");
         }
         else if(this.interactable.type == "colony"){
             this.interactable.colony.display(this.centerRect, this.batch, "general");
@@ -175,7 +178,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     @Override
     public boolean keyDown(int keycode) {
         if(keycode == Input.Keys.F1)
-            Profiler.enabled = this.drawingInfo = !this.drawingInfo;
+            this.drawingInfo = !this.drawingInfo;
         else if(keycode == Input.Keys.F2)
             Profiler.enabled = this.drawingProfiler = !this.drawingProfiler;
         else
@@ -203,10 +206,16 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
             this.selected = null;
             this.interactable = null;
 
-//            System.out.println("Inside, X/Y: "+screenX+" "+fixedY);
             this.testPoint.set(worldCoords.x, worldCoords.y);
             this.world.QueryAABB(this.callback, worldCoords.x - 1f, worldCoords.y - 1f, worldCoords.x + 1f, worldCoords.y + 1f);
             return true;
+        }else if(button == Input.Buttons.RIGHT){
+            if(this.selected != null){
+                BehaviourManagerComp manager = this.selected.getComponent(BehaviourManagerComp.class);
+                if(manager!=null){
+                    manager.move(new Vector2(worldCoords.x, worldCoords.y));
+                }
+            }
         }
 
         return false;
