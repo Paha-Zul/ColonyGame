@@ -1,7 +1,10 @@
 package com.mygdx.game.helpers.worldgeneration;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
@@ -36,6 +39,11 @@ public class WorldGen {
     private static Texture[] tallGrassTiles;
     private static Texture treeTexture = new Texture("img/trees/tree.png");
     private static Texture rockTexture = new Texture("img/rock.png");
+    private static Texture darkWater = new Texture("img/DarkWater.png");
+    private static Texture lightWater = new Texture("img/LightWater.png");
+
+
+    private static Texture grayTexture;
 
     private static ArrayList<Entity> treeList = new ArrayList<>();
 
@@ -69,6 +77,12 @@ public class WorldGen {
 
         //Initializes a new array
         map = new TerrainTile[numX][numY];
+
+        Pixmap pixmap = new Pixmap(1,1, Pixmap.Format.RGBA4444);
+        pixmap.setColor(Color.GRAY);
+        pixmap.fillRectangle(0,0,1,1);
+        grayTexture = new Texture(pixmap);
+        pixmap.dispose();
     }
 
     /**
@@ -81,47 +95,49 @@ public class WorldGen {
 
         //If there's steps left and currX is still less than the total num X, generate!
         while(stepsLeft > 0 && currX < numX){
-            TerrainTile tile = map[currX][currY] = new TerrainTile(); //Initialize a new terrain tile.
-            tile.noiseValue = SimplexNoise.noise((double)currX/freq,(double)currY/freq); //Generate the noise for this tile.
-            tile.position = new Vector2(currX*tileSize, currY*tileSize); //Set the position.
+            double noiseValue = SimplexNoise.noise((double)currX/freq,(double)currY/freq); //Generate the noise for this tile.
+            Vector2 position = new Vector2(currX*tileSize, currY*tileSize); //Set the position.
+            Sprite terrainSprite = new Sprite();
+            int type = 0;
+            float rotation=0;
 
             //If under this value, generate dark water.
-            if(tile.noiseValue < -0.6) {
-                tile.type = Constants.TERRAIN_WATER;
-                tile.image = new Texture("img/DarkWater.png");
+            if(noiseValue < -0.6) {
+                type = Constants.TERRAIN_WATER;
+                terrainSprite = new Sprite(darkWater);
 
             //If between 0 and -0.2, light water.
-            }else if (tile.noiseValue < -0.4) {
-                tile.type = Constants.TERRAIN_WATER;
-                tile.image = new Texture("img/LightWater.png");
+            }else if (noiseValue < -0.4) {
+                type = Constants.TERRAIN_WATER;
+                terrainSprite = new Sprite(lightWater);
 
             //If between 0 and 0.6, random grass.
-            }else if (tile.noiseValue < 0.6){
-                tile.type = Constants.TERRAIN_GRASS;
-                tile.image = grassTiles[(int)(MathUtils.random()*grassTiles.length)];
-                tile.rotation = (int)(MathUtils.random()*4)*90;
+            }else if (noiseValue < 0.6){
+                type = Constants.TERRAIN_GRASS;
+                terrainSprite = new Sprite(grassTiles[(int)(MathUtils.random()*grassTiles.length)]);
+                rotation = (int)(MathUtils.random()*4)*90;
 
             //Otherwise, tall grass!
             }else{
-                tile.type = Constants.TERRAIN_GRASS;
-                tile.image = tallGrassTiles[(int)(MathUtils.random()*tallGrassTiles.length)];
-                tile.rotation = (int)(MathUtils.random()*4)*90;
+                type = Constants.TERRAIN_GRASS;
+                terrainSprite = new Sprite(tallGrassTiles[(int)(MathUtils.random()*tallGrassTiles.length)]);
+                rotation = (int)(MathUtils.random()*4)*90;
             }
 
             //If the tile is not water...
-            if(tile.type == 1){
+            if(type == 1){
                 float rand = MathUtils.random();
                 //Random chance for a tree to spawn.
                 if(rand < 0.1){
-                    Vector2 pos = new Vector2(tile.position.x + tileSize/2, tile.position.y + tileSize/2); //Get a random position in the tile.
+                    Vector2 pos = new Vector2(position.x + tileSize/2, position.y + tileSize/2); //Get a random position in the tile.
                     Entity tree = new TreeEnt(pos, 0, treeTexture, ColonyGame.batch, 11); //Make the Entity
                     tree.transform.setScale(treeScale); //Set the scale.
                     tree.name = "Tree";
 
                     //We add to a tree list for prototyping.
                     treeList.add(tree);
-                }else if(rand < 0.005){
-                    Vector2 pos = new Vector2(tile.position.x + tileSize/2, tile.position.y + tileSize/2); //Get a random position in the tile.
+                }else if(rand < 0.15){
+                    Vector2 pos = new Vector2(position.x + tileSize/2, position.y + tileSize/2); //Get a random position in the tile.
                     Entity rock = new Entity(pos, 0, rockTexture, ColonyGame.batch, 11); //Make the Entity
                     rock.transform.setScale(0.6f); //Set the scale.
                     rock.name = "Rock"; //Set the name!
@@ -144,9 +160,12 @@ public class WorldGen {
                     rock.addComponent(new Interactable("resource"));
                     rock.addComponent(new Resource("Stone"));
                     rock.addComponent(new GridComponent(Constants.GRIDSTATIC, ColonyGame.worldGrid));
+                    rock.entityType = Constants.ENTITY_RESOURCE;
                     //circle.dispose();
                 }
             }
+
+            TerrainTile tile = map[currX][currY] = new TerrainTile(terrainSprite, noiseValue, rotation, type, position); //Create a new terrain tile.
 
             done = false; //Set done to false signifying that we are not finished yet.
             stepsLeft--; //Decrement the remaining step amount.
@@ -161,6 +180,7 @@ public class WorldGen {
             float currDone = currX + (currX*numY + currY);
             float total = (numX+1)*(numY+1);
             percentageDone = (float)currDone/(float)total; //Calcs the percentage done so that the player's UI can use this.
+
         }
 
         return done;
@@ -227,11 +247,21 @@ public class WorldGen {
     }
 
     public static class TerrainTile{
-        public Texture image;
+        public Sprite terrainSprite;
         public Vector2 position;
         public double noiseValue;
         public float rotation;
         public int type;
+
+        public TerrainTile(Sprite sprite, double noiseValue, float rotation, int type, Vector2 position){
+            this.terrainSprite = new Sprite(sprite);
+            this.noiseValue = noiseValue;
+            this.rotation = rotation;
+            this.type = type;
+            this.position = new Vector2(position);
+            this.terrainSprite.setPosition(position.x, position.y);
+            this.terrainSprite.setRotation(rotation);
+        }
 
     }
 
