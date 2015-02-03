@@ -12,6 +12,7 @@ import com.badlogic.gdx.physics.box2d.QueryCallback;
 import com.badlogic.gdx.physics.box2d.World;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.component.BehaviourManagerComp;
+import com.mygdx.game.component.Colony;
 import com.mygdx.game.component.GridComponent;
 import com.mygdx.game.component.Interactable;
 import com.mygdx.game.entity.Entity;
@@ -24,6 +25,8 @@ import com.mygdx.game.helpers.timer.RepeatingTimer;
 import com.mygdx.game.helpers.timer.Timer;
 import com.mygdx.game.interfaces.Functional;
 import com.mygdx.game.interfaces.IGUI;
+import com.mygdx.game.server.Server;
+import com.mygdx.game.server.ServerPlayer;
 
 /**
  * Created by Bbent_000 on 12/25/2014.
@@ -34,6 +37,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     private World world;
     private boolean drawingInfo = false;
     private boolean drawingProfiler = false;
+    private boolean onUI = false;
 
     private Rectangle buttonRect = new Rectangle();
     private Rectangle infoRect = new Rectangle();
@@ -92,6 +96,13 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         int height = Gdx.graphics.getHeight();
         FPSTimer.update(delta);
 
+        this.moveCamera();
+
+        if(this.infoRect.contains(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY()))
+            this.onUI = true;
+        else
+            this.onUI = false;
+
         GUI.Texture(this.infoRect, this.background, this.batch);
 
         this.drawInfo(height);
@@ -103,6 +114,17 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
             this.displaySelected(this.infoRect);
         }
 
+    }
+
+    private void moveCamera(){
+        if(Gdx.input.isKeyPressed(Input.Keys.W))
+            ColonyGame.camera.translate(0, Gdx.graphics.getDeltaTime()*200);
+        if(Gdx.input.isKeyPressed(Input.Keys.S))
+            ColonyGame.camera.translate(0, -Gdx.graphics.getDeltaTime()*200);
+        if(Gdx.input.isKeyPressed(Input.Keys.A))
+            ColonyGame.camera.translate(-Gdx.graphics.getDeltaTime()*200, 0);
+        if(Gdx.input.isKeyPressed(Input.Keys.D))
+            ColonyGame.camera.translate(Gdx.graphics.getDeltaTime()*200, 0);
     }
 
     private void drawInfo(int height){
@@ -148,6 +170,10 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         Profiler.end();
     }
 
+    public boolean isOnUI(){
+        return this.onUI;
+    }
+
     @Override
     public void destroy() {
         super.destroy();
@@ -181,7 +207,10 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
             this.drawingInfo = !this.drawingInfo;
         else if(keycode == Input.Keys.F2)
             Profiler.enabled = this.drawingProfiler = !this.drawingProfiler;
-        else
+        else if(keycode == Input.Keys.F3) {
+            ServerPlayer.drawGrid = !ServerPlayer.drawGrid;
+
+        }else
             return false;
 
         return true;
@@ -199,6 +228,9 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+        if(this.onUI)
+            return false;
+
         Vector3 worldCoords = ColonyGame.camera.unproject(new Vector3(screenX, screenY, 0));
 
 //      System.out.println("There was a click: "+button);
@@ -211,10 +243,10 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
             return true;
         }else if(button == Input.Buttons.RIGHT){
             if(this.selected != null){
-                BehaviourManagerComp manager = this.selected.getComponent(BehaviourManagerComp.class);
-                if(manager!=null){
-                    manager.move(new Vector2(worldCoords.x, worldCoords.y));
-                }
+//                BehaviourManagerComp manager = this.selected.getComponent(BehaviourManagerComp.class);
+//                if(manager!=null){
+//                    manager.move(new Vector2(worldCoords.x, worldCoords.y));
+//                }
             }
         }
 

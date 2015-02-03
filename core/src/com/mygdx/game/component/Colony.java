@@ -46,7 +46,7 @@ public class Colony extends Component implements IDisplayable {
 
         Texture colonistTexture = new Texture("img/BlackSquare.png");
 
-        for(int i=0;i<100;i++){
+        for(int i=0;i<5;i++){
             Entity c = this.makeColonist(this.owner.transform.getPosition(), 200, colonistTexture);
             c.name = ServerPlayer.names[MathUtils.random(ServerPlayer.names.length-1)];
             this.addColonist(c.getComponent(Colonist.class));

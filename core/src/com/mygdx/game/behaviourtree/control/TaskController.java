@@ -42,6 +42,8 @@ public class TaskController {
         this.ready = true;
         this.running = false;
         this.failed = false;
+        this.started = false;
+        this.finished = false;
     }
 
     /**

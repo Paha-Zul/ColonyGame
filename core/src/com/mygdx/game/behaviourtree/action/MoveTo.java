@@ -1,22 +1,25 @@
 package com.mygdx.game.behaviourtree.action;
 
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.behaviourtree.LeafTask;
 import com.mygdx.game.component.BlackBoard;
 import com.mygdx.game.component.Transform;
 import com.mygdx.game.component.collider.Collider;
-import com.mygdx.game.helpers.Grid;
+
+import java.util.LinkedList;
 
 /**
  * Created by Paha on 1/28/2015.
  */
 public class MoveTo extends LeafTask{
-    private int currIndex = 0;
     private Transform transform;
-    private Grid.Node[] path;
+    private LinkedList<Vector2> path;
     private int squareSize;
     private Texture square = new Texture("img/blueSquare.png");
     private Collider collider;
+
+    private float completeDst = 1f;
 
     public MoveTo(String name, BlackBoard blackBoard) {
         super(name, blackBoard);
@@ -24,7 +27,7 @@ public class MoveTo extends LeafTask{
 
     @Override
     public boolean check() {
-        return (blackBoard.path != null && blackBoard.path.length > 0);
+        return (blackBoard.path != null && blackBoard.path.size() > 0);
     }
 
     @Override
@@ -35,23 +38,23 @@ public class MoveTo extends LeafTask{
         this.path = this.blackBoard.path;
         this.squareSize = this.blackBoard.colonyGrid.getSquareSize();
         this.collider = this.transform.getComponent(Collider.class);
-        this.currIndex = this.path.length - 1;
     }
 
     @Override
     public void update(float delta) {
         super.update(delta);
 
-        if(this.currIndex < 0){
+        if(this.path.size() < 1){
             this.collider.body.setLinearVelocity(0,0);
             this.control.finishWithSuccess();
+            this.path.clear();
             this.path = null;
             return;
         }
 
-        Grid.Node currNode = path[currIndex];
-        float nodeX = currNode.getCol()*squareSize + squareSize/2;
-        float nodeY = currNode.getRow()*squareSize + squareSize/2;
+        Vector2 currPoint = path.peekLast();
+        float nodeX = currPoint.x;
+        float nodeY = currPoint.y;
 
         double rot = (Math.atan2(nodeY - transform.getPosition().y, nodeX - transform.getPosition().x));
 
@@ -60,9 +63,8 @@ public class MoveTo extends LeafTask{
 
         this.collider.body.setLinearVelocity(x, y);
 
-        if((Math.abs(transform.getPosition().x - nodeX) + Math.abs(transform.getPosition().y - nodeY) < 10)) {
-            this.blackBoard.path[this.currIndex] = null;
-            this.currIndex--;
+        if((Math.abs(transform.getPosition().x - nodeX) + Math.abs(transform.getPosition().y - nodeY) < completeDst)) {
+            this.path.removeLast();
         }
     }
 

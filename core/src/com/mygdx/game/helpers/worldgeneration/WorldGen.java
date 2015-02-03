@@ -19,6 +19,7 @@ import com.mygdx.game.entity.Entity;
 import com.mygdx.game.entity.TreeEnt;
 import com.mygdx.game.helpers.Constants;
 import com.mygdx.game.server.ServerPlayer;
+import com.sun.corba.se.impl.orbutil.closure.Constant;
 
 import java.util.ArrayList;
 
@@ -43,7 +44,7 @@ public class WorldGen {
     private static Texture lightWater = new Texture("img/LightWater.png");
 
 
-    private static Texture grayTexture;
+    public static Texture grayTexture;
 
     private static ArrayList<Entity> treeList = new ArrayList<>();
 
@@ -79,7 +80,9 @@ public class WorldGen {
         map = new TerrainTile[numX][numY];
 
         Pixmap pixmap = new Pixmap(1,1, Pixmap.Format.RGBA4444);
-        pixmap.setColor(Color.GRAY);
+        Color color = new Color(Color.BLACK);
+        color.a = 0.2f;
+        pixmap.setColor(color);
         pixmap.fillRectangle(0,0,1,1);
         grayTexture = new Texture(pixmap);
         pixmap.dispose();
@@ -248,23 +251,32 @@ public class WorldGen {
 
     public static class TerrainTile{
         public Sprite terrainSprite;
-        public Vector2 position;
         public double noiseValue;
-        public float rotation;
         public int type;
+        public int visibility = Constants.TERRAIN_EXPLORED;
 
         public TerrainTile(Sprite sprite, double noiseValue, float rotation, int type, Vector2 position){
             this.terrainSprite = new Sprite(sprite);
             this.noiseValue = noiseValue;
-            this.rotation = rotation;
             this.type = type;
-            this.position = new Vector2(position);
             this.terrainSprite.setPosition(position.x, position.y);
             this.terrainSprite.setRotation(rotation);
         }
 
-    }
+        public void changeVisibility(int visibility){
+            if(this.visibility == visibility)
+                return;
 
+            this.visibility = visibility;
+
+            if(visibility == Constants.TERRAIN_UNEXPLORED)
+                this.terrainSprite.setColor(new Color(0, 0, 0, 1));
+            else if(visibility == Constants.TERRAIN_EXPLORED)
+                this.terrainSprite.setColor(new Color(0.6f, 0.6f, 0.6f, 1));
+            else
+                this.terrainSprite.setColor(new Color(1f, 1f, 1f, 1));
+        }
+    }
 }
 
 

@@ -40,7 +40,6 @@ public class FindClosestResource extends LeafTask{
 //        else if(this.blackBoard.target.transform == null)
 //            System.out.println("[FindClosestResource]Null resource transform on "+this.blackBoard.target.name);
 
-
         this.control.finishWithSuccess();
     }
 

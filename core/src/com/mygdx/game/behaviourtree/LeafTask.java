@@ -44,4 +44,9 @@ public class LeafTask extends Task{
     public void setBlackBoard(BlackBoard blackBoard) {
         this.blackBoard = blackBoard;
     }
+
+    @Override
+    public String getName() {
+        return this.name;
+    }
 }

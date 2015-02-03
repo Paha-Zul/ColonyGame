@@ -1,25 +1,21 @@
 package com.mygdx.game.behaviourtree.action;
 
+import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.behaviourtree.LeafTask;
 import com.mygdx.game.component.BlackBoard;
-import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.Constants;
 import com.mygdx.game.helpers.Grid;
 import com.mygdx.game.helpers.Profiler;
 import com.mygdx.game.helpers.worldgeneration.WorldGen;
-import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
-import sun.java2d.cmm.Profile;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.PriorityQueue;
+import java.lang.reflect.Array;
+import java.util.*;
 
 /**
  * Created by Paha on 1/21/2015.
  */
 public class FindPath extends LeafTask {
-    private Grid.Node[] path;
+    private LinkedList<Vector2> path;
 
     public FindPath(String name, BlackBoard blackBoard) {
         super(name, blackBoard);
@@ -51,7 +47,7 @@ public class FindPath extends LeafTask {
         super.end();
     }
 
-    public Grid.Node[] getPath(){
+    public LinkedList<Vector2> getPath(){
         boolean found = false;
         Grid.PathNode target = null;
         Grid.PathNode targetNode;
@@ -67,7 +63,7 @@ public class FindPath extends LeafTask {
         //Otherwise, end with failure.
         else{
             this.control.finishWithFailure();
-            return new Grid.PathNode[0];
+            return new LinkedList<>();
         }
 
         //If our targetNode is still null somehow, fail and return.
@@ -77,7 +73,7 @@ public class FindPath extends LeafTask {
             return null;
         }
 
-        ArrayList<Grid.Node> path = new ArrayList<>(20); //Will hold the end path.
+        LinkedList<Vector2> path = new LinkedList<>(); //Will hold the end path.
         ArrayDeque<Grid.PathNode> closedList = new ArrayDeque<>(20); //Holds already visited nodes.
 
         //Priority queue that sorts by the lowest F value of the PathNode.
@@ -154,11 +150,12 @@ public class FindPath extends LeafTask {
             node.H = 0;
         }
 
+        int squareSize = this.blackBoard.colonyGrid.getSquareSize();
         //If a path was found, record the path.
         if(found) {
             currNode = target;
             while (currNode != null) {
-                path.add(currNode);
+                path.add(new Vector2(currNode.getCol()*squareSize + squareSize*0.5f, currNode.getRow()*squareSize + squareSize*0.5f));
                 currNode.visited = false;
                 currNode = currNode.parentNode;
             }
@@ -166,7 +163,49 @@ public class FindPath extends LeafTask {
 
         closedList.clear();
         openList.clear();
-        return path.toArray(new Grid.Node[path.size()]);
+        return path;
+    }
+
+    private LinkedList<Vector2> smoothPath(LinkedList<Vector2> path){
+        ListIterator<Vector2> iter = path.listIterator();
+        Vector2 currPoint = null;
+        Vector2 nextPoint = null;
+
+        //Get the initial point
+        if(iter.hasNext())
+            currPoint = iter.next();
+        //If we can't just return the path.
+        else return path;
+
+        //Loop over.
+        while(iter.hasNext()){
+            nextPoint = iter.next();
+
+            //If both X and Y doesn't match, we have a turn...
+            if(currPoint.x != nextPoint.x && currPoint.y != nextPoint.y){
+                ArrayList<Vector2> list = new ArrayList<>();
+                list = getCenterPoint(currPoint, nextPoint, 0, 1, list);
+            }
+
+        }
+
+        return path;
+    }
+
+
+
+    private ArrayList<Vector2> getCenterPoint(Vector2 first, Vector2 second, int counter, int maxInterp, ArrayList<Vector2> list){
+        if(counter >= maxInterp)
+            return list;
+
+        list.add(new Vector2((first.x + second.x)/2, (first.y + second.y)/2));
+
+        list = (getCenterPoint(first, list.get(0), counter+1, maxInterp, list));
+        list = (getCenterPoint(second, list.get(list.size()-1), counter+1, maxInterp, list));
+        //get left
+        //get right
+
+        return list;
     }
 
 

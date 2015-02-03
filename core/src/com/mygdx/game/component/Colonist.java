@@ -15,6 +15,8 @@ public class Colonist extends Component implements IDisplayable{
     private Stats stats;
     private BehaviourManagerComp manager;
 
+    private Rectangle gatherButton = new Rectangle();
+
     public Colonist() {
         super();
     }
@@ -66,6 +68,11 @@ public class Colonist extends Component implements IDisplayable{
 
         if(name == "general"){
             GUI.Label("Name: "+this.owner.name, batch, rect.x + rect.getWidth()/2, rect.y + rect.getHeight() - 5, true);
+            GUI.Label("Current Task: "+this.manager.getCurrentTaskName(), batch, rect.x + rect.getWidth()/2, rect.y + rect.getHeight() - 25, true);
+            this.gatherButton.set(rect.getX(), rect.getY() + rect.getHeight() - 75, 75, 25);
+            if(GUI.Button(this.gatherButton, "Gather", batch)){
+                this.manager.gather();
+            }
         }else if(name == "health"){
             stats.display(rect, batch, name);
         }else if(name == "inventory"){

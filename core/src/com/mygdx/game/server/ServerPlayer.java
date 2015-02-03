@@ -10,11 +10,11 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.mygdx.game.ColonyGame;
-import com.mygdx.game.behaviourtree.action.FindPath;
 import com.mygdx.game.component.*;
 import com.mygdx.game.component.Colony;
 import com.mygdx.game.entity.ColonistEnt;
 import com.mygdx.game.entity.ColonyEntity;
+import com.mygdx.game.helpers.Constants;
 import com.mygdx.game.helpers.Grid;
 import com.mygdx.game.helpers.ItemManager;
 import com.mygdx.game.helpers.Profiler;
@@ -34,6 +34,8 @@ public class ServerPlayer {
 	private ColonyGame game;
 	private Grid.GridInstance grid;
 	private Grid.Node[] path;
+
+    public static boolean drawGrid = false;
 
 	public static String[] names = {"Bobby","Sally","Jimmy","Bradley","Willy","Tommy","Brian","Doug","Ben","Jacob","Sammy","Jason","David","Sarah","Betty","Tom","James"};
 
@@ -55,7 +57,7 @@ public class ServerPlayer {
 		//Create the Box2D world.
 		ColonyGame.debugRenderer = new Box2DDebugRenderer();
 
-		generateStart(new Vector2(1400,800));
+		generateStart(new Vector2(Gdx.graphics.getWidth()/2,Gdx.graphics.getHeight()/2));
 
 		initPlayer();
 	}
@@ -67,7 +69,7 @@ public class ServerPlayer {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
 		//Step the Box2D simulation.
-		ColonyGame.world.step(delta, 6, 2);
+		ColonyGame.world.step(delta, 8, 3);
 
 		//this.debug();
 
@@ -76,28 +78,31 @@ public class ServerPlayer {
 
 		WorldGen.TerrainTile[][] map = WorldGen.map;
 		float halfTileSize = ((float)WorldGen.tileSize+20)/2f;
+
 		//Loop over the array
-		for(int x=0;x<map.length;x++) {
-			for (int y = 0; y < map[0].length; y++) {
-				WorldGen.TerrainTile tile = map[x][y];
-				if(!ColonyGame.camera.frustum.boundsInFrustum(tile.position.x, tile.position.y, 0, halfTileSize, halfTileSize, 0))
-					continue;
+        for(int x=0;x<map.length;x++) {
+            for (int y = 0; y < map[0].length; y++) {
+                WorldGen.TerrainTile tile = map[x][y];
+                if(!ColonyGame.camera.frustum.boundsInFrustum(tile.terrainSprite.getX(), tile.terrainSprite.getY(), 0, halfTileSize, halfTileSize, 0))
+                    continue;
 
-				batch.draw(tile.image, tile.position.x, tile.position.y, WorldGen.tileSize / 2f, WorldGen.tileSize / 2f, WorldGen.tileSize, WorldGen.tileSize, 1, 1, tile.rotation, 0, 0, WorldGen.tileSize, WorldGen.tileSize, false, false);
-				//batch.draw(tile.image, tile.position.x, tile.position.y);
-			}
-		}
+                tile.terrainSprite.draw(batch);
+            }
+        }
 
-		ColonyGame.debugRenderer.render(ColonyGame.world, ColonyGame.camera.combined);
-		this.batch.end();
+        batch.setColor(Color.WHITE);
 
-		//this.drawPath();
+        batch.draw(WorldGen.grayTexture, 0, 0, 200, 200);
+        this.batch.end();
 
 		this.batch.begin();
-		//this.grid.drawText(this.batch);
+        ColonyGame.debugRenderer.render(ColonyGame.world, ColonyGame.camera.combined);
 		this.batch.end();
 
-		this.grid.debugDraw();
+        //Draw the grid squares if enabled.
+        if(drawGrid)
+		    this.grid.debugDraw();
+
 		Profiler.end();
 	}
 

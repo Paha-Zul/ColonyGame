@@ -22,6 +22,8 @@ public class GUI {
 
     private static ButtonStyle defaultButtonStyle = new ButtonStyle();
 
+    private static boolean clicked = false;
+
     static{
         font = defaultFont;
     }
@@ -39,40 +41,13 @@ public class GUI {
     }
 
     public static boolean Button(Rectangle rect, SpriteBatch batch){
-        boolean clicked = false;
-        ButtonStyle style = GUI.defaultButtonStyle;
-        Texture currTexture = style.normal;
-
-        if(rect.contains(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY())){
-            if(Gdx.input.isButtonPressed(Input.Buttons.LEFT)){
-                currTexture = style.clicked;
-                clicked = true;
-            }else
-                currTexture = style.moused;
-        }
-
-        batch.draw(currTexture, rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight());
-        return clicked;
+        return GUI.Button(rect, null, "", batch);
     }
 
     public static boolean Button(Rectangle rect, String text, SpriteBatch batch){
-        boolean clicked = false;
-        ButtonStyle style = new ButtonStyle();
-        Texture currTexture = style.normal;
 
-        if(rect.contains(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY())){
-            if(Gdx.input.isButtonPressed(Input.Buttons.LEFT)){
-                currTexture = style.clicked;
-                clicked = true;
-            }else
-                currTexture = style.moused;
-        }
 
-        batch.draw(currTexture, rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight());   //Draw the background texture.
-        BitmapFont.TextBounds bounds = font.getBounds(text);                                //Get the bounds of the text
-        font.draw(batch, text, rect.getX() + rect.getWidth()/2 - bounds.width/2, rect.getY() + rect.getHeight()/2 + bounds.height/2); //Draw the text
-
-        return clicked;
+        return GUI.Button(rect, null, text, batch);
     }
 
     public static boolean Button(Rectangle rect, ButtonStyle style, String text, SpriteBatch batch){
@@ -84,12 +59,19 @@ public class GUI {
         Texture currTexture = style.normal;
 
         if(rect.contains(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY())){
-            if(Gdx.input.isButtonPressed(Input.Buttons.LEFT)){
+            boolean down = Gdx.input.isButtonPressed(Input.Buttons.LEFT);
+            if(down && !GUI.clicked){
                 currTexture = style.clicked;
-                clicked = true;
-            }else
+                GUI.clicked = clicked = true;
+            }else if(down && GUI.clicked){
                 currTexture = style.moused;
-        }
+                clicked = false;
+            }else {
+                currTexture = style.moused;
+                GUI.clicked = false;
+            }
+        }else
+            GUI.clicked = false;
 
         batch.draw(currTexture, rect.x, rect.y, rect.getWidth(), rect.getHeight());
         BitmapFont.TextBounds bounds = font.getBounds(text);                                //Get the bounds of the text

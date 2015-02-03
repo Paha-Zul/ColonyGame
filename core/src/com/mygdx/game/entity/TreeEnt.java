@@ -26,7 +26,7 @@ public class TreeEnt extends Entity{
         this.addComponent(new Resource("Wood Log"));
         this.addComponent(new GridComponent(Constants.GRIDSTATIC, ColonyGame.worldGrid));
 
-        //this.makeCollider();
+        this.makeCollider();
     }
 
     private void makeCollider(){

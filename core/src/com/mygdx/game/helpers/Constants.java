@@ -21,6 +21,12 @@ public class Constants {
 	public static int TERRAIN_WATER = 0;
 	public static int TERRAIN_GRASS = 1;
 
+    public static int TERRAIN_UNEXPLORED = 0;
+    public static int TERRAIN_EXPLORED = 1;
+    public static int TERRAIN_VISIBLE = 2;
+
+
     //Entity types
     public static int ENTITY_RESOURCE = 0;
+
 }

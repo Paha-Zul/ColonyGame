@@ -45,5 +45,7 @@ public abstract class Task {
 
     public abstract void setBlackBoard(BlackBoard blackBoard);
 
+    public abstract String getName();
+
 
 }

@@ -75,4 +75,12 @@ public abstract class ParentTask extends Task{
             task.setBlackBoard(blackBoard);
         }
     }
+
+    @Override
+    public String getName() {
+        if(this.control.currTask != null)
+            return this.name+": "+this.control.currTask.getName();
+
+        return "Nothing";
+    }
 }

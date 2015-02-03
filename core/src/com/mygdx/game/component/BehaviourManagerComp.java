@@ -2,7 +2,6 @@ package com.mygdx.game.component;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Rectangle;
@@ -12,8 +11,6 @@ import com.mygdx.game.behaviourtree.Task;
 import com.mygdx.game.behaviourtree.action.*;
 import com.mygdx.game.behaviourtree.composite.Sequence;
 import com.mygdx.game.behaviourtree.control.ParentTaskController;
-import com.mygdx.game.helpers.BehaviourManager;
-import com.mygdx.game.helpers.Grid;
 import com.mygdx.game.interfaces.IDisplayable;
 
 /**
@@ -65,15 +62,15 @@ public class BehaviourManagerComp extends Component implements IDisplayable{
         //Find a path back to the storage.
         //Store the resource.
 
-        Sequence sequence = new Sequence("FindResource", this.blackBoard);
+        Sequence sequence = new Sequence("Gathering Resource", this.blackBoard);
 
-        FindClosestResource fr = new FindClosestResource("FindClosestResource", this.blackBoard, "Wood Log");
-        FindPath findPath = new FindPath("FindPathToResource", this.blackBoard);
-        MoveTo move = new MoveTo("MoveToResource", this.blackBoard);
-        Gather gather = new Gather("GatherResource", this.blackBoard);
-        FindPath findPathToStorage = new FindPath("FindPathToStorage", this.blackBoard);
-        MoveTo moveToStorage = new MoveTo("MoveToStorage", this.blackBoard);
-        TransferResource transferItems = new TransferResource("Transfer", this.blackBoard);
+        FindClosestResource fr = new FindClosestResource("Finding Closest Resource", this.blackBoard, "Wood Log");
+        FindPath findPath = new FindPath("Finding Path to Resource", this.blackBoard);
+        MoveTo move = new MoveTo("Moving to Resource", this.blackBoard);
+        Gather gather = new Gather("Gathering Resource", this.blackBoard);
+        FindPath findPathToStorage = new FindPath("Finding Path to Storage", this.blackBoard);
+        MoveTo moveToStorage = new MoveTo("Moving to Storage", this.blackBoard);
+        TransferResource transferItems = new TransferResource("Transfering Resources", this.blackBoard);
 
 
         ((ParentTaskController) sequence.getControl()).addTask(fr);
@@ -87,13 +84,33 @@ public class BehaviourManagerComp extends Component implements IDisplayable{
         return sequence;
     }
 
-    public void move(Vector2 position){
-        //this.blackBoard.targetNode = this.blackBoard.colonyGrid.getNode(position);
+    public Task idle(){
+        //Find random spot to walk to
+        //Find path
+        //Move there
+        //Idle for some amount of time.
+
+        Sequence sequence = new Sequence("Idling", this.blackBoard);
+
+        FindRandomNearbyLocation findNearbyLocation = new FindRandomNearbyLocation("Finding Nearby Location", this.blackBoard);
+        FindPath findPath = new FindPath("Finding Path to Nearby Location", this.blackBoard);
+        MoveTo moveTo = new MoveTo("Moving to Nearby Location", this.blackBoard);
+        Idle idle = new Idle("Standing Still", this.blackBoard, 2f, 2f);
+
+        ((ParentTaskController) sequence.getControl()).addTask(findNearbyLocation);
+        ((ParentTaskController) sequence.getControl()).addTask(findPath);
+        ((ParentTaskController) sequence.getControl()).addTask(moveTo);
+        ((ParentTaskController) sequence.getControl()).addTask(idle);
+
+        return sequence;
+    }
+
+    public void gather(){
+        if(this.behaviourTree != null && !this.behaviourTree.getControl().hasFinished())
+            this.behaviourTree.getControl().finishWithSuccess();
+
         this.behaviourTree = this.gatherResource();
         this.behaviourTree.start();
-
-//        behaviourTree = moveTo();
-//        behaviourTree.start();
     }
 
     @Override
@@ -102,11 +119,15 @@ public class BehaviourManagerComp extends Component implements IDisplayable{
 
         if(behaviourTree != null) {
             this.behaviourTree.update(delta);
-            if(this.behaviourTree.getControl().hasFinished())
+            if(this.behaviourTree.getControl().hasFinished() && !this.behaviourTree.getControl().hasFailed()) {
+                this.behaviourTree.getControl().reset();
+                this.behaviourTree.start();
+            }else if(this.behaviourTree.getControl().hasFinished()){
                 this.behaviourTree = null;
+            }
         }else{
             if(this.behaviourType.equals("colonist")) {
-                this.behaviourTree = this.gatherResource();
+                this.behaviourTree = this.idle();
                 this.behaviourTree.start();
             }
         }
@@ -120,24 +141,24 @@ public class BehaviourManagerComp extends Component implements IDisplayable{
         float lineWidth = 2;
 
         int squareSize = this.blackBoard.colonyGrid.getSquareSize();
-        if(this.blackBoard.path != null && this.blackBoard.path.length > 0){
-            for(int i=0; i < this.blackBoard.path.length; i++){
-                Grid.Node node = this.blackBoard.path[i];
-                if(node == null) {
+        if(this.blackBoard.path != null && this.blackBoard.path.size() > 0){
+            for(int i=0; i < this.blackBoard.path.size(); i++){
+                Vector2 point = this.blackBoard.path.get(i);
+                if(point == null) {
                     break;
 
-                //Take a peak at the next node. If it's not null, draw a line from the Entity to the next square
+                //Take a peak at the next point. If it's not null, draw a line from the Entity to the next square
                 }else{
                     float nextX=0, nextY=0;
-                    node = this.blackBoard.path[i];
+                    point = this.blackBoard.path.get(i);
 
-                    float currX = node.getCol()*squareSize + squareSize*0.5f;
-                    float currY = node.getRow()*squareSize + squareSize*0.5f;
+                    float currX = point.x;
+                    float currY = point.y;
 
-                    //If the next node is within our boundaries and not null, draw from the current node to the next.
-                    if((i+1) < this.blackBoard.path.length && this.blackBoard.path[i+1] != null){
-                        nextX = this.blackBoard.path[i+1].getCol()*squareSize + squareSize*0.5f;
-                        nextY = this.blackBoard.path[i+1].getRow()*squareSize + squareSize*0.5f;
+                    //If the next point is within our boundaries and not null, draw from the current point to the next.
+                    if((i+1) < this.blackBoard.path.size() && this.blackBoard.path.get(i + 1) != null){
+                        nextX = this.blackBoard.path.get(i + 1).x;
+                        nextY = this.blackBoard.path.get(i + 1).y;
 
                     //Otherwise, draw to the Entity.
                     }else{
@@ -156,6 +177,13 @@ public class BehaviourManagerComp extends Component implements IDisplayable{
         }
 
         batch.setProjectionMatrix(projection);
+    }
+
+    public String getCurrentTaskName(){
+        if(this.behaviourTree != null)
+            return this.behaviourTree.getName();
+
+        return "Nothing";
     }
 
     @Override

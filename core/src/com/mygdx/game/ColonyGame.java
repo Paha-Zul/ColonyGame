@@ -48,7 +48,6 @@ public class ColonyGame extends Game {
 
 		float delta = Gdx.graphics.getDeltaTime();
 
-		camera.update();
 		Profiler.update(delta);
 
 //		Gdx.gl.glClearColor(screenColor.r, screenColor.g, screenColor.b, screenColor.a);
@@ -69,5 +68,7 @@ public class ColonyGame extends Game {
 
 		this.batch.end();
 		Profiler.end();
-	}
+
+        camera.update();
+    }
 }
