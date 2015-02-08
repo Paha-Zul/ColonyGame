@@ -53,6 +53,15 @@ public abstract class Component implements IDestroyable {
 
 	}
 
+    /**
+     * Called every frame for drawing stuff.
+     * @param delta The time between the current and last frame.
+     * @param batch The SpriteBatch to batch the draw call.
+     */
+    public void render(float delta, SpriteBatch batch){
+
+    }
+
 	/**
 	 * A shortcut function to call 'addComponent' on the Entity owner. This cannot be called in the constructor
 	 * as the Entity owner will be null. Use in the 'start' function.
