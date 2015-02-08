@@ -89,7 +89,6 @@ public class Entity {
 	}
 
 	public void update(float delta){
-
 		//Only update if active.
 		if(this.active && !this.destroyed) {
 			//Start all new components.
