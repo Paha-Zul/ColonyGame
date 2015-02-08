@@ -25,25 +25,23 @@ public class GraphicIdentity extends Component{
 		this.sprite.setPosition(pos.x - this.sprite.getWidth()/2, pos.y - this.sprite.getHeight()/2);
 	}
 
-    @Override
-    public void render(float delta, SpriteBatch batch) {
-        super.render(delta, batch);
+	@Override
+	public void update(float delta) {
+		Profiler.begin("GraphicIdentity Update");
+		Vector2 pos = this.owner.transform.getPosition(); //Cache the owner's position.
 
-        Profiler.begin("GraphicIdentity Update");
-        Vector2 pos = this.owner.transform.getPosition(); //Cache the owner's position.
+		if(!ColonyGame.camera.frustum.boundsInFrustum(pos.x, pos.y, 0, sprite.getWidth()*0.5f, sprite.getHeight()*0.5f, 0)) {
+			Profiler.end();
+			return;
+		}
 
-        if(!ColonyGame.camera.frustum.boundsInFrustum(pos.x, pos.y, 0, sprite.getWidth()*0.5f, sprite.getHeight()*0.5f, 0)) {
-            Profiler.end();
-            return;
-        }
+		this.sprite.setScale(this.owner.transform.getScale());
+		this.sprite.setRotation(this.owner.transform.getRotation());
 
-        this.sprite.setScale(this.owner.transform.getScale());
-        this.sprite.setRotation(this.owner.transform.getRotation());
+		this.sprite.setPosition(pos.x - (sprite.getWidth())/2, pos.y - (sprite.getHeight())/2);
 
-        this.sprite.setPosition(pos.x - (sprite.getWidth())/2, pos.y - (sprite.getHeight())/2);
+		this.sprite.draw(this.batch);
 
-        this.sprite.draw(this.batch);
-
-        Profiler.end();
-    }
+		Profiler.end();
+	}
 }
