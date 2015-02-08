@@ -17,7 +17,7 @@ import com.mygdx.game.interfaces.IGUI;
 public class LoadingInterface extends UI {
     private SpriteBatch batch;
     private float width = 200, height = 20;
-    private static boolean done;
+    private boolean done;
 
     private Rectangle loadingBar = new Rectangle(), square = new Rectangle();
     private Texture outline, bar, blackSquare;
@@ -45,11 +45,10 @@ public class LoadingInterface extends UI {
             GUI.Texture(this.loadingBar, this.outline, this.batch);
             GUI.Texture(this.loadingBar.x, this.loadingBar.y, this.loadingBar.width*WorldGen.percentageDone, this.loadingBar.height, this.bar, this.batch);
             GUI.Label("Loading Terrain", this.batch, this.loadingBar.getX() + this.loadingBar.width/2, this.loadingBar.getY() + 40, true);
-
         }
     }
 
-    public static void setDone(){
+    public void setDone(){
         done = true;
     }
 
@@ -65,6 +64,16 @@ public class LoadingInterface extends UI {
 
     @Override
     public void destroy() {
+        super.destroy();
 
+        batch = null;
+        loadingBar = null;
+        square = null;
+        outline.dispose();
+        outline = null;
+        bar.dispose();
+        bar = null;
+        blackSquare.dispose();
+        blackSquare = null;
     }
 }

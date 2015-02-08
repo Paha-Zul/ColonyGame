@@ -46,7 +46,7 @@ public class ServerPlayer {
 	public ServerPlayer(SpriteBatch batch, ShapeRenderer renderer, ColonyGame game){
 
 		//Start the server
-		Server.start(1337);
+		//Server.start(1337);
 		this.grid = game.worldGrid;
 
 		//Make a new spritebatch and shaperenderer.
@@ -60,7 +60,8 @@ public class ServerPlayer {
 		generateStart(new Vector2(Gdx.graphics.getWidth()/2,Gdx.graphics.getHeight()/2));
 
 		initPlayer();
-	}
+
+    }
 
 	public void render(float delta){
 		Profiler.begin("ServerPlayer Render");
@@ -104,6 +105,7 @@ public class ServerPlayer {
 		    this.grid.debugDraw();
 
 		Profiler.end();
+
 	}
 
 	private void drawPath(){

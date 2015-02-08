@@ -145,21 +145,6 @@ public class WorldGen {
                     rock.transform.setScale(0.6f); //Set the scale.
                     rock.name = "Rock"; //Set the name!
 
-                    //All Box2D stuff below...
-//                    BodyDef bodyDef = new BodyDef();
-//                    bodyDef.type = BodyDef.BodyType.StaticBody;
-//
-//                    CircleShape circle = new CircleShape();
-//                    circle.setRadius(18f);
-//
-//                    FixtureDef fixtureDef = new FixtureDef();
-//                    fixtureDef.shape = circle;
-//                    fixtureDef.density = 0;
-//                    fixtureDef.friction = 0;
-//                    fixtureDef.restitution = 0;
-//
-//                    //Add the Collider Component and an Interactable Component.
-//                    rock.addComponent(new Collider(ColonyGame.world, bodyDef, fixtureDef));
                     rock.addComponent(new Interactable("resource"));
                     rock.addComponent(new Resource("Stone"));
                     rock.addComponent(new GridComponent(Constants.GRIDSTATIC, ColonyGame.worldGrid));
@@ -249,13 +234,13 @@ public class WorldGen {
         return treeList.size();
     }
 
-    public static class TerrainTile{
+    public static class TerrainTile {
         public Sprite terrainSprite;
         public double noiseValue;
         public int type;
         public int visibility = Constants.TERRAIN_EXPLORED;
 
-        public TerrainTile(Sprite sprite, double noiseValue, float rotation, int type, Vector2 position){
+        public TerrainTile(Sprite sprite, double noiseValue, float rotation, int type, Vector2 position) {
             this.terrainSprite = new Sprite(sprite);
             this.noiseValue = noiseValue;
             this.type = type;
@@ -263,19 +248,45 @@ public class WorldGen {
             this.terrainSprite.setRotation(rotation);
         }
 
-        public void changeVisibility(int visibility){
-            if(this.visibility == visibility)
+        public void changeVisibility(int visibility) {
+            if (this.visibility == visibility)
                 return;
 
             this.visibility = visibility;
 
-            if(visibility == Constants.TERRAIN_UNEXPLORED)
+            if (visibility == Constants.TERRAIN_UNEXPLORED)
                 this.terrainSprite.setColor(new Color(0, 0, 0, 1));
-            else if(visibility == Constants.TERRAIN_EXPLORED)
+            else if (visibility == Constants.TERRAIN_EXPLORED)
                 this.terrainSprite.setColor(new Color(0.6f, 0.6f, 0.6f, 1));
             else
                 this.terrainSprite.setColor(new Color(1f, 1f, 1f, 1));
         }
+    }
+
+    public static void clean(){
+//        for(Texture tex : grassTiles)
+//            tex.dispose();
+//
+//        grassTiles = null;
+//
+//        for(Texture tex : tallGrassTiles)
+//            tex.dispose();
+//
+//        tallGrassTiles = null;
+//
+//        treeTexture.dispose();
+//        treeTexture = null;
+//        rockTexture.dispose();
+//        rockTexture = null;
+//        darkWater.dispose();
+//        darkWater = null;
+//        lightWater.dispose();
+//        lightWater = null;
+//        grayTexture.dispose();
+//        grayTexture = null;
+//
+//        treeList.clear();
+//        treeList = null;
     }
 }
 

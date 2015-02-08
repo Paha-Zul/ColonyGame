@@ -3,14 +3,11 @@ package com.mygdx.game.screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.helpers.Constants;
-import com.mygdx.game.ui.LoadingInterface;
-import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.ListHolder;
 import com.mygdx.game.helpers.worldgeneration.WorldGen;
-import com.mygdx.game.interfaces.IGUI;
+import com.mygdx.game.ui.LoadingInterface;
 import com.mygdx.game.ui.UI;
 
 import java.util.ArrayList;
@@ -21,6 +18,7 @@ import java.util.ArrayList;
  */
 public class LoadingScreen implements Screen {
     private ColonyGame game;
+    private LoadingInterface loadingInterface;
 
     public LoadingScreen(final ColonyGame game){
         this.game = game;
@@ -33,13 +31,16 @@ public class LoadingScreen implements Screen {
         WorldGen.init((long)(MathUtils.random()*Long.MAX_VALUE));
         WorldGen.numStep = 50;
 
-        new LoadingInterface(game.batch, this.game);
+        loadingInterface = new LoadingInterface(game.batch, this.game);
     }
 
     @Override
     public void render(float delta) {
         if(WorldGen.generateWorld()) {
-            LoadingInterface.setDone();
+            loadingInterface.setDone();
+            WorldGen.clean();
+            this.dispose();
+            //throw new RuntimeException("Broken");
             game.setScreen(new GameScreen(this.game));
         }
     }

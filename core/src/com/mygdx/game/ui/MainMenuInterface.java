@@ -73,8 +73,12 @@ public class MainMenuInterface extends UI{
         music.dispose();
         mainMenuTexture.dispose();
         titleFont.dispose();
+        titleFont = null;
         startRect = null;
         quitRect = null;
+        buttonStyle = null;
+
+        versionNumber = null;
     }
 
     @Override

@@ -20,10 +20,8 @@ public class GameScreen implements Screen{
     private ClientPlayer clientPlayer;
     private ColonyGame game;
 
-    public static float scaleX;
-    public static float scaleY;
-
     public GameScreen(final ColonyGame game){
+
         if(ColonyGame.server)
             serverPlayer = new ServerPlayer(ColonyGame.batch, ColonyGame.renderer, this.game);
         else
