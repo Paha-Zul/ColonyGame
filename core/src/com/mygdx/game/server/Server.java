@@ -8,7 +8,14 @@ import com.mygdx.game.helpers.BytesUtil;
 import com.mygdx.game.helpers.GH;
 
 import java.io.*;
+import java.net.InetSocketAddress;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
+import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by Bbent_000 on 11/22/2014.
@@ -17,6 +24,8 @@ public class Server{
 
 	private static ServerThread serverThread;
 	private static Thread thread;
+
+
 
 	public static void start(int port){
 		if(serverThread == null){
@@ -30,31 +39,64 @@ public class Server{
 		public boolean done = false;
 
 		private ArrayList<ConnectionThread> clients = new ArrayList<ConnectionThread>();
-		private ServerSocket server;
-		private InputStream input;
+		private ServerSocket serverSocket;
+
+        public final static String ADDRESS = "127.0.0.1";
+        public static int PORT = 8511;
+        public final static long TIMEOUT = 10000;
+
+        private ServerSocketChannel serverChannel;
+        private Selector selector;
+        /**
+         * This hashmap is important. It keeps track of the data that will be written to the clients.
+         * This is needed because we read/write asynchronously and we might be reading while the server
+         * wants to write. In other words, we tell the Selector we are ready to write (SelectionKey.OP_WRITE)
+         * and when we get a key for writing, we then write from the Hashmap. The write() method explains this further.
+         */
+        private Map<SocketChannel,byte[]> dataTracking = new HashMap<SocketChannel, byte[]>();
 
 		public ServerThread(int port){
 			try {
-				server = Gdx.net.newServerSocket(Net.Protocol.TCP, port, null);
-				System.out.println("Server: Hosting server on port "+port);
+                init();
+                PORT = port;
+				System.out.println("Server: Hosting server on port "+PORT);
 			}catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
 
+        private void init(){
+            System.out.println("initializing server");
+            // We do not want to call init() twice and recreate the selector or the serverChannel.
+            if (selector != null) return;
+            if (serverChannel != null) return;
+
+            try {
+                // This is how you open a Selector
+                selector = Selector.open();
+                // This is how you open a ServerSocketChannel
+                serverChannel = ServerSocketChannel.open();
+                // You MUST configure as non-blocking or else you cannot register the serverChannel to the Selector.
+                serverChannel.configureBlocking(false);
+                // bind to the address that you will use to Serve.
+                serverChannel.socket().bind(new InetSocketAddress(ADDRESS, PORT));
+
+                /**
+                 * Here you are registering the serverSocketChannel to accept connection, thus the OP_ACCEPT.
+                 * This means that you just told your selector that this channel will be used to accept connections.
+                 * We can change this operation later to read/write, more on this later.
+                 */
+                serverChannel.register(selector, SelectionKey.OP_ACCEPT);
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
 		@Override
 		public void run() {
-			while(!this.done) {
-				try {
-					Socket client = server.accept(null);
-					ConnectionThread connThread = new ConnectionThread(client) ;
-					clients.add(connThread);
-					Thread thread = new Thread(connThread);
-					thread.start();
-				} catch (Exception e) {
-					e.printStackTrace();
-					this.done = true;
-				}
+			while(!Thread.currentThread().isInterrupted()) {
+
 			}
 		}
 	}
