@@ -39,7 +39,7 @@ public class GridComponent extends Component{
 
         Profiler.begin("GridComponent update");
 
-        this.currNode = this.grid.checkNode(this.currNode, this.owner);
+        this.currNode = this.grid.checkNode(this.currNode, this.owner, true, 5);
 
         Profiler.end();
     }
