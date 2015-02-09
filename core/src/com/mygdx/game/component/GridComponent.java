@@ -30,7 +30,7 @@ public class GridComponent extends Component{
         //System.out.println("[GridComponent]Starting for "+this.owner.name);
 
         //Gets a node to start.
-        this.currNode = this.grid.checkNode(this.currNode, this.owner);
+        this.currNode = this.grid.getNode(this.owner);
     }
 
     @Override

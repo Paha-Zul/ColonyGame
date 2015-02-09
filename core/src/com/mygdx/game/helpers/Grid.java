@@ -7,6 +7,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.gui.GUI;
+import com.mygdx.game.helpers.worldgeneration.WorldGen;
 import com.mygdx.game.interfaces.Functional;
 import com.sun.istack.internal.NotNull;
 
@@ -124,7 +125,7 @@ public class Grid {
          * @param entity   The Entity that should be in the Node.
          * @return The Node that the Entity is in. This could be the same as the currNode passed in, or a new Node.
          */
-        public Node checkNode(Node currNode, Entity entity) {
+        public Node checkNode(Node currNode, Entity entity, boolean changeVisibility, int radius) {
             Vector2 pos = entity.transform.getPosition();
 
             //If the currNode still matches our current position, return it.
@@ -133,11 +134,30 @@ public class Grid {
             }
 
             if (currNode != null) currNode.removeEntity(entity); //Remove from the old Node if it's not null.
-            currNode = getNode(pos); //Get the new Node.
-            if (currNode == null) return null; //If it's null, return null.
+            Node tmpNode = getNode(pos); //Get the new Node.
+            if (tmpNode == null) return null; //If it's null, return null.
 
-            currNode.addEntity(entity);
-            return currNode;
+            //Under work!
+            if(changeVisibility){
+                this.perform((grid)->{
+                    int startX = (tmpNode.getCol() - radius >= 0) ? tmpNode.getCol() - radius : 0;
+                    int endX = (tmpNode.getCol() + radius < this.grid.length) ? tmpNode.getCol() + radius : this.grid.length-1;
+                    int startY = (tmpNode.getRow() - radius >= 0) ? tmpNode.getRow() - radius : 0;
+                    int endY = (tmpNode.getRow() + radius < this.grid[0].length) ? tmpNode.getRow() + radius : this.grid[0].length-1;
+
+                    for(int x = startX; x <= endX ; x++){
+                        for(int y = startY; y <= endY; y++){
+                            Node n = this.getNode(x, y);
+                            if(n == null || (Math.abs(x - tmpNode.getCol()) + Math.abs(y - tmpNode.getRow()) > radius*1.5f)) continue;
+
+                            WorldGen.getVisibilityMap()[x][y].addViewer();
+                        }
+                    }
+                });
+            }
+
+            tmpNode.addEntity(entity);
+            return tmpNode;
         }
 
         /**
