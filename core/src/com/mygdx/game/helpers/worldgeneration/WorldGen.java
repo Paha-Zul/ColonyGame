@@ -7,19 +7,13 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.BodyDef;
-import com.badlogic.gdx.physics.box2d.CircleShape;
-import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.component.GridComponent;
 import com.mygdx.game.component.Interactable;
 import com.mygdx.game.component.Resource;
-import com.mygdx.game.component.collider.Collider;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.entity.TreeEnt;
 import com.mygdx.game.helpers.Constants;
-import com.mygdx.game.server.ServerPlayer;
-import com.sun.corba.se.impl.orbutil.closure.Constant;
 
 import java.util.ArrayList;
 
@@ -43,10 +37,10 @@ public class WorldGen {
     private static Texture darkWater = new Texture("img/DarkWater.png");
     private static Texture lightWater = new Texture("img/LightWater.png");
 
-
     public static Texture grayTexture;
 
     private static ArrayList<Entity> treeList = new ArrayList<>();
+    private static VisibilityTile[][] visibilityMap;
 
     private static int numX, numY, currX = 0, currY = 0;
 
@@ -78,7 +72,10 @@ public class WorldGen {
 
         //Initializes a new array
         map = new TerrainTile[numX][numY];
+        //Initialize a new int array.
+        visibilityMap = new VisibilityTile[numX][numY];
 
+        //Generate a gray square.
         Pixmap pixmap = new Pixmap(1,1, Pixmap.Format.RGBA4444);
         Color color = new Color(Color.BLACK);
         color.a = 0.2f;
@@ -100,8 +97,8 @@ public class WorldGen {
         while(stepsLeft > 0 && currX < numX){
             double noiseValue = SimplexNoise.noise((double)currX/freq,(double)currY/freq); //Generate the noise for this tile.
             Vector2 position = new Vector2(currX*tileSize, currY*tileSize); //Set the position.
-            Sprite terrainSprite = new Sprite();
-            int type = 0;
+            Sprite terrainSprite;
+            int type;
             float rotation=0;
 
             //If under this value, generate dark water.
@@ -153,7 +150,8 @@ public class WorldGen {
                 }
             }
 
-            TerrainTile tile = map[currX][currY] = new TerrainTile(terrainSprite, noiseValue, rotation, type, position); //Create a new terrain tile.
+            map[currX][currY] = new TerrainTile(terrainSprite, noiseValue, rotation, type, position); //Create a new terrain tile.
+            visibilityMap[currX][currY] = new VisibilityTile(); //Set this to unexplored.
 
             done = false; //Set done to false signifying that we are not finished yet.
             stepsLeft--; //Decrement the remaining step amount.
@@ -167,7 +165,7 @@ public class WorldGen {
 
             float currDone = currX + (currX*numY + currY);
             float total = (numX+1)*(numY+1);
-            percentageDone = (float)currDone/(float)total; //Calcs the percentage done so that the player's UI can use this.
+            percentageDone = currDone/total; //Calcs the percentage done so that the player's UI can use this.
 
         }
 
@@ -222,12 +220,12 @@ public class WorldGen {
         return getNode(index[0], index[1]);
     }
 
-    public static void changeSeed(long seed){
-        SimplexNoise.genGrad(seed);
-    }
-
     public static int numTiles() {
         return numX*numY;
+    }
+
+    public static VisibilityTile[][] getVisibilityMap(){
+        return visibilityMap;
     }
 
     public static int numTrees(){
@@ -238,7 +236,6 @@ public class WorldGen {
         public Sprite terrainSprite;
         public double noiseValue;
         public int type;
-        public int visibility = Constants.TERRAIN_EXPLORED;
 
         public TerrainTile(Sprite sprite, double noiseValue, float rotation, int type, Vector2 position) {
             this.terrainSprite = new Sprite(sprite);
@@ -248,18 +245,40 @@ public class WorldGen {
             this.terrainSprite.setRotation(rotation);
         }
 
-        public void changeVisibility(int visibility) {
-            if (this.visibility == visibility)
-                return;
+    }
 
+    public static class VisibilityTile{
+        private int visibility;
+        private int currViewers = 0;
+
+        public VisibilityTile(){
+            this.visibility = Constants.VISIBILITY_UNEXPLORED;
+        }
+
+        public void changeVisibility(int visibility){
             this.visibility = visibility;
+        }
 
-            if (visibility == Constants.TERRAIN_UNEXPLORED)
-                this.terrainSprite.setColor(new Color(0, 0, 0, 1));
-            else if (visibility == Constants.TERRAIN_EXPLORED)
-                this.terrainSprite.setColor(new Color(0.6f, 0.6f, 0.6f, 1));
-            else
-                this.terrainSprite.setColor(new Color(1f, 1f, 1f, 1));
+        public void addViewer(){
+            this.currViewers++;
+            this.changeVisibility(Constants.VISIBILITY_VISIBLE);
+        }
+
+        /**
+         * Removes a viewer from this tile. If it reaches 0, the terrain is set to explored and not visibile.
+         */
+        public void removeViewer(){
+            this.currViewers--;
+            if(currViewers <= 0)
+                this.changeVisibility(Constants.VISIBILITY_EXPLORED);
+        }
+
+        public int getVisibility() {
+            return visibility;
+        }
+
+        public int getCurrViewers() {
+            return currViewers;
         }
     }
 
