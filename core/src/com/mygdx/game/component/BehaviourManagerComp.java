@@ -84,7 +84,7 @@ public class BehaviourManagerComp extends Component implements IDisplayable{
         return sequence;
     }
 
-    public Task idle(){
+    public Task idle(float baseIdleTime, float randomIdleTime, int radius){
         //Find random spot to walk to
         //Find path
         //Move there
@@ -92,10 +92,10 @@ public class BehaviourManagerComp extends Component implements IDisplayable{
 
         Sequence sequence = new Sequence("Idling", this.blackBoard);
 
-        FindRandomNearbyLocation findNearbyLocation = new FindRandomNearbyLocation("Finding Nearby Location", this.blackBoard);
+        FindRandomNearbyLocation findNearbyLocation = new FindRandomNearbyLocation("Finding Nearby Location", this.blackBoard, radius);
         FindPath findPath = new FindPath("Finding Path to Nearby Location", this.blackBoard);
         MoveTo moveTo = new MoveTo("Moving to Nearby Location", this.blackBoard);
-        Idle idle = new Idle("Standing Still", this.blackBoard, 2f, 2f);
+        Idle idle = new Idle("Standing Still", this.blackBoard, baseIdleTime, randomIdleTime);
 
         ((ParentTaskController) sequence.getControl()).addTask(findNearbyLocation);
         ((ParentTaskController) sequence.getControl()).addTask(findPath);
@@ -117,17 +117,27 @@ public class BehaviourManagerComp extends Component implements IDisplayable{
     public void update(float delta) {
         super.update(delta);
 
+        //If our behaviour is not null....
         if(behaviourTree != null) {
-            this.behaviourTree.update(delta);
+            //If it has finished successfully, start it over. (repeat)
             if(this.behaviourTree.getControl().hasFinished() && !this.behaviourTree.getControl().hasFailed()) {
-                this.behaviourTree.getControl().reset();
-                this.behaviourTree.start();
+                this.behaviourTree.getControl().reset(); //Reset it
+                this.behaviourTree.start(); //Start again
+
+            //If it finished but failed.
             }else if(this.behaviourTree.getControl().hasFinished()){
-                this.behaviourTree = null;
+                this.behaviourTree = null; //Set it to null to get a new job. (default job)
+
+            //Otherwise, update it.
+            }else{
+                this.behaviourTree.update(delta); //Update it.
             }
         }else{
             if(this.behaviourType.equals("colonist")) {
-                this.behaviourTree = this.idle();
+                this.behaviourTree = this.idle(2f, 2f, 1);
+                this.behaviourTree.start();
+            }else if(this.behaviourType.equals("animal")) {
+                this.behaviourTree = this.idle(2f, 2f, 2);
                 this.behaviourTree.start();
             }
         }

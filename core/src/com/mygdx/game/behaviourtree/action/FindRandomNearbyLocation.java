@@ -15,9 +15,15 @@ import java.util.ArrayList;
  * Created by Paha on 2/1/2015.
  */
 public class FindRandomNearbyLocation extends LeafTask{
+    private int possibleDistance;
+
+    public FindRandomNearbyLocation(String name, BlackBoard blackBoard, int possibleDistance) {
+        super(name, blackBoard);
+        this.possibleDistance = possibleDistance;
+    }
 
     public FindRandomNearbyLocation(String name, BlackBoard blackBoard) {
-        super(name, blackBoard);
+        this(name, blackBoard, 1);
     }
 
     @Override
@@ -35,7 +41,7 @@ public class FindRandomNearbyLocation extends LeafTask{
         //This function will get valid nodes around the entity.
         Functional.PerformAndGet<ArrayList<Grid.Node>, Grid.Node[][]> getValidNodes = (graph) -> {
             ArrayList<Grid.Node> nodes = new ArrayList<>();
-            int radius = 1;
+            int radius = MathUtils.random(this.possibleDistance-1) + 1; //At least one...
 
             while(nodes.size() < 1) {
                 int startX = (int) (transform.getPosition().x / this.blackBoard.colonyGrid.getSquareSize()) - radius;

@@ -168,31 +168,34 @@ public class FindPath extends LeafTask {
 
     private LinkedList<Vector2> smoothPath(LinkedList<Vector2> path){
         ListIterator<Vector2> iter = path.listIterator();
-        Vector2 currPoint = null;
         Vector2 nextPoint = null;
+        Vector2 currPoint = null;
 
-        //Get the initial point
-        if(iter.hasNext())
-            currPoint = iter.next();
-        //If we can't just return the path.
-        else return path;
+        if(path.size() <= 2)
+            return path;
+
+        System.out.println("path length: "+path.size());
 
         //Loop over.
         while(iter.hasNext()){
-            nextPoint = iter.next();
+            currPoint = iter.next(); //Get the current point
+            nextPoint = iter.hasNext() ? iter.next() : currPoint; //Try and get the next point.
 
             //If both X and Y doesn't match, we have a turn...
             if(currPoint.x != nextPoint.x && currPoint.y != nextPoint.y){
-                ArrayList<Vector2> list = new ArrayList<>();
-                list = getCenterPoint(currPoint, nextPoint, 0, 1, list);
+                Vector2 middle = getCenterPoint(currPoint, nextPoint);
+                iter.previous(); //Go back to the currPoint index.
+                iter.add(middle);
+                iter.next(); //Get to the point we just added. This will make the nextPoint our currPoint on the next iter.next call.
+                System.out.println("Added new point "+middle+" curr: "+currPoint+" next: "+nextPoint);
             }
-
         }
+
+        System.out.println("path length after: "+path.size());
+
 
         return path;
     }
-
-
 
     private ArrayList<Vector2> getCenterPoint(Vector2 first, Vector2 second, int counter, int maxInterp, ArrayList<Vector2> list){
         if(counter >= maxInterp)
@@ -206,6 +209,10 @@ public class FindPath extends LeafTask {
         //get right
 
         return list;
+    }
+
+    private Vector2 getCenterPoint(Vector2 first, Vector2 second){
+        return new Vector2((first.x + second.x)/2, (first.y + second.y)/2);
     }
 
 
