@@ -87,18 +87,25 @@ public class ServerPlayer {
                 if(!ColonyGame.camera.frustum.boundsInFrustum(tile.terrainSprite.getX(), tile.terrainSprite.getY(), 0, halfTileSize, halfTileSize, 0))
                     continue;
 
+                if(WorldGen.getVisibilityMap()[x][y].getVisibility() == Constants.VISIBILITY_UNEXPLORED)
+                    tile.terrainSprite.setColor(Constants.COLOR_UNEXPLORED);
+                else if(WorldGen.getVisibilityMap()[x][y].getVisibility() == Constants.VISIBILITY_EXPLORED)
+                    tile.terrainSprite.setColor(Constants.COLOR_EXPLORED);
+                else if(WorldGen.getVisibilityMap()[x][y].getVisibility() == Constants.VISIBILITY_VISIBLE)
+                    tile.terrainSprite.setColor(Constants.COLOR_VISIBILE);
+
                 tile.terrainSprite.draw(batch);
             }
         }
 
+        //Set the color back to white.
         batch.setColor(Color.WHITE);
 
+        //This is just testing... drawing the gray texture that we made.
         batch.draw(WorldGen.grayTexture, 0, 0, 200, 200);
         this.batch.end();
 
-		this.batch.begin();
-        ColonyGame.debugRenderer.render(ColonyGame.world, ColonyGame.camera.combined);
-		this.batch.end();
+        drawBox2DDebug();
 
         //Draw the grid squares if enabled.
         if(drawGrid)
@@ -108,17 +115,12 @@ public class ServerPlayer {
 
 	}
 
-	private void drawPath(){
-		ShapeRenderer renderer = new ShapeRenderer();
-		renderer.setProjectionMatrix(ColonyGame.camera.combined);
-		renderer.setColor(Color.BLUE);
-		renderer.begin(ShapeRenderer.ShapeType.Filled);
-		int size = this.game.worldGrid.getSquareSize();
-		for(Grid.Node node : path)
-			renderer.rect(node.getCol()*size, node.getRow()*size, size, size);
-
-		renderer.end();
-	}
+    private void drawBox2DDebug(){
+        //Draw the box2d debug
+        this.batch.begin();
+        ColonyGame.debugRenderer.render(ColonyGame.world, ColonyGame.camera.combined);
+        this.batch.end();
+    }
 
 	private void generateTest(Vector2 position){
 		Texture square = new Texture("img/BlackSquare.png");
@@ -130,7 +132,7 @@ public class ServerPlayer {
 		ColonyEntity colonyEnt = new ColonyEntity(start, 0, new Texture("img/colony.png"), this.batch, 11);
 		Colony colony = colonyEnt.getComponent(Colony.class);
 
-		int radius = 5;
+		int radius = 8;
 		Functional.Perform<Grid.Node[][]> destroyNearbyResources = (grid) -> {
 			int[] index= this.grid.getIndex(colonyEnt.transform.getPosition());
 			int startX = index[0]-radius;
@@ -142,10 +144,14 @@ public class ServerPlayer {
 				for(int row = startY; row <= endY; row++){
 					Grid.Node node = this.grid.getNode(col, row);
 					if(node == null) continue;
+                    if(Math.abs(node.getCol() - index[0]) + Math.abs(node.getRow() - index[1]) >= radius*1.5) continue;
+
 					for(Entity ent : new ArrayList<>(node.getEntityList())){
 						if(ent.getComponent(Resource.class) != null)
 							ent.destroy();
 					}
+
+                    WorldGen.getVisibilityMap()[col][row].addViewer();
 				}
 			}
 		};
