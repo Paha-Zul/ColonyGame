@@ -130,13 +130,6 @@ public class ServerPlayer {
 		ColonyEntity colonyEnt = new ColonyEntity(start, 0, new Texture("img/colony.png"), this.batch, 11);
 		Colony colony = colonyEnt.getComponent(Colony.class);
 
-		Item item = ItemManager.getItemByName("Wood Log");
-		item.setCurrStack(10);
-		colony.getComponent(Inventory.class).addItem(item);
-		item = ItemManager.getItemByName("Stone");
-		item.setCurrStack(10);
-		colony.getComponent(Inventory.class).addItem(item);
-
 		int radius = 5;
 		Functional.Perform<Grid.Node[][]> destroyNearbyResources = (grid) -> {
 			int[] index= this.grid.getIndex(colonyEnt.transform.getPosition());

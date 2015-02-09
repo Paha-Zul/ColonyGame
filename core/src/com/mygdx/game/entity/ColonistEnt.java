@@ -26,7 +26,8 @@ public class ColonistEnt extends Entity{
         this.addComponent(new BehaviourManagerComp("colonist"));
         this.makeCollider();
 
-        this.entityType = 100;
+        this.addTag(Constants.ENTITY_HUMANOID);
+        this.addTag(Constants.ENTITY_COLONIST);
     }
 
     private void makeCollider(){

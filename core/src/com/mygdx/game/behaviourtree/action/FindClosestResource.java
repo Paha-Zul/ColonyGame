@@ -80,7 +80,7 @@ public class FindClosestResource extends LeafTask{
 
                         //Loop over the Entity list in the current node and try to find a tree.
                         for(Entity entity : node.getEntityList()) {
-                            if (entity.entityType == Constants.ENTITY_RESOURCE) {
+                            if (entity.hasTag(Constants.ENTITY_RESOURCE)) {
                                 if(!entity.getComponent(Resource.class).isTaken())
                                     return entity;
                             }
@@ -132,7 +132,7 @@ public class FindClosestResource extends LeafTask{
                         finished = false;
 
                         for(Entity entity : node.getEntityList()) {
-                            if (entity.entityType == Constants.ENTITY_RESOURCE) {
+                            if (entity.hasTag(Constants.ENTITY_RESOURCE)) {
                                 return entity;
                             }
                         }

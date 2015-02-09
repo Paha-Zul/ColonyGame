@@ -27,6 +27,10 @@ public class Constants {
 
 
     //Entity types
-    public static int ENTITY_RESOURCE = 0;
+    public static int ENTITY_HUMANOID = 1;
+    public static int ENTITY_BUILDING = 2;
+    public static int ENTITY_ANIMAL = 3;
+    public static int ENTITY_RESOURCE = 4;
+    public static int ENTITY_COLONIST = 5;
 
 }

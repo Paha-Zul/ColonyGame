@@ -20,7 +20,7 @@ public class TreeEnt extends Entity{
     public TreeEnt(Vector2 position, float rotation, Texture graphic, SpriteBatch batch, int drawLevel) {
         super(position, rotation, graphic, batch, drawLevel);
 
-        this.entityType = Constants.ENTITY_RESOURCE;
+        this.addTag(Constants.ENTITY_RESOURCE);
 
         this.addComponent(new Interactable("resource"));
         this.addComponent(new Resource("Wood Log"));
