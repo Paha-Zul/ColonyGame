@@ -1,9 +1,11 @@
 package com.mygdx.game.helpers;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.World;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.gui.GUI;
@@ -118,6 +120,30 @@ public class Grid {
             return neighbors;
         }
 
+        public Node addToGrid(Entity entity, int exploreRadius){
+            Node node = this.getNode(entity);
+            node.addEntity(entity);
+
+            int startX = node.getCol()-exploreRadius;
+            int endX = node.getCol()+exploreRadius;
+            int startY = node.getRow()-exploreRadius;
+            int endY = node.getRow()+exploreRadius;
+            WorldGen.VisibilityTile[][] visMap = WorldGen.getVisibilityMap();
+
+            for(int x=startX;x<=endX;x++){
+                for(int y=startY;y<=endY;y++){
+                    Node tmpNode = this.getNode(x, y);
+                    if(node == null) continue;
+                    if(Math.abs(node.col - x) + Math.abs(node.row - y) >= exploreRadius*1.5f) continue;
+
+                    visMap[x][y].addViewer();
+                }
+            }
+
+
+            return node;
+        }
+
         /**
          * Checks a Node to see if the Entity is still in the same Node as previously. If not, removes the Entity from the old Node and adds the Entity to the new Node.
          *
@@ -134,30 +160,58 @@ public class Grid {
             }
 
             if (currNode != null) currNode.removeEntity(entity); //Remove from the old Node if it's not null.
-            Node tmpNode = getNode(pos); //Get the new Node.
-            if (tmpNode == null) return null; //If it's null, return null.
+            Node newNode = getNode(pos); //Get the new Node.
+            if (newNode == null) return null; //If it's null, return null.
 
             //Under work!
             if(changeVisibility){
                 this.perform((grid)->{
-                    int startX = (tmpNode.getCol() - radius >= 0) ? tmpNode.getCol() - radius : 0;
-                    int endX = (tmpNode.getCol() + radius < this.grid.length) ? tmpNode.getCol() + radius : this.grid.length-1;
-                    int startY = (tmpNode.getRow() - radius >= 0) ? tmpNode.getRow() - radius : 0;
-                    int endY = (tmpNode.getRow() + radius < this.grid[0].length) ? tmpNode.getRow() + radius : this.grid[0].length-1;
+                    int startX = newNode.getCol()-radius < currNode.getCol()-radius ? newNode.getCol()-radius : currNode.getCol()-radius; //Get the least
+                    int endX = newNode.getCol()+radius > currNode.getCol()+radius ? newNode.getCol()+radius : currNode.getCol()+radius; //Get the greatest
+                    int startY = newNode.getRow()-radius < currNode.getRow()-radius ? newNode.getRow()-radius : currNode.getRow()-radius; //get the least
+                    int endY = newNode.getRow()+radius > currNode.getRow()+radius ? newNode.getRow()+radius : currNode.getRow()+radius; //get greatest
+
+                    Gdx.app.log("Startx/Endx/StartY/EndY: ",startX+"/"+endX+"/"+startY+"/"+endY);
+
+                    WorldGen.VisibilityTile[][] visibilityMap = WorldGen.getVisibilityMap();
 
                     for(int x = startX; x <= endX ; x++){
                         for(int y = startY; y <= endY; y++){
                             Node n = this.getNode(x, y);
-                            if(n == null || (Math.abs(x - tmpNode.getCol()) + Math.abs(y - tmpNode.getRow()) > radius*1.5f)) continue;
+                            if(n == null) continue;
 
-                            WorldGen.getVisibilityMap()[x][y].addViewer();
+                            int nXRange = Math.abs(x - newNode.getCol()); //Current node's range from x
+                            int nYRange = Math.abs(y - newNode.getRow()); //Current node's range from y
+                            int lastXRange = Math.abs(x - currNode.getCol()); //Last node's range from x
+                            int lastYRange = Math.abs(y - currNode.getRow()); //Last node's range from y
+                            boolean currInRange = nXRange <= radius && nYRange <= radius;
+                            boolean lastInRange = lastXRange <= radius && lastYRange <= radius;
+
+                            //TODO FIX THIS!
+                            if(currInRange && lastInRange)
+                                continue;
+
+                            //If we are on new territory, add a viewer.
+                            else if(currInRange && !lastInRange) {
+                                if((Math.abs(x - newNode.getCol()) + Math.abs(y - newNode.getRow()) < radius*1.5f))
+                                    visibilityMap[x][y].addViewer();
+                            //If leaving old territory, remove a viewer
+                            }else if(!currInRange && lastInRange){
+                                if((Math.abs(x - newNode.getCol()) + Math.abs(y - newNode.getRow()) < radius*1.5f))
+                                    visibilityMap[x][y].removeViewer();
+                             }
+
+                            if((Math.abs(x - newNode.getCol()) + Math.abs(y - newNode.getRow()) > radius*1.5f))
+                                continue;
+
+                            //WorldGen.getVisibilityMap()[x][y].addViewer();
                         }
                     }
                 });
             }
 
-            tmpNode.addEntity(entity);
-            return tmpNode;
+            newNode.addEntity(entity);
+            return newNode;
         }
 
         /**

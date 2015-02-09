@@ -72,14 +72,13 @@ public class ServerPlayer {
 		//Step the Box2D simulation.
 		ColonyGame.world.step(delta, 8, 3);
 
-		//this.debug();
-
 		batch.begin();
 		this.batch.setProjectionMatrix(ColonyGame.camera.combined);
 
 		WorldGen.TerrainTile[][] map = WorldGen.map;
 		float halfTileSize = ((float)WorldGen.tileSize+20)/2f;
 
+        Profiler.begin("RenderingWorld");
 		//Loop over the array
         for(int x=0;x<map.length;x++) {
             for (int y = 0; y < map[0].length; y++) {
@@ -101,16 +100,20 @@ public class ServerPlayer {
         //Set the color back to white.
         batch.setColor(Color.WHITE);
 
+        Profiler.end();
+
+        Profiler.begin("Box2DDebug");
         //This is just testing... drawing the gray texture that we made.
         batch.draw(WorldGen.grayTexture, 0, 0, 200, 200);
         this.batch.end();
 
-        drawBox2DDebug();
+        //drawBox2DDebug();
 
         //Draw the grid squares if enabled.
         if(drawGrid)
 		    this.grid.debugDraw();
 
+        Profiler.end();
 		Profiler.end();
 
 	}
@@ -151,7 +154,7 @@ public class ServerPlayer {
 							ent.destroy();
 					}
 
-                    WorldGen.getVisibilityMap()[col][row].addViewer();
+                    //WorldGen.getVisibilityMap()[col][row].addViewer();
 				}
 			}
 		};

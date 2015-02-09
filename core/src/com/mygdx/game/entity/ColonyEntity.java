@@ -21,7 +21,7 @@ public class ColonyEntity extends Entity{
     public ColonyEntity(Vector2 position, float rotation, Texture graphic, SpriteBatch batch, int drawLevel) {
         super(position, rotation, graphic, batch, drawLevel);
 
-        this.addComponent(new GridComponent(Constants.GRIDSTATIC, ColonyGame.worldGrid));
+        this.addComponent(new GridComponent(Constants.GRIDSTATIC, ColonyGame.worldGrid, 5));
         this.addComponent(new Colony());
         this.addComponent(new Interactable("colony"));
         this.addComponent(new Inventory("all", 100, 100, 100));

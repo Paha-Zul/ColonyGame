@@ -144,7 +144,7 @@ public class WorldGen {
 
                     rock.addComponent(new Interactable("resource"));
                     rock.addComponent(new Resource("Stone"));
-                    rock.addComponent(new GridComponent(Constants.GRIDSTATIC, ColonyGame.worldGrid));
+                    rock.addComponent(new GridComponent(Constants.GRIDSTATIC, ColonyGame.worldGrid, -1));
                     rock.addTag(Constants.ENTITY_RESOURCE);
                     //circle.dispose();
                 }

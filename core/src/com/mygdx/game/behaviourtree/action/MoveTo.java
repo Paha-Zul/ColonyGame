@@ -63,7 +63,7 @@ public class MoveTo extends LeafTask{
 
         this.collider.body.setLinearVelocity(x, y);
 
-        if((Math.abs(transform.getPosition().x - nodeX) + Math.abs(transform.getPosition().y - nodeY) < completeDst)) {
+        if((Math.abs(transform.getPosition().x - nodeX) + Math.abs(transform.getPosition().y - nodeY) < completeDst*(delta*100))) {
             this.path.removeLast();
         }
     }

@@ -11,12 +11,13 @@ public class GridComponent extends Component{
     private int gridType;
     private Grid.Node currNode;
     private Grid.GridInstance grid;
+    private int exploreRadius = 3;
 
-    public GridComponent(int gridType, Grid.GridInstance grid) {
+    public GridComponent(int gridType, Grid.GridInstance grid, int exploreRadius) {
         super();
 
         this.grid = grid;
-
+        this.exploreRadius = exploreRadius;
         this.gridType = gridType;
         if(this.gridType == Constants.GRIDSTATIC)
             this.setActive(false);
@@ -30,7 +31,7 @@ public class GridComponent extends Component{
         //System.out.println("[GridComponent]Starting for "+this.owner.name);
 
         //Gets a node to start.
-        this.currNode = this.grid.getNode(this.owner);
+        this.currNode = this.grid.addToGrid(this.owner, exploreRadius);
     }
 
     @Override
@@ -39,7 +40,7 @@ public class GridComponent extends Component{
 
         Profiler.begin("GridComponent update");
 
-        this.currNode = this.grid.checkNode(this.currNode, this.owner, true, 5);
+        this.currNode = this.grid.checkNode(this.currNode, this.owner, true, exploreRadius);
 
         Profiler.end();
     }
