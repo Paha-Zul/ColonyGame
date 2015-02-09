@@ -19,11 +19,13 @@ import com.mygdx.game.interfaces.IScalable;
  *
  */
 public class Entity {
-	public String name = "Entity", tag;
-	public int entityType = -1, entitySubType = -1, drawLevel = 0;
+	public String name = "Entity";
+	public int drawLevel = 0;
 	public Transform transform;
 	public GraphicIdentity identity;
 	public boolean active = true;
+
+    protected int tagMask;
 
 	protected ArrayList<Component> newComponentList;
 	protected ArrayList<Component> activeComponentList;
@@ -88,6 +90,10 @@ public class Entity {
 		this.ID = MathUtils.random()*Double.MAX_VALUE;
 	}
 
+    /**
+     * Updates the Entity and all active components.
+     * @param delta The time between the current and last frame.
+     */
 	public void update(float delta){
 		//Only update if active.
 		if(this.active && !this.destroyed) {
@@ -159,6 +165,9 @@ public class Entity {
 		return this.activeComponentList.remove(comp);
 	}
 
+    /**
+     * Prints all components to the console.
+     */
     public void printComponents(){
         System.out.print("Active: ");
         for(Component comp : activeComponentList)
@@ -182,6 +191,22 @@ public class Entity {
 	public double getID(){
 		return this.ID;
 	}
+
+    public void addTag(int tag){
+        this.tagMask |= (1 << tag); //OR the tag to the mask.
+    }
+
+    public boolean hasTag(int tag){
+        return ((1 << tag) & tagMask) == (1 << tag);
+    }
+
+    public boolean hasTags(int[] tagsToCheck){
+        int tags = 0b0;
+        for(int i=0;i<tagsToCheck.length;i++)
+            tags |= (1 << tagsToCheck[i]);
+
+        return (tags & tagMask) == tags;
+    }
 
 	/**
 	 * Destroys this Entity. This will kill all children, components of children, and components of the parent.
