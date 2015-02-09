@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.*;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.component.*;
@@ -77,6 +78,8 @@ public class ServerPlayer {
 
 		WorldGen.TerrainTile[][] map = WorldGen.map;
 		float halfTileSize = ((float)WorldGen.tileSize+20)/2f;
+
+        Vector3[] points = ColonyGame.camera.frustum.planePoints;
 
         Profiler.begin("RenderingWorld");
 		//Loop over the array

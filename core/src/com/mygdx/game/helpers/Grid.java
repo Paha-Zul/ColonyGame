@@ -192,12 +192,12 @@ public class Grid {
                                 continue;
 
                             //If we are on new territory, add a viewer.
-                            else if(currInRange && !lastInRange) {
-                                if((Math.abs(x - newNode.getCol()) + Math.abs(y - newNode.getRow()) < radius*1.5f))
+                            else if(currInRange) {
+                                //if((Math.abs(newNode.getCol() - n.getCol()) + Math.abs(newNode.getRow() - n.getRow()) <= radius*1.5f))
                                     visibilityMap[x][y].addViewer();
                             //If leaving old territory, remove a viewer
-                            }else if(!currInRange && lastInRange){
-                                if((Math.abs(x - newNode.getCol()) + Math.abs(y - newNode.getRow()) < radius*1.5f))
+                            }else if(lastInRange){
+                                //if((Math.abs(newNode.getCol() - n.getCol()) + Math.abs(newNode.getRow() - n.getRow()) <= radius*1.5f))
                                     visibilityMap[x][y].removeViewer();
                              }
 

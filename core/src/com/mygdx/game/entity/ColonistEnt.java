@@ -18,7 +18,7 @@ public class ColonistEnt extends Entity{
         super(position, rotation, graphic, batch, drawLevel);
 
         this.addComponent(new Colonist());
-        this.addComponent(new GridComponent(Constants.GRIDACTIVE, ColonyGame.worldGrid, 3));
+        this.addComponent(new GridComponent(Constants.GRIDACTIVE, ColonyGame.worldGrid, 1));
         this.addComponent(new Interactable("humanoid"));
         this.addComponent(new Stats());
         this.addComponent(new Skills());
