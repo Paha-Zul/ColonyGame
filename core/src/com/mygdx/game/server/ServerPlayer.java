@@ -15,10 +15,7 @@ import com.mygdx.game.component.*;
 import com.mygdx.game.component.Colony;
 import com.mygdx.game.entity.ColonistEnt;
 import com.mygdx.game.entity.ColonyEntity;
-import com.mygdx.game.helpers.Constants;
-import com.mygdx.game.helpers.Grid;
-import com.mygdx.game.helpers.ItemManager;
-import com.mygdx.game.helpers.Profiler;
+import com.mygdx.game.helpers.*;
 import com.mygdx.game.interfaces.Functional;
 import com.mygdx.game.ui.PlayerInterface;
 import com.mygdx.game.entity.Entity;
@@ -61,7 +58,6 @@ public class ServerPlayer {
 		generateStart(new Vector2(Gdx.graphics.getWidth()/2,Gdx.graphics.getHeight()/2));
 
 		initPlayer();
-
     }
 
 	public void render(float delta){
@@ -82,6 +78,8 @@ public class ServerPlayer {
         Vector3[] points = ColonyGame.camera.frustum.planePoints;
 
         Profiler.begin("RenderingWorld");
+
+
 		//Loop over the array
         for(int x=0;x<map.length;x++) {
             for (int y = 0; y < map[0].length; y++) {
@@ -102,6 +100,12 @@ public class ServerPlayer {
 
         //Set the color back to white.
         batch.setColor(Color.WHITE);
+
+        Profiler.begin("UpdateEntities");
+        ListHolder.update(delta);
+        Profiler.end();
+
+        ListHolder.updateFloatingTexts(delta, batch);
 
         Profiler.end();
 
@@ -128,12 +132,6 @@ public class ServerPlayer {
         this.batch.end();
     }
 
-	private void generateTest(Vector2 position){
-		Texture square = new Texture("img/BlackSquare.png");
-		ColonistEnt colonist = new ColonistEnt(position, 0, square, this.batch, 12);
-		colonist.name = names[MathUtils.random(names.length-1)];
-	}
-
 	private void generateStart(Vector2 start){
 		ColonyEntity colonyEnt = new ColonyEntity(start, 0, new Texture("img/colony.png"), this.batch, 11);
 		Colony colony = colonyEnt.getComponent(Colony.class);
@@ -153,7 +151,7 @@ public class ServerPlayer {
                     if(Math.abs(node.getCol() - index[0]) + Math.abs(node.getRow() - index[1]) >= radius*1.5) continue;
 
 					for(Entity ent : new ArrayList<>(node.getEntityList())){
-						if(ent.getComponent(Resource.class) != null)
+						if(ent.hasTag(Constants.ENTITY_RESOURCE))
 							ent.destroy();
 					}
 
@@ -183,27 +181,5 @@ public class ServerPlayer {
 	private void initPlayer(){
 		new PlayerInterface(ColonyGame.batch, this.game, ColonyGame.world);
 	}
-
-	/*
-	public void debug(){
-		Gdx.gl.glEnable(GL20.GL_BLEND);
-		Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-		shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-
-		Functional.Perform<Grid.Cell> perform = cell -> {
-			shapeRenderer.setColor(1f, 0, 0, cell.food/100f);
-			shapeRenderer.rect(cell.getCol()*Grid.activeGrid.squareSize, cell.getRow()*Grid.activeGrid.squareSize, Grid.activeGrid.squareSize, Grid.activeGrid.squareSize);
-			shapeRenderer.setColor(0, 1f, 0, cell.trail/10f);
-			shapeRenderer.arc((float)cell.getCol()*Grid.activeGrid.squareSize + Grid.activeGrid.squareSize/2, (float)cell.getRow()*Grid.activeGrid.squareSize + Grid.activeGrid.squareSize/2, (float)Grid.activeGrid.squareSize/2, 0, 360);
-		};
-		Grid.activeGrid.iterate(perform);
-
-		shapeRenderer.end();
-		Gdx.gl.glDisable(GL20.GL_BLEND);
-	}
-	*/
-
-
-
 
 }

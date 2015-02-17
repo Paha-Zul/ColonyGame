@@ -1,13 +1,12 @@
 package com.mygdx.game.behaviourtree.action;
 
+import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.behaviourtree.LeafTask;
 import com.mygdx.game.component.BlackBoard;
 import com.mygdx.game.component.Resource;
 import com.mygdx.game.entity.Entity;
-import com.mygdx.game.helpers.Constants;
-import com.mygdx.game.helpers.Grid;
-import com.mygdx.game.helpers.ItemManager;
-import com.mygdx.game.helpers.Profiler;
+import com.mygdx.game.helpers.*;
+import com.mygdx.game.helpers.worldgeneration.WorldGen;
 import com.mygdx.game.interfaces.Functional;
 
 /**
@@ -35,10 +34,16 @@ public class FindClosestResource extends LeafTask{
         this.getClosestResource();
         Profiler.end();
 
-//        if(this.blackBoard.target == null)
-//            System.out.println("[FindClosestResource]Null resource");
-//        else if(this.blackBoard.target.transform == null)
-//            System.out.println("[FindClosestResource]Null resource transform on "+this.blackBoard.target.name);
+        if(this.blackBoard.target == null){
+            this.control.finishWithFailure();
+            Vector2 pos = this.blackBoard.getEntityOwner().transform.getPosition();
+            new FloatingText("Couldn't find a nearby resource!", new Vector2(pos.x, pos.y+10), new Vector2(pos.x, pos.y+40), 1.5f, 0.8f);
+            return;
+        }
+
+        this.blackBoard.targetNode = this.blackBoard.colonyGrid.getNode(this.blackBoard.target);
+        this.blackBoard.targetResource = this.blackBoard.target.getComponent(Resource.class);
+        this.blackBoard.targetResource.setTaken(true);
 
         this.control.finishWithSuccess();
     }
@@ -56,10 +61,10 @@ public class FindClosestResource extends LeafTask{
             }
 
             while(!finished) {
-                int startX = currNode.getCol() - radius;
-                int endX = currNode.getCol() + radius;
-                int startY = currNode.getRow() - radius;
-                int endY = currNode.getRow() + radius;
+                int startX = (currNode.getCol() - radius < 0) ? 0 : currNode.getCol() - radius;
+                int endX = (currNode.getCol() + radius >= grid.length) ? grid.length - 1 : currNode.getCol() + radius;
+                int startY = (currNode.getRow() - radius < 0) ? 0 : currNode.getRow() - radius;
+                int endY = (currNode.getRow() + radius >= grid[currNode.getCol()].length) ? grid.length-1 : currNode.getRow() + radius;
 
                 finished = true;
 
@@ -73,7 +78,7 @@ public class FindClosestResource extends LeafTask{
 
                         //If we try to get the node and it's null, continue.
                         Grid.Node node = this.blackBoard.colonyGrid.getNode(col, row);
-                        if(node == null)
+                        if(node == null || WorldGen.getVisibilityMap()[col][row].getVisibility() == Constants.VISIBILITY_UNEXPLORED)
                             continue;
 
                         finished = false; //Set this to false. We still have places to check obviously!
@@ -95,55 +100,6 @@ public class FindClosestResource extends LeafTask{
         };
 
         this.blackBoard.target = this.blackBoard.colonyGrid.performAndGet(getClosestResource);
-        if(this.blackBoard.target == null){
-            this.control.finishWithFailure();
-            return;
-        }
-        this.blackBoard.targetNode = this.blackBoard.colonyGrid.getNode(this.blackBoard.target);
-        this.blackBoard.targetResource = this.blackBoard.target.getComponent(Resource.class);
-        this.blackBoard.targetResource.setTaken(true);
-    }
-
-    private void getClosestStockpile(){
-        Functional.PerformAndGet<Entity, Grid.Node[][]> pg = grid -> {
-            Entity closest = null;
-            Grid.Node currNode = this.blackBoard.colonyGrid.getNode(this.blackBoard.getEntityOwner());
-            boolean finished = false;
-            int radius = 1;
-
-            while(!finished) {
-                int startX = currNode.getCol() - radius;
-                int endX = currNode.getCol() + radius;
-                int startY = currNode.getRow() - radius;
-                int endY = currNode.getRow() + radius;
-
-                finished = true;
-
-                for (int col = startX; col <= endX; col++){
-                    for(int row = startY; row <= endY; row++){
-
-                        if((col != startX && col != endX) || (row != startY && row != endY))
-                            continue;
-
-                        Grid.Node node = this.blackBoard.colonyGrid.getNode(col, row);
-                        if(node == null)
-                            continue;
-
-                        finished = false;
-
-                        for(Entity entity : node.getEntityList()) {
-                            if (entity.hasTag(Constants.ENTITY_RESOURCE)) {
-                                return entity;
-                            }
-                        }
-                    }
-                }
-
-                radius++;
-            }
-
-            return closest;
-        };
     }
 
     @Override

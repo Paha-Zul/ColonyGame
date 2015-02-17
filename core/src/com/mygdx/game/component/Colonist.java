@@ -2,7 +2,9 @@ package com.mygdx.game.component;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.helpers.BehaviourManager;
+import com.mygdx.game.helpers.FloatingText;
 import com.mygdx.game.helpers.gui.GUI;
 import com.mygdx.game.interfaces.IDisplayable;
 
@@ -70,9 +72,13 @@ public class Colonist extends Component implements IDisplayable{
             GUI.Label("Name: "+this.owner.name, batch, rect.x + rect.getWidth()/2, rect.y + rect.getHeight() - 5, true);
             GUI.Label("Current Task: "+this.manager.getCurrentTaskName(), batch, rect.x + rect.getWidth()/2, rect.y + rect.getHeight() - 25, true);
             this.gatherButton.set(rect.getX(), rect.getY() + rect.getHeight() - 75, 75, 25);
-            if(GUI.Button(this.gatherButton, "Gather", batch)){
+            if(GUI.Button(this.gatherButton, "Gather", batch))
                 this.manager.gather();
-            }
+
+            this.gatherButton.set(rect.getX() + 80, rect.getY() + rect.getHeight() - 75, 75, 25);
+            if(GUI.Button(this.gatherButton, "Explore", batch))
+                this.manager.explore();
+
         }else if(name == "health"){
             stats.display(rect, batch, name);
         }else if(name == "inventory"){

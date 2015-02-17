@@ -3,8 +3,10 @@ package com.mygdx.game.screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Graphics;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.math.Vector3;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.client.ClientPlayer;
+import com.mygdx.game.helpers.Grid;
 import com.mygdx.game.helpers.ListHolder;
 import com.mygdx.game.interfaces.IGUI;
 import com.mygdx.game.server.ServerPlayer;
@@ -28,6 +30,7 @@ public class GameScreen implements Screen{
             clientPlayer = new ClientPlayer();
 
         this.game = game;
+        Grid.GridInstance grid = ColonyGame.worldGrid;
     }
 
     @Override
@@ -45,9 +48,11 @@ public class GameScreen implements Screen{
 
     @Override
     public void resize(int width, int height) {
+        Vector3 pos = new Vector3(ColonyGame.camera.position);
         Gdx.graphics.setDisplayMode(width, height, false);
         ColonyGame.camera.setToOrtho(false, width, height);
         ColonyGame.UICamera.setToOrtho(false, width, height);
+        ColonyGame.camera.position.set(pos);
 
         //Resizes all the GUI elements of the game (hopefully!)
         ArrayList<UI> list = ListHolder.getGUIList();

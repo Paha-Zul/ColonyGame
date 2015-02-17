@@ -16,7 +16,6 @@ public class MoveTo extends LeafTask{
     private Transform transform;
     private LinkedList<Vector2> path;
     private int squareSize;
-    private Texture square = new Texture("img/blueSquare.png");
     private Collider collider;
 
     private float completeDst = 1f;

@@ -1,5 +1,6 @@
 package com.mygdx.game.component;
 
+import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.Constants;
 import com.mygdx.game.helpers.Grid;
 import com.mygdx.game.helpers.Profiler;
@@ -25,13 +26,16 @@ public class GridComponent extends Component{
     }
 
     @Override
-    public void start() {
-        super.start();
-
-        //System.out.println("[GridComponent]Starting for "+this.owner.name);
+    public void init(Entity owner) {
+        super.init(owner);
 
         //Gets a node to start.
         this.currNode = this.grid.addToGrid(this.owner, exploreRadius);
+    }
+
+    @Override
+    public void start() {
+        super.start();
     }
 
     @Override

@@ -133,13 +133,11 @@ public class Grid {
             for(int x=startX;x<=endX;x++){
                 for(int y=startY;y<=endY;y++){
                     Node tmpNode = this.getNode(x, y);
-                    if(node == null) continue;
-                    if(Math.abs(node.col - x) + Math.abs(node.row - y) >= exploreRadius*1.5f) continue;
+                    if(tmpNode == null) continue;
 
                     visMap[x][y].addViewer();
                 }
             }
-
 
             return node;
         }
@@ -171,7 +169,7 @@ public class Grid {
                     int startY = newNode.getRow()-radius < currNode.getRow()-radius ? newNode.getRow()-radius : currNode.getRow()-radius; //get the least
                     int endY = newNode.getRow()+radius > currNode.getRow()+radius ? newNode.getRow()+radius : currNode.getRow()+radius; //get greatest
 
-                    Gdx.app.log("Startx/Endx/StartY/EndY: ",startX+"/"+endX+"/"+startY+"/"+endY);
+                    //Gdx.app.log("Startx/Endx/StartY/EndY: ",startX+"/"+endX+"/"+startY+"/"+endY);
 
                     WorldGen.VisibilityTile[][] visibilityMap = WorldGen.getVisibilityMap();
 

@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
+import com.sun.istack.internal.NotNull;
 
 /**
  * Created by Bbent_000 on 12/25/2014.
@@ -80,7 +81,7 @@ public class GUI {
         return clicked;
     }
 
-    public static void Label(String text, SpriteBatch batch, float x, float y, boolean centered){
+    public static void Label(@NotNull String text, @NotNull SpriteBatch batch, float x, float y, boolean centered){
         if(centered){
             BitmapFont.TextBounds bounds = font.getBounds(text);
             font.draw(batch, text, x - bounds.width/2, y + bounds.height/2);

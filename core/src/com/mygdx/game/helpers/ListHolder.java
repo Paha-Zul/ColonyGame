@@ -1,5 +1,6 @@
 package com.mygdx.game.helpers;
 
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.interfaces.Functional;
 import com.mygdx.game.interfaces.IGUI;
@@ -7,6 +8,8 @@ import com.mygdx.game.ui.UI;
 import com.sun.java.accessibility.util.GUIInitializedListener;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.ListIterator;
 
 /**
  * Created by Bbent_000 on 11/24/2014.
@@ -14,6 +17,8 @@ import java.util.ArrayList;
 public class ListHolder {
 	private static ArrayList<ArrayList<Entity>> entityList = new ArrayList<>();
 	private static ArrayList<UI> GUIList = new ArrayList<>();
+
+    private static LinkedList<FloatingText> floatingTexts = new LinkedList<>();
 
 	public static void addEntity(int drawLevel, Entity e){
 		//If our list doesn't have enough layers to put something at 'drawLevel', add the layers!
@@ -32,6 +37,10 @@ public class ListHolder {
 		entityList.forEach((e)->perform.perform(e));
 	}
 
+    /**
+     * Updates the main list in the ListHolder.
+     * @param delta The time between frames.
+     */
 	public static void update(float delta){
 		//Loop over each layer.
 		for(int i=0;i<entityList.size();i++){
@@ -51,6 +60,10 @@ public class ListHolder {
 		}
 	}
 
+    /**
+     * Updates the GUI elements
+     * @param delta The time between frames.
+     */
 	public static void updateGUI(float delta){
 		for (int i=0;i<GUIList.size();i++) {
 			UI gui = GUIList.get(i);
@@ -64,6 +77,29 @@ public class ListHolder {
 			gui.drawGUI(delta);
 		}
 	}
+
+    /**
+     * Updates the list of FloatingTexts
+     * @param delta The time between frames.
+     * @param batch The SpriteBatch to draw with.
+     */
+    public static void updateFloatingTexts(float delta, SpriteBatch batch){
+        ListIterator<FloatingText> iter = floatingTexts.listIterator();
+        while(iter.hasNext()){
+            FloatingText text = iter.next();
+            if(text.isDestroyed()){
+                iter.remove();
+                continue;
+            }
+
+            text.update(delta);
+            text.render(delta, batch);
+        }
+    }
+
+    public static void addFloatingText(FloatingText text){
+        floatingTexts.add(text);
+    }
 
 	/**
 	 * Adds a UI Object to the list.

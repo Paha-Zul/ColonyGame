@@ -19,9 +19,11 @@ public abstract class Component implements IDestroyable {
 	/**
 	 * The initialization of this Component. This should only be called by the Entity owner. This function will
 	 * set the owner of this Component and other Components of the owner may not be available to access.
+     * Override this when an immediate reference to the owner is needed. This function does not guarantee that any other
+     * Components are available to be accessed.
 	 * @param owner The Entity owner of this Component.
 	 */
-	public final void init(Entity owner){
+	public void init(Entity owner){
 		this.owner = owner;
 		this.initiated = true;
 	}

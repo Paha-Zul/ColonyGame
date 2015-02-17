@@ -27,7 +27,6 @@ public class WorldGen {
     public static int tileSize = 25;
     public static float treeScale = 0.8f;
     public static float freq = 5;
-    public static int numStep = 1;
     public static float percentageDone = 0;
 
     private static Texture[] grassTiles;
@@ -67,8 +66,8 @@ public class WorldGen {
         SimplexNoise.genGrad(seed);
 
         //Sets the number of tiles in X (numX) and Y (numY) by getting the screen width/height.
-        numX = Gdx.graphics.getWidth()/tileSize + 1;
-        numY = Gdx.graphics.getHeight()/tileSize + 1;
+        numX = Constants.GRID_WIDTH/tileSize + 1;
+        numY = Constants.GRID_HEIGHT/tileSize + 1;
 
         //Initializes a new array
         map = new TerrainTile[numX][numY];
@@ -90,7 +89,7 @@ public class WorldGen {
      * @return True when finished, false otherwise.
      */
     public static boolean generateWorld(){
-        int stepsLeft = numStep;
+        int stepsLeft = Constants.WORLDGEN_GENERATESPEED;
         boolean done = true; //Flag for completion.
 
         //If there's steps left and currX is still less than the total num X, generate!
@@ -248,17 +247,16 @@ public class WorldGen {
     }
 
     public static class VisibilityTile{
-        private int visibility;
+        private int visibility = Constants.VISIBILITY_UNEXPLORED;
         private int currViewers = 0;
 
         public VisibilityTile(){
             this.visibility = Constants.VISIBILITY_UNEXPLORED;
         }
 
-        public void changeVisibility(int visibility){
-            this.visibility = visibility;
-        }
-
+        /**
+         * Adds a viewer to this Tile. This will immediately mark the Tile as visible.
+         */
         public void addViewer(){
             this.currViewers++;
             this.changeVisibility(Constants.VISIBILITY_VISIBLE);
@@ -275,6 +273,10 @@ public class WorldGen {
 
         public int getVisibility() {
             return visibility;
+        }
+
+        public void changeVisibility(int visibility){
+            this.visibility = visibility;
         }
 
         public int getCurrViewers() {

@@ -84,6 +84,23 @@ public class BehaviourManagerComp extends Component implements IDisplayable{
         return sequence;
     }
 
+    private Task exploreUnexplored(){
+        //Find an unexplored location.
+        //Move to it!
+
+        Sequence sequence = new Sequence("Exploring", this.blackBoard);
+
+        FindClosestUnexplored findClosestUnexplored = new FindClosestUnexplored("Finding Closest Unexplored Location", this.blackBoard, this.getEntityOwner().getComponent(Colonist.class).getColony().getEntityOwner());
+        FindPath findPathToUnexplored = new FindPath("Finding Path to Unexplored", this.blackBoard);
+        MoveTo moveToLocation = new MoveTo("Moving to Explore", this.blackBoard);
+
+        ((ParentTaskController) sequence.getControl()).addTask(findClosestUnexplored);
+        ((ParentTaskController) sequence.getControl()).addTask(findPathToUnexplored);
+        ((ParentTaskController) sequence.getControl()).addTask(moveToLocation);
+
+        return sequence;
+    }
+
     public Task idle(float baseIdleTime, float randomIdleTime, int radius){
         //Find random spot to walk to
         //Find path
@@ -106,10 +123,18 @@ public class BehaviourManagerComp extends Component implements IDisplayable{
     }
 
     public void gather(){
+        this.changeTask(this.gatherResource());
+    }
+
+    public void explore(){
+        this.changeTask(this.exploreUnexplored());
+    }
+
+    private void changeTask(Task task){
         if(this.behaviourTree != null && !this.behaviourTree.getControl().hasFinished())
             this.behaviourTree.getControl().finishWithSuccess();
 
-        this.behaviourTree = this.gatherResource();
+        this.behaviourTree = task;
         this.behaviourTree.start();
     }
 

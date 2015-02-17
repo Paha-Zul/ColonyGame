@@ -8,37 +8,41 @@ import com.badlogic.gdx.graphics.Color;
 public class Constants {
 
 	//For the Grid stuff...
-	public static int GRIDACTIVE = 0;
-	public static int GRIDSTATIC = 1;
+	public final static int GRIDACTIVE = 0;
+	public final static int GRIDSTATIC = 1;
 
 	//For interactable types...
 
 	//Grid stuff
-	public static int GRID_SIZE = 25;
+	public final static int GRID_SQUARESIZE = 25;
+	public final static int GRID_WIDTH = 5000;
+	public final static int GRID_HEIGHT = 5000;
 
 	//WorldGen stuff
 
 
 	//Terrain stuff
-	public static int TERRAIN_WATER = 0;
-	public static int TERRAIN_GRASS = 1;
+	public final static int TERRAIN_WATER = 0;
+	public final static int TERRAIN_GRASS = 1;
 
-    public static int VISIBILITY_UNEXPLORED = 0;
-    public static int VISIBILITY_EXPLORED = 1;
-    public static int VISIBILITY_VISIBLE = 2;
+    public final static int VISIBILITY_UNEXPLORED = 0;
+    public final static int VISIBILITY_EXPLORED = 1;
+    public final static int VISIBILITY_VISIBLE = 2;
+
+    public final static int WORLDGEN_GENERATESPEED = 500;
 
 
     //Entity types
-    public static int ENTITY_HUMANOID = 1;
-    public static int ENTITY_BUILDING = 2;
-    public static int ENTITY_ANIMAL = 3;
-    public static int ENTITY_RESOURCE = 4;
-    public static int ENTITY_COLONIST = 5;
+    public final static int ENTITY_HUMANOID = 1;
+    public final static int ENTITY_BUILDING = 2;
+    public final static int ENTITY_ANIMAL = 3;
+    public final static int ENTITY_RESOURCE = 4;
+    public final static int ENTITY_COLONIST = 5;
 
 
     //Colors
-    public static Color COLOR_UNEXPLORED = new Color(Color.BLACK);
-    public static Color COLOR_EXPLORED = new Color(0.3f, 0.3f, 0.3f, 1f);
-    public static Color COLOR_VISIBILE = new Color(Color.WHITE);
+    public final static Color COLOR_UNEXPLORED = new Color(Color.BLACK);
+    public final static Color COLOR_EXPLORED = new Color(0.3f, 0.3f, 0.3f, 1f);
+    public final static Color COLOR_VISIBILE = new Color(Color.WHITE);
 
 }

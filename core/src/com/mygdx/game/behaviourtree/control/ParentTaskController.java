@@ -47,4 +47,17 @@ public class ParentTaskController extends TaskController{
     public Task getCurrTask(){
         return this.currTask;
     }
+
+    @Override
+    public void safeEnd() {
+        super.safeEnd();
+
+        for(Task task : this.subTasks)
+            task.getControl().safeEnd();
+    }
+
+    @Override
+    public void safeStart() {
+        super.safeStart();
+    }
 }

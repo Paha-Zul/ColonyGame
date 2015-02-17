@@ -35,7 +35,7 @@ public class ColonyGame extends Game {
 		this.UICamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		world = new World(new Vector2(0,0), true);
 
-		this.worldGrid = Grid.newGridInstance("grid", Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), Constants.GRID_SIZE);
+		this.worldGrid = Grid.newGridInstance("grid", Constants.GRID_WIDTH, Constants.GRID_HEIGHT, Constants.GRID_SQUARESIZE);
 
 		this.setScreen(new MainMenuScreen(this));
 	}
@@ -58,9 +58,7 @@ public class ColonyGame extends Game {
 		//Draw everything that is modified by the regular camera.
 		this.batch.begin();
 
-		Profiler.begin("UpdateEntities");
-		ListHolder.update(delta);
-		Profiler.end();
+
 
 		Profiler.begin("UpdateGUI");
 		ListHolder.updateGUI(delta);
