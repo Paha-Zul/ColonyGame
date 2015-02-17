@@ -6,6 +6,7 @@ import com.mygdx.game.behaviourtree.LeafTask;
 import com.mygdx.game.component.BlackBoard;
 import com.mygdx.game.component.Transform;
 import com.mygdx.game.component.collider.Collider;
+import com.mygdx.game.interfaces.Functional;
 
 import java.util.LinkedList;
 
@@ -17,11 +18,17 @@ public class MoveTo extends LeafTask{
     private LinkedList<Vector2> path;
     private int squareSize;
     private Collider collider;
+    private Functional.Callback callback;
 
     private float completeDst = 1f;
 
-    public MoveTo(String name, BlackBoard blackBoard) {
+    public MoveTo(String name, BlackBoard blackBoard, Functional.Callback callback) {
         super(name, blackBoard);
+        this.callback = callback;
+    }
+
+    public MoveTo(String name, BlackBoard blackBoard) {
+        this(name, blackBoard, null);
     }
 
     @Override
@@ -48,6 +55,7 @@ public class MoveTo extends LeafTask{
             this.control.finishWithSuccess();
             this.path.clear();
             this.path = null;
+            if(this.callback != null) this.callback.callback();
             return;
         }
 

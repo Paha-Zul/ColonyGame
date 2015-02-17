@@ -14,6 +14,15 @@ import com.mygdx.game.interfaces.Functional;
  */
 public class FindClosestResource extends LeafTask{
     private String itemName;
+    private Functional.Callback failCallback, successCallback;
+
+    public FindClosestResource(String name, BlackBoard blackBoard, String itemName, Functional.Callback failCallback, Functional.Callback successCallback) {
+        super(name, blackBoard);
+
+        this.itemName = itemName;
+        this.failCallback = failCallback;
+        this.successCallback = successCallback;
+    }
 
     public FindClosestResource(String name, BlackBoard blackBoard, String itemName) {
         super(name, blackBoard);
@@ -38,6 +47,7 @@ public class FindClosestResource extends LeafTask{
             this.control.finishWithFailure();
             Vector2 pos = this.blackBoard.getEntityOwner().transform.getPosition();
             new FloatingText("Couldn't find a nearby resource!", new Vector2(pos.x, pos.y+10), new Vector2(pos.x, pos.y+40), 1.5f, 0.8f);
+            if(this.failCallback != null) this.failCallback.callback();
             return;
         }
 
@@ -45,6 +55,7 @@ public class FindClosestResource extends LeafTask{
         this.blackBoard.targetResource = this.blackBoard.target.getComponent(Resource.class);
         this.blackBoard.targetResource.setTaken(true);
 
+        if(this.successCallback != null) this.successCallback.callback();
         this.control.finishWithSuccess();
     }
 

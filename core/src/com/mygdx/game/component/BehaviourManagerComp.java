@@ -11,6 +11,7 @@ import com.mygdx.game.behaviourtree.Task;
 import com.mygdx.game.behaviourtree.action.*;
 import com.mygdx.game.behaviourtree.composite.Sequence;
 import com.mygdx.game.behaviourtree.control.ParentTaskController;
+import com.mygdx.game.interfaces.Functional;
 import com.mygdx.game.interfaces.IDisplayable;
 
 /**
@@ -64,7 +65,17 @@ public class BehaviourManagerComp extends Component implements IDisplayable{
 
         Sequence sequence = new Sequence("Gathering Resource", this.blackBoard);
 
-        FindClosestResource fr = new FindClosestResource("Finding Closest Resource", this.blackBoard, "Wood Log");
+        //On the failing of finding a resource...
+        Functional.Callback fail = () -> {
+            //On the finishing of moving to a new spot.
+            Functional.Callback onFinish = () -> {
+              this.changeTask(this.gatherResource()); //Change this back to gathering.
+            };
+
+            this.changeTask(this.exploreUnexplored(onFinish));
+        };
+
+        FindClosestResource fr = new FindClosestResource("Finding Closest Resource", this.blackBoard, "Wood Log", fail, null);
         FindPath findPath = new FindPath("Finding Path to Resource", this.blackBoard);
         MoveTo move = new MoveTo("Moving to Resource", this.blackBoard);
         Gather gather = new Gather("Gathering Resource", this.blackBoard);
@@ -84,7 +95,7 @@ public class BehaviourManagerComp extends Component implements IDisplayable{
         return sequence;
     }
 
-    private Task exploreUnexplored(){
+    private Task exploreUnexplored(Functional.Callback callbackOnCompletion){
         //Find an unexplored location.
         //Move to it!
 
@@ -92,7 +103,7 @@ public class BehaviourManagerComp extends Component implements IDisplayable{
 
         FindClosestUnexplored findClosestUnexplored = new FindClosestUnexplored("Finding Closest Unexplored Location", this.blackBoard, this.getEntityOwner().getComponent(Colonist.class).getColony().getEntityOwner());
         FindPath findPathToUnexplored = new FindPath("Finding Path to Unexplored", this.blackBoard);
-        MoveTo moveToLocation = new MoveTo("Moving to Explore", this.blackBoard);
+        MoveTo moveToLocation = new MoveTo("Moving to Explore", this.blackBoard, callbackOnCompletion);
 
         ((ParentTaskController) sequence.getControl()).addTask(findClosestUnexplored);
         ((ParentTaskController) sequence.getControl()).addTask(findPathToUnexplored);
@@ -127,7 +138,7 @@ public class BehaviourManagerComp extends Component implements IDisplayable{
     }
 
     public void explore(){
-        this.changeTask(this.exploreUnexplored());
+        this.changeTask(this.exploreUnexplored(null));
     }
 
     private void changeTask(Task task){
