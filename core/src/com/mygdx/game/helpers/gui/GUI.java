@@ -24,6 +24,7 @@ public class GUI {
     private static ButtonStyle defaultButtonStyle = new ButtonStyle();
 
     private static boolean clicked = false;
+    private static boolean up = false;
 
     static{
         font = defaultFont;
@@ -42,17 +43,16 @@ public class GUI {
     }
 
     public static boolean Button(Rectangle rect, SpriteBatch batch){
-        return GUI.Button(rect, null, "", batch);
+        return GUI.Button(rect, "", batch, null);
     }
 
     public static boolean Button(Rectangle rect, String text, SpriteBatch batch){
-
-
-        return GUI.Button(rect, null, text, batch);
+        return GUI.Button(rect, text, batch, null);
     }
 
-    public static boolean Button(Rectangle rect, ButtonStyle style, String text, SpriteBatch batch){
+    public static boolean Button(Rectangle rect, String text, SpriteBatch batch, ButtonStyle style){
         boolean clicked = false;
+        GUI.checkState();
 
         if(style == null)
             style = defaultButtonStyle;
@@ -60,19 +60,15 @@ public class GUI {
         Texture currTexture = style.normal;
 
         if(rect.contains(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY())){
-            boolean down = Gdx.input.isButtonPressed(Input.Buttons.LEFT);
-            if(down && !GUI.clicked){
+            if(GUI.clicked){
                 currTexture = style.clicked;
-                GUI.clicked = clicked = true;
-            }else if(down && GUI.clicked){
+            }else if(GUI.up){
                 currTexture = style.moused;
-                clicked = false;
+                clicked = true;
             }else {
                 currTexture = style.moused;
-                GUI.clicked = false;
             }
-        }else
-            GUI.clicked = false;
+        }
 
         batch.draw(currTexture, rect.x, rect.y, rect.getWidth(), rect.getHeight());
         BitmapFont.TextBounds bounds = font.getBounds(text);                                //Get the bounds of the text
@@ -110,6 +106,21 @@ public class GUI {
 
         public ButtonStyle(){
 
+        }
+    }
+
+    private static void checkState(){
+        boolean down = Gdx.input.isButtonPressed(Input.Buttons.LEFT);
+
+        if(down){
+            GUI.clicked = true;
+            GUI.up = false;
+        }else if(GUI.clicked){
+            GUI.up = true;
+            GUI.clicked = false;
+        }else if(GUI.up){
+            GUI.up = false;
+            GUI.clicked = false;
         }
     }
 }
