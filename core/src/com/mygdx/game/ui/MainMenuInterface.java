@@ -52,14 +52,14 @@ public class MainMenuInterface extends UI{
         GUI.Label("Version: "+this.versionNumber, this.batch, quitRect.getX() + quitRect.getWidth()/2, quitRect.getY() - 50, true);
 
         //Start button.
-        if(GUI.Button(startRect, null, "Start", this.batch)){
+        if(GUI.Button(startRect, "Start", this.batch, null)){
             this.done = true;
             this.game.setScreen(new LoadingScreen(this.game));
             return;
         }
 
         //Quit button.
-        if(GUI.Button(quitRect, null, "Quit", this.batch)){
+        if(GUI.Button(quitRect, "Quit", this.batch, null)){
             Gdx.app.exit();
             return;
         }
