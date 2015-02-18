@@ -1,5 +1,6 @@
 package com.mygdx.game.component;
 
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -18,6 +19,15 @@ public class Colonist extends Component implements IDisplayable{
     private BehaviourManagerComp manager;
 
     private Rectangle gatherButton = new Rectangle();
+
+    private static GUI.ButtonStyle gatherButtonStyle;
+
+    static{
+        gatherButtonStyle = new GUI.ButtonStyle();
+        gatherButtonStyle.normal = new Texture("img/ui/axebutton_normal.png");
+        gatherButtonStyle.moused = new Texture("img/ui/axebutton_moused.png");
+        gatherButtonStyle.clicked = new Texture("img/ui/axebutton_clicked.png");
+    }
 
     public Colonist() {
         super();
@@ -71,8 +81,8 @@ public class Colonist extends Component implements IDisplayable{
         if(name == "general"){
             GUI.Label("Name: "+this.owner.name, batch, rect.x + rect.getWidth()/2, rect.y + rect.getHeight() - 5, true);
             GUI.Label("Current Task: "+this.manager.getCurrentTaskName(), batch, rect.x + rect.getWidth()/2, rect.y + rect.getHeight() - 25, true);
-            this.gatherButton.set(rect.getX(), rect.getY() + rect.getHeight() - 75, 75, 25);
-            if(GUI.Button(this.gatherButton, "Gather", batch))
+            this.gatherButton.set(rect.getX(), rect.getY() + rect.getHeight() - 75, 35, 35);
+            if(GUI.Button(this.gatherButton, "", batch, gatherButtonStyle))
                 this.manager.gather();
 
             this.gatherButton.set(rect.getX() + 80, rect.getY() + rect.getHeight() - 75, 75, 25);
