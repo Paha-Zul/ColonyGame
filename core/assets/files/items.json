@@ -1,0 +1,4 @@
+{"items":[
+  {"itemName":"wood", "displayName":"Wood Log", "itemType":"wood", "description": "A wood log."},
+  {"itemName":"stone", "displayName":"Stone", "itemType":"stone", "description": "A stone rock."}
+]}

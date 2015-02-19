@@ -1,5 +1,6 @@
 package com.mygdx.game.component;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
@@ -21,12 +22,18 @@ public class Colonist extends Component implements IDisplayable{
     private Rectangle gatherButton = new Rectangle();
 
     private static GUI.ButtonStyle gatherButtonStyle;
+    private static GUI.ButtonStyle exploreButtonStyle;
 
     static{
         gatherButtonStyle = new GUI.ButtonStyle();
-        gatherButtonStyle.normal = new Texture("img/ui/axebutton_normal.png");
+        gatherButtonStyle.normal = new Texture(Gdx.files.internal("img/ui/axebutton_normal.png"));
         gatherButtonStyle.moused = new Texture("img/ui/axebutton_moused.png");
         gatherButtonStyle.clicked = new Texture("img/ui/axebutton_clicked.png");
+
+        exploreButtonStyle = new GUI.ButtonStyle();
+        exploreButtonStyle.normal = new Texture("img/ui/explorebutton_normal.png");
+        exploreButtonStyle.moused = new Texture("img/ui/explorebutton_moused.png");
+        exploreButtonStyle.clicked = new Texture("img/ui/explorebutton_clicked.png");
     }
 
     public Colonist() {
@@ -81,13 +88,15 @@ public class Colonist extends Component implements IDisplayable{
         if(name == "general"){
             GUI.Label("Name: "+this.owner.name, batch, rect.x + rect.getWidth()/2, rect.y + rect.getHeight() - 5, true);
             GUI.Label("Current Task: "+this.manager.getCurrentTaskName(), batch, rect.x + rect.getWidth()/2, rect.y + rect.getHeight() - 25, true);
+
             this.gatherButton.set(rect.getX(), rect.getY() + rect.getHeight() - 75, 35, 35);
             if(GUI.Button(this.gatherButton, "", batch, gatherButtonStyle))
                 this.manager.gather();
 
-            this.gatherButton.set(rect.getX() + 80, rect.getY() + rect.getHeight() - 75, 75, 25);
-            if(GUI.Button(this.gatherButton, "Explore", batch))
+            this.gatherButton.set(rect.getX() + 40, rect.getY() + rect.getHeight() - 75, 35, 35);
+            if(GUI.Button(this.gatherButton, "", batch, exploreButtonStyle)) {
                 this.manager.explore();
+            }
 
         }else if(name == "health"){
             stats.display(rect, batch, name);

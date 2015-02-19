@@ -1,0 +1,4 @@
+{"resources":[
+  {"Name":"Redwood", "Items":"Wood, Stick, Leaf", "Amounts":"[1,10][5][1-5]},
+  {"Name":"Pine", "Items":"Wood, Stick, Leaf", "Amounts":"[1,4][1][1-10]}
+]}

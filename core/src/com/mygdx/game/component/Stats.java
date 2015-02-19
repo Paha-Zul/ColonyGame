@@ -10,6 +10,7 @@ import com.mygdx.game.interfaces.IDisplayable;
  */
 public class Stats extends Component implements IDisplayable{
     private float maxHealth, currHealth;
+    private int hunger = 100, thirst = 100;
 
     public Stats() {
         super();

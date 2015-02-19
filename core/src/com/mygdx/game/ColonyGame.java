@@ -10,6 +10,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
 import com.mygdx.game.helpers.*;
+import com.mygdx.game.helpers.gui.GUI;
 import com.mygdx.game.screens.MainMenuScreen;
 
 public class ColonyGame extends Game {
@@ -36,6 +37,7 @@ public class ColonyGame extends Game {
 		world = new World(new Vector2(0,0), true);
 
 		this.worldGrid = Grid.newGridInstance("grid", Constants.GRID_WIDTH, Constants.GRID_HEIGHT, Constants.GRID_SQUARESIZE);
+        DataBuilder builder = new DataBuilder();
 
 		this.setScreen(new MainMenuScreen(this));
 	}
@@ -43,6 +45,8 @@ public class ColonyGame extends Game {
 	@Override
 	public void render () {
 		super.render();
+
+        GUI.checkState();
 
 		Profiler.begin("ColonyGame Render");
 

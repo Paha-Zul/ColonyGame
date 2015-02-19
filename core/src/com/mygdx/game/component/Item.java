@@ -4,7 +4,8 @@ package com.mygdx.game.component;
  * Created by Paha on 1/18/2015.
  */
 public class Item extends Component{
-    private String name = "default";
+    private String itemName = "default";
+    private String displayName = "default";
     private String itemType = "default";
 
     private int stackLimit = 100;
@@ -12,9 +13,9 @@ public class Item extends Component{
     private int currStack = 1;
     private boolean stackable = true;
 
-    public Item(String name, String itemType, boolean stackable, int stackLimit, int weight) {
+    public Item(String itemName, String itemType, boolean stackable, int stackLimit, int weight) {
         super();
-        this.name = name;
+        this.itemName = itemName;
         this.stackable = stackable;
         this.stackLimit = stackLimit;
         this.weight = weight;
@@ -26,11 +27,11 @@ public class Item extends Component{
     }
 
     /**
-     * Sets the name of this Item.
-     * @param name The new name of this Item.
+     * Sets the itemName of this Item.
+     * @param itemName The new itemName of this Item.
      */
-    public void setName(String name) {
-        this.name = name;
+    public void setItemName(String itemName) {
+        this.itemName = itemName;
     }
 
     /**
@@ -65,8 +66,8 @@ public class Item extends Component{
         this.itemType = itemType;
     }
 
-    public String getName() {
-        return name;
+    public String getItemName() {
+        return itemName;
     }
 
     public int getStackLimit() {
@@ -95,7 +96,7 @@ public class Item extends Component{
 
     @Override
     public String toString() {
-        return "[Name: "+this.name+",Type: "+this.itemType+",Weight: "+this.weight+",CurrStack: "+this.currStack+"]";
+        return "[Name: "+this.itemName +",Type: "+this.itemType+",Weight: "+this.weight+",CurrStack: "+this.currStack+"]";
     }
 
     @Override

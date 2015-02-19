@@ -79,7 +79,6 @@ public class ServerPlayer {
 
         Profiler.begin("RenderingWorld");
 
-
 		//Loop over the array
         for(int x=0;x<map.length;x++) {
             for (int y = 0; y < map[0].length; y++) {
@@ -87,13 +86,7 @@ public class ServerPlayer {
                 if(!ColonyGame.camera.frustum.boundsInFrustum(tile.terrainSprite.getX(), tile.terrainSprite.getY(), 0, halfTileSize, halfTileSize, 0))
                     continue;
 
-                if(WorldGen.getVisibilityMap()[x][y].getVisibility() == Constants.VISIBILITY_UNEXPLORED)
-                    tile.terrainSprite.setColor(Constants.COLOR_UNEXPLORED);
-                else if(WorldGen.getVisibilityMap()[x][y].getVisibility() == Constants.VISIBILITY_EXPLORED)
-                    tile.terrainSprite.setColor(Constants.COLOR_EXPLORED);
-                else if(WorldGen.getVisibilityMap()[x][y].getVisibility() == Constants.VISIBILITY_VISIBLE)
-                    tile.terrainSprite.setColor(Constants.COLOR_VISIBILE);
-
+                tile.changeVisibility(WorldGen.getVisibilityMap()[x][y].getVisibility());
                 tile.terrainSprite.draw(batch);
             }
         }

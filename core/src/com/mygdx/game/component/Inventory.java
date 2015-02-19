@@ -55,10 +55,10 @@ public class Inventory extends Component implements IDisplayable{
      * @param item The Item to add.
      */
     public void addItem(Item item){
-        InventoryItem invItem = this.inventory.get(item.getName());
+        InventoryItem invItem = this.inventory.get(item.getItemName());
         if(invItem == null) {
             invItem = new InventoryItem(item, 0);
-            this.inventory.put(item.getName(), invItem); //Make a new inventory item in the hashmap.
+            this.inventory.put(item.getItemName(), invItem); //Make a new inventory item in the hashmap.
         }
 
         invItem.addAmount(item.getCurrStack());
@@ -74,7 +74,7 @@ public class Inventory extends Component implements IDisplayable{
             return null;
 
         //Make a copy of the item and set some values. Then return it.
-        Item item = new Item(invItem.item.getName(), invItem.item.getItemType(), invItem.item.isStackable(), invItem.item.getStackLimit(), invItem.item.getWeight());
+        Item item = new Item(invItem.item.getItemName(), invItem.item.getItemType(), invItem.item.isStackable(), invItem.item.getStackLimit(), invItem.item.getWeight());
         item.setCurrStack(invItem.amount); //Set the item stack to the amount removed.
         this.currTotalItems-=invItem.amount; //Subtract the current item counter by the amount being removed.
         invItem.amount = 0;
@@ -89,7 +89,7 @@ public class Inventory extends Component implements IDisplayable{
         if(invItem == null || invItem.amount <= 0)
             return null;
 
-        Item item = new Item(invItem.item.getName(), invItem.item.getItemType(), invItem.item.isStackable(), invItem.item.getStackLimit(), invItem.item.getWeight()); //Copy the item.
+        Item item = new Item(invItem.item.getItemName(), invItem.item.getItemType(), invItem.item.isStackable(), invItem.item.getStackLimit(), invItem.item.getWeight()); //Copy the item.
         int amt = (amount >= invItem.amount) ? invItem.amount : amount; //If amount is equal or more than the inv amount, take all of it, otherwise the amount.
         invItem.amount = amt; //Set the inventory Item's amount.
         this.currTotalItems-=amt; //Subtract the amount being removed from the counter.
@@ -150,7 +150,7 @@ public class Inventory extends Component implements IDisplayable{
         GUI.Text("Inventory Items", batch, x, y);
         y-=20;
         for(Inventory.InventoryItem item : this.getItemList()){
-            GUI.Text(item.item.getName()+": "+item.amount, batch, x, y);
+            GUI.Text(item.item.getItemName()+": "+item.amount, batch, x, y);
             y-=20;
         }
     }
@@ -165,7 +165,7 @@ public class Inventory extends Component implements IDisplayable{
          * @param amount The amount of the item to initially store.
          */
         public InventoryItem(Item item, int amount){
-            this.item = new Item(item.getName(), item.getItemType(), item.isStackable(), item.getStackLimit(), item.getWeight());
+            this.item = new Item(item.getItemName(), item.getItemType(), item.isStackable(), item.getStackLimit(), item.getWeight());
             this.item.setCurrStack(amount);
             this.amount = amount;
         }

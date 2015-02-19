@@ -236,12 +236,25 @@ public class WorldGen {
         public double noiseValue;
         public int type;
 
+        private int visibility = Constants.VISIBILITY_UNEXPLORED;
+
         public TerrainTile(Sprite sprite, double noiseValue, float rotation, int type, Vector2 position) {
             this.terrainSprite = new Sprite(sprite);
+            this.terrainSprite.setColor(Constants.COLOR_UNEXPLORED);
             this.noiseValue = noiseValue;
             this.type = type;
             this.terrainSprite.setPosition(position.x, position.y);
             this.terrainSprite.setRotation(rotation);
+        }
+
+        public void changeVisibility(int visibility){
+            if(this.visibility == visibility)
+                return;
+
+            this.visibility = visibility;
+            if(visibility == Constants.VISIBILITY_UNEXPLORED) this.terrainSprite.setColor(Constants.COLOR_UNEXPLORED);
+            if(visibility == Constants.VISIBILITY_EXPLORED) this.terrainSprite.setColor(Constants.COLOR_EXPLORED);
+            if(visibility == Constants.VISIBILITY_VISIBLE) this.terrainSprite.setColor(Constants.COLOR_VISIBILE);
         }
 
     }

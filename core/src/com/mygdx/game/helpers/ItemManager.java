@@ -20,7 +20,7 @@ public class ItemManager {
         if(item == null)
             throw new RuntimeException("Item of name '"+name+"' does not exist.");
 
-        return new Item(item.getName(), item.getItemType(), item.isStackable(), item.getStackLimit(), item.getWeight());
+        return new Item(item.getItemName(), item.getItemType(), item.isStackable(), item.getStackLimit(), item.getWeight());
     }
 
     public static boolean doesItemExist(String name){
@@ -28,6 +28,10 @@ public class ItemManager {
             return false;
 
         return true;
+    }
+
+    public static void addItemInstance(Item item){
+        itemMap.put(item.getItemName(), item);
     }
 
 }

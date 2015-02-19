@@ -52,7 +52,6 @@ public class GUI {
 
     public static boolean Button(Rectangle rect, String text, SpriteBatch batch, ButtonStyle style){
         boolean clicked = false;
-        GUI.checkState();
 
         if(style == null)
             style = defaultButtonStyle;
@@ -109,7 +108,7 @@ public class GUI {
         }
     }
 
-    private static void checkState(){
+    public static void checkState(){
         boolean down = Gdx.input.isButtonPressed(Input.Buttons.LEFT);
 
         if(down){

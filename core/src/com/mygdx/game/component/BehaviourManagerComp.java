@@ -101,7 +101,7 @@ public class BehaviourManagerComp extends Component implements IDisplayable{
 
         Sequence sequence = new Sequence("Exploring", this.blackBoard);
 
-        FindClosestUnexplored findClosestUnexplored = new FindClosestUnexplored("Finding Closest Unexplored Location", this.blackBoard, this.getEntityOwner().getComponent(Colonist.class).getColony().getEntityOwner());
+        FindClosestUnexplored findClosestUnexplored = new FindClosestUnexplored("Finding Closest Unexplored Location", this.blackBoard);
         FindPath findPathToUnexplored = new FindPath("Finding Path to Unexplored", this.blackBoard);
         MoveTo moveToLocation = new MoveTo("Moving to Explore", this.blackBoard, callbackOnCompletion);
 

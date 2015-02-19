@@ -96,21 +96,23 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         int height = Gdx.graphics.getHeight();
         FPSTimer.update(delta);
 
-        this.moveCamera();
+        this.moveCamera(); //Move the camera
 
+        //Determines if any UI is moused over or not.
         if(this.infoRect.contains(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY()))
             this.onUI = true;
         else
             this.onUI = false;
 
-        GUI.Texture(this.infoRect, this.background, this.batch);
-
+        //Draws info about the game
         this.drawInfo(height);
 
         if(this.drawingProfiler)
             Profiler.drawDebug(ColonyGame.batch, 200, height - 20);
 
+        //Draw stuff about the selected entity.
         if(this.selected != null && this.interactable != null){
+            GUI.Texture(this.infoRect, this.background, this.batch);
             this.displaySelected(this.infoRect);
         }
 
@@ -160,12 +162,12 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
             this.interactable.colony.display(this.rightRect, this.batch, "inventory");
         }
 
-        if(this.gridComp != null) {
-            if(this.gridComp.getCurrNode() != null) {
-                GUI.Text("Grid Index: " + gridComp.getCurrNode().getCol() + " " + gridComp.getCurrNode().getRow(), this.batch, x + 100, y + 100);
-                y -= 20;
-            }
-        }
+//        if(this.gridComp != null) {
+//            if(this.gridComp.getCurrNode() != null) {
+//                GUI.Text("Grid Index: " + gridComp.getCurrNode().getCol() + " " + gridComp.getCurrNode().getRow(), this.batch, x + 100, y + 100);
+//                y -= 20;
+//            }
+//        }
 
         Profiler.end();
     }
