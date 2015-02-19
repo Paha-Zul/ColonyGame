@@ -1,4 +1,5 @@
 {"resources":[
-  {"Name":"Redwood", "Items":"Wood, Stick, Leaf", "Amounts":"[1,10][5][1-5]},
-  {"Name":"Pine", "Items":"Wood, Stick, Leaf", "Amounts":"[1,4][1][1-10]}
+  {"resourceName":"redwood", "displayName": "RedWood", "resourceType": "tree", "items":["woodlog", "twig"], "amounts":[[3,10], [1,3]], "img":"redtree"},
+  {"resourceName":"pine", "displayName": "Pine", "resourceType": "tree", "items":["woodlog"], "amounts":[[1,3]], "img":"greentree"},
+  {"resourceName":"rock", "displayName": "Rock", "resourceType": "stone", "items":["stone"], "amounts":[[1,5]], "img": "rock"}
 ]}
