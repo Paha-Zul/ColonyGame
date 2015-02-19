@@ -44,8 +44,12 @@ public class FindClosestUnexplored extends LeafTask{
             Grid.Node closestNode = null;
             Grid.Node targetNode = this.blackBoard.colonyGrid.getNode(this.target);
             Grid.Node myNode = this.blackBoard.colonyGrid.getNode(this.blackBoard.getEntityOwner());
+            int xDiff = Math.abs(targetNode.getCol() - myNode.getCol());
+            int yDiff = Math.abs(targetNode.getRow() - myNode.getRow());
+            int minRadius = xDiff > yDiff ? xDiff : yDiff;
+            minRadius+=2;
 
-            while(closestNode == null) {
+            while(closestNode == null || radius < minRadius) {
                 int startX = targetNode.getCol() - radius < 0 ? 0 : targetNode.getCol() - radius;
                 int endX = targetNode.getCol() + radius >= grid.length ? grid.length - 1 : targetNode.getCol() + radius;
                 int startY = targetNode.getRow() - radius < 0 ? 0 : targetNode.getRow() - radius;
