@@ -1,4 +1,4 @@
-package com.mygdx.game.helpers;
+package com.mygdx.game.helpers.managers;
 
 import com.mygdx.game.component.Item;
 
@@ -11,8 +11,7 @@ public class ItemManager {
     private static HashMap<String, Item> itemMap = new HashMap<>(20);
 
     static{
-        itemMap.put("Wood Log", new Item("Wood Log", "wood", true, 100, 100));
-        itemMap.put("Stone", new Item("Stone", "stone", true, 100, 100));
+
     }
 
     public static Item getItemByName(String name){
@@ -20,7 +19,7 @@ public class ItemManager {
         if(item == null)
             throw new RuntimeException("Item of name '"+name+"' does not exist.");
 
-        return new Item(item.getItemName(), item.getItemType(), item.isStackable(), item.getStackLimit(), item.getWeight());
+        return new Item(item);
     }
 
     public static boolean doesItemExist(String name){

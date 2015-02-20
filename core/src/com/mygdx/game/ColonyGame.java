@@ -2,6 +2,7 @@ package com.mygdx.game;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -12,6 +13,7 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.mygdx.game.helpers.*;
 import com.mygdx.game.helpers.gui.GUI;
 import com.mygdx.game.screens.MainMenuScreen;
+import com.mygdx.game.screens.PreLoadingScreen;
 
 public class ColonyGame extends Game {
 	public static boolean server = true;
@@ -25,6 +27,8 @@ public class ColonyGame extends Game {
 	public static World world;
 	public static Box2DDebugRenderer debugRenderer;
 
+    public static EasyAssetManager assetManager;
+
 	private Color screenColor = new Color(163f/255f, 154f/255f, 124f/255f, 1);
 
 
@@ -33,13 +37,13 @@ public class ColonyGame extends Game {
 		batch = new SpriteBatch();
 		renderer = new ShapeRenderer();
 		camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-		this.UICamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		ColonyGame.UICamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		world = new World(new Vector2(0,0), true);
+        ColonyGame.assetManager = new EasyAssetManager();
 
-		this.worldGrid = Grid.newGridInstance("grid", Constants.GRID_WIDTH, Constants.GRID_HEIGHT, Constants.GRID_SQUARESIZE);
-        DataBuilder builder = new DataBuilder();
+		ColonyGame.worldGrid = Grid.newGridInstance("grid", Constants.GRID_WIDTH, Constants.GRID_HEIGHT, Constants.GRID_SQUARESIZE);
 
-		this.setScreen(new MainMenuScreen(this));
+		this.setScreen(new PreLoadingScreen(this));
 	}
 
 	@Override

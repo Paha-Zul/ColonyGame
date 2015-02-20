@@ -14,7 +14,9 @@ import com.mygdx.game.component.Resource;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.entity.TreeEnt;
 import com.mygdx.game.helpers.Constants;
+import com.mygdx.game.helpers.managers.ResourceManager;
 
+import javax.xml.soap.Text;
 import java.util.ArrayList;
 
 /**
@@ -31,10 +33,10 @@ public class WorldGen {
 
     private static Texture[] grassTiles;
     private static Texture[] tallGrassTiles;
-    private static Texture treeTexture = new Texture("img/trees/tree.png");
-    private static Texture rockTexture = new Texture("img/rock.png");
-    private static Texture darkWater = new Texture("img/DarkWater.png");
-    private static Texture lightWater = new Texture("img/LightWater.png");
+    private static Texture treeTexture;
+    private static Texture rockTexture;
+    private static Texture darkWater;
+    private static Texture lightWater;
 
     public static Texture grayTexture;
 
@@ -43,24 +45,20 @@ public class WorldGen {
 
     private static int numX, numY, currX = 0, currY = 0;
 
+    private static ColonyGame game;
+
+    static{
+
+    }
+
     /**
      * Initializes the World Generator. For now, most stuff is temporary for prototyping.
      * @param seed The seed that the world should use for randomly generating.
      */
-    public static void init(long seed){
-        grassTiles = new Texture[4];
-        tallGrassTiles = new Texture[3];
+    public static void init(long seed, ColonyGame game){
+        WorldGen.game = game;
 
-        //Loads in some grass.
-        grassTiles[0] = new Texture("img/grass1.png");
-        grassTiles[1] = new Texture("img/grass2.png");
-        grassTiles[2] = new Texture("img/grass3.png");
-        grassTiles[3] = new Texture("img/grass4.png");
-
-        //Loads in some tall grass.
-        tallGrassTiles[0] = new Texture("img/tallgrass1.png");
-        tallGrassTiles[1] = new Texture("img/tallgrass2.png");
-        tallGrassTiles[2] = new Texture("img/tallgrass3.png");
+        loadImages();
 
         //This randomizes the noise by using the seed passed in.
         SimplexNoise.genGrad(seed);
@@ -82,6 +80,27 @@ public class WorldGen {
         pixmap.fillRectangle(0,0,1,1);
         grayTexture = new Texture(pixmap);
         pixmap.dispose();
+    }
+
+    private static void loadImages(){
+        treeTexture = game.assetManager.get("redtree", Texture.class);
+        rockTexture = new Texture("img/rock.png");
+        darkWater = new Texture("img/DarkWater.png");
+        lightWater = new Texture("img/LightWater.png");
+
+        grassTiles = new Texture[4];
+        tallGrassTiles = new Texture[3];
+
+        //Loads in some grass.
+        grassTiles[0] = new Texture("img/grass1.png");
+        grassTiles[1] = new Texture("img/grass2.png");
+        grassTiles[2] = new Texture("img/grass3.png");
+        grassTiles[3] = new Texture("img/grass4.png");
+
+        //Loads in some tall grass.
+        tallGrassTiles[0] = new Texture("img/tallgrass1.png");
+        tallGrassTiles[1] = new Texture("img/tallgrass2.png");
+        tallGrassTiles[2] = new Texture("img/tallgrass3.png");
     }
 
     /**
@@ -142,7 +161,7 @@ public class WorldGen {
                     rock.name = "Rock"; //Set the name!
 
                     rock.addComponent(new Interactable("resource"));
-                    rock.addComponent(new Resource("Stone"));
+                    rock.addComponent(ResourceManager.getResourceByname("rock"));
                     rock.addComponent(new GridComponent(Constants.GRIDSTATIC, ColonyGame.worldGrid, -1));
                     rock.addTag(Constants.ENTITY_RESOURCE);
                     //circle.dispose();

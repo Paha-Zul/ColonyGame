@@ -75,7 +75,7 @@ public class BehaviourManagerComp extends Component implements IDisplayable{
             this.changeTask(this.exploreUnexplored(onFinish));
         };
 
-        FindClosestResource fr = new FindClosestResource("Finding Closest Resource", this.blackBoard, "Wood Log", fail, null);
+        FindClosestResource fr = new FindClosestResource("Finding Closest Resource", this.blackBoard, "woodlog", fail, null);
         FindPath findPath = new FindPath("Finding Path to Resource", this.blackBoard);
         MoveTo move = new MoveTo("Moving to Resource", this.blackBoard);
         Gather gather = new Gather("Gathering Resource", this.blackBoard);

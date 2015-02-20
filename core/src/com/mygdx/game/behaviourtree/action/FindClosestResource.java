@@ -6,6 +6,7 @@ import com.mygdx.game.component.BlackBoard;
 import com.mygdx.game.component.Resource;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.*;
+import com.mygdx.game.helpers.managers.ItemManager;
 import com.mygdx.game.helpers.worldgeneration.WorldGen;
 import com.mygdx.game.interfaces.Functional;
 

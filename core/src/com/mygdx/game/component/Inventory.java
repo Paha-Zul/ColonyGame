@@ -51,19 +51,18 @@ public class Inventory extends Component implements IDisplayable{
     }
 
     /**
-     * Adds all of the Item passed in. The Item passed in will have its current stack amount set to 0.
+     * Adds all of the Item passed in.
      * @param item The Item to add.
      */
     public void addItem(Item item){
         InventoryItem invItem = this.inventory.get(item.getItemName());
         if(invItem == null) {
-            invItem = new InventoryItem(item, 0);
+            invItem = new InventoryItem(item);
             this.inventory.put(item.getItemName(), invItem); //Make a new inventory item in the hashmap.
-        }
+        }else
+            invItem.addAmount(item.getCurrStack());
 
-        invItem.addAmount(item.getCurrStack());
         this.currTotalItems+=item.getCurrStack();
-        item.setCurrStack(0); //Reset the item's stack amount.
     }
 
     public Item removeItemAll(String name){
@@ -77,7 +76,6 @@ public class Inventory extends Component implements IDisplayable{
         Item item = new Item(invItem.item.getItemName(), invItem.item.getItemType(), invItem.item.isStackable(), invItem.item.getStackLimit(), invItem.item.getWeight());
         item.setCurrStack(invItem.amount); //Set the item stack to the amount removed.
         this.currTotalItems-=invItem.amount; //Subtract the current item counter by the amount being removed.
-        invItem.amount = 0;
 
         return item;
     }
@@ -150,7 +148,7 @@ public class Inventory extends Component implements IDisplayable{
         GUI.Text("Inventory Items", batch, x, y);
         y-=20;
         for(Inventory.InventoryItem item : this.getItemList()){
-            GUI.Text(item.item.getItemName()+": "+item.amount, batch, x, y);
+            GUI.Text(item.item.getDisplayName()+": "+item.amount, batch, x, y);
             y-=20;
         }
     }
@@ -165,9 +163,13 @@ public class Inventory extends Component implements IDisplayable{
          * @param amount The amount of the item to initially store.
          */
         public InventoryItem(Item item, int amount){
-            this.item = new Item(item.getItemName(), item.getItemType(), item.isStackable(), item.getStackLimit(), item.getWeight());
+            this.item = item;
             this.item.setCurrStack(amount);
             this.amount = amount;
+        }
+
+        public InventoryItem(Item item){
+            this(item, item.getCurrStack());
         }
 
         public void addAmount(int amount){

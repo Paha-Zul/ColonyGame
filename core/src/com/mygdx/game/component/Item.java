@@ -6,6 +6,7 @@ package com.mygdx.game.component;
 public class Item extends Component{
     private String itemName = "default";
     private String displayName = "default";
+    private String description = "default";
     private String itemType = "default";
 
     private int stackLimit = 100;
@@ -21,6 +22,20 @@ public class Item extends Component{
         this.weight = weight;
     }
 
+    /**
+     * Copy constructor.
+     * @param item The Item to be copied.
+     */
+    public Item(Item item){
+        this.itemName = item.itemName;
+        this.displayName = item.displayName;
+        this.description = item.description;
+        this.itemType = item.itemType;
+        this.stackLimit = item.getStackLimit();
+        this.weight = item.getWeight();
+        this.stackable = item.isStackable();
+    }
+
     @Override
     public void start() {
         super.start();
@@ -32,6 +47,22 @@ public class Item extends Component{
      */
     public void setItemName(String itemName) {
         this.itemName = itemName;
+    }
+
+    /**
+     * Sets the display name for this Item.
+     * @param displayName The name to use for display.
+     */
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
+    /**
+     * Sets the description of this Item.
+     * @param description The string for the description.
+     */
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     /**
@@ -68,6 +99,14 @@ public class Item extends Component{
 
     public String getItemName() {
         return itemName;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public String getDescription() {
+        return description;
     }
 
     public int getStackLimit() {

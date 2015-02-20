@@ -58,6 +58,10 @@ public class GraphicIdentity extends Component{
 		Profiler.end();
 	}
 
+    public void setTexture(Texture texture){
+        this.sprite.setTexture(texture);
+    }
+
     private void changeVisibility(int visibility){
         if(this.currVisibility == visibility)
             return;

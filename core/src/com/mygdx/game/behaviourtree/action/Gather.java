@@ -1,7 +1,9 @@
 package com.mygdx.game.behaviourtree.action;
 
+import com.badlogic.gdx.math.MathUtils;
 import com.mygdx.game.behaviourtree.LeafTask;
 import com.mygdx.game.component.*;
+import com.mygdx.game.helpers.managers.ItemManager;
 import com.mygdx.game.helpers.timer.OneShotTimer;
 import com.mygdx.game.helpers.timer.Timer;
 
@@ -44,7 +46,14 @@ public class Gather extends LeafTask{
             this.blackBoard.targetNode = null;
             this.blackBoard.target = targetColony.getEntityOwner();
             this.blackBoard.transferToInventory = targetColony.getInventory();
-            this.blackBoard.myInventory.addItem(this.resource.getItem());
+            for(int i=0;i<this.resource.getItemNames().length;i++){
+                Item item = ItemManager.getItemByName(this.resource.getItemNames()[i]);
+                int diff = this.resource.getItemAmounts()[i][1] - this.resource.getItemAmounts()[i][0];
+                int base = this.resource.getItemAmounts()[i][0];
+                item.setCurrStack(MathUtils.random(diff) + base);
+                this.blackBoard.myInventory.addItem(item);
+            }
+
             this.resource.getEntityOwner().destroy();
             this.control.finishWithSuccess();
         });
