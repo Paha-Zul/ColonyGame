@@ -1,22 +1,28 @@
 {
-  "items": [
+  "resources": [
     {
-      "itemName": "woodlog",
-      "displayName": "Wood Log",
-      "itemType": "wood",
-      "description": "A wood log."
+      "resourceName": "redwood",
+      "displayName": "RedWood",
+      "resourceType": "tree",
+      "items": ["woodlog",
+        "twig"],
+      "amounts": [[3,10],[1,3]],
+      "img": "redtree"
     },
     {
-      "itemName": "stone",
-      "displayName": "Stone",
-      "itemType": "stone",
-      "description": "A stone rock."
+      "resourceName": "pine",
+      "displayName": "Pine",
+      "resourceType": "tree",
+      "items": ["woodlog"],
+      "amounts": [[1,3]],
+      "img": "greentree"
     },
     {
-      "itemName": "twig",
-      "displayName": "Twig",
-      "itemType": "wood",
-      "description": "A Twig."
-    }
-  ]
+      "resourceName": "rock",
+      "displayName": "Rock",
+      "resourceType": "stone",
+      "items": ["stone"],
+      "amounts": [[1,5]],
+      "img": "rock"
+    }]
 }
