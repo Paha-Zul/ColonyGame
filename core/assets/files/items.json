@@ -1,5 +1,21 @@
-{"items":[
-  {"itemName":"woodlog", "displayName":"Wood Log", "itemType":"wood", "description": "A wood log."},
-  {"itemName":"stone", "displayName":"Stone", "itemType":"stone", "description": "A stone rock."},
-  {"itemName":"twig", "displayName":"Twig", "itemType":"wood", "description": "A Twig."}
-]}
+{
+  "items": [
+    {
+      "itemName": "woodlog",
+      "displayName": "Wood Log",
+      "itemType": "wood",
+      "description": "A wood log."
+    },
+    {
+      "itemName": "stone",
+      "displayName": "Stone",
+      "itemType": "stone",
+      "description": "A stone rock."
+    },
+    {
+      "itemName": "twig",
+      "displayName": "Twig",
+      "itemType": "wood",
+      "description": "A Twig."
+    }]
+}
