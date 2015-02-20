@@ -1,5 +1,6 @@
 package com.mygdx.game.behaviourtree.action;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.behaviourtree.LeafTask;
 import com.mygdx.game.component.BlackBoard;
@@ -73,10 +74,10 @@ public class FindClosestResource extends LeafTask{
             }
 
             while(!finished) {
-                int startX = (currNode.getCol() - radius < 0) ? 0 : currNode.getCol() - radius;
-                int endX = (currNode.getCol() + radius >= grid.length) ? grid.length - 1 : currNode.getCol() + radius;
-                int startY = (currNode.getRow() - radius < 0) ? 0 : currNode.getRow() - radius;
-                int endY = (currNode.getRow() + radius >= grid[currNode.getCol()].length) ? grid.length-1 : currNode.getRow() + radius;
+                int startX = (currNode.getCol() - radius < 0) ? -1 : currNode.getCol() - radius;
+                int endX = (currNode.getCol() + radius >= grid.length) ? grid.length : currNode.getCol() + radius;
+                int startY = (currNode.getRow() - radius < 0) ? -1 : currNode.getRow() - radius;
+                int endY = (currNode.getRow() + radius >= grid[currNode.getCol()].length) ? grid.length : currNode.getRow() + radius;
 
                 finished = true;
 

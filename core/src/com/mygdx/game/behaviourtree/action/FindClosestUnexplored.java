@@ -1,5 +1,6 @@
 package com.mygdx.game.behaviourtree.action;
 
+import com.badlogic.gdx.Gdx;
 import com.mygdx.game.behaviourtree.LeafTask;
 import com.mygdx.game.component.BlackBoard;
 import com.mygdx.game.entity.Entity;
@@ -50,10 +51,10 @@ public class FindClosestUnexplored extends LeafTask{
             minRadius+=2;
 
             while(closestNode == null || radius < minRadius) {
-                int startX = targetNode.getCol() - radius < 0 ? 0 : targetNode.getCol() - radius;
-                int endX = targetNode.getCol() + radius >= grid.length ? grid.length - 1 : targetNode.getCol() + radius;
-                int startY = targetNode.getRow() - radius < 0 ? 0 : targetNode.getRow() - radius;
-                int endY = targetNode.getRow() + radius >= grid[targetNode.getCol()].length ? grid[targetNode.getCol()].length - 1 : targetNode.getRow() + radius;
+                int startX = targetNode.getCol() - radius < 0 ? -1 : targetNode.getCol() - radius;
+                int endX = targetNode.getCol() + radius >= grid.length ? grid.length : targetNode.getCol() + radius;
+                int startY = targetNode.getRow() - radius < 0 ? -1 : targetNode.getRow() - radius;
+                int endY = targetNode.getRow() + radius >= grid[targetNode.getCol()].length ? grid[targetNode.getCol()].length : targetNode.getRow() + radius;
                 finished = true; //Reset the flag.
 
                 for(int x = startX; x <= endX; x++){
