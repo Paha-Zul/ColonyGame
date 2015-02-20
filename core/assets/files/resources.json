@@ -4,8 +4,7 @@
       "resourceName": "redwood",
       "displayName": "RedWood",
       "resourceType": "tree",
-      "items": ["woodlog",
-        "twig"],
+      "items": ["woodlog", "twig"],
       "amounts": [[3,10],[1,3]],
       "img": "redtree"
     },
