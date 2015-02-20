@@ -59,62 +59,117 @@ public class Resource extends Component implements IDisplayable{
         return this.resourceName;
     }
 
+    /**
+     * @return A String which is the formal display name of this Resource.
+     */
     public String getDisplayName() {
         return displayName;
     }
 
+    /**
+     * Gets the array of item names for this Resource. This is essentially the inventory of this Resource.
+     * @return A String array of item names.
+     */
     public String[] getItemNames() {
         return itemNames;
     }
 
+    /**
+     * Gets the amounts of the item in this Resource.
+     * @return A 2D int array which represents the possible (low-high) range of amount of items.
+     */
     public int[][] getItemAmounts() {
         return itemAmounts;
     }
 
+    /**
+     * @return The texture name for this Resource.
+     */
     public String getTextureName() {
         return textureName;
     }
 
+    /**
+     * @return The type of this Resource.
+     */
     public String getResourceType() {
         return resourceType;
     }
 
+    /**
+     * @return The gather time for this Resource.
+     */
     public float getGatherTime(){
         return this.gatherTime;
     }
 
+    /**
+     * @return True if this Resource is taken, false otherwise.
+     */
     public boolean isTaken(){
         return this.taken;
     }
 
+    /**
+     * Sets the gather time for this Resource.
+     * @param gatherTime The amount of time to gather.
+     */
     public void setGatherTime(float gatherTime){
         this.gatherTime = gatherTime;
     }
 
+    /**
+     * Sets the type for this Resource.
+     * @param resourceType A String denoting the type.
+     */
     public void setResourceType(String resourceType) {
         this.resourceType = resourceType;
     }
 
+    /**
+     * Sets this Resource as taken or not taken.
+     * @param taken If this Resource is taken or not.
+     */
     public void setTaken(boolean taken){
         this.taken = taken;
     }
 
+    /**
+     * Sets the name of this Resource.
+     * @param resourceName The name to set for this Resource.
+     */
     public void setResourceName(String resourceName) {
         this.resourceName = resourceName;
     }
 
+    /**
+     * Sets the display name of this Resource.
+     * @param displayName The display name of this Resource.
+     */
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
     }
 
+    /**
+     * Sets the item names for this Resource.
+     * @param itemNames A String array which is the itemNames.
+     */
     public void setItemNames(String[] itemNames) {
         this.itemNames = itemNames;
     }
 
+    /**
+     * Sets the item amounts for this Resource.
+     * @param itemAmounts A 2D int array which are the (low-high) range amounts.
+     */
     public void setItemAmounts(int[][] itemAmounts) {
         this.itemAmounts = itemAmounts;
     }
 
+    /**
+     * Sets the texture name of this Resource.
+     * @param textureName The texture name for drawing this resource.
+     */
     public void setTextureName(String textureName) {
         this.textureName = textureName;
     }
