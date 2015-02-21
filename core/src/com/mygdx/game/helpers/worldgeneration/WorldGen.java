@@ -75,7 +75,7 @@ public class WorldGen {
         //Generate a gray square.
         Pixmap pixmap = new Pixmap(1,1, Pixmap.Format.RGBA4444);
         Color color = new Color(Color.BLACK);
-        color.a = 0.2f;
+        color.a = 0.5f;
         pixmap.setColor(color);
         pixmap.fillRectangle(0,0,1,1);
         grayTexture = new Texture(pixmap);
@@ -83,7 +83,7 @@ public class WorldGen {
     }
 
     private static void loadImages(){
-        treeTexture = game.assetManager.get("redtree", Texture.class);
+        treeTexture = ColonyGame.assetManager.get("redtree", Texture.class);
         rockTexture = new Texture("img/rock.png");
         darkWater = new Texture("img/DarkWater.png");
         lightWater = new Texture("img/LightWater.png");

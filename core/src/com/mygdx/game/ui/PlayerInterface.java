@@ -17,6 +17,7 @@ import com.mygdx.game.component.GridComponent;
 import com.mygdx.game.component.Interactable;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.BehaviourManager;
+import com.mygdx.game.helpers.Constants;
 import com.mygdx.game.helpers.Profiler;
 import com.mygdx.game.helpers.gui.GUI;
 import com.mygdx.game.helpers.ListHolder;
@@ -28,6 +29,8 @@ import com.mygdx.game.interfaces.IGUI;
 import com.mygdx.game.server.Server;
 import com.mygdx.game.server.ServerPlayer;
 
+import java.util.ArrayList;
+
 /**
  * Created by Bbent_000 on 12/25/2014.
  */
@@ -35,21 +38,27 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     private SpriteBatch batch;
     private Texture background;
     private World world;
+
     private boolean drawingInfo = false;
     private boolean drawingProfiler = false;
     private boolean onUI = false;
+    private boolean mouseDown = false;
 
     private Rectangle buttonRect = new Rectangle();
     private Rectangle infoRect = new Rectangle();
     private float FPS = 0;
 
-    private float leftRectPerc = 0.1f;
-    private float rightRectPerc = 0.1f;
-    private float centerRectPerc = 0.1f;
+    private final float leftRectPerc = 0.1f;
+    private final float rightRectPerc = 0.1f;
+    private final float centerRectPerc = 0.1f;
 
     private Rectangle leftRect = new Rectangle();
     private Rectangle rightRect = new Rectangle();
     private Rectangle centerRect = new Rectangle();
+    private Rectangle leftCenterRect = new Rectangle();
+
+    private Rectangle selectionBox = new Rectangle();
+    private Rectangle profileButtonRect = new Rectangle();
 
     private Interactable interactable = null;
 
@@ -58,15 +67,30 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     private Vector2 testPoint = new Vector2();
     private Entity selected = null;
     private GridComponent gridComp;
+
     private QueryCallback callback = fixture -> {
         if(fixture.testPoint(testPoint.x, testPoint.y)){
             this.selected = (Entity)fixture.getBody().getUserData();
             this.interactable = this.selected.getComponent(Interactable.class);
             this.gridComp = this.selected.getComponent(GridComponent.class);
-            System.out.println(this.selected.name+" was selected");
             return false;
         }
 
+        return true;
+    };
+
+    //For selecting multiple units.
+    private ArrayList<UnitProfile> selectedList = new ArrayList<>();
+    private QueryCallback selectionCallback = fixture -> {
+        Entity selected = (Entity)fixture.getBody().getUserData();
+        if(selected.hasTag(Constants.ENTITY_COLONIST)) {
+            UnitProfile profile = new UnitProfile();
+            profile.entity = this.selected = selected;
+            profile.interactable = this.interactable = selected.getComponent(Interactable.class);
+            profile.gridComp = this.gridComp = selected.getComponent(GridComponent.class);
+            selectedList.add(profile);
+            return true;
+        }
         return true;
     };
 
@@ -80,7 +104,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         this.batch = batch;
         this.world = world;
 
-        this.background = new Texture("img/background.png");
+        this.background = ColonyGame.assetManager.get("background", Texture.class);
 
         this.buttonRect.set(0, Gdx.graphics.getHeight() - 100, 200, 100);
 
@@ -97,6 +121,8 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         FPSTimer.update(delta);
 
         this.moveCamera(); //Move the camera
+        this.drawSelectionBox();
+        this.drawMultipleProfiles();
 
         //Determines if any UI is moused over or not.
         if(this.infoRect.contains(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY()))
@@ -111,13 +137,21 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
             Profiler.drawDebug(ColonyGame.batch, 200, height - 20);
 
         //Draw stuff about the selected entity.
-        if(this.selected != null && this.interactable != null){
+        if((this.selected != null && this.interactable != null) || this.selectedList.size() > 0){
             GUI.Texture(this.infoRect, this.background, this.batch);
             this.displaySelected(this.infoRect);
         }
 
     }
 
+    private void drawSelectionBox(){
+        if(mouseDown)
+            this.batch.draw(WorldGen.grayTexture, selectionBox.x, selectionBox.y, selectionBox.getWidth(), selectionBox.getHeight());
+    }
+
+    /**
+     * Moves the camera when keys are pressed.
+     */
     private void moveCamera(){
         if(Gdx.input.isKeyPressed(Input.Keys.W))
             ColonyGame.camera.translate(0, Gdx.graphics.getDeltaTime()*200);
@@ -129,6 +163,10 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
             ColonyGame.camera.translate(Gdx.graphics.getDeltaTime()*200, 0);
     }
 
+    /**
+     * Draws info (like FPS) on the screen.
+     * @param height
+     */
     private void drawInfo(int height){
         if(this.drawingInfo) {
             GUI.Text("FPS: " + FPS, this.batch, 0, height - 20);
@@ -141,22 +179,42 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         }
     }
 
+    private void drawMultipleProfiles(){
+        profileButtonRect.set(leftCenterRect.getX(), leftCenterRect.getY() + leftCenterRect.getHeight() - 20, 50, 20);
+        if(selectedList.size() > 0){
+            for(UnitProfile profile : selectedList) {
+                if(GUI.Button(profileButtonRect, profile.entity.name, this.batch)){
+                    this.selected = profile.entity;
+                    this.interactable = profile.interactable;
+                    this.gridComp = profile.gridComp;
+                }
+
+                profileButtonRect.setY(profileButtonRect.getY() - 22);
+                if(profileButtonRect.y <= leftCenterRect.getY() + 10)
+                    profileButtonRect.set(leftCenterRect.getX() + 55, leftCenterRect.getY() + leftCenterRect.getHeight() - 20, 50, 20);
+            }
+        }
+    }
+
+    /**
+     * Displays the selected Entity.
+     * @param rect
+     */
     private void displaySelected(Rectangle rect){
         Profiler.begin("PlayerInterface displaySelected");
 
         float x = rect.getX() + 20;
         float y = rect.getY() + rect.getHeight() - 10;
 
-        if(this.interactable.type == "resource"){
+        if(this.interactable.type.equals("resource")){
             this.interactable.resource.display(this.centerRect, this.batch, "general");
             this.interactable.resource.display(this.leftRect, this.batch, "resource");
-        }else if(this.interactable.type == "humanoid"){
+        }else if(this.interactable.type.equals("humanoid")){
             this.interactable.colonist.display(this.centerRect, this.batch, "general");
             this.interactable.colonist.display(this.leftRect, this.batch, "health");
             this.interactable.colonist.display(this.rightRect, this.batch, "inventory");
             this.interactable.colonist.display(null, this.batch, "path");
-        }
-        else if(this.interactable.type == "colony"){
+        }else if(this.interactable.type.equals("colony")){
             this.interactable.colony.display(this.centerRect, this.batch, "general");
             this.interactable.colony.display(this.leftRect, this.batch, "colony");
             this.interactable.colony.display(this.rightRect, this.batch, "inventory");
@@ -172,8 +230,31 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         Profiler.end();
     }
 
+    private void startDragging(float x, float y){
+        selectionBox.set(x, y, 0, 0);
+    }
+
+    private void drag(float x, float y){
+        selectionBox.set(selectionBox.x, selectionBox.y, x - selectionBox.x, y - selectionBox.y);
+    }
+
+    private void finishDragging(float x, float y){
+        selectionBox.set(selectionBox.x, selectionBox.y, x - selectionBox.x, y - selectionBox.y);
+        Vector2 center = new Vector2();
+        selectionBox.getCenter(center);
+        float halfWidth = Math.abs(selectionBox.getWidth()/2);
+        float halfHeight = Math.abs(selectionBox.getHeight()/2);
+        selectionBox.set(center.x - halfWidth, center.y - halfHeight, center.x + halfWidth, center.y + halfHeight);
+        this.world.QueryAABB(this.selectionCallback, selectionBox.x, selectionBox.y, selectionBox.getWidth(), selectionBox.getHeight());
+    }
+
+    /**
+     * If the GUI is moused over or not.
+     * @return True if moused over, false otherwise.
+     */
     public boolean isOnUI(){
-        return this.onUI;
+        boolean windowActive = ((this.selected != null && this.interactable != null) || this.selectedList.size() > 0);
+        return this.onUI && windowActive;
     }
 
     @Override
@@ -195,7 +276,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         this.leftRect.set(infoRect.x, infoRect.y, infoRect.width * leftRectPerc, infoRect.height);
         this.rightRect.set(infoRect.x + infoRect.width - infoRect.width * rightRectPerc, infoRect.y, infoRect.width * rightRectPerc, infoRect.height);
         this.centerRect.set(infoRect.x + infoRect.width/2 - infoRect.width * centerRectPerc, infoRect.y, infoRect.width * centerRectPerc, infoRect.height);
-
+        this.leftCenterRect.set(infoRect.x + infoRect.width/3 - infoRect.width * centerRectPerc, infoRect.y, infoRect.width * centerRectPerc, infoRect.height);
     }
 
     @Override
@@ -230,15 +311,29 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-        if(this.onUI)
+        if(button == Input.Buttons.LEFT) {
+            if(!this.isOnUI()) {
+                this.mouseDown = true;
+                Vector3 worldCoords = ColonyGame.camera.unproject(new Vector3(screenX, screenY, 0));
+                startDragging(worldCoords.x, worldCoords.y);
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+        if(this.isOnUI())
             return false;
 
+        this.mouseDown = false;
         Vector3 worldCoords = ColonyGame.camera.unproject(new Vector3(screenX, screenY, 0));
 
-//      System.out.println("There was a click: "+button);
         if(button == Input.Buttons.LEFT){
+            this.selectedList.clear();
             this.selected = null;
             this.interactable = null;
+            this.finishDragging(worldCoords.x, worldCoords.y);
 
             this.testPoint.set(worldCoords.x, worldCoords.y);
             this.world.QueryAABB(this.callback, worldCoords.x - 1f, worldCoords.y - 1f, worldCoords.x + 1f, worldCoords.y + 1f);
@@ -256,12 +351,12 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     }
 
     @Override
-    public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-        return false;
-    }
-
-    @Override
     public boolean touchDragged(int screenX, int screenY, int pointer) {
+        if(mouseDown) {
+            Vector3 worldCoords = ColonyGame.camera.unproject(new Vector3(screenX, screenY, 0));
+            drag(worldCoords.x, worldCoords.y);
+        }
+
         return false;
     }
 
@@ -275,5 +370,11 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         ColonyGame.camera.zoom += amount*Gdx.graphics.getDeltaTime();
         if(ColonyGame.camera.zoom < 0) ColonyGame.camera.zoom = 0;
         return false;
+    }
+
+    private class UnitProfile{
+        public Entity entity;
+        public Interactable interactable;
+        public GridComponent gridComp;
     }
 }
