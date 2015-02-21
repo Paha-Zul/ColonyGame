@@ -11,7 +11,6 @@ public class EasyAssetManager extends AssetManager{
     HashMap<String, DataReference> dataMap = new HashMap<>(100);
 
     public synchronized <T> T get(String commonName, Class<T> type) {
-        System.out.println("Trying to get: '"+commonName+"'");
         DataReference ref = dataMap.get(commonName);
         return super.get(dataMap.get(commonName).path, type);
     }
