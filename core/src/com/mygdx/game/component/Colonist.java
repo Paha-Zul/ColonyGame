@@ -26,14 +26,21 @@ public class Colonist extends Component implements IDisplayable{
 
     static{
         gatherButtonStyle = new GUI.ButtonStyle();
-        gatherButtonStyle.normal = new Texture(Gdx.files.internal("img/ui/axebutton_normal.png"));
-        gatherButtonStyle.moused = new Texture("img/ui/axebutton_moused.png");
-        gatherButtonStyle.clicked = new Texture("img/ui/axebutton_clicked.png");
+        gatherButtonStyle.normal = new Texture(Gdx.files.internal("img/ui/axebutton_normal.png"), true);
+        gatherButtonStyle.normal.setFilter(Texture.TextureFilter.MipMapNearestLinear, Texture.TextureFilter.Linear);
+        gatherButtonStyle.moused = new Texture(Gdx.files.internal("img/ui/axebutton_moused.png"), true);
+        gatherButtonStyle.moused.setFilter(Texture.TextureFilter.MipMapNearestLinear, Texture.TextureFilter.Linear);
+        gatherButtonStyle.clicked = new Texture(Gdx.files.internal("img/ui/axebutton_clicked.png"), true);
+        gatherButtonStyle.clicked.setFilter(Texture.TextureFilter.MipMapNearestLinear, Texture.TextureFilter.Linear);
 
         exploreButtonStyle = new GUI.ButtonStyle();
-        exploreButtonStyle.normal = new Texture("img/ui/explorebutton_normal.png");
-        exploreButtonStyle.moused = new Texture("img/ui/explorebutton_moused.png");
-        exploreButtonStyle.clicked = new Texture("img/ui/explorebutton_clicked.png");
+        exploreButtonStyle.normal = new Texture(Gdx.files.internal("img/ui/explorebutton_normal.png"), true);
+        exploreButtonStyle.normal.setFilter(Texture.TextureFilter.MipMapNearestLinear, Texture.TextureFilter.Linear);
+        exploreButtonStyle.moused = new Texture(Gdx.files.internal("img/ui/explorebutton_moused.png"), true);
+        exploreButtonStyle.moused.setFilter(Texture.TextureFilter.MipMapNearestLinear, Texture.TextureFilter.Linear);
+        exploreButtonStyle.clicked = new Texture(Gdx.files.internal("img/ui/explorebutton_clicked.png"), true);
+        exploreButtonStyle.clicked.setFilter(Texture.TextureFilter.MipMapNearestLinear, Texture.TextureFilter.Linear);
+
     }
 
     public Colonist() {
