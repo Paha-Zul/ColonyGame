@@ -17,6 +17,7 @@ public class DesktopLauncher {
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
 		config.width = width;
 		config.height = height;
+        config.samples = 8;
 		new LwjglApplication(new ColonyGame(), config);
 	}
 }

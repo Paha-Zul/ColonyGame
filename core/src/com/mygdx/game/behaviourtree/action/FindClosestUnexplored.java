@@ -59,12 +59,17 @@ public class FindClosestUnexplored extends LeafTask{
 
                 for(int x = startX; x <= endX; x++){
                     for(int y = startY; y <= endY; y++){
+                        //Check if we are still on the grid.
                         Grid.Node tmpNode = this.blackBoard.colonyGrid.getNode(x, y);
-                        int visibility = WorldGen.getVisibilityMap()[x][y].getVisibility();
-                        int terrainType = WorldGen.getNode(x,y).type;
-                        if(tmpNode == null || visibility != Constants.VISIBILITY_UNEXPLORED || terrainType == Constants.TERRAIN_WATER) {
+                        if(tmpNode == null)
                             continue;
-                        }
+
+                        //Check terrain and visibility.
+                        int terrainType = WorldGen.getNode(x,y).type;
+                        int visibility = WorldGen.getVisibilityMap()[x][y].getVisibility();
+                        if(visibility != Constants.VISIBILITY_UNEXPLORED || terrainType == Constants.TERRAIN_WATER)
+                            continue;
+
 
                         finished = false;
 
