@@ -339,7 +339,9 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         else if(keycode == Input.Keys.F3) {
             ServerPlayer.drawGrid = !ServerPlayer.drawGrid;
 
-        }else
+        }else if(keycode == Input.Keys.SPACE)
+            this.gameScreen.setPaused(!this.gameScreen.getPaused());
+        else
             return false;
 
         return true;
