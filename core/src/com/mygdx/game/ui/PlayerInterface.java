@@ -3,6 +3,7 @@ package com.mygdx.game.ui;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
@@ -28,6 +29,7 @@ import com.mygdx.game.interfaces.Functional;
 import com.mygdx.game.interfaces.IGUI;
 import com.mygdx.game.server.Server;
 import com.mygdx.game.server.ServerPlayer;
+import com.sun.tracing.dtrace.StabilityLevel;
 
 import java.util.ArrayList;
 
@@ -38,6 +40,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     private SpriteBatch batch;
     private Texture background;
     private World world;
+    private ServerPlayer gameScreen;
 
     private boolean drawingInfo = false;
     private boolean drawingProfiler = false;
@@ -67,6 +70,37 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     private Vector2 testPoint = new Vector2();
     private Entity selected = null;
     private GridComponent gridComp;
+
+    private static GUI.ButtonStyle gatherButtonStyle = new GUI.ButtonStyle();
+    private static GUI.ButtonStyle exploreButtonStyle = new GUI.ButtonStyle();
+
+    static{
+        loadGatherButtonStyle();
+        loadExploreButtonStyle();
+
+        gatherButtonStyle.font.setColor(new Color(0, 0, 0, 0.5f));
+        exploreButtonStyle.font.setColor(new Color(0, 0, 0, 0.5f));
+    }
+
+    private static void loadGatherButtonStyle(){
+        gatherButtonStyle = new GUI.ButtonStyle();
+        gatherButtonStyle.normal = new Texture(Gdx.files.internal("img/ui/axebutton_normal.png"), true);
+        gatherButtonStyle.normal.setFilter(Texture.TextureFilter.MipMapNearestLinear, Texture.TextureFilter.Linear);
+        gatherButtonStyle.moused = new Texture(Gdx.files.internal("img/ui/axebutton_moused.png"), true);
+        gatherButtonStyle.moused.setFilter(Texture.TextureFilter.MipMapNearestLinear, Texture.TextureFilter.Linear);
+        gatherButtonStyle.clicked = new Texture(Gdx.files.internal("img/ui/axebutton_clicked.png"), true);
+        gatherButtonStyle.clicked.setFilter(Texture.TextureFilter.MipMapNearestLinear, Texture.TextureFilter.Linear);
+    }
+
+    private static void loadExploreButtonStyle(){
+        exploreButtonStyle = new GUI.ButtonStyle();
+        exploreButtonStyle.normal = new Texture(Gdx.files.internal("img/ui/explorebutton_normal.png"), true);
+        exploreButtonStyle.normal.setFilter(Texture.TextureFilter.MipMapNearestLinear, Texture.TextureFilter.Linear);
+        exploreButtonStyle.moused = new Texture(Gdx.files.internal("img/ui/explorebutton_moused.png"), true);
+        exploreButtonStyle.moused.setFilter(Texture.TextureFilter.MipMapNearestLinear, Texture.TextureFilter.Linear);
+        exploreButtonStyle.clicked = new Texture(Gdx.files.internal("img/ui/explorebutton_clicked.png"), true);
+        exploreButtonStyle.clicked.setFilter(Texture.TextureFilter.MipMapNearestLinear, Texture.TextureFilter.Linear);
+    }
 
     private QueryCallback callback = fixture -> {
         if(fixture.testPoint(testPoint.x, testPoint.y)){
@@ -99,10 +133,11 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
      * @param batch The SpriteBatch for drawing to the screen.
      * @param world The Box2D world. We need to know about this for clicking on objects.
      */
-    public PlayerInterface(SpriteBatch batch, ColonyGame game, World world) {
+    public PlayerInterface(SpriteBatch batch, ColonyGame game, ServerPlayer gameScreen, World world) {
         super(batch, game);
         this.batch = batch;
         this.world = world;
+        this.gameScreen = gameScreen;
 
         this.background = ColonyGame.assetManager.get("background", Texture.class);
 
@@ -122,7 +157,6 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
         this.moveCamera(); //Move the camera
         this.drawSelectionBox();
-        this.drawMultipleProfiles();
 
         //Determines if any UI is moused over or not.
         if(this.infoRect.contains(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY()))
@@ -139,14 +173,21 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         //Draw stuff about the selected entity.
         if((this.selected != null && this.interactable != null) || this.selectedList.size() > 0){
             GUI.Texture(this.infoRect, this.background, this.batch);
+            this.drawMultipleProfiles(this.leftCenterRect);
             this.displaySelected(this.infoRect);
         }
 
     }
 
     private void drawSelectionBox(){
+        Vector3 pos = new Vector3(selectionBox.x, selectionBox.y, 0);
+        Vector3 start = ColonyGame.camera.project(new Vector3(pos.x, pos.y, 0));
+
+        pos.set(selectionBox.x + selectionBox.getWidth(), selectionBox.y + selectionBox.getHeight(), 0);
+        Vector3 end = ColonyGame.camera.project(new Vector3(pos.x, pos.y, 0));
+
         if(mouseDown)
-            this.batch.draw(WorldGen.grayTexture, selectionBox.x, selectionBox.y, selectionBox.getWidth(), selectionBox.getHeight());
+            this.batch.draw(WorldGen.grayTexture, start.x, start.y, end.x - start.x, end.y - start.y);
     }
 
     /**
@@ -179,9 +220,20 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         }
     }
 
-    private void drawMultipleProfiles(){
-        profileButtonRect.set(leftCenterRect.getX(), leftCenterRect.getY() + leftCenterRect.getHeight() - 20, 50, 20);
-        if(selectedList.size() > 0){
+    private void drawMultipleProfiles(Rectangle rect){
+        //If there is more than one unit selected.. display in a group format.
+        if(selectedList.size() > 1){
+            profileButtonRect.set(leftCenterRect.getX(), leftCenterRect.getY() + leftCenterRect.getHeight() - 20, 50, 20);
+
+            //Tell all to gather.
+            if(GUI.Button(rect.x - 35, rect.y + rect.getHeight() - 35, 30, 30, "ALL", this.batch, gatherButtonStyle))
+                for(UnitProfile prof : selectedList) prof.entity.getComponent(BehaviourManagerComp.class).gather();
+
+            //Tell all to explore
+            if(GUI.Button(rect.x - 35, rect.y + rect.getHeight() - 70, 30, 30, "ALL", this.batch, exploreButtonStyle))
+                for(UnitProfile prof : selectedList) prof.entity.getComponent(BehaviourManagerComp.class).explore();
+
+            //For each profile, draw a button to access each individual entity.
             for(UnitProfile profile : selectedList) {
                 if(GUI.Button(profileButtonRect, profile.entity.name, this.batch)){
                     this.selected = profile.entity;
@@ -189,6 +241,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
                     this.gridComp = profile.gridComp;
                 }
 
+                //If we go too far down the screen, move over.
                 profileButtonRect.setY(profileButtonRect.getY() - 22);
                 if(profileButtonRect.y <= leftCenterRect.getY() + 10)
                     profileButtonRect.set(leftCenterRect.getX() + 55, leftCenterRect.getY() + leftCenterRect.getHeight() - 20, 50, 20);
@@ -219,13 +272,6 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
             this.interactable.colony.display(this.leftRect, this.batch, "colony");
             this.interactable.colony.display(this.rightRect, this.batch, "inventory");
         }
-
-//        if(this.gridComp != null) {
-//            if(this.gridComp.getCurrNode() != null) {
-//                GUI.Text("Grid Index: " + gridComp.getCurrNode().getCol() + " " + gridComp.getCurrNode().getRow(), this.batch, x + 100, y + 100);
-//                y -= 20;
-//            }
-//        }
 
         Profiler.end();
     }
