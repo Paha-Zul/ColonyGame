@@ -9,6 +9,7 @@ import com.mygdx.game.helpers.BehaviourManager;
 import com.mygdx.game.helpers.FloatingText;
 import com.mygdx.game.helpers.gui.GUI;
 import com.mygdx.game.interfaces.IDisplayable;
+import com.sun.istack.internal.NotNull;
 
 /**
  * Created by Paha on 1/17/2015.
@@ -20,28 +21,6 @@ public class Colonist extends Component implements IDisplayable{
     private BehaviourManagerComp manager;
 
     private Rectangle gatherButton = new Rectangle();
-
-    private static GUI.ButtonStyle gatherButtonStyle;
-    private static GUI.ButtonStyle exploreButtonStyle;
-
-    static{
-        gatherButtonStyle = new GUI.ButtonStyle();
-        gatherButtonStyle.normal = new Texture(Gdx.files.internal("img/ui/axebutton_normal.png"), true);
-        gatherButtonStyle.normal.setFilter(Texture.TextureFilter.MipMapNearestLinear, Texture.TextureFilter.Linear);
-        gatherButtonStyle.moused = new Texture(Gdx.files.internal("img/ui/axebutton_moused.png"), true);
-        gatherButtonStyle.moused.setFilter(Texture.TextureFilter.MipMapNearestLinear, Texture.TextureFilter.Linear);
-        gatherButtonStyle.clicked = new Texture(Gdx.files.internal("img/ui/axebutton_clicked.png"), true);
-        gatherButtonStyle.clicked.setFilter(Texture.TextureFilter.MipMapNearestLinear, Texture.TextureFilter.Linear);
-
-        exploreButtonStyle = new GUI.ButtonStyle();
-        exploreButtonStyle.normal = new Texture(Gdx.files.internal("img/ui/explorebutton_normal.png"), true);
-        exploreButtonStyle.normal.setFilter(Texture.TextureFilter.MipMapNearestLinear, Texture.TextureFilter.Linear);
-        exploreButtonStyle.moused = new Texture(Gdx.files.internal("img/ui/explorebutton_moused.png"), true);
-        exploreButtonStyle.moused.setFilter(Texture.TextureFilter.MipMapNearestLinear, Texture.TextureFilter.Linear);
-        exploreButtonStyle.clicked = new Texture(Gdx.files.internal("img/ui/explorebutton_clicked.png"), true);
-        exploreButtonStyle.clicked.setFilter(Texture.TextureFilter.MipMapNearestLinear, Texture.TextureFilter.Linear);
-
-    }
 
     public Colonist() {
         super();
@@ -83,33 +62,34 @@ public class Colonist extends Component implements IDisplayable{
     }
 
     @Override
-    public void display(Rectangle rect, SpriteBatch batch, String name) {
-        float x = 0;
-        float y = 0;
+    public void display(@NotNull Rectangle rect, SpriteBatch batch, String name) {
+        float x=0, y=0, height=0, width=0;
 
         if(rect != null){
             x = rect.getX();
             y = rect.getY() + rect.getHeight() - 5;
+            height = rect.getHeight();
+            width = rect.getWidth();
         }
 
-        if(name == "general"){
-            GUI.Label("Name: "+this.owner.name, batch, rect.x + rect.getWidth()/2, rect.y + rect.getHeight() - 5, true);
-            GUI.Label("Current Task: "+this.manager.getCurrentTaskName(), batch, rect.x + rect.getWidth()/2, rect.y + rect.getHeight() - 25, true);
+        if(name.equals("general")){
+            GUI.Label("Name: " + this.owner.name, batch, x + width / 2, y, true);
+            GUI.Label("Current Task: "+this.manager.getCurrentTaskName(), batch, x + width/2, y - 20, true);
 
-            this.gatherButton.set(rect.getX(), rect.getY() + rect.getHeight() - 75, 35, 35);
-            if(GUI.Button(this.gatherButton, "", batch, gatherButtonStyle))
+            this.gatherButton.set(x, y - 70, 35, 35);
+            if(GUI.Button(this.gatherButton, "", batch, GUI.gatherButtonStyle))
                 this.manager.gather();
 
-            this.gatherButton.set(rect.getX() + 40, rect.getY() + rect.getHeight() - 75, 35, 35);
-            if(GUI.Button(this.gatherButton, "", batch, exploreButtonStyle)) {
+            this.gatherButton.set(x + 40, y - 70, 35, 35);
+            if(GUI.Button(this.gatherButton, "", batch, GUI.exploreButtonStyle)) {
                 this.manager.explore();
             }
 
-        }else if(name == "health"){
+        }else if(name.equals("health")){
             stats.display(rect, batch, name);
-        }else if(name == "inventory"){
+        }else if(name.equals("inventory")){
             this.inventory.display(rect, batch, name);
-        }else if(name == "path"){
+        }else if(name.equals("path")){
             this.manager.display(rect, batch, name);
         }
     }
