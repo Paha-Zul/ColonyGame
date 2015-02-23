@@ -25,9 +25,35 @@ public class GUI {
 
     private static boolean clicked = false;
     private static boolean up = false;
+    private static Rectangle rect1 = new Rectangle();
+
+    public static GUI.ButtonStyle gatherButtonStyle;
+    public static GUI.ButtonStyle exploreButtonStyle;
 
     static{
         font = defaultFont;
+        loadGatherButtonStyle();
+        loadExploreButtonStyle();
+    }
+
+    private static void loadGatherButtonStyle(){
+        gatherButtonStyle = new GUI.ButtonStyle();
+        gatherButtonStyle.normal = new Texture(Gdx.files.internal("img/ui/axebutton_normal.png"), true);
+        gatherButtonStyle.normal.setFilter(Texture.TextureFilter.MipMapNearestLinear, Texture.TextureFilter.Linear);
+        gatherButtonStyle.moused = new Texture(Gdx.files.internal("img/ui/axebutton_moused.png"), true);
+        gatherButtonStyle.moused.setFilter(Texture.TextureFilter.MipMapNearestLinear, Texture.TextureFilter.Linear);
+        gatherButtonStyle.clicked = new Texture(Gdx.files.internal("img/ui/axebutton_clicked.png"), true);
+        gatherButtonStyle.clicked.setFilter(Texture.TextureFilter.MipMapNearestLinear, Texture.TextureFilter.Linear);
+    }
+
+    private static void loadExploreButtonStyle(){
+        exploreButtonStyle = new GUI.ButtonStyle();
+        exploreButtonStyle.normal = new Texture(Gdx.files.internal("img/ui/explorebutton_normal.png"), true);
+        exploreButtonStyle.normal.setFilter(Texture.TextureFilter.MipMapNearestLinear, Texture.TextureFilter.Linear);
+        exploreButtonStyle.moused = new Texture(Gdx.files.internal("img/ui/explorebutton_moused.png"), true);
+        exploreButtonStyle.moused.setFilter(Texture.TextureFilter.MipMapNearestLinear, Texture.TextureFilter.Linear);
+        exploreButtonStyle.clicked = new Texture(Gdx.files.internal("img/ui/explorebutton_clicked.png"), true);
+        exploreButtonStyle.clicked.setFilter(Texture.TextureFilter.MipMapNearestLinear, Texture.TextureFilter.Linear);
     }
 
     public static void Texture(Rectangle rect, Texture texture, SpriteBatch batch){
@@ -48,6 +74,11 @@ public class GUI {
 
     public static boolean Button(Rectangle rect, String text, SpriteBatch batch){
         return GUI.Button(rect, text, batch, null);
+    }
+
+    public static boolean Button(float x, float y, float width, float height, String text, SpriteBatch batch, ButtonStyle style){
+        rect1.set(x, y, width, height);
+        return GUI.Button(rect1, text, batch, style);
     }
 
     public static boolean Button(Rectangle rect, String text, SpriteBatch batch, ButtonStyle style){
@@ -71,7 +102,7 @@ public class GUI {
 
         batch.draw(currTexture, rect.x, rect.y, rect.getWidth(), rect.getHeight());
         BitmapFont.TextBounds bounds = font.getBounds(text);                                //Get the bounds of the text
-        font.draw(batch, text, rect.getX() + rect.getWidth()/2 - bounds.width/2, rect.getY() + rect.getHeight()/2 + bounds.height/2); //Draw the text
+        style.font.draw(batch, text, rect.getX() + rect.getWidth()/2 - bounds.width/2, rect.getY() + rect.getHeight()/2 + bounds.height/2); //Draw the text
 
         return clicked;
     }
@@ -102,6 +133,8 @@ public class GUI {
         public Texture normal = GUI.defaultNormalButton;
         public Texture moused = GUI.defaultMousedButton;
         public Texture clicked = GUI.defaultClickedButton;
+
+        public BitmapFont font = new BitmapFont();
 
         public ButtonStyle(){
 
