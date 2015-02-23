@@ -50,29 +50,20 @@ public class ColonyGame extends Game {
 	public void render () {
 		super.render();
 
-        GUI.checkState();
-
 		Profiler.begin("ColonyGame Render");
-
 		float delta = Gdx.graphics.getDeltaTime();
-
 		Profiler.update(delta);
-
-//		Gdx.gl.glClearColor(screenColor.r, screenColor.g, screenColor.b, screenColor.a);
-//		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
-		this.batch.setProjectionMatrix(camera.combined);
-
+        GUI.checkState();
+        ColonyGame.batch.setProjectionMatrix(camera.combined);
 		//Draw everything that is modified by the regular camera.
-		this.batch.begin();
-
-
+        ColonyGame.batch.begin();
 
 		Profiler.begin("UpdateGUI");
+        batch.setProjectionMatrix(UICamera.combined);
 		ListHolder.updateGUI(delta);
 		Profiler.end();
 
-		this.batch.end();
+        ColonyGame.batch.end();
 		Profiler.end();
 
         camera.update();
