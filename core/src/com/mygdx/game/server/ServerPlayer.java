@@ -1,6 +1,7 @@
 package com.mygdx.game.server;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
@@ -31,7 +32,7 @@ public class ServerPlayer {
 	private ShapeRenderer shapeRenderer;
 	private ColonyGame game;
 	private Grid.GridInstance grid;
-	private Grid.Node[] path;
+    private boolean paused = false;
 
     public static boolean drawGrid = false;
 
@@ -45,7 +46,7 @@ public class ServerPlayer {
 
 		//Start the server
 		//Server.start(1337);
-		this.grid = game.worldGrid;
+		this.grid = ColonyGame.worldGrid;
 
 		//Make a new spritebatch and shaperenderer.
 		this.batch = batch;
@@ -61,6 +62,9 @@ public class ServerPlayer {
     }
 
 	public void render(float delta){
+        if(paused)
+            delta = 0f;
+
 		Profiler.begin("ServerPlayer Render");
 
 		Gdx.gl.glClearColor(screenColor.r, screenColor.g, screenColor.b, screenColor.a);
@@ -125,6 +129,14 @@ public class ServerPlayer {
         this.batch.end();
     }
 
+    public boolean getPaused(){
+        return this.paused;
+    }
+
+    public void setPaused(boolean paused){
+        this.paused = paused;
+    }
+
 	private void generateStart(Vector2 start){
 		ColonyEntity colonyEnt = new ColonyEntity(start, 0, new Texture("img/colony.png"), this.batch, 11);
 		Colony colony = colonyEnt.getComponent(Colony.class);
@@ -172,7 +184,7 @@ public class ServerPlayer {
 	}
 
 	private void initPlayer(){
-		new PlayerInterface(ColonyGame.batch, this.game, ColonyGame.world);
+		new PlayerInterface(ColonyGame.batch, this.game, this, ColonyGame.world);
 	}
 
 }
