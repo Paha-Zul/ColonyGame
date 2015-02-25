@@ -2,6 +2,7 @@ package com.mygdx.game.helpers;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.assets.loaders.TextureLoader;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.utils.Array;
@@ -28,9 +29,13 @@ public class DataBuilder {
     private EasyAssetManager assetManager;
 
     public DataBuilder(EasyAssetManager assetManager){
+        TextureLoader.TextureParameter param = new TextureLoader.TextureParameter();
+        param.minFilter = Texture.TextureFilter.MipMapLinearLinear;
+        param.magFilter = Texture.TextureFilter.MipMapLinearLinear;
+        param.genMipMaps = true;
 
         this.assetManager = assetManager;
-        buildImages(Gdx.files.internal(this.imgPath));
+        buildImages(Gdx.files.internal(this.imgPath), param);
         buildItems();
         buildResources();
     }
@@ -39,16 +44,16 @@ public class DataBuilder {
         return assetManager.update();
     }
 
-    private void buildImages(FileHandle dirHandle){
+    private void buildImages(FileHandle dirHandle, TextureLoader.TextureParameter param){
         for (FileHandle entry: dirHandle.list()) {
             if(entry.isDirectory()) //For every directory, call this function again to load the images.
-                buildImages(new FileHandle(entry.path()+"/")); //A bit of recursion.
+                buildImages(new FileHandle(entry.path()+"/"), param); //A bit of recursion.
 
-            loadImage(entry);
+            loadImage(entry, param);
         }
     }
 
-    private void loadImage(FileHandle entry){
+    private void loadImage(FileHandle entry, TextureLoader.TextureParameter param){
         String extension = "";
         String commonName = "";
 
@@ -61,7 +66,7 @@ public class DataBuilder {
         if(!extension.equals("png"))
             return;
 
-        assetManager.load(entry.path(), commonName, Texture.class);
+        assetManager.load(entry.path(), commonName, Texture.class, param);
     }
 
     private void buildItems() {
