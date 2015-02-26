@@ -12,16 +12,16 @@ import com.mygdx.game.helpers.ListHolder;
 import com.mygdx.game.screens.LoadingScreen;
 
 /**
- * Created by Paha on 1/10/2015.
+ * A UI that controls the main menu. This is responsible for all buttons, images, music, and sounds of the main menu.
  */
 public class MainMenuInterface extends UI{
-    public static Texture mainMenuTexture = new Texture("img/Space2.png");
+    public static Texture mainMenuTexture = ColonyGame.assetManager.get("Space2", Texture.class);
     public static Music music = Gdx.audio.newMusic(Gdx.files.internal("music/Karkarakacrrot.ogg"));
 
-    private String versionNumber = "0.1";
+    private String versionNumber = "0.11";
     private BitmapFont titleFont = new BitmapFont(Gdx.files.internal("fonts/titlefont.fnt"));
 
-    private GUI.ButtonStyle buttonStyle;
+    private GUI.GUIStyle GUIStyle;
 
     private Rectangle startRect;
     private Rectangle quitRect;
@@ -34,7 +34,8 @@ public class MainMenuInterface extends UI{
         music.play();
         music.setLooping(true);
 
-        this.buttonStyle = new GUI.ButtonStyle();
+        this.GUIStyle = new GUI.GUIStyle();
+        this.GUIStyle.font = titleFont;
     }
 
     @Override
@@ -45,7 +46,7 @@ public class MainMenuInterface extends UI{
 
         //Set a new font, draw "Colony Game" to the screen, and reset the font.
         GUI.font = titleFont;
-        GUI.Label("Colony Game", this.batch, Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight() - 75, true);
+        GUI.Label("Colony Game", this.batch, Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight() - 75, true, GUIStyle);
         GUI.ResetFont();
 
         //Draw the version number
@@ -61,7 +62,6 @@ public class MainMenuInterface extends UI{
         //Quit button.
         if(GUI.Button(quitRect, "Quit", this.batch, null)){
             Gdx.app.exit();
-            return;
         }
     }
 
@@ -76,7 +76,7 @@ public class MainMenuInterface extends UI{
         titleFont = null;
         startRect = null;
         quitRect = null;
-        buttonStyle = null;
+        GUIStyle = null;
 
         versionNumber = null;
     }
