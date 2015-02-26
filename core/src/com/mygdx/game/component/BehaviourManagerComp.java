@@ -11,6 +11,7 @@ import com.mygdx.game.behaviourtree.Task;
 import com.mygdx.game.behaviourtree.action.*;
 import com.mygdx.game.behaviourtree.composite.Sequence;
 import com.mygdx.game.behaviourtree.control.ParentTaskController;
+import com.mygdx.game.entity.Entity;
 import com.mygdx.game.interfaces.Functional;
 import com.mygdx.game.interfaces.IDisplayable;
 
@@ -29,12 +30,16 @@ public class BehaviourManagerComp extends Component implements IDisplayable{
     }
 
     @Override
-    public void start() {
-        super.start();
+    public void init(Entity owner) {
+        super.init(owner);
 
         this.blackBoard = this.owner.addComponent(new BlackBoard());
         this.blackBoard.colonyGrid = ColonyGame.worldGrid;
+    }
 
+    @Override
+    public void start() {
+        super.start();
 //        this.behaviourTree = this.gatherResource();
 //        this.behaviourTree.start();
     }
@@ -170,10 +175,10 @@ public class BehaviourManagerComp extends Component implements IDisplayable{
             }
         }else{
             if(this.behaviourType.equals("colonist")) {
-                this.behaviourTree = this.idle(2f, 2f, 1);
+                this.behaviourTree = this.idle(this.blackBoard.baseIdleTime, this.blackBoard.randomIdleTime, this.blackBoard.idleDistance);
                 this.behaviourTree.start();
             }else if(this.behaviourType.equals("animal")) {
-                this.behaviourTree = this.idle(2f, 2f, 2);
+                this.behaviourTree = this.idle(this.blackBoard.baseIdleTime, this.blackBoard.randomIdleTime, this.blackBoard.idleDistance);
                 this.behaviourTree.start();
             }
         }
@@ -223,6 +228,10 @@ public class BehaviourManagerComp extends Component implements IDisplayable{
         }
 
         batch.setProjectionMatrix(projection);
+    }
+
+    public BlackBoard getBlackBoard(){
+        return this.blackBoard;
     }
 
     public String getCurrentTaskName(){
