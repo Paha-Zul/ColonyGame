@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.mygdx.game.ColonyGame;
 import com.mygdx.game.helpers.BehaviourManager;
 import com.mygdx.game.helpers.FloatingText;
 import com.mygdx.game.helpers.gui.GUI;
@@ -92,5 +93,8 @@ public class Colonist extends Component implements IDisplayable{
         }else if(name.equals("path")){
             this.manager.display(rect, batch, name);
         }
+
+        //This should be called at the end of all processing to reset the batch to the UI screen. Otherwise, UI stuff may get drawn on the world and not the UI.
+        batch.setProjectionMatrix(ColonyGame.UICamera.combined);
     }
 }
