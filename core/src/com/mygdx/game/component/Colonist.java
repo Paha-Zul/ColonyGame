@@ -1,13 +1,8 @@
 package com.mygdx.game.component;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.ColonyGame;
-import com.mygdx.game.helpers.BehaviourManager;
-import com.mygdx.game.helpers.FloatingText;
 import com.mygdx.game.helpers.gui.GUI;
 import com.mygdx.game.interfaces.IDisplayable;
 import com.sun.istack.internal.NotNull;
@@ -78,11 +73,11 @@ public class Colonist extends Component implements IDisplayable{
             GUI.Label("Current Task: "+this.manager.getCurrentTaskName(), batch, x + width/2, y - 20, true);
 
             this.gatherButton.set(x, y - 70, 35, 35);
-            if(GUI.Button(this.gatherButton, "", batch, GUI.gatherButtonStyle))
+            if(GUI.Button(this.gatherButton, "", batch, GUI.gatherGUIStyle))
                 this.manager.gather();
 
             this.gatherButton.set(x + 40, y - 70, 35, 35);
-            if(GUI.Button(this.gatherButton, "", batch, GUI.exploreButtonStyle)) {
+            if(GUI.Button(this.gatherButton, "", batch, GUI.exploreGUIStyle)) {
                 this.manager.explore();
             }
 
