@@ -17,6 +17,11 @@ public class BlackBoard extends Component{
     public Resource targetResource;
     public Inventory transferToInventory;
 
+    //Related to idle jobs
+    public float baseIdleTime = 2f;
+    public float randomIdleTime = 2f;
+    public int idleDistance = 1;
+
     //My stuff
     public Inventory myInventory;
 
