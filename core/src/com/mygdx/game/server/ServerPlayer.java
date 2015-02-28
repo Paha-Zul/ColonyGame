@@ -1,20 +1,18 @@
 package com.mygdx.game.server;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.*;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.component.*;
 import com.mygdx.game.component.Colony;
-import com.mygdx.game.entity.ColonistEnt;
+import com.mygdx.game.entity.AnimalEnt;
 import com.mygdx.game.entity.ColonyEntity;
 import com.mygdx.game.helpers.*;
 import com.mygdx.game.interfaces.Functional;
@@ -77,7 +75,7 @@ public class ServerPlayer {
 		this.batch.setProjectionMatrix(ColonyGame.camera.combined);
 
 		WorldGen.TerrainTile[][] map = WorldGen.map;
-		float halfTileSize = ((float)WorldGen.tileSize+20)/2f;
+		float halfTileSize = ((float)WorldGen.getInstance().tileSize+20)/2f;
 
         Vector3[] points = ColonyGame.camera.frustum.planePoints;
 
@@ -90,7 +88,7 @@ public class ServerPlayer {
                 if(!ColonyGame.camera.frustum.boundsInFrustum(tile.terrainSprite.getX(), tile.terrainSprite.getY(), 0, halfTileSize, halfTileSize, 0))
                     continue;
 
-                tile.changeVisibility(WorldGen.getVisibilityMap()[x][y].getVisibility());
+                tile.changeVisibility(WorldGen.getInstance().getVisibilityMap()[x][y].getVisibility());
                 tile.terrainSprite.draw(batch);
             }
         }
@@ -107,19 +105,15 @@ public class ServerPlayer {
         Profiler.end();
 
         Profiler.begin("Box2DDebug");
-        //This is just testing... drawing the gray texture that we made.
-        batch.draw(WorldGen.grayTexture, 0, 0, 200, 200);
         this.batch.end();
 
         //drawBox2DDebug();
-
         //Draw the grid squares if enabled.
         if(drawGrid)
 		    this.grid.debugDraw();
 
         Profiler.end();
 		Profiler.end();
-
 	}
 
     private void drawBox2DDebug(){
@@ -139,6 +133,8 @@ public class ServerPlayer {
 
 	private void generateStart(Vector2 start){
 		ColonyEntity colonyEnt = new ColonyEntity(start, 0, new Texture("img/colony.png"), this.batch, 11);
+        for(int i=0;i<10;i++)
+            new AnimalEnt(start, 0, ColonyGame.assetManager.get("animal2", Texture.class), this.batch, 11);
 		Colony colony = colonyEnt.getComponent(Colony.class);
 
 		int radius = 8;

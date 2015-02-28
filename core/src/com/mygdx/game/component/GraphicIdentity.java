@@ -40,7 +40,7 @@ public class GraphicIdentity extends Component{
 		}
 
         Grid.Node node = ColonyGame.worldGrid.getNode(this.owner);
-        int visibility = WorldGen.getVisibilityMap()[node.getCol()][node.getRow()].getVisibility();
+        int visibility = WorldGen.getInstance().getVisibilityMap()[node.getCol()][node.getRow()].getVisibility();
         if(visibility == Constants.VISIBILITY_UNEXPLORED) {
             Profiler.end();
             return;

@@ -1,0 +1,24 @@
+{
+  "tiles": [
+    {
+      "tileName": "grass1",
+      "type": "grass1",
+      "img": "Grass1_1"
+    },
+
+    {
+      "tileName": "tallGrass1",
+      "type": "tallgrass",
+      "img": "tallgrass1"
+    },
+    {
+      "tileName": "lightWater",
+      "type": "lightwater",
+      "img": "Water1"
+    },
+    {
+      "tileName": "darkWater",
+      "type": "darkwater",
+      "img": "Water2"
+    }]
+}

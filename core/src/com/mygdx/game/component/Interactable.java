@@ -14,6 +14,7 @@ public class Interactable extends Component{
     public Resource resource;
     public Colony colony;
     public Colonist colonist;
+    public Animal animal;
 
     public Interactable(String type) {
         super();

@@ -26,7 +26,7 @@ public class MainMenuScreen implements Screen {
 
     @Override
     public void show() {
-        MainMenuInterface menuInterface = new MainMenuInterface(this.game.batch, this.game);
+        new MainMenuInterface(ColonyGame.batch, this.game);
     }
 
     @Override

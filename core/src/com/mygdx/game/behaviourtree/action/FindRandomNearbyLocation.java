@@ -53,7 +53,7 @@ public class FindRandomNearbyLocation extends LeafTask{
                 for (int col = startX; col <= endX; col++) {
                     for (int row = startY; row <= endY; row++) {
                         Grid.Node node = this.blackBoard.colonyGrid.getNode(col, row);
-                        if (node != null && (col == startX || col == endX || row == startY || row == endY) && WorldGen.getNode(node.getCol(), node.getRow()).type != Constants.TERRAIN_WATER)
+                        if (node != null && (col == startX || col == endX || row == startY || row == endY) && WorldGen.getInstance().getNode(node.getCol(), node.getRow()).type != Constants.TERRAIN_WATER)
                             nodes.add(node);
                     }
                 }

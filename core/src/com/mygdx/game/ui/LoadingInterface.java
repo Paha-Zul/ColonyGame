@@ -43,7 +43,7 @@ public class LoadingInterface extends UI {
         if(!done) {
             GUI.Texture(this.square, this.blackSquare, this.batch);
             GUI.Texture(this.loadingBar, this.outline, this.batch);
-            GUI.Texture(this.loadingBar.x, this.loadingBar.y, this.loadingBar.width*WorldGen.percentageDone, this.loadingBar.height, this.bar, this.batch);
+            GUI.Texture(this.loadingBar.x, this.loadingBar.y, this.loadingBar.width*WorldGen.getInstance().percentageDone, this.loadingBar.height, this.bar, this.batch);
             GUI.Label("Loading Terrain", this.batch, this.loadingBar.getX() + this.loadingBar.width/2, this.loadingBar.getY() + 40, true);
         }
     }

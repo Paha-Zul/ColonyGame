@@ -128,7 +128,7 @@ public class Grid {
             int endX = node.getCol()+exploreRadius;
             int startY = node.getRow()-exploreRadius;
             int endY = node.getRow()+exploreRadius;
-            WorldGen.VisibilityTile[][] visMap = WorldGen.getVisibilityMap();
+            WorldGen.VisibilityTile[][] visMap = WorldGen.getInstance().getVisibilityMap();
 
             for(int x=startX;x<=endX;x++){
                 for(int y=startY;y<=endY;y++){
@@ -171,7 +171,7 @@ public class Grid {
 
                     //Gdx.app.log("Startx/Endx/StartY/EndY: ",startX+"/"+endX+"/"+startY+"/"+endY);
 
-                    WorldGen.VisibilityTile[][] visibilityMap = WorldGen.getVisibilityMap();
+                    WorldGen.VisibilityTile[][] visibilityMap = WorldGen.getInstance().getVisibilityMap();
 
                     for(int x = startX; x <= endX ; x++){
                         for(int y = startY; y <= endY; y++){

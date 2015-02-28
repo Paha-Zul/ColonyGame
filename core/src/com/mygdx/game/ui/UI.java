@@ -26,7 +26,7 @@ public abstract class UI implements IGUI, IDestroyable{
 
     @Override
     public void drawGUI(float delta) {
-        this.batch.setProjectionMatrix(ColonyGame.UICamera.combined);
+
     }
 
     @Override

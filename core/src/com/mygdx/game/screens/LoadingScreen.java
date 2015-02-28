@@ -26,18 +26,18 @@ public class LoadingScreen implements Screen {
 
     @Override
     public void show() {
-        WorldGen.tileSize = Constants.GRID_SQUARESIZE;
-        WorldGen.freq = 20;
-        WorldGen.init((long)(MathUtils.random()*Long.MAX_VALUE), game);
+        WorldGen.getInstance().tileSize = Constants.GRID_SQUARESIZE;
+        WorldGen.getInstance().freq = 20;
+        WorldGen.getInstance().init((long)(MathUtils.random()*Long.MAX_VALUE), game);
 
         loadingInterface = new LoadingInterface(game.batch, this.game);
     }
 
     @Override
     public void render(float delta) {
-        if(WorldGen.generateWorld()) {
+        if(WorldGen.getInstance().generateWorld()) {
             loadingInterface.setDone();
-            WorldGen.clean();
+            WorldGen.getInstance().clean();
             this.dispose();
             //throw new RuntimeException("Broken");
             game.setScreen(new GameScreen(this.game));

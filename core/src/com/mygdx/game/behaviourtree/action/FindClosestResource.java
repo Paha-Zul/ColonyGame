@@ -91,7 +91,7 @@ public class FindClosestResource extends LeafTask{
 
                         //If we try to get the node and it's null, continue.
                         Grid.Node node = this.blackBoard.colonyGrid.getNode(col, row);
-                        if(node == null || WorldGen.getVisibilityMap()[col][row].getVisibility() == Constants.VISIBILITY_UNEXPLORED)
+                        if(node == null || WorldGen.getInstance().getVisibilityMap()[col][row].getVisibility() == Constants.VISIBILITY_UNEXPLORED)
                             continue;
 
                         finished = false; //Set this to false. We still have places to check obviously!

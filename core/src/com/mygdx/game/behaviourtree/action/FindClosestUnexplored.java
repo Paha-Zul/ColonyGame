@@ -65,8 +65,8 @@ public class FindClosestUnexplored extends LeafTask{
                             continue;
 
                         //Check terrain and visibility.
-                        int terrainType = WorldGen.getNode(x,y).type;
-                        int visibility = WorldGen.getVisibilityMap()[x][y].getVisibility();
+                        int terrainType = WorldGen.getInstance().getNode(x,y).type;
+                        int visibility = WorldGen.getInstance().getVisibilityMap()[x][y].getVisibility();
                         if(visibility != Constants.VISIBILITY_UNEXPLORED || terrainType == Constants.TERRAIN_WATER)
                             continue;
 
