@@ -8,12 +8,15 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter;
+import com.mygdx.game.ColonyGame;
 import com.mygdx.game.component.Item;
 import com.mygdx.game.component.Resource;
 import com.mygdx.game.helpers.managers.ItemManager;
 import com.mygdx.game.helpers.managers.ResourceManager;
+import com.mygdx.game.helpers.worldgeneration.WorldGen;
 
 import java.io.File;
+import java.lang.reflect.Field;
 
 /**
  * Created by Paha on 2/19/2015.
@@ -22,9 +25,8 @@ public class DataBuilder {
     String filePath = "files/";
     String itemPath = "items.json";
     String resourcePath = "resources.json";
+    String tilePath = "tiles.json";
     String imgPath = "img/";
-    String musicPath = "music/";
-    String fontsPath = "fonts/";
 
     private EasyAssetManager assetManager;
 
@@ -36,12 +38,16 @@ public class DataBuilder {
 
         this.assetManager = assetManager;
         buildImages(Gdx.files.internal(this.imgPath), param);
-        buildItems();
-        buildResources();
     }
 
-    public boolean update(float delta){
+    public boolean update(){
         return assetManager.update();
+    }
+
+    public void loadFiles(){
+        buildItems();
+        buildResources();
+        buildTiles();
     }
 
     private void buildImages(FileHandle dirHandle, TextureLoader.TextureParameter param){
@@ -120,6 +126,21 @@ public class DataBuilder {
         }
     }
 
+    private void buildTiles(){
+        Json json = new Json();
+        json.setTypeName(null);
+        json.setUsePrototypes(false);
+        json.setIgnoreUnknownFields(true);
+        json.setOutputType(JsonWriter.OutputType.json);
+
+        JsonTiles tiles = json.fromJson(JsonTiles.class, Gdx.files.internal(filePath+tilePath));
+
+        //Loop over the results.
+        for(JsonTile jTile : tiles.tiles){
+            WorldGen.getInstance().addTexture(jTile.type, ColonyGame.assetManager.get(jTile.img, Texture.class));
+        }
+    }
+
     private static class JsonItems{
         public Array<JsonItem> items;
     }
@@ -136,5 +157,13 @@ public class DataBuilder {
         public String resourceName, displayName, resourceType, description, img;
         public Array<String> items;
         public int[][] amounts;
+    }
+
+    private static class JsonTiles{
+        public Array<JsonTile> tiles;
+    }
+
+    private static class JsonTile{
+        public String tileName, img, type;
     }
 }
