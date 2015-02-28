@@ -115,7 +115,7 @@ public class FindPath extends LeafTask {
                     node.G = currNode.G + 20; //Diagonal.
 
                 WorldGen.TerrainTile tile = WorldGen.getInstance().getNode(node.getCol(), node.getRow());
-                if(node.getEntityList().size() > 0 || (tile != null && tile.type == Constants.TERRAIN_WATER))
+                if(node.getEntityList().size() > 0 || (tile != null && tile.avoid))
                     node.B = 500;
 
                 //Set the H value, add it to the openList, and make its parent the current Node.
