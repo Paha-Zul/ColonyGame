@@ -30,8 +30,6 @@ public class WorldGen {
     public float percentageDone = 0;
 
     private HashMap<String, ArrayList<Texture>> texMap = new HashMap<>();
-    private Texture[] grassTiles;
-    private Texture[] tallGrassTiles;
     private Texture treeTexture;
     private Texture rockTexture;
     private Texture darkWater;
@@ -80,22 +78,8 @@ public class WorldGen {
     private void loadImages(){
         treeTexture = ColonyGame.assetManager.get("redtree", Texture.class);
         rockTexture = new Texture("img/rock.png");
-        darkWater = new Texture("img/DarkWater.png");
-        lightWater = new Texture("img/LightWater.png");
-
-        grassTiles = new Texture[4];
-        tallGrassTiles = new Texture[3];
-
-        //Loads in some grass.
-        grassTiles[0] = new Texture("img/grass1.png");
-        grassTiles[1] = new Texture("img/grass2.png");
-        grassTiles[2] = new Texture("img/grass3.png");
-        grassTiles[3] = new Texture("img/grass4.png");
-
-        //Loads in some tall grass.
-        tallGrassTiles[0] = new Texture("img/tallgrass1.png");
-        tallGrassTiles[1] = new Texture("img/tallgrass2.png");
-        tallGrassTiles[2] = new Texture("img/tallgrass3.png");
+        darkWater = new Texture("img/Water2.png");
+        lightWater = new Texture("img/Water1.png");
     }
 
     /**
@@ -105,6 +89,7 @@ public class WorldGen {
     public boolean generateWorld(){
         int stepsLeft = Constants.WORLDGEN_GENERATESPEED;
         boolean done = true; //Flag for completion.
+        ArrayList<Texture> texList;
 
         //If there's steps left and currX is still less than the total num X, generate!
         while(stepsLeft > 0 && currX < numX){
@@ -127,13 +112,15 @@ public class WorldGen {
             //If between 0 and 0.6, random grass.
             }else if (noiseValue < 0.6){
                 type = Constants.TERRAIN_GRASS;
-                terrainSprite = new Sprite(grassTiles[(int)(MathUtils.random()*grassTiles.length)]);
+                texList = getTextureList("grass1");
+                terrainSprite = new Sprite(texList.get(0));
                 rotation = (int)(MathUtils.random()*4)*90;
 
             //Otherwise, tall grass!
             }else{
                 type = Constants.TERRAIN_GRASS;
-                terrainSprite = new Sprite(tallGrassTiles[(int)(MathUtils.random()*tallGrassTiles.length)]);
+                texList = getTextureList("tallgrass");
+                terrainSprite = new Sprite(texList.get((int)(MathUtils.random()*texList.size())));
                 rotation = (int)(MathUtils.random()*4)*90;
             }
 
@@ -195,6 +182,14 @@ public class WorldGen {
         list.add(texture);
     }
 
+    public ArrayList<Texture> getTextureList(String type){
+        ArrayList<Texture> list = texMap.get(type);
+        if(list == null)
+            return new ArrayList<>();
+
+        return list;
+    }
+
     /**
      * Gets the Node at the Entity's location.
      *
@@ -248,7 +243,6 @@ public class WorldGen {
     }
 
     public VisibilityTile[][] getVisibilityMap(){
-        System.out.println("vis null: "+(this.visibilityMap == null));
         return this.visibilityMap;
     }
 
