@@ -1,6 +1,8 @@
 package com.mygdx.game.helpers;
 
+import com.badlogic.gdx.assets.AssetLoaderParameters;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.assets.loaders.TextureLoader;
 
 import java.util.HashMap;
 
@@ -17,6 +19,11 @@ public class EasyAssetManager extends AssetManager{
 
     public synchronized <T> void load(String fileName, String commonName, Class<T> type) {
         super.load(fileName, type);
+        dataMap.put(commonName, new DataReference(commonName, fileName));
+    }
+
+    public synchronized <T> void load(String fileName, String commonName, Class<T> type, AssetLoaderParameters<T> param) {
+        super.load(fileName, type, param);
         dataMap.put(commonName, new DataReference(commonName, fileName));
     }
 

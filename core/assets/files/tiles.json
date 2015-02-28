@@ -1,24 +1,74 @@
 {
   "tiles": [
+
     {
       "tileName": "grass1",
       "type": "grass1",
       "img": "Grass1_1"
     },
-
+    {
+      "tileName": "grass1",
+      "type": "grass1",
+      "img": "Grass1_2"
+    },
+    {
+      "tileName": "grass1",
+      "type": "grass1",
+      "img": "Grass1_3"
+    },
+    {
+      "tileName": "grass1",
+      "type": "grass1",
+      "img": "Grass1_4"
+    },
+    {
+      "tileName": "grass1",
+      "type": "grass1",
+      "img": "Grass1_5"
+    },
+    {
+      "tileName": "grass1",
+      "type": "grass1",
+      "img": "Grass1_6"
+    },
     {
       "tileName": "tallGrass1",
       "type": "tallgrass",
-      "img": "tallgrass1"
+      "img": "Grass2_1"
+    },
+    {
+      "tileName": "tallGrass1",
+      "type": "tallgrass",
+      "img": "Grass2_2"
+    },
+    {
+      "tileName": "tallGrass1",
+      "type": "tallgrass",
+      "img": "Grass2_3"
+    },
+    {
+      "tileName": "tallGrass1",
+      "type": "tallgrass",
+      "img": "Grass2_4"
+    },
+    {
+      "tileName": "tallGrass1",
+      "type": "tallgrass",
+      "img": "Grass2_5"
+    },
+    {
+      "tileName": "tallGrass1",
+      "type": "tallgrass",
+      "img": "Grass2_6"
     },
     {
       "tileName": "lightWater",
       "type": "lightwater",
-      "img": "Water1"
+      "img": "Dirt1_1",
     },
     {
       "tileName": "darkWater",
       "type": "darkwater",
-      "img": "Water2"
+      "img": "Dirt2",
     }]
 }
