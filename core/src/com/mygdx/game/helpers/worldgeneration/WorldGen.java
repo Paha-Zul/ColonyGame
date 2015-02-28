@@ -32,8 +32,6 @@ public class WorldGen {
     private HashMap<String, ArrayList<Texture>> texMap = new HashMap<>();
     private Texture treeTexture;
     private Texture rockTexture;
-    private Texture darkWater;
-    private Texture lightWater;
 
     public Texture whiteTex;
 
@@ -78,8 +76,6 @@ public class WorldGen {
     private void loadImages(){
         treeTexture = ColonyGame.assetManager.get("redtree", Texture.class);
         rockTexture = new Texture("img/rock.png");
-        darkWater = new Texture("img/Water2.png");
-        lightWater = new Texture("img/Water1.png");
     }
 
     /**
@@ -102,26 +98,28 @@ public class WorldGen {
             //If under this value, generate dark water.
             if(noiseValue < -0.6) {
                 type = Constants.TERRAIN_WATER;
-                terrainSprite = new Sprite(darkWater);
+                texList = getTextureList("darkwater");
+                terrainSprite = new Sprite(texList.get((int)(MathUtils.random()*texList.size())));
 
             //If between 0 and -0.2, light water.
             }else if (noiseValue < -0.4) {
                 type = Constants.TERRAIN_WATER;
-                terrainSprite = new Sprite(lightWater);
+                texList = getTextureList("lightwater");
+                terrainSprite = new Sprite(texList.get((int)(MathUtils.random()*texList.size())));
 
             //If between 0 and 0.6, random grass.
             }else if (noiseValue < 0.6){
                 type = Constants.TERRAIN_GRASS;
                 texList = getTextureList("grass1");
-                terrainSprite = new Sprite(texList.get(0));
-                rotation = (int)(MathUtils.random()*4)*90;
+                terrainSprite = new Sprite(texList.get((int)(MathUtils.random()*texList.size())));
+                //rotation = (int)(MathUtils.random()*4)*90;
 
             //Otherwise, tall grass!
             }else{
                 type = Constants.TERRAIN_GRASS;
                 texList = getTextureList("tallgrass");
                 terrainSprite = new Sprite(texList.get((int)(MathUtils.random()*texList.size())));
-                rotation = (int)(MathUtils.random()*4)*90;
+                //rotation = (int)(MathUtils.random()*4)*90;
             }
 
             //If the tile is not water...
@@ -254,6 +252,7 @@ public class WorldGen {
         public Sprite terrainSprite;
         public double noiseValue;
         public int type;
+
 
         private int visibility = Constants.VISIBILITY_UNEXPLORED;
 
