@@ -22,8 +22,10 @@ public class PreLoadingScreen implements Screen{
 
     @Override
     public void render(float delta) {
-        if(builder.update(delta))
+        if(builder.update()) {
+            builder.loadFiles();
             this.game.setScreen(new MainMenuScreen(this.game));
+        }
     }
 
     @Override
