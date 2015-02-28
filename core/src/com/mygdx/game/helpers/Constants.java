@@ -14,7 +14,7 @@ public class Constants {
 	//For interactable types...
 
 	//Grid stuff
-	public final static int GRID_SQUARESIZE = 25;
+	public final static int GRID_SQUARESIZE = 100;
 	public final static int GRID_WIDTH = 5000;
 	public final static int GRID_HEIGHT = 5000;
 
