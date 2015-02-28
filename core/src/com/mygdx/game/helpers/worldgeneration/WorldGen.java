@@ -1,6 +1,5 @@
 package com.mygdx.game.helpers.worldgeneration;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
@@ -10,14 +9,13 @@ import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.component.GridComponent;
 import com.mygdx.game.component.Interactable;
-import com.mygdx.game.component.Resource;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.entity.TreeEnt;
 import com.mygdx.game.helpers.Constants;
 import com.mygdx.game.helpers.managers.ResourceManager;
 
-import javax.xml.soap.Text;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created by Bbent_000 on 12/24/2014.
@@ -26,37 +24,35 @@ public class WorldGen {
     public static TerrainTile[][] map;
 
     //Some default values that can be modified globally.
-    public static int tileSize = 25;
-    public static float treeScale = 0.8f;
-    public static float freq = 5;
-    public static float percentageDone = 0;
+    public int tileSize = 25;
+    public float treeScale = 0.8f;
+    public float freq = 5;
+    public float percentageDone = 0;
 
-    private static Texture[] grassTiles;
-    private static Texture[] tallGrassTiles;
-    private static Texture treeTexture;
-    private static Texture rockTexture;
-    private static Texture darkWater;
-    private static Texture lightWater;
+    private HashMap<String, ArrayList<Texture>> texMap = new HashMap<>();
+    private Texture[] grassTiles;
+    private Texture[] tallGrassTiles;
+    private Texture treeTexture;
+    private Texture rockTexture;
+    private Texture darkWater;
+    private Texture lightWater;
 
-    public static Texture grayTexture;
+    public Texture whiteTex;
 
-    private static ArrayList<Entity> treeList = new ArrayList<>();
-    private static VisibilityTile[][] visibilityMap;
+    private ArrayList<Entity> treeList = new ArrayList<>();
+    private VisibilityTile[][] visibilityMap;
 
-    private static int numX, numY, currX = 0, currY = 0;
+    private int numX, numY, currX = 0, currY = 0;
 
-    private static ColonyGame game;
-
-    static{
-
-    }
+    private ColonyGame game;
+    private static WorldGen instance;
 
     /**
      * Initializes the World Generator. For now, most stuff is temporary for prototyping.
      * @param seed The seed that the world should use for randomly generating.
      */
-    public static void init(long seed, ColonyGame game){
-        WorldGen.game = game;
+    public void init(long seed, ColonyGame game){
+        this.game = game;
 
         loadImages();
 
@@ -70,19 +66,18 @@ public class WorldGen {
         //Initializes a new array
         map = new TerrainTile[numX][numY];
         //Initialize a new int array.
-        visibilityMap = new VisibilityTile[numX][numY];
+        this.visibilityMap = new VisibilityTile[numX][numY];
 
-        //Generate a gray square.
+        //Generate a white square (pixel).
         Pixmap pixmap = new Pixmap(1,1, Pixmap.Format.RGBA4444);
-        Color color = new Color(Color.BLACK);
-        color.a = 0.5f;
+        Color color = new Color(Color.WHITE);
         pixmap.setColor(color);
         pixmap.fillRectangle(0,0,1,1);
-        grayTexture = new Texture(pixmap);
+        whiteTex = new Texture(pixmap);
         pixmap.dispose();
     }
 
-    private static void loadImages(){
+    private void loadImages(){
         treeTexture = ColonyGame.assetManager.get("redtree", Texture.class);
         rockTexture = new Texture("img/rock.png");
         darkWater = new Texture("img/DarkWater.png");
@@ -107,7 +102,7 @@ public class WorldGen {
      * Called every frame to generate the world. This will return true when the world is fully generated.
      * @return True when finished, false otherwise.
      */
-    public static boolean generateWorld(){
+    public boolean generateWorld(){
         int stepsLeft = Constants.WORLDGEN_GENERATESPEED;
         boolean done = true; //Flag for completion.
 
@@ -169,7 +164,7 @@ public class WorldGen {
             }
 
             map[currX][currY] = new TerrainTile(terrainSprite, noiseValue, rotation, type, position); //Create a new terrain tile.
-            visibilityMap[currX][currY] = new VisibilityTile(); //Set this to unexplored.
+            this.visibilityMap[currX][currY] = new VisibilityTile(); //Set this to unexplored.
 
             done = false; //Set done to false signifying that we are not finished yet.
             stepsLeft--; //Decrement the remaining step amount.
@@ -190,13 +185,23 @@ public class WorldGen {
         return done;
     }
 
+    public void addTexture(String type, Texture texture){
+        ArrayList<Texture> list = texMap.get(type);
+        if(list == null){
+            list = new ArrayList<>();
+            texMap.put(type, list);
+        }
+
+        list.add(texture);
+    }
+
     /**
      * Gets the Node at the Entity's location.
      *
      * @param entity The Entity to use for a location.
      * @return A Node at the Entity's location.
      */
-    public static TerrainTile getNode(Entity entity) {
+    public TerrainTile getNode(Entity entity) {
         return getNode((int) (entity.transform.getPosition().x / tileSize), (int) (entity.transform.getPosition().y / tileSize));
     }
 
@@ -206,7 +211,7 @@ public class WorldGen {
      * @param pos The Vector2 position to get a Node at.
      * @return A Node at the Vector2 position.
      */
-    public static TerrainTile getNode(Vector2 pos) {
+    public TerrainTile getNode(Vector2 pos) {
         return getNode((int) (pos.x / tileSize), (int) (pos.y / tileSize));
     }
 
@@ -217,7 +222,7 @@ public class WorldGen {
      * @param y The Y (row) index to get the Node at.
      * @return The Node if the index was valid, null otherwise.
      */
-    public static TerrainTile getNode(int x, int y) {
+    public TerrainTile getNode(int x, int y) {
         //If the index is not in bounds, return null.
         if (x < 0 || x >= map.length || y < 0 || y >= map[x].length)
             return null;
@@ -231,26 +236,27 @@ public class WorldGen {
      * @param index An integer array containing X and Y index.
      * @return The Node if the index was valid, null otherwise.
      */
-    public static TerrainTile getNode(int[] index) {
+    public TerrainTile getNode(int[] index) {
         if (index.length < 2)
             return null;
 
         return getNode(index[0], index[1]);
     }
 
-    public static int numTiles() {
+    public int numTiles() {
         return numX*numY;
     }
 
-    public static VisibilityTile[][] getVisibilityMap(){
-        return visibilityMap;
+    public VisibilityTile[][] getVisibilityMap(){
+        System.out.println("vis null: "+(this.visibilityMap == null));
+        return this.visibilityMap;
     }
 
-    public static int numTrees(){
+    public int numTrees(){
         return treeList.size();
     }
 
-    public static class TerrainTile {
+    public class TerrainTile {
         public Sprite terrainSprite;
         public double noiseValue;
         public int type;
@@ -278,7 +284,7 @@ public class WorldGen {
 
     }
 
-    public static class VisibilityTile{
+    public class VisibilityTile{
         private int visibility = Constants.VISIBILITY_UNEXPLORED;
         private int currViewers = 0;
 
@@ -316,7 +322,7 @@ public class WorldGen {
         }
     }
 
-    public static void clean(){
+    public void clean(){
 //        for(Texture tex : grassTiles)
 //            tex.dispose();
 //
@@ -335,11 +341,16 @@ public class WorldGen {
 //        darkWater = null;
 //        lightWater.dispose();
 //        lightWater = null;
-//        grayTexture.dispose();
-//        grayTexture = null;
+//        whiteTex.dispose();
+//        whiteTex = null;
 //
 //        treeList.clear();
 //        treeList = null;
+    }
+
+    public static WorldGen getInstance(){
+        if(instance == null) instance = new WorldGen();
+        return instance;
     }
 }
 
