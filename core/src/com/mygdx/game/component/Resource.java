@@ -47,7 +47,6 @@ public class Resource extends Component implements IDisplayable{
         super.start();
 
         this.getEntityOwner().name = this.displayName;
-        this.getComponent(GraphicIdentity.class).setTexture(ColonyGame.assetManager.get(textureName, Texture.class));
     }
 
     @Override
