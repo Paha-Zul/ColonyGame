@@ -2,18 +2,18 @@
   "tiles": [
 
     {
-      "tileName": ["grass1", "grass2", "grass3", "grass4", "grass5", "grass6"],
+      "tileName": ["grass1", "grass2", "grass3", "grass4"],
       "category": "grass1",
-      "img": ["Grass1_1", "Grass1_2", "Grass1_3", "Grass1_4", "Grass1_5", "Grass1_6"],
-      "height": [-0.6, 0.8],
+      "img": ["Grass1small_1", "Grass1small_2", "Grass1small_3", "Grass1small_4"],
+      "height": [-0.4, 0.8],
       "avoid": "false",
       "resources":["pine"],
       "resourcesChance":[[0.9, 1]]
     },
     {
-      "tileName": ["tallGrass1", "tallGrass2", "tallGrass3", "tallGrass4", "tallGrass5", "tallGrass6"],
+      "tileName": ["tallGrass1", "tallGrass2", "tallGrass3", "tallGrass4"],
       "category": "tallgrass",
-      "img": ["Grass2_1", "Grass2_2", "Grass2_3", "Grass2_4", "Grass2_5", "Grass2_6"],
+      "img": ["Grass2small_1", "Grass2small_2", "Grass2small_3", "Grass2small_4"],
       "height": [0.8, 1],
       "avoid": "false",
       "resources":["pine", "redwood"],
@@ -22,15 +22,15 @@
     {
       "tileName": ["lightWater"],
       "category": "lightwater",
-      "img": ["Dirt1_1"],
-      "height": [-0.8, -0.6],
-      "avoid": "false"
+      "img": ["lightwater"],
+      "height": [-0.8, -0.4],
+      "avoid": "true"
     },
     {
       "tileName": ["darkWater"],
       "category": "darkwater",
-      "img": ["Dirt2"],
+      "img": ["darkwater"],
       "height": [-1, -0.8],
-      "avoid": "false"
+      "avoid": "true"
     }]
 }
