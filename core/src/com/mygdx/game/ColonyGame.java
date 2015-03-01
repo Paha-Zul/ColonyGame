@@ -15,6 +15,9 @@ import com.mygdx.game.helpers.gui.GUI;
 import com.mygdx.game.screens.MainMenuScreen;
 import com.mygdx.game.screens.PreLoadingScreen;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 public class ColonyGame extends Game {
 	public static boolean server = true;
 	public static boolean singlePlayer = true;
@@ -26,6 +29,7 @@ public class ColonyGame extends Game {
 	public static ShapeRenderer renderer;
 	public static World world;
 	public static Box2DDebugRenderer debugRenderer;
+    public static ExecutorService threadPool;
 
     public static EasyAssetManager assetManager;
 
@@ -42,6 +46,8 @@ public class ColonyGame extends Game {
         ColonyGame.assetManager = new EasyAssetManager();
 
 		ColonyGame.worldGrid = Grid.newGridInstance("grid", Constants.GRID_WIDTH, Constants.GRID_HEIGHT, Constants.GRID_SQUARESIZE);
+
+        threadPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
 		this.setScreen(new PreLoadingScreen(this));
 	}
