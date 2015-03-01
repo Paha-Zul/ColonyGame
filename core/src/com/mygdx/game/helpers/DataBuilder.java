@@ -28,6 +28,7 @@ public class DataBuilder implements IDestroyable{
     String itemPath = "items.json";
     String resourcePath = "resources.json";
     String tilePath = "tiles.json";
+    String worldPath = "worldgen.json";
     String imgPath = "img/";
 
     private EasyAssetManager assetManager;
@@ -52,6 +53,7 @@ public class DataBuilder implements IDestroyable{
         buildItems();
         buildResources();
         buildTiles();
+        buildWorldGen();
     }
 
     private void buildImages(FileHandle dirHandle, TextureLoader.TextureParameter param){
@@ -141,6 +143,18 @@ public class DataBuilder implements IDestroyable{
         tileList = tiles.tiles;
     }
 
+    private void buildWorldGen(){
+        Json json = new Json();
+        json.setTypeName(null);
+        json.setUsePrototypes(false);
+        json.setIgnoreUnknownFields(true);
+        json.setOutputType(JsonWriter.OutputType.json);
+
+        JsonWorld world = json.fromJson(JsonWorld.class, Gdx.files.internal(filePath+worldPath));
+        WorldGen.getInstance().treeScale = world.treeScale;
+        WorldGen.getInstance().freq = world.freq;
+    }
+
     private static class JsonItems{
         public Array<JsonItem> items;
     }
@@ -169,6 +183,10 @@ public class DataBuilder implements IDestroyable{
         public float[] height;
         public float[][] resourcesChance;
         public boolean avoid;
+    }
+
+    public static class JsonWorld{
+        public float treeScale=0, freq=0;
     }
 
     @Override
