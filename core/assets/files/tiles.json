@@ -2,73 +2,35 @@
   "tiles": [
 
     {
-      "tileName": "grass1",
-      "type": "grass1",
-      "img": "Grass1_1"
+      "tileName": ["grass1", "grass2", "grass3", "grass4", "grass5", "grass6"],
+      "category": "grass1",
+      "img": ["Grass1_1", "Grass1_2", "Grass1_3", "Grass1_4", "Grass1_5", "Grass1_6"],
+      "height": [-0.6, 0.8],
+      "avoid": "false",
+      "resources":["pine"],
+      "resourcesChance":[[0.9, 1]]
     },
     {
-      "tileName": "grass1",
-      "type": "grass1",
-      "img": "Grass1_2"
+      "tileName": ["tallGrass1", "tallGrass2", "tallGrass3", "tallGrass4", "tallGrass5", "tallGrass6"],
+      "category": "tallgrass",
+      "img": ["Grass2_1", "Grass2_2", "Grass2_3", "Grass2_4", "Grass2_5", "Grass2_6"],
+      "height": [0.8, 1],
+      "avoid": "false",
+      "resources":["pine", "redwood"],
+      "resourcesChance":[[0, 0.8], [0.8, 1]]
     },
     {
-      "tileName": "grass1",
-      "type": "grass1",
-      "img": "Grass1_3"
+      "tileName": ["lightWater"],
+      "category": "lightwater",
+      "img": ["Dirt1_1"],
+      "height": [-0.8, -0.6],
+      "avoid": "false"
     },
     {
-      "tileName": "grass1",
-      "type": "grass1",
-      "img": "Grass1_4"
-    },
-    {
-      "tileName": "grass1",
-      "type": "grass1",
-      "img": "Grass1_5"
-    },
-    {
-      "tileName": "grass1",
-      "type": "grass1",
-      "img": "Grass1_6"
-    },
-    {
-      "tileName": "tallGrass1",
-      "type": "tallgrass",
-      "img": "Grass2_1"
-    },
-    {
-      "tileName": "tallGrass1",
-      "type": "tallgrass",
-      "img": "Grass2_2"
-    },
-    {
-      "tileName": "tallGrass1",
-      "type": "tallgrass",
-      "img": "Grass2_3"
-    },
-    {
-      "tileName": "tallGrass1",
-      "type": "tallgrass",
-      "img": "Grass2_4"
-    },
-    {
-      "tileName": "tallGrass1",
-      "type": "tallgrass",
-      "img": "Grass2_5"
-    },
-    {
-      "tileName": "tallGrass1",
-      "type": "tallgrass",
-      "img": "Grass2_6"
-    },
-    {
-      "tileName": "lightWater",
-      "type": "lightwater",
-      "img": "Dirt1_1",
-    },
-    {
-      "tileName": "darkWater",
-      "type": "darkwater",
-      "img": "Dirt2",
+      "tileName": ["darkWater"],
+      "category": "darkwater",
+      "img": ["Dirt2"],
+      "height": [-1, -0.8],
+      "avoid": "false"
     }]
 }
