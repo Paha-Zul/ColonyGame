@@ -39,7 +39,6 @@ public class LoadingScreen implements Screen {
             loadingInterface.setDone();
             WorldGen.getInstance().clean();
             this.dispose();
-            //throw new RuntimeException("Broken");
             game.setScreen(new GameScreen(this.game));
         }
     }
