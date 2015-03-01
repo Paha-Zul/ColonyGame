@@ -107,7 +107,7 @@ public class ServerPlayer {
         Profiler.begin("Box2DDebug");
         this.batch.end();
 
-        //drawBox2DDebug();
+        drawBox2DDebug();
         //Draw the grid squares if enabled.
         if(drawGrid)
 		    this.grid.debugDraw();

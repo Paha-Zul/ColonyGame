@@ -14,14 +14,16 @@ import com.mygdx.game.component.Resource;
 import com.mygdx.game.helpers.managers.ItemManager;
 import com.mygdx.game.helpers.managers.ResourceManager;
 import com.mygdx.game.helpers.worldgeneration.WorldGen;
+import com.mygdx.game.interfaces.IDestroyable;
 
 import java.io.File;
 import java.lang.reflect.Field;
+import java.util.*;
 
 /**
  * Created by Paha on 2/19/2015.
  */
-public class DataBuilder {
+public class DataBuilder implements IDestroyable{
     String filePath = "files/";
     String itemPath = "items.json";
     String resourcePath = "resources.json";
@@ -29,6 +31,8 @@ public class DataBuilder {
     String imgPath = "img/";
 
     private EasyAssetManager assetManager;
+
+    public static JsonTile[] tileList;
 
     public DataBuilder(EasyAssetManager assetManager){
         TextureLoader.TextureParameter param = new TextureLoader.TextureParameter();
@@ -134,11 +138,7 @@ public class DataBuilder {
         json.setOutputType(JsonWriter.OutputType.json);
 
         JsonTiles tiles = json.fromJson(JsonTiles.class, Gdx.files.internal(filePath+tilePath));
-
-        //Loop over the results.
-        for(JsonTile jTile : tiles.tiles){
-            WorldGen.getInstance().addTexture(jTile.type, ColonyGame.assetManager.get(jTile.img, Texture.class));
-        }
+        tileList = tiles.tiles;
     }
 
     private static class JsonItems{
@@ -160,10 +160,24 @@ public class DataBuilder {
     }
 
     private static class JsonTiles{
-        public Array<JsonTile> tiles;
+        public JsonTile[] tiles;
     }
 
-    private static class JsonTile{
-        public String tileName, img, type;
+    public static class JsonTile{
+        public String[] tileNames, img, resources;
+        public String category;
+        public float[] height;
+        public float[][] resourcesChance;
+        public boolean avoid;
+    }
+
+    @Override
+    public void destroy() {
+
+    }
+
+    @Override
+    public boolean isDestroyed() {
+        return false;
     }
 }

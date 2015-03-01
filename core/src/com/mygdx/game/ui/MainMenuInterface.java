@@ -18,7 +18,9 @@ public class MainMenuInterface extends UI{
     public static Texture mainMenuTexture = ColonyGame.assetManager.get("Space2", Texture.class);
     public static Music music = Gdx.audio.newMusic(Gdx.files.internal("music/Karkarakacrrot.ogg"));
 
-    private String versionNumber = "0.11";
+    private String versionNumber = "0.12";
+    private String[] changeLog = {"-Changed how the tiles.json file works.",
+                                  "-Changed how pathing works (avoids tiles with 'avoid: true' in the tiles.json."};
     private BitmapFont titleFont = new BitmapFont(Gdx.files.internal("fonts/titlefont.fnt"));
 
     private GUI.GUIStyle GUIStyle;
@@ -51,6 +53,11 @@ public class MainMenuInterface extends UI{
 
         //Draw the version number
         GUI.Label("Version: "+this.versionNumber, this.batch, quitRect.getX() + quitRect.getWidth()/2, quitRect.getY() - 50, true);
+        GUI.Label("Changes: ", this.batch, quitRect.getX() + quitRect.getWidth()/2, quitRect.getY() - 80, true);
+        for(int i=0;i<this.changeLog.length;i++){
+            GUI.Label(this.changeLog[i], this.batch, quitRect.getX() + quitRect.getWidth()/2, quitRect.getY() - 80 - (i+1)*15, true);
+        }
+
 
         //Start button.
         if(GUI.Button(startRect, "Start", this.batch, null)){

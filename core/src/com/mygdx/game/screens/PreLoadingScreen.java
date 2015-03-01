@@ -17,7 +17,7 @@ public class PreLoadingScreen implements Screen{
 
     @Override
     public void show() {
-        builder = new DataBuilder(this.game.assetManager);
+        builder = new DataBuilder(ColonyGame.assetManager);
     }
 
     @Override
