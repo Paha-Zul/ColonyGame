@@ -36,6 +36,9 @@ public class ServerPlayer {
 
 	public static String[] names = {"Bobby","Sally","Jimmy","Bradley","Willy","Tommy","Brian","Doug","Ben","Jacob","Sammy","Jason","David","Sarah","Betty","Tom","James"};
 
+    private boolean generatedTrees = false;
+    private Vector2 startLocation = new Vector2();
+
 	//Box2d stuff
 
 	private Color screenColor = new Color(163f/255f, 154f/255f, 124f/255f, 1);
@@ -54,7 +57,8 @@ public class ServerPlayer {
 		//Create the Box2D world.
 		ColonyGame.debugRenderer = new Box2DDebugRenderer();
 
-		generateStart(new Vector2(Gdx.graphics.getWidth()/2,Gdx.graphics.getHeight()/2));
+        startLocation.set(Gdx.graphics.getWidth()/2,Gdx.graphics.getHeight()/2);
+		generateStart(startLocation);
 
 		initPlayer();
     }
@@ -63,13 +67,16 @@ public class ServerPlayer {
         if(paused)
             delta = 0f;
 
+        if(!generatedTrees)
+            generatedTrees = WorldGen.getInstance().generateResources(startLocation, 8);
+
 		Profiler.begin("ServerPlayer Render");
 
 		Gdx.gl.glClearColor(screenColor.r, screenColor.g, screenColor.b, screenColor.a);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
 		//Step the Box2D simulation.
-		ColonyGame.world.step(delta, 8, 3);
+		ColonyGame.world.step(1f/60f, 8, 3);
 
 		batch.begin();
 		this.batch.setProjectionMatrix(ColonyGame.camera.combined);
@@ -107,7 +114,7 @@ public class ServerPlayer {
         Profiler.begin("Box2DDebug");
         this.batch.end();
 
-        drawBox2DDebug();
+        //drawBox2DDebug();
         //Draw the grid squares if enabled.
         if(drawGrid)
 		    this.grid.debugDraw();
