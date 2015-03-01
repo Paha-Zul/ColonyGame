@@ -20,6 +20,7 @@ import com.mygdx.game.helpers.managers.ResourceManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 
 /**
  * Created by Bbent_000 on 12/24/2014.
@@ -33,18 +34,23 @@ public class WorldGen {
     public float freq = 5;
     public float percentageDone = 0;
 
-    private Texture treeTexture;
-    private Texture rockTexture;
-
     public Texture whiteTex;
 
-    private ArrayList<Entity> treeList = new ArrayList<>();
     private VisibilityTile[][] visibilityMap;
 
     private int numX, numY, currX = 0, currY = 0;
+    private int numTrees = 0;
 
     private ColonyGame game;
     private static WorldGen instance;
+
+    //Variables for performing breadth first resource spawning;
+    LinkedList<TerrainTile> neighbors = new LinkedList<>();
+    HashMap<Integer, TerrainTile> visitedMap = new HashMap<>(1000);
+    ArrayList<TerrainTile> tmpNeighbors = new ArrayList<>(4);
+    int[] startIndex;
+    Vector2 center = new Vector2();
+    boolean started = false;
 
     /**
      * Initializes the World Generator. For now, most stuff is temporary for prototyping.
@@ -52,8 +58,6 @@ public class WorldGen {
      */
     public void init(long seed, ColonyGame game){
         this.game = game;
-
-        loadImages();
 
         //This randomizes the noise by using the seed passed in.
         SimplexNoise.genGrad(seed);
@@ -76,21 +80,17 @@ public class WorldGen {
         pixmap.dispose();
     }
 
-    private void loadImages(){
-        treeTexture = ColonyGame.assetManager.get("redtree", Texture.class);
-        rockTexture = new Texture("img/rock.png");
-    }
-
     /**
      * Called every frame to generate the world. This will return true when the world is fully generated.
      * @return True when finished, false otherwise.
      */
     public boolean generateWorld(){
+
         int stepsLeft = Constants.WORLDGEN_GENERATESPEED;
         boolean done = true; //Flag for completion.
         DataBuilder.JsonTile[] tileList = DataBuilder.tileList;
         Texture[] texList = null;
-        Texture tex = null;
+        Texture terrainTex = null;
 
         //If there's steps left and currX is still less than the total num X, generate!
         while(stepsLeft > 0 && currX < numX){
@@ -105,19 +105,13 @@ public class WorldGen {
             DataBuilder.JsonTile jtile = this.getTileAtHeight(tileList, (float)noiseValue);
             if(jtile == null) continue;
 
-            //Gets the resource that should be spawned on this tile
-            Resource res = this.getResourceOnTile(jtile, (float)Math.random());
 
-            if(res != null) {
-                ResourceEnt resEnt = new ResourceEnt(centerPos, 0, ColonyGame.assetManager.get(res.getTextureName(), Texture.class), ColonyGame.batch, 11);
-                resEnt.addComponent(res);
-            }
 
             //Gets the texture that the tile should be.
-            tex = ColonyGame.assetManager.get(jtile.img[MathUtils.random(jtile.img.length-1)], Texture.class);
+            terrainTex = ColonyGame.assetManager.get(jtile.img[MathUtils.random(jtile.img.length-1)], Texture.class);
 
             //Creates a new sprite and a new tile, assigns the Sprite to the tile and puts it into the map array.
-            terrainSprite = new Sprite(tex);
+            terrainSprite = new Sprite(terrainTex);
             TerrainTile tile = new TerrainTile(terrainSprite, noiseValue, rotation, type, position); //Create a new terrain tile.
             tile.avoid = jtile.avoid;
             map[currX][currY] = tile;
@@ -138,10 +132,85 @@ public class WorldGen {
             float currDone = currX + (currX*numY + currY);
             float total = (numX+1)*(numY+1);
             percentageDone = currDone/total; //Calcs the percentage done so that the player's UI can use this.
+        }
 
+        if(done){
+            currX = currY = 0;
         }
 
         return done;
+    }
+
+    public boolean generateResources(Vector2 startPos, int blockRadius){
+        boolean done = false;
+
+        if(!started){
+            neighbors.add(this.getNode(startPos));
+            startIndex = this.getIndex(startPos);
+            started = true;
+        }
+
+        for(int i=0;i<1000;i++){
+            TerrainTile currTile = neighbors.pop();
+            int[] index = {(int)(currTile.terrainSprite.getX()/Constants.GRID_SQUARESIZE), (int)(currTile.terrainSprite.getY()/Constants.GRID_SQUARESIZE)};
+            TerrainTile left = this.getNode(index[0] - 1, index[1]);
+            TerrainTile right = this.getNode(index[0] + 1, index[1]);
+            TerrainTile up = this.getNode(index[0], index[1] + 1);
+            TerrainTile down = this.getNode(index[0] - 1, index[1] - 1);
+
+            //If a neighbor is not null and it hasn't been visited already...
+            if(left != null && !visitedMap.containsKey(left.hashCode())){
+                neighbors.add(left);
+                visitedMap.put(left.hashCode(), left);
+            }
+            if(right != null && !visitedMap.containsKey(right.hashCode())) {
+                neighbors.add(right);
+                visitedMap.put(right.hashCode(), right);
+            }
+            if(up != null && !visitedMap.containsKey(up.hashCode())) {
+                neighbors.add(up);
+                visitedMap.put(up.hashCode(), up);
+            }
+            if(down != null && !visitedMap.containsKey(down.hashCode())) {
+                neighbors.add(down);
+                visitedMap.put(down.hashCode(), down);
+            }
+
+            visitedMap.put(currTile.hashCode(), currTile);
+
+            int[] currIndex = getIndex(currTile.terrainSprite.getX(), currTile.terrainSprite.getY());
+            if(Math.abs(currIndex[0] - startIndex[0]) <= blockRadius && Math.abs(currIndex[1] - startIndex[1]) <= blockRadius)
+                continue;
+
+            center.set(currTile.terrainSprite.getX() + Constants.GRID_SQUARESIZE * 0.5f, currTile.terrainSprite.getY() + Constants.GRID_SQUARESIZE * 0.5f);
+            spawnTree(getTileAtHeight(DataBuilder.tileList, (float) currTile.noiseValue), center);
+
+            if(neighbors.size() == 0) {
+                done = true;
+                break;
+            }
+        }
+
+        return done;
+    }
+
+    private void spawnTree(DataBuilder.JsonTile jtile, Vector2 centerPos){
+        //Gets the resource that should be spawned on this tile
+        Resource res = this.getResourceOnTile(jtile, (float)Math.random());
+
+        if(res != null) {
+            ResourceEnt resEnt = new ResourceEnt(centerPos, 0, ColonyGame.assetManager.get(res.getTextureName(), Texture.class), ColonyGame.batch, 11);
+            resEnt.addComponent(res);
+            resEnt.transform.setScale(treeScale);
+        }
+    }
+
+    public int[] getIndex(Vector2 pos){
+        return getIndex(pos.x, pos.y);
+    }
+
+    public int[] getIndex(float x, float y){
+        return new int[]{(int)(x/Constants.GRID_SQUARESIZE), (int)(y/Constants.GRID_SQUARESIZE)};
     }
 
     /**
@@ -235,7 +304,7 @@ public class WorldGen {
     }
 
     public int numTrees(){
-        return treeList.size();
+        return numTrees;
     }
 
     public class TerrainTile {
@@ -243,8 +312,6 @@ public class WorldGen {
         public double noiseValue;
         public int type;
         public boolean avoid = false;
-
-
         private int visibility = Constants.VISIBILITY_UNEXPLORED;
 
         public TerrainTile(Sprite sprite, double noiseValue, float rotation, int type, Vector2 position) {
@@ -266,6 +333,15 @@ public class WorldGen {
             if(visibility == Constants.VISIBILITY_VISIBLE) this.terrainSprite.setColor(Constants.COLOR_VISIBILE);
         }
 
+        @Override
+        public int hashCode() {
+            int hash = (int)(terrainSprite.getX() + terrainSprite.getY() + terrainSprite.getWidth() + terrainSprite.getY());
+            hash += hash*type;
+            hash += noiseValue*10000d;
+            hash += terrainSprite.hashCode();
+
+            return hash;
+        }
     }
 
     public class VisibilityTile{
