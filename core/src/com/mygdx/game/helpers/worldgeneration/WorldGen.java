@@ -1,5 +1,6 @@
 package com.mygdx.game.helpers.worldgeneration;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
@@ -9,9 +10,12 @@ import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.component.GridComponent;
 import com.mygdx.game.component.Interactable;
+import com.mygdx.game.component.Resource;
 import com.mygdx.game.entity.Entity;
+import com.mygdx.game.entity.ResourceEnt;
 import com.mygdx.game.entity.TreeEnt;
 import com.mygdx.game.helpers.Constants;
+import com.mygdx.game.helpers.DataBuilder;
 import com.mygdx.game.helpers.managers.ResourceManager;
 
 import java.util.ArrayList;
@@ -29,7 +33,6 @@ public class WorldGen {
     public float freq = 5;
     public float percentageDone = 0;
 
-    private HashMap<String, ArrayList<Texture>> texMap = new HashMap<>();
     private Texture treeTexture;
     private Texture rockTexture;
 
@@ -85,71 +88,42 @@ public class WorldGen {
     public boolean generateWorld(){
         int stepsLeft = Constants.WORLDGEN_GENERATESPEED;
         boolean done = true; //Flag for completion.
-        ArrayList<Texture> texList;
+        DataBuilder.JsonTile[] tileList = DataBuilder.tileList;
+        Texture[] texList = null;
+        Texture tex = null;
 
         //If there's steps left and currX is still less than the total num X, generate!
         while(stepsLeft > 0 && currX < numX){
             double noiseValue = SimplexNoise.noise((double)currX/freq,(double)currY/freq); //Generate the noise for this tile.
             Vector2 position = new Vector2(currX*tileSize, currY*tileSize); //Set the position.
+            Vector2 centerPos = new Vector2(currX*tileSize + tileSize*0.5f, currY*tileSize + tileSize*0.5f); //Set the position.
             Sprite terrainSprite;
-            int type;
+            int type = 0;
             float rotation=0;
 
-            //If under this value, generate dark water.
-            if(noiseValue < -0.6) {
-                type = Constants.TERRAIN_WATER;
-                texList = getTextureList("darkwater");
-                terrainSprite = new Sprite(texList.get((int)(MathUtils.random()*texList.size())));
+            //Gets the jTile as the noise height.
+            DataBuilder.JsonTile jtile = this.getTileAtHeight(tileList, (float)noiseValue);
+            if(jtile == null) continue;
 
-            //If between 0 and -0.2, light water.
-            }else if (noiseValue < -0.4) {
-                type = Constants.TERRAIN_WATER;
-                texList = getTextureList("lightwater");
-                terrainSprite = new Sprite(texList.get((int)(MathUtils.random()*texList.size())));
+            //Gets the resource that should be spawned on this tile
+            Resource res = this.getResourceOnTile(jtile, (float)Math.random());
 
-            //If between 0 and 0.6, random grass.
-            }else if (noiseValue < 0.6){
-                type = Constants.TERRAIN_GRASS;
-                texList = getTextureList("grass1");
-                terrainSprite = new Sprite(texList.get((int)(MathUtils.random()*texList.size())));
-                //rotation = (int)(MathUtils.random()*4)*90;
-
-            //Otherwise, tall grass!
-            }else{
-                type = Constants.TERRAIN_GRASS;
-                texList = getTextureList("tallgrass");
-                terrainSprite = new Sprite(texList.get((int)(MathUtils.random()*texList.size())));
-                //rotation = (int)(MathUtils.random()*4)*90;
+            if(res != null) {
+                ResourceEnt resEnt = new ResourceEnt(centerPos, 0, ColonyGame.assetManager.get(res.getTextureName(), Texture.class), ColonyGame.batch, 11);
+                resEnt.addComponent(res);
             }
 
-            //If the tile is not water...
-            if(type == 1){
-                float rand = MathUtils.random();
-                //Random chance for a tree to spawn.
-                if(rand < 0.1){
-                    Vector2 pos = new Vector2(position.x + tileSize/2, position.y + tileSize/2); //Get a random position in the tile.
-                    Entity tree = new TreeEnt(pos, 0, treeTexture, ColonyGame.batch, 11); //Make the Entity
-                    tree.transform.setScale(treeScale); //Set the scale.
-                    tree.name = "Tree";
+            //Gets the texture that the tile should be.
+            tex = ColonyGame.assetManager.get(jtile.img[MathUtils.random(jtile.img.length-1)], Texture.class);
 
-                    //We add to a tree list for prototyping.
-                    treeList.add(tree);
-                }else if(rand < 0.15){
-                    Vector2 pos = new Vector2(position.x + tileSize/2, position.y + tileSize/2); //Get a random position in the tile.
-                    Entity rock = new Entity(pos, 0, rockTexture, ColonyGame.batch, 11); //Make the Entity
-                    rock.transform.setScale(0.6f); //Set the scale.
-                    rock.name = "Rock"; //Set the name!
+            //Creates a new sprite and a new tile, assigns the Sprite to the tile and puts it into the map array.
+            terrainSprite = new Sprite(tex);
+            TerrainTile tile = new TerrainTile(terrainSprite, noiseValue, rotation, type, position); //Create a new terrain tile.
+            tile.avoid = jtile.avoid;
+            map[currX][currY] = tile;
 
-                    rock.addComponent(new Interactable("resource"));
-                    rock.addComponent(ResourceManager.getResourceByname("rock"));
-                    rock.addComponent(new GridComponent(Constants.GRIDSTATIC, ColonyGame.worldGrid, -1));
-                    rock.addTag(Constants.ENTITY_RESOURCE);
-                    //circle.dispose();
-                }
-            }
-
-            map[currX][currY] = new TerrainTile(terrainSprite, noiseValue, rotation, type, position); //Create a new terrain tile.
-            this.visibilityMap[currX][currY] = new VisibilityTile(); //Set this to unexplored.
+            //Generate the visibility tile for this location
+            this.visibilityMap[currX][currY] = new VisibilityTile();
 
             done = false; //Set done to false signifying that we are not finished yet.
             stepsLeft--; //Decrement the remaining step amount.
@@ -170,22 +144,38 @@ public class WorldGen {
         return done;
     }
 
-    public void addTexture(String type, Texture texture){
-        ArrayList<Texture> list = texMap.get(type);
-        if(list == null){
-            list = new ArrayList<>();
-            texMap.put(type, list);
+    /**
+     * Returns a JsonTile object for the specified 'height' parameter. Throws an Exception if a tile cannot be found at the height parameter.
+     * @param tileList The JsonTile array to search through.
+     * @param height The height of the desired tile.
+     * @return A JsonTile if on was found at the desired height.
+     */
+    private DataBuilder.JsonTile getTileAtHeight(DataBuilder.JsonTile[] tileList, float height){
+        for (DataBuilder.JsonTile tile : tileList) {
+            if (height >= tile.height[0] && height <= tile.height[1])
+                return tile;
         }
 
-        list.add(texture);
+        throw new RuntimeException("No tile found at height "+height);
     }
 
-    public ArrayList<Texture> getTextureList(String type){
-        ArrayList<Texture> list = texMap.get(type);
-        if(list == null)
-            return new ArrayList<>();
+    /**
+     * Retrieves a resource from the DataBuilder's tileList using the 'value' value passed in. If a resource is found at that chance, a
+     * Resource is created and returned.
+     * @param tile The JsonTile to search through. The 'resources' and 'resourcesChance' will be searched through.
+     * @param value The value of the resource. This
+     * @return A ResourceComponent if the 'value' parameter was between a resource's chance to spawn. If no valid resource was found, returns null.
+     */
+    private Resource getResourceOnTile(DataBuilder.JsonTile tile, float value){
+        if(tile.resources == null || tile.resources.length <= 0)
+            return null;
 
-        return list;
+        for (int i=0;i<tile.resources.length;i++) {
+            if (value >= tile.resourcesChance[i][0] && value <= tile.resourcesChance[i][1])
+                return ResourceManager.getResourceByname(tile.resources[i]);
+        }
+
+        return null;
     }
 
     /**
@@ -252,6 +242,7 @@ public class WorldGen {
         public Sprite terrainSprite;
         public double noiseValue;
         public int type;
+        public boolean avoid = false;
 
 
         private int visibility = Constants.VISIBILITY_UNEXPLORED;
