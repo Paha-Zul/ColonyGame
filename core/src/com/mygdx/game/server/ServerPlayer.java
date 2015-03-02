@@ -68,7 +68,7 @@ public class ServerPlayer {
             delta = 0f;
 
         if(!generatedTrees)
-            generatedTrees = WorldGen.getInstance().generateResources(startLocation, 8);
+            generatedTrees = WorldGen.getInstance().generateResources(new Vector2((ColonyGame.worldGrid.getNumCols()-1)*Constants.GRID_SQUARESIZE,(ColonyGame.worldGrid.getNumRows()-1)*Constants.GRID_SQUARESIZE), 8, 100);
 
 		Profiler.begin("ServerPlayer Render");
 
