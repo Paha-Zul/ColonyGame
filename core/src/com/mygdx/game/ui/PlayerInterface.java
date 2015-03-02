@@ -17,6 +17,7 @@ import com.mygdx.game.component.GridComponent;
 import com.mygdx.game.component.Interactable;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.Constants;
+import com.mygdx.game.helpers.Grid;
 import com.mygdx.game.helpers.Profiler;
 import com.mygdx.game.helpers.gui.GUI;
 import com.mygdx.game.helpers.ListHolder;
@@ -174,10 +175,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
      */
     private void checkMousedOver(){
         //Determines if any UI is moused over or not.
-        if(this.infoRect.contains(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY()))
-            this.onUI = true;
-        else
-            this.onUI = false;
+        this.onUI = this.infoRect.contains(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY());
     }
 
     /**
@@ -337,6 +335,17 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         return this.onUI && windowActive;
     }
 
+    private void revealMap(){
+        Grid.Node[][] grid = ColonyGame.worldGrid.getGrid();
+        System.out.println("grid: "+grid.length+"/"+grid[0].length);
+        WorldGen.VisibilityTile[][] visMap = WorldGen.getInstance().getVisibilityMap();
+        for(int x=0;x<visMap.length;x++){
+            for(int y=0;y<visMap[x].length;y++){
+                visMap[x][y].addViewer();
+            }
+        }
+    }
+
     @Override
     public void destroy() {
         super.destroy();
@@ -372,9 +381,10 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
             Profiler.enabled = this.drawingProfiler = !this.drawingProfiler;
         else if(keycode == Input.Keys.F3) {
             ServerPlayer.drawGrid = !ServerPlayer.drawGrid;
-
         }else if(keycode == Input.Keys.SPACE)
             this.gameScreen.setPaused(!this.gameScreen.getPaused());
+        else if(keycode == Input.Keys.F4)
+            this.revealMap();
         else
             return false;
 
