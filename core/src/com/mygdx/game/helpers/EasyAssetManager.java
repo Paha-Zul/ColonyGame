@@ -14,6 +14,8 @@ public class EasyAssetManager extends AssetManager{
 
     public synchronized <T> T get(String commonName, Class<T> type) {
         DataReference ref = dataMap.get(commonName);
+        if(ref == null)
+            throw new RuntimeException("Can't find file "+commonName);
         return super.get(dataMap.get(commonName).path, type);
     }
 
