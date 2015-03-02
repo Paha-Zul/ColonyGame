@@ -81,6 +81,33 @@ public class DataBuilder implements IDestroyable{
         assetManager.load(entry.path(), commonName, Texture.class, param);
     }
 
+    private void getFileNamesFromDir(FileHandle dirHandle, ArrayList<String> list){
+        for (FileHandle entry: dirHandle.list()) {
+            if(entry.isDirectory()) //For every directory, call this function again to load the images.
+                getFileNamesFromDir(new FileHandle(entry.path()+"/"), list); //A bit of recursion.
+
+            String name = getFileName(entry);
+            if(!name.equals(""))
+                list.add(name);
+        }
+    }
+
+    private String getFileName(FileHandle entry){
+        String extension = "";
+        String commonName = "";
+
+        int i = entry.name().lastIndexOf('.');
+        if (i > 0) {
+            extension = entry.name().substring(i + 1);
+            commonName = entry.name().substring(0, i);
+        }
+
+        if(extension.equals("png"))
+            return commonName;
+
+        return "";
+    }
+
     private void buildItems() {
         Json json = new Json();
         json.setTypeName(null);
@@ -140,6 +167,18 @@ public class DataBuilder implements IDestroyable{
         json.setOutputType(JsonWriter.OutputType.json);
 
         JsonTiles tiles = json.fromJson(JsonTiles.class, Gdx.files.internal(filePath+tilePath));
+
+        //Check over each tile.
+        for(JsonTile tile : tiles.tiles){
+            //If the dir field was assing.
+            if(tile.dir != null){
+                //Loop over each file in the dir and grab it. We use this for our img list instead.
+                ArrayList<String> fileNames = new ArrayList<>();
+                this.getFileNamesFromDir(Gdx.files.internal(tile.dir), fileNames);
+                tile.img = fileNames.toArray(new String[fileNames.size()]);
+            }
+        }
+
         tileList = tiles.tiles;
     }
 
@@ -153,6 +192,7 @@ public class DataBuilder implements IDestroyable{
         JsonWorld world = json.fromJson(JsonWorld.class, Gdx.files.internal(filePath+worldPath));
         WorldGen.getInstance().treeScale = world.treeScale;
         WorldGen.getInstance().freq = world.freq;
+        Constants.GRID_SQUARESIZE = world.tileSize;
     }
 
     private static class JsonItems{
@@ -179,13 +219,14 @@ public class DataBuilder implements IDestroyable{
 
     public static class JsonTile{
         public String[] tileNames, img, resources;
-        public String category;
+        public String category=null, dir=null;
         public float[] height;
         public float[][] resourcesChance;
         public boolean avoid;
     }
 
     public static class JsonWorld{
+        public int tileSize = 25;
         public float treeScale=0, freq=0;
     }
 
