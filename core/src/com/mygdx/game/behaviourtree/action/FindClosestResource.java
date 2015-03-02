@@ -2,12 +2,14 @@ package com.mygdx.game.behaviourtree.action;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
+import com.mygdx.game.ColonyGame;
 import com.mygdx.game.behaviourtree.LeafTask;
 import com.mygdx.game.component.BlackBoard;
 import com.mygdx.game.component.Resource;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.*;
 import com.mygdx.game.helpers.managers.ItemManager;
+import com.mygdx.game.helpers.runnables.CallbackRunnable;
 import com.mygdx.game.helpers.worldgeneration.WorldGen;
 import com.mygdx.game.interfaces.Functional;
 
@@ -44,33 +46,19 @@ public class FindClosestResource extends LeafTask{
         Profiler.begin("FindClosestResource");
         this.getClosestResource();
         Profiler.end();
-
-        if(this.blackBoard.target == null){
-            this.control.finishWithFailure();
-            Vector2 pos = this.blackBoard.getEntityOwner().transform.getPosition();
-            new FloatingText("Couldn't find a nearby resource!", new Vector2(pos.x, pos.y+10), new Vector2(pos.x, pos.y+40), 1.5f, 0.8f);
-            if(this.failCallback != null) this.failCallback.callback();
-            return;
-        }
-
-        this.blackBoard.targetNode = this.blackBoard.colonyGrid.getNode(this.blackBoard.target);
-        this.blackBoard.targetResource = this.blackBoard.target.getComponent(Resource.class);
-        this.blackBoard.targetResource.setTaken(true);
-
-        if(this.successCallback != null) this.successCallback.callback();
-        this.control.finishWithSuccess();
     }
 
     private void getClosestResource(){
-        Functional.PerformAndGet<Entity, Grid.Node[][]> getClosestResource = grid -> {
-            Entity closest = null;
+        Grid.Node[][] grid = ColonyGame.worldGrid.getGrid();
+        Functional.Callback getClosestResource = () -> {
             Grid.Node currNode = this.blackBoard.colonyGrid.getNode(this.blackBoard.getEntityOwner());
             boolean finished = false;
             int radius = 0;
 
             if(currNode == null){
                 this.control.finishWithFailure();
-                return null;
+                this.blackBoard.target = null;
+                return;
             }
 
             while(!finished) {
@@ -99,8 +87,18 @@ public class FindClosestResource extends LeafTask{
                         //Loop over the Entity list in the current node and try to find a tree.
                         for(Entity entity : node.getEntityList()) {
                             if (entity.hasTag(Constants.ENTITY_RESOURCE)) {
-                                if(!entity.getComponent(Resource.class).isTaken())
-                                    return entity;
+                                if(!entity.getComponent(Resource.class).isTaken()) {
+                                    //If we have a valid Entity, store it and finish with success.
+                                    this.blackBoard.target = entity;
+                                    this.control.finishWithSuccess();
+
+                                    //Call the success callback if available and set some extra variables.
+                                    if(this.successCallback != null) this.successCallback.callback();
+                                    this.blackBoard.targetNode = this.blackBoard.colonyGrid.getNode(this.blackBoard.target);
+                                    this.blackBoard.targetResource = this.blackBoard.target.getComponent(Resource.class);
+                                    this.blackBoard.targetResource.setTaken(true); //Set the resource as taken.
+                                    return;
+                                }
                             }
                         }
                     }
@@ -109,10 +107,18 @@ public class FindClosestResource extends LeafTask{
                 radius++; //Increase the radius
             }
 
-            return closest;
+            //If we reach this area, we've covered everywhere we can. Fail this Task.
+            this.blackBoard.target = null;
+            if(this.blackBoard.target == null){
+                this.control.finishWithFailure();
+                Vector2 pos = this.blackBoard.getEntityOwner().transform.getPosition();
+                new FloatingText("Couldn't find a nearby resource!", new Vector2(pos.x, pos.y+10), new Vector2(pos.x, pos.y+40), 1.5f, 0.8f);
+                if(this.failCallback != null) this.failCallback.callback();
+                return;
+            }
         };
 
-        this.blackBoard.target = this.blackBoard.colonyGrid.performAndGet(getClosestResource);
+        ColonyGame.threadPool.submit(new CallbackRunnable(getClosestResource));
     }
 
     @Override
