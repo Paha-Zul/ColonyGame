@@ -2,7 +2,9 @@ package com.mygdx.game.screens;
 
 import com.badlogic.gdx.Screen;
 import com.mygdx.game.ColonyGame;
+import com.mygdx.game.helpers.Constants;
 import com.mygdx.game.helpers.DataBuilder;
+import com.mygdx.game.helpers.Grid;
 
 /**
  * Created by Paha on 2/19/2015.
@@ -24,6 +26,7 @@ public class PreLoadingScreen implements Screen{
     public void render(float delta) {
         if(builder.update()) {
             builder.loadFiles();
+            ColonyGame.worldGrid = Grid.newGridInstance("grid", Constants.GRID_WIDTH, Constants.GRID_HEIGHT, Constants.GRID_SQUARESIZE);
             this.game.setScreen(new MainMenuScreen(this.game));
         }
     }

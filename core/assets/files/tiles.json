@@ -1,35 +1,141 @@
 {
-  "tiles": [
-
+  "tiles":  [
     {
-      "tileName": ["grass1", "grass2", "grass3", "grass4"],
-      "category": "grass1",
-      "img": ["Grass1small_1", "Grass1small_2", "Grass1small_3", "Grass1small_4"],
-      "height": [-0.4, 0.8],
-      "avoid": "false"
-
-    },
-    {
-      "tileName": ["tallGrass1", "tallGrass2", "tallGrass3", "tallGrass4"],
-      "category": "tallgrass",
-      "img": ["Grass2small_1", "Grass2small_2", "Grass2small_3", "Grass2small_4"],
-      "height": [0.8, 1],
+      "tileName": ["A10"],
+      "category": "tallergrass",
+      "dir": "img/terrain/A10",
+      "height": [0.95, 1],
       "resources":["pine"],
-      "resourcesChance":[[0, 1]],
-      "avoid": "false"
+      "resourcesChance": [[0, 1]]
     },
     {
-      "tileName": ["lightWater", "lightWater", "lightWater", "lightWater"],
-      "category": "lightwater",
-      "img": ["Dirt1small_1","Dirt1small_2", "Dirt1small_3", "Dirt1small_4"],
-      "height": [-0.8, -0.4],
-      "avoid": "false"
+      "tileName": ["A9"],
+      "category": "tallergrass",
+      "dir": "img/terrain/A9",
+      "height": [0.9, 0.95],
+      "resources":["pine"],
+      "resourcesChance": [[0, 1]]
     },
     {
-      "tileName": ["darkWater", "darkWater", "darkWater", "darkWater"],
-      "category": "darkwater",
-      "img": ["Dirt2small_1", "Dirt2small_2", "Dirt2small_3", "Dirt2small_4"],
-      "height": [-1, -0.8],
-      "avoid": "false"
+      "tileName": ["A8"],
+      "category": "tallergrass",
+      "dir": "img/terrain/A8",
+      "height": [0.85, 0.9],
+      "resources":["pine"],
+      "resourcesChance": [[0, 1]]
+    },
+    {
+      "tileName": ["A7"],
+      "category": "tallergrass",
+      "dir": "img/terrain/A7",
+      "height": [0.8, 0.85],
+      "resources":["pine"],
+      "resourcesChance": [[0, 1]]
+    },
+    {
+      "tileName": ["A6"],
+      "category": "tallgrass",
+      "dir": "img/terrain/A6",
+      "height": [0.75, 0.8],
+      "resources":["pine"],
+      "resourcesChance": [[0, 1]]
+    },
+    {
+      "tileName": ["A5"],
+      "category": "grass",
+      "dir": "img/terrain/A5",
+      "height": [0.7, 0.75],
+      "resources":["pine"],
+      "resourcesChance": [[0, 1]]
+    },
+    {
+      "tileName": ["A4"],
+      "category": "flat",
+      "dir": "img/terrain/A4",
+      "height": [0.65, 0.7]
+    },
+    {
+      "tileName": ["A3"],
+      "category": "deep",
+      "dir": "img/terrain/A3",
+      "height": [0.6, 0.65]
+    },
+    {
+      "tileName": ["A2"],
+      "category": "deepest",
+      "dir": "img/terrain/A2",
+      "height": [0.55, 0.6]
+    },
+    {
+      "tileName": ["A1"],
+      "category": "deeperdeepest",
+      "dir": "img/terrain/A1",
+      "height": [0.5, 0.55]
+    },
+    {
+      "tileName": ["0"],
+      "category": "tallergrass",
+      "dir": "img/terrain/0",
+      "height": [-0.5, 0.5]
+    },
+    {
+      "tileName": ["B1"],
+      "category": "tallergrass",
+      "dir": "img/terrain/B1",
+      "height": [-0.55, -0.5]
+    },
+    {
+      "tileName": ["B2"],
+      "category": "tallergrass",
+      "dir": "img/terrain/B2",
+      "height": [-0.6, -0.55]
+    },
+    {
+      "tileName": ["B3"],
+      "category": "tallgrass",
+      "dir": "img/terrain/B3",
+      "height": [-0.65, -0.6]
+    },
+    {
+      "tileName": ["B4"],
+      "category": "grass",
+      "dir": "img/terrain/B4",
+      "height": [-0.7, -0.65]
+    },
+    {
+      "tileName": ["B5"],
+      "category": "flat",
+      "dir": "img/terrain/B5",
+      "height": [-0.75, -0.7]
+    },
+    {
+      "tileName": ["B6"],
+      "category": "deep",
+      "dir": "img/terrain/B6",
+      "height": [-0.8, -0.75]
+    },
+    {
+      "tileName": ["B7"],
+      "category": "deepest",
+      "dir": "img/terrain/B7",
+      "height": [-0.85, -0.8]
+    },
+    {
+      "tileName": ["B8"],
+      "category": "deeperdeepest",
+      "dir": "img/terrain/B8",
+      "height": [-0.9, -0.85]
+    },
+    {
+      "tileName": ["B9"],
+      "category": "deepest",
+      "dir": "img/terrain/B9",
+      "height": [-0.95, -0.9]
+    },
+    {
+      "tileName": ["B10"],
+      "category": "deepest",
+      "dir": "img/terrain/B10",
+      "height": [-1, -0.95]
     }]
 }
