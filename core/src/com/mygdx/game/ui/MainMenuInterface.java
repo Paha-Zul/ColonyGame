@@ -53,11 +53,6 @@ public class MainMenuInterface extends UI{
 
         //Draw the version number
         GUI.Label("Version: "+this.versionNumber, this.batch, quitRect.getX() + quitRect.getWidth()/2, quitRect.getY() - 50, true);
-        GUI.Label("Changes: ", this.batch, quitRect.getX() + quitRect.getWidth()/2, quitRect.getY() - 80, true);
-        for(int i=0;i<this.changeLog.length;i++){
-            GUI.Label(this.changeLog[i], this.batch, quitRect.getX() + quitRect.getWidth()/2, quitRect.getY() - 80 - (i+1)*15, true);
-        }
-
 
         //Start button.
         if(GUI.Button(startRect, "Start", this.batch, null)){

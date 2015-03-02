@@ -27,10 +27,8 @@ public class LoadingScreen implements Screen {
     @Override
     public void show() {
         WorldGen.getInstance().tileSize = Constants.GRID_SQUARESIZE;
-        WorldGen.getInstance().freq = 20;
         WorldGen.getInstance().init((long)(MathUtils.random()*Long.MAX_VALUE), game);
-
-        loadingInterface = new LoadingInterface(game.batch, this.game);
+        loadingInterface = new LoadingInterface(ColonyGame.batch, this.game);
     }
 
     @Override
