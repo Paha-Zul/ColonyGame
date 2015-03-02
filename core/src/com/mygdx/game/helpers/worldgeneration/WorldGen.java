@@ -1,6 +1,5 @@
 package com.mygdx.game.helpers.worldgeneration;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
@@ -8,12 +7,9 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.ColonyGame;
-import com.mygdx.game.component.GridComponent;
-import com.mygdx.game.component.Interactable;
 import com.mygdx.game.component.Resource;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.entity.ResourceEnt;
-import com.mygdx.game.entity.TreeEnt;
 import com.mygdx.game.helpers.Constants;
 import com.mygdx.game.helpers.DataBuilder;
 import com.mygdx.game.helpers.managers.ResourceManager;
@@ -71,6 +67,10 @@ public class WorldGen {
         //Initialize a new int array.
         this.visibilityMap = new VisibilityTile[numX][numY];
 
+        System.out.println("numx/numy: "+numX+"/"+numY);
+        System.out.println("map: "+map.length+"/"+map[0].length);
+        System.out.println("vismap: "+visibilityMap.length+"/"+visibilityMap[0].length);
+
         //Generate a white square (pixel).
         Pixmap pixmap = new Pixmap(1,1, Pixmap.Format.RGBA4444);
         Color color = new Color(Color.WHITE);
@@ -89,14 +89,12 @@ public class WorldGen {
         int stepsLeft = Constants.WORLDGEN_GENERATESPEED;
         boolean done = true; //Flag for completion.
         DataBuilder.JsonTile[] tileList = DataBuilder.tileList;
-        Texture[] texList = null;
-        Texture terrainTex = null;
+        Texture terrainTex;
 
         //If there's steps left and currX is still less than the total num X, generate!
         while(stepsLeft > 0 && currX < numX){
             double noiseValue = SimplexNoise.noise((double)currX/freq,(double)currY/freq); //Generate the noise for this tile.
             Vector2 position = new Vector2(currX*tileSize, currY*tileSize); //Set the position.
-            Vector2 centerPos = new Vector2(currX*tileSize + tileSize*0.5f, currY*tileSize + tileSize*0.5f); //Set the position.
             Sprite terrainSprite;
             int type = 0;
             float rotation=0;
@@ -105,13 +103,11 @@ public class WorldGen {
             DataBuilder.JsonTile jtile = this.getTileAtHeight(tileList, (float)noiseValue);
             if(jtile == null) continue;
 
-
-
             //Gets the texture that the tile should be.
             terrainTex = ColonyGame.assetManager.get(jtile.img[MathUtils.random(jtile.img.length-1)], Texture.class);
 
             //Creates a new sprite and a new tile, assigns the Sprite to the tile and puts it into the map array.
-            terrainSprite = new Sprite(terrainTex);
+            terrainSprite = new Sprite(terrainTex, tileSize, tileSize);
             TerrainTile tile = new TerrainTile(terrainSprite, noiseValue, rotation, type, position); //Create a new terrain tile.
             tile.avoid = jtile.avoid;
             map[currX][currY] = tile;
@@ -141,7 +137,7 @@ public class WorldGen {
         return done;
     }
 
-    public boolean generateResources(Vector2 startPos, int blockRadius){
+    public boolean generateResources(Vector2 startPos, int blockRadius, int step){
         boolean done = false;
 
         if(!started){
@@ -150,9 +146,11 @@ public class WorldGen {
             started = true;
         }
 
-        for(int i=0;i<1000;i++){
-            TerrainTile currTile = neighbors.pop();
-            int[] index = {(int)(currTile.terrainSprite.getX()/Constants.GRID_SQUARESIZE), (int)(currTile.terrainSprite.getY()/Constants.GRID_SQUARESIZE)};
+        //Partially executes a breadth first search.
+        for(int i=0;i<step;i++){
+            TerrainTile currTile = neighbors.pop(); //Pop the first neighbor
+            int[] index = {(int)(currTile.terrainSprite.getX()/Constants.GRID_SQUARESIZE), (int)(currTile.terrainSprite.getY()/Constants.GRID_SQUARESIZE)}; //Get the index.
+            //Get left/right/up/down
             TerrainTile left = this.getNode(index[0] - 1, index[1]);
             TerrainTile right = this.getNode(index[0] + 1, index[1]);
             TerrainTile up = this.getNode(index[0], index[1] + 1);
@@ -176,15 +174,19 @@ public class WorldGen {
                 visitedMap.put(down.hashCode(), down);
             }
 
+            //Add the current tile to the visitedMap.
             visitedMap.put(currTile.hashCode(), currTile);
 
-            int[] currIndex = getIndex(currTile.terrainSprite.getX(), currTile.terrainSprite.getY());
+            int[] currIndex = getIndex(currTile.terrainSprite.getX(), currTile.terrainSprite.getY()); //Get the current index.
+            //If the resource is within the blockRadius, simply continue.
             if(Math.abs(currIndex[0] - startIndex[0]) <= blockRadius && Math.abs(currIndex[1] - startIndex[1]) <= blockRadius)
                 continue;
 
+            //Set the center Vector2 and spawn the tree using the center position.
             center.set(currTile.terrainSprite.getX() + Constants.GRID_SQUARESIZE * 0.5f, currTile.terrainSprite.getY() + Constants.GRID_SQUARESIZE * 0.5f);
             spawnTree(getTileAtHeight(DataBuilder.tileList, (float) currTile.noiseValue), center);
 
+            //If there are no more neighbors, we are done.
             if(neighbors.size() == 0) {
                 done = true;
                 break;
@@ -240,8 +242,9 @@ public class WorldGen {
             return null;
 
         for (int i=0;i<tile.resources.length;i++) {
-            if (value >= tile.resourcesChance[i][0] && value <= tile.resourcesChance[i][1])
+            if (value >= tile.resourcesChance[i][0] && value <= tile.resourcesChance[i][1]) {
                 return ResourceManager.getResourceByname(tile.resources[i]);
+            }
         }
 
         return null;
