@@ -108,6 +108,28 @@ public class DataBuilder implements IDestroyable{
         return "";
     }
 
+    private ArrayList<FolderStructure> buildFolderStructure(FileHandle handle){
+        ArrayList<FolderStructure> list = new ArrayList<>();
+        ArrayList<String> fileList = new ArrayList<>();
+
+        for(FileHandle entry : handle.list()){
+            if(entry.isDirectory()){
+                fileList.clear();
+                int index = entry.nameWithoutExtension().lastIndexOf('_'); //Get the index of the last _.
+                if(index == -1) throw new RuntimeException(entry.nameWithoutExtension()+" has no rank attached to it!"); //Throw an error if it doesn't exist.
+                int rank = Integer.parseInt(entry.nameWithoutExtension().substring(index+1)); //Record the rank of the folder.
+                String fullName = entry.nameWithoutExtension(); //Record the full name.
+                this.getFileNamesFromDir(entry, fileList);
+                String[] img = fileList.toArray(new String[fileList.size()]);
+
+                list.add(new FolderStructure(rank, fullName, img));
+            }
+        }
+
+        list.sort((fs1, fs2) -> fs1.rank - fs2.rank);
+        return list;
+    }
+
     private void buildItems() {
         Json json = new Json();
         json.setTypeName(null);
@@ -168,14 +190,30 @@ public class DataBuilder implements IDestroyable{
 
         JsonTiles tiles = json.fromJson(JsonTiles.class, Gdx.files.internal(filePath+tilePath));
 
-        //Check over each tile.
-        for(JsonTile tile : tiles.tiles){
-            //If the dir field was assing.
-            if(tile.dir != null){
-                //Loop over each file in the dir and grab it. We use this for our img list instead.
-                ArrayList<String> fileNames = new ArrayList<>();
-                this.getFileNamesFromDir(Gdx.files.internal(tile.dir), fileNames);
-                tile.img = fileNames.toArray(new String[fileNames.size()]);
+        //If it is auto layered....
+        if(tiles.autoLayered && tiles.dir != null){
+            ArrayList<FolderStructure> list = this.buildFolderStructure(Gdx.files.internal(tiles.dir)); //Build the folder structure.
+            ArrayList<JsonTile> tileList = new ArrayList<>(); //a list.
+            for(int i=0;i<list.size();i++){
+                FolderStructure struct = list.get(i);
+                JsonTile tile = new JsonTile();
+                tile.img = struct.img; //Set the images.
+                tile.height = new float[]{-1 + i*(2f/list.size()), -1 + (i+1)*(2f/list.size())}; //Set the heights
+                tileList.add(tile);
+            }
+
+            tiles.tiles = tileList.toArray(new JsonTile[tileList.size()]);
+        }else {
+            //Check over each tile.
+            for (JsonTile tile : tiles.tiles) {
+                //If the dir field was assigned.
+                if (tile.dir != null) {
+                    //Loop over each file in the dir and grab it. We use this for our img list instead.
+                    ArrayList<String> fileNames = new ArrayList<>();
+                    this.getFileNamesFromDir(Gdx.files.internal(tile.dir), fileNames);
+                    tile.img = fileNames.toArray(new String[fileNames.size()]);
+                    if(tile.img.length == 0) throw new RuntimeException("No files in folder "+tile.tileName[0]);
+                }
             }
         }
 
@@ -215,10 +253,12 @@ public class DataBuilder implements IDestroyable{
 
     private static class JsonTiles{
         public JsonTile[] tiles;
+        public boolean autoLayered = false;
+        public String dir;
     }
 
     public static class JsonTile{
-        public String[] tileNames, img, resources;
+        public String[] tileName, img, resources;
         public String category=null, dir=null;
         public float[] height;
         public float[][] resourcesChance;
@@ -228,6 +268,18 @@ public class DataBuilder implements IDestroyable{
     public static class JsonWorld{
         public int tileSize = 25;
         public float treeScale=0, freq=0;
+    }
+
+    private static class FolderStructure{
+        public int rank=0;
+        public String fullName = "";
+        public String[] img;
+
+        public FolderStructure(int rank, String fullName, String[] img) {
+            this.rank = rank;
+            this.fullName = fullName;
+            this.img = img;
+        }
     }
 
     @Override
