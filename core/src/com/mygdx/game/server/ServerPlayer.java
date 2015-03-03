@@ -57,7 +57,8 @@ public class ServerPlayer {
 		//Create the Box2D world.
 		ColonyGame.debugRenderer = new Box2DDebugRenderer();
 
-        startLocation.set(Gdx.graphics.getWidth()/2,Gdx.graphics.getHeight()/2);
+        startLocation.set((ColonyGame.worldGrid.getNumCols()/2)*ColonyGame.worldGrid.getSquareSize(), (ColonyGame.worldGrid.getNumRows()/2)*ColonyGame.worldGrid.getSquareSize());
+        ColonyGame.camera.position.set((ColonyGame.worldGrid.getNumCols()/2)*ColonyGame.worldGrid.getSquareSize(), (ColonyGame.worldGrid.getNumRows()/2)*ColonyGame.worldGrid.getSquareSize(), 0);
 		generateStart(startLocation);
 
 		initPlayer();

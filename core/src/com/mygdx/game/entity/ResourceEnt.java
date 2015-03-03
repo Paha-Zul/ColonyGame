@@ -7,6 +7,7 @@ import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.mygdx.game.ColonyGame;
+import com.mygdx.game.component.GraphicIdentity;
 import com.mygdx.game.component.GridComponent;
 import com.mygdx.game.component.Interactable;
 import com.mygdx.game.component.collider.Collider;
@@ -22,6 +23,7 @@ public class ResourceEnt extends Entity{
 
         this.addComponent(new Interactable("resource"));
         this.addComponent(new GridComponent(Constants.GRIDSTATIC, ColonyGame.worldGrid, -1));
+        this.getComponent(GraphicIdentity.class).alignment = 1;
 
         this.makeCollider();
     }

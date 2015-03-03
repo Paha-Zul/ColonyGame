@@ -12,6 +12,7 @@ import com.mygdx.game.helpers.worldgeneration.WorldGen;
 
 public class GraphicIdentity extends Component{
 	public Sprite sprite;
+    public int alignment = 0; //center
 
 	private SpriteBatch batch;
     private int currVisibility=0;
@@ -51,9 +52,12 @@ public class GraphicIdentity extends Component{
 		this.sprite.setScale(this.owner.transform.getScale());
 		this.sprite.setRotation(this.owner.transform.getRotation());
 
-		this.sprite.setPosition(pos.x - (sprite.getWidth())/2, pos.y - (sprite.getHeight())/2);
+        if(alignment == 0)
+		    this.sprite.setPosition(pos.x - (sprite.getWidth())/2, pos.y - (sprite.getHeight()/2));
+        if(alignment == 1)
+            this.sprite.setPosition(pos.x - (sprite.getWidth())/2, pos.y);
 
-		this.sprite.draw(this.batch);
+        this.sprite.draw(this.batch);
 
 		Profiler.end();
 	}

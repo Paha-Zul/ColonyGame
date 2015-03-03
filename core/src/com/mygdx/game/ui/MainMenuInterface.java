@@ -8,8 +8,11 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.Window;
+import com.badlogic.gdx.scenes.scene2d.utils.Align;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.helpers.DataBuilder;
@@ -28,12 +31,9 @@ public class MainMenuInterface extends UI{
     private static TextureRegion defaultUp, defaultOver, defaultDown;
 
     private BitmapFont titleFont = new BitmapFont(Gdx.files.internal("fonts/titlefont.fnt"));
-
     private GUI.GUIStyle GUIStyle;
-
     private Rectangle startRect, quitRect, changelogRect;
-
-    private Stage stage;
+    private Label logLabel, versionLabel;
 
     public MainMenuInterface(SpriteBatch batch, ColonyGame game) {
         super(batch, game);
@@ -42,14 +42,14 @@ public class MainMenuInterface extends UI{
         defaultOver = new TextureRegion(ColonyGame.assetManager.get("defaultButton_moused", Texture.class));
         defaultDown = new TextureRegion(ColonyGame.assetManager.get("defaultButton_clicked", Texture.class));
 
-        stage = new Stage();
-        Gdx.input.setInputProcessor(stage);
-
-        this.makeButtons();
+        int width = Gdx.graphics.getWidth();
+        int height = Gdx.graphics.getHeight();
 
         this.startRect = new Rectangle(Gdx.graphics.getWidth()/2 - 100, Gdx.graphics.getHeight()/2 - 25, 200, 50);
         this.quitRect = new Rectangle(Gdx.graphics.getWidth()/2 - 100, Gdx.graphics.getHeight()/2 - 25 - 100, 200, 50);
-        this.changelogRect = new Rectangle();
+        this.changelogRect = new Rectangle(width - width * 0.2f, 0, width * 0.2f, height - height*0.2f);
+
+        //this.makeLabels(changelogRect);
 
         music.play();
         music.setLooping(true);
@@ -58,17 +58,31 @@ public class MainMenuInterface extends UI{
         this.GUIStyle.font = titleFont;
     }
 
-    private void makeButtons(){
-        TextButton.TextButtonStyle style = new TextButton.TextButtonStyle();
-        style.font = new BitmapFont();
-        style.up = new TextureRegionDrawable(defaultUp);
-        style.over = new TextureRegionDrawable(defaultOver);
-        style.down = new TextureRegionDrawable(defaultDown);
+    private void makeLabels(Rectangle rect){
+        if(DataBuilder.changelog == null || DataBuilder.changelog.changes == null)
+            GH.writeErrorMessage("changelog.json has something wrong with it or does not exist.");
 
-        TextButton button = new TextButton("Button", style);
-        button.setBounds(Gdx.graphics.getWidth()/2 - 100,Gdx.graphics.getHeight()/2 - 25, 200, 50);
+        Label.LabelStyle style = new Label.LabelStyle();
+        style.font = new BitmapFont(Gdx.files.internal("fonts/titlefont.fnt"));
+        style.font.setScale(0.3f);
 
-        stage.addActor(button);
+        DataBuilder.JsonLog log = DataBuilder.changelog.changes[0];
+        String text = "";
+        for(String txt : log.log)
+            text += txt+"\n";
+
+        logLabel = new Label(text, style);
+        logLabel.setAlignment(Align.topLeft);
+        logLabel.setWrap(true);
+
+        versionLabel = new Label("Version: "+log.version+"\n"+log.date, style);
+        versionLabel.setAlignment(Align.center);
+        setLabelBounds(rect);
+    }
+
+    private void setLabelBounds(Rectangle rect){
+        logLabel.setBounds(rect.x, rect.y, rect.getWidth(), rect.getHeight());
+        versionLabel.setBounds(rect.x, rect.y + rect.getHeight(), rect.getWidth(), 100);
     }
 
     @Override
@@ -82,7 +96,8 @@ public class MainMenuInterface extends UI{
         GUI.Label("Colony Game", this.batch, Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight() - 75, true, GUIStyle);
         GUI.ResetFont();
 
-        this.displayChangelog(this.changelogRect);
+        //this.logLabel.draw(this.batch, 1f);
+        //this.versionLabel.draw(this.batch, 1f);
 
         //Start button.
         if(GUI.Button(startRect, "Start", this.batch, null)){
@@ -94,23 +109,6 @@ public class MainMenuInterface extends UI{
         //Quit button.
         if(GUI.Button(quitRect, "Quit", this.batch, null)){
             Gdx.app.exit();
-        }
-
-
-        stage.act(delta);
-        stage.draw();
-    }
-
-    private void displayChangelog(Rectangle rect){
-        if(DataBuilder.changelog == null || DataBuilder.changelog.changes == null)
-            GH.writeErrorMessage("changelog.json has something wrong with it or does not exist.");
-
-        DataBuilder.JsonLog log = DataBuilder.changelog.changes[0];
-        //Draw the version number
-        GUI.Label("Version: "+ log.version + " ("+log.date+")", this.batch, rect.getX(), rect.getY() - 50, false);
-        GUI.Label("Changes: ", this.batch, rect.getX(), rect.getY() - 70, false);
-        for(int i=0;i<log.log.length;i++){
-            GUI.Label(log.log[i], this.batch, rect.getX(), rect.getY() - 80 - (i+1)*15, false);
         }
     }
 
@@ -132,7 +130,8 @@ public class MainMenuInterface extends UI{
     public void resize(int width, int height) {
         this.startRect = new Rectangle(Gdx.graphics.getWidth()/2 - 100, Gdx.graphics.getHeight()/2 - 25, 200, 50);
         this.quitRect = new Rectangle(Gdx.graphics.getWidth()/2 - 100, Gdx.graphics.getHeight()/2 - 25 - 100, 200, 50);
-        this.changelogRect.set(width - width*0.2f, height, width*0.2f, height);
+        this.changelogRect.set(width - width * 0.2f, 0, width * 0.2f, height - height*0.2f);
+        //this.setLabelBounds(this.changelogRect);
     }
 
     @Override

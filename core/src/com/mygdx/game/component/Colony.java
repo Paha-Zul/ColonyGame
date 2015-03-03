@@ -44,19 +44,18 @@ public class Colony extends Component implements IDisplayable {
 
         this.inventory = this.owner.getComponent(Inventory.class);
 
-        Texture colonistTexture = new Texture("img/BlackSquare.png");
+        Texture colonistTexture = ColonyGame.assetManager.get("colonist", Texture.class);
 
         for(int i=0;i<5;i++){
             Entity c = this.makeColonist(this.owner.transform.getPosition(), 200, colonistTexture);
             c.name = ServerPlayer.names[MathUtils.random(ServerPlayer.names.length-1)];
             this.addColonist(c.getComponent(Colonist.class));
         }
-
     }
 
     private Entity makeColonist(Vector2 start, float offset, Texture texture){
         Vector2 newPos = new Vector2(start.x + MathUtils.random()*offset*2 - offset, start.y + MathUtils.random()*offset*2 - offset);
-        return new ColonistEnt(newPos, 0, texture, ColonyGame.batch, 12);
+        return new ColonistEnt(newPos, 0, texture, ColonyGame.batch, 10);
     }
 
     @Override

@@ -275,20 +275,22 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         float x = rect.getX() + 20;
         float y = rect.getY() + rect.getHeight() - 10;
 
-        if(this.interactable.type.equals("resource")){
-            this.interactable.resource.display(this.centerRect, this.batch, "general");
-            this.interactable.resource.display(this.leftRect, this.batch, "resource");
-        }else if(this.interactable.type.equals("humanoid")){
-            this.interactable.colonist.display(this.centerRect, this.batch, "general");
-            this.interactable.colonist.display(this.leftRect, this.batch, "health");
-            this.interactable.colonist.display(this.rightRect, this.batch, "inventory");
-            this.interactable.colonist.display(null, this.batch, "path");
-        }else if(this.interactable.type.equals("colony")){
-            this.interactable.colony.display(this.centerRect, this.batch, "general");
-            this.interactable.colony.display(this.leftRect, this.batch, "colony");
-            this.interactable.colony.display(this.rightRect, this.batch, "inventory");
-        }else if(this.interactable.type.equals("animal")){
+        if(this.interactable != null && !this.interactable.isDestroyed()) {
+            if (this.interactable.type.equals("resource")) {
+                this.interactable.resource.display(this.centerRect, this.batch, "general");
+                this.interactable.resource.display(this.leftRect, this.batch, "resource");
+            } else if (this.interactable.type.equals("humanoid")) {
+                this.interactable.colonist.display(this.centerRect, this.batch, "general");
+                this.interactable.colonist.display(this.leftRect, this.batch, "health");
+                this.interactable.colonist.display(this.rightRect, this.batch, "inventory");
+                this.interactable.colonist.display(null, this.batch, "path");
+            } else if (this.interactable.type.equals("colony")) {
+                this.interactable.colony.display(this.centerRect, this.batch, "general");
+                this.interactable.colony.display(this.leftRect, this.batch, "colony");
+                this.interactable.colony.display(this.rightRect, this.batch, "inventory");
+            } else if (this.interactable.type.equals("animal")) {
 
+            }
         }
         Profiler.end();
     }
@@ -365,7 +367,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         this.leftRect.set(infoRect.x, infoRect.y, infoRect.width * leftRectPerc, infoRect.height);
         this.rightRect.set(infoRect.x + infoRect.width - infoRect.width * rightRectPerc, infoRect.y, infoRect.width * rightRectPerc, infoRect.height);
         this.centerRect.set(infoRect.x + infoRect.width/2 - infoRect.width * centerRectPerc, infoRect.y, infoRect.width * centerRectPerc, infoRect.height);
-        this.leftCenterRect.set(infoRect.x + infoRect.width/3 - infoRect.width * centerRectPerc, infoRect.y, infoRect.width * centerRectPerc, infoRect.height);
+        this.leftCenterRect.set(infoRect.x + infoRect.width / 3 - infoRect.width * centerRectPerc, infoRect.y, infoRect.width * centerRectPerc, infoRect.height);
     }
 
     @Override

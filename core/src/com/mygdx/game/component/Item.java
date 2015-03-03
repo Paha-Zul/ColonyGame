@@ -74,7 +74,7 @@ public class Item extends Component{
     }
 
     /**
-     * The weight of this Item. For instance, wood logs are really heavy and have a weight of 100.
+     * The weight of this Item. For instance, wood changes are really heavy and have a weight of 100.
      * @param weight The new weight of this Item.
      */
     public void setWeight(int weight) {

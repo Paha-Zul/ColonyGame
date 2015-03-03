@@ -1,6 +1,7 @@
 package com.mygdx.game.ui;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
@@ -20,7 +21,7 @@ public class LoadingInterface extends UI {
     private boolean done;
 
     private Rectangle loadingBar = new Rectangle(), square = new Rectangle();
-    private Texture outline, bar, blackSquare;
+    private Texture outline, bar;
 
     public LoadingInterface(SpriteBatch batch, ColonyGame game){
         super(batch, game);
@@ -28,7 +29,6 @@ public class LoadingInterface extends UI {
 
         this.outline = new Texture("img/LoadingBarOutline.png");
         this.bar = new Texture("img/LoadingBar.png");
-        this.blackSquare = new Texture("img/BlackSquare.png");
 
         this.loadingBar.set(Gdx.graphics.getWidth()/2 - width/2, Gdx.graphics.getHeight()/2 + height/2, width, height);
         this.square.set(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -41,7 +41,11 @@ public class LoadingInterface extends UI {
         super.drawGUI(delta);
 
         if(!done) {
-            GUI.Texture(this.square, this.blackSquare, this.batch);
+            Color color = this.batch.getColor();
+            this.batch.setColor(Color.BLACK);
+            GUI.Texture(this.square, WorldGen.getInstance().whiteTex, this.batch);
+            this.batch.setColor(color);
+
             GUI.Texture(this.loadingBar, this.outline, this.batch);
             GUI.Texture(this.loadingBar.x, this.loadingBar.y, this.loadingBar.width*WorldGen.getInstance().percentageDone, this.loadingBar.height, this.bar, this.batch);
             GUI.Label("Loading Terrain", this.batch, this.loadingBar.getX() + this.loadingBar.width/2, this.loadingBar.getY() + 40, true);
@@ -73,7 +77,5 @@ public class LoadingInterface extends UI {
         outline = null;
         bar.dispose();
         bar = null;
-        blackSquare.dispose();
-        blackSquare = null;
     }
 }

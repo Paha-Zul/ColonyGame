@@ -16,6 +16,7 @@ import com.mygdx.game.helpers.managers.ResourceManager;
 import com.mygdx.game.helpers.worldgeneration.WorldGen;
 import com.mygdx.game.interfaces.IDestroyable;
 
+import javax.xml.crypto.Data;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.util.*;
@@ -29,11 +30,13 @@ public class DataBuilder implements IDestroyable{
     String resourcePath = "resources.json";
     String tilePath = "tiles.json";
     String worldPath = "worldgen.json";
+    String changeLogPath = "changelog.json";
     String imgPath = "img/";
 
     private EasyAssetManager assetManager;
 
     public static JsonTile[] tileList;
+    public static JsonChangeLog changelog;
 
     public DataBuilder(EasyAssetManager assetManager){
         TextureLoader.TextureParameter param = new TextureLoader.TextureParameter();
@@ -54,6 +57,7 @@ public class DataBuilder implements IDestroyable{
         buildResources();
         buildTiles();
         buildWorldGen();
+        buildChangeLog();
     }
 
     private void buildImages(FileHandle dirHandle, TextureLoader.TextureParameter param){
@@ -116,7 +120,7 @@ public class DataBuilder implements IDestroyable{
             if(entry.isDirectory()){
                 fileList.clear();
                 int index = entry.nameWithoutExtension().lastIndexOf('_'); //Get the index of the last _.
-                if(index == -1) throw new RuntimeException(entry.nameWithoutExtension()+" has no rank attached to it!"); //Throw an error if it doesn't exist.
+                if(index == -1) GH.writeErrorMessage("Using 'autoLayered' in tiles.json and "+entry.nameWithoutExtension() + " has no rank attached to it! (ex: 'file_1, file_2'"); //Throw an error if it doesn't exist.
                 int rank = Integer.parseInt(entry.nameWithoutExtension().substring(index+1)); //Record the rank of the folder.
                 String fullName = entry.nameWithoutExtension(); //Record the full name.
                 this.getFileNamesFromDir(entry, fileList);
@@ -212,7 +216,7 @@ public class DataBuilder implements IDestroyable{
                     ArrayList<String> fileNames = new ArrayList<>();
                     this.getFileNamesFromDir(Gdx.files.internal(tile.dir), fileNames);
                     tile.img = fileNames.toArray(new String[fileNames.size()]);
-                    if(tile.img.length == 0) throw new RuntimeException("No files in folder "+tile.tileName[0]);
+                    if(tile.img.length == 0) GH.writeErrorMessage("No files in folder '" + tile.tileName[0]+"'");
                 }
             }
         }
@@ -231,6 +235,16 @@ public class DataBuilder implements IDestroyable{
         WorldGen.getInstance().treeScale = world.treeScale;
         WorldGen.getInstance().freq = world.freq;
         Constants.GRID_SQUARESIZE = world.tileSize;
+    }
+
+    private void buildChangeLog(){
+        Json json = new Json();
+        json.setTypeName(null);
+        json.setUsePrototypes(false);
+        json.setIgnoreUnknownFields(true);
+        json.setOutputType(JsonWriter.OutputType.json);
+
+        DataBuilder.changelog = json.fromJson(JsonChangeLog.class, Gdx.files.internal(filePath+changeLogPath));
     }
 
     private static class JsonItems{
@@ -268,6 +282,15 @@ public class DataBuilder implements IDestroyable{
     public static class JsonWorld{
         public int tileSize = 25;
         public float treeScale=0, freq=0;
+    }
+
+    public static class JsonChangeLog{
+        public JsonLog changes[];
+    }
+
+    public static class JsonLog{
+        public String version, date;
+        public String[] log;
     }
 
     private static class FolderStructure{
