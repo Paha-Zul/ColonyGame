@@ -12,6 +12,7 @@ import com.mygdx.game.entity.Entity;
 import com.mygdx.game.entity.ResourceEnt;
 import com.mygdx.game.helpers.Constants;
 import com.mygdx.game.helpers.DataBuilder;
+import com.mygdx.game.helpers.GH;
 import com.mygdx.game.helpers.managers.ResourceManager;
 
 import java.util.ArrayList;
@@ -40,12 +41,18 @@ public class WorldGen {
     private ColonyGame game;
     private static WorldGen instance;
 
+    private int currDone = 0;
+    private int maxAmount = 0;
+    private int currIndex = 0;
+
+    private HashMap<String, SimplexNoise> simplexNoiseMaps = new HashMap<>();
+
     //Variables for performing breadth first resource spawning;
-    LinkedList<TerrainTile> neighbors = new LinkedList<>();
-    HashMap<Integer, TerrainTile> visitedMap = new HashMap<>(1000);
-    ArrayList<TerrainTile> tmpNeighbors = new ArrayList<>(4);
-    int[] startIndex;
-    Vector2 center = new Vector2();
+    private LinkedList<TerrainTile> neighbors = new LinkedList<>();
+    private HashMap<Integer, TerrainTile> visitedMap = new HashMap<>(1000);
+    private ArrayList<TerrainTile> tmpNeighbors = new ArrayList<>(4);
+    private int[] startIndex;
+    private Vector2 center = new Vector2();
     boolean started = false;
 
     /**
@@ -55,8 +62,10 @@ public class WorldGen {
     public void init(long seed, ColonyGame game){
         this.game = game;
 
-        //This randomizes the noise by using the seed passed in.
-        SimplexNoise.genGrad(seed);
+        for(DataBuilder.NoiseMap noiseMap : DataBuilder.worldData.noiseMapHashMap.values()){
+            seed = (long)(Math.random()*Long.MAX_VALUE);
+            this.simplexNoiseMaps.put(noiseMap.name, new SimplexNoise(seed));
+        }
 
         //Sets the number of tiles in X (numX) and Y (numY) by getting the screen width/height.
         numX = Constants.GRID_WIDTH/tileSize + 1;
@@ -66,10 +75,6 @@ public class WorldGen {
         map = new TerrainTile[numX][numY];
         //Initialize a new int array.
         this.visibilityMap = new VisibilityTile[numX][numY];
-
-        System.out.println("numx/numy: "+numX+"/"+numY);
-        System.out.println("map: "+map.length+"/"+map[0].length);
-        System.out.println("vismap: "+visibilityMap.length+"/"+visibilityMap[0].length);
 
         //Generate a white square (pixel).
         Pixmap pixmap = new Pixmap(1,1, Pixmap.Format.RGBA4444);
@@ -85,53 +90,86 @@ public class WorldGen {
      * @return True when finished, false otherwise.
      */
     public boolean generateWorld(){
-
+        maxAmount = numTiles()* DataBuilder.worldData.noiseMapHashMap.size();
         int stepsLeft = Constants.WORLDGEN_GENERATESPEED;
         boolean done = true; //Flag for completion.
-        DataBuilder.JsonTile[] tileList = DataBuilder.tileList;
+        HashMap<String, DataBuilder.JsonTileGroup> tileGroupsMap = DataBuilder.tileGroupsMap;
         Texture terrainTex;
 
-        //If there's steps left and currX is still less than the total num X, generate!
-        while(stepsLeft > 0 && currX < numX){
-            double noiseValue = SimplexNoise.noise((double)currX/freq,(double)currY/freq); //Generate the noise for this tile.
-            Vector2 position = new Vector2(currX*tileSize, currY*tileSize); //Set the position.
-            Sprite terrainSprite;
-            int type = 0;
-            float rotation=0;
+        //This will loop until everything is done.
+        while(this.currDone < maxAmount && stepsLeft > 0) {
 
-            //Gets the jTile as the noise height.
-            DataBuilder.JsonTile jtile = this.getTileAtHeight(tileList, (float)noiseValue);
-            if(jtile == null) continue;
+            freq = DataBuilder.worldData.noiseMapHashMap.get(this.currIndex).freq;
+            String noiseMapName = DataBuilder.worldData.noiseMapHashMap.get(this.currIndex).name;
 
-            //Gets the texture that the tile should be.
-            terrainTex = ColonyGame.assetManager.get(jtile.img[MathUtils.random(jtile.img.length-1)], Texture.class);
+            //Loop for a certain amount of steps. This is done for each noise level. Resets after each one.
+            while (stepsLeft > 0 && currX < numX) {
+                double noiseValue = simplexNoiseMaps.get(noiseMapName).noise((double) currX / freq, (double) currY / freq); //Generate the noise for this tile.
+                Vector2 position = new Vector2(currX * tileSize, currY * tileSize); //Set the position.
+                Sprite terrainSprite; //Prepare the sprite object.
+                int type = 0; //The type of tile.
+                float rotation = 0; //The rotation of the tile.
 
-            //Creates a new sprite and a new tile, assigns the Sprite to the tile and puts it into the map array.
-            terrainSprite = new Sprite(terrainTex, tileSize, tileSize);
-            TerrainTile tile = new TerrainTile(terrainSprite, noiseValue, rotation, type, position); //Create a new terrain tile.
-            tile.avoid = jtile.avoid;
-            map[currX][currY] = tile;
+                done = false; //Set done to false signifying that we are not finished yet.
+                //Gets the jTile as the noise height.
+                DataBuilder.JsonTile jtile = this.getTileAtHeight(tileGroupsMap.get(noiseMapName).tiles, (float) noiseValue);
+                if (jtile == null && noiseMapName.equals("main"))
+                    GH.writeErrorMessage("No tile found at height "+noiseValue+" for noise map '"+noiseMapName+"'. A tile must exist for all heights on noise map '"+noiseMapName+"'.");
 
-            //Generate the visibility tile for this location
-            this.visibilityMap[currX][currY] = new VisibilityTile();
+                //If the tile is not null, let use assign a new tile to the terrain.
+                else if(jtile != null) {
+                    //Gets the texture that the tile should be.
+                    int randTileIndex = MathUtils.random(jtile.img.length - 1);
+                    terrainTex = ColonyGame.assetManager.get(jtile.img[randTileIndex], Texture.class);
+                    TerrainTile tile;
 
-            done = false; //Set done to false signifying that we are not finished yet.
-            stepsLeft--; //Decrement the remaining step amount.
+                    if(map[currX][currY] != null){
+                        tile = map[currX][currY];
+                    }else{
+                        tile = new TerrainTile();
+                    }
 
-            if(currY < numY-1) currY++; //Increment currY
-            //Otherwise, set currY to 0 and increment X.
-            else{
-                currY = 0;
-                currX++;
+                    //Creates a new sprite and a new tile, assigns the Sprite to the tile and puts it into the map array.
+                    terrainSprite = new Sprite(terrainTex, tileSize, tileSize);
+                    tile.set(terrainSprite, noiseValue, rotation, type, position); //Create a new terrain tile.
+                    tile.avoid = jtile.avoid;
+                    if(jtile.tileNames.length <= randTileIndex) GH.writeErrorMessage("Tile with image "+jtile.img[randTileIndex]+" and category "+jtile.category+" does not have a name assigned to it");
+                    tile.tileName = jtile.tileNames[randTileIndex]; //Assign the name
+                    tile.category = jtile.category; //Assign the category.
+                    map[currX][currY] = tile;
+                }
+
+                //Generate the visibility tile for this location
+                this.visibilityMap[currX][currY] = new VisibilityTile();
+
+                //Decrement steps remaining and increment currDone.
+                stepsLeft--;
+                this.currDone++;
+
+                if (currY < numY - 1) currY++; //Increment currY
+                //Otherwise, set currY to 0 and increment X.
+                else {
+                    currY = 0; //Reset currY
+                    currX++; //Increment currX
+                }
+
+                float currDone = this.currDone;
+                float total = this.maxAmount;
+                percentageDone = currDone / total; //Calcs the percentage done so that the player's UI can use this.
             }
 
-            float currDone = currX + (currX*numY + currY);
-            float total = (numX+1)*(numY+1);
-            percentageDone = currDone/total; //Calcs the percentage done so that the player's UI can use this.
-        }
+            //If we are done with the current noise level but we have more levels to go, reset the currX and currY, increment currIndex and continue.
+            if (done && this.currIndex < DataBuilder.worldData.noiseMapHashMap.size()) {
+                currX = currY = 0;
+                this.currIndex++;
+                done = false;
+            //Otherwise, if we are simply done, let's be done!
+            }else if(done){
+                currX = currY = 0;
+            }
 
-        if(done){
-            currX = currY = 0;
+            //If we exit the loop, set stepsLeft to 0 so we can restart if we need to.
+            stepsLeft = 0;
         }
 
         return done;
@@ -184,7 +222,7 @@ public class WorldGen {
 
             //Set the center Vector2 and spawn the tree using the center position.
             center.set(currTile.terrainSprite.getX() + Constants.GRID_SQUARESIZE * 0.5f, currTile.terrainSprite.getY() + Constants.GRID_SQUARESIZE * 0.5f);
-            spawnTree(getTileAtHeight(DataBuilder.tileList, (float) currTile.noiseValue), center);
+            spawnTree(getTileAtHeight(DataBuilder.tileGroupsMap.get("main").tiles, (float) currTile.noiseValue), center);
 
             //If there are no more neighbors, we are done.
             if(neighbors.size() == 0) {
@@ -227,7 +265,7 @@ public class WorldGen {
                 return tile;
         }
 
-        throw new RuntimeException("No tile found at height "+height);
+        return null;
     }
 
     /**
@@ -311,11 +349,16 @@ public class WorldGen {
     }
 
     public class TerrainTile {
+        public String tileName, category;
         public Sprite terrainSprite;
         public double noiseValue;
         public int type;
         public boolean avoid = false;
         private int visibility = Constants.VISIBILITY_UNEXPLORED;
+
+        public TerrainTile(){
+
+        }
 
         public TerrainTile(Sprite sprite, double noiseValue, float rotation, int type, Vector2 position) {
             this.terrainSprite = new Sprite(sprite);
@@ -334,6 +377,18 @@ public class WorldGen {
             if(visibility == Constants.VISIBILITY_UNEXPLORED) this.terrainSprite.setColor(Constants.COLOR_UNEXPLORED);
             if(visibility == Constants.VISIBILITY_EXPLORED) this.terrainSprite.setColor(Constants.COLOR_EXPLORED);
             if(visibility == Constants.VISIBILITY_VISIBLE) this.terrainSprite.setColor(Constants.COLOR_VISIBILE);
+        }
+
+        public void set(Sprite sprite, double noiseValue, float rotation, int type, Vector2 position){
+            if(terrainSprite != null)
+                this.terrainSprite.set(sprite);
+            else this.terrainSprite = sprite;
+
+            this.noiseValue = noiseValue;
+            this.terrainSprite.setRotation(rotation);
+            this.type = type;
+            this.terrainSprite.setPosition(position.x, position.y);
+            this.terrainSprite.setColor(Constants.COLOR_UNEXPLORED);
         }
 
         @Override

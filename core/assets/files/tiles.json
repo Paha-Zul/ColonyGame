@@ -1,141 +1,64 @@
 {
-  "tiles":  [
+  "tileGroups":  [
     {
-      "tileName": ["A10"],
-      "category": "tallergrass",
-      "dir": "img/terrain/A10",
-      "height": [0.95, 1],
-      "resources":["pine"],
-      "resourcesChance": [[0, 1]]
+      "noiseMap": "main",
+      "tiles": [
+        {
+          "tileNames": ["0"],
+          "category": "Muddy Water",
+          "dir": "img/terrain/0",
+          "height": [0.8, 1]
+        },
+        {
+          "tileNames": ["1"],
+          "category": "Grass",
+          "dir": "img/terrain/1",
+          "height": [0.6, 0.8],
+          "resources":["flower"],
+          "resourcesChance": [[0, 0.1]]
+        },
+        {
+          "tileNames": ["2"],
+          "category": "Grass",
+          "dir": "img/terrain/2",
+          "height": [0.4, 0.6]
+        },
+        {
+          "tileNames": ["3"],
+          "category": "Grass",
+          "dir": "img/terrain/3",
+          "height": [-0.4, 0.4],
+          "resources":["pine", "redwood"],
+          "resourcesChance": [[0, 0.01], [0.01, 0.015]]
+        },
+        {
+          "tileNames": ["4"],
+          "category": "Grass",
+          "dir": "img/terrain/4",
+          "height": [-0.6, -0.4]
+        },
+        {
+          "tileNames": ["5"],
+          "category": "Grass",
+          "dir": "img/terrain/5",
+          "height": [-0.8, -0.6]
+        },
+        {
+          "tileNames": ["6"],
+          "category": "Grass",
+          "dir": "img/terrain/6",
+          "height": [-1, -0.8]
+        }]
     },
     {
-      "tileName": ["A9"],
-      "category": "tallergrass",
-      "dir": "img/terrain/A9",
-      "height": [0.9, 0.95],
-      "resources":["pine"],
-      "resourcesChance": [[0, 1]]
-    },
-    {
-      "tileName": ["A8"],
-      "category": "tallergrass",
-      "dir": "img/terrain/A8",
-      "height": [0.85, 0.9],
-      "resources":["pine"],
-      "resourcesChance": [[0, 1]]
-    },
-    {
-      "tileName": ["A7"],
-      "category": "tallergrass",
-      "dir": "img/terrain/A7",
-      "height": [0.8, 0.85],
-      "resources":["pine"],
-      "resourcesChance": [[0, 1]]
-    },
-    {
-      "tileName": ["A6"],
-      "category": "tallgrass",
-      "dir": "img/terrain/A6",
-      "height": [0.75, 0.8],
-      "resources":["pine"],
-      "resourcesChance": [[0, 1]]
-    },
-    {
-      "tileName": ["A5"],
-      "category": "grass",
-      "dir": "img/terrain/A5",
-      "height": [0.7, 0.75],
-      "resources":["pine"],
-      "resourcesChance": [[0, 1]]
-    },
-    {
-      "tileName": ["A4"],
-      "category": "flat",
-      "dir": "img/terrain/A4",
-      "height": [0.65, 0.7]
-    },
-    {
-      "tileName": ["A3"],
-      "category": "deep",
-      "dir": "img/terrain/A3",
-      "height": [0.6, 0.65]
-    },
-    {
-      "tileName": ["A2"],
-      "category": "deepest",
-      "dir": "img/terrain/A2",
-      "height": [0.55, 0.6]
-    },
-    {
-      "tileName": ["A1"],
-      "category": "deeperdeepest",
-      "dir": "img/terrain/A1",
-      "height": [0.5, 0.55]
-    },
-    {
-      "tileName": ["0"],
-      "category": "tallergrass",
-      "dir": "img/terrain/0",
-      "height": [-0.5, 0.5]
-    },
-    {
-      "tileName": ["B1"],
-      "category": "tallergrass",
-      "dir": "img/terrain/B1",
-      "height": [-0.55, -0.5]
-    },
-    {
-      "tileName": ["B2"],
-      "category": "tallergrass",
-      "dir": "img/terrain/B2",
-      "height": [-0.6, -0.55]
-    },
-    {
-      "tileName": ["B3"],
-      "category": "tallgrass",
-      "dir": "img/terrain/B3",
-      "height": [-0.65, -0.6]
-    },
-    {
-      "tileName": ["B4"],
-      "category": "grass",
-      "dir": "img/terrain/B4",
-      "height": [-0.7, -0.65]
-    },
-    {
-      "tileName": ["B5"],
-      "category": "flat",
-      "dir": "img/terrain/B5",
-      "height": [-0.75, -0.7]
-    },
-    {
-      "tileName": ["B6"],
-      "category": "deep",
-      "dir": "img/terrain/B6",
-      "height": [-0.8, -0.75]
-    },
-    {
-      "tileName": ["B7"],
-      "category": "deepest",
-      "dir": "img/terrain/B7",
-      "height": [-0.85, -0.8]
-    },
-    {
-      "tileName": ["B8"],
-      "category": "deeperdeepest",
-      "dir": "img/terrain/B8",
-      "height": [-0.9, -0.85]
-    },
-    {
-      "tileName": ["B9"],
-      "category": "deepest",
-      "dir": "img/terrain/B9",
-      "height": [-0.95, -0.9]
-    },
-    {
-      "tileName": ["B10"],
-      "category": "deepest",
-      "dir": "img/terrain/B10",
-      "height": [-1, -0.95]
+      "noiseMap": "water",
+      "tiles": [
+        {
+          "tileNames": ["Water"],
+          "category": "Water",
+          "img":["water"],
+          "height": [-1, -0.4],
+          "avoid": true
+        }]
     }]
 }

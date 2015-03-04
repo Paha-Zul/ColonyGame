@@ -1,14 +1,12 @@
 package com.mygdx.game.helpers;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.assets.loaders.TextureLoader;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter;
-import com.mygdx.game.ColonyGame;
 import com.mygdx.game.component.Item;
 import com.mygdx.game.component.Resource;
 import com.mygdx.game.helpers.managers.ItemManager;
@@ -16,9 +14,6 @@ import com.mygdx.game.helpers.managers.ResourceManager;
 import com.mygdx.game.helpers.worldgeneration.WorldGen;
 import com.mygdx.game.interfaces.IDestroyable;
 
-import javax.xml.crypto.Data;
-import java.io.File;
-import java.lang.reflect.Field;
 import java.util.*;
 
 /**
@@ -35,8 +30,9 @@ public class DataBuilder implements IDestroyable{
 
     private EasyAssetManager assetManager;
 
-    public static JsonTile[] tileList;
+    public static HashMap<String, JsonTileGroup> tileGroupsMap = new HashMap<>();
     public static JsonChangeLog changelog;
+    public static JsonWorld worldData;
 
     public DataBuilder(EasyAssetManager assetManager){
         TextureLoader.TextureParameter param = new TextureLoader.TextureParameter();
@@ -185,6 +181,9 @@ public class DataBuilder implements IDestroyable{
         }
     }
 
+    /**
+     * Builds the tile data from the json file.
+     */
     private void buildTiles(){
         Json json = new Json();
         json.setTypeName(null);
@@ -194,36 +193,54 @@ public class DataBuilder implements IDestroyable{
 
         JsonTiles tiles = json.fromJson(JsonTiles.class, Gdx.files.internal(filePath+tilePath));
 
-        //If it is auto layered....
-        if(tiles.autoLayered && tiles.dir != null){
-            ArrayList<FolderStructure> list = this.buildFolderStructure(Gdx.files.internal(tiles.dir)); //Build the folder structure.
-            ArrayList<JsonTile> tileList = new ArrayList<>(); //a list.
-            for(int i=0;i<list.size();i++){
-                FolderStructure struct = list.get(i);
-                JsonTile tile = new JsonTile();
-                tile.img = struct.img; //Set the images.
-                tile.height = new float[]{-1 + i*(2f/list.size()), -1 + (i+1)*(2f/list.size())}; //Set the heights
-                tileList.add(tile);
-            }
 
-            tiles.tiles = tileList.toArray(new JsonTile[tileList.size()]);
-        }else {
-            //Check over each tile.
-            for (JsonTile tile : tiles.tiles) {
-                //If the dir field was assigned.
-                if (tile.dir != null) {
-                    //Loop over each file in the dir and grab it. We use this for our img list instead.
-                    ArrayList<String> fileNames = new ArrayList<>();
-                    this.getFileNamesFromDir(Gdx.files.internal(tile.dir), fileNames);
-                    tile.img = fileNames.toArray(new String[fileNames.size()]);
-                    if(tile.img.length == 0) GH.writeErrorMessage("No files in folder '" + tile.tileName[0]+"'");
+        //For each group of tiles
+        for (JsonTileGroup group : tiles.tileGroups) {
+            //If the group of tiles is auto layered...
+            if(group.autoLayered && group.dir != null){
+                ArrayList<FolderStructure> list = this.buildFolderStructure(Gdx.files.internal(group.dir)); //Build the folder structure.
+                ArrayList<JsonTile> tileList = new ArrayList<>(); //a list.
+                for(int i=0;i<list.size();i++){
+                    FolderStructure struct = list.get(i);
+                    JsonTile tile = new JsonTile();
+                    tile.img = struct.img; //Set the images.
+                    tile.height = new float[]{-1 + i*(2f/list.size()), -1 + (i+1)*(2f/list.size())}; //Set the heights
+                    tileList.add(tile);
                 }
-            }
-        }
+                group.tiles = tileList.toArray(new JsonTile[tileList.size()]);
 
-        tileList = tiles.tiles;
+            //Otherwise, for each tile we check if we have a 'dir' to get images from. If so, get images from the directory. Otherwise, they listed the images manually.
+            }else {
+                //For each tile.
+                for (JsonTile tile : group.tiles) {
+                    //If the dir field was assigned.
+                    if (tile.dir != null) {
+                        //Loop over each file in the dir and grab it. We use this for our img list instead.
+                        ArrayList<String> fileNames = new ArrayList<>();
+                        this.getFileNamesFromDir(Gdx.files.internal(tile.dir), fileNames);
+                        tile.img = fileNames.toArray(new String[fileNames.size()]);
+                        tile.tileNames = tile.img; //Assign the tileNames the same as the img names.
+                        if (tile.img.length == 0)
+                            GH.writeErrorMessage("No files in folder '" + tile.tileNames[0] + "'");
+                    }
+
+                    //Throw an error message if we have no images/files for this tile.
+                    if(tile.img == null || tile.img.length <= 0)
+                        GH.writeErrorMessage("No files were generated for "+tile.tileNames[0]+". Either there are no files in the directory specified or no files manually listed in tiles.json");
+                }
+
+                //Throw an error if something went wrong with the tile groups.
+                if(group.tiles == null || group.tiles.length <= 0)
+                    GH.writeErrorMessage("Something is wrong with group "+group.noiseMap+" in tiles.json");
+            }
+
+            tileGroupsMap.put(group.noiseMap, group);
+        }
     }
 
+    /**
+     * Builds the WorldGen data for things like noise maps, frequency of noise maps, size, tile sizes....
+     */
     private void buildWorldGen(){
         Json json = new Json();
         json.setTypeName(null);
@@ -232,11 +249,19 @@ public class DataBuilder implements IDestroyable{
         json.setOutputType(JsonWriter.OutputType.json);
 
         JsonWorld world = json.fromJson(JsonWorld.class, Gdx.files.internal(filePath+worldPath));
+        for(NoiseMap map : world.noiseMaps)
+            world.noiseMapHashMap.put(map.rank, map);
+
         WorldGen.getInstance().treeScale = world.treeScale;
-        WorldGen.getInstance().freq = world.freq;
+        WorldGen.getInstance().freq = world.noiseMapHashMap.get(0).freq;
         Constants.GRID_SQUARESIZE = world.tileSize;
+
+        worldData = world;
     }
 
+    /**
+     * Builds the changelog data for displaying in game.
+     */
     private void buildChangeLog(){
         Json json = new Json();
         json.setTypeName(null);
@@ -266,13 +291,20 @@ public class DataBuilder implements IDestroyable{
     }
 
     private static class JsonTiles{
-        public JsonTile[] tiles;
+        public JsonTileGroup[] tileGroups;
+
+    }
+
+    public static class JsonTileGroup{
+        public int rank = 0;
         public boolean autoLayered = false;
         public String dir;
+        public String noiseMap;
+        public JsonTile[] tiles;
     }
 
     public static class JsonTile{
-        public String[] tileName, img, resources;
+        public String[] tileNames, img, resources;
         public String category=null, dir=null;
         public float[] height;
         public float[][] resourcesChance;
@@ -281,7 +313,15 @@ public class DataBuilder implements IDestroyable{
 
     public static class JsonWorld{
         public int tileSize = 25;
-        public float treeScale=0, freq=0;
+        public float treeScale=0;
+        public NoiseMap[] noiseMaps;
+        public HashMap<Integer, NoiseMap> noiseMapHashMap = new HashMap<>(); //A hasmap that stores NoiseMaps by ranks.
+    }
+
+    public static class NoiseMap{
+        public int rank;
+        public String name;
+        public float freq;
     }
 
     public static class JsonChangeLog{

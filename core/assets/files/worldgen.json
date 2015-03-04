@@ -1,6 +1,16 @@
-
   {
     "tileSize": 25,
-    "treeScale": 0.8,
-    "freq": 50
+    "treeScale": 1,
+    "noiseMaps": [
+      {
+        "name": "main",
+        "rank": 0,
+        "freq": 80
+      },
+      {
+        "name": "water",
+        "rank": 1,
+        "freq": 200
+      }
+    ]
   }
