@@ -57,9 +57,7 @@ public class ServerPlayer {
 		//Create the Box2D world.
 		ColonyGame.debugRenderer = new Box2DDebugRenderer();
 
-        startLocation.set((ColonyGame.worldGrid.getNumCols()/2)*ColonyGame.worldGrid.getSquareSize(), (ColonyGame.worldGrid.getNumRows()/2)*ColonyGame.worldGrid.getSquareSize());
-        ColonyGame.camera.position.set((ColonyGame.worldGrid.getNumCols()/2)*ColonyGame.worldGrid.getSquareSize(), (ColonyGame.worldGrid.getNumRows()/2)*ColonyGame.worldGrid.getSquareSize(), 0);
-		generateStart(startLocation);
+        ColonyGame.camera.position.set((ColonyGame.worldGrid.getNumCols() / 2) * ColonyGame.worldGrid.getSquareSize(), (ColonyGame.worldGrid.getNumRows() / 2) * ColonyGame.worldGrid.getSquareSize(), 0);
 
 		initPlayer();
     }
@@ -68,8 +66,13 @@ public class ServerPlayer {
         if(paused)
             delta = 0f;
 
-        if(!generatedTrees)
-            generatedTrees = WorldGen.getInstance().generateResources(new Vector2((ColonyGame.worldGrid.getNumCols()-1)*Constants.GRID_SQUARESIZE,(ColonyGame.worldGrid.getNumRows()-1)*Constants.GRID_SQUARESIZE), 8, 100);
+        if(!generatedTrees) {
+            generatedTrees = WorldGen.getInstance().generateResources(new Vector2((ColonyGame.worldGrid.getNumCols() - 1) * Constants.GRID_SQUARESIZE, (ColonyGame.worldGrid.getNumRows() - 1) * Constants.GRID_SQUARESIZE), 8, 1000);
+            if(generatedTrees){
+                startLocation.set((ColonyGame.worldGrid.getNumCols()/2)*ColonyGame.worldGrid.getSquareSize(), (ColonyGame.worldGrid.getNumRows()/2)*ColonyGame.worldGrid.getSquareSize());
+                generateStart(startLocation);
+            }
+        }
 
 		Profiler.begin("ServerPlayer Render");
 
