@@ -59,6 +59,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     private Rectangle rightRect = new Rectangle();
     private Rectangle centerRect = new Rectangle();
     private Rectangle leftCenterRect = new Rectangle();
+    private Rectangle bottomLeftRect = new Rectangle();
 
     private Rectangle selectionBox = new Rectangle();
     private Rectangle profileButtonRect = new Rectangle();
@@ -158,6 +159,8 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         //Draws info about the game
         this.drawInfo(height);
 
+        this.drawTerrainInfo(this.bottomLeftRect);
+
         if(this.drawingProfiler)
             Profiler.drawDebug(ColonyGame.batch, 200, height - 20);
 
@@ -228,6 +231,15 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
             GUI.Text("NumGridCols(X): " + ColonyGame.worldGrid.getNumCols(), this.batch, 0, height - 120);
             GUI.Text("NumGridRows(Y): " + ColonyGame.worldGrid.getNumRows(), this.batch, 0, height - 140);
         }
+    }
+
+    private void drawTerrainInfo(Rectangle rect){
+        Vector3 mouseCoords = ColonyGame.camera.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
+
+        GUI.Texture(rect, this.background, this.batch);
+        WorldGen world = WorldGen.getInstance();
+        WorldGen.TerrainTile tile = world.getNode(world.getIndex(mouseCoords.x, mouseCoords.y));
+        GUI.Label(tile.category, this.batch, rect.x + rect.getWidth()*0.5f, rect.getY() + rect.getHeight()*0.5f, true);
     }
 
     /**
@@ -368,6 +380,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         this.rightRect.set(infoRect.x + infoRect.width - infoRect.width * rightRectPerc, infoRect.y, infoRect.width * rightRectPerc, infoRect.height);
         this.centerRect.set(infoRect.x + infoRect.width/2 - infoRect.width * centerRectPerc, infoRect.y, infoRect.width * centerRectPerc, infoRect.height);
         this.leftCenterRect.set(infoRect.x + infoRect.width / 3 - infoRect.width * centerRectPerc, infoRect.y, infoRect.width * centerRectPerc, infoRect.height);
+        this.bottomLeftRect.set(width - width*0.05f, 0, width*0.05f, height*0.05f);
     }
 
     @Override
