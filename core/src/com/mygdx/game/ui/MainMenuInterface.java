@@ -49,7 +49,7 @@ public class MainMenuInterface extends UI{
         this.quitRect = new Rectangle(Gdx.graphics.getWidth()/2 - 100, Gdx.graphics.getHeight()/2 - 25 - 100, 200, 50);
         this.changelogRect = new Rectangle(width - width * 0.2f, 0, width * 0.2f, height - height*0.2f);
 
-        //this.makeLabels(changelogRect);
+        this.makeLabels(changelogRect);
 
         music.play();
         music.setLooping(true);
@@ -96,8 +96,8 @@ public class MainMenuInterface extends UI{
         GUI.Label("Colony Game", this.batch, Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight() - 75, true, GUIStyle);
         GUI.ResetFont();
 
-        //this.logLabel.draw(this.batch, 1f);
-        //this.versionLabel.draw(this.batch, 1f);
+        this.logLabel.draw(this.batch, 1f);
+        this.versionLabel.draw(this.batch, 1f);
 
         //Start button.
         if(GUI.Button(startRect, "Start", this.batch, null)){
@@ -131,7 +131,7 @@ public class MainMenuInterface extends UI{
         this.startRect = new Rectangle(Gdx.graphics.getWidth()/2 - 100, Gdx.graphics.getHeight()/2 - 25, 200, 50);
         this.quitRect = new Rectangle(Gdx.graphics.getWidth()/2 - 100, Gdx.graphics.getHeight()/2 - 25 - 100, 200, 50);
         this.changelogRect.set(width - width * 0.2f, 0, width * 0.2f, height - height*0.2f);
-        //this.setLabelBounds(this.changelogRect);
+        this.setLabelBounds(this.changelogRect);
     }
 
     @Override
