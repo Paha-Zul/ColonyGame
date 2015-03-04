@@ -1,0 +1,18 @@
+{
+  "changes": [
+    {
+      "version": "0.13",
+      "date": "3/3/2015",
+      "log": [
+        "- Harvesting resources works correctly again (and works on a separate thread!).",
+        "- Added generates an error file if the game crashed from a user json file problem.",
+        "- Started converting to new UI system.",
+        "- Added support for this changelog!",
+        "- Added multiple noise levels.... maybe? Crap I think I forgot to do something. Okay I just fixed it, we're good! There's a possibility you might spawn in water... a LOT of water...",
+        "- Fixed something weird with the noise seed generation. Now it actually varies!",
+        "- Added early version of mousing over terrain for information (check bottom right of screen)."
+
+      ]
+    }
+  ]
+}

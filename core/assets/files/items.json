@@ -23,5 +23,11 @@
       "displayName": "Penis",
       "itemType": "wood",
       "description": "A Big Black Penis."
+    },
+    {
+      "itemName": "herbs",
+      "displayName": "Herbs",
+      "itemType": "plant",
+      "description": "Medicinal Herbs."
     }]
 }
