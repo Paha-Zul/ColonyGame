@@ -239,6 +239,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         GUI.Texture(rect, this.background, this.batch);
         WorldGen world = WorldGen.getInstance();
         WorldGen.TerrainTile tile = world.getNode(world.getIndex(mouseCoords.x, mouseCoords.y));
+        if(tile == null) return;
         GUI.Label(tile.category, this.batch, rect.x + rect.getWidth()*0.5f, rect.getY() + rect.getHeight()*0.5f, true);
     }
 

@@ -3,6 +3,7 @@
     "treeScale": 1,
     "noiseMaps": [
       {
+        "seed": "lolWTFm8",
         "name": "main",
         "rank": 0,
         "freq": 80

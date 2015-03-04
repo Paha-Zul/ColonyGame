@@ -249,8 +249,12 @@ public class DataBuilder implements IDestroyable{
         json.setOutputType(JsonWriter.OutputType.json);
 
         JsonWorld world = json.fromJson(JsonWorld.class, Gdx.files.internal(filePath+worldPath));
-        for(NoiseMap map : world.noiseMaps)
+        for(NoiseMap map : world.noiseMaps) {
             world.noiseMapHashMap.put(map.rank, map);
+            //If the seed is null or empty, generate one. Otherwise, use the seed from worldgen.json.
+            if(map.seed == null || map.seed.isEmpty()) map.noiseSeed = (long)(Math.random()*Long.MAX_VALUE);
+            else map.noiseSeed = Long.parseLong(map.seed, 36);
+        }
 
         WorldGen.getInstance().treeScale = world.treeScale;
         WorldGen.getInstance().freq = world.noiseMapHashMap.get(0).freq;
@@ -319,8 +323,9 @@ public class DataBuilder implements IDestroyable{
     }
 
     public static class NoiseMap{
+        public long noiseSeed;
         public int rank;
-        public String name;
+        public String name, seed;
         public float freq;
     }
 

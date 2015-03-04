@@ -42,10 +42,8 @@ public class WorldGen {
     private static WorldGen instance;
 
     private int currDone = 0;
-    private int maxAmount = 0;
     private int currIndex = 0;
-
-    private HashMap<String, SimplexNoise> simplexNoiseMaps = new HashMap<>();
+    private int lastIndex = -1;
 
     //Variables for performing breadth first resource spawning;
     private LinkedList<TerrainTile> neighbors = new LinkedList<>();
@@ -57,15 +55,9 @@ public class WorldGen {
 
     /**
      * Initializes the World Generator. For now, most stuff is temporary for prototyping.
-     * @param seed The seed that the world should use for randomly generating.
      */
-    public void init(long seed, ColonyGame game){
+    public void init(ColonyGame game){
         this.game = game;
-
-        for(DataBuilder.NoiseMap noiseMap : DataBuilder.worldData.noiseMapHashMap.values()){
-            seed = (long)(Math.random()*Long.MAX_VALUE);
-            this.simplexNoiseMaps.put(noiseMap.name, new SimplexNoise(seed));
-        }
 
         //Sets the number of tiles in X (numX) and Y (numY) by getting the screen width/height.
         numX = Constants.GRID_WIDTH/tileSize + 1;
@@ -90,7 +82,7 @@ public class WorldGen {
      * @return True when finished, false otherwise.
      */
     public boolean generateWorld(){
-        maxAmount = numTiles()* DataBuilder.worldData.noiseMapHashMap.size();
+        int maxAmount = numTiles() * DataBuilder.worldData.noiseMapHashMap.size();
         int stepsLeft = Constants.WORLDGEN_GENERATESPEED;
         boolean done = true; //Flag for completion.
         HashMap<String, DataBuilder.JsonTileGroup> tileGroupsMap = DataBuilder.tileGroupsMap;
@@ -98,13 +90,18 @@ public class WorldGen {
 
         //This will loop until everything is done.
         while(this.currDone < maxAmount && stepsLeft > 0) {
-
             freq = DataBuilder.worldData.noiseMapHashMap.get(this.currIndex).freq;
             String noiseMapName = DataBuilder.worldData.noiseMapHashMap.get(this.currIndex).name;
 
+            if(this.lastIndex != this.currIndex){
+                this.lastIndex = this.currIndex;
+                SimplexNoise.genGrad(DataBuilder.worldData.noiseMapHashMap.get(this.currIndex).noiseSeed);
+                System.out.println("Seed: "+DataBuilder.worldData.noiseMapHashMap.get(this.currIndex).noiseSeed);
+            }
+
             //Loop for a certain amount of steps. This is done for each noise level. Resets after each one.
             while (stepsLeft > 0 && currX < numX) {
-                double noiseValue = simplexNoiseMaps.get(noiseMapName).noise((double) currX / freq, (double) currY / freq); //Generate the noise for this tile.
+                double noiseValue = SimplexNoise.noise((double) currX / freq, (double) currY / freq); //Generate the noise for this tile.
                 Vector2 position = new Vector2(currX * tileSize, currY * tileSize); //Set the position.
                 Sprite terrainSprite; //Prepare the sprite object.
                 int type = 0; //The type of tile.
@@ -154,8 +151,7 @@ public class WorldGen {
                 }
 
                 float currDone = this.currDone;
-                float total = this.maxAmount;
-                percentageDone = currDone / total; //Calcs the percentage done so that the player's UI can use this.
+                percentageDone = currDone / maxAmount; //Calcs the percentage done so that the player's UI can use this.
             }
 
             //If we are done with the current noise level but we have more levels to go, reset the currX and currY, increment currIndex and continue.
