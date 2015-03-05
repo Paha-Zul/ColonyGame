@@ -93,8 +93,5 @@ public class Colonist extends Component implements IDisplayable{
         batch.setProjectionMatrix(ColonyGame.UICamera.combined);
     }
 
-    @Override
-    public void display(float x, float y, float width, float height, SpriteBatch batch, String name) {
 
-    }
 }
