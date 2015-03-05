@@ -275,7 +275,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
                 if(profileButtonRect.y <= leftCenterRect.getY() + 10)
                     profileButtonRect.set(leftCenterRect.getX() + 55, leftCenterRect.getY() + leftCenterRect.getHeight() - 20, 50, 20);
 
-                profile.interactable.colonist.display(null, this.batch, "path");
+                profile.interactable.colonist.display(0,0,0,0, this.batch, "path");
             }
         }
     }
