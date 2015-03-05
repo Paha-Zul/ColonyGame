@@ -1,9 +1,11 @@
 package com.mygdx.game.helpers.worldgeneration;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.ColonyGame;
@@ -33,6 +35,8 @@ public class WorldGen {
 
     public Texture whiteTex;
 
+    private TextureAtlas terrainAtlas;
+
     private VisibilityTile[][] visibilityMap;
 
     private int numX, numY, currX = 0, currY = 0;
@@ -51,7 +55,9 @@ public class WorldGen {
     private ArrayList<TerrainTile> tmpNeighbors = new ArrayList<>(4);
     private int[] startIndex;
     private Vector2 center = new Vector2();
-    boolean started = false;
+    private boolean started = false;
+    private String noiseMapName = "";
+
 
     /**
      * Initializes the World Generator. For now, most stuff is temporary for prototyping.
@@ -75,6 +81,8 @@ public class WorldGen {
         pixmap.fillRectangle(0,0,1,1);
         whiteTex = new Texture(pixmap);
         pixmap.dispose();
+
+        terrainAtlas = new TextureAtlas(Gdx.files.internal("atlas/terrain.atlas"));
     }
 
     /**
@@ -86,7 +94,6 @@ public class WorldGen {
         int stepsLeft = Constants.WORLDGEN_GENERATESPEED;
         boolean done = true; //Flag for completion.
         HashMap<String, DataBuilder.JsonTileGroup> tileGroupsMap = DataBuilder.tileGroupsMap;
-        Texture terrainTex;
 
         //This will loop until everything is done.
         while(this.currDone < maxAmount && stepsLeft > 0) {
@@ -96,7 +103,6 @@ public class WorldGen {
             if(this.lastIndex != this.currIndex){
                 this.lastIndex = this.currIndex;
                 SimplexNoise.genGrad(DataBuilder.worldData.noiseMapHashMap.get(this.currIndex).noiseSeed);
-                System.out.println("Seed: "+DataBuilder.worldData.noiseMapHashMap.get(this.currIndex).noiseSeed);
             }
 
             //Loop for a certain amount of steps. This is done for each noise level. Resets after each one.
@@ -117,7 +123,6 @@ public class WorldGen {
                 else if(jtile != null) {
                     //Gets the texture that the tile should be.
                     int randTileIndex = MathUtils.random(jtile.img.length - 1);
-                    terrainTex = ColonyGame.assetManager.get(jtile.img[randTileIndex], Texture.class);
                     TerrainTile tile;
 
                     if(map[currX][currY] != null){
@@ -127,13 +132,14 @@ public class WorldGen {
                     }
 
                     //Creates a new sprite and a new tile, assigns the Sprite to the tile and puts it into the map array.
-                    terrainSprite = new Sprite(terrainTex, tileSize, tileSize);
+                    terrainSprite = terrainAtlas.createSprite(jtile.img[randTileIndex]);
+                    terrainSprite.setSize(tileSize, tileSize);
                     tile.set(terrainSprite, noiseValue, rotation, type, position); //Create a new terrain tile.
                     tile.avoid = jtile.avoid;
                     if(jtile.tileNames.length <= randTileIndex) GH.writeErrorMessage("Tile with image "+jtile.img[randTileIndex]+" and category "+jtile.category+" does not have a name assigned to it");
                     tile.tileName = jtile.tileNames[randTileIndex]; //Assign the name
                     tile.category = jtile.category; //Assign the category.
-                    map[currX][currY] = tile;
+                    map[currX][currY] = tile; //Assign the tile to the map.
                 }
 
                 //Generate the visibility tile for this location
@@ -160,12 +166,15 @@ public class WorldGen {
                 this.currIndex++;
                 done = false;
             //Otherwise, if we are simply done, let's be done!
-            }else if(done){
-                currX = currY = 0;
             }
 
             //If we exit the loop, set stepsLeft to 0 so we can restart if we need to.
             stepsLeft = 0;
+        }
+
+        if(done){
+            currIndex = 0;
+            currX = currY = 0;
         }
 
         return done;
@@ -175,15 +184,16 @@ public class WorldGen {
         boolean done = false;
 
         if(!started){
-            neighbors.add(this.getNode(startPos));
-            startIndex = this.getIndex(startPos);
-            started = true;
+            this.neighbors.add(this.getNode(startPos));
+            this.startIndex = this.getIndex(startPos);
+            this.started = true;
+            noiseMapName = DataBuilder.worldData.noiseMapHashMap.get(this.currIndex).name;
         }
 
         //Partially executes a breadth first search.
-        for(int i=0;i<step;i++){
+        for (int i = 0; i < step; i++) {
             TerrainTile currTile = neighbors.pop(); //Pop the first neighbor
-            int[] index = {(int)(currTile.terrainSprite.getX()/Constants.GRID_SQUARESIZE), (int)(currTile.terrainSprite.getY()/Constants.GRID_SQUARESIZE)}; //Get the index.
+            int[] index = {(int) (currTile.terrainSprite.getX() / Constants.GRID_SQUARESIZE), (int) (currTile.terrainSprite.getY() / Constants.GRID_SQUARESIZE)}; //Get the index.
             //Get left/right/up/down
             TerrainTile left = this.getNode(index[0] - 1, index[1]);
             TerrainTile right = this.getNode(index[0] + 1, index[1]);
@@ -191,19 +201,19 @@ public class WorldGen {
             TerrainTile down = this.getNode(index[0] - 1, index[1] - 1);
 
             //If a neighbor is not null and it hasn't been visited already...
-            if(left != null && !visitedMap.containsKey(left.hashCode())){
+            if (left != null && !visitedMap.containsKey(left.hashCode())) {
                 neighbors.add(left);
                 visitedMap.put(left.hashCode(), left);
             }
-            if(right != null && !visitedMap.containsKey(right.hashCode())) {
+            if (right != null && !visitedMap.containsKey(right.hashCode())) {
                 neighbors.add(right);
                 visitedMap.put(right.hashCode(), right);
             }
-            if(up != null && !visitedMap.containsKey(up.hashCode())) {
+            if (up != null && !visitedMap.containsKey(up.hashCode())) {
                 neighbors.add(up);
                 visitedMap.put(up.hashCode(), up);
             }
-            if(down != null && !visitedMap.containsKey(down.hashCode())) {
+            if (down != null && !visitedMap.containsKey(down.hashCode())) {
                 neighbors.add(down);
                 visitedMap.put(down.hashCode(), down);
             }
@@ -213,16 +223,26 @@ public class WorldGen {
 
             int[] currIndex = getIndex(currTile.terrainSprite.getX(), currTile.terrainSprite.getY()); //Get the current index.
             //If the resource is within the blockRadius, simply continue.
-            if(Math.abs(currIndex[0] - startIndex[0]) <= blockRadius && Math.abs(currIndex[1] - startIndex[1]) <= blockRadius)
+            if (Math.abs(currIndex[0] - startIndex[0]) <= blockRadius && Math.abs(currIndex[1] - startIndex[1]) <= blockRadius)
                 continue;
 
             //Set the center Vector2 and spawn the tree using the center position.
             center.set(currTile.terrainSprite.getX() + Constants.GRID_SQUARESIZE * 0.5f, currTile.terrainSprite.getY() + Constants.GRID_SQUARESIZE * 0.5f);
-            spawnTree(getTileAtHeight(DataBuilder.tileGroupsMap.get("main").tiles, (float) currTile.noiseValue), center);
+            spawnTree(getTileAtHeight(DataBuilder.tileGroupsMap.get(noiseMapName).tiles, (float) currTile.noiseValue), center, currTile);
 
             //If there are no more neighbors, we are done.
-            if(neighbors.size() == 0) {
+            if (neighbors.size() == 0 && this.currIndex < DataBuilder.worldData.noiseMapHashMap.size() - 1) {
+                done = false;
+                this.neighbors.clear();
+                this.visitedMap.clear();
+                this.started = false;
+                this.currIndex++;
+                break;
+            }else if(neighbors.size() == 0){
                 done = true;
+                this.neighbors.clear();
+                this.visitedMap.clear();
+                this.started = false;
                 break;
             }
         }
@@ -230,7 +250,10 @@ public class WorldGen {
         return done;
     }
 
-    private void spawnTree(DataBuilder.JsonTile jtile, Vector2 centerPos){
+    private void spawnTree(DataBuilder.JsonTile jtile, Vector2 centerPos, TerrainTile currTile){
+        if(jtile == null || currTile == null || !currTile.category.equals(jtile.category))
+            return;
+
         //Gets the resource that should be spawned on this tile
         Resource res = this.getResourceOnTile(jtile, (float)Math.random());
 

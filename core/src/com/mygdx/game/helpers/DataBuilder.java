@@ -193,7 +193,6 @@ public class DataBuilder implements IDestroyable{
 
         JsonTiles tiles = json.fromJson(JsonTiles.class, Gdx.files.internal(filePath+tilePath));
 
-
         //For each group of tiles
         for (JsonTileGroup group : tiles.tileGroups) {
             //If the group of tiles is auto layered...
@@ -233,7 +232,6 @@ public class DataBuilder implements IDestroyable{
                 if(group.tiles == null || group.tiles.length <= 0)
                     GH.writeErrorMessage("Something is wrong with group "+group.noiseMap+" in tiles.json");
             }
-
             tileGroupsMap.put(group.noiseMap, group);
         }
     }
@@ -253,12 +251,21 @@ public class DataBuilder implements IDestroyable{
             world.noiseMapHashMap.put(map.rank, map);
             //If the seed is null or empty, generate one. Otherwise, use the seed from worldgen.json.
             if(map.seed == null || map.seed.isEmpty()) map.noiseSeed = (long)(Math.random()*Long.MAX_VALUE);
-            else map.noiseSeed = Long.parseLong(map.seed, 36);
+            else{
+                for(int i=0;i<map.seed.length();i++){
+                    char ch = map.seed.charAt(i);
+                    map.noiseSeed = (map.noiseSeed + (long)ch*1000000000000000000l)%Long.MAX_VALUE;
+                }
+            }
         }
 
         WorldGen.getInstance().treeScale = world.treeScale;
         WorldGen.getInstance().freq = world.noiseMapHashMap.get(0).freq;
         Constants.GRID_SQUARESIZE = world.tileSize;
+        Constants.GRID_WIDTH = world.worldWidth;
+        Constants.GRID_HEIGHT = world.worldHeight;
+        Constants.WORLDGEN_GENERATESPEED = world.worldGenSpeed;
+        Constants.WORLDGEN_RESOURCEGENERATESPEED = world.resourceGenerateSpeed;
 
         worldData = world;
     }
@@ -317,6 +324,7 @@ public class DataBuilder implements IDestroyable{
 
     public static class JsonWorld{
         public int tileSize = 25;
+        public int worldWidth, worldHeight, worldGenSpeed, resourceGenerateSpeed;
         public float treeScale=0;
         public NoiseMap[] noiseMaps;
         public HashMap<Integer, NoiseMap> noiseMapHashMap = new HashMap<>(); //A hasmap that stores NoiseMaps by ranks.

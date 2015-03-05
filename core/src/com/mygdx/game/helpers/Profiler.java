@@ -28,8 +28,8 @@ public class Profiler {
         sortedList = new ArrayList<>(map.values());
 
         for(Profile profile : sortedList) {
-            profile.avgTime = (profile.time*2)/ Gdx.graphics.getFramesPerSecond();
             profile.avgTimePerSecond = (profile.time*2);
+            profile.avgTime = profile.avgTimePerSecond/ Gdx.graphics.getFramesPerSecond();
             profile.time = 0;
         }
 

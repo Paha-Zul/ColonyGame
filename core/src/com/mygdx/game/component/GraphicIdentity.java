@@ -32,18 +32,15 @@ public class GraphicIdentity extends Component{
 
 	@Override
 	public void update(float delta) {
-		Profiler.begin("GraphicIdentity Update");
 		Vector2 pos = this.owner.transform.getPosition(); //Cache the owner's position.
 
 		if(!ColonyGame.camera.frustum.boundsInFrustum(pos.x, pos.y, 0, sprite.getWidth()*0.5f, sprite.getHeight()*0.5f, 0)) {
-			Profiler.end();
 			return;
 		}
 
         Grid.Node node = ColonyGame.worldGrid.getNode(this.owner);
         int visibility = WorldGen.getInstance().getVisibilityMap()[node.getCol()][node.getRow()].getVisibility();
         if(visibility == Constants.VISIBILITY_UNEXPLORED) {
-            Profiler.end();
             return;
         }
 
@@ -58,8 +55,6 @@ public class GraphicIdentity extends Component{
             this.sprite.setPosition(pos.x - (sprite.getWidth())/2, pos.y);
 
         this.sprite.draw(this.batch);
-
-		Profiler.end();
 	}
 
     public void setTexture(Texture texture){

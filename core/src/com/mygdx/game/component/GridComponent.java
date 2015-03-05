@@ -41,12 +41,7 @@ public class GridComponent extends Component{
     @Override
     public void update(float delta) {
         super.update(delta);
-
-        Profiler.begin("GridComponent update");
-
         this.currNode = this.grid.checkNode(this.currNode, this.owner, true, exploreRadius);
-
-        Profiler.end();
     }
 
     public Grid.Node getCurrNode(){

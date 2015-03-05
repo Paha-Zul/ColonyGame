@@ -32,6 +32,8 @@ public class ServerPlayer {
 	private Grid.GridInstance grid;
     private boolean paused = false;
 
+    private final int off = 1;
+
     public static boolean drawGrid = false;
 
 	public static String[] names = {"Bobby","Sally","Jimmy","Bradley","Willy","Tommy","Brian","Doug","Ben","Jacob","Sammy","Jason","David","Sarah","Betty","Tom","James"};
@@ -67,14 +69,12 @@ public class ServerPlayer {
             delta = 0f;
 
         if(!generatedTrees) {
-            generatedTrees = WorldGen.getInstance().generateResources(new Vector2((ColonyGame.worldGrid.getNumCols() - 1) * Constants.GRID_SQUARESIZE, (ColonyGame.worldGrid.getNumRows() - 1) * Constants.GRID_SQUARESIZE), 8, 1000);
+            generatedTrees = WorldGen.getInstance().generateResources(new Vector2((ColonyGame.worldGrid.getNumCols() - 1) * Constants.GRID_SQUARESIZE, (ColonyGame.worldGrid.getNumRows() - 1) * Constants.GRID_SQUARESIZE), 8, Constants.WORLDGEN_RESOURCEGENERATESPEED);
             if(generatedTrees){
                 startLocation.set((ColonyGame.worldGrid.getNumCols()/2)*ColonyGame.worldGrid.getSquareSize(), (ColonyGame.worldGrid.getNumRows()/2)*ColonyGame.worldGrid.getSquareSize());
                 generateStart(startLocation);
             }
         }
-
-		Profiler.begin("ServerPlayer Render");
 
 		Gdx.gl.glClearColor(screenColor.r, screenColor.g, screenColor.b, screenColor.a);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
@@ -85,19 +85,26 @@ public class ServerPlayer {
 		batch.begin();
 		this.batch.setProjectionMatrix(ColonyGame.camera.combined);
 
+        Profiler.begin("ServerPlayer: Rendering Terrain");
+
 		WorldGen.TerrainTile[][] map = WorldGen.map;
-		float halfTileSize = ((float)WorldGen.getInstance().tileSize+20)/2f;
 
-        Vector3[] points = ColonyGame.camera.frustum.planePoints;
+        int squareSize = ColonyGame.worldGrid.getSquareSize();
+        int halfWidth = (int)((ColonyGame.camera.viewportWidth*ColonyGame.camera.zoom)/2f);
+        int halfHeight = (int)((ColonyGame.camera.viewportHeight*ColonyGame.camera.zoom)/2f);
+        int xc = (int)ColonyGame.camera.position.x;
+        int yc = (int)ColonyGame.camera.position.y;
 
-        Profiler.begin("RenderingWorld");
+        int startX = ((xc - halfWidth)/squareSize) - off >= 0 ? ((xc - halfWidth)/squareSize) - off : 0;
+        int endX = ((xc + halfWidth)/squareSize) + off < ColonyGame.worldGrid.getNumCols() ? ((xc + halfWidth)/squareSize) + off : ColonyGame.worldGrid.getNumCols()-1;
+        int startY = ((yc - halfHeight)/squareSize) - off >= 0 ? ((yc - halfHeight)/squareSize) - off : 0;
+        int endY = ((yc + halfHeight)/squareSize) + off < ColonyGame.worldGrid.getNumRows() ? ((yc + halfHeight)/squareSize) + off : ColonyGame.worldGrid.getNumRows()-1;
 
-		//Loop over the array
-        for(int x=0;x<map.length;x++) {
-            for (int y = 0; y < map[0].length; y++) {
+        //Loop over the array
+        for(int x=startX;x<=endX;x++) {
+            for (int y = startY; y <= endY; y++) {
                 WorldGen.TerrainTile tile = map[x][y];
-                if(!ColonyGame.camera.frustum.boundsInFrustum(tile.terrainSprite.getX(), tile.terrainSprite.getY(), 0, halfTileSize, halfTileSize, 0))
-                    continue;
+
 
                 tile.changeVisibility(WorldGen.getInstance().getVisibilityMap()[x][y].getVisibility());
                 tile.terrainSprite.draw(batch);
@@ -107,15 +114,15 @@ public class ServerPlayer {
         //Set the color back to white.
         batch.setColor(Color.WHITE);
 
-        Profiler.begin("UpdateEntities");
-        ListHolder.update(delta);
         Profiler.end();
 
+        Profiler.begin("ServerPlayer: Updating Entities");
+
+        ListHolder.update(delta);
         ListHolder.updateFloatingTexts(delta, batch);
 
         Profiler.end();
 
-        Profiler.begin("Box2DDebug");
         this.batch.end();
 
         //drawBox2DDebug();
@@ -123,8 +130,6 @@ public class ServerPlayer {
         if(drawGrid)
 		    this.grid.debugDraw();
 
-        Profiler.end();
-		Profiler.end();
 	}
 
     private void drawBox2DDebug(){

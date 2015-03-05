@@ -43,9 +43,7 @@ public class FindClosestResource extends LeafTask{
     public void start() {
         super.start();
 
-        Profiler.begin("FindClosestResource");
         this.getClosestResource();
-        Profiler.end();
     }
 
     private void getClosestResource(){

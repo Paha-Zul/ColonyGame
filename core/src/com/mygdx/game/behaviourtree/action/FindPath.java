@@ -31,9 +31,7 @@ public class FindPath extends LeafTask {
     public void start() {
         super.start();
 
-        Profiler.begin("FindPath");
         this.path = getPath();
-        Profiler.end();
         this.blackBoard.path = this.path;
         this.control.finishWithSuccess();
     }

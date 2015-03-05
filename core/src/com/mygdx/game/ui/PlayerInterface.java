@@ -35,7 +35,7 @@ import java.util.ArrayList;
  */
 public class PlayerInterface extends UI implements IGUI, InputProcessor {
     private SpriteBatch batch;
-    private Texture background;
+    private Texture background, UIBackgroundBase, UIBackgroundTop;
     private World world;
     private ServerPlayer gameScreen;
 
@@ -131,6 +131,8 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         this.gameScreen = gameScreen;
 
         this.background = ColonyGame.assetManager.get("background", Texture.class);
+        this.UIBackgroundBase = ColonyGame.assetManager.get("UIBackground_base", Texture.class);
+        this.UIBackgroundTop = ColonyGame.assetManager.get("UIBackground_top", Texture.class);
 
         this.buttonRect.set(0, Gdx.graphics.getHeight() - 100, 200, 100);
 
@@ -166,9 +168,9 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
         //Draw stuff about the selected entity.
         if((this.selected != null && this.interactable != null) || this.selectedList.size() > 0){
-            GUI.Texture(this.infoRect, this.background, this.batch);
+            GUI.Texture(this.infoRect, this.UIBackgroundBase, this.batch);
             this.drawMultipleProfiles(this.leftCenterRect);
-            this.displaySelected(this.infoRect);
+            this.displaySelected();
         }
 
     }
@@ -280,32 +282,30 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
     /**
      * Displays the selected Entity.
-     * @param rect
      */
-    private void displaySelected(Rectangle rect){
-        Profiler.begin("PlayerInterface displaySelected");
-
-        float x = rect.getX() + 20;
-        float y = rect.getY() + rect.getHeight() - 10;
-
+    private void displaySelected(){
         if(this.interactable != null && !this.interactable.isDestroyed()) {
-            if (this.interactable.type.equals("resource")) {
-                this.interactable.resource.display(this.centerRect, this.batch, "general");
-                this.interactable.resource.display(this.leftRect, this.batch, "resource");
-            } else if (this.interactable.type.equals("humanoid")) {
-                this.interactable.colonist.display(this.centerRect, this.batch, "general");
-                this.interactable.colonist.display(this.leftRect, this.batch, "health");
-                this.interactable.colonist.display(this.rightRect, this.batch, "inventory");
-                this.interactable.colonist.display(null, this.batch, "path");
-            } else if (this.interactable.type.equals("colony")) {
-                this.interactable.colony.display(this.centerRect, this.batch, "general");
-                this.interactable.colony.display(this.leftRect, this.batch, "colony");
-                this.interactable.colony.display(this.rightRect, this.batch, "inventory");
-            } else if (this.interactable.type.equals("animal")) {
+            switch (this.interactable.type) {
+                case "resource":
+                    this.interactable.resource.display(this.centerRect, this.batch, "general");
+                    this.interactable.resource.display(this.leftRect, this.batch, "resource");
+                    break;
+                case "humanoid":
+                    this.interactable.colonist.display(this.centerRect, this.batch, "general");
+                    this.interactable.colonist.display(this.leftRect, this.batch, "health");
+                    this.interactable.colonist.display(this.rightRect, this.batch, "inventory");
+                    this.interactable.colonist.display(null, this.batch, "path");
+                    break;
+                case "colony":
+                    this.interactable.colony.display(this.centerRect, this.batch, "general");
+                    this.interactable.colony.display(this.leftRect, this.batch, "colony");
+                    this.interactable.colony.display(this.rightRect, this.batch, "inventory");
+                    break;
+                case "animal":
 
+                    break;
             }
         }
-        Profiler.end();
     }
 
     /**
@@ -381,7 +381,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         this.rightRect.set(infoRect.x + infoRect.width - infoRect.width * rightRectPerc, infoRect.y, infoRect.width * rightRectPerc, infoRect.height);
         this.centerRect.set(infoRect.x + infoRect.width/2 - infoRect.width * centerRectPerc, infoRect.y, infoRect.width * centerRectPerc, infoRect.height);
         this.leftCenterRect.set(infoRect.x + infoRect.width / 3 - infoRect.width * centerRectPerc, infoRect.y, infoRect.width * centerRectPerc, infoRect.height);
-        this.bottomLeftRect.set(width - width*0.05f, 0, width*0.05f, height*0.05f);
+        this.bottomLeftRect.set(width - 100, 0, 100, height*0.05f);
     }
 
     @Override

@@ -8,4 +8,5 @@ import com.badlogic.gdx.math.Rectangle;
  */
 public interface IDisplayable {
     void display(Rectangle rect, SpriteBatch batch, String name);
+
 }

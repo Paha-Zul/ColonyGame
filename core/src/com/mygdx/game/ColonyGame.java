@@ -54,21 +54,18 @@ public class ColonyGame extends Game {
 	public void render () {
 		super.render();
 
-		Profiler.begin("ColonyGame Render");
 		float delta = Gdx.graphics.getDeltaTime();
 		Profiler.update(delta);
+
         GUI.checkState();
         ColonyGame.batch.setProjectionMatrix(camera.combined);
 		//Draw everything that is modified by the regular camera.
         ColonyGame.batch.begin();
 
-		Profiler.begin("UpdateGUI");
         batch.setProjectionMatrix(UICamera.combined);
 		ListHolder.updateGUI(delta);
-		Profiler.end();
 
         ColonyGame.batch.end();
-		Profiler.end();
 
         camera.update();
     }

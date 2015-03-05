@@ -14,14 +14,15 @@ public class Constants {
 	//For interactable types...
 
 	//Grid stuff
-	public static int GRID_SQUARESIZE = 25; //Specifically not final.
-	public final static int GRID_WIDTH = 5000;
-	public final static int GRID_HEIGHT = 5000;
+	public static int GRID_SQUARESIZE;
+	public static int GRID_WIDTH;
+	public static int GRID_HEIGHT;
 
 	//WorldGen stuff
+    public static int WORLDGEN_GENERATESPEED = 500;
+    public static int WORLDGEN_RESOURCEGENERATESPEED = 500;
 
-
-	//Terrain stuff
+    //Terrain stuff
 	public final static int TERRAIN_WATER = 0;
 	public final static int TERRAIN_GRASS = 1;
 
@@ -29,7 +30,6 @@ public class Constants {
     public final static int VISIBILITY_EXPLORED = 1;
     public final static int VISIBILITY_VISIBLE = 2;
 
-    public final static int WORLDGEN_GENERATESPEED = 500;
 
 
     //Entity types

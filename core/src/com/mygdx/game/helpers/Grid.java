@@ -338,8 +338,6 @@ public class Grid {
         }
 
         public void debugDraw() {
-            Profiler.begin("Grid debugDraw");
-
             ShapeRenderer renderer = new ShapeRenderer();
             renderer.setProjectionMatrix(ColonyGame.camera.combined);
 
@@ -353,12 +351,9 @@ public class Grid {
                 }
             }
             renderer.end();
-            Profiler.end();
         }
 
         public void drawText(SpriteBatch batch) {
-            Profiler.begin("Grid drawText");
-
             for (int col = 0; col < grid.length; col++) {
                 for (int row = 0; row < grid[col].length; row++) {
                     Node node = grid[col][row];
@@ -369,7 +364,6 @@ public class Grid {
                     GUI.Text("F: " + ((PathNode) node).getF(), batch, col * squareSize, row * squareSize + squareSize - 80);
                 }
             }
-            Profiler.end();
         }
     }
 

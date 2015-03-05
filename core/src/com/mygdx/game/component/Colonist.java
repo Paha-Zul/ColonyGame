@@ -92,4 +92,9 @@ public class Colonist extends Component implements IDisplayable{
         //This should be called at the end of all processing to reset the batch to the UI screen. Otherwise, UI stuff may get drawn on the world and not the UI.
         batch.setProjectionMatrix(ColonyGame.UICamera.combined);
     }
+
+    @Override
+    public void display(float x, float y, float width, float height, SpriteBatch batch, String name) {
+
+    }
 }

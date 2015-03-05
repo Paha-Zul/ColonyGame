@@ -1,9 +1,12 @@
   {
-    "tileSize": 25,
+    "tileSize": 26,
+    "worldWidth": 10000,
+    "worldHeight": 10000,
+    "worldGenSpeed": 5000,
+    "resourceGenerateSpeed": 20000,
     "treeScale": 1,
     "noiseMaps": [
       {
-        "seed": "lolWTFm8",
         "name": "main",
         "rank": 0,
         "freq": 80
@@ -11,7 +14,7 @@
       {
         "name": "water",
         "rank": 1,
-        "freq": 200
+        "freq": 20
       }
     ]
   }

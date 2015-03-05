@@ -2,6 +2,8 @@ package com.mygdx.game.desktop;
 
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.tools.texturepacker.TexturePacker;
 import com.mygdx.game.ColonyGame;
 
 import java.awt.*;
@@ -14,10 +16,23 @@ public class DesktopLauncher {
 //		int width = 800;
 //		int height = 600;
 
+
+        TexturePacker.Settings settings = new TexturePacker.Settings();
+        settings.maxWidth = 512;
+        settings.maxHeight = 512;
+        settings.combineSubdirectories = true;
+        settings.paddingX = 8;
+        settings.paddingY = 8;
+        settings.flattenPaths = true;
+        settings.edgePadding = true;
+        settings.duplicatePadding = true;
+        TexturePacker.process(settings, "./img/terrain", "./atlas", "terrain");
+
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
 		config.width = width;
 		config.height = height;
         config.samples = 8;
+        config.vSyncEnabled = false;
 		new LwjglApplication(new ColonyGame(), config);
 	}
 }
