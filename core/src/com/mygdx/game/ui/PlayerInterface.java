@@ -5,7 +5,9 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
@@ -45,24 +47,35 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     private boolean mouseDown = false;
 
     private Rectangle buttonRect = new Rectangle();
-    private Rectangle infoRect = new Rectangle();
+    private Rectangle uiBackgroundBaseRect = new Rectangle();
+    private Rectangle uiBackgroundTopRect = new Rectangle();
     private float FPS = 0;
 
     private static final float camMoveSpeed = 500f;
     private static final float camZoomSpeed = 1.5f;
 
-    private final float leftRectPerc = 0.1f;
-    private final float rightRectPerc = 0.1f;
-    private final float centerRectPerc = 0.1f;
+    private final float infoWidth = 0.13f;
+    private final float statusWidth = 0.13f;
+    private final float tabsWidth = 0.26f;
+    private final float ordersWidth = 0.479f;
 
-    private Rectangle leftRect = new Rectangle();
-    private Rectangle rightRect = new Rectangle();
-    private Rectangle centerRect = new Rectangle();
-    private Rectangle leftCenterRect = new Rectangle();
+    private Rectangle infoTopRect = new Rectangle();
+    private Rectangle statusTopRect = new Rectangle();
+    private Rectangle tabsTopRect = new Rectangle();
+    private Rectangle ordersTopRect = new Rectangle();
+
+    private Rectangle infoRect = new Rectangle();
+    private Rectangle statusRect = new Rectangle();
+    private Rectangle tabsRect = new Rectangle();
+    private Rectangle ordersRect = new Rectangle();
+
     private Rectangle bottomLeftRect = new Rectangle();
 
     private Rectangle selectionBox = new Rectangle();
     private Rectangle profileButtonRect = new Rectangle();
+
+    private BitmapFont topFont;
+    private GUI.GUIStyle UIStyle;
 
     private Interactable interactable = null;
 
@@ -70,7 +83,6 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
     private Vector2 testPoint = new Vector2();
     private Entity selected = null;
-    private GridComponent gridComp;
 
     private Color gray = new Color(Color.BLACK);
 
@@ -97,7 +109,6 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         if(fixture.testPoint(testPoint.x, testPoint.y)){
             this.selected = (Entity)fixture.getBody().getUserData();
             this.interactable = this.selected.getComponent(Interactable.class);
-            this.gridComp = this.selected.getComponent(GridComponent.class);
             return false;
         }
 
@@ -112,7 +123,6 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
             UnitProfile profile = new UnitProfile();
             profile.entity = this.selected = selected;
             profile.interactable = this.interactable = selected.getComponent(Interactable.class);
-            profile.gridComp = this.gridComp = selected.getComponent(GridComponent.class);
             selectedList.add(profile);
             return true;
         }
@@ -145,7 +155,21 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         gatherGUIStyle.font.setColor(new Color(0, 0, 0, 0.5f));
         exploreGUIStyle.font.setColor(new Color(0, 0, 0, 0.5f));
 
+        this.generateFonts();
+
         Gdx.input.setInputProcessor(this);
+    }
+
+    private void generateFonts(){
+        FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("fonts/Trajan Bold.ttf"));
+        FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
+        parameter.size = 12;
+        topFont = generator.generateFont(parameter);
+        generator.dispose();
+        topFont.setColor(126f/255f, 75f/255f, 27f/255f, 1);
+
+        UIStyle = new GUI.GUIStyle();
+        UIStyle.font = topFont;
     }
 
     @Override
@@ -168,8 +192,9 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
         //Draw stuff about the selected entity.
         if((this.selected != null && this.interactable != null) || this.selectedList.size() > 0){
-            GUI.Texture(this.infoRect, this.UIBackgroundBase, this.batch);
-            this.drawMultipleProfiles(this.leftCenterRect);
+            GUI.Texture(this.uiBackgroundBaseRect, this.UIBackgroundBase, this.batch);
+            GUI.Texture(this.uiBackgroundTopRect, this.UIBackgroundTop, this.batch);
+            this.drawMultipleProfiles(this.tabsRect);
             this.displaySelected();
         }
 
@@ -235,6 +260,10 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         }
     }
 
+    /**
+     * Gets the terrain tile and displays its information.
+     * @param rect The rectangle to draw the terrain info in.
+     */
     private void drawTerrainInfo(Rectangle rect){
         Vector3 mouseCoords = ColonyGame.camera.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
 
@@ -252,7 +281,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     private void drawMultipleProfiles(Rectangle rect){
         //If there is more than one unit selected.. display in a group format.
         if(selectedList.size() > 1){
-            profileButtonRect.set(leftCenterRect.getX(), leftCenterRect.getY() + leftCenterRect.getHeight() - 20, 50, 20);
+            profileButtonRect.set(rect.getX(), rect.getY() + rect.getHeight() - 20, 50, 20);
 
             //Tell all to gather.
             if(GUI.Button(rect.x - 35, rect.y + rect.getHeight() - 35, 30, 30, "ALL", this.batch, gatherGUIStyle))
@@ -267,15 +296,14 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
                 if(GUI.Button(profileButtonRect, profile.entity.name, this.batch)){
                     this.selected = profile.entity;
                     this.interactable = profile.interactable;
-                    this.gridComp = profile.gridComp;
                 }
 
                 //If we go too far down the screen, move over.
                 profileButtonRect.setY(profileButtonRect.getY() - 22);
-                if(profileButtonRect.y <= leftCenterRect.getY() + 10)
-                    profileButtonRect.set(leftCenterRect.getX() + 55, leftCenterRect.getY() + leftCenterRect.getHeight() - 20, 50, 20);
+                if(profileButtonRect.y <= rect.getY() + 10)
+                    profileButtonRect.set(rect.getX() + 55, rect.getY() + rect.getHeight() - 20, 50, 20);
 
-                profile.interactable.colonist.display(0,0,0,0, this.batch, "path");
+                profile.interactable.colonist.display(0,0,0,0, this.batch, "path", UIStyle);
             }
         }
     }
@@ -287,19 +315,19 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         if(this.interactable != null && !this.interactable.isDestroyed()) {
             switch (this.interactable.type) {
                 case "resource":
-                    this.interactable.resource.display(this.centerRect, this.batch, "general");
-                    this.interactable.resource.display(this.leftRect, this.batch, "resource");
+                    this.interactable.resource.display(this.infoRect, this.batch, "general", UIStyle);
+                    this.interactable.resource.display(this.infoRect, this.batch, "resource", UIStyle);
                     break;
                 case "humanoid":
-                    this.interactable.colonist.display(this.centerRect, this.batch, "general");
-                    this.interactable.colonist.display(this.leftRect, this.batch, "health");
-                    this.interactable.colonist.display(this.rightRect, this.batch, "inventory");
-                    this.interactable.colonist.display(null, this.batch, "path");
+                    this.interactable.colonist.display(this.infoRect, this.batch, "general", UIStyle);
+                    this.interactable.colonist.display(this.statusRect, this.batch, "stats", UIStyle);
+                    this.interactable.colonist.display(this.tabsRect, this.batch, "inventory", UIStyle);
+                    this.interactable.colonist.display(null, this.batch, "path", UIStyle);
                     break;
                 case "colony":
-                    this.interactable.colony.display(this.centerRect, this.batch, "general");
-                    this.interactable.colony.display(this.leftRect, this.batch, "colony");
-                    this.interactable.colony.display(this.rightRect, this.batch, "inventory");
+                    this.interactable.colony.display(this.infoRect, this.batch, "general", UIStyle);
+                    this.interactable.colony.display(this.infoRect, this.batch, "colony", UIStyle);
+                    this.interactable.colony.display(this.tabsRect, this.batch, "inventory", UIStyle);
                     break;
                 case "animal":
 
@@ -354,9 +382,9 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         Grid.Node[][] grid = ColonyGame.worldGrid.getGrid();
         System.out.println("grid: "+grid.length+"/"+grid[0].length);
         WorldGen.VisibilityTile[][] visMap = WorldGen.getInstance().getVisibilityMap();
-        for(int x=0;x<visMap.length;x++){
-            for(int y=0;y<visMap[x].length;y++){
-                visMap[x][y].addViewer();
+        for (WorldGen.VisibilityTile[] aVisMap : visMap) {
+            for (WorldGen.VisibilityTile anAVisMap : aVisMap) {
+                anAVisMap.addViewer();
             }
         }
     }
@@ -376,11 +404,18 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     public void resize(int width, int height) {
         this.buttonRect.set(0, Gdx.graphics.getHeight() - 100, 200, 100);
 
-        this.infoRect.set(0,0,Gdx.graphics.getWidth(), 0.1f*Gdx.graphics.getHeight());
-        this.leftRect.set(infoRect.x, infoRect.y, infoRect.width * leftRectPerc, infoRect.height);
-        this.rightRect.set(infoRect.x + infoRect.width - infoRect.width * rightRectPerc, infoRect.y, infoRect.width * rightRectPerc, infoRect.height);
-        this.centerRect.set(infoRect.x + infoRect.width/2 - infoRect.width * centerRectPerc, infoRect.y, infoRect.width * centerRectPerc, infoRect.height);
-        this.leftCenterRect.set(infoRect.x + infoRect.width / 3 - infoRect.width * centerRectPerc, infoRect.y, infoRect.width * centerRectPerc, infoRect.height);
+        this.uiBackgroundBaseRect.set(0, 0, width, height * 0.1f);
+        this.infoRect.set(0, 0, width * infoWidth, height*0.1f);
+        this.statusRect.set(infoRect.x + infoRect.width, 0, width*statusWidth, height*0.1f);
+        this.tabsRect.set(statusRect.x + statusRect.width, 0, width * tabsWidth, height * 0.1f);
+        this.ordersRect.set(tabsRect.x + tabsRect.width, 0, width * ordersWidth, height * 0.1f);
+
+        this.uiBackgroundTopRect.set(0, uiBackgroundBaseRect.x + uiBackgroundBaseRect.height, width, height * 0.02f);
+        this.infoTopRect.set(uiBackgroundTopRect.x, uiBackgroundTopRect.y, width * infoWidth, height*0.1f); //The top info area
+        this.statusTopRect.set(uiBackgroundTopRect.x + uiBackgroundTopRect.width, 0, width*statusWidth, height*0.1f); //The top status area
+        this.tabsTopRect.set(uiBackgroundTopRect.x + uiBackgroundTopRect.width, 0, width * tabsWidth, height * 0.1f); //The top tabs area
+        this.ordersTopRect.set(uiBackgroundTopRect.x + uiBackgroundTopRect.width, 0, width * ordersWidth, height * 0.1f); //The top orders ares
+
         this.bottomLeftRect.set(width - 100, 0, 100, height*0.05f);
     }
 

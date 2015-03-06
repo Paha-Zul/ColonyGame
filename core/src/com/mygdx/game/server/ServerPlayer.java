@@ -36,7 +36,8 @@ public class ServerPlayer {
 
     public static boolean drawGrid = false;
 
-	public static String[] names = {"Bobby","Sally","Jimmy","Bradley","Willy","Tommy","Brian","Doug","Ben","Jacob","Sammy","Jason","David","Sarah","Betty","Tom","James"};
+	public static String[] names = {"Bobby Poopers","Sally Poopers","Jimmy Poopers","Bradley Poopers","Willy Poopers","Tommy Poopers","Brian Poopers",
+            "Doug Poopers","Ben Poopers","Jacob Poopers","Sammy Poopers","Jason Poopers","David Poopers","Sarah Poopers","Betty Poopers","Tom Poopers","James Poopers"};
 
     private boolean generatedTrees = false;
     private Vector2 startLocation = new Vector2();

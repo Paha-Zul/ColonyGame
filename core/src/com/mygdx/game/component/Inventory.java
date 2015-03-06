@@ -141,10 +141,12 @@ public class Inventory extends Component implements IDisplayable{
     }
 
     @Override
-    public void display(Rectangle rect, SpriteBatch batch, String name) {
-        float x = rect.x;
-        float y = rect.y + rect.getHeight() - 5;
+    public void display(Rectangle rect, SpriteBatch batch, String name, GUI.GUIStyle style) {
 
+    }
+
+    @Override
+    public void display(float x, float y, float width, float height, SpriteBatch batch, String name, GUI.GUIStyle style) {
         GUI.Text("Inventory Items", batch, x, y);
         y-=20;
         for(Inventory.InventoryItem item : this.getItemList()){

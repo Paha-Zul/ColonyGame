@@ -155,12 +155,14 @@ public class Colony extends Component implements IDisplayable {
     }
 
     @Override
-    public void display(Rectangle rect, SpriteBatch batch, String name) {
-        float x = rect.x;
-        float y = rect.y + rect.getHeight() - 5;
+    public void display(Rectangle rect, SpriteBatch batch, String name, GUI.GUIStyle style) {
 
+    }
+
+    @Override
+    public void display(float x, float y, float width, float height, SpriteBatch batch, String name, GUI.GUIStyle style) {
         if(name == "general") {
-            GUI.Label("Name: " + this.owner.name, batch, rect.getX() + rect.getWidth() / 2 - 5, y, true);
+            GUI.Label("Name: " + this.owner.name, batch, x + width / 2 - 5, y, true);
             y -= 20;
         }else if(name == "colony"){
             GUI.Text("ColonyName: " + this.colonyName, batch, x, y);
@@ -173,7 +175,7 @@ public class Colony extends Component implements IDisplayable {
             y -= 20;
             GUI.Text("NumColonists: " + this.getNumColonists(), batch, x, y);
         }else if(name == "inventory"){
-            this.inventory.display(rect, batch, name);
+            this.inventory.display(x, y, width, height, batch, name, style);
         }
     }
 }

@@ -70,10 +70,12 @@ public class Stats extends Component implements IDisplayable{
     }
 
     @Override
-    public void display(Rectangle rect, SpriteBatch batch, String name) {
-        float x = rect.getX();
-        float y = rect.getY() + rect.getHeight() - 5;
+    public void display(Rectangle rect, SpriteBatch batch, String name, GUI.GUIStyle style) {
 
+    }
+
+    @Override
+    public void display(float x, float y, float width, float height, SpriteBatch batch, String name, GUI.GUIStyle style) {
         float leftOffset = 50;
 
         drawHealth(x, y, leftOffset, batch);

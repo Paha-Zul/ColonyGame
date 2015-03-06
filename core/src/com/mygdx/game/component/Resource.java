@@ -179,22 +179,19 @@ public class Resource extends Component implements IDisplayable{
     }
 
     @Override
-    public void display(Rectangle rect, SpriteBatch batch, String name) {
-        float x = rect.getX();
-        float y = rect.getY() + rect.getHeight() - 5;
+    public void display(Rectangle rect, SpriteBatch batch, String name, GUI.GUIStyle style) {
 
+    }
+
+    @Override
+    public void display(float x, float y, float width, float height, SpriteBatch batch, String name, GUI.GUIStyle style) {
         //Print name of the entity
         if(name == "general"){
-            GUI.Label("Name: "+this.owner.name, batch, rect.getX() + rect.getWidth()/2, rect.getY() + rect.getHeight() - 5, true);
+            GUI.Label("Name: "+this.owner.name, batch, x + width/2, y + height - 5, true);
 
-        //Print resource info
+            //Print resource info
         }else if(name == "resource"){
             GUI.Text("ResourceType: "+this.owner.name, batch, x, y);
-            y-=20;
-//            GUI.Text("MaxResources: "+this.maxResources, batch, x, y);
-//            y-=20;
-//            GUI.Text("CurrResources: "+this.currResources, batch, x, y);
-//            y-=20;
         }
     }
 }

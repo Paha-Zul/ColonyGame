@@ -12,6 +12,7 @@ import com.mygdx.game.behaviourtree.action.*;
 import com.mygdx.game.behaviourtree.composite.Sequence;
 import com.mygdx.game.behaviourtree.control.ParentTaskController;
 import com.mygdx.game.entity.Entity;
+import com.mygdx.game.helpers.gui.GUI;
 import com.mygdx.game.interfaces.Functional;
 import com.mygdx.game.interfaces.IDisplayable;
 
@@ -185,7 +186,12 @@ public class BehaviourManagerComp extends Component implements IDisplayable{
     }
 
     @Override
-    public void display(Rectangle rect, SpriteBatch batch, String name) {
+    public void display(Rectangle rect, SpriteBatch batch, String name, GUI.GUIStyle style) {
+
+    }
+
+    @Override
+    public void display(float x, float y, float width, float height, SpriteBatch batch, String name, GUI.GUIStyle style) {
         Matrix4 projection = batch.getProjectionMatrix();
         batch.setProjectionMatrix(ColonyGame.camera.combined);
 
@@ -198,7 +204,7 @@ public class BehaviourManagerComp extends Component implements IDisplayable{
                 if(point == null) {
                     break;
 
-                //Take a peak at the next point. If it's not null, draw a line from the Entity to the next square
+                    //Take a peak at the next point. If it's not null, draw a line from the Entity to the next square
                 }else{
                     float nextX=0, nextY=0;
                     point = this.blackBoard.path.get(i);
@@ -211,7 +217,7 @@ public class BehaviourManagerComp extends Component implements IDisplayable{
                         nextX = this.blackBoard.path.get(i + 1).x;
                         nextY = this.blackBoard.path.get(i + 1).y;
 
-                    //Otherwise, draw to the Entity.
+                        //Otherwise, draw to the Entity.
                     }else{
                         nextX = this.getEntityOwner().transform.getPosition().x;
                         nextY = this.getEntityOwner().transform.getPosition().y;
