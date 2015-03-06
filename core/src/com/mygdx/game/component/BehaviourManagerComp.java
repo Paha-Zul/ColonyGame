@@ -16,13 +16,17 @@ import com.mygdx.game.helpers.gui.GUI;
 import com.mygdx.game.interfaces.Functional;
 import com.mygdx.game.interfaces.IDisplayable;
 
+import java.util.ArrayList;
+
 /**
  * Created by Bbent_000 on 12/31/2014.
  */
-public class BehaviourManagerComp extends Component implements IDisplayable{
+public class BehaviourManagerComp extends Component{
     private BlackBoard blackBoard;
     private Task behaviourTree;
     private String behaviourType = "";
+
+    private ArrayList<Line> lineList = new ArrayList<>();
 
     private Texture blueSquare = new Texture("img/blueSquare.png");
 
@@ -185,19 +189,15 @@ public class BehaviourManagerComp extends Component implements IDisplayable{
         }
     }
 
-    @Override
-    public void display(Rectangle rect, SpriteBatch batch, String name, GUI.GUIStyle style) {
-
+    public BlackBoard getBlackBoard(){
+        return this.blackBoard;
     }
 
-    @Override
-    public void display(float x, float y, float width, float height, SpriteBatch batch, String name, GUI.GUIStyle style) {
-        Matrix4 projection = batch.getProjectionMatrix();
-        batch.setProjectionMatrix(ColonyGame.camera.combined);
+    public Line[] getLines() {
+        lineList.clear(); //Clear the list.
 
         float lineWidth = 2;
 
-        int squareSize = this.blackBoard.colonyGrid.getSquareSize();
         if(this.blackBoard.path != null && this.blackBoard.path.size() > 0){
             for(int i=0; i < this.blackBoard.path.size(); i++){
                 Vector2 point = this.blackBoard.path.get(i);
@@ -206,8 +206,8 @@ public class BehaviourManagerComp extends Component implements IDisplayable{
 
                     //Take a peak at the next point. If it's not null, draw a line from the Entity to the next square
                 }else{
-                    float nextX=0, nextY=0;
-                    point = this.blackBoard.path.get(i);
+                    float nextX=0, nextY=0; //Start at 0.
+                    point = this.blackBoard.path.get(i); //Get the Vector2 start point of our next destination.
 
                     float currX = point.x;
                     float currY = point.y;
@@ -217,7 +217,7 @@ public class BehaviourManagerComp extends Component implements IDisplayable{
                         nextX = this.blackBoard.path.get(i + 1).x;
                         nextY = this.blackBoard.path.get(i + 1).y;
 
-                        //Otherwise, draw to the Entity.
+                    //Otherwise, draw to the Entity.
                     }else{
                         nextX = this.getEntityOwner().transform.getPosition().x;
                         nextY = this.getEntityOwner().transform.getPosition().y;
@@ -227,17 +227,25 @@ public class BehaviourManagerComp extends Component implements IDisplayable{
                     float rotation = (float)Math.atan2(nextY - currY, nextX - currX )* MathUtils.radDeg;
                     //Get the distance to the next location
                     float dist = Vector2.dst(currX, currY, nextX, nextY);
+
+                    Line line = new Line();
+                    line.startX = currX;
+                    line.startY = currY;
+                    line.width = dist;
+                    line.height = lineWidth;
+                    line.rotation = rotation;
+                    line.scaleX = 1;
+                    line.scaleY = 1;
+
+                    lineList.add(line);
+
                     //Draw the line!
-                    batch.draw(blueSquare, currX, currY, 0, 0, dist, lineWidth, 1, 1, rotation, 0, 0, blueSquare.getWidth(), blueSquare.getHeight(), false, false);
+                    //batch.draw(blueSquare, currX, currY, 0, 0, dist, lineWidth, 1, 1, rotation, 0, 0, blueSquare.getWidth(), blueSquare.getHeight(), false, false);
                 }
             }
         }
 
-        batch.setProjectionMatrix(projection);
-    }
-
-    public BlackBoard getBlackBoard(){
-        return this.blackBoard;
+        return lineList.toArray(new Line[lineList.size()]);
     }
 
     public String getCurrentTaskName(){
@@ -250,5 +258,9 @@ public class BehaviourManagerComp extends Component implements IDisplayable{
     @Override
     public void destroy() {
         super.destroy();
+    }
+
+    public class Line{
+        float startX, startY,width, height, scaleX, scaleY, rotation;
     }
 }

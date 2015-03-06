@@ -38,9 +38,9 @@ public class MainMenuInterface extends UI{
     public MainMenuInterface(SpriteBatch batch, ColonyGame game) {
         super(batch, game);
 
-        defaultUp = new TextureRegion(ColonyGame.assetManager.get("defaultButton_normal", Texture.class));
-        defaultOver = new TextureRegion(ColonyGame.assetManager.get("defaultButton_moused", Texture.class));
-        defaultDown = new TextureRegion(ColonyGame.assetManager.get("defaultButton_clicked", Texture.class));
+        defaultUp = new TextureRegion(ColonyGame.assetManager.get("menuButton_normal", Texture.class));
+        defaultOver = new TextureRegion(ColonyGame.assetManager.get("menuButton_moused", Texture.class));
+        defaultDown = new TextureRegion(ColonyGame.assetManager.get("menuButton_clicked", Texture.class));
 
         int width = Gdx.graphics.getWidth();
         int height = Gdx.graphics.getHeight();

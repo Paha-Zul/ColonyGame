@@ -10,6 +10,7 @@ import com.mygdx.game.entity.ColonistEnt;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.gui.GUI;
 import com.mygdx.game.interfaces.IDisplayable;
+import com.mygdx.game.interfaces.IInteractable;
 import com.mygdx.game.server.ServerPlayer;
 
 import java.util.ArrayList;
@@ -18,7 +19,7 @@ import java.util.HashMap;
 /**
  * Created by Paha on 1/17/2015.
  */
-public class Colony extends Component implements IDisplayable {
+public class Colony extends Component implements IInteractable {
     private String colonyName = "Colony";
 
     private ArrayList<Colonist> colonistList = new ArrayList<>(20);
@@ -150,32 +151,28 @@ public class Colony extends Component implements IDisplayable {
         return this.colonistList.size();
     }
 
+    @Override
     public Inventory getInventory(){
         return this.inventory;
     }
 
     @Override
-    public void display(Rectangle rect, SpriteBatch batch, String name, GUI.GUIStyle style) {
-
+    public Stats getStats() {
+        return null;
     }
 
     @Override
-    public void display(float x, float y, float width, float height, SpriteBatch batch, String name, GUI.GUIStyle style) {
-        if(name == "general") {
-            GUI.Label("Name: " + this.owner.name, batch, x + width / 2 - 5, y, true);
-            y -= 20;
-        }else if(name == "colony"){
-            GUI.Text("ColonyName: " + this.colonyName, batch, x, y);
-            y -= 20;
-            GUI.Text("Type: Colony", batch, x, y);
-            y -= 20;
-            GUI.Text("NumResourcesNearby: " + this.getTotalNearbyResources(), batch, x, y);
-            y -= 20;
-            GUI.Text("NumStockedResources: " + this.getTotalStockedResources(), batch, x, y);
-            y -= 20;
-            GUI.Text("NumColonists: " + this.getNumColonists(), batch, x, y);
-        }else if(name == "inventory"){
-            this.inventory.display(x, y, width, height, batch, name, style);
-        }
+    public Skills getSkills() {
+        return null;
+    }
+
+    @Override
+    public String getName() {
+        return null;
+    }
+
+    @Override
+    public BehaviourManagerComp getBehManager() {
+        return null;
     }
 }

@@ -220,7 +220,7 @@ public class DataBuilder implements IDestroyable{
                         tile.img = fileNames.toArray(new String[fileNames.size()]);
                         tile.tileNames = tile.img; //Assign the tileNames the same as the img names.
                         if (tile.img.length == 0)
-                            GH.writeErrorMessage("No files in folder '" + tile.tileNames[0] + "'");
+                            GH.writeErrorMessage("No files in folder '" + tile.dir + "'");
                     }
 
                     //Throw an error message if we have no images/files for this tile.

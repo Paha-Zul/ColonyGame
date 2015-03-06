@@ -14,9 +14,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.QueryCallback;
 import com.badlogic.gdx.physics.box2d.World;
 import com.mygdx.game.ColonyGame;
-import com.mygdx.game.component.BehaviourManagerComp;
-import com.mygdx.game.component.GridComponent;
-import com.mygdx.game.component.Interactable;
+import com.mygdx.game.component.*;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.Constants;
 import com.mygdx.game.helpers.Grid;
@@ -55,9 +53,11 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     private static final float camZoomSpeed = 1.5f;
 
     private final float infoWidth = 0.13f;
-    private final float statusWidth = 0.13f;
-    private final float tabsWidth = 0.26f;
+    private final float statusWidth = 0.135f;
+    private final float tabsWidth = 0.262f;
     private final float ordersWidth = 0.479f;
+
+    private float barW = 100, barH = 20;
 
     private Rectangle infoTopRect = new Rectangle();
     private Rectangle statusTopRect = new Rectangle();
@@ -73,6 +73,13 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
     private Rectangle selectionBox = new Rectangle();
     private Rectangle profileButtonRect = new Rectangle();
+
+    private Rectangle orderButtonRect = new Rectangle();
+
+    private Texture[] gatherButtonTextures;
+    private Texture[] exploreButtonTextures;
+    private GUI.GUIStyle gatherStyle = new GUI.GUIStyle();
+    private GUI.GUIStyle exploreStyle = new GUI.GUIStyle();
 
     private BitmapFont topFont;
     private GUI.GUIStyle UIStyle;
@@ -157,6 +164,16 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
         this.generateFonts();
 
+        gatherButtonTextures = new Texture[3];
+        gatherStyle.normal = gatherButtonTextures[0] = ColonyGame.assetManager.get("axebutton_normal", Texture.class);
+        gatherStyle.moused = gatherButtonTextures[1] = ColonyGame.assetManager.get("axebutton_moused", Texture.class);
+        gatherStyle.clicked = gatherButtonTextures[2] = ColonyGame.assetManager.get("axebutton_clicked", Texture.class);
+
+        exploreButtonTextures = new Texture[3];
+        exploreStyle.normal = exploreButtonTextures[0] = ColonyGame.assetManager.get("explorebutton_normal", Texture.class);
+        exploreStyle.moused = exploreButtonTextures[1] = ColonyGame.assetManager.get("explorebutton_moused", Texture.class);
+        exploreStyle.clicked = exploreButtonTextures[2] = ColonyGame.assetManager.get("explorebutton_clicked", Texture.class);
+
         Gdx.input.setInputProcessor(this);
     }
 
@@ -170,6 +187,8 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
         UIStyle = new GUI.GUIStyle();
         UIStyle.font = topFont;
+        gatherStyle.font = topFont;
+        exploreStyle.font = topFont;
     }
 
     @Override
@@ -181,7 +200,6 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
         this.moveCamera(); //Move the camera
         this.drawSelectionBox();
-        this.checkMousedOver();
         //Draws info about the game
         this.drawInfo(height);
 
@@ -203,9 +221,10 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     /**
      * Checks if the GUI is moused over or not.
      */
-    private void checkMousedOver(){
+    private boolean checkMousedOver(){
         //Determines if any UI is moused over or not.
-        this.onUI = this.infoRect.contains(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY());
+        return this.uiBackgroundBaseRect.contains(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY()) ||
+                this.uiBackgroundBaseRect.contains(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY());
     }
 
     /**
@@ -303,7 +322,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
                 if(profileButtonRect.y <= rect.getY() + 10)
                     profileButtonRect.set(rect.getX() + 55, rect.getY() + rect.getHeight() - 20, 50, 20);
 
-                profile.interactable.colonist.display(0,0,0,0, this.batch, "path", UIStyle);
+                //profile.interactable.colonist.display(0,0,0,0, this.batch, "path", UIStyle);
             }
         }
     }
@@ -312,28 +331,58 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
      * Displays the selected Entity.
      */
     private void displaySelected(){
-        if(this.interactable != null && !this.interactable.isDestroyed()) {
-            switch (this.interactable.type) {
-                case "resource":
-                    this.interactable.resource.display(this.infoRect, this.batch, "general", UIStyle);
-                    this.interactable.resource.display(this.infoRect, this.batch, "resource", UIStyle);
-                    break;
-                case "humanoid":
-                    this.interactable.colonist.display(this.infoRect, this.batch, "general", UIStyle);
-                    this.interactable.colonist.display(this.statusRect, this.batch, "stats", UIStyle);
-                    this.interactable.colonist.display(this.tabsRect, this.batch, "inventory", UIStyle);
-                    this.interactable.colonist.display(null, this.batch, "path", UIStyle);
-                    break;
-                case "colony":
-                    this.interactable.colony.display(this.infoRect, this.batch, "general", UIStyle);
-                    this.interactable.colony.display(this.infoRect, this.batch, "colony", UIStyle);
-                    this.interactable.colony.display(this.tabsRect, this.batch, "inventory", UIStyle);
-                    break;
-                case "animal":
 
-                    break;
+        if(this.interactable != null && !this.interactable.isDestroyed()){
+            if(this.interactable.interactable.getName() != null)
+                GUI.Label(this.interactable.interactable.getName(), this.batch, this.infoTopRect, true, this.UIStyle);
+            if(this.interactable.interactable.getStats() != null){
+                //GUI.Texture(statusRect, ColonyGame.assetManager.get("menuButton_normal", Texture.class), this.batch);
+
+                GUI.Label("Stats", this.batch, this.statusTopRect, true, this.UIStyle);
+                drawBar("Health: ", statusRect.x + 10, statusRect.y + statusRect.height - 25, 100, 20, interactable.interactable.getStats().getCurrHealth(), interactable.interactable.getStats().getMaxHealth());
+                drawBar("Food: ", statusRect.x + 10, statusRect.y + statusRect.height - 50, 100, 20, interactable.interactable.getStats().getFood(), 100);
+                drawBar("Water: ", +statusRect.x + 10, statusRect.y + statusRect.height - 75, 100, 20, interactable.interactable.getStats().getWater(), 100);
+            }
+            if(this.interactable.interactable.getInventory() != null){
+                //GUI.Texture(tabsRect, ColonyGame.assetManager.get("menuButton_normal", Texture.class), this.batch);
+
+                GUI.Label("Inventory", this.batch, this.tabsTopRect, true, this.UIStyle);
+                ArrayList<Inventory.InventoryItem> itemList = this.interactable.interactable.getInventory().getItemList();
+                for(int i=0;i<itemList.size();i++){
+                    Inventory.InventoryItem item = itemList.get(i);
+                    GUI.Label(item.item.getDisplayName(), this.batch, this.tabsRect.x, this.tabsRect.y + this.tabsRect.height - 20 - i*10, false, this.UIStyle);
+                    GUI.Label(""+item.getAmount(), this.batch, this.tabsRect.x + 100, this.tabsRect.y + this.tabsRect.height - 20 - i*10, false, this.UIStyle);
+
+                }
+                this.batch.setColor(Color.WHITE);
+            }
+
+            if(this.interactable.type.equals("humanoid")){
+                GUI.Label("Orders", this.batch, this.ordersTopRect, true, this.UIStyle);
+
+                //GUI.Texture(ordersRect, ColonyGame.assetManager.get("menuButton_normal", Texture.class), this.batch);
+                if(this.interactable.interactable.getBehManager() != null) {
+                    orderButtonRect.set(ordersRect.x + 10, ordersRect.y + ordersRect.getHeight() - 50, 50, 50);
+                    if (GUI.Button(orderButtonRect, "", this.batch, this.gatherStyle))
+                        interactable.interactable.getBehManager().gather();
+
+                    orderButtonRect.set(ordersRect.x + 75, ordersRect.y + ordersRect.getHeight() - 50, 50, 50);
+                    if (GUI.Button(orderButtonRect, "", this.batch, this.exploreStyle))
+                        interactable.interactable.getBehManager().explore();
+                }
             }
         }
+    }
+
+    private void drawBar(String text, float x, float y, float width, float height, float currVal, float maxVal){
+        GUI.Label(text, batch, x, y, false, this.UIStyle);
+
+        batch.setColor(Color.BLACK);
+        GUI.Texture(x + 80, y, width, height, WorldGen.getInstance().whiteTex, batch);
+        batch.setColor(Color.GREEN);
+        GUI.Texture(x + 80 + 2, y + 2, width - 4, height - 4, WorldGen.getInstance().whiteTex, batch);
+
+        GUI.Label((int)currVal+"/"+(int)maxVal, batch, x + 80 + width*0.5f, y + height*0.5f, true);
     }
 
     /**
@@ -375,7 +424,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
      */
     public boolean isOnUI(){
         boolean windowActive = ((this.selected != null && this.interactable != null) || this.selectedList.size() > 0);
-        return this.onUI && windowActive;
+        return this.checkMousedOver() && windowActive;
     }
 
     private void revealMap(){
@@ -408,13 +457,13 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         this.infoRect.set(0, 0, width * infoWidth, height*0.1f);
         this.statusRect.set(infoRect.x + infoRect.width, 0, width*statusWidth, height*0.1f);
         this.tabsRect.set(statusRect.x + statusRect.width, 0, width * tabsWidth, height * 0.1f);
-        this.ordersRect.set(tabsRect.x + tabsRect.width, 0, width * ordersWidth, height * 0.1f);
+        this.ordersRect.set(tabsRect.x + tabsRect.width, 0, width - (tabsRect.x + tabsRect.width), height * 0.1f);
 
-        this.uiBackgroundTopRect.set(0, uiBackgroundBaseRect.x + uiBackgroundBaseRect.height, width, height * 0.02f);
-        this.infoTopRect.set(uiBackgroundTopRect.x, uiBackgroundTopRect.y, width * infoWidth, height*0.1f); //The top info area
-        this.statusTopRect.set(uiBackgroundTopRect.x + uiBackgroundTopRect.width, 0, width*statusWidth, height*0.1f); //The top status area
-        this.tabsTopRect.set(uiBackgroundTopRect.x + uiBackgroundTopRect.width, 0, width * tabsWidth, height * 0.1f); //The top tabs area
-        this.ordersTopRect.set(uiBackgroundTopRect.x + uiBackgroundTopRect.width, 0, width * ordersWidth, height * 0.1f); //The top orders ares
+        this.uiBackgroundTopRect.set(0, uiBackgroundBaseRect.y + uiBackgroundBaseRect.height, width, height * 0.03f);
+        this.infoTopRect.set(uiBackgroundTopRect.x, uiBackgroundTopRect.y, width * infoWidth, uiBackgroundTopRect.height); //The top info area
+        this.statusTopRect.set(infoTopRect.x + infoTopRect.width, uiBackgroundTopRect.y, width*statusWidth, uiBackgroundTopRect.height); //The top status area
+        this.tabsTopRect.set(statusTopRect.x + statusTopRect.width, uiBackgroundTopRect.y, width * tabsWidth, uiBackgroundTopRect.height); //The top tabs area
+        this.ordersTopRect.set(tabsTopRect.x + tabsTopRect.width, uiBackgroundTopRect.y, width - (tabsRect.x + tabsRect.width), uiBackgroundTopRect.height); //The top orders ares
 
         this.bottomLeftRect.set(width - 100, 0, 100, height*0.05f);
     }

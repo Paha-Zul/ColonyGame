@@ -6,11 +6,12 @@ import com.badlogic.gdx.math.Rectangle;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.helpers.gui.GUI;
 import com.mygdx.game.interfaces.IDisplayable;
+import com.mygdx.game.interfaces.IInteractable;
 
 /**
  * Created by Paha on 1/10/2015.
  */
-public class Resource extends Component implements IDisplayable{
+public class Resource extends Component implements IInteractable{
     private String resourceName = "default", displayName = "default", resourceType = "default", textureName="";
     private String[] itemNames;
     private int[][] itemAmounts;
@@ -179,19 +180,27 @@ public class Resource extends Component implements IDisplayable{
     }
 
     @Override
-    public void display(Rectangle rect, SpriteBatch batch, String name, GUI.GUIStyle style) {
-
+    public Inventory getInventory() {
+        return null;
     }
 
     @Override
-    public void display(float x, float y, float width, float height, SpriteBatch batch, String name, GUI.GUIStyle style) {
-        //Print name of the entity
-        if(name == "general"){
-            GUI.Label("Name: "+this.owner.name, batch, x + width/2, y + height - 5, true);
+    public Stats getStats() {
+        return null;
+    }
 
-            //Print resource info
-        }else if(name == "resource"){
-            GUI.Text("ResourceType: "+this.owner.name, batch, x, y);
-        }
+    @Override
+    public Skills getSkills() {
+        return null;
+    }
+
+    @Override
+    public String getName() {
+        return null;
+    }
+
+    @Override
+    public BehaviourManagerComp getBehManager() {
+        return null;
     }
 }

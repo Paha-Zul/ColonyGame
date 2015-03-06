@@ -10,7 +10,7 @@ import com.mygdx.game.interfaces.IDisplayable;
 /**
  * Created by Paha on 1/12/2015.
  */
-public class Stats extends Component implements IDisplayable{
+public class Stats extends Component{
     private float maxHealth=100, currHealth=100;
     private int food = 100, water = 100;
 
@@ -69,52 +69,4 @@ public class Stats extends Component implements IDisplayable{
         super.destroy();
     }
 
-    @Override
-    public void display(Rectangle rect, SpriteBatch batch, String name, GUI.GUIStyle style) {
-
-    }
-
-    @Override
-    public void display(float x, float y, float width, float height, SpriteBatch batch, String name, GUI.GUIStyle style) {
-        float leftOffset = 50;
-
-        drawHealth(x, y, leftOffset, batch);
-        y-=20;
-        drawFood(x, y, leftOffset, batch);
-        y-=20;
-        drawWater(x, y, leftOffset, batch);
-    }
-
-    private void drawHealth(float x, float y, float leftOffset, SpriteBatch batch){
-
-        batch.setColor(Color.BLACK);
-        GUI.Texture(x + leftOffset, y - barH, barW, barH, WorldGen.getInstance().whiteTex, batch);
-        batch.setColor(Color.GREEN);
-        GUI.Texture(x + leftOffset + 2, y - barH + 2, barW - barOff, barH - barOff, WorldGen.getInstance().whiteTex, batch);
-
-        GUI.Label("Health: ", batch, x, y, false);
-        GUI.Label((int)currHealth+"/"+(int)maxHealth, batch, x + leftOffset + halfBarW, y - halfBarH, true);
-    }
-
-    private void drawFood(float x, float y, float leftOffset, SpriteBatch batch){
-
-        batch.setColor(Color.BLACK);
-        GUI.Texture(x + leftOffset, y - barH, barW, barH, WorldGen.getInstance().whiteTex, batch);
-        batch.setColor(Color.GREEN);
-        GUI.Texture(x + leftOffset + 2, y - barH + 2, barW - barOff, barH - barOff, WorldGen.getInstance().whiteTex, batch);
-
-        GUI.Label("Food: ", batch, x, y, false);
-        GUI.Label(food+"/100", batch, x + leftOffset + halfBarW, y - halfBarH, true);
-    }
-
-    private void drawWater(float x, float y, float leftOffset, SpriteBatch batch){
-
-        batch.setColor(Color.BLACK);
-        GUI.Texture(x + leftOffset, y - barH, barW, barH, WorldGen.getInstance().whiteTex, batch);
-        batch.setColor(Color.GREEN);
-        GUI.Texture(x + leftOffset + 2, y - barH + 2, barW - barOff, barH - barOff, WorldGen.getInstance().whiteTex, batch);
-
-        GUI.Label("Water: ", batch, x, y, false);
-        GUI.Label(water+"/100", batch, x + leftOffset + halfBarW, y - halfBarH, true);
-    }
 }

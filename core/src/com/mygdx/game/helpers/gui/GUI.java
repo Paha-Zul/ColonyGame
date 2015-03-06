@@ -111,6 +111,10 @@ public class GUI {
         GUI.Label(text, batch, rect.getX() + rect.getWidth()/2, rect.getY() + rect.getHeight()/2, centered, null);
     }
 
+    public static void Label(@NotNull String text, @NotNull SpriteBatch batch, @NotNull Rectangle rect, boolean centered, GUIStyle style){
+        GUI.Label(text, batch, rect.getX() + rect.getWidth()/2, rect.getY() + rect.getHeight()/2, centered, style);
+    }
+
     public static void Label(@NotNull String text, @NotNull SpriteBatch batch, float x, float y, boolean centered){
         GUI.Label(text, batch, x, y, centered, null);
     }
@@ -122,7 +126,8 @@ public class GUI {
             BitmapFont.TextBounds bounds = font.getBounds(text);
             x = x - bounds.width/2;
             y = y + bounds.height/2;
-        }
+        }else
+            y += style.font.getLineHeight();
 
         style.font.draw(batch, text, x, y);
     }
