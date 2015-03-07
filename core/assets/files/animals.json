@@ -1,0 +1,21 @@
+{
+  "animals": [
+    {
+      "name": "Wolf",
+      "aggressive": true,
+      "pack": true,
+      "packAmount": [2, 10],
+      "img": "Wolf"
+    },
+    {
+      "name": "Deer",
+      "aggressive": false,
+      "img": "Deer"
+    },
+    {
+      "name": "Bear",
+      "aggressive": true,
+      "img": "Bear"
+    }
+  ]
+}

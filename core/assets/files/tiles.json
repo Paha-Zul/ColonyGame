@@ -54,10 +54,24 @@
       "noiseMap": "water",
       "tiles": [
         {
-          "tileNames": ["Water"],
-          "category": "Water",
-          "img":["water"],
-          "height": [-1, -0.4],
+          "tileNames": ["Shore"],
+          "category": "Shore",
+          "dir": "img/terrain/shore",
+          "height": [-0.55, -0.5],
+          "avoid": true
+        },
+		{
+          "tileNames": ["LightWater"],
+          "category": "LightWater",
+          "dir": "img/terrain/lightwater",
+          "height": [-0.6, -0.55],
+          "avoid": true
+        },
+		{
+          "tileNames": ["DeepWater"],
+          "category": "DeepWater",
+          "dir": "img/terrain/deepwater",
+          "height": [-1, -0.6],
           "avoid": true
         }]
     }]

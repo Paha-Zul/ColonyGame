@@ -6,9 +6,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.mygdx.game.ColonyGame;
-import com.mygdx.game.component.BehaviourManagerComp;
-import com.mygdx.game.component.BlackBoard;
-import com.mygdx.game.component.GridComponent;
+import com.mygdx.game.component.*;
 import com.mygdx.game.component.collider.Collider;
 import com.mygdx.game.helpers.Constants;
 
@@ -19,8 +17,13 @@ public class AnimalEnt extends Entity{
     public AnimalEnt(Vector2 position, float rotation, Texture graphic, SpriteBatch batch, int drawLevel) {
         super(position, rotation, graphic, batch, drawLevel);
 
+        this.name = "Squirrel";
+
+        this.addComponent(new Stats());
+        this.addComponent(new Interactable("animal"));
         this.addComponent(new BehaviourManagerComp("animal"));
         this.addComponent(new GridComponent(Constants.GRIDACTIVE, ColonyGame.worldGrid, -1));
+        this.addComponent(new Animal());
 
         this.makeCollider();
 

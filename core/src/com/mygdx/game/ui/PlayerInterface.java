@@ -41,8 +41,8 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
     private boolean drawingInfo = false;
     private boolean drawingProfiler = false;
-    private boolean onUI = false;
     private boolean mouseDown = false;
+    private boolean dragging = false;
 
     private Rectangle buttonRect = new Rectangle();
     private Rectangle uiBackgroundBaseRect = new Rectangle();
@@ -95,6 +95,8 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
     private GUI.GUIStyle gatherGUIStyle = new GUI.GUIStyle();
     private GUI.GUIStyle exploreGUIStyle = new GUI.GUIStyle();
+
+    private Texture blueSquare = ColonyGame.assetManager.get("blueSquare", Texture.class);
 
 
     private void loadGatherButtonStyle(){
@@ -322,7 +324,6 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
                 if(profileButtonRect.y <= rect.getY() + 10)
                     profileButtonRect.set(rect.getX() + 55, rect.getY() + rect.getHeight() - 20, 50, 20);
 
-                //profile.interactable.colonist.display(0,0,0,0, this.batch, "path", UIStyle);
             }
         }
     }
@@ -333,8 +334,11 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     private void displaySelected(){
 
         if(this.interactable != null && !this.interactable.isDestroyed()){
+            //If it has a name, draw the name...
             if(this.interactable.interactable.getName() != null)
                 GUI.Label(this.interactable.interactable.getName(), this.batch, this.infoTopRect, true, this.UIStyle);
+
+            //If it has stats, draw the stats...
             if(this.interactable.interactable.getStats() != null){
                 //GUI.Texture(statusRect, ColonyGame.assetManager.get("menuButton_normal", Texture.class), this.batch);
 
@@ -342,7 +346,10 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
                 drawBar("Health: ", statusRect.x + 10, statusRect.y + statusRect.height - 25, 100, 20, interactable.interactable.getStats().getCurrHealth(), interactable.interactable.getStats().getMaxHealth());
                 drawBar("Food: ", statusRect.x + 10, statusRect.y + statusRect.height - 50, 100, 20, interactable.interactable.getStats().getFood(), 100);
                 drawBar("Water: ", +statusRect.x + 10, statusRect.y + statusRect.height - 75, 100, 20, interactable.interactable.getStats().getWater(), 100);
+                drawBar("Energy: ", +statusRect.x + 10, statusRect.y + statusRect.height - 100, 100, 20, interactable.interactable.getStats().getEnergy(), 100);
             }
+
+            //If it has an inventory, draw the inventory...
             if(this.interactable.interactable.getInventory() != null){
                 //GUI.Texture(tabsRect, ColonyGame.assetManager.get("menuButton_normal", Texture.class), this.batch);
 
@@ -357,6 +364,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
                 this.batch.setColor(Color.WHITE);
             }
 
+            //If it's a humanoid that we can control, draw some order buttons and its current path.
             if(this.interactable.type.equals("humanoid")){
                 GUI.Label("Orders", this.batch, this.ordersTopRect, true, this.UIStyle);
 
@@ -369,11 +377,27 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
                     orderButtonRect.set(ordersRect.x + 75, ordersRect.y + ordersRect.getHeight() - 50, 50, 50);
                     if (GUI.Button(orderButtonRect, "", this.batch, this.exploreStyle))
                         interactable.interactable.getBehManager().explore();
+
+                    batch.setProjectionMatrix(ColonyGame.camera.combined);
+                    BehaviourManagerComp.Line[] lines = this.interactable.interactable.getBehManager().getLines();
+                    for(BehaviourManagerComp.Line line : lines)
+                        batch.draw(blueSquare, line.startX, line.startY, 0, 0, line.width, line.height, 1, 1, line.rotation, 0, 0, blueSquare.getWidth(), blueSquare.getHeight(), false, false);
+                    batch.setProjectionMatrix(ColonyGame.UICamera.combined);
                 }
             }
         }
     }
 
+    /**
+     * Draws a bar for a current and maximum value.
+     * @param text The text to put as a label for the bar.
+     * @param x The x location to start at.
+     * @param y The Y location to start at.
+     * @param width The width of the bar.
+     * @param height The height of the bar.
+     * @param currVal THe current value.
+     * @param maxVal The maximum value.
+     */
     private void drawBar(String text, float x, float y, float width, float height, float currVal, float maxVal){
         GUI.Label(text, batch, x, y, false, this.UIStyle);
 
@@ -392,6 +416,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
      */
     private void startDragging(float x, float y){
         selectionBox.set(x, y, 0, 0);
+        this.dragging = true;
     }
 
     /**
@@ -416,6 +441,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         float halfHeight = Math.abs(selectionBox.getHeight()/2);
         selectionBox.set(center.x - halfWidth, center.y - halfHeight, center.x + halfWidth, center.y + halfHeight);
         this.world.QueryAABB(this.selectionCallback, selectionBox.x, selectionBox.y, selectionBox.getWidth(), selectionBox.getHeight());
+        this.dragging = false;
     }
 
     /**
@@ -515,7 +541,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-        if(this.isOnUI())
+        if(this.isOnUI() && !this.dragging)
             return false;
 
         this.mouseDown = false;

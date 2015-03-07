@@ -12,10 +12,7 @@ import com.mygdx.game.interfaces.IDisplayable;
  */
 public class Stats extends Component{
     private float maxHealth=100, currHealth=100;
-    private int food = 100, water = 100;
-
-    private float barW = 75, barH = 14, barOff = 4;
-    private float halfBarW = barW*0.5f, halfBarH = barH*0.5f;
+    private int food = 100, water = 100, energy = 100;
 
     public Stats() {
         super();
@@ -48,6 +45,10 @@ public class Stats extends Component{
         return water;
     }
 
+    public int getEnergy() {
+        return energy;
+    }
+
     public void setMaxHealth(float maxHealth) {
         this.maxHealth = maxHealth;
     }
@@ -62,6 +63,10 @@ public class Stats extends Component{
 
     public void setWater(int water) {
         this.water = water;
+    }
+
+    public void setEnergy(int energy) {
+        this.energy = energy;
     }
 
     @Override

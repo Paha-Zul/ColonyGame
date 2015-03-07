@@ -27,16 +27,14 @@ public class Interactable extends Component{
     public void start() {
         super.start();
 
-        if(this.type == "resource")
+        if(this.type.equals("resource"))
             this.interactable = this.owner.getComponent(Resource.class);
-
-        if(this.type == "humanoid") {
+        else if(this.type.equals("humanoid"))
             this.interactable = this.owner.getComponent(Colonist.class);
-        }
-
-        if(this.type == "colony") {
+        else if(this.type.equals("colony"))
             this.interactable = this.owner.getComponent(Colony.class);
-        }
+        else if(this.type.equals("animal"))
+            this.interactable = this.owner.getComponent(Animal.class);
 
     }
 

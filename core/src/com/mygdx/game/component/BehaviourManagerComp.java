@@ -234,8 +234,6 @@ public class BehaviourManagerComp extends Component{
                     line.width = dist;
                     line.height = lineWidth;
                     line.rotation = rotation;
-                    line.scaleX = 1;
-                    line.scaleY = 1;
 
                     lineList.add(line);
 
@@ -261,6 +259,6 @@ public class BehaviourManagerComp extends Component{
     }
 
     public class Line{
-        float startX, startY,width, height, scaleX, scaleY, rotation;
+        public float startX, startY, width, height, rotation;
     }
 }

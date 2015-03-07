@@ -105,8 +105,6 @@ public class ServerPlayer {
         for(int x=startX;x<=endX;x++) {
             for (int y = startY; y <= endY; y++) {
                 WorldGen.TerrainTile tile = map[x][y];
-
-
                 tile.changeVisibility(WorldGen.getInstance().getVisibilityMap()[x][y].getVisibility());
                 tile.terrainSprite.draw(batch);
             }
