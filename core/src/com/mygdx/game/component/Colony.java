@@ -8,6 +8,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.entity.ColonistEnt;
 import com.mygdx.game.entity.Entity;
+import com.mygdx.game.helpers.Constants;
 import com.mygdx.game.helpers.gui.GUI;
 import com.mygdx.game.interfaces.IDisplayable;
 import com.mygdx.game.interfaces.IInteractable;
@@ -48,7 +49,7 @@ public class Colony extends Component implements IInteractable {
         Texture colonistTexture = ColonyGame.assetManager.get("colonist", Texture.class);
 
         for(int i=0;i<5;i++){
-            Entity c = this.makeColonist(this.owner.transform.getPosition(), 200, colonistTexture);
+            Entity c = this.makeColonist(this.owner.transform.getPosition(), 200f/ Constants.SCALE, colonistTexture);
             c.name = ServerPlayer.names[MathUtils.random(ServerPlayer.names.length-1)];
             this.addColonist(c.getComponent(Colonist.class));
         }

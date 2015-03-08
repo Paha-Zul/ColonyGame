@@ -20,6 +20,7 @@ public class ResourceEnt extends Entity{
     public ResourceEnt(Vector2 position, float rotation, Texture graphic, SpriteBatch batch, int drawLevel) {
         super(position, rotation, graphic, batch, drawLevel);
         this.addTag(Constants.ENTITY_RESOURCE);
+        this.name = "Resource";
 
         this.addComponent(new Interactable("resource"));
         this.addComponent(new GridComponent(Constants.GRIDSTATIC, ColonyGame.worldGrid, -1));

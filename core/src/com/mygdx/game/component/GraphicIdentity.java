@@ -46,7 +46,7 @@ public class GraphicIdentity extends Component{
 
         this.changeVisibility(visibility);
 
-		this.sprite.setScale(this.owner.transform.getScale());
+		this.sprite.setScale(this.owner.transform.getScale()/ Constants.SCALE);
 		this.sprite.setRotation(this.owner.transform.getRotation());
 
         if(alignment == 0)

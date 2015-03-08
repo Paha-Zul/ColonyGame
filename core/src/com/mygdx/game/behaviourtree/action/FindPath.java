@@ -149,7 +149,7 @@ public class FindPath extends LeafTask {
             node.H = 0;
         }
 
-        int squareSize = this.blackBoard.colonyGrid.getSquareSize();
+        float squareSize = this.blackBoard.colonyGrid.getSquareSize();
         //If a path was found, record the path.
         if(found) {
             currNode = target;

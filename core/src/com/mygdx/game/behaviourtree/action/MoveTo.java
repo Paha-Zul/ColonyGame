@@ -17,7 +17,7 @@ import java.util.LinkedList;
 public class MoveTo extends LeafTask{
     private Transform transform;
     private LinkedList<Vector2> path;
-    private int squareSize;
+    private float squareSize;
     private Collider collider;
     private Functional.Callback callback;
 

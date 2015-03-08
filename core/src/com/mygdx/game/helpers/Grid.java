@@ -121,6 +121,8 @@ public class Grid {
         }
 
         public Node addToGrid(Entity entity, int exploreRadius){
+            System.out.println("Adding Entity: "+entity.name+" at: "+entity.transform.getPosition());
+
             Node node = this.getNode(entity);
             node.addEntity(entity);
 
@@ -153,7 +155,7 @@ public class Grid {
             Vector2 pos = entity.transform.getPosition();
 
             //If the currNode still matches our current position, return it.
-            if (currNode != null && (((int)pos.x / this.squareSize) == currNode.getCol() && ((int)pos.y / this.squareSize) == currNode.getRow())) {
+            if (currNode != null && (((int)pos.x / this.getSquareSize()) == currNode.getCol() && ((int)pos.y / this.getSquareSize()) == currNode.getRow())) {
                 return currNode;
             }
 
@@ -231,7 +233,7 @@ public class Grid {
             if(entity.transform == null)
                 return null;
 
-            return this.getNode((int) (entity.transform.getPosition().x / this.squareSize), (int) (entity.transform.getPosition().y / this.squareSize));
+            return this.getNode((int) (entity.transform.getPosition().x / this.getSquareSize()), (int) (entity.transform.getPosition().y / this.getSquareSize()));
         }
 
         /**
@@ -241,7 +243,7 @@ public class Grid {
          * @return A Node at the Vector2 position.
          */
         public Node getNode(Vector2 pos) {
-            return this.getNode((int) (pos.x / this.squareSize), (int) (pos.y / this.squareSize));
+            return this.getNode((int) (pos.x / this.getSquareSize()), (int) (pos.y / this.getSquareSize()));
         }
 
         /**
@@ -278,8 +280,8 @@ public class Grid {
          * @param entity The Entity to add.
          */
         public void addEntity(Entity entity) {
-            int xIndex = (int) (entity.transform.getPosition().x / this.squareSize);
-            int yIndex = (int) (entity.transform.getPosition().y / this.squareSize);
+            int xIndex = (int) (entity.transform.getPosition().x / this.getSquareSize());
+            int yIndex = (int) (entity.transform.getPosition().y / this.getSquareSize());
             Node node = this.grid[xIndex][yIndex];
 
             node.addEntity(entity);
@@ -291,8 +293,8 @@ public class Grid {
          * @param entity The Entity to remove.
          */
         public void removeEntity(Entity entity) {
-            int xIndex = (int) (entity.transform.getPosition().x / this.squareSize);
-            int yIndex = (int) (entity.transform.getPosition().y / this.squareSize);
+            int xIndex = (int) (entity.transform.getPosition().x / this.getSquareSize());
+            int yIndex = (int) (entity.transform.getPosition().y / this.getSquareSize());
             Node node = this.grid[xIndex][yIndex];
 
             node.removeEntity(entity);
@@ -329,12 +331,12 @@ public class Grid {
             return this.numRows;
         }
 
-        public int getSquareSize() {
-            return this.squareSize;
+        public float getSquareSize() {
+            return this.squareSize/Constants.SCALE;
         }
 
         public int[] getIndex(Vector2 position) {
-            return new int[]{(int) position.x / squareSize, (int) position.y / squareSize};
+            return new int[]{(int) (position.x / getSquareSize()), (int) (position.y / getSquareSize())};
         }
 
         public void debugDraw() {
@@ -347,7 +349,7 @@ public class Grid {
             for (int col = 0; col < grid.length; col++) {
                 for (int row = 0; row < grid[col].length; row++) {
                     Node node = grid[col][row];
-                    renderer.rect(node.getCol() * squareSize, node.getRow() * squareSize, squareSize, squareSize);
+                    renderer.rect(node.getCol() * getSquareSize(), node.getRow() * getSquareSize(), getSquareSize(), getSquareSize());
                 }
             }
             renderer.end();
@@ -357,11 +359,11 @@ public class Grid {
             for (int col = 0; col < grid.length; col++) {
                 for (int row = 0; row < grid[col].length; row++) {
                     Node node = grid[col][row];
-                    GUI.Text("index: " + node.getCol() + " " + node.getRow(), batch, col * squareSize, row * squareSize + squareSize);
-                    GUI.Text("G: " + ((PathNode) node).G, batch, col * squareSize, row * squareSize + squareSize - 20);
-                    GUI.Text("H: " + ((PathNode) node).H, batch, col * squareSize, row * squareSize + squareSize - 40);
-                    GUI.Text("B: " + ((PathNode) node).B, batch, col * squareSize, row * squareSize + squareSize - 60);
-                    GUI.Text("F: " + ((PathNode) node).getF(), batch, col * squareSize, row * squareSize + squareSize - 80);
+                    GUI.Text("index: " + node.getCol() + " " + node.getRow(), batch, col * getSquareSize(), row * getSquareSize() + getSquareSize());
+                    GUI.Text("G: " + ((PathNode) node).G, batch, col * getSquareSize(), row * getSquareSize() + getSquareSize() - 20);
+                    GUI.Text("H: " + ((PathNode) node).H, batch, col * getSquareSize(), row * getSquareSize() + getSquareSize() - 40);
+                    GUI.Text("B: " + ((PathNode) node).B, batch, col * getSquareSize(), row * getSquareSize() + getSquareSize() - 60);
+                    GUI.Text("F: " + ((PathNode) node).getF(), batch, col * getSquareSize(), row * getSquareSize() + getSquareSize() - 80);
                 }
             }
         }
@@ -400,6 +402,7 @@ public class Grid {
         public int getRow(){
             return this.row;
         }
+
 
         @Override
         public String toString() {

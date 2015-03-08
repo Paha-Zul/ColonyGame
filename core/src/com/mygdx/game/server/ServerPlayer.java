@@ -70,7 +70,7 @@ public class ServerPlayer {
             delta = 0f;
 
         if(!generatedTrees) {
-            generatedTrees = WorldGen.getInstance().generateResources(new Vector2((ColonyGame.worldGrid.getNumCols() - 1) * Constants.GRID_SQUARESIZE, (ColonyGame.worldGrid.getNumRows() - 1) * Constants.GRID_SQUARESIZE), 8, Constants.WORLDGEN_RESOURCEGENERATESPEED);
+            generatedTrees = WorldGen.getInstance().generateResources(new Vector2((ColonyGame.worldGrid.getNumCols() - 1) * WorldGen.getInstance().getTileSize(), (ColonyGame.worldGrid.getNumRows() - 1) * WorldGen.getInstance().getTileSize()), 8, Constants.WORLDGEN_RESOURCEGENERATESPEED);
             if(generatedTrees){
                 startLocation.set((ColonyGame.worldGrid.getNumCols()/2)*ColonyGame.worldGrid.getSquareSize(), (ColonyGame.worldGrid.getNumRows()/2)*ColonyGame.worldGrid.getSquareSize());
                 generateStart(startLocation);
@@ -90,16 +90,16 @@ public class ServerPlayer {
 
 		WorldGen.TerrainTile[][] map = WorldGen.map;
 
-        int squareSize = ColonyGame.worldGrid.getSquareSize();
+        float squareSize = ColonyGame.worldGrid.getSquareSize();
         int halfWidth = (int)((ColonyGame.camera.viewportWidth*ColonyGame.camera.zoom)/2f);
         int halfHeight = (int)((ColonyGame.camera.viewportHeight*ColonyGame.camera.zoom)/2f);
         int xc = (int)ColonyGame.camera.position.x;
         int yc = (int)ColonyGame.camera.position.y;
 
-        int startX = ((xc - halfWidth)/squareSize) - off >= 0 ? ((xc - halfWidth)/squareSize) - off : 0;
-        int endX = ((xc + halfWidth)/squareSize) + off < ColonyGame.worldGrid.getNumCols() ? ((xc + halfWidth)/squareSize) + off : ColonyGame.worldGrid.getNumCols()-1;
-        int startY = ((yc - halfHeight)/squareSize) - off >= 0 ? ((yc - halfHeight)/squareSize) - off : 0;
-        int endY = ((yc + halfHeight)/squareSize) + off < ColonyGame.worldGrid.getNumRows() ? ((yc + halfHeight)/squareSize) + off : ColonyGame.worldGrid.getNumRows()-1;
+        int startX = ((xc - halfWidth)/squareSize) - off >= 0 ? (int)((xc - halfWidth)/squareSize) - off : 0;
+        int endX = ((xc + halfWidth)/squareSize) + off < ColonyGame.worldGrid.getNumCols() ? (int)((xc + halfWidth)/squareSize) + off : ColonyGame.worldGrid.getNumCols()-1;
+        int startY = ((yc - halfHeight)/squareSize) - off >= 0 ? (int)((yc - halfHeight)/squareSize) - off : 0;
+        int endY = ((yc + halfHeight)/squareSize) + off < ColonyGame.worldGrid.getNumRows() ? (int)((yc + halfHeight)/squareSize) + off : ColonyGame.worldGrid.getNumRows()-1;
 
         //Loop over the array
         for(int x=startX;x<=endX;x++) {

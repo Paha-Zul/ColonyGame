@@ -6,6 +6,7 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.math.Vector3;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.client.ClientPlayer;
+import com.mygdx.game.helpers.Constants;
 import com.mygdx.game.helpers.Grid;
 import com.mygdx.game.helpers.ListHolder;
 import com.mygdx.game.interfaces.IGUI;
@@ -50,7 +51,7 @@ public class GameScreen implements Screen{
     public void resize(int width, int height) {
         Vector3 pos = new Vector3(ColonyGame.camera.position);
         Gdx.graphics.setDisplayMode(width, height, false);
-        ColonyGame.camera.setToOrtho(false, width, height);
+        ColonyGame.camera.setToOrtho(false, width/ Constants.SCALE, height/ Constants.SCALE);
         ColonyGame.UICamera.setToOrtho(false, width, height);
         ColonyGame.camera.position.set(pos);
 

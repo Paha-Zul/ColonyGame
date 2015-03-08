@@ -28,7 +28,7 @@ public class WorldGen {
     public static TerrainTile[][] map;
 
     //Some default values that can be modified globally.
-    public int tileSize = 25;
+    private int tileSize = 25;
     public float treeScale = 0.8f;
     public float freq = 5;
     public float percentageDone = 0;
@@ -108,7 +108,7 @@ public class WorldGen {
             //Loop for a certain amount of steps. This is done for each noise level. Resets after each one.
             while (stepsLeft > 0 && currX < numX) {
                 double noiseValue = SimplexNoise.noise((double) currX / freq, (double) currY / freq); //Generate the noise for this tile.
-                Vector2 position = new Vector2(currX * tileSize, currY * tileSize); //Set the position.
+                Vector2 position = new Vector2(currX * getTileSize(), currY * getTileSize()); //Set the position.
                 Sprite terrainSprite; //Prepare the sprite object.
                 int type = 0; //The type of tile.
                 float rotation = 0; //The rotation of the tile.
@@ -133,7 +133,7 @@ public class WorldGen {
 
                     //Creates a new sprite and a new tile, assigns the Sprite to the tile and puts it into the map array.
                     terrainSprite = terrainAtlas.createSprite(jtile.img[randTileIndex]);
-                    terrainSprite.setSize(tileSize, tileSize);
+                    terrainSprite.setSize(getTileSize(), getTileSize());
                     tile.set(terrainSprite, noiseValue, rotation, type, position); //Create a new terrain tile.
                     tile.avoid = jtile.avoid;
                     if(jtile.tileNames.length <= randTileIndex) GH.writeErrorMessage("Tile with image "+jtile.img[randTileIndex]+" and category "+jtile.category+" does not have a name assigned to it");
@@ -193,7 +193,7 @@ public class WorldGen {
         //Partially executes a breadth first search.
         for (int i = 0; i < step; i++) {
             TerrainTile currTile = neighbors.pop(); //Pop the first neighbor
-            int[] index = {(int) (currTile.terrainSprite.getX() / Constants.GRID_SQUARESIZE), (int) (currTile.terrainSprite.getY() / Constants.GRID_SQUARESIZE)}; //Get the index.
+            int[] index = {(int) (currTile.terrainSprite.getX() / getTileSize()), (int) (currTile.terrainSprite.getY() / getTileSize())}; //Get the index.
             //Get left/right/up/down
             TerrainTile left = this.getNode(index[0] - 1, index[1]);
             TerrainTile right = this.getNode(index[0] + 1, index[1]);
@@ -227,7 +227,7 @@ public class WorldGen {
                 continue;
 
             //Set the center Vector2 and spawn the tree using the center position.
-            center.set(currTile.terrainSprite.getX() + Constants.GRID_SQUARESIZE * 0.5f, currTile.terrainSprite.getY() + Constants.GRID_SQUARESIZE * 0.5f);
+            center.set(currTile.terrainSprite.getX() + WorldGen.getInstance().getTileSize() * 0.5f, currTile.terrainSprite.getY() + WorldGen.getInstance().getTileSize() * 0.5f);
             spawnTree(getTileAtHeight(DataBuilder.tileGroupsMap.get(noiseMapName).tiles, (float) currTile.noiseValue), center, currTile);
 
             //If there are no more neighbors, we are done.
@@ -261,6 +261,7 @@ public class WorldGen {
             ResourceEnt resEnt = new ResourceEnt(centerPos, 0, ColonyGame.assetManager.get(res.getTextureName(), Texture.class), ColonyGame.batch, 11);
             resEnt.addComponent(res);
             resEnt.transform.setScale(treeScale);
+            resEnt.name = res.getDisplayName();
         }
     }
 
@@ -314,7 +315,7 @@ public class WorldGen {
      * @return A Node at the Entity's location.
      */
     public TerrainTile getNode(Entity entity) {
-        return getNode((int) (entity.transform.getPosition().x / tileSize), (int) (entity.transform.getPosition().y / tileSize));
+        return getNode((int) (entity.transform.getPosition().x / getTileSize()), (int) (entity.transform.getPosition().y / getTileSize()));
     }
 
     /**
@@ -324,7 +325,8 @@ public class WorldGen {
      * @return A Node at the Vector2 position.
      */
     public TerrainTile getNode(Vector2 pos) {
-        return getNode((int) (pos.x / tileSize), (int) (pos.y / tileSize));
+        System.out.println("Getting node at: "+(int) (pos.x / getTileSize()) +"/"+ (int) (pos.y / getTileSize()));
+        return getNode((int) (pos.x / getTileSize()), (int) (pos.y / getTileSize()));
     }
 
     /**
@@ -368,7 +370,11 @@ public class WorldGen {
     }
 
     public float getTileSize(){
-        return this.tileSize;
+        return this.tileSize/Constants.SCALE;
+    }
+
+    public void setTileSize(int tileSize){
+        this.tileSize = tileSize;
     }
 
     public class TerrainTile {
