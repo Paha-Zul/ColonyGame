@@ -26,8 +26,10 @@ public class GraphicIdentity extends Component{
 
 	@Override
 	public void start() {
-		Vector2 pos = this.owner.transform.getPosition(); //Cache the owner's position.
-        this.sprite.setPosition(pos.x - this.sprite.getWidth() / 2, pos.y - this.sprite.getHeight() / 2);
+        //This is initially needed for getting the sprite to be the right size. If we simply scaled it using this method, then
+        //the image would draw the right size, but the offset from the width and height being unaffected causes real problems whenever the image
+        //is not centered.
+        this.sprite.setSize(sprite.getRegionWidth()/Constants.SCALE, sprite.getRegionHeight()/Constants.SCALE);
     }
 
 	@Override
@@ -40,19 +42,17 @@ public class GraphicIdentity extends Component{
 
         Grid.Node node = ColonyGame.worldGrid.getNode(this.owner);
         int visibility = WorldGen.getInstance().getVisibilityMap()[node.getCol()][node.getRow()].getVisibility();
-        if(visibility == Constants.VISIBILITY_UNEXPLORED) {
+        if(visibility == Constants.VISIBILITY_UNEXPLORED)
             return;
-        }
 
         this.changeVisibility(visibility);
 
-        this.sprite.setScale(this.owner.transform.getScale() / Constants.SCALE);
         this.sprite.setRotation(this.owner.transform.getRotation());
 
         if(alignment == 0)
 		    this.sprite.setPosition(pos.x - (sprite.getWidth()/2), pos.y - (sprite.getHeight()/2));
         if(alignment == 1) {
-            this.sprite.setPosition(pos.x - (sprite.getWidth() / 2), pos.y - (sprite.getHeight()/2));
+            this.sprite.setPosition(pos.x - (sprite.getWidth() / 2), pos.y);
         }
 
         this.sprite.draw(this.batch);
