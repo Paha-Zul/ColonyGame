@@ -18,6 +18,9 @@ public class Constants {
 	public static int GRID_WIDTH;
 	public static int GRID_HEIGHT;
 
+    //CAMERA
+    public final static float SCALE = 30;
+
 	//WorldGen stuff
     public static int WORLDGEN_GENERATESPEED = 500;
     public static int WORLDGEN_RESOURCEGENERATESPEED = 500;
@@ -29,8 +32,6 @@ public class Constants {
     public final static int VISIBILITY_UNEXPLORED = 0;
     public final static int VISIBILITY_EXPLORED = 1;
     public final static int VISIBILITY_VISIBLE = 2;
-
-
 
     //Entity types
     public final static int ENTITY_HUMANOID = 1;

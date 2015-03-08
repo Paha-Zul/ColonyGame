@@ -367,6 +367,10 @@ public class WorldGen {
         return numTrees;
     }
 
+    public float getTileSize(){
+        return this.tileSize;
+    }
+
     public class TerrainTile {
         public String tileName, category;
         public Sprite terrainSprite;
