@@ -33,6 +33,7 @@ public class Colonist extends Component implements IInteractable{
         this.inventory = this.getComponent(Inventory.class);
         this.stats = this.getComponent(Stats.class);
         this.manager = this.getComponent(BehaviourManagerComp.class);
+        this.getComponent(BlackBoard.class).moveSpeed = 200f;
     }
 
     public Colony getColony() {

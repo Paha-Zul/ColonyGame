@@ -27,6 +27,7 @@ public class DesktopLauncher {
         settings.duplicatePadding = true;
         settings.flattenPaths = true;
         TexturePacker.process(settings, "./img/terrain", "./atlas", "terrain");
+        TexturePacker.process(settings, "./img/trees", "./atlas", "trees");
 
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
 		config.width = width;

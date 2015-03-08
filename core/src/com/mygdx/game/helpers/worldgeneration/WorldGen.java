@@ -255,14 +255,16 @@ public class WorldGen {
             return;
 
         //Gets the resource that should be spawned on this tile
-        Resource res = this.getResourceOnTile(jtile, (float)Math.random());
+        DataBuilder.JsonResource jRes = this.getResourceOnTile(jtile, (float)Math.random());
+        if(jRes == null)
+            return;
 
-        if(res != null) {
-            ResourceEnt resEnt = new ResourceEnt(centerPos, 0, ColonyGame.assetManager.get(res.getTextureName(), Texture.class), ColonyGame.batch, 11);
-            resEnt.addComponent(res);
-            resEnt.transform.setScale(treeScale);
-            resEnt.name = res.getDisplayName();
-        }
+        Resource res = new Resource(jRes);
+
+        ResourceEnt resEnt = new ResourceEnt(centerPos, 0, ColonyGame.assetManager.get(jRes.img[MathUtils.random(jRes.img.length-1)], Texture.class), ColonyGame.batch, 11);
+        resEnt.addComponent(res);
+        resEnt.transform.setScale(treeScale);
+        resEnt.name = res.getDisplayName();
     }
 
     public int[] getIndex(Vector2 pos){
@@ -295,13 +297,13 @@ public class WorldGen {
      * @param value The value of the resource. This
      * @return A ResourceComponent if the 'value' parameter was between a resource's chance to spawn. If no valid resource was found, returns null.
      */
-    private Resource getResourceOnTile(DataBuilder.JsonTile tile, float value){
+    private DataBuilder.JsonResource getResourceOnTile(DataBuilder.JsonTile tile, float value){
         if(tile.resources == null || tile.resources.length <= 0)
             return null;
 
         for (int i=0;i<tile.resources.length;i++) {
             if (value >= tile.resourcesChance[i][0] && value <= tile.resourcesChance[i][1]) {
-                return ResourceManager.getResourceByname(tile.resources[i]);
+                return ResourceManager.getJsonResourceByName(tile.resources[i]);
             }
         }
 

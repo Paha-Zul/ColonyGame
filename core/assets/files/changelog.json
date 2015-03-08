@@ -4,9 +4,18 @@
       "version": "0.15",
       "date": "3/8/2015",
       "log": [
+        "- Added: Support for multiple tree images. Now we just need to set up the directories and resources and we can go nuts!",
+        "- Added: Atlas support for trees. Now any trees in the specified folder (currently img/trees) will be created into an atlas.",
         "- Fixed: Set up scaling system so everything can be scaled according to Box2D",
         "- Fixed: Terrain information in bottom left works again after breaking from the scaling conversion.",
-        "- Bug: Trees not being centered on the bottom middle of the image. Just doesn't freaking work..."
+        "- Fixed: Trees not spawning everywhere with new scale system, now they do!",
+        "- Fixed: Changed how the text for this area is done. Now it's generated on the fly and looks crisp!",
+        "- Fixed: Can see colonists' paths again!",
+        "- Bug: Colonists' path overlay the UI. Need to fix that....",
+        "- Bug: Trees not being centered on the bottom middle of the image. Just doesn't freaking work...",
+        "- Bug: I think making colonist gather is broken? It only happens sometimes but when you tell them to gather they continue to idle, not even a fail message",
+        "- Bug: Holy crap they still move freaking fast... should be a quick fix.",
+        "- Fixed: Super fast move speed."
       ]
     },
     {

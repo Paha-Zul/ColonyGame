@@ -7,7 +7,9 @@ import com.mygdx.game.behaviourtree.LeafTask;
 import com.mygdx.game.component.BlackBoard;
 import com.mygdx.game.component.Transform;
 import com.mygdx.game.component.collider.Collider;
+import com.mygdx.game.helpers.Constants;
 import com.mygdx.game.interfaces.Functional;
+import com.sun.xml.internal.bind.v2.runtime.reflect.opt.Const;
 
 import java.util.LinkedList;
 
@@ -21,7 +23,7 @@ public class MoveTo extends LeafTask{
     private Collider collider;
     private Functional.Callback callback;
 
-    private float completeDst = 1f;
+    private float completeDst = 1f/ Constants.SCALE;
 
     public MoveTo(String name, BlackBoard blackBoard, Functional.Callback callback) {
         super(name, blackBoard);
@@ -66,8 +68,8 @@ public class MoveTo extends LeafTask{
 
         double rot = (Math.atan2(nodeY - transform.getPosition().y, nodeX - transform.getPosition().x));
 
-        float x = (float)Math.cos(rot)*2000*delta;
-        float y = (float)Math.sin(rot)*2000*delta;
+        float x = (float)Math.cos(rot)*this.blackBoard.moveSpeed*delta;
+        float y = (float)Math.sin(rot)*this.blackBoard.moveSpeed*delta;
 
         this.collider.body.setLinearVelocity(x, y);
 

@@ -70,7 +70,7 @@ public class ServerPlayer {
             delta = 0f;
 
         if(!generatedTrees) {
-            generatedTrees = WorldGen.getInstance().generateResources(new Vector2((ColonyGame.worldGrid.getNumCols() - 1) * WorldGen.getInstance().getTileSize(), (ColonyGame.worldGrid.getNumRows() - 1) * WorldGen.getInstance().getTileSize()), 8, Constants.WORLDGEN_RESOURCEGENERATESPEED);
+            generatedTrees = WorldGen.getInstance().generateResources(new Vector2((ColonyGame.worldGrid.getNumCols() - 1) * WorldGen.getInstance().getTileSize(), (ColonyGame.worldGrid.getNumRows() - 1) * WorldGen.getInstance().getTileSize()), 0, Constants.WORLDGEN_RESOURCEGENERATESPEED);
             if(generatedTrees){
                 startLocation.set((ColonyGame.worldGrid.getNumCols()/2)*ColonyGame.worldGrid.getSquareSize(), (ColonyGame.worldGrid.getNumRows()/2)*ColonyGame.worldGrid.getSquareSize());
                 generateStart(startLocation);

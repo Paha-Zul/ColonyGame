@@ -6,14 +6,10 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
-import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.Align;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.helpers.DataBuilder;
 import com.mygdx.game.helpers.GH;
@@ -31,7 +27,7 @@ public class MainMenuInterface extends UI{
     private static TextureRegion defaultUp, defaultOver, defaultDown;
 
     private BitmapFont titleFont = new BitmapFont(Gdx.files.internal("fonts/titlefont.fnt"));
-    private GUI.GUIStyle GUIStyle;
+    private GUI.GUIStyle GUIStyle, changeLogStyle;
     private Rectangle startRect, quitRect, changelogRect;
     private Label logLabel, versionLabel;
 
@@ -49,32 +45,47 @@ public class MainMenuInterface extends UI{
         this.quitRect = new Rectangle(Gdx.graphics.getWidth()/2 - 100, Gdx.graphics.getHeight()/2 - 25 - 100, 200, 50);
         this.changelogRect = new Rectangle(width - width * 0.2f, 0, width * 0.2f, height - height*0.2f);
 
-        this.makeLabels(changelogRect);
-
         music.play();
         music.setLooping(true);
 
         this.GUIStyle = new GUI.GUIStyle();
         this.GUIStyle.font = titleFont;
+
+        this.changeLogStyle = new GUI.GUIStyle();
+        FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("fonts/Roboto-Bold.ttf"));
+        FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
+        parameter.size = 16;
+        parameter.borderWidth = 1f;
+        changeLogStyle.font = generator.generateFont(parameter);
+        generator.dispose();
+
+        this.makeLabels(changelogRect);
     }
 
+    /**
+     * Makes the labels for the changelog.
+     * @param rect
+     */
     private void makeLabels(Rectangle rect){
         if(DataBuilder.changelog == null || DataBuilder.changelog.changes == null)
             GH.writeErrorMessage("changelog.json has something wrong with it or does not exist.");
 
+        //Sets the font and stuff.
         Label.LabelStyle style = new Label.LabelStyle();
-        style.font = new BitmapFont(Gdx.files.internal("fonts/titlefont.fnt"));
-        style.font.setScale(0.3f);
+        style.font = changeLogStyle.font;
 
+        //Combines all the lines from the Json log, adding newlines.
         DataBuilder.JsonLog log = DataBuilder.changelog.changes[0];
         String text = "";
         for(String txt : log.log)
             text += txt+"\n";
 
+        //Sets the label text and style.
         logLabel = new Label(text, style);
         logLabel.setAlignment(Align.topLeft);
         logLabel.setWrap(true);
 
+        //Version and date label.
         versionLabel = new Label("Version: "+log.version+"\n"+log.date, style);
         versionLabel.setAlignment(Align.center);
         setLabelBounds(rect);

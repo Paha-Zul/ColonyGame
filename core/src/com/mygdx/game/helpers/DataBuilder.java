@@ -157,15 +157,17 @@ public class DataBuilder implements IDestroyable{
         JsonResources resources = json.fromJson(JsonResources.class, Gdx.files.internal(filePath+resourcePath));
 
         for(JsonResource jRes : resources.resources){
-            Resource resource = new Resource();
-            resource.setResourceName(jRes.resourceName);
-            resource.setDisplayName(jRes.displayName);
-            resource.setResourceType(jRes.resourceType);
+
+            if(jRes.dir != null){
+                ArrayList<String> list = new ArrayList<>();
+                this.getFileNamesFromDir(Gdx.files.internal(jRes.dir), list);
+                jRes.img = list.toArray(new String[list.size()]);
+            }
 
             //Build the item array
-            String[] items = new String[jRes.items.size];
-            for(int i=0;i<jRes.items.size;i++)
-                items[i] = jRes.items.get(i);
+            String[] items = new String[jRes.items.length];
+            for(int i=0;i<jRes.items.length;i++)
+                items[i] = jRes.items[i];
 
             //Build the amounts array
             int[][] amounts = new int[jRes.amounts.length][2];
@@ -174,11 +176,8 @@ public class DataBuilder implements IDestroyable{
                 amounts[i][1] = jRes.amounts[i][1];
             }
 
-            resource.setItemNames(items);
-            resource.setItemAmounts(amounts);
-            resource.setTextureName(jRes.img);
-            ResourceManager.addResourceInstance(resource);
-        }
+            ResourceManager.addResourceInstance(jRes);
+       }
     }
 
     /**
@@ -297,9 +296,10 @@ public class DataBuilder implements IDestroyable{
         public Array<JsonResource> resources;
     }
 
-    private static class JsonResource{
-        public String resourceName, displayName, resourceType, description, img;
-        public Array<String> items;
+    public static class JsonResource{
+        public String resourceName, displayName, resourceType, description, dir;
+        public String[] img;
+        public String[] items;
         public int[][] amounts;
     }
 

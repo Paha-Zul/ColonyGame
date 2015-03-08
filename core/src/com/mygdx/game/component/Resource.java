@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.mygdx.game.ColonyGame;
+import com.mygdx.game.helpers.DataBuilder;
 import com.mygdx.game.helpers.gui.GUI;
 import com.mygdx.game.interfaces.IDisplayable;
 import com.mygdx.game.interfaces.IInteractable;
@@ -12,7 +13,7 @@ import com.mygdx.game.interfaces.IInteractable;
  * Created by Paha on 1/10/2015.
  */
 public class Resource extends Component implements IInteractable{
-    private String resourceName = "default", displayName = "default", resourceType = "default", textureName="";
+    private String resourceName = "default", displayName = "default", resourceType = "default";
     private String[] itemNames;
     private int[][] itemAmounts;
     private float gatherTime = 1;
@@ -39,8 +40,14 @@ public class Resource extends Component implements IInteractable{
         this.resourceType = resource.resourceType;
         this.itemNames = resource.itemNames;
         this.itemAmounts = resource.itemAmounts;
-        this.displayName = resource.displayName;
-        this.textureName = resource.textureName;
+    }
+
+    public Resource(DataBuilder.JsonResource jRes){
+        this(jRes.resourceName);
+        this.displayName = jRes.displayName;
+        this.resourceType = jRes.resourceType;
+        this.itemNames = jRes.items;
+        this.itemAmounts = jRes.amounts;
     }
 
     @Override
@@ -80,13 +87,6 @@ public class Resource extends Component implements IInteractable{
      */
     public int[][] getItemAmounts() {
         return itemAmounts;
-    }
-
-    /**
-     * @return The texture name for this Resource.
-     */
-    public String getTextureName() {
-        return textureName;
     }
 
     /**
@@ -164,14 +164,6 @@ public class Resource extends Component implements IInteractable{
      */
     public void setItemAmounts(int[][] itemAmounts) {
         this.itemAmounts = itemAmounts;
-    }
-
-    /**
-     * Sets the texture name of this Resource.
-     * @param textureName The texture name for drawing this resource.
-     */
-    public void setTextureName(String textureName) {
-        this.textureName = textureName;
     }
 
     @Override
