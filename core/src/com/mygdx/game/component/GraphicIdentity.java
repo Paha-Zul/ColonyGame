@@ -27,14 +27,14 @@ public class GraphicIdentity extends Component{
 	@Override
 	public void start() {
 		Vector2 pos = this.owner.transform.getPosition(); //Cache the owner's position.
-		this.sprite.setPosition(pos.x - this.sprite.getWidth()/2, pos.y - this.sprite.getHeight()/2);
-	}
+        this.sprite.setPosition(pos.x - this.sprite.getWidth() / 2, pos.y - this.sprite.getHeight() / 2);
+    }
 
 	@Override
 	public void update(float delta) {
 		Vector2 pos = this.owner.transform.getPosition(); //Cache the owner's position.
 
-		if(!ColonyGame.camera.frustum.boundsInFrustum(pos.x, pos.y, 0, sprite.getWidth(), sprite.getHeight(), 0)) {
+        if(!ColonyGame.camera.frustum.boundsInFrustum(pos.x, pos.y, 0, sprite.getWidth(), sprite.getHeight(), 0)) {
 			return;
 		}
 
@@ -46,13 +46,14 @@ public class GraphicIdentity extends Component{
 
         this.changeVisibility(visibility);
 
-		this.sprite.setScale(this.owner.transform.getScale()/ Constants.SCALE);
-		this.sprite.setRotation(this.owner.transform.getRotation());
+        this.sprite.setScale(this.owner.transform.getScale() / Constants.SCALE);
+        this.sprite.setRotation(this.owner.transform.getRotation());
 
         if(alignment == 0)
-		    this.sprite.setPosition(pos.x - (sprite.getWidth())/2, pos.y - (sprite.getHeight()/2));
-        if(alignment == 1)
-            this.sprite.setPosition(pos.x - (sprite.getWidth())/2, pos.y);
+		    this.sprite.setPosition(pos.x - (sprite.getWidth()/2), pos.y - (sprite.getHeight()/2));
+        if(alignment == 1) {
+            this.sprite.setPosition(pos.x - (sprite.getWidth() / 2), pos.y - (sprite.getHeight()/2));
+        }
 
         this.sprite.draw(this.batch);
 	}

@@ -252,6 +252,7 @@ public class DataBuilder implements IDestroyable{
             //If the seed is null or empty, generate one. Otherwise, use the seed from worldgen.json.
             if(map.seed == null || map.seed.isEmpty()) map.noiseSeed = (long)(Math.random()*Long.MAX_VALUE);
             else{
+                //Goes over each character and adds to the seed.
                 for(int i=0;i<map.seed.length();i++){
                     char ch = map.seed.charAt(i);
                     map.noiseSeed = (map.noiseSeed + (long)ch*1000000000000000000l)%Long.MAX_VALUE;

@@ -18,8 +18,13 @@ public class FloatingText implements IDestroyable{
     private float percent, fadingDiff, fadePercent;
 
     private boolean destroyed = false;
+    private static GUI.GUIStyle style = new GUI.GUIStyle();
 
     private Color color = new Color(1, 1, 1, 1);
+
+    static{
+        style.font.setScale(1f/Constants.SCALE);
+    }
 
     /**
      * Creates a floating text object.
@@ -66,9 +71,8 @@ public class FloatingText implements IDestroyable{
             color.set(1, 1, 1, 1);
         }
 
-        GUI.font.setColor(color);
-        GUI.Label(this.text, batch, currPos.x, currPos.y, true);
-        GUI.ResetFont();
+        style.font.setColor(color);
+        GUI.Label(this.text, batch, currPos.x, currPos.y, true, style);
     }
 
     @Override

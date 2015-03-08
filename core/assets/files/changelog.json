@@ -1,6 +1,15 @@
 {
   "changes": [
     {
+      "version": "0.15",
+      "date": "3/8/2015",
+      "log": [
+        "- Fixed: Set up scaling system so everything can be scaled according to Box2D",
+        "- Fixed: Terrain information in bottom left works again after breaking from the scaling conversion.",
+        "- Bug: Trees not being centered on the bottom middle of the image. Just doesn't freaking work..."
+      ]
+    },
+    {
       "version": "0.14",
       "date": "3/4/2015",
       "log": [

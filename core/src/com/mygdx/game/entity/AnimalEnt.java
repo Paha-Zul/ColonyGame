@@ -32,7 +32,7 @@ public class AnimalEnt extends Entity{
 
     private void makeCollider(){
         CircleShape shape = new CircleShape();
-        shape.setRadius(6f);
+        shape.setRadius(0.5f);
         Collider collider = this.addComponent(new Collider(ColonyGame.world, shape));
 
         collider.body.setType(BodyDef.BodyType.DynamicBody);

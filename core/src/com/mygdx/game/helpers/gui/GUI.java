@@ -139,6 +139,7 @@ public class GUI {
     public static void ResetFont(){
         GUI.font = defaultFont;
         GUI.font.setColor(Color.WHITE);
+        GUI.font.setScale(1f);
     }
 
     public static class GUIStyle {

@@ -34,7 +34,7 @@ public class ColonyEntity extends Entity{
         bodyDef.position.set(position);
 
         PolygonShape shape = new PolygonShape();
-        shape.setAsBox(identity.sprite.getWidth()/2, identity.sprite.getHeight()/2);
+        shape.setAsBox((identity.sprite.getWidth()/2)/Constants.SCALE, (identity.sprite.getHeight()/2)/Constants.SCALE);
 
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.restitution = 0;

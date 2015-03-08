@@ -34,7 +34,7 @@ public class ResourceEnt extends Entity{
         bodyDef.type = BodyDef.BodyType.StaticBody;
 
         CircleShape circle = new CircleShape();
-        circle.setRadius(10f);
+        circle.setRadius(0.5f);
 
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.shape = circle;

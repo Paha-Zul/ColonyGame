@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -49,8 +50,8 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     private Rectangle uiBackgroundTopRect = new Rectangle();
     private float FPS = 0;
 
-    private static final float camMoveSpeed = 500f;
-    private static final float camZoomSpeed = 1.5f;
+    private static final float camMoveSpeed = 100f;
+    private static final float camZoomSpeed = 3f;
 
     private final float infoWidth = 0.13f;
     private final float statusWidth = 0.135f;
@@ -286,11 +287,13 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
      * @param rect The rectangle to draw the terrain info in.
      */
     private void drawTerrainInfo(Rectangle rect){
-        Vector3 mouseCoords = ColonyGame.camera.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
+        OrthographicCamera camera = ColonyGame.camera;
+        Vector3 mouseCoords = camera.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
 
         GUI.Texture(rect, this.background, this.batch);
         WorldGen world = WorldGen.getInstance();
-        WorldGen.TerrainTile tile = world.getNode(world.getIndex(mouseCoords.x, mouseCoords.y));
+        int index[] = world.getIndex(mouseCoords.x*Constants.SCALE, mouseCoords.y*Constants.SCALE);
+        WorldGen.TerrainTile tile = world.getNode(index);
         if(tile == null) return;
         GUI.Label(tile.category, this.batch, rect.x + rect.getWidth()*0.5f, rect.getY() + rect.getHeight()*0.5f, true);
     }
@@ -381,7 +384,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
                     batch.setProjectionMatrix(ColonyGame.camera.combined);
                     BehaviourManagerComp.Line[] lines = this.interactable.interactable.getBehManager().getLines();
                     for(BehaviourManagerComp.Line line : lines)
-                        batch.draw(blueSquare, line.startX, line.startY, 0, 0, line.width, line.height, 1, 1, line.rotation, 0, 0, blueSquare.getWidth(), blueSquare.getHeight(), false, false);
+                        batch.draw(blueSquare, line.startX, line.startY, 0, 0, line.width, 0.1f, 1, 1, line.rotation, 0, 0, blueSquare.getWidth(), blueSquare.getHeight(), false, false);
                     batch.setProjectionMatrix(ColonyGame.UICamera.combined);
                 }
             }
@@ -554,7 +557,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
             this.finishDragging(worldCoords.x, worldCoords.y);
 
             this.testPoint.set(worldCoords.x, worldCoords.y);
-            this.world.QueryAABB(this.callback, worldCoords.x - 1f, worldCoords.y - 1f, worldCoords.x + 1f, worldCoords.y + 1f);
+            this.world.QueryAABB(this.callback, worldCoords.x - 0.01f, worldCoords.y - 0.011f, worldCoords.x + 0.01f, worldCoords.y + 0.01f);
             return true;
         }else if(button == Input.Buttons.RIGHT){
             if(this.selected != null){

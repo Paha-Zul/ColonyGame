@@ -23,9 +23,9 @@ public class DesktopLauncher {
         settings.combineSubdirectories = true;
         settings.paddingX = 8;
         settings.paddingY = 8;
-        settings.flattenPaths = true;
         settings.edgePadding = true;
         settings.duplicatePadding = true;
+        settings.flattenPaths = true;
         TexturePacker.process(settings, "./img/terrain", "./atlas", "terrain");
 
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();

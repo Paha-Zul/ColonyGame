@@ -121,8 +121,6 @@ public class Grid {
         }
 
         public Node addToGrid(Entity entity, int exploreRadius){
-            System.out.println("Adding Entity: "+entity.name+" at: "+entity.transform.getPosition());
-
             Node node = this.getNode(entity);
             node.addEntity(entity);
 
