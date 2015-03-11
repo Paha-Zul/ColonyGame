@@ -13,21 +13,8 @@ public class DesktopLauncher {
 		GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
 		int width = gd.getDisplayMode().getWidth();
 		int height = gd.getDisplayMode().getHeight();
-//		int width = 800;
-//		int height = 600;
 
-
-        TexturePacker.Settings settings = new TexturePacker.Settings();
-        settings.maxWidth = 512;
-        settings.maxHeight = 512;
-        settings.combineSubdirectories = true;
-        settings.paddingX = 8;
-        settings.paddingY = 8;
-        settings.edgePadding = true;
-        settings.duplicatePadding = true;
-        settings.flattenPaths = true;
-        TexturePacker.process(settings, "./img/terrain", "./atlas", "terrain");
-        TexturePacker.process(settings, "./img/trees", "./atlas", "trees");
+        createAtlas();
 
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
 		config.width = width;
@@ -36,4 +23,20 @@ public class DesktopLauncher {
         config.vSyncEnabled = false;
 		new LwjglApplication(new ColonyGame(), config);
 	}
+
+    private static void createAtlas(){
+        TexturePacker.Settings settings = new TexturePacker.Settings();
+        settings.maxWidth = 1024;
+        settings.maxHeight = 1024;
+        settings.combineSubdirectories = true;
+        settings.paddingX = 8;
+        settings.paddingY = 8;
+        settings.edgePadding = true;
+        settings.duplicatePadding = true;
+        settings.flattenPaths = true;
+        TexturePacker.process(settings, "./img/terrain", "./atlas", "terrain");
+        TexturePacker.process(settings, "./img/trees", "./atlas", "trees");
+        TexturePacker.process(settings, "./img/ui/buttons", "./atlas", "buttons");
+        TexturePacker.process(settings, "./img/Interactable", "./atlas", "interactables");
+    }
 }
