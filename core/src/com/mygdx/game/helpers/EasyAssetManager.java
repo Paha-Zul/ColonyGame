@@ -14,8 +14,12 @@ public class EasyAssetManager extends AssetManager{
 
     public synchronized <T> T get(String commonName, Class<T> type) {
         DataReference ref = dataMap.get(commonName);
-        if(ref == null)
+        if(ref == null) {
+            if(this.isLoaded(commonName))
+                return super.get(commonName, type);
+
             GH.writeErrorMessage("Can't find file "+commonName+". Check to make sure it exists.");
+        }
         return super.get(dataMap.get(commonName).path, type);
     }
 
