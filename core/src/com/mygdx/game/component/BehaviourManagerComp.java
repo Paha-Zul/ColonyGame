@@ -28,7 +28,7 @@ public class BehaviourManagerComp extends Component{
 
     private ArrayList<Line> lineList = new ArrayList<>();
 
-    private Texture blueSquare = new Texture("img/blueSquare.png");
+    private Texture blueSquare = ColonyGame.assetManager.get("blueSquare", Texture.class);
 
     public BehaviourManagerComp(String behaviourType) {
         this.behaviourType = behaviourType;
@@ -75,13 +75,12 @@ public class BehaviourManagerComp extends Component{
 
         Sequence sequence = new Sequence("Gathering Resource", this.blackBoard);
 
-        //On the failing of finding a resource...
+        //If we fail to find a resource, we need to explore until we find one...
         Functional.Callback fail = () -> {
-            //On the finishing of moving to a new spot.
+            //When we finish moving to the newly explored area, try to gather a resource again.
             Functional.Callback onFinish = () -> {
               this.changeTask(this.gatherResource()); //Change this back to gathering.
             };
-
             this.changeTask(this.exploreUnexplored(onFinish));
         };
 

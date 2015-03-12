@@ -188,7 +188,7 @@ public class Resource extends Component implements IInteractable{
 
     @Override
     public String getName() {
-        return null;
+        return this.getDisplayName();
     }
 
     @Override
