@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
+import com.mygdx.game.ColonyGame;
 import com.sun.istack.internal.NotNull;
 
 /**
@@ -14,12 +15,12 @@ import com.sun.istack.internal.NotNull;
  */
 public class GUI {
     public static BitmapFont font;
-    public static Texture defaultTexture = new Texture("img/background.png");
+    public static Texture defaultTexture = new Texture("img/misc/background.png");
 
     private static BitmapFont defaultFont = new BitmapFont();
-    private static Texture defaultNormalButton = new Texture("img/ui/defaultButton_normal.png");
-    private static Texture defaultMousedButton = new Texture("img/ui/defaultButton_moused.png");
-    private static Texture defaultClickedButton = new Texture("img/ui/defaultButton_clicked.png");
+    private static Texture defaultNormalButton = new Texture("img/ui/buttons/defaultButton_normal.png");
+    private static Texture defaultMousedButton = new Texture("img/ui/buttons/defaultButton_moused.png");
+    private static Texture defaultClickedButton = new Texture("img/ui/buttons/defaultButton_clicked.png");
 
     private static GUIStyle defaultGUIStyle = new GUIStyle();
 
@@ -27,40 +28,15 @@ public class GUI {
     private static boolean up = false;
     private static Rectangle rect1 = new Rectangle();
 
-    public static GUIStyle gatherGUIStyle;
-    public static GUIStyle exploreGUIStyle;
-
     static{
         font = defaultFont;
-        loadGatherButtonStyle();
-        loadExploreButtonStyle();
     }
 
-    private static void loadGatherButtonStyle(){
-        gatherGUIStyle = new GUIStyle();
-        gatherGUIStyle.normal = new Texture(Gdx.files.internal("img/ui/axebutton_normal.png"), true);
-        gatherGUIStyle.normal.setFilter(Texture.TextureFilter.MipMapNearestLinear, Texture.TextureFilter.Linear);
-        gatherGUIStyle.moused = new Texture(Gdx.files.internal("img/ui/axebutton_moused.png"), true);
-        gatherGUIStyle.moused.setFilter(Texture.TextureFilter.MipMapNearestLinear, Texture.TextureFilter.Linear);
-        gatherGUIStyle.clicked = new Texture(Gdx.files.internal("img/ui/axebutton_clicked.png"), true);
-        gatherGUIStyle.clicked.setFilter(Texture.TextureFilter.MipMapNearestLinear, Texture.TextureFilter.Linear);
-    }
-
-    private static void loadExploreButtonStyle(){
-        exploreGUIStyle = new GUIStyle();
-        exploreGUIStyle.normal = new Texture(Gdx.files.internal("img/ui/explorebutton_normal.png"), true);
-        exploreGUIStyle.normal.setFilter(Texture.TextureFilter.MipMapNearestLinear, Texture.TextureFilter.Linear);
-        exploreGUIStyle.moused = new Texture(Gdx.files.internal("img/ui/explorebutton_moused.png"), true);
-        exploreGUIStyle.moused.setFilter(Texture.TextureFilter.MipMapNearestLinear, Texture.TextureFilter.Linear);
-        exploreGUIStyle.clicked = new Texture(Gdx.files.internal("img/ui/explorebutton_clicked.png"), true);
-        exploreGUIStyle.clicked.setFilter(Texture.TextureFilter.MipMapNearestLinear, Texture.TextureFilter.Linear);
-    }
-
-    public static void Texture(Rectangle rect, Texture texture, SpriteBatch batch){
+    public static void Texture(Texture texture, Rectangle rect, SpriteBatch batch){
         batch.draw(texture, rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight());
     }
 
-    public static void Texture(float x, float y, float width, float height, Texture texture, SpriteBatch batch){
+    public static void Texture(Texture texture, float x, float y, float width, float height, SpriteBatch batch){
         batch.draw(texture, x, y, width, height);
     }
 
@@ -147,7 +123,7 @@ public class GUI {
         public Texture moused = GUI.defaultMousedButton;
         public Texture clicked = GUI.defaultClickedButton;
 
-        public BitmapFont font = new BitmapFont();
+        public BitmapFont font = defaultFont;
 
         public GUIStyle(){
 
