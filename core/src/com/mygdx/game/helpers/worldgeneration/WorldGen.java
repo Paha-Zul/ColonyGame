@@ -6,9 +6,11 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.ColonyGame;
+import com.mygdx.game.component.GraphicIdentity;
 import com.mygdx.game.component.Resource;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.entity.ResourceEnt;
@@ -261,7 +263,12 @@ public class WorldGen {
 
         Resource res = new Resource(jRes);
 
-        ResourceEnt resEnt = new ResourceEnt(centerPos, 0, ColonyGame.assetManager.get(jRes.img[MathUtils.random(jRes.img.length-1)], Texture.class), ColonyGame.batch, 11);
+        TextureAtlas interactableAtlas = ColonyGame.assetManager.get("interactables", TextureAtlas.class); //Get the atlas
+        String textureName = jRes.img[MathUtils.random(jRes.img.length-1)]; //Get the texture name.
+        Sprite sprite = interactableAtlas.createSprite(textureName); //Create the sprite.
+
+        //Create the resource and stuff.
+        ResourceEnt resEnt = new ResourceEnt(centerPos, 0, sprite, ColonyGame.batch, 11);
         resEnt.addComponent(res);
         resEnt.transform.setScale(treeScale);
         resEnt.name = res.getDisplayName();

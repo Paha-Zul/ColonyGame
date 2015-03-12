@@ -1,9 +1,12 @@
 package com.mygdx.game.helpers;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.assets.AssetLoaderParameters;
 import com.badlogic.gdx.assets.loaders.TextureLoader;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter;
@@ -27,6 +30,8 @@ public class DataBuilder implements IDestroyable{
     String worldPath = "worldgen.json";
     String changeLogPath = "changelog.json";
     String imgPath = "img/";
+    String soundPath = "sounds/";
+    String atlasPath = "atlas/";
 
     private EasyAssetManager assetManager;
 
@@ -41,7 +46,10 @@ public class DataBuilder implements IDestroyable{
         param.genMipMaps = true;
 
         this.assetManager = assetManager;
-        buildImages(Gdx.files.internal(this.imgPath), param);
+
+        buildFilesInDir(Gdx.files.internal(this.imgPath), Texture.class, param, new String[]{"png"});
+        buildFilesInDir(Gdx.files.internal(this.soundPath), Sound.class, null, new String[]{"ogg"});
+        buildFilesInDir(Gdx.files.internal(this.atlasPath), TextureAtlas.class, null, new String[]{"atlas"});
     }
 
     public boolean update(){
@@ -56,42 +64,77 @@ public class DataBuilder implements IDestroyable{
         buildChangeLog();
     }
 
-    private void buildImages(FileHandle dirHandle, TextureLoader.TextureParameter param){
-        for (FileHandle entry: dirHandle.list()) {
-            if(entry.isDirectory()) //For every directory, call this function again to load the images.
-                buildImages(new FileHandle(entry.path()+"/"), param); //A bit of recursion.
 
-            loadImage(entry, param);
+    private void buildFilesInDir(FileHandle dirHandle, Class<?> type, AssetLoaderParameters param, String[] extensions) {
+        for (FileHandle entry : dirHandle.list()) {
+            if (entry.isDirectory()) //For every directory, call this function again to load the images.
+                buildFilesInDir(new FileHandle(entry.path() + "/"), type, param, extensions); //A bit of recursion.
+
+            loadFile(entry, type, param, extensions);
         }
     }
 
-    private void loadImage(FileHandle entry, TextureLoader.TextureParameter param){
+    private void loadFile(FileHandle entry, Class<?> type, AssetLoaderParameters param, String[] extensions){
         String extension = "";
         String commonName = "";
 
         int i = entry.name().lastIndexOf('.');
         if (i > 0) {
             extension = entry.name().substring(i + 1);
-            commonName = entry.name().substring(0, i);
+            commonName = entry.name().substring(0, i); //Get the common name (no path or extension).
         }
 
-        if(!extension.equals("png"))
-            return;
+        //If it matches one of the extensions, load it!
+        for(String ext : extensions)
+            if(extension.equals(ext)) {
+                if(param != null)
+                    assetManager.load(entry.path(), commonName, type, param);
+                else
+                    assetManager.load(entry.path(), commonName, type);
+                return;
+            }
 
-        assetManager.load(entry.path(), commonName, Texture.class, param);
     }
 
+    /**
+     * Gets all the file names from the directory passed in. Adds them to the list passed in.
+     * @param dirHandle The Handle to the directory.
+     * @param list The ArrayList to add the names to.
+     */
     private void getFileNamesFromDir(FileHandle dirHandle, ArrayList<String> list){
         for (FileHandle entry: dirHandle.list()) {
             if(entry.isDirectory()) //For every directory, call this function again to load the images.
                 getFileNamesFromDir(new FileHandle(entry.path()+"/"), list); //A bit of recursion.
 
+            //Get the name. If it's empty, don't add it.
             String name = getFileName(entry);
             if(!name.equals(""))
                 list.add(name);
         }
     }
 
+    /**
+     * Gets all the file names from the directory passed in. Adds them to the list passed in. Must match the base string passed in (ie: "palmtree_dark", base = "palmtree")
+     * @param dirHandle The Handle to the directory.
+     * @param list The ArrayList to add the names to.
+     * @param base The base to match.
+     */
+    private void getFileNamesFromDir(FileHandle dirHandle, ArrayList<String> list, String base){
+        for (FileHandle entry: dirHandle.list()) {
+            if(entry.isDirectory()) //For every directory, call this function again to load the images.
+                getFileNamesFromDir(new FileHandle(entry.path()+"/"), list, base); //A bit of recursion.
+
+            String name = getFileName(entry, base);
+            if(!name.equals(""))
+                list.add(name);
+        }
+    }
+
+    /**
+     * Gets the file name from the Handle passed in.
+     * @param entry The File Handle of the file.
+     * @return The File name if it succeeded, empty if it didn't.
+     */
     private String getFileName(FileHandle entry){
         String extension = "";
         String commonName = "";
@@ -101,6 +144,38 @@ public class DataBuilder implements IDestroyable{
             extension = entry.name().substring(i + 1);
             commonName = entry.name().substring(0, i);
         }
+
+        if(extension.equals("png"))
+            return commonName;
+
+        return "";
+    }
+
+    /**
+     * Gets the file name from the Handle passed in.
+     * @param entry The File Handle of the file.
+     * @param base The base the file name must match/
+     * @return The name of the file if succeeded, empty otherwise.
+     */
+    private String getFileName(FileHandle entry, String base){
+        String extension = "";
+        String commonName = "";
+
+        //Get the index of the extension.
+        int i = entry.name().lastIndexOf('.');
+        if (i > 0) {
+            extension = entry.name().substring(i + 1); //Get the extension.
+            commonName = entry.name().substring(0, i); //Get the common name.
+        }
+
+        //Get the index of the base
+        int baseIndex = entry.name().lastIndexOf('_');
+        if(baseIndex > 0){
+            if(!entry.name().substring(0, baseIndex).equals(base)) { //If the substring doesn't equal the base, return empty.
+                return "";
+            }
+        }else
+            return "";
 
         if(extension.equals("png"))
             return commonName;
@@ -158,16 +233,22 @@ public class DataBuilder implements IDestroyable{
 
         for(JsonResource jRes : resources.resources){
 
+            //If the dir field is not null, we have a directory to pull images from.
             if(jRes.dir != null){
                 ArrayList<String> list = new ArrayList<>();
-                this.getFileNamesFromDir(Gdx.files.internal(jRes.dir), list);
-                jRes.img = list.toArray(new String[list.size()]);
-            }
+                //If we have the field 'allimgwith', loop through all of them and get the images from the dir.
+                if(jRes.allimgwith != null && jRes.allimgwith.length != 0){
+                    for(String base : jRes.allimgwith)
+                        getFileNamesFromDir(Gdx.files.internal(jRes.dir), list, base);
+                    jRes.img = list.toArray(new String[list.size()]);
+                //Otherwise, just load all from the dir.
+                }else
+                    this.getFileNamesFromDir(Gdx.files.internal(jRes.dir), list);
 
-            //Build the item array
-            String[] items = new String[jRes.items.length];
-            for(int i=0;i<jRes.items.length;i++)
-                items[i] = jRes.items[i];
+                //Set the img array as the list.
+                jRes.img = list.toArray(new String[list.size()]);
+                if(jRes.img.length == 0) GH.writeErrorMessage("No images loaded for "+jRes.resourceName+". Check that the directory "+jRes.dir+" has files and they are named correctly.");
+            }
 
             //Build the amounts array
             int[][] amounts = new int[jRes.amounts.length][2];
@@ -298,8 +379,7 @@ public class DataBuilder implements IDestroyable{
 
     public static class JsonResource{
         public String resourceName, displayName, resourceType, description, dir;
-        public String[] img;
-        public String[] items;
+        public String[] img, allimgwith, items;
         public int[][] amounts;
     }
 
