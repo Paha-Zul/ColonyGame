@@ -24,6 +24,13 @@ public class GraphicIdentity extends Component{
 		this.batch = batch;
 	}
 
+    public GraphicIdentity(Sprite sprite, SpriteBatch batch){
+        super();
+
+        this.sprite = sprite;
+        this.batch = batch;
+    }
+
 	@Override
 	public void start() {
         //This is initially needed for getting the sprite to be the right size. If we simply scaled it using this method, then
