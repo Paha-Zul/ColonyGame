@@ -6,7 +6,8 @@
       "resourceType": "tree",
       "items": ["woodlog", "twig", "penis"],
       "amounts": [[3,10],[1,3], [1,1]],
-      "img": ["redtree"]
+      "dir": "img/Interactable",
+      "allimgwith": ["tree"]
     },
     {
       "resourceName": "pine",
@@ -31,5 +32,45 @@
       "items": ["herbs"],
       "amounts": [[1,3]],
       "img": ["Flower1"]
+    },
+    {
+      "resourceName": "bunchberry",
+      "displayName": "Canadian Bunchberry",
+      "resourceType": "plant",
+      "items": ["food", "herbs"],
+      "amounts": [[1,1], [3,3]],
+      "img": ["Canadian Bunchberry"]
+    },
+    {
+      "resourceName": "cloudberry",
+      "displayName": "Cloudberry",
+      "resourceType": "plant",
+      "items": ["food", "herbs"],
+      "amounts": [[3,3], [1,1]],
+      "img": ["Cloudberry"]
+    },
+    {
+      "resourceName": "cranberry",
+      "displayName": "Cranberry",
+      "resourceType": "plant",
+      "items": ["food", "herbs"],
+      "amounts": [[3,3], [3,3]],
+      "img": ["Cranberry"]
+    },
+    {
+      "resourceName": "lingonberry",
+      "displayName": "Lingonberry",
+      "resourceType": "plant",
+      "items": ["food", "herbs"],
+      "amounts": [[1,1], [4,4]],
+      "img": ["Lingonberry"]
+    },
+    {
+      "resourceName": "partridgeberry",
+      "displayName": "Partridge Berry",
+      "resourceType": "plant",
+      "items": ["food", "herbs"],
+      "amounts": [[1,1], [1,1]],
+      "img": ["Partridge Berry"]
     }]
 }

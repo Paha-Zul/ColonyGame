@@ -5,9 +5,11 @@
       "tiles": [
         {
           "tileNames": ["0"],
-          "category": "Muddy Water",
+          "category": "Grass",
           "dir": "img/terrain/0",
-          "height": [0.8, 1]
+          "height": [0.8, 1],
+          "resources":["bunchberry"],
+          "resourcesChance": [[0, 0.2]]
         },
         {
           "tileNames": ["1"],
@@ -21,33 +23,41 @@
           "tileNames": ["2"],
           "category": "Grass",
           "dir": "img/terrain/2",
-          "height": [0.4, 0.6]
+          "height": [0.4, 0.6],
+          "resources":["cloudberry"],
+          "resourcesChance": [[0, 0.2]]
         },
         {
           "tileNames": ["3"],
           "category": "Grass",
           "dir": "img/terrain/3",
           "height": [-0.4, 0.4],
-          "resources":["pine", "redwood"],
-          "resourcesChance": [[0, 0.01], [0.01, 0.015]]
+          "resources":["redwood", "cloudberry"],
+          "resourcesChance": [[0, 0.01], [0.01, 0.1]]
         },
         {
           "tileNames": ["4"],
           "category": "Grass",
           "dir": "img/terrain/4",
-          "height": [-0.6, -0.4]
+          "height": [-0.6, -0.4],
+          "resources":["cranberry"],
+          "resourcesChance": [[0, 0.2]]
         },
         {
           "tileNames": ["5"],
           "category": "Grass",
           "dir": "img/terrain/5",
-          "height": [-0.8, -0.6]
+          "height": [-0.8, -0.6],
+          "resources":["lingonberry"],
+          "resourcesChance": [[0, 0.2]]
         },
         {
           "tileNames": ["6"],
           "category": "Grass",
           "dir": "img/terrain/6",
-          "height": [-1, -0.8]
+          "height": [-1, -0.8],
+          "resources":["partridgeberry"],
+          "resourcesChance": [[0, 0.2]]
         }]
     },
     {

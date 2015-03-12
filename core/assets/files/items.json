@@ -29,5 +29,12 @@
       "displayName": "Herbs",
       "itemType": "plant",
       "description": "Medicinal Herbs."
-    }]
+    },
+    {
+      "itemName": "food",
+      "displayName": "Food",
+      "itemType": "food",
+      "description": "Yummy food."
+    }
+  ]
 }
