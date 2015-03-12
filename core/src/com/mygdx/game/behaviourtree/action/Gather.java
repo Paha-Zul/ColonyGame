@@ -1,11 +1,16 @@
 package com.mygdx.game.behaviourtree.action;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
+import com.mygdx.game.ColonyGame;
 import com.mygdx.game.behaviourtree.LeafTask;
 import com.mygdx.game.component.*;
 import com.mygdx.game.helpers.managers.ItemManager;
+import com.mygdx.game.helpers.managers.SoundManager;
 import com.mygdx.game.helpers.timer.OneShotTimer;
+import com.mygdx.game.helpers.timer.RepeatingTimer;
 import com.mygdx.game.helpers.timer.Timer;
 
 /**
@@ -14,6 +19,10 @@ import com.mygdx.game.helpers.timer.Timer;
 public class Gather extends LeafTask{
     private Resource resource;
     private Timer gatherTimer;
+    private Timer soundTimer;
+
+    private static Sound[] chopTreeSounds = new Sound[]{ColonyGame.assetManager.get("axechop1", Sound.class), ColonyGame.assetManager.get("axechop2", Sound.class), ColonyGame.assetManager.get("axechop3", Sound.class),
+            ColonyGame.assetManager.get("axechop4", Sound.class)  , ColonyGame.assetManager.get("axechop5", Sound.class), ColonyGame.assetManager.get("axechop6", Sound.class)};
 
     public Gather(String name, BlackBoard blackBoard) {
         super(name, blackBoard);
@@ -37,7 +46,12 @@ public class Gather extends LeafTask{
             return;
         }
 
-        this.gatherTimer = new OneShotTimer(this.resource.getGatherTime(), ()->{
+        this.soundTimer = new RepeatingTimer(0.5f, ()->{
+            SoundManager.play(chopTreeSounds[MathUtils.random(chopTreeSounds.length - 1)], this.blackBoard.getEntityOwner().transform.getPosition(),
+                    new Vector2(ColonyGame.camera.position.x, ColonyGame.camera.position.y), 200, 1000);
+        });
+
+        this.gatherTimer = new OneShotTimer(5f, ()->{
             if(this.resource.isDestroyed()){
                 this.control.finishWithFailure();
                 return;
@@ -64,6 +78,7 @@ public class Gather extends LeafTask{
     public void update(float delta) {
         super.update(delta);
 
+        this.soundTimer.update(delta);
         this.gatherTimer.update(delta);
     }
 
