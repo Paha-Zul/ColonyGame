@@ -78,7 +78,7 @@ public class Gather extends LeafTask{
     public void update(float delta) {
         super.update(delta);
 
-        this.soundTimer.update(delta);
+        //this.soundTimer.update(delta);
         this.gatherTimer.update(delta);
     }
 

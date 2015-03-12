@@ -196,6 +196,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     @Override
     public void drawGUI(float delta) {
         super.drawGUI(delta);
+        GUI.font.setColor(Color.WHITE);
 
         int height = Gdx.graphics.getHeight();
         FPSTimer.update(delta);
