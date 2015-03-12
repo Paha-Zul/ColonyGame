@@ -51,7 +51,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     private float FPS = 0;
 
     private static final float camMoveSpeed = 100f;
-    private static final float camZoomSpeed = 3f;
+    private static final float camZoomSpeed = 5f;
 
     private final float infoWidth = 0.13f;
     private final float statusWidth = 0.135f;
@@ -82,7 +82,6 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     private GUI.GUIStyle gatherStyle = new GUI.GUIStyle();
     private GUI.GUIStyle exploreStyle = new GUI.GUIStyle();
 
-    private BitmapFont topFont;
     private GUI.GUIStyle UIStyle;
 
     private Interactable interactable = null;
@@ -184,7 +183,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("fonts/Trajan Bold.ttf"));
         FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
         parameter.size = 12;
-        topFont = generator.generateFont(parameter);
+        BitmapFont topFont = generator.generateFont(parameter);
         generator.dispose();
         topFont.setColor(126f/255f, 75f/255f, 27f/255f, 1);
 
@@ -213,8 +212,8 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
         //Draw stuff about the selected entity.
         if((this.selected != null && this.interactable != null) || this.selectedList.size() > 0){
-            GUI.Texture(this.uiBackgroundBaseRect, this.UIBackgroundBase, this.batch);
-            GUI.Texture(this.uiBackgroundTopRect, this.UIBackgroundTop, this.batch);
+            GUI.Texture(this.UIBackgroundBase, this.uiBackgroundBaseRect, this.batch);
+            GUI.Texture(this.UIBackgroundTop, this.uiBackgroundTopRect, this.batch);
             this.drawMultipleProfiles(this.tabsRect);
             this.displaySelected();
         }
@@ -290,7 +289,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         OrthographicCamera camera = ColonyGame.camera;
         Vector3 mouseCoords = camera.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
 
-        GUI.Texture(rect, this.background, this.batch);
+        GUI.Texture(this.background, rect, this.batch);
         WorldGen world = WorldGen.getInstance();
         int index[] = world.getIndex(mouseCoords.x*Constants.SCALE, mouseCoords.y*Constants.SCALE);
         WorldGen.TerrainTile tile = world.getNode(index);
@@ -386,6 +385,8 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
                     for(BehaviourManagerComp.Line line : lines)
                         batch.draw(blueSquare, line.startX, line.startY, 0, 0, line.width, 0.1f, 1, 1, line.rotation, 0, 0, blueSquare.getWidth(), blueSquare.getHeight(), false, false);
                     batch.setProjectionMatrix(ColonyGame.UICamera.combined);
+
+                    GUI.Label(this.interactable.interactable.getBehManager().getCurrentTaskName(), this.batch, this.infoRect.x + this.infoRect.width/2, this.infoRect.y + this.infoRect.getHeight()/2, true, this.UIStyle);
                 }
             }
         }
@@ -405,9 +406,9 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         GUI.Label(text, batch, x, y, false, this.UIStyle);
 
         batch.setColor(Color.BLACK);
-        GUI.Texture(x + 80, y, width, height, WorldGen.getInstance().whiteTex, batch);
+        GUI.Texture(WorldGen.getInstance().whiteTex, x + 80, y, width, height, batch);
         batch.setColor(Color.GREEN);
-        GUI.Texture(x + 80 + 2, y + 2, width - 4, height - 4, WorldGen.getInstance().whiteTex, batch);
+        GUI.Texture(WorldGen.getInstance().whiteTex, x + 80 + 2, y + 2, width - 4, height - 4, batch);
 
         GUI.Label((int)currVal+"/"+(int)maxVal, batch, x + 80 + width*0.5f, y + height*0.5f, true);
     }

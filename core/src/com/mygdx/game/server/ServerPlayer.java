@@ -124,10 +124,11 @@ public class ServerPlayer {
 
         this.batch.end();
 
-        //drawBox2DDebug();
         //Draw the grid squares if enabled.
-        if(drawGrid)
-		    this.grid.debugDraw();
+        if(drawGrid) {
+            this.grid.debugDraw();
+            drawBox2DDebug();
+        }
 
 	}
 
@@ -147,10 +148,11 @@ public class ServerPlayer {
     }
 
 	private void generateStart(Vector2 start){
-		ColonyEntity colonyEnt = new ColonyEntity(start, 0, new Texture("img/colony.png"), this.batch, 11);
+		ColonyEntity colonyEnt = new ColonyEntity(start, 0, ColonyGame.assetManager.get("Colony", Texture.class), this.batch, 11);
+        Colony colony = colonyEnt.getComponent(Colony.class);
+
         for(int i=0;i<10;i++)
             new AnimalEnt(start, 0, ColonyGame.assetManager.get("animal2", Texture.class), this.batch, 11);
-		Colony colony = colonyEnt.getComponent(Colony.class);
 
 		int radius = 8;
 		Functional.Perform<Grid.Node[][]> destroyNearbyResources = (grid) -> {

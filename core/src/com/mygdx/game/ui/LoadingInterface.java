@@ -27,8 +27,8 @@ public class LoadingInterface extends UI {
         super(batch, game);
         this.batch = batch;
 
-        this.outline = new Texture("img/LoadingBarOutline.png");
-        this.bar = new Texture("img/LoadingBar.png");
+        this.outline = ColonyGame.assetManager.get("LoadingBarOutline", Texture.class);
+        this.bar = ColonyGame.assetManager.get("LoadingBar", Texture.class);
 
         this.loadingBar.set(Gdx.graphics.getWidth()/2 - width/2, Gdx.graphics.getHeight()/2 + height/2, width, height);
         this.square.set(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -43,11 +43,11 @@ public class LoadingInterface extends UI {
         if(!done) {
             Color color = this.batch.getColor();
             this.batch.setColor(Color.BLACK);
-            GUI.Texture(this.square, WorldGen.getInstance().whiteTex, this.batch);
+            GUI.Texture(WorldGen.getInstance().whiteTex, this.square, this.batch);
             this.batch.setColor(color);
 
-            GUI.Texture(this.loadingBar, this.outline, this.batch);
-            GUI.Texture(this.loadingBar.x, this.loadingBar.y, this.loadingBar.width*WorldGen.getInstance().percentageDone, this.loadingBar.height, this.bar, this.batch);
+            GUI.Texture(this.outline, this.loadingBar, this.batch);
+            GUI.Texture(this.bar, this.loadingBar.x, this.loadingBar.y, this.loadingBar.width*WorldGen.getInstance().percentageDone, this.loadingBar.height, this.batch);
             GUI.Label("Loading Terrain", this.batch, this.loadingBar.getX() + this.loadingBar.width/2, this.loadingBar.getY() + 40, true);
         }
     }

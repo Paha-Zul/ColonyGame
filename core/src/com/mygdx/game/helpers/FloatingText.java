@@ -18,11 +18,12 @@ public class FloatingText implements IDestroyable{
     private float percent, fadingDiff, fadePercent;
 
     private boolean destroyed = false;
-    private static GUI.GUIStyle style = new GUI.GUIStyle();
+    private static GUI.GUIStyle style;
 
     private Color color = new Color(1, 1, 1, 1);
 
     static{
+        style = new GUI.GUIStyle();
         style.font.setScale(1f/Constants.SCALE);
     }
 
