@@ -1,6 +1,7 @@
 package com.mygdx.game.behaviourtree.control;
 
 import com.mygdx.game.behaviourtree.Task;
+import com.mygdx.game.interfaces.Functional;
 
 /**
  * Created by Bbent_000 on 12/31/2014.
@@ -8,9 +9,16 @@ import com.mygdx.game.behaviourtree.Task;
 public class TaskController {
     protected boolean ready=true, failed=false, finished=false, running = false, started = false;
     protected Task task;
+    protected Functional.Callback successCallback, failureCallback;
 
     public TaskController(Task task){
         this.task = task;
+    }
+
+    public TaskController(Task task, Functional.Callback successCallback, Functional.Callback failureCallback){
+        this.task = task;
+        this.successCallback = successCallback;
+        this.failureCallback = failureCallback;
     }
 
     /**
@@ -32,7 +40,7 @@ public class TaskController {
         this.running = false;
         this.failed = false;
 
-        this.task.getControl().safeEnd();
+        this.safeEnd();
     }
 
     /**
@@ -55,9 +63,14 @@ public class TaskController {
     }
 
     /**
-     * Ends the task.
+     * Ends the task. Also calls any callbacks if valid.
      */
     public void safeEnd(){
+        if(hasFailed() && this.failureCallback != null)
+            this.failureCallback.callback();
+        else if(this.successCallback != null)
+            this.successCallback.callback();
+
         this.task.end();
     }
 
