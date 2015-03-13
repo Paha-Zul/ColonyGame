@@ -16,20 +16,12 @@ import com.mygdx.game.interfaces.Functional;
 /**
  * Created by Paha on 1/29/2015.
  */
-public class FindClosestResource extends LeafTask{
+public class FindClosestEntity extends LeafTask{
     private String itemName;
-    private Functional.Callback failCallback, successCallback;
+    private boolean done = false, failed = false;
 
-    public FindClosestResource(String name, BlackBoard blackBoard, String itemName, Functional.Callback failCallback, Functional.Callback successCallback) {
-        super(name, blackBoard);
-
-        this.itemName = itemName;
-        this.failCallback = failCallback;
-        this.successCallback = successCallback;
-    }
-
-    public FindClosestResource(String name, BlackBoard blackBoard, String itemName) {
-        super(name, blackBoard);
+    public FindClosestEntity(String name, BlackBoard blackBoard, String itemName, Functional.Callback failCallback, Functional.Callback successCallback) {
+        super(name, blackBoard, successCallback, failCallback);
 
         this.itemName = itemName;
     }
@@ -88,13 +80,11 @@ public class FindClosestResource extends LeafTask{
                                 if(!entity.getComponent(Resource.class).isTaken()) {
                                     //If we have a valid Entity, store it and finish with success.
                                     this.blackBoard.target = entity;
-                                    this.control.finishWithSuccess();
-
                                     //Call the success callback if available and set some extra variables.
-                                    if(this.successCallback != null) this.successCallback.callback();
                                     this.blackBoard.targetNode = this.blackBoard.colonyGrid.getNode(this.blackBoard.target);
                                     this.blackBoard.targetResource = this.blackBoard.target.getComponent(Resource.class);
                                     this.blackBoard.targetResource.setTaken(true); //Set the resource as taken.
+                                    this.done = true;
                                     return;
                                 }
                             }
@@ -107,8 +97,8 @@ public class FindClosestResource extends LeafTask{
 
             //If we reach this area, we've covered everywhere we can. Fail this Task.
             this.blackBoard.target = null;
-            this.control.finishWithFailure();
-            if(this.failCallback != null) this.failCallback.callback();
+            this.failed = true;
+            this.done = true;
         };
 
         ColonyGame.threadPool.submit(new CallbackRunnable(getClosestResource));
@@ -117,6 +107,12 @@ public class FindClosestResource extends LeafTask{
     @Override
     public void update(float delta) {
         super.update(delta);
+
+        //This needs to be kept out of the threaded method. Causes issues.
+        if(this.done){
+            if(failed) this.control.finishWithFailure();
+            else this.control.finishWithSuccess();
+        }
     }
 
     @Override
