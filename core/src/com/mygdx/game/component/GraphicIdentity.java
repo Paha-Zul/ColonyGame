@@ -3,6 +3,7 @@ package com.mygdx.game.component;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.helpers.Constants;
@@ -17,7 +18,7 @@ public class GraphicIdentity extends Component{
 	private SpriteBatch batch;
     private int currVisibility=0;
 
-	public GraphicIdentity(Texture image, SpriteBatch batch){
+	public GraphicIdentity(TextureRegion image, SpriteBatch batch){
 		super();
 
 		this.sprite = new Sprite(image);

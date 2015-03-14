@@ -5,6 +5,8 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
@@ -148,11 +150,13 @@ public class ServerPlayer {
     }
 
 	private void generateStart(Vector2 start){
-		ColonyEntity colonyEnt = new ColonyEntity(start, 0, ColonyGame.assetManager.get("Colony", Texture.class), this.batch, 11);
+		ColonyEntity colonyEnt = new ColonyEntity(start, 0, new TextureRegion(ColonyGame.assetManager.get("Colony", Texture.class)), this.batch, 11);
         Colony colony = colonyEnt.getComponent(Colony.class);
 
-        for(int i=0;i<10;i++)
-            new AnimalEnt(start, 0, ColonyGame.assetManager.get("animal2", Texture.class), this.batch, 11);
+        for(int i=0;i<10;i++) {
+            TextureAtlas atlas = ColonyGame.assetManager.get("interactables", TextureAtlas.class);
+            new AnimalEnt(start, 0, atlas.findRegion("squirrel"), this.batch, 11);
+        }
 
 		int radius = 8;
 		Functional.Perform<Grid.Node[][]> destroyNearbyResources = (grid) -> {

@@ -89,11 +89,10 @@ public class ListHolder {
             FloatingText text = iter.next();
             if(text.isDestroyed()){
                 iter.remove();
-                continue;
+            }else {
+                text.update(delta);
+                text.render(delta, batch);
             }
-
-            text.update(delta);
-            text.render(delta, batch);
         }
     }
 

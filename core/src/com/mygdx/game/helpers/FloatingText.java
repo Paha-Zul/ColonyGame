@@ -3,6 +3,8 @@ package com.mygdx.game.helpers;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
+import com.mygdx.game.ColonyGame;
 import com.mygdx.game.helpers.gui.GUI;
 import com.mygdx.game.interfaces.IDestroyable;
 
@@ -24,7 +26,6 @@ public class FloatingText implements IDestroyable{
 
     static{
         style = new GUI.GUIStyle();
-        style.font.setScale(1f/Constants.SCALE);
     }
 
     /**
@@ -73,7 +74,9 @@ public class FloatingText implements IDestroyable{
         }
 
         style.font.setColor(color);
-        GUI.Label(this.text, batch, currPos.x, currPos.y, true, style);
+        batch.setProjectionMatrix(ColonyGame.UICamera.combined);
+        Vector3 pos = ColonyGame.camera.project(new Vector3(currPos.x, currPos.y, 0));
+        GUI.Label(this.text, batch, pos.x, pos.y, true, style);
     }
 
     @Override

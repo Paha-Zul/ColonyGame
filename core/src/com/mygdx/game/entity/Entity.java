@@ -1,5 +1,6 @@
 package com.mygdx.game.entity;
 
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 
@@ -42,7 +43,7 @@ public class Entity {
 	 * @param graphic The Texture of the Entity
 	 * @param batch The SpriteBatch to draw the Entity.
 	 */
-	public Entity(Vector2 position, float rotation, Texture graphic, SpriteBatch batch, int drawLevel){
+	public Entity(Vector2 position, float rotation, TextureRegion graphic, SpriteBatch batch, int drawLevel){
 		this.activeComponentList = new ArrayList<>();
 		this.inactiveComponentList = new ArrayList<>();
 		this.newComponentList = new ArrayList<>();
@@ -51,7 +52,7 @@ public class Entity {
 		this.transform = this.addComponent(new Transform(position, rotation, this));
 
 		if(batch != null && graphic != null) {
-			this.identity = this.addComponent(new GraphicIdentity(graphic, batch));
+			this.identity = this.addComponent(new GraphicIdentity(new TextureRegion(graphic), batch));
 			this.newComponentList.add(this.identity);
 		}
 

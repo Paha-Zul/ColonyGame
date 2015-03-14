@@ -12,6 +12,10 @@ public class Functional {
 		void perform(T t);
 	}
 
+    public interface Criteria<T>{
+        boolean criteria(T t);
+    }
+
 	public interface Callback{
 		void callback();
 	}

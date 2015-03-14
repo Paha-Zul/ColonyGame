@@ -3,6 +3,7 @@ package com.mygdx.game.component;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.Grid;
+import com.mygdx.game.interfaces.Functional;
 
 import java.util.LinkedList;
 

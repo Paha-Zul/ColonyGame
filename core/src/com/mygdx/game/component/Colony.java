@@ -2,6 +2,7 @@ package com.mygdx.game.component;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -46,7 +47,7 @@ public class Colony extends Component implements IInteractable {
 
         this.inventory = this.owner.getComponent(Inventory.class);
 
-        Texture colonistTexture = ColonyGame.assetManager.get("colonist", Texture.class);
+        TextureRegion colonistTexture = new TextureRegion(ColonyGame.assetManager.get("colonist", Texture.class));
 
         for(int i=0;i<5;i++){
             Entity c = this.makeColonist(this.owner.transform.getPosition(), 200f/ Constants.SCALE, colonistTexture);
@@ -55,7 +56,7 @@ public class Colony extends Component implements IInteractable {
         }
     }
 
-    private Entity makeColonist(Vector2 start, float offset, Texture texture){
+    private Entity makeColonist(Vector2 start, float offset, TextureRegion texture){
         Vector2 newPos = new Vector2(start.x + MathUtils.random()*offset*2 - offset, start.y + MathUtils.random()*offset*2 - offset);
         return new ColonistEnt(newPos, 0, texture, ColonyGame.batch, 10);
     }

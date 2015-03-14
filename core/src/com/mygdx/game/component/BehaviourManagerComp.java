@@ -1,10 +1,7 @@
 package com.mygdx.game.component;
 
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Matrix4;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.behaviourtree.Task;
@@ -12,9 +9,9 @@ import com.mygdx.game.behaviourtree.action.*;
 import com.mygdx.game.behaviourtree.composite.Sequence;
 import com.mygdx.game.behaviourtree.control.ParentTaskController;
 import com.mygdx.game.entity.Entity;
-import com.mygdx.game.helpers.gui.GUI;
+import com.mygdx.game.helpers.Callbacks;
+import com.mygdx.game.helpers.Constants;
 import com.mygdx.game.interfaces.Functional;
-import com.mygdx.game.interfaces.IDisplayable;
 
 import java.util.ArrayList;
 
@@ -66,32 +63,37 @@ public class BehaviourManagerComp extends Component{
     }
 
     private Task gatherResource(){
-        //Find the closest valid resource and valid storage closest to the resource.
-        //Find a path to the resource.
-        //Move to the resource.
-        //Gather the resource.
-        //Find a path back to the storage.
-        //Store the resource.
-
-        Sequence sequence = new Sequence("Gathering Resource", this.blackBoard);
+        /*
+         * Find the closest valid resource and valid storage closest to the resource.
+         * Find a path to the resource.
+         * Move to the resource.
+         * Gather the resource.
+         * Find a path back to the storage.
+         * Store the resource.
+         */
 
         //If we fail to find a resource, we need to explore until we find one...
         Functional.Callback fail = () -> {
             //When we finish moving to the newly explored area, try to gather a resource again.
-            Functional.Callback onFinish = () -> {
-              this.changeTask(this.gatherResource()); //Change this back to gathering.
-            };
-            this.changeTask(this.exploreUnexplored(onFinish));
+            Functional.Callback onFinish = () ->  this.changeTask(this.gatherResource());
+            Task task = this.exploreUnexplored();
+            task.getControl().getCallbacks().finishCallback = onFinish;
+            this.changeTask(task);
         };
 
-        FindClosestResource fr = new FindClosestResource("Finding Closest Resource", this.blackBoard, "woodlog", fail, null);
+        Sequence sequence = new Sequence("Gathering Resource", this.blackBoard);
+
+        FindClosestEntity fr = new FindClosestEntity("Finding Closest Resource", this.blackBoard, "woodlog", Constants.ENTITY_RESOURCE);
+        fr.getControl().callbacks.failureCallback = fail;
+        fr.getControl().callbacks.criteria = (e) -> ((Entity)e).hasTag(Constants.ENTITY_RESOURCE) && !((Entity)e).getComponent(Resource.class).isTaken();
+        fr.getControl().callbacks.successCallback = () -> {blackBoard.target.getComponent(Resource.class).setTaken(true); System.out.println("Set taken");};
+
         FindPath findPath = new FindPath("Finding Path to Resource", this.blackBoard);
         MoveTo move = new MoveTo("Moving to Resource", this.blackBoard);
         Gather gather = new Gather("Gathering Resource", this.blackBoard);
         FindPath findPathToStorage = new FindPath("Finding Path to Storage", this.blackBoard);
         MoveTo moveToStorage = new MoveTo("Moving to Storage", this.blackBoard);
         TransferResource transferItems = new TransferResource("Transfering Resources", this.blackBoard);
-
 
         ((ParentTaskController) sequence.getControl()).addTask(fr);
         ((ParentTaskController)sequence.getControl()).addTask(findPath);
@@ -104,15 +106,17 @@ public class BehaviourManagerComp extends Component{
         return sequence;
     }
 
-    private Task exploreUnexplored(Functional.Callback callbackOnCompletion){
-        //Find an unexplored location.
-        //Move to it!
+    private Task exploreUnexplored(){
+        /**
+         * Find an unexplored location.
+         * Move to it!
+         */
 
         Sequence sequence = new Sequence("Exploring", this.blackBoard);
 
         FindClosestUnexplored findClosestUnexplored = new FindClosestUnexplored("Finding Closest Unexplored Location", this.blackBoard);
         FindPath findPathToUnexplored = new FindPath("Finding Path to Unexplored", this.blackBoard);
-        MoveTo moveToLocation = new MoveTo("Moving to Explore", this.blackBoard, callbackOnCompletion);
+        MoveTo moveToLocation = new MoveTo("Moving to Explore", this.blackBoard);
 
         ((ParentTaskController) sequence.getControl()).addTask(findClosestUnexplored);
         ((ParentTaskController) sequence.getControl()).addTask(findPathToUnexplored);
@@ -147,7 +151,7 @@ public class BehaviourManagerComp extends Component{
     }
 
     public void explore(){
-        this.changeTask(this.exploreUnexplored(null));
+        this.changeTask(this.exploreUnexplored());
     }
 
     private void changeTask(Task task){

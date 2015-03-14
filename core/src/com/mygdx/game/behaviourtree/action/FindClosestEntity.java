@@ -19,11 +19,13 @@ import com.mygdx.game.interfaces.Functional;
 public class FindClosestEntity extends LeafTask{
     private String itemName;
     private boolean done = false, failed = false;
+    private int[] tags;
 
-    public FindClosestEntity(String name, BlackBoard blackBoard, String itemName, Functional.Callback failCallback, Functional.Callback successCallback) {
-        super(name, blackBoard, successCallback, failCallback);
+    public FindClosestEntity(String name, BlackBoard blackBoard, String itemName, int... tags) {
+        super(name, blackBoard);
 
         this.itemName = itemName;
+        this.tags = tags;
     }
 
     @Override
@@ -34,6 +36,7 @@ public class FindClosestEntity extends LeafTask{
     @Override
     public void start() {
         super.start();
+        System.out.println("Started");
 
         this.getClosestResource();
     }
@@ -41,17 +44,21 @@ public class FindClosestEntity extends LeafTask{
     private void getClosestResource(){
         Grid.Node[][] grid = ColonyGame.worldGrid.getGrid();
         Functional.Callback getClosestResource = () -> {
-            Grid.Node currNode = this.blackBoard.colonyGrid.getNode(this.blackBoard.getEntityOwner());
-            boolean finished = false;
-            int radius = 0;
+            Grid.Node currNode = this.blackBoard.colonyGrid.getNode(this.blackBoard.getEntityOwner()); //Get the nod we are standing on.
+            boolean finished = false; //Flag
+            int radius = 0; //The radius to start at and keep track of.
 
+            //If we couldn't get our node we are standing on, something went wrong. Give up.
             if(currNode == null){
-                this.control.finishWithFailure();
+                this.failed = true;
+                this.done = true;
                 this.blackBoard.target = null;
                 return;
             }
 
+            //While the flag is still false, go!
             while(!finished) {
+                //Get the starting and ending bounds.
                 int startX = (currNode.getCol() - radius < 0) ? -1 : currNode.getCol() - radius;
                 int endX = (currNode.getCol() + radius >= grid.length) ? grid.length : currNode.getCol() + radius;
                 int startY = (currNode.getRow() - radius < 0) ? -1 : currNode.getRow() - radius;
@@ -74,16 +81,14 @@ public class FindClosestEntity extends LeafTask{
 
                         finished = false; //Set this to false. We still have places to check obviously!
 
-                        //Loop over the Entity list in the current node and try to find a tree.
+                        //Loop over the Entity list in the current node and try to an entity that matches the criteria.
                         for(Entity entity : node.getEntityList()) {
-                            if (entity.hasTag(Constants.ENTITY_RESOURCE)) {
-                                if(!entity.getComponent(Resource.class).isTaken()) {
+                            if (entity.hasTags(tags)) { //If it has the tags required.
+                                //If there is no callback or the callback passes, finish successfully.
+                                if(control.callbacks == null || control.callbacks.criteria == null || control.callbacks.criteria.criteria(entity)) {
                                     //If we have a valid Entity, store it and finish with success.
                                     this.blackBoard.target = entity;
-                                    //Call the success callback if available and set some extra variables.
                                     this.blackBoard.targetNode = this.blackBoard.colonyGrid.getNode(this.blackBoard.target);
-                                    this.blackBoard.targetResource = this.blackBoard.target.getComponent(Resource.class);
-                                    this.blackBoard.targetResource.setTaken(true); //Set the resource as taken.
                                     this.done = true;
                                     return;
                                 }
@@ -110,8 +115,10 @@ public class FindClosestEntity extends LeafTask{
 
         //This needs to be kept out of the threaded method. Causes issues.
         if(this.done){
+            System.out.println("Finished1");
             if(failed) this.control.finishWithFailure();
             else this.control.finishWithSuccess();
+            System.out.println("Finished2");
         }
     }
 

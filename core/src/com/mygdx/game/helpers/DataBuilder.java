@@ -29,7 +29,7 @@ public class DataBuilder implements IDestroyable{
     String tilePath = "tiles.json";
     String worldPath = "worldgen.json";
     String changeLogPath = "changelog.json";
-    String imgPath = "img/";
+    String imgPath = "img/misc";
     String soundPath = "sounds/";
     String atlasPath = "atlas/";
 

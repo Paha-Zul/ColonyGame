@@ -1,7 +1,7 @@
 package com.mygdx.game.behaviourtree.control;
 
 import com.mygdx.game.behaviourtree.Task;
-import com.mygdx.game.interfaces.Functional;
+import com.mygdx.game.helpers.Callbacks;
 
 /**
  * Created by Bbent_000 on 12/31/2014.
@@ -9,16 +9,11 @@ import com.mygdx.game.interfaces.Functional;
 public class TaskController {
     protected boolean ready=true, failed=false, finished=false, running = false, started = false;
     protected Task task;
-    protected Functional.Callback successCallback, failureCallback;
+    public Callbacks callbacks;
 
     public TaskController(Task task){
         this.task = task;
-    }
-
-    public TaskController(Task task, Functional.Callback successCallback, Functional.Callback failureCallback){
-        this.task = task;
-        this.successCallback = successCallback;
-        this.failureCallback = failureCallback;
+        this.callbacks = new Callbacks();
     }
 
     /**
@@ -28,8 +23,6 @@ public class TaskController {
         this.finished = true;
         this.failed = true;
         this.running = false;
-
-        this.task.getControl().safeEnd();
     }
 
     /**
@@ -39,8 +32,6 @@ public class TaskController {
         this.finished = true;
         this.running = false;
         this.failed = false;
-
-        this.safeEnd();
     }
 
     /**
@@ -60,16 +51,26 @@ public class TaskController {
     public void safeStart(){
         this.started = true;
         this.task.start();
+
+        if(this.callbacks != null && this.callbacks.startCallback != null)
+            this.callbacks.startCallback.callback();
     }
 
     /**
      * Ends the task. Also calls any callbacks if valid.
      */
     public void safeEnd(){
-        if(hasFailed() && this.failureCallback != null)
-            this.failureCallback.callback();
-        else if(this.successCallback != null)
-            this.successCallback.callback();
+        if(callbacks != null) {
+            if (hasFailed() && this.callbacks.failureCallback != null)
+                this.callbacks.failureCallback.callback();
+            else if (this.callbacks.successCallback != null) {
+                this.callbacks.successCallback.callback();
+                System.out.println("Called");
+            }
+
+            if(this.callbacks.finishCallback != null)
+                this.callbacks.finishCallback.callback();
+        }
 
         this.task.end();
     }
@@ -116,5 +117,9 @@ public class TaskController {
 
     public boolean hasStarted(){
         return this.started;
+    }
+
+    public Callbacks getCallbacks(){
+        return this.callbacks;
     }
 }

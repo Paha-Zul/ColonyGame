@@ -1,7 +1,6 @@
 package com.mygdx.game.behaviourtree.control;
 
 import com.mygdx.game.behaviourtree.Task;
-import com.mygdx.game.interfaces.Functional;
 
 import java.util.ArrayList;
 
@@ -16,10 +15,6 @@ public class ParentTaskController extends TaskController{
 
     public ParentTaskController(Task task) {
         super(task);
-    }
-
-    public ParentTaskController(Task task, Functional.Callback successCallback, Functional.Callback failureCallback){
-        super(task, successCallback, failureCallback);
     }
 
     @Override

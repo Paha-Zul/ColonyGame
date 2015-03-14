@@ -2,6 +2,7 @@ package com.mygdx.game.behaviourtree;
 
 import com.mygdx.game.behaviourtree.control.TaskController;
 import com.mygdx.game.component.BlackBoard;
+import com.mygdx.game.helpers.Callbacks;
 import com.mygdx.game.interfaces.Functional;
 
 /**
@@ -14,12 +15,6 @@ public class LeafTask extends Task{
         super(name, blackBoard);
 
         this.control = new TaskController(this);
-    }
-
-    public LeafTask(String name, BlackBoard blackBoard, Functional.Callback successCallback, Functional.Callback failureCallback) {
-        super(name, blackBoard);
-
-        this.control = new TaskController(this, successCallback, failureCallback);
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.mygdx.game.entity;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
@@ -19,7 +20,7 @@ import com.mygdx.game.helpers.managers.ResourceManager;
  * Created by Paha on 1/29/2015.
  */
 public class TreeEnt extends Entity{
-    public TreeEnt(Vector2 position, float rotation, Texture graphic, SpriteBatch batch, int drawLevel) {
+    public TreeEnt(Vector2 position, float rotation, TextureRegion graphic, SpriteBatch batch, int drawLevel) {
         super(position, rotation, graphic, batch, drawLevel);
 
         this.addTag(Constants.ENTITY_RESOURCE);
