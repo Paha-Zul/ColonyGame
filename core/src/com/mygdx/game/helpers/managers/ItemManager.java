@@ -1,6 +1,7 @@
 package com.mygdx.game.helpers.managers;
 
 import com.mygdx.game.component.Item;
+import com.mygdx.game.helpers.DataBuilder;
 
 import java.util.HashMap;
 
@@ -8,28 +9,29 @@ import java.util.HashMap;
  * Created by Paha on 1/18/2015.
  */
 public class ItemManager {
-    private static HashMap<String, Item> itemMap = new HashMap<>(20);
-
-    static{
-
-    }
+    private static HashMap<String, DataBuilder.JsonItem> itemMap = new HashMap<>(20);
 
     public static Item getItemByName(String name){
-        Item item = itemMap.get(name);
+        DataBuilder.JsonItem item = itemMap.get(name);
         if(item == null)
             throw new RuntimeException("Item of name '"+name+"' does not exist.");
 
         return new Item(item);
     }
 
-    public static boolean doesItemExist(String name){
-        if(itemMap.get(name) == null)
-            return false;
+    public static DataBuilder.JsonItem getItemReference(String name){
+        DataBuilder.JsonItem item = itemMap.get(name);
+        if(item == null)
+            throw new RuntimeException("Item of name '"+name+"' does not exist.");
 
-        return true;
+        return item;
     }
 
-    public static void addItemInstance(Item item){
+    public static boolean doesItemExist(String name){
+        return itemMap.get(name) != null;
+    }
+
+    public static void addItemInstance(DataBuilder.JsonItem item){
         itemMap.put(item.getItemName(), item);
     }
 

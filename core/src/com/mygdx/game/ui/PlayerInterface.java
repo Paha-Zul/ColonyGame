@@ -409,7 +409,8 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         batch.setColor(Color.BLACK);
         GUI.Texture(WorldGen.getInstance().whiteTex, x + 80, y, width, height, batch);
         batch.setColor(Color.GREEN);
-        GUI.Texture(WorldGen.getInstance().whiteTex, x + 80 + 2, y + 2, width - 4, height - 4, batch);
+        float newWidth = (currVal/maxVal)*width;
+        GUI.Texture(WorldGen.getInstance().whiteTex, x + 80 + 2, y + 2, newWidth - 4, height - 4, batch);
 
         GUI.Label((int)currVal+"/"+(int)maxVal, batch, x + 80 + width*0.5f, y + height*0.5f, true);
     }

@@ -35,8 +35,8 @@ public class ResourceEnt extends Entity{
         super(position, rotation, null, batch, drawLevel);
         this.addTag(Constants.ENTITY_RESOURCE);
         this.name = "Resource";
-        this.addComponent(new GraphicIdentity(sprite, batch));
 
+        this.addComponent(new GraphicIdentity(sprite, batch));
         this.addComponent(new Interactable("resource"));
         this.addComponent(new GridComponent(Constants.GRIDSTATIC, ColonyGame.worldGrid, -1));
         this.getComponent(GraphicIdentity.class).alignment = 1;

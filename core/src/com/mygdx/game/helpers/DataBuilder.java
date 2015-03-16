@@ -218,7 +218,7 @@ public class DataBuilder implements IDestroyable{
             Item item = new Item(jsonItem.itemName, jsonItem.itemType, true, 10000, 1);
             item.setDisplayName(jsonItem.displayName);
             item.setDescription(jsonItem.description);
-            ItemManager.addItemInstance(item);
+            ItemManager.addItemInstance(jsonItem);
         }
     }
 
@@ -369,8 +369,48 @@ public class DataBuilder implements IDestroyable{
         public Array<JsonItem> items;
     }
 
-    private static class JsonItem{
-        public String itemName, displayName, itemType, description, img;
+    public static class JsonItem{
+        private String itemName, displayName, itemType, description, img;
+        private String[] effects;
+        private int[] strengths;
+
+        public String getItemName() {
+            return itemName;
+        }
+
+        public String getDisplayName() {
+            return displayName;
+        }
+
+        public String getItemType() {
+            return itemType;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+
+        public String getImg() {
+            return img;
+        }
+
+        public String[] getEffects() {
+            return effects;
+        }
+
+        public int[] getStrengths() {
+            return strengths;
+        }
+
+        public boolean hasEffect(String effect){
+            if(effects != null) {
+                for (String eff : effects)
+                    if (eff.equals(effect))
+                        return true;
+            }
+
+            return false;
+        }
     }
 
     private static class JsonResources{
@@ -381,6 +421,7 @@ public class DataBuilder implements IDestroyable{
         public String resourceName, displayName, resourceType, description, dir;
         public String[] img, allimgwith, items;
         public int[][] amounts;
+        public int gatherTime;
     }
 
     private static class JsonTiles{

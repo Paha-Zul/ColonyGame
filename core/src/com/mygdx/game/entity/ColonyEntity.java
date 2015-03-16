@@ -21,6 +21,8 @@ import com.mygdx.game.helpers.Constants;
 public class ColonyEntity extends Entity{
     public ColonyEntity(Vector2 position, float rotation, TextureRegion graphic, SpriteBatch batch, int drawLevel) {
         super(position, rotation, graphic, batch, drawLevel);
+        this.name = "Colony";
+        this.addTag(Constants.ENTITY_BUILDING);
 
         this.addComponent(new GridComponent(Constants.GRIDSTATIC, ColonyGame.worldGrid, 5));
         this.addComponent(new Colony());

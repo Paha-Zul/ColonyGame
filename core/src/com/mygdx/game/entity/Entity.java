@@ -203,9 +203,7 @@ public class Entity {
 
     public boolean hasTags(int[] tagsToCheck){
         int tags = 0b0;
-        for(int i=0;i<tagsToCheck.length;i++)
-            tags |= (1 << tagsToCheck[i]);
-
+        for (int aTagsToCheck : tagsToCheck) tags |= (1 << aTagsToCheck);
         return (tags & tagMask) == tags;
     }
 

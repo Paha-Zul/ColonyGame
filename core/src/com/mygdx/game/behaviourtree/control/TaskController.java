@@ -63,10 +63,8 @@ public class TaskController {
         if(callbacks != null) {
             if (hasFailed() && this.callbacks.failureCallback != null)
                 this.callbacks.failureCallback.callback();
-            else if (this.callbacks.successCallback != null) {
+            else if (this.callbacks.successCallback != null)
                 this.callbacks.successCallback.callback();
-                System.out.println("Called");
-            }
 
             if(this.callbacks.finishCallback != null)
                 this.callbacks.finishCallback.callback();

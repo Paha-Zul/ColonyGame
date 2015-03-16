@@ -85,4 +85,9 @@ public abstract class ParentTask extends Task{
 
         return "Nothing";
     }
+
+    @Override
+    public BlackBoard getBlackboard() {
+        return this.blackBoard;
+    }
 }
