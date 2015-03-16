@@ -1,11 +1,9 @@
 package com.mygdx.game.behaviourtree.action;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.behaviourtree.LeafTask;
 import com.mygdx.game.component.BlackBoard;
-import com.mygdx.game.component.Resource;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.*;
 import com.mygdx.game.helpers.managers.ItemManager;
@@ -36,7 +34,6 @@ public class FindClosestEntity extends LeafTask{
     @Override
     public void start() {
         super.start();
-        System.out.println("Started");
 
         this.getClosestResource();
     }
@@ -115,10 +112,8 @@ public class FindClosestEntity extends LeafTask{
 
         //This needs to be kept out of the threaded method. Causes issues.
         if(this.done){
-            System.out.println("Finished1");
             if(failed) this.control.finishWithFailure();
             else this.control.finishWithSuccess();
-            System.out.println("Finished2");
         }
     }
 
