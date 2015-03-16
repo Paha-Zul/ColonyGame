@@ -7,7 +7,8 @@
       "items": ["woodlog", "twig", "penis"],
       "amounts": [[3,10],[1,3], [1,1]],
       "dir": "img/Interactable",
-      "allimgwith": ["tree"]
+      "allimgwith": ["tree"],
+      "gatherTime": 3
     },
     {
       "resourceName": "pine",
@@ -15,7 +16,8 @@
       "resourceType": "tree",
       "items": ["woodlog"],
       "amounts": [[1,3]],
-      "img": ["greentree"]
+      "img": ["greentree"],
+      "gatherTime": 3
     },
     {
       "resourceName": "rock",
@@ -23,7 +25,8 @@
       "resourceType": "stone",
       "items": ["stone"],
       "amounts": [[1,5]],
-      "img": ["rock"]
+      "img": ["rock"],
+      "gatherTime": 3
     },
     {
       "resourceName": "bunchberry",
@@ -31,7 +34,8 @@
       "resourceType": "plant",
       "items": ["food", "herbs"],
       "amounts": [[1,1], [3,3]],
-      "img": ["Canadian Bunchberry"]
+      "img": ["Canadian Bunchberry"],
+      "gatherTime": 3
     },
     {
       "resourceName": "cloudberry",
@@ -39,7 +43,8 @@
       "resourceType": "plant",
       "items": ["food", "herbs"],
       "amounts": [[3,3], [1,1]],
-      "img": ["Cloudberry"]
+      "img": ["Cloudberry"],
+      "gatherTime": 3
     },
     {
       "resourceName": "cranberry",
@@ -47,7 +52,8 @@
       "resourceType": "plant",
       "items": ["food", "herbs"],
       "amounts": [[3,3], [3,3]],
-      "img": ["Cranberry"]
+      "img": ["Cranberry"],
+      "gatherTime": 3
     },
     {
       "resourceName": "lingonberry",
@@ -55,7 +61,8 @@
       "resourceType": "plant",
       "items": ["food", "herbs"],
       "amounts": [[1,1], [4,4]],
-      "img": ["Lingonberry"]
+      "img": ["Lingonberry"],
+      "gatherTime": 3
     },
     {
       "resourceName": "partridgeberry",
@@ -63,7 +70,8 @@
       "resourceType": "plant",
       "items": ["food", "herbs"],
       "amounts": [[1,1], [1,1]],
-      "img": ["Partridge Berry"]
+      "img": ["Partridge Berry"],
+      "gatherTime": 3
     },
     {
       "resourceName": "elderberry",
@@ -71,7 +79,8 @@
       "resourceType": "plant",
       "items": ["food", "herbs"],
       "amounts": [[1,1], [4,4]],
-      "img": ["Elderberry"]
+      "img": ["Elderberry"],
+      "gatherTime": 3
     },
     {
       "resourceName": "huckleberry",
@@ -79,6 +88,7 @@
       "resourceType": "plant",
       "items": ["food", "herbs"],
       "amounts": [[2,2], [2,2]],
-      "img": ["Huckleberry"]
+      "img": ["Huckleberry"],
+      "gatherTime": 3
     }]
 }

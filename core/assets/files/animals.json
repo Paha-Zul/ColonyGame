@@ -5,17 +5,23 @@
       "aggressive": true,
       "pack": true,
       "packAmount": [2, 10],
-      "img": "Wolf"
+      "img": "Wolf",
+      "items": ["food"],
+      "itemAmounts":[[0,2]]
     },
     {
       "name": "Deer",
       "aggressive": false,
-      "img": "Deer"
+      "img": "Deer",
+      "items": ["food"],
+      "itemAmounts":[[0,2]]
     },
     {
       "name": "Bear",
       "aggressive": true,
-      "img": "Bear"
+      "img": "Bear",
+      "items": ["food"],
+      "itemAmounts":[[0,2]]
     }
   ]
 }

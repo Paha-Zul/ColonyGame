@@ -28,13 +28,25 @@
       "itemName": "herbs",
       "displayName": "Herbs",
       "itemType": "plant",
-      "description": "Medicinal Herbs."
+      "description": "Medicinal Herbs.",
+      "effects": ["heal"],
+      "strengths":[20]
     },
     {
       "itemName": "food",
       "displayName": "Food",
       "itemType": "food",
-      "description": "Yummy food."
+      "description": "Yummy food.",
+      "effects": ["feed"],
+      "strengths":[20]
+    },
+    {
+      "itemName": "water",
+      "displayName": "Water",
+      "itemType": "water",
+      "description": "Yummy water.",
+      "effects": ["hydrate"],
+      "strengths":[20]
     }
   ]
 }
