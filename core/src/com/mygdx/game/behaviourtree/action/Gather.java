@@ -1,6 +1,5 @@
 package com.mygdx.game.behaviourtree.action;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
@@ -51,7 +50,7 @@ public class Gather extends LeafTask{
                     new Vector2(ColonyGame.camera.position.x, ColonyGame.camera.position.y), 200, 1000);
         });
 
-        this.gatherTimer = new OneShotTimer(5f, ()->{
+        this.gatherTimer = new OneShotTimer(this.resource.getGatherTime(), ()->{
             if(this.resource.isDestroyed()){
                 this.control.finishWithFailure();
                 return;
@@ -60,7 +59,7 @@ public class Gather extends LeafTask{
             Colony targetColony = this.blackBoard.getEntityOwner().getComponent(Colonist.class).getColony();
             this.blackBoard.targetNode = null;
             this.blackBoard.target = targetColony.getEntityOwner();
-            this.blackBoard.transferToInventory = targetColony.getInventory();
+            this.blackBoard.toInventory = targetColony.getInventory();
             for(int i=0;i<this.resource.getItemNames().length;i++){
                 Item item = ItemManager.getItemByName(this.resource.getItemNames()[i]);
                 int diff = this.resource.getItemAmounts()[i][1] - this.resource.getItemAmounts()[i][0];
