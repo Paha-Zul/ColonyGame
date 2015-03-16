@@ -19,6 +19,7 @@ public class Animal extends Component implements IInteractable{
         super.start();
 
         this.stats = this.getComponent(Stats.class);
+        this.setActive(false);
     }
 
     @Override
