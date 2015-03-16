@@ -56,15 +56,23 @@ public class Inventory extends Component implements IDisplayable{
      */
     public void addItem(Item item){
         InventoryItem invItem = this.inventory.get(item.getItemName());
+        //If the invItem doesn't exist, create a new one and add it to the hash map.
         if(invItem == null) {
             invItem = new InventoryItem(item);
             this.inventory.put(item.getItemName(), invItem); //Make a new inventory item in the hashmap.
+        //Otherwise, simply add the amount from the item.
         }else
             invItem.addAmount(item.getCurrStack());
 
+        //Keeps track of total items in this inventory.
         this.currTotalItems+=item.getCurrStack();
     }
 
+    /**
+     * Removes all of an item (by name) and returns that item with the amount removed.
+     * @param name The name of the Item.
+     * @return The Item that was completely removed from the inventory with the quantity that was removed.
+     */
     public Item removeItemAll(String name){
         InventoryItem invItem = this.inventory.get(name);
 
@@ -77,31 +85,39 @@ public class Inventory extends Component implements IDisplayable{
         item.setCurrStack(invItem.amount); //Set the item stack to the amount removed.
         this.currTotalItems-=invItem.amount; //Subtract the current item counter by the amount being removed.
 
+        this.inventory.remove(name);
+
         return item;
     }
 
-    public Item removeItemAmount(String name, int amount){
+
+    public int removeItemAmount(String name, int amount){
         InventoryItem invItem = this.inventory.get(name);
 
         //If it didn't exist or it was empty, return null.
         if(invItem == null || invItem.amount <= 0)
-            return null;
+            return 0;
 
-        Item item = new Item(invItem.item.getItemName(), invItem.item.getItemType(), invItem.item.isStackable(), invItem.item.getStackLimit(), invItem.item.getWeight()); //Copy the item.
         int amt = (amount >= invItem.amount) ? invItem.amount : amount; //If amount is equal or more than the inv amount, take all of it, otherwise the amount.
-        invItem.amount = amt; //Set the inventory Item's amount.
+        invItem.amount -= amt; //Set the inventory Item's amount.
         this.currTotalItems-=amt; //Subtract the amount being removed from the counter.
-        item.setCurrStack(amt); //Give that amount to the new item.
 
-        return item;
+        if(invItem.amount <= 0)
+            this.inventory.remove(name);
+
+        return amt;
     }
 
     public void clearInventory(){
         this.inventory.clear();
     }
 
-    public ArrayList<InventoryItem> getItemList(){
-        return new ArrayList<InventoryItem>(inventory.values());
+    /**
+     * Gets a list of the inventory.
+     * @return An ArrayList containing the items of the inventory.
+     */
+    public final ArrayList<InventoryItem> getItemList(){
+        return new ArrayList<>(inventory.values());
     }
 
     public boolean canTakeItem(Item item){
@@ -125,6 +141,11 @@ public class Inventory extends Component implements IDisplayable{
     public int getCurrTotalItems(){
         return this.currTotalItems;
     }
+
+    public final InventoryItem getItemReference(String name){
+        return this.inventory.get(name);
+    }
+
 
     public void printInventory(){
         System.out.println("[Inventory]Inventory of "+this.getEntityOwner().name);
