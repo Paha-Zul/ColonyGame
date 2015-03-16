@@ -4,6 +4,8 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.mygdx.game.helpers.gui.GUI;
+import com.mygdx.game.helpers.timer.RepeatingTimer;
+import com.mygdx.game.helpers.timer.Timer;
 import com.mygdx.game.helpers.worldgeneration.WorldGen;
 import com.mygdx.game.interfaces.IDisplayable;
 
@@ -12,7 +14,9 @@ import com.mygdx.game.interfaces.IDisplayable;
  */
 public class Stats extends Component{
     private float maxHealth=100, currHealth=100;
-    private int food = 100, water = 100, energy = 100;
+    private int food = 22, water = 100, energy = 100;
+
+    Timer waterTimer, foodTimer;
 
     public Stats() {
         super();
@@ -22,11 +26,17 @@ public class Stats extends Component{
     @Override
     public void start() {
         super.start();
+
+        waterTimer = new RepeatingTimer(5f, ()->addWater(-1));
+        foodTimer = new RepeatingTimer(10f, ()->addFood(-1));
     }
 
     @Override
     public void update(float delta) {
         super.update(delta);
+
+        waterTimer.update(delta);
+        foodTimer.update(delta);
     }
 
     public float getMaxHealth() {
@@ -49,24 +59,22 @@ public class Stats extends Component{
         return energy;
     }
 
-    public void setMaxHealth(float maxHealth) {
-        this.maxHealth = maxHealth;
+    public void addHealth(float health){
+        this.currHealth += health;
+        if(currHealth > 100) currHealth = 100;
+        else if(currHealth <= 0) currHealth = 0;
     }
 
-    public void setCurrHealth(float currHealth) {
-        this.currHealth = currHealth;
+    public void addFood(int food){
+        this.food += food;
+        if(this.food > 100) this.food = 100;
+        else if(this.food <= 0) this.food = 0;
     }
 
-    public void setFood(int food) {
-        this.food = food;
-    }
-
-    public void setWater(int water) {
-        this.water = water;
-    }
-
-    public void setEnergy(int energy) {
-        this.energy = energy;
+    public void addWater(int water){
+        this.water += water;
+        if(this.water > 100) this.water = 100;
+        else if(this.water <= 0) this.water = 0;
     }
 
     @Override
