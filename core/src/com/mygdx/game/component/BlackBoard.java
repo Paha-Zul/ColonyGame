@@ -16,7 +16,13 @@ public class BlackBoard extends Component{
     public Entity target;
     public LinkedList<Vector2> path;
     public Resource targetResource;
-    public Inventory transferToInventory;
+
+    //Transfering variables
+    public boolean transferAll = false;
+    public int takeAmount = 0;
+    public Inventory toInventory;
+    public Inventory fromInventory;
+    public String itemNameToTake;
 
     //Related to idle jobs
     public float baseIdleTime = 2f;

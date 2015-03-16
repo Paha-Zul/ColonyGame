@@ -9,8 +9,9 @@ import com.mygdx.game.behaviourtree.action.*;
 import com.mygdx.game.behaviourtree.composite.Sequence;
 import com.mygdx.game.behaviourtree.control.ParentTaskController;
 import com.mygdx.game.entity.Entity;
-import com.mygdx.game.helpers.Callbacks;
 import com.mygdx.game.helpers.Constants;
+import com.mygdx.game.helpers.timer.OneShotTimer;
+import com.mygdx.game.helpers.timer.Timer;
 import com.mygdx.game.interfaces.Functional;
 
 import java.util.ArrayList;
@@ -21,11 +22,13 @@ import java.util.ArrayList;
 public class BehaviourManagerComp extends Component{
     private BlackBoard blackBoard;
     private Task behaviourTree;
+    private Task nextBehaviour;
     private String behaviourType = "";
 
-    private ArrayList<Line> lineList = new ArrayList<>();
+    private Stats stats;
 
-    private Texture blueSquare = ColonyGame.assetManager.get("blueSquare", Texture.class);
+    private ArrayList<Line> lineList = new ArrayList<>();
+    private Timer feedTimer = new OneShotTimer(10f, null);
 
     public BehaviourManagerComp(String behaviourType) {
         this.behaviourType = behaviourType;
@@ -44,6 +47,7 @@ public class BehaviourManagerComp extends Component{
         super.start();
 //        this.behaviourTree = this.gatherResource();
 //        this.behaviourTree.start();
+        this.stats = this.owner.getComponent(Stats.class);
     }
 
     private Task moveTo(){
@@ -72,6 +76,10 @@ public class BehaviourManagerComp extends Component{
          * Store the resource.
          */
 
+        blackBoard.fromInventory = this.getComponent(Colonist.class).getInventory();
+        blackBoard.toInventory = this.getComponent(Colonist.class).getColony().getInventory();
+        blackBoard.transferAll = true;
+
         //If we fail to find a resource, we need to explore until we find one...
         Functional.Callback fail = () -> {
             //When we finish moving to the newly explored area, try to gather a resource again.
@@ -86,7 +94,7 @@ public class BehaviourManagerComp extends Component{
         FindClosestEntity fr = new FindClosestEntity("Finding Closest Resource", this.blackBoard, "woodlog", Constants.ENTITY_RESOURCE);
         fr.getControl().callbacks.failureCallback = fail;
         fr.getControl().callbacks.criteria = (e) -> ((Entity)e).hasTag(Constants.ENTITY_RESOURCE) && !((Entity)e).getComponent(Resource.class).isTaken();
-        fr.getControl().callbacks.successCallback = () -> {blackBoard.target.getComponent(Resource.class).setTaken(true); System.out.println("Set taken");};
+        fr.getControl().callbacks.successCallback = () -> blackBoard.target.getComponent(Resource.class).setTaken(true);
 
         FindPath findPath = new FindPath("Finding Path to Resource", this.blackBoard);
         MoveTo move = new MoveTo("Moving to Resource", this.blackBoard);
@@ -95,13 +103,18 @@ public class BehaviourManagerComp extends Component{
         MoveTo moveToStorage = new MoveTo("Moving to Storage", this.blackBoard);
         TransferResource transferItems = new TransferResource("Transfering Resources", this.blackBoard);
 
-        ((ParentTaskController) sequence.getControl()).addTask(fr);
+        ((ParentTaskController)sequence.getControl()).addTask(fr);
         ((ParentTaskController)sequence.getControl()).addTask(findPath);
         ((ParentTaskController)sequence.getControl()).addTask(move);
         ((ParentTaskController)sequence.getControl()).addTask(gather);
         ((ParentTaskController)sequence.getControl()).addTask(findPathToStorage);
         ((ParentTaskController)sequence.getControl()).addTask(moveToStorage);
         ((ParentTaskController)sequence.getControl()).addTask(transferItems);
+
+        sequence.getControl().callbacks.finishCallback = () -> {
+            if (sequence.getBlackboard().target != null && !sequence.getBlackboard().target.isDestroyed() && sequence.getBlackboard().target.hasTag(Constants.ENTITY_RESOURCE))
+                sequence.getBlackboard().target.getComponent(Resource.class).setTaken(false);
+        };
 
         return sequence;
     }
@@ -146,6 +159,40 @@ public class BehaviourManagerComp extends Component{
         return sequence;
     }
 
+    private Task consume(String effect){
+        //Find a stockpile (easy for now)
+        //Search for an item to consume.
+        //Pathfind to the stockpile
+        //Move to the stockpile
+        //Get the item
+        //Consume it.
+
+        blackBoard.target = this.getComponent(Colonist.class).getColony().getEntityOwner();
+        blackBoard.targetNode = null;
+        blackBoard.fromInventory = this.getComponent(Colonist.class).getColony().getInventory();
+        blackBoard.toInventory = this.getComponent(Inventory.class);
+        blackBoard.transferAll = false;
+        this.blackBoard.takeAmount = 1;
+
+        Sequence sequence = new Sequence("Consuming Item", this.blackBoard);
+
+        CheckInventoryHas check = new CheckInventoryHas("Checking Inventory", this.blackBoard, effect, 1);
+        FindPath fp = new FindPath("Finding Path", this.blackBoard);
+        MoveTo moveTo = new MoveTo("Moving to...", this.blackBoard);
+        TransferResource tr = new TransferResource("Transfering Resource", this.blackBoard);
+        Consume consume = new Consume("Consuming Item", this.blackBoard, effect);
+
+        consume.getControl().getCallbacks().finishCallback = () -> consume.getControl().finishWithFailure();
+
+        ((ParentTaskController) sequence.getControl()).addTask(check);
+        ((ParentTaskController) sequence.getControl()).addTask(fp);
+        ((ParentTaskController) sequence.getControl()).addTask(moveTo);
+        ((ParentTaskController) sequence.getControl()).addTask(tr);
+        ((ParentTaskController) sequence.getControl()).addTask(consume);
+
+        return sequence;
+    }
+
     public void gather(){
         this.changeTask(this.gatherResource());
     }
@@ -155,40 +202,57 @@ public class BehaviourManagerComp extends Component{
     }
 
     private void changeTask(Task task){
-        if(this.behaviourTree != null && !this.behaviourTree.getControl().hasFinished())
+        //End the current task.
+        if(this.behaviourTree != null && !this.behaviourTree.getControl().hasFinished()) {
             this.behaviourTree.getControl().finishWithSuccess();
+            this.behaviourTree.getControl().safeEnd();
+        }
 
-        this.behaviourTree = task;
-        this.behaviourTree.start();
+        //Set the next behaviour.
+        this.nextBehaviour = task;
     }
 
     @Override
     public void update(float delta) {
         super.update(delta);
 
-        //If our behaviour is not null....
-        if(behaviourTree != null) {
-            //If it has finished successfully, start it over. (repeat)
-            if(this.behaviourTree.getControl().hasFinished() && !this.behaviourTree.getControl().hasFailed()) {
-                this.behaviourTree.getControl().reset(); //Reset it
-                this.behaviourTree.start(); //Start again
+        feedTimer.update(delta);
 
-            //If it finished but failed.
-            }else if(this.behaviourTree.getControl().hasFinished()){
-                this.behaviourTree = null; //Set it to null to get a new job. (default job)
+        if(this.nextBehaviour == null) {
+            //If our behaviour is not null....
+            if (behaviourTree != null) {
+                //If it has finished successfully, start it over. (repeat)
+                if (this.behaviourTree.getControl().hasFinished() && !this.behaviourTree.getControl().hasFailed()) {
+                    this.nextBehaviour = this.behaviourTree;
+                    this.nextBehaviour.getControl().reset();
 
-            //Otherwise, update it.
-            }else{
-                this.behaviourTree.update(delta); //Update it.
+                    //If it finished but failed.
+                } else if (this.behaviourTree.getControl().hasFinished()) {
+                    this.behaviourTree = null; //Set it to null to get a new job. (default job)
+
+                    //Otherwise, update it.
+                } else {
+                    this.behaviourTree.update(delta); //Update it.
+                }
+
+                //If our behaviour is null, set the next behaviour to the default behaviour.
+            } else {
+                if (this.behaviourType.equals("colonist"))
+                    this.nextBehaviour = this.idle(this.blackBoard.baseIdleTime, this.blackBoard.randomIdleTime, this.blackBoard.idleDistance);
+                else if (this.behaviourType.equals("animal"))
+                    this.nextBehaviour = this.idle(this.blackBoard.baseIdleTime, this.blackBoard.randomIdleTime, this.blackBoard.idleDistance);
             }
+
+        //If our next behaviour is not null, we need to start it!
         }else{
-            if(this.behaviourType.equals("colonist")) {
-                this.behaviourTree = this.idle(this.blackBoard.baseIdleTime, this.blackBoard.randomIdleTime, this.blackBoard.idleDistance);
-                this.behaviourTree.start();
-            }else if(this.behaviourType.equals("animal")) {
-                this.behaviourTree = this.idle(this.blackBoard.baseIdleTime, this.blackBoard.randomIdleTime, this.blackBoard.idleDistance);
-                this.behaviourTree.start();
+            if(this.stats.getFood() <= 20 && feedTimer.isFinished() && this.behaviourType.equals("colonist")) {
+                this.nextBehaviour = this.consume("feed");
+                this.feedTimer.restart();
             }
+
+            this.behaviourTree = this.nextBehaviour;
+            this.behaviourTree.start();
+            this.nextBehaviour = null;
         }
     }
 
