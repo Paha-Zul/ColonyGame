@@ -53,7 +53,7 @@ public class ParentTaskController extends TaskController{
         super.safeEnd();
 
         for(Task task : this.subTasks)
-            task.getControl().safeEnd();
+            task.end(); //Skip the safe end. That's for when it ends normally. We don't want to call the callbacks a second time.
     }
 
     @Override
