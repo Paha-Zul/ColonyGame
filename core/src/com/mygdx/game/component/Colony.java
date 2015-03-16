@@ -49,7 +49,7 @@ public class Colony extends Component implements IInteractable {
 
         TextureRegion colonistTexture = new TextureRegion(ColonyGame.assetManager.get("colonist", Texture.class));
 
-        for(int i=0;i<5;i++){
+        for(int i=0;i<1;i++){
             Entity c = this.makeColonist(this.owner.transform.getPosition(), 200f/ Constants.SCALE, colonistTexture);
             c.name = ServerPlayer.names[MathUtils.random(ServerPlayer.names.length-1)];
             this.addColonist(c.getComponent(Colonist.class));
