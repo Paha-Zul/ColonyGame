@@ -1,7 +1,9 @@
 package com.mygdx.game.component;
 
+import com.mygdx.game.helpers.DataBuilder;
+
 /**
- * Created by Paha on 1/18/2015.
+ * A class that represents an item.
  */
 public class Item extends Component{
     private String itemName = "default";
@@ -34,6 +36,20 @@ public class Item extends Component{
         this.stackLimit = item.getStackLimit();
         this.weight = item.getWeight();
         this.stackable = item.isStackable();
+    }
+
+    /**
+     * Copy constructor for a JsonItem
+     * @param jItem The JsonItem to copy.
+     */
+    public Item(DataBuilder.JsonItem jItem){
+        this.itemName = jItem.getItemName();
+        this.displayName = jItem.getDisplayName();
+        this.description = jItem.getDescription();
+        this.itemType = jItem.getItemType();
+        this.stackLimit = 100000;
+        this.weight = 1;
+        this.stackable = true;
     }
 
     @Override
