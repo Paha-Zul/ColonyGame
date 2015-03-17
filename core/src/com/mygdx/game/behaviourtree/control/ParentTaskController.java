@@ -52,8 +52,8 @@ public class ParentTaskController extends TaskController{
     public void safeEnd() {
         super.safeEnd();
 
-        for(Task task : this.subTasks)
-            task.end(); //Skip the safe end. That's for when it ends normally. We don't want to call the callbacks a second time.
+        //Skip the safe end. That's for when it ends normally. We don't want to call the callbacks a second time.
+        this.subTasks.forEach(com.mygdx.game.behaviourtree.Task::end);
     }
 
     @Override
