@@ -50,6 +50,7 @@ public class Gather extends LeafTask{
                     new Vector2(ColonyGame.camera.position.x, ColonyGame.camera.position.y), 200, 1000);
         });
 
+        //Gather after the amount of time needed.
         this.gatherTimer = new OneShotTimer(this.resource.getGatherTime(), ()->{
             if(this.resource.isDestroyed()){
                 this.control.finishWithFailure();
