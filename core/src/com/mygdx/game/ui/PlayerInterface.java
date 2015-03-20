@@ -215,7 +215,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         if((this.selected != null && this.interactable != null) || this.selectedList.size() > 0){
             GUI.Texture(this.UIBackgroundBase, this.uiBackgroundBaseRect, this.batch);
             GUI.Texture(this.UIBackgroundTop, this.uiBackgroundTopRect, this.batch);
-            this.drawMultipleProfiles(this.tabsRect);
+            this.drawMultipleProfiles(this.ordersRect);
             this.displaySelected();
         }
 
@@ -305,19 +305,19 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     private void drawMultipleProfiles(Rectangle rect){
         //If there is more than one unit selected.. display in a group format.
         if(selectedList.size() > 1){
-            profileButtonRect.set(rect.getX(), rect.getY() + rect.getHeight() - 20, 50, 20);
+            profileButtonRect.set(rect.getX() + rect.getWidth() - 115, rect.getY() + rect.getHeight() - 20, 50, 20);
 
             //Tell all to gather.
-            if(GUI.Button(rect.x - 35, rect.y + rect.getHeight() - 35, 30, 30, "ALL", this.batch, gatherGUIStyle))
+            if(GUI.Button(rect.x + rect.getWidth() - 150, rect.y + rect.getHeight() - 35, 30, 30, "ALL", this.batch, gatherGUIStyle))
                 for(UnitProfile prof : selectedList) prof.entity.getComponent(BehaviourManagerComp.class).gather();
 
             //Tell all to explore
-            if(GUI.Button(rect.x - 35, rect.y + rect.getHeight() - 70, 30, 30, "ALL", this.batch, exploreGUIStyle))
+            if(GUI.Button(rect.x + rect.getWidth() - 150, rect.y + rect.getHeight() - 70, 30, 30, "ALL", this.batch, exploreGUIStyle))
                 for(UnitProfile prof : selectedList) prof.entity.getComponent(BehaviourManagerComp.class).explore();
 
             //For each profile, draw a button to access each individual entity.
             for(UnitProfile profile : selectedList) {
-                if(GUI.Button(profileButtonRect, profile.entity.name, this.batch)){
+                if(GUI.Button(profileButtonRect, profile.interactable.interactable.getName(), this.batch)){ //Draw the button.
                     this.selected = profile.entity;
                     this.interactable = profile.interactable;
                 }
@@ -325,7 +325,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
                 //If we go too far down the screen, move over.
                 profileButtonRect.setY(profileButtonRect.getY() - 22);
                 if(profileButtonRect.y <= rect.getY() + 10)
-                    profileButtonRect.set(rect.getX() + 55, rect.getY() + rect.getHeight() - 20, 50, 20);
+                    profileButtonRect.set(rect.getX() + rect.getWidth() - 65, rect.getY() + rect.getHeight() - 20, 50, 20);
 
             }
         }
@@ -387,7 +387,8 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
                         batch.draw(blueSquare, line.startX, line.startY, 0, 0, line.width, 0.1f, 1, 1, line.rotation, 0, 0, blueSquare.getWidth(), blueSquare.getHeight(), false, false);
                     batch.setProjectionMatrix(ColonyGame.UICamera.combined);
 
-                    GUI.Label(this.interactable.interactable.getBehManager().getCurrentTaskName(), this.batch, this.infoRect.x + this.infoRect.width/2, this.infoRect.y + this.infoRect.getHeight()/2, true, this.UIStyle);
+                    GUI.Label(this.interactable.interactable.getBehManager().getCurrentTaskName(), this.batch, this.ordersRect.x + this.ordersRect.width/2,
+                            this.ordersRect.y + this.ordersRect.getHeight()/2, true, this.UIStyle);
                 }
             }
         }
