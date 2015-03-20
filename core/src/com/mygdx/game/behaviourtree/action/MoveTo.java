@@ -44,6 +44,12 @@ public class MoveTo extends LeafTask{
     public void update(float delta) {
         super.update(delta);
 
+        if(this.getControl().getCallbacks().criteria != null && !this.getControl().getCallbacks().criteria.criteria(this)){
+            this.collider.body.setLinearVelocity(0,0);
+            this.control.finishWithFailure();
+            return;
+        }
+
         if(this.path.size() < 1){
             this.collider.body.setLinearVelocity(0,0);
             this.control.finishWithSuccess();
