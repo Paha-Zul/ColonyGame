@@ -1,5 +1,6 @@
 package com.mygdx.game.component;
 
+import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.DataBuilder;
 import com.mygdx.game.interfaces.IInteractable;
 
@@ -11,7 +12,7 @@ public class Resource extends Component implements IInteractable{
     private String[] itemNames;
     private int[][] itemAmounts;
     private float gatherTime = 1;
-    private volatile boolean taken = false;
+    private volatile Entity taken = null;
 
     public Resource(String resourceName) {
         super();
@@ -69,8 +70,8 @@ public class Resource extends Component implements IInteractable{
     }
 
     /**
-     * Gets the array of item names for this Resource. This is essentially the inventory of this Resource.
-     * @return A String array of item names.
+     * Gets the array of item firstNames for this Resource. This is essentially the inventory of this Resource.
+     * @return A String array of item firstNames.
      */
     public String[] getItemNames() {
         return itemNames;
@@ -102,6 +103,13 @@ public class Resource extends Component implements IInteractable{
      * @return True if this Resource is taken, false otherwise.
      */
     public boolean isTaken(){
+        return this.taken != null;
+    }
+
+    /**
+     * @return The Entity that has marked this resource as taken, null if not taken.
+     */
+    public Entity getTaken(){
         return this.taken;
     }
 
@@ -123,10 +131,10 @@ public class Resource extends Component implements IInteractable{
 
     /**
      * Sets this Resource as taken or not taken.
-     * @param taken If this Resource is taken or not.
+     * @param entity The Entity to take this resource. Null if setting the resource as not taken.
      */
-    public void setTaken(boolean taken){
-        this.taken = taken;
+    public void setTaken(Entity entity){
+        this.taken = entity;
     }
 
     /**
@@ -146,7 +154,7 @@ public class Resource extends Component implements IInteractable{
     }
 
     /**
-     * Sets the item names for this Resource.
+     * Sets the item firstNames for this Resource.
      * @param itemNames A String array which is the itemNames.
      */
     public void setItemNames(String[] itemNames) {
