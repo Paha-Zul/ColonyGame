@@ -41,10 +41,14 @@ public class GameScreen implements Screen{
 
     @Override
     public void render(float delta) {
-        if(ColonyGame.server)
-            serverPlayer.render(delta);
-        else
-            clientPlayer.render(delta);
+        try {
+            if (ColonyGame.server)
+                serverPlayer.render(delta);
+            else
+                clientPlayer.render(delta);
+        }catch(Exception e){
+            ColonyGame.threadPool.shutdown();
+        }
     }
 
     @Override
