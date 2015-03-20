@@ -38,8 +38,10 @@ public class ServerPlayer {
 
     public static boolean drawGrid = false;
 
-	public static String[] names = {"Bobby Poopers","Sally Poopers","Jimmy Poopers","Bradley Poopers","Willy Poopers","Tommy Poopers","Brian Poopers",
-            "Doug Poopers","Ben Poopers","Jacob Poopers","Sammy Poopers","Jason Poopers","David Poopers","Sarah Poopers","Betty Poopers","Tom Poopers","James Poopers"};
+	public static String[] firstNames = {"Bobby","Sally","Jimmy","Bradley","Willy","Tommy","Brian",
+            "Doug","Ben","Jacob","Sammy","Jason","David","Sarah","Betty","Tom","James"};
+
+    public static String[] lastNames = {"Poopers"};
 
     private boolean generatedTrees = false;
     private Vector2 startLocation = new Vector2();
@@ -85,12 +87,33 @@ public class ServerPlayer {
 		//Step the Box2D simulation.
 		ColonyGame.world.step(1f/60f, 8, 3);
 
-		batch.begin();
+		this.batch.begin();
 		this.batch.setProjectionMatrix(ColonyGame.camera.combined);
 
-        Profiler.begin("ServerPlayer: Rendering Terrain");
+        Profiler.begin("ServerPlayer: Rendering Terrain"); //Start the profiler.
+        renderMap(); //Render the map.
+        batch.setColor(Color.WHITE); //Set the color back to white.
+        Profiler.end(); //End the profiler.
 
-		WorldGen.TerrainTile[][] map = WorldGen.map;
+        Profiler.begin("ServerPlayer: Updating Entities");
+
+        ListHolder.update(delta);
+        ListHolder.updateFloatingTexts(delta, batch);
+
+        Profiler.end();
+
+        this.batch.end();
+
+        //Draw the grid squares if enabled.
+        if(drawGrid) {
+            this.grid.debugDraw();
+            drawBox2DDebug();
+        }
+
+	}
+
+    private void renderMap(){
+        WorldGen.TerrainTile[][] map = WorldGen.map;
 
         float squareSize = ColonyGame.worldGrid.getSquareSize();
         int halfWidth = (int)((ColonyGame.camera.viewportWidth*ColonyGame.camera.zoom)/2f);
@@ -111,28 +134,7 @@ public class ServerPlayer {
                 tile.terrainSprite.draw(batch);
             }
         }
-
-        //Set the color back to white.
-        batch.setColor(Color.WHITE);
-
-        Profiler.end();
-
-        Profiler.begin("ServerPlayer: Updating Entities");
-
-        ListHolder.update(delta);
-        ListHolder.updateFloatingTexts(delta, batch);
-
-        Profiler.end();
-
-        this.batch.end();
-
-        //Draw the grid squares if enabled.
-        if(drawGrid) {
-            this.grid.debugDraw();
-            drawBox2DDebug();
-        }
-
-	}
+    }
 
     private void drawBox2DDebug(){
         //Draw the box2d debug
