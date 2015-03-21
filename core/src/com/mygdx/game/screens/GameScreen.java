@@ -48,6 +48,7 @@ public class GameScreen implements Screen{
                 clientPlayer.render(delta);
         }catch(Exception e){
             ColonyGame.threadPool.shutdown();
+            e.printStackTrace();
         }
     }
 
