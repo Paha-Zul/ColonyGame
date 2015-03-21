@@ -1,15 +1,11 @@
 package com.mygdx.game.behaviourtree.action;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.behaviourtree.LeafTask;
 import com.mygdx.game.component.BlackBoard;
-import com.mygdx.game.helpers.Constants;
 import com.mygdx.game.helpers.Grid;
-import com.mygdx.game.helpers.Profiler;
 import com.mygdx.game.helpers.worldgeneration.WorldGen;
 
-import java.lang.reflect.Array;
 import java.util.*;
 
 /**
@@ -24,7 +20,7 @@ public class FindPath extends LeafTask {
 
     @Override
     public boolean check() {
-        return true;
+        return control.callbacks.checkCriteria == null || control.callbacks.checkCriteria.criteria(this);
     }
 
     @Override
