@@ -94,8 +94,8 @@ public class Inventory extends Component implements IDisplayable{
     public int removeItemAmount(String name, int amount){
         InventoryItem invItem = this.inventory.get(name);
 
-        //If it didn't exist or it was empty, return null.
-        if(invItem == null || invItem.amount <= 0)
+        //If it didn't exist or it was empty, return 0.
+        if(invItem == null || invItem.amount <= 0 || invItem.item.getCurrStack() <= 0)
             return 0;
 
         int amt = (amount >= invItem.amount) ? invItem.amount : amount; //If amount is equal or more than the inv amount, take all of it, otherwise the amount.
