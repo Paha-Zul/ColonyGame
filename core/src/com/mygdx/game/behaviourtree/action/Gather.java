@@ -6,6 +6,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.behaviourtree.LeafTask;
 import com.mygdx.game.component.*;
+import com.mygdx.game.helpers.DataBuilder;
 import com.mygdx.game.helpers.managers.ItemManager;
 import com.mygdx.game.helpers.managers.SoundManager;
 import com.mygdx.game.helpers.timer.OneShotTimer;
@@ -57,18 +58,21 @@ public class Gather extends LeafTask{
                 return;
             }
 
-            Colony targetColony = this.blackBoard.getEntityOwner().getComponent(Colonist.class).getColony();
-            this.blackBoard.targetNode = null;
-            this.blackBoard.target = targetColony.getEntityOwner();
-            this.blackBoard.toInventory = targetColony.getInventory();
+            //For each resource, random an amount to add to my (the colonists') inventory.
             for(int i=0;i<this.resource.getItemNames().length;i++){
-                Item item = ItemManager.getItemByName(this.resource.getItemNames()[i]);
-                int diff = this.resource.getItemAmounts()[i][1] - this.resource.getItemAmounts()[i][0];
-                int base = this.resource.getItemAmounts()[i][0];
-                item.setCurrStack(MathUtils.random(diff) + base);
-                this.blackBoard.myInventory.addItem(item);
+                DataBuilder.JsonItem item = ItemManager.getItemReference(this.resource.getItemNames()[i]); //Get the reference.
+                int diff = this.resource.getItemAmounts()[i][1] - this.resource.getItemAmounts()[i][0]; //Get the difference between low and high.
+                int base = this.resource.getItemAmounts()[i][0]; //Get the base amount (which is the low amount).
+                this.blackBoard.myInventory.addItem(item.getItemName(), MathUtils.random(diff) + base); //Random a number!
             }
 
+            //This sets up the information for moving and transfering to the colony.
+            Colony targetColony = this.blackBoard.getEntityOwner().getComponent(Colonist.class).getColony(); //Get the colony.
+            this.blackBoard.targetNode = null; //Set the target node to null to make sure we use the target (not the node)
+            this.blackBoard.target = targetColony.getEntityOwner(); //Set the target to the entity owner of the colony.
+            this.blackBoard.toInventory = targetColony.getInventory(); //Set the inventory to the colony's inventory.
+
+            //Destroy the resource and finish with success..
             this.resource.getEntityOwner().destroy();
             this.control.finishWithSuccess();
         });

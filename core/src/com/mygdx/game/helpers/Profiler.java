@@ -16,7 +16,7 @@ public class Profiler {
     public static double interval = 0.5f; //The interval that the average time should be updated.
     public static boolean enabled = false; //If the profiler is enabled or not.
 
-    private static HashMap<String, Profile> map = new HashMap<>(); //Holds the profile names and links them with Records.
+    private static HashMap<String, Profile> map = new HashMap<>(); //Holds the profile firstNames and links them with Records.
     private static ArrayList<Profile> sortedList = new ArrayList<>(); //Used to sort the map and print to the screen in order.
     private static Stack<Profile> stack = new Stack<>(); //Used to keep begins and ends in order and for parenting/adding children.
 

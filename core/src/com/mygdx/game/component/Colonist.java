@@ -16,6 +16,7 @@ public class Colonist extends Component implements IInteractable{
     private Inventory inventory;
     private Stats stats;
     private BehaviourManagerComp manager;
+    private String firstName, lastName;
 
     public Colonist() {
         super();
@@ -44,6 +45,11 @@ public class Colonist extends Component implements IInteractable{
         this.colony = colony;
     }
 
+    public void setName(String firstName, String lastName) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+    }
+
     @Override
     public Skills getSkills() {
         return null;
@@ -51,7 +57,7 @@ public class Colonist extends Component implements IInteractable{
 
     @Override
     public String getName() {
-        return this.getEntityOwner().name;
+        return this.firstName;
     }
 
     public Inventory getInventory(){

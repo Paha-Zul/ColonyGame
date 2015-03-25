@@ -4,6 +4,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.behaviourtree.LeafTask;
 import com.mygdx.game.component.BlackBoard;
+import com.mygdx.game.component.Resource;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.*;
 import com.mygdx.game.helpers.managers.ItemManager;
@@ -35,6 +36,7 @@ public class FindClosestEntity extends LeafTask{
     public void start() {
         super.start();
 
+        this.done = false; //Need to reset this on start or else when we reset this behaviour, we get errors.
         this.getClosestResource();
     }
 
@@ -87,6 +89,7 @@ public class FindClosestEntity extends LeafTask{
                                     this.blackBoard.target = entity;
                                     this.blackBoard.targetNode = this.blackBoard.colonyGrid.getNode(this.blackBoard.target);
                                     this.done = true;
+                                    this.failed = false;
                                     return;
                                 }
                             }
@@ -110,6 +113,7 @@ public class FindClosestEntity extends LeafTask{
     public void update(float delta) {
         super.update(delta);
 
+
         //This needs to be kept out of the threaded method. Causes issues.
         if(this.done){
             if(failed) this.control.finishWithFailure();
@@ -122,7 +126,7 @@ public class FindClosestEntity extends LeafTask{
         super.end();
         if(this.control.hasFailed()) {
             Vector2 pos = this.blackBoard.getEntityOwner().transform.getPosition();
-            new FloatingText("Couldn't find a nearby resource!", new Vector2(pos.x, pos.y + 10), new Vector2(pos.x, pos.y + 40), 1.5f, 0.8f);
+            new FloatingText("Couldn't find a nearby resource!", new Vector2(pos.x, pos.y + 1), new Vector2(pos.x, pos.y + 10), 1.5f, 0.8f);
         }
     }
 }

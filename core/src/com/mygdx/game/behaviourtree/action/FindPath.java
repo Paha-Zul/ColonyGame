@@ -12,7 +12,6 @@ import java.util.*;
  * Created by Paha on 1/21/2015.
  */
 public class FindPath extends LeafTask {
-    private LinkedList<Vector2> path;
 
     public FindPath(String name, BlackBoard blackBoard) {
         super(name, blackBoard);
@@ -27,8 +26,7 @@ public class FindPath extends LeafTask {
     public void start() {
         super.start();
 
-        this.path = getPath();
-        this.blackBoard.path = this.path;
+        this.blackBoard.path = getPath();
         this.control.finishWithSuccess();
     }
 

@@ -360,7 +360,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
                 ArrayList<Inventory.InventoryItem> itemList = this.interactable.interactable.getInventory().getItemList();
                 for(int i=0;i<itemList.size();i++){
                     Inventory.InventoryItem item = itemList.get(i);
-                    GUI.Label(item.item.getDisplayName(), this.batch, this.tabsRect.x, this.tabsRect.y + this.tabsRect.height - 20 - i*10, false, this.UIStyle);
+                    GUI.Label(item.itemRef.getDisplayName(), this.batch, this.tabsRect.x, this.tabsRect.y + this.tabsRect.height - 20 - i*10, false, this.UIStyle);
                     GUI.Label(""+item.getAmount(), this.batch, this.tabsRect.x + 100, this.tabsRect.y + this.tabsRect.height - 20 - i*10, false, this.UIStyle);
 
                 }
@@ -410,8 +410,8 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         batch.setColor(Color.BLACK);
         GUI.Texture(WorldGen.getInstance().whiteTex, x + 80, y, width, height, batch);
         batch.setColor(Color.GREEN);
-        float newWidth = (currVal/maxVal)*width;
-        GUI.Texture(WorldGen.getInstance().whiteTex, x + 80 + 2, y + 2, newWidth - 4, height - 4, batch);
+        float newWidth = (currVal/maxVal)*(width-4);
+        GUI.Texture(WorldGen.getInstance().whiteTex, x + 80 + 2, y + 2, newWidth, height - 4, batch);
 
         GUI.Label((int)currVal+"/"+(int)maxVal, batch, x + 80 + width*0.5f, y + height*0.5f, true);
     }

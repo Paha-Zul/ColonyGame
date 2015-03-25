@@ -1,6 +1,17 @@
 {
   "changes": [
     {
+      "version": "0.16",
+      "date": "3/16/2015",
+      "log": [
+        "- Added: Hunger and water decay. Water decays super slow since there's no way to replenish it yet.",
+        "- Added: Health will deplete for the amount of each hunger/water tick if hunger/water is 0. Health slowly regenerates if both hunger and water are anything more than 0.",
+        "- Added: Colonists will get food if available when under 20 food. This happens after a job completes. It replenishes 5 food for now.",
+        "- Fixed: Move the current job description and group buttons. Now they are on the left side and hopefully work...",
+        "- Bug: Colonists will explore when you tell them to gather and no resource is found, but they randomly stop exploring after a bit...",
+        "- Bug: Colonists can (a lot?) attempt to harvest the same resource, but only one will get it. All of the colonists that fail at harvesting it will sadly idle around."
+      ]
+    },{
       "version": "0.15",
       "date": "3/8/2015",
       "log": [

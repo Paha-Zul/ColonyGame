@@ -30,7 +30,7 @@ public class CheckInventoryHas extends LeafTask {
         super.start();
 
         for(Inventory.InventoryItem item : this.blackBoard.fromInventory.getItemList()){
-            DataBuilder.JsonItem itemRef = ItemManager.getItemReference(item.item.getItemName());
+            DataBuilder.JsonItem itemRef = ItemManager.getItemReference(item.itemRef.getItemName());
             if(itemRef.getEffects() != null && itemRef.getEffects().length > 0) {
                 if (itemRef.hasEffect(effect) && item.getAmount() >= quantity) {
                     this.control.finishWithSuccess();

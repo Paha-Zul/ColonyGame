@@ -3,7 +3,6 @@ package com.mygdx.game.behaviourtree.action;
 import com.mygdx.game.behaviourtree.LeafTask;
 import com.mygdx.game.component.BlackBoard;
 import com.mygdx.game.component.Inventory;
-import com.mygdx.game.component.Item;
 import com.mygdx.game.helpers.managers.ItemManager;
 
 /**
@@ -23,18 +22,16 @@ public class TransferResource extends LeafTask{
     public void start() {
         super.start();
 
-        //If we are transferring the whole inventory, go through each item and add each one to the 'toInventory'. Clear the 'fromInventory'.
+        //If we are transferring the whole inventory, go through each itemRef and add each one to the 'toInventory'. Clear the 'fromInventory'.
         if(this.blackBoard.transferAll) {
             for (Inventory.InventoryItem item : this.blackBoard.fromInventory.getItemList())
-                this.blackBoard.toInventory.addItem(item.item);
+                this.blackBoard.toInventory.addItem(item.itemRef.getItemName(), item.getAmount());
             this.blackBoard.fromInventory.clearInventory();
 
         //Otherwise, take the number of items specified.
         }else{
             int amount = this.blackBoard.fromInventory.removeItemAmount(this.blackBoard.itemNameToTake, this.blackBoard.takeAmount);
-            Item item = new Item(ItemManager.getItemReference(this.blackBoard.itemNameToTake));
-            item.setCurrStack(amount);
-            this.blackBoard.toInventory.addItem(item);
+            this.blackBoard.toInventory.addItem(this.blackBoard.itemNameToTake, this.blackBoard.takeAmount);
         }
 
         this.control.finishWithSuccess();

@@ -1,6 +1,5 @@
 package com.mygdx.game.component;
 
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.ColonyGame;
@@ -21,8 +20,7 @@ import java.util.ArrayList;
  */
 public class BehaviourManagerComp extends Component{
     private BlackBoard blackBoard;
-    private Task behaviourTree;
-    private Task nextBehaviour;
+    private Task currentBehaviour, nextBehaviour, lastBehaviour;
     private String behaviourType = "";
 
     private Stats stats;
@@ -45,8 +43,8 @@ public class BehaviourManagerComp extends Component{
     @Override
     public void start() {
         super.start();
-//        this.behaviourTree = this.gatherResource();
-//        this.behaviourTree.start();
+//        this.currentBehaviour = this.gatherResource();
+//        this.currentBehaviour.start();
         this.stats = this.owner.getComponent(Stats.class);
     }
 
@@ -76,32 +74,33 @@ public class BehaviourManagerComp extends Component{
          * Store the resource.
          */
 
-        blackBoard.fromInventory = this.getComponent(Colonist.class).getInventory();
-        blackBoard.toInventory = this.getComponent(Colonist.class).getColony().getInventory();
-        blackBoard.transferAll = true;
-
         //If we fail to find a resource, we need to explore until we find one...
         Functional.Callback fail = () -> {
             //When we finish moving to the newly explored area, try to gather a resource again.
-            Functional.Callback onFinish = () ->  this.changeTask(this.gatherResource());
             Task task = this.exploreUnexplored();
-            task.getControl().getCallbacks().finishCallback = onFinish;
+            task.getControl().getCallbacks().finishCallback = () -> this.changeTask(this.gatherResource());
             this.changeTask(task);
         };
 
         Sequence sequence = new Sequence("Gathering Resource", this.blackBoard);
-
         FindClosestEntity fr = new FindClosestEntity("Finding Closest Resource", this.blackBoard, "woodlog", Constants.ENTITY_RESOURCE);
-        fr.getControl().callbacks.failureCallback = fail;
-        fr.getControl().callbacks.criteria = (e) -> ((Entity)e).hasTag(Constants.ENTITY_RESOURCE) && !((Entity)e).getComponent(Resource.class).isTaken();
-        fr.getControl().callbacks.successCallback = () -> blackBoard.target.getComponent(Resource.class).setTaken(true);
-
         FindPath findPath = new FindPath("Finding Path to Resource", this.blackBoard);
         MoveTo move = new MoveTo("Moving to Resource", this.blackBoard);
         Gather gather = new Gather("Gathering Resource", this.blackBoard);
         FindPath findPathToStorage = new FindPath("Finding Path to Storage", this.blackBoard);
         MoveTo moveToStorage = new MoveTo("Moving to Storage", this.blackBoard);
-        TransferResource transferItems = new TransferResource("Transfering Resources", this.blackBoard);
+        TransferResource transferItems = new TransferResource("Transferring Resources", this.blackBoard);
+
+        fr.getControl().callbacks.failureCallback = fail; //If we fail, call the fail callback.
+        fr.getControl().callbacks.criteria = (e) -> ((Entity)e).hasTag(Constants.ENTITY_RESOURCE) && !((Entity)e).getComponent(Resource.class).isTaken(); //Check to make sure the resource isn't taken.
+
+        fr.getControl().callbacks.successCallback = () ->  { //On success, take the resource.
+            blackBoard.targetResource = blackBoard.target.getComponent(Resource.class);
+            if(!blackBoard.targetResource.isTaken())
+                blackBoard.targetResource.setTaken(this.blackBoard.getEntityOwner());
+        };
+
+        findPath.getControl().callbacks.checkCriteria = (task) -> ((Task) task).getBlackboard().targetResource.getTaken() == ((Task) task).getBlackboard().getEntityOwner();
 
         ((ParentTaskController)sequence.getControl()).addTask(fr);
         ((ParentTaskController)sequence.getControl()).addTask(findPath);
@@ -111,9 +110,27 @@ public class BehaviourManagerComp extends Component{
         ((ParentTaskController)sequence.getControl()).addTask(moveToStorage);
         ((ParentTaskController)sequence.getControl()).addTask(transferItems);
 
+        //When we finish, set the target back to not taken IF it is still a valid target (if we ended early).
         sequence.getControl().callbacks.finishCallback = () -> {
-            if (sequence.getBlackboard().target != null && !sequence.getBlackboard().target.isDestroyed() && sequence.getBlackboard().target.hasTag(Constants.ENTITY_RESOURCE))
-                sequence.getBlackboard().target.getComponent(Resource.class).setTaken(false);
+            if (sequence.getBlackboard().target != null && !sequence.getBlackboard().target.isDestroyed() && sequence.getBlackboard().target.hasTag(Constants.ENTITY_RESOURCE)) {
+                if(sequence.getBlackboard().targetResource.getTaken() == sequence.getBlackboard().getEntityOwner()) {
+                    sequence.getBlackboard().targetResource.setTaken(null);
+                    System.out.println("Set taken to null");
+                }
+            }
+
+        };
+
+        sequence.getControl().callbacks.startCallback = ()->{
+            //Reset blackboard values...
+            blackBoard.fromInventory = this.getComponent(Colonist.class).getInventory();
+            blackBoard.toInventory = this.getComponent(Colonist.class).getColony().getInventory();
+            blackBoard.transferAll = true;
+            blackBoard.takeAmount = 0;
+            blackBoard.itemNameToTake = null;
+            blackBoard.targetResource = null;
+            blackBoard.target = null;
+            blackBoard.targetNode = null;
         };
 
         return sequence;
@@ -161,10 +178,10 @@ public class BehaviourManagerComp extends Component{
 
     private Task consume(String effect){
         //Find a stockpile (easy for now)
-        //Search for an item to consume.
+        //Search for an itemRef to consume.
         //Pathfind to the stockpile
         //Move to the stockpile
-        //Get the item
+        //Get the itemRef
         //Consume it.
 
         blackBoard.target = this.getComponent(Colonist.class).getColony().getEntityOwner();
@@ -172,23 +189,36 @@ public class BehaviourManagerComp extends Component{
         blackBoard.fromInventory = this.getComponent(Colonist.class).getColony().getInventory();
         blackBoard.toInventory = this.getComponent(Inventory.class);
         blackBoard.transferAll = false;
-        this.blackBoard.takeAmount = 1;
+        blackBoard.takeAmount = 1;
+        blackBoard.itemNameToTake = null;
 
         Sequence sequence = new Sequence("Consuming Item", this.blackBoard);
 
         CheckInventoryHas check = new CheckInventoryHas("Checking Inventory", this.blackBoard, effect, 1);
         FindPath fp = new FindPath("Finding Path", this.blackBoard);
         MoveTo moveTo = new MoveTo("Moving to...", this.blackBoard);
-        TransferResource tr = new TransferResource("Transfering Resource", this.blackBoard);
+        TransferResource tr = new TransferResource("Transferring Consumable", this.blackBoard);
         Consume consume = new Consume("Consuming Item", this.blackBoard, effect);
 
-        consume.getControl().getCallbacks().finishCallback = () -> consume.getControl().finishWithFailure();
+        check.getControl().getCallbacks().failureCallback = () -> this.changeTask(this.getLastBehaviour()); //Go back to last behaviour
+        consume.getControl().getCallbacks().finishCallback = () -> this.changeTask(this.getLastBehaviour()); //Go back to last behaviour
 
         ((ParentTaskController) sequence.getControl()).addTask(check);
         ((ParentTaskController) sequence.getControl()).addTask(fp);
         ((ParentTaskController) sequence.getControl()).addTask(moveTo);
         ((ParentTaskController) sequence.getControl()).addTask(tr);
         ((ParentTaskController) sequence.getControl()).addTask(consume);
+
+        sequence.getControl().callbacks.startCallback = ()->{
+            //Reset blackboard values.
+            blackBoard.target = this.getComponent(Colonist.class).getColony().getEntityOwner();
+            blackBoard.targetNode = null;
+            blackBoard.fromInventory = this.getComponent(Colonist.class).getColony().getInventory();
+            blackBoard.toInventory = this.getComponent(Inventory.class);
+            blackBoard.transferAll = false;
+            blackBoard.takeAmount = 1;
+            blackBoard.itemNameToTake = null;
+        };
 
         return sequence;
     }
@@ -201,11 +231,16 @@ public class BehaviourManagerComp extends Component{
         this.changeTask(this.exploreUnexplored());
     }
 
+    /**
+     * Changes the next Task to the Task passed in. This essentially saves the current task to 'lastBehaviour' and sets the 'nextBehaviour' to the Task passed in.
+     * @param task The Task to start immediately.
+     */
     private void changeTask(Task task){
         //End the current task.
-        if(this.behaviourTree != null && !this.behaviourTree.getControl().hasFinished()) {
-            this.behaviourTree.getControl().finishWithSuccess();
-            this.behaviourTree.getControl().safeEnd();
+        if(this.currentBehaviour != null && !this.currentBehaviour.getControl().hasFinished()) {
+            this.currentBehaviour.getControl().finishWithSuccess();
+            this.currentBehaviour.getControl().safeEnd();
+            this.lastBehaviour = this.currentBehaviour;
         }
 
         //Set the next behaviour.
@@ -220,19 +255,23 @@ public class BehaviourManagerComp extends Component{
 
         if(this.nextBehaviour == null) {
             //If our behaviour is not null....
-            if (behaviourTree != null) {
+            if (currentBehaviour != null) {
                 //If it has finished successfully, start it over. (repeat)
-                if (this.behaviourTree.getControl().hasFinished() && !this.behaviourTree.getControl().hasFailed()) {
-                    this.nextBehaviour = this.behaviourTree;
-                    this.nextBehaviour.getControl().reset();
+                if (this.currentBehaviour.getControl().hasFinished() && !this.currentBehaviour.getControl().hasFailed()) {
+                    this.currentBehaviour.getControl().safeEnd();
 
-                    //If it finished but failed.
-                } else if (this.behaviourTree.getControl().hasFinished()) {
-                    this.behaviourTree = null; //Set it to null to get a new job. (default job)
+                    if(this.nextBehaviour == null) {
+                        this.changeTask(this.currentBehaviour);
+                        this.nextBehaviour.getControl().reset();
+                    }
+
+                //If it finished but failed.
+                } else if (this.currentBehaviour.getControl().hasFinished()) {
+                    this.currentBehaviour = null;
 
                     //Otherwise, update it.
                 } else {
-                    this.behaviourTree.update(delta); //Update it.
+                    this.currentBehaviour.update(delta); //Update it.
                 }
 
                 //If our behaviour is null, set the next behaviour to the default behaviour.
@@ -250,8 +289,9 @@ public class BehaviourManagerComp extends Component{
                 this.feedTimer.restart();
             }
 
-            this.behaviourTree = this.nextBehaviour;
-            this.behaviourTree.start();
+            this.currentBehaviour = this.nextBehaviour;
+            this.currentBehaviour.getControl().reset();
+            this.currentBehaviour.getControl().safeStart();
             this.nextBehaviour = null;
         }
     }
@@ -313,9 +353,13 @@ public class BehaviourManagerComp extends Component{
         return lineList.toArray(new Line[lineList.size()]);
     }
 
+    private Task getLastBehaviour(){
+        return this.lastBehaviour;
+    }
+
     public String getCurrentTaskName(){
-        if(this.behaviourTree != null)
-            return this.behaviourTree.getName();
+        if(this.currentBehaviour != null)
+            return this.currentBehaviour.getName();
 
         return "Nothing";
     }

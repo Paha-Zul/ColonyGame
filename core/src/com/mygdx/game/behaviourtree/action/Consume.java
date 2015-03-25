@@ -29,10 +29,10 @@ public class Consume extends LeafTask{
 
 
         Inventory inv = this.blackBoard.getEntityOwner().getComponent(Inventory.class);
-        //Search for an item that has the effect we want. If we find one, consume one!
+        //Search for an itemRef that has the effect we want. If we find one, consume one!
         for(Inventory.InventoryItem item : inv.getItemList()){
-            DataBuilder.JsonItem ref = ItemManager.getItemReference(item.item.getItemName()); //Get the item list.
-            if(ref.hasEffect(effectWanted)) { //If this item has the effect we want, get some and consume it!
+            DataBuilder.JsonItem ref = ItemManager.getItemReference(item.itemRef.getItemName()); //Get the itemRef list.
+            if(ref.hasEffect(effectWanted)) { //If this itemRef has the effect we want, get some and consume it!
                 int itemAmount = inv.removeItemAmount(ref.getItemName(), 1);
                 this.addEffect(ref, itemAmount);
                 this.control.finishWithSuccess();
@@ -49,7 +49,7 @@ public class Consume extends LeafTask{
     public void addEffect(DataBuilder.JsonItem item, int amount){
         Stats stats = this.getBlackboard().getEntityOwner().getComponent(Stats.class);
 
-        //For each effect in the item we are consuming...
+        //For each effect in the itemRef we are consuming...
         for(int i=0;i<item.getEffects().length;i++) {
             String effect = item.getEffects()[i];
             int strength = item.getStrengths()[i];

@@ -19,18 +19,12 @@
       "description": "A Twig."
     },
     {
-      "itemName": "penis",
-      "displayName": "Penis",
-      "itemType": "wood",
-      "description": "A Big Black Penis."
-    },
-    {
       "itemName": "herbs",
       "displayName": "Herbs",
       "itemType": "plant",
       "description": "Medicinal Herbs.",
       "effects": ["heal"],
-      "strengths":[20]
+      "strengths":[5]
     },
     {
       "itemName": "food",
@@ -38,7 +32,7 @@
       "itemType": "food",
       "description": "Yummy food.",
       "effects": ["feed"],
-      "strengths":[20]
+      "strengths":[5]
     },
     {
       "itemName": "water",
@@ -46,7 +40,7 @@
       "itemType": "water",
       "description": "Yummy water.",
       "effects": ["hydrate"],
-      "strengths":[20]
+      "strengths":[5]
     }
   ]
 }

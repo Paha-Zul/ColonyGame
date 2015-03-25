@@ -10,7 +10,6 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter;
-import com.mygdx.game.component.Item;
 import com.mygdx.game.component.Resource;
 import com.mygdx.game.helpers.managers.ItemManager;
 import com.mygdx.game.helpers.managers.ResourceManager;
@@ -97,9 +96,9 @@ public class DataBuilder implements IDestroyable{
     }
 
     /**
-     * Gets all the file names from the directory passed in. Adds them to the list passed in.
+     * Gets all the file firstNames from the directory passed in. Adds them to the list passed in.
      * @param dirHandle The Handle to the directory.
-     * @param list The ArrayList to add the names to.
+     * @param list The ArrayList to add the firstNames to.
      */
     private void getFileNamesFromDir(FileHandle dirHandle, ArrayList<String> list){
         for (FileHandle entry: dirHandle.list()) {
@@ -114,9 +113,9 @@ public class DataBuilder implements IDestroyable{
     }
 
     /**
-     * Gets all the file names from the directory passed in. Adds them to the list passed in. Must match the base string passed in (ie: "palmtree_dark", base = "palmtree")
+     * Gets all the file firstNames from the directory passed in. Adds them to the list passed in. Must match the base string passed in (ie: "palmtree_dark", base = "palmtree")
      * @param dirHandle The Handle to the directory.
-     * @param list The ArrayList to add the names to.
+     * @param list The ArrayList to add the firstNames to.
      * @param base The base to match.
      */
     private void getFileNamesFromDir(FileHandle dirHandle, ArrayList<String> list, String base){
@@ -214,12 +213,8 @@ public class DataBuilder implements IDestroyable{
 
         JsonItems items = json.fromJson(JsonItems.class, Gdx.files.internal(filePath+itemPath));
 
-        for(JsonItem jsonItem : items.items){
-            Item item = new Item(jsonItem.itemName, jsonItem.itemType, true, 10000, 1);
-            item.setDisplayName(jsonItem.displayName);
-            item.setDescription(jsonItem.description);
+        for(JsonItem jsonItem : items.items)
             ItemManager.addItemInstance(jsonItem);
-        }
     }
 
     private void buildResources(){
@@ -298,7 +293,7 @@ public class DataBuilder implements IDestroyable{
                         ArrayList<String> fileNames = new ArrayList<>();
                         this.getFileNamesFromDir(Gdx.files.internal(tile.dir), fileNames);
                         tile.img = fileNames.toArray(new String[fileNames.size()]);
-                        tile.tileNames = tile.img; //Assign the tileNames the same as the img names.
+                        tile.tileNames = tile.img; //Assign the tileNames the same as the img firstNames.
                         if (tile.img.length == 0)
                             GH.writeErrorMessage("No files in folder '" + tile.dir + "'");
                     }

@@ -3,12 +3,15 @@ package com.mygdx.game.behaviourtree;
 import com.mygdx.game.behaviourtree.control.TaskController;
 import com.mygdx.game.component.BlackBoard;
 
+import java.lang.annotation.Repeatable;
+
 /**
  * Created by Bbent_000 on 12/31/2014.
  */
 public abstract class Task {
     protected BlackBoard blackBoard;
     protected String name;
+    protected boolean repeat = false;
 
     public Task(String name, BlackBoard blackBoard){
         this.blackBoard = blackBoard;

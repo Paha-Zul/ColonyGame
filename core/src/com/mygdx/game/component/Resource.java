@@ -70,15 +70,15 @@ public class Resource extends Component implements IInteractable{
     }
 
     /**
-     * Gets the array of item firstNames for this Resource. This is essentially the inventory of this Resource.
-     * @return A String array of item firstNames.
+     * Gets the array of itemRef firstNames for this Resource. This is essentially the inventory of this Resource.
+     * @return A String array of itemRef firstNames.
      */
     public String[] getItemNames() {
         return itemNames;
     }
 
     /**
-     * Gets the amounts of the item in this Resource.
+     * Gets the amounts of the itemRef in this Resource.
      * @return A 2D int array which represents the possible (low-high) range of amount of items.
      */
     public int[][] getItemAmounts() {
@@ -154,7 +154,7 @@ public class Resource extends Component implements IInteractable{
     }
 
     /**
-     * Sets the item firstNames for this Resource.
+     * Sets the itemRef firstNames for this Resource.
      * @param itemNames A String array which is the itemNames.
      */
     public void setItemNames(String[] itemNames) {
@@ -162,7 +162,7 @@ public class Resource extends Component implements IInteractable{
     }
 
     /**
-     * Sets the item amounts for this Resource.
+     * Sets the itemRef amounts for this Resource.
      * @param itemAmounts A 2D int array which are the (low-high) range amounts.
      */
     public void setItemAmounts(int[][] itemAmounts) {

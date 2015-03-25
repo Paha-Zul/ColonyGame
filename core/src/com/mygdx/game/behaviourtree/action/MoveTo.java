@@ -16,10 +16,10 @@ import java.util.LinkedList;
 public class MoveTo extends LeafTask{
     private Transform transform;
     private LinkedList<Vector2> path;
-    private float squareSize;
     private Collider collider;
+    private String name;
 
-    private float completeDst = 1f/ Constants.SCALE;
+    private final float completeDst = 1f/ Constants.SCALE;
 
     public MoveTo(String name, BlackBoard blackBoard) {
         super(name, blackBoard);
@@ -35,8 +35,8 @@ public class MoveTo extends LeafTask{
         super.start();
 
         this.transform = this.blackBoard.getEntityOwner().transform;
+        this.name = this.transform.getEntityOwner().name;
         this.path = this.blackBoard.path;
-        this.squareSize = this.blackBoard.colonyGrid.getSquareSize();
         this.collider = this.transform.getComponent(Collider.class);
     }
 
@@ -50,7 +50,7 @@ public class MoveTo extends LeafTask{
             return;
         }
 
-        if(this.path.size() < 1){
+        if(this.path == null || this.path.size() < 1){
             this.collider.body.setLinearVelocity(0,0);
             this.control.finishWithSuccess();
             this.path.clear();

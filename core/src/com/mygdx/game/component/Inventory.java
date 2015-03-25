@@ -2,7 +2,9 @@ package com.mygdx.game.component;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
+import com.mygdx.game.helpers.DataBuilder;
 import com.mygdx.game.helpers.gui.GUI;
+import com.mygdx.game.helpers.managers.ItemManager;
 import com.mygdx.game.interfaces.IDisplayable;
 
 import java.util.ArrayList;
@@ -51,63 +53,89 @@ public class Inventory extends Component implements IDisplayable{
     }
 
     /**
-     * Adds all of the Item passed in.
-     * @param item The Item to add.
+     * Adds one of the item designated by the itemName passed in.
+     * @param itemName The name of the item to add.
      */
-    public void addItem(Item item){
-        InventoryItem invItem = this.inventory.get(item.getItemName());
+    public void addItem(String itemName){
+        InventoryItem invItem = this.inventory.get(itemName);
         //If the invItem doesn't exist, create a new one and add it to the hash map.
         if(invItem == null) {
-            invItem = new InventoryItem(item);
-            this.inventory.put(item.getItemName(), invItem); //Make a new inventory item in the hashmap.
-        //Otherwise, simply add the amount from the item.
+            invItem = new InventoryItem(itemName, 1);
+            this.inventory.put(itemName, invItem); //Make a new inventory itemRef in the hashmap.
+            //Otherwise, simply add the amount from the itemRef.
         }else
-            invItem.addAmount(item.getCurrStack());
+            invItem.addAmount(1);
 
         //Keeps track of total items in this inventory.
-        this.currTotalItems+=item.getCurrStack();
+        this.currTotalItems+=1;
     }
 
     /**
-     * Removes all of an item (by name) and returns that item with the amount removed.
-     * @param name The name of the Item.
-     * @return The Item that was completely removed from the inventory with the quantity that was removed.
+     * Adds an amount of the item designated by the name passed in.
+     * @param itemName The name of the item to add.
+     * @param amount The amount of the item to add.
      */
-    public Item removeItemAll(String name){
-        InventoryItem invItem = this.inventory.get(name);
+    public void addItem(String itemName, int amount){
+        InventoryItem invItem = this.inventory.get(itemName);
+        //If the invItem doesn't exist, create a new one and add it to the hash map.
+        if(invItem == null) {
+            invItem = new InventoryItem(itemName, amount);
+            this.inventory.put(itemName, invItem); //Make a new inventory itemRef in the hashmap.
+            //Otherwise, simply add the amount from the itemRef.
+        }else
+            invItem.addAmount(amount);
 
-        //If it didn't exist or it was empty, return null.
-        if(invItem == null || invItem.amount <= 0)
-            return null;
-
-        //Make a copy of the item and set some values. Then return it.
-        Item item = new Item(invItem.item.getItemName(), invItem.item.getItemType(), invItem.item.isStackable(), invItem.item.getStackLimit(), invItem.item.getWeight());
-        item.setCurrStack(invItem.amount); //Set the item stack to the amount removed.
-        this.currTotalItems-=invItem.amount; //Subtract the current item counter by the amount being removed.
-
-        this.inventory.remove(name);
-
-        return item;
+        //Keeps track of total items in this inventory.
+        this.currTotalItems+=amount;
     }
 
-
-    public int removeItemAmount(String name, int amount){
+    /**
+     * Removes all of an itemRef (by name) and returns that itemRef with the amount removed.
+     * @param itemName The name of the Item.
+     * @return The Item that was completely removed from the inventory with the quantity that was removed.
+     */
+    public int removeItemAll(String itemName){
         InventoryItem invItem = this.inventory.get(name);
 
         //If it didn't exist or it was empty, return 0.
-        if(invItem == null || invItem.amount <= 0 || invItem.item.getCurrStack() <= 0)
+        if(invItem == null || invItem.amount <= 0)
+            return 0;
+
+        this.currTotalItems-=invItem.amount; //Subtract the current itemRef counter by the amount being removed.
+        this.inventory.remove(name); //Remove it from the inventory.
+
+        return invItem.amount; //Return the amount of the item we removed.
+    }
+
+    /**
+     * Attempts to remove an amount of an item from this inventory. It will either remove the requested amount
+     * or will remove all of the item if the amount requested was higher than the stock of the item. Returns the amount
+     * removed from this inventory.
+     * @param itemName The name of the Item.
+     * @param amount The amount of the item to remove.
+     * @return The amount removed from the inventory.
+     */
+    public int removeItemAmount(String itemName, int amount){
+        InventoryItem invItem = this.inventory.get(itemName); //Get the item.
+
+        //If it didn't exist or it was empty, return 0.
+        if(invItem == null || invItem.amount <= 0)
             return 0;
 
         int amt = (amount >= invItem.amount) ? invItem.amount : amount; //If amount is equal or more than the inv amount, take all of it, otherwise the amount.
         invItem.amount -= amt; //Set the inventory Item's amount.
         this.currTotalItems-=amt; //Subtract the amount being removed from the counter.
 
+        //Remove the item from the inventory if all of it has been taken.
         if(invItem.amount <= 0)
-            this.inventory.remove(name);
+            this.inventory.remove(itemName);
 
         return amt;
     }
 
+    /**
+     * Clears the inventory.
+     */
     public void clearInventory(){
         this.inventory.clear();
     }
@@ -120,24 +148,6 @@ public class Inventory extends Component implements IDisplayable{
         return new ArrayList<>(inventory.values());
     }
 
-    public boolean canTakeItem(Item item){
-        boolean amt = (this.totalItemsAllowed == -1 || this.totalItemsAllowed - this.currTotalItems >= item.getCurrStack());
-        if(allowsType(item.getItemType()) && amt)
-            return true;
-
-        return false;
-    }
-
-    public boolean allowsType(String type){
-        String types[] = this.allowedTypes.split(",");
-        for(String tmpType : types){
-            tmpType = tmpType.trim();
-            if(tmpType == "all") return true; //If allows all, return true.
-            if(tmpType == type) return true; //If allows the item type, return true.
-        }
-        return false;
-    }
-
     public int getCurrTotalItems(){
         return this.currTotalItems;
     }
@@ -146,11 +156,10 @@ public class Inventory extends Component implements IDisplayable{
         return this.inventory.get(name);
     }
 
-
     public void printInventory(){
         System.out.println("[Inventory]Inventory of "+this.getEntityOwner().name);
         for(InventoryItem item : this.inventory.values())
-            System.out.println("[Inventory]Item: "+item.item);
+            System.out.println("[Inventory]Item: "+item.itemRef);
     }
 
     @Override
@@ -171,33 +180,31 @@ public class Inventory extends Component implements IDisplayable{
         GUI.Text("Inventory Items", batch, x, y);
         y-=20;
         for(Inventory.InventoryItem item : this.getItemList()){
-            GUI.Text(item.item.getDisplayName()+": "+item.amount, batch, x, y);
+            GUI.Text(item.itemRef.getDisplayName()+": "+item.amount, batch, x, y);
             y-=20;
         }
     }
 
     public class InventoryItem{
         private int amount;
-        public Item item;
+        public DataBuilder.JsonItem itemRef;
 
         /**
          * Creates a new InventoryItem. Uses the Item passed in to clone a new Item for reference.
-         * @param item The Item to clone.
-         * @param amount The amount of the item to initially store.
+         * @param itemRef The Item to clone.
+         * @param amount The amount of the itemRef to initially store.
          */
-        public InventoryItem(Item item, int amount){
-            this.item = item;
-            this.item.setCurrStack(amount);
+        public InventoryItem(DataBuilder.JsonItem itemRef, int amount){
+            this.itemRef = itemRef;
             this.amount = amount;
         }
 
-        public InventoryItem(Item item){
-            this(item, item.getCurrStack());
+        public InventoryItem(String itemName, int amount){
+            this(ItemManager.getItemReference(itemName), amount);
         }
 
         public void addAmount(int amount){
             this.amount += amount;
-            this.item.setCurrStack(this.amount);
         }
 
         public int getAmount(){

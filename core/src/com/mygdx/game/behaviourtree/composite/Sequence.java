@@ -48,5 +48,6 @@ public class Sequence extends ParentTask {
     @Override
     public void childFailed() {
         this.control.finishWithFailure();
+        this.control.safeEnd();
     }
 }
