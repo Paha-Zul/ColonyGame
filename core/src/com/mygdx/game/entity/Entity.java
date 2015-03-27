@@ -168,6 +168,17 @@ public class Entity implements IDelayedDestroyable{
 		return this.activeComponentList.remove(comp);
 	}
 
+	/**
+	 * Destroyes and removes the passed in Component from its owner. Note that the Entity performing the function
+	 * does not need to be the owner of the Component.
+	 * @param comp The Component to be destroyed and removed.
+	 */
+	public void destroyComponent(Component comp){
+		comp.destroy();
+		if(comp.isActive()) comp.getEntityOwner().inactiveComponentList.remove(comp);
+		else comp.getEntityOwner().inactiveComponentList.remove(comp);
+	}
+
     /**
      * Prints all components to the console.
      */
