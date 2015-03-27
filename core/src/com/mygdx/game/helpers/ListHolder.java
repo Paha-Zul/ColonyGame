@@ -47,8 +47,14 @@ public class ListHolder {
 			//For each entity in this layer
 			for(int j=0;j<entityList.get(i).size(); j++){
 				Entity e = entityList.get(i).get(j);
-				//If it is destroyed, remove it, decrement, and continue;
-				if(e.isDestroyed()){
+				//If it is set to be destroyed, destroy it, remove it, decrement, continue.
+				if(e.isSetToBeDestroyed()){
+					entityList.get(i).get(j).destroy();
+					entityList.get(i).remove(j);
+					j--;
+					continue;
+				//If it is already destroyed (an immediate destroy call from somewhere else), remove it, decrement, continue.
+				}else if(e.isDestroyed()){
 					entityList.get(i).remove(j);
 					j--;
 					continue;
