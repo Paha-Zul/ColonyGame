@@ -73,7 +73,7 @@ public class Gather extends LeafTask{
             this.blackBoard.toInventory = targetColony.getInventory(); //Set the inventory to the colony's inventory.
 
             //Destroy the resource and finish with success..
-            this.resource.getEntityOwner().destroy();
+            this.resource.getEntityOwner().setToDestroy();
             this.control.finishWithSuccess();
         });
     }

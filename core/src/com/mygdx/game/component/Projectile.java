@@ -21,7 +21,7 @@ public class Projectile extends Component{
 	public void start() {
 		super.start();
 
-		this.lifetimeTimer = new OneShotTimer(this.lifetime, ()->this.owner.destroy());
+		this.lifetimeTimer = new OneShotTimer(this.lifetime, this.owner::setToDestroy);
 	}
 
 	@Override

@@ -58,7 +58,7 @@ public class ResourceEnt extends Entity{
         fixtureDef.restitution = 0;
 
         //Add the Collider Component and an Interactable Component.
-        this.addComponent(new Collider(ColonyGame.world, bodyDef, fixtureDef));
+        Collider coll = this.addComponent(new Collider(ColonyGame.world, bodyDef, fixtureDef));
 
         circle.dispose();
     }

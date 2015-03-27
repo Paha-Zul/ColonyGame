@@ -25,8 +25,6 @@ public class Collider extends Component implements IScalable{
 
         this.world = world;
         BodyDef bodyDef = new BodyDef();
-
-
         this.body = world.createBody(bodyDef);
 
         FixtureDef fixtureDef = new FixtureDef();
@@ -60,7 +58,6 @@ public class Collider extends Component implements IScalable{
         Vector2 ownerPos = this.owner.transform.getPosition();
         this.body.setTransform(ownerPos.x, ownerPos.y, this.owner.transform.getRotation());
         this.body.setUserData(this.owner);
-
         this.owner.registerScalable(this);
     }
 

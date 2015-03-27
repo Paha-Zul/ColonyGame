@@ -34,7 +34,7 @@ public class ServerPlayer {
 	private Grid.GridInstance grid;
     private boolean paused = false;
 
-    private final int off = 1;
+    private final int off = 5;
 
     public static boolean drawGrid = false;
 
@@ -112,6 +112,7 @@ public class ServerPlayer {
 
 	}
 
+    //Renders the map
     private void renderMap(){
         WorldGen.TerrainTile[][] map = WorldGen.map;
 
@@ -136,6 +137,7 @@ public class ServerPlayer {
         }
     }
 
+    //Draws the box2D debug.
     private void drawBox2DDebug(){
         //Draw the box2d debug
         this.batch.begin();
@@ -168,16 +170,14 @@ public class ServerPlayer {
 			int startY = index[1]-radius;
 			int endY = index[1]+radius;
 
+            //Loops over the boundaries and draws the map.
 			for(int col = startX; col<=endX; col++){
 				for(int row = startY; row <= endY; row++){
 					Grid.Node node = this.grid.getNode(col, row);
 					if(node == null) continue;
                     if(Math.abs(node.getCol() - index[0]) + Math.abs(node.getRow() - index[1]) >= radius*1.5) continue;
 
-					for(Entity ent : new ArrayList<>(node.getEntityList())){
-						if(ent.hasTag(Constants.ENTITY_RESOURCE))
-							ent.destroy();
-					}
+                    new ArrayList<>(node.getEntityList()).stream().filter(ent -> ent.hasTag(Constants.ENTITY_RESOURCE)).forEach(com.mygdx.game.entity.Entity::setToDestroy);
 
                     //WorldGen.getVisibilityMap()[col][row].addViewer();
 				}
@@ -191,8 +191,9 @@ public class ServerPlayer {
 					if(node == null) continue;
 					for(Entity ent : node.getEntityList()){
 						Resource resource;
-						if((resource = ent.getComponent(Resource.class)) != null)
-							colony.addNearbyResource(resource);
+						if((resource = ent.getComponent(Resource.class)) != null) {
+                            colony.addNearbyResource(resource);
+                        }
 					}
 				}
 			}
@@ -205,5 +206,4 @@ public class ServerPlayer {
 	private void initPlayer(){
 		new PlayerInterface(ColonyGame.batch, this.game, this, ColonyGame.world);
 	}
-
 }

@@ -2,13 +2,14 @@ package com.mygdx.game.component;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.mygdx.game.entity.Entity;
+import com.mygdx.game.interfaces.IDelayedDestroyable;
 import com.mygdx.game.interfaces.IDestroyable;
 
 
-public abstract class Component implements IDestroyable {
+public abstract class Component implements IDelayedDestroyable {
 	protected String name;
 	protected int type;
-	private boolean active = true, destroyed = false;
+	private boolean active = true, destroyed = false, setToDestroy = false;
 	protected Entity owner;
 	protected boolean initiated = false;
 
@@ -118,6 +119,16 @@ public abstract class Component implements IDestroyable {
 	 */
 	public Entity getEntityOwner() {
 		return this.owner;
+	}
+
+	@Override
+	public boolean isSetToBeDestroyed() {
+		return this.setToDestroy;
+	}
+
+	@Override
+	public void setToDestroy() {
+		this.setToDestroy = true;
 	}
 
 	@Override

@@ -45,6 +45,8 @@ public class ColonyGame extends Game {
 		world = new World(new Vector2(0,0), true);
         ColonyGame.assetManager = new EasyAssetManager();
 
+		world.setContactListener(new Collision());
+
         threadPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
 		this.setScreen(new PreLoadingScreen(this));

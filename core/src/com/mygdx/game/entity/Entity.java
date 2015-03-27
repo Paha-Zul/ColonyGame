@@ -13,13 +13,15 @@ import com.mygdx.game.component.Component;
 import com.mygdx.game.component.GraphicIdentity;
 import com.mygdx.game.component.Transform;
 import com.mygdx.game.helpers.ListHolder;
+import com.mygdx.game.interfaces.IDelayedDestroyable;
+import com.mygdx.game.interfaces.IDestroyable;
 import com.mygdx.game.interfaces.IScalable;
 
 /**
  * @author Bbent_000
  *
  */
-public class Entity {
+public class Entity implements IDelayedDestroyable{
 	public String name = "Entity";
 	public int drawLevel = 0;
 	public Transform transform;
@@ -185,6 +187,7 @@ public class Entity {
 	/**
 	 * @return True if this Entity has been destroyed, false otherwise.
 	 */
+	@Override
 	public boolean isDestroyed(){
 		return this.destroyed;
 	}
@@ -207,9 +210,17 @@ public class Entity {
         return (tags & tagMask) == tags;
     }
 
-	/**
-	 * Destroys this Entity. This will kill all children, components of children, and components of the parent.
-	 */
+	@Override
+	public boolean isSetToBeDestroyed() {
+		return this.setToDestroy;
+	}
+
+	@Override
+	public void setToDestroy() {
+		this.setToDestroy = true;
+	}
+
+	@Override
 	public void destroy(){
 		//Destroy all children
         this.transform.getChildren().forEach(com.mygdx.game.entity.Entity::destroy);
@@ -221,12 +232,10 @@ public class Entity {
 		}
 
 		//Destroy active components.
-		for(Component comp : this.activeComponentList)
-			comp.destroy();
+		this.activeComponentList.forEach(com.mygdx.game.component.Component::destroy);
 
 		//Destroy inactive components
-		for(Component comp : this.inactiveComponentList)
-			comp.destroy();
+		this.inactiveComponentList.forEach(com.mygdx.game.component.Component::destroy);
 
 		//Clear both lists.
 		this.activeComponentList.clear();

@@ -9,7 +9,6 @@ public class Animal extends Component implements IInteractable{
     private BehaviourManagerComp behComp;
     private Stats stats;
 
-
     public Animal() {
         super();
     }
@@ -20,6 +19,8 @@ public class Animal extends Component implements IInteractable{
 
         this.stats = this.getComponent(Stats.class);
         this.setActive(false);
+
+        //EventSystem.registerEvent(this.owner, "collidestart", args -> this.owner.setToDestroy());
     }
 
     @Override

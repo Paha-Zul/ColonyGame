@@ -50,7 +50,7 @@ public class TreeEnt extends Entity{
 
         //Add the Collider Component and an Interactable Component.
         this.addComponent(new Collider(ColonyGame.world, bodyDef, fixtureDef));
-
         circle.dispose();
+
     }
 }
