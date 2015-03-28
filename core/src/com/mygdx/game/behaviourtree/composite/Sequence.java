@@ -40,6 +40,7 @@ public class Sequence extends ParentTask {
         //If the index is still less than the size, get the next task.
         if(this.control.currIndex < this.control.getSubTasks().size())
             this.control.currTask = this.control.getSubTasks().get(this.control.currIndex);
+
         //If we ran out of tasks, finish with success.
         else
             this.control.finishWithSuccess();

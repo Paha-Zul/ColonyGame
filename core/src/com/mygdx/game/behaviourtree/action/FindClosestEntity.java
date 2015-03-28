@@ -16,20 +16,18 @@ import com.mygdx.game.interfaces.Functional;
  * Created by Paha on 1/29/2015.
  */
 public class FindClosestEntity extends LeafTask{
-    private String itemName;
     private boolean done = false, failed = false;
     private int[] tags;
 
-    public FindClosestEntity(String name, BlackBoard blackBoard, String itemName, int... tags) {
+    public FindClosestEntity(String name, BlackBoard blackBoard, int... tags) {
         super(name, blackBoard);
 
-        this.itemName = itemName;
         this.tags = tags;
     }
 
     @Override
     public boolean check() {
-        return ItemManager.doesItemExist(this.itemName);
+        return super.check();
     }
 
     @Override
@@ -87,7 +85,6 @@ public class FindClosestEntity extends LeafTask{
                                 if(control.callbacks == null || control.callbacks.criteria == null || control.callbacks.criteria.criteria(entity)) {
                                     //If we have a valid Entity, store it and finish with success.
                                     this.blackBoard.target = entity;
-                                    this.blackBoard.targetNode = this.blackBoard.colonyGrid.getNode(this.blackBoard.target);
                                     this.done = true;
                                     this.failed = false;
                                     return;

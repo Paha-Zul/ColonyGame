@@ -17,7 +17,7 @@ public class LeafTask extends Task{
 
     @Override
     public boolean check() {
-        return false;
+        return this.control.callbacks.checkCriteria == null || this.control.callbacks.checkCriteria.criteria(this);
     }
 
     @Override

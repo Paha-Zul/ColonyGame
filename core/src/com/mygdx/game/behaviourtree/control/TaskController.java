@@ -73,6 +73,10 @@ public class TaskController {
         this.task.end();
     }
 
+    public void setTask(Task task){
+        this.task = task;
+    }
+
     /**
      * Sets the TaskController as ready or not ready.
      * @param ready A boolean to set the TaskController as ready or not ready.

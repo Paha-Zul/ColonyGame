@@ -7,6 +7,7 @@ import com.mygdx.game.behaviourtree.Task;
 import com.mygdx.game.behaviourtree.action.*;
 import com.mygdx.game.behaviourtree.composite.Sequence;
 import com.mygdx.game.behaviourtree.control.ParentTaskController;
+import com.mygdx.game.behaviourtree.decorator.RepeatUntilSuccess;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.Constants;
 import com.mygdx.game.helpers.timer.OneShotTimer;
@@ -83,7 +84,7 @@ public class BehaviourManagerComp extends Component{
         };
 
         Sequence sequence = new Sequence("Gathering Resource", this.blackBoard);
-        FindClosestEntity fr = new FindClosestEntity("Finding Closest Resource", this.blackBoard, "woodlog", Constants.ENTITY_RESOURCE);
+        FindClosestEntity fr = new FindClosestEntity("Finding Closest Resource", this.blackBoard, Constants.ENTITY_RESOURCE);
         FindPath findPath = new FindPath("Finding Path to Resource", this.blackBoard);
         MoveTo move = new MoveTo("Moving to Resource", this.blackBoard);
         Gather gather = new Gather("Gathering Resource", this.blackBoard);
@@ -100,7 +101,7 @@ public class BehaviourManagerComp extends Component{
                 blackBoard.targetResource.setTaken(this.blackBoard.getEntityOwner());
         };
 
-        findPath.getControl().callbacks.checkCriteria = (task) -> ((Task) task).getBlackboard().targetResource.getTaken() == ((Task) task).getBlackboard().getEntityOwner();
+        findPath.getControl().callbacks.checkCriteria = (task) -> (task).getBlackboard().targetResource.getTaken() == ((Task) task).getBlackboard().getEntityOwner();
 
         ((ParentTaskController)sequence.getControl()).addTask(fr);
         ((ParentTaskController)sequence.getControl()).addTask(findPath);
@@ -223,12 +224,37 @@ public class BehaviourManagerComp extends Component{
         return sequence;
     }
 
+    private Task follow(){
+        //Seq -> findclosest -> seq -> findpath/moveto...
+
+        Sequence seq = new Sequence("Following", this.blackBoard);
+        FindClosestEntity fc = new FindClosestEntity("Finding Closest Animal", this.blackBoard, Constants.ENTITY_ANIMAL);
+        ((ParentTaskController) seq.getControl()).addTask(fc);
+
+        Sequence seq2 = new Sequence("Moving Towards", this.blackBoard);
+        RepeatUntilSuccess rp = new RepeatUntilSuccess("Following Target", this.blackBoard, seq2);
+
+        FindPath fp = new FindPath("Finding Path To Target", this.blackBoard);
+        MoveTo mt = new MoveTo("Moving to Target", this.blackBoard);
+
+        ((ParentTaskController) seq.getControl()).addTask(rp); //Add the repeated task to the first sequence.
+        ((ParentTaskController) seq2.getControl()).addTask(fp); //Add the find path to the second sequence.
+        ((ParentTaskController) seq2.getControl()).addTask(mt); //Add the move to the second sequence.
+
+        mt.getControl().callbacks.criteria = task -> {
+            Task tsk = (Task)task;
+            return tsk.getBlackboard().targetNode == ColonyGame.worldGrid.getNode(tsk.getBlackboard().target);
+        };
+
+        return seq;
+    }
+
     public void gather(){
         this.changeTask(this.gatherResource());
     }
 
     public void explore(){
-        this.changeTask(this.exploreUnexplored());
+        this.changeTask(this.follow());
     }
 
     /**
@@ -256,15 +282,9 @@ public class BehaviourManagerComp extends Component{
         if(this.nextBehaviour == null) {
             //If our behaviour is not null....
             if (currentBehaviour != null) {
-                //If it has finished successfully, start it over. (repeat)
+                //If it has finished successfully, safely end it.
                 if (this.currentBehaviour.getControl().hasFinished() && !this.currentBehaviour.getControl().hasFailed()) {
-                    this.currentBehaviour.getControl().safeEnd();
-
-                    if(this.nextBehaviour == null) {
-                        this.changeTask(this.currentBehaviour);
-                        this.nextBehaviour.getControl().reset();
-                    }
-
+                    this.currentBehaviour = null;
                 //If it finished but failed.
                 } else if (this.currentBehaviour.getControl().hasFinished()) {
                     this.currentBehaviour = null;

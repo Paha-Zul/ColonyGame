@@ -17,6 +17,7 @@ import com.mygdx.game.helpers.Constants;
 public class AnimalEnt extends Entity{
     public AnimalEnt(Vector2 position, float rotation, TextureRegion graphic, SpriteBatch batch, int drawLevel) {
         super(position, rotation, graphic, batch, drawLevel);
+        this.addTag(Constants.ENTITY_ANIMAL);
 
         this.name = "Squirrel";
 

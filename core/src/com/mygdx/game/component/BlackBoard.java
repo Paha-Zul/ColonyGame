@@ -29,6 +29,10 @@ public class BlackBoard extends Component{
     public float randomIdleTime = 2f;
     public int idleDistance = 1;
 
+    //Attack stuff
+    public float attackRange = 5f;
+    public float disBeforeRepath = 5f;
+
     //My stuff
     public Inventory myInventory;
     public float moveSpeed = 100f;
