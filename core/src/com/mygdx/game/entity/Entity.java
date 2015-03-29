@@ -53,10 +53,8 @@ public class Entity implements IDelayedDestroyable{
 
 		this.transform = this.addComponent(new Transform(position, rotation, this));
 
-		if(batch != null && graphic != null) {
+		if(batch != null && graphic != null)
 			this.identity = this.addComponent(new GraphicIdentity(new TextureRegion(graphic), batch));
-			this.newComponentList.add(this.identity);
-		}
 
 		ListHolder.addEntity(drawLevel, this);
 		this.ID = MathUtils.random()*Double.MAX_VALUE;
@@ -83,7 +81,6 @@ public class Entity implements IDelayedDestroyable{
 		this.inactiveComponentList = new ArrayList<>(); //Init the inactive list.
 		this.newComponentList = new ArrayList<>(); //Init the inactive list.
 		this.scalableComponents = new ArrayList<>();
-
 
 		this.transform = this.addComponent(new Transform(position, rotation, this));
 		for(Component comp : comps)
