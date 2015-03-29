@@ -17,7 +17,6 @@ public class MoveTo extends LeafTask{
     private Transform transform;
     private LinkedList<Vector2> path;
     private Collider collider;
-    private String name;
 
     private final float completeDst = 1f/ Constants.SCALE;
 

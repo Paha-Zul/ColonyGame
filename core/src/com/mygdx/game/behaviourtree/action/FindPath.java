@@ -147,7 +147,7 @@ public class FindPath extends LeafTask {
         //If a path was found, record the path.
         if(found) {
             currNode = target;
-            while (currNode != null) {
+            while (currNode.parentNode != null) {
                 path.add(new Vector2(currNode.getCol()*squareSize + squareSize*0.5f, currNode.getRow()*squareSize + squareSize*0.5f));
                 currNode.visited = false;
                 currNode = currNode.parentNode;
