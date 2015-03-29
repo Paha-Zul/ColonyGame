@@ -42,9 +42,7 @@ public abstract class ParentTask extends Task{
                 currTask.getControl().safeStart();
 
         //If the task has finished, end it!
-        }
-
-        if(currTask.getControl().hasFinished()){
+        }else if(currTask.getControl().hasFinished()){
             currTask.getControl().safeEnd(); //End the task.
             //If failed, call childFailed.
             if(currTask.getControl().hasFailed())
