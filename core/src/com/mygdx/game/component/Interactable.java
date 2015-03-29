@@ -21,6 +21,7 @@ public class Interactable extends Component{
 
     public Interactable(){
         this("NothingType");
+        this.setActive(false);
     }
 
     @Override

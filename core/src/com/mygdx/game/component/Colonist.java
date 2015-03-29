@@ -20,6 +20,7 @@ public class Colonist extends Component implements IInteractable{
 
     public Colonist() {
         super();
+        this.setActive(false);
     }
 
     @Override

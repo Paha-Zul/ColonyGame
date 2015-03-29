@@ -294,7 +294,7 @@ public class BehaviourManagerComp extends Component{
                     this.currentBehaviour.update(delta); //Update it.
                 }
 
-                //If our behaviour is null, set the next behaviour to the default behaviour.
+            //If our behaviour is null, set the next behaviour to the default behaviour.
             } else {
                 if (this.behaviourType.equals("colonist"))
                     this.nextBehaviour = this.idle(this.blackBoard.baseIdleTime, this.blackBoard.randomIdleTime, this.blackBoard.idleDistance);

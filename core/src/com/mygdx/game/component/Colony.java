@@ -32,9 +32,10 @@ public class Colony extends Component implements IInteractable {
         super();
 
         this.colonyName = colonyName;
+        this.setActive(false);
     }
     public Colony() {
-        super();
+        this("Colony");
     }
 
     @Override

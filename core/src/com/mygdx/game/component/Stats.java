@@ -21,6 +21,7 @@ public class Stats extends Component{
     public Stats() {
         super();
 
+        this.setActive(false);
     }
 
     @Override

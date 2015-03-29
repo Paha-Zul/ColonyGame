@@ -38,6 +38,8 @@ public class Inventory extends Component implements IDisplayable{
         this.totalTypesAllowed = totalTypesAllowed;
         this.totalItemsAllowed = totalItemsAllowed;
         this.totalWeightAllowed = totalWeightAllowed;
+
+        this.setActive(false);
     }
 
     /**
