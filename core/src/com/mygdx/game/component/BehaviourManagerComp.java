@@ -21,7 +21,7 @@ import java.util.ArrayList;
  */
 public class BehaviourManagerComp extends Component{
     private BlackBoard blackBoard;
-    private Task currentBehaviour, nextBehaviour, lastBehaviour;
+    private Task currentBehaviour, nextBehaviour;
     private String behaviourType = "";
 
     private Stats stats;
@@ -146,8 +146,13 @@ public class BehaviourManagerComp extends Component{
     private Task exploreUnexplored(){
         /**
          * Find an unexplored location.
+         * Find path.
          * Move to it!
          */
+
+        //Reset these. Left over assignments from other jobs will cause the explore behaviour to simply move to the wrong area.
+        this.blackBoard.target = null;
+        this.blackBoard.targetNode = null;
 
         Sequence sequence = new Sequence("Exploring", this.blackBoard);
 
@@ -207,9 +212,6 @@ public class BehaviourManagerComp extends Component{
         TransferResource tr = new TransferResource("Transferring Consumable", this.blackBoard);
         Consume consume = new Consume("Consuming Item", this.blackBoard, effect);
 
-        check.getControl().getCallbacks().failureCallback = () -> this.changeTask(this.getLastBehaviour()); //Go back to last behaviour
-        consume.getControl().getCallbacks().finishCallback = () -> this.changeTask(this.getLastBehaviour()); //Go back to last behaviour
-
         ((ParentTaskController) sequence.getControl()).addTask(check);
         ((ParentTaskController) sequence.getControl()).addTask(fp);
         ((ParentTaskController) sequence.getControl()).addTask(moveTo);
@@ -231,22 +233,33 @@ public class BehaviourManagerComp extends Component{
     }
 
     private Task followTask(){
-        //Seq -> findclosest -> seq -> findpath/moveto...
+        /**
+         * Find an Entity to follow
+         * Repeat until success...
+         *      Find path to Entity
+         *      MoveTo - If target moves ^ (fail and repeat), if target is reached, finish the job successfully.
+         */
 
-        Sequence seq = new Sequence("Following", this.blackBoard);
+        Sequence mainSeq = new Sequence("Following", this.blackBoard);
         FindClosestEntity fc = new FindClosestEntity("Finding Closest Animal", this.blackBoard, Constants.ENTITY_ANIMAL);
-        ((ParentTaskController) seq.getControl()).addTask(fc);
+        ((ParentTaskController) mainSeq.getControl()).addTask(fc);
 
-        Sequence seq2 = new Sequence("Moving Towards", this.blackBoard);
-        RepeatUntilSuccess rp = new RepeatUntilSuccess("Following Target", this.blackBoard, seq2);
+        Sequence repeatSeq = new Sequence("Moving Towards", this.blackBoard);
+        RepeatUntilSuccess rp = new RepeatUntilSuccess("Following Target", this.blackBoard, repeatSeq);
 
         FindPath fp = new FindPath("Finding Path To Target", this.blackBoard);
         MoveTo mt = new MoveTo("Moving to Target", this.blackBoard);
 
-        ((ParentTaskController) seq.getControl()).addTask(rp); //Add the repeated task to the first sequence.
-        ((ParentTaskController) seq2.getControl()).addTask(fp); //Add the find path to the second sequence.
-        ((ParentTaskController) seq2.getControl()).addTask(mt); //Add the move to the second sequence.
+        ((ParentTaskController) mainSeq.getControl()).addTask(rp); //Add the repeated task to the first sequence.
+        ((ParentTaskController) repeatSeq.getControl()).addTask(fp); //Add the find path to the second sequence.
+        ((ParentTaskController) repeatSeq.getControl()).addTask(mt); //Add the move to the second sequence.
 
+        //Since this FindPath behaviour is under a RepeatUntilSuccess, it will get stuck getting a path to nothing (failing).
+        //We need to forcefully end the whole behaviour if this happens.
+        fp.getControl().callbacks.failureCallback = () -> repeatSeq.getControl().finishWithFailure();
+
+        //On each movement, we need to check if the target has moved nodes. The criteria will fail if the two nodes don't equal each other.
+        //The behaviour will fail and a new path will be calculated.
         mt.getControl().callbacks.criteria = task -> {
             Task tsk = (Task)task;
             return tsk.getBlackboard().targetNode == ColonyGame.worldGrid.getNode(tsk.getBlackboard().target);
@@ -254,7 +267,7 @@ public class BehaviourManagerComp extends Component{
 
         mt.getControl().callbacks.successCallback = () -> this.blackBoard.target.setToDestroy();
 
-        return seq;
+        return mainSeq;
     }
 
     public void idle(){
@@ -286,7 +299,6 @@ public class BehaviourManagerComp extends Component{
         if(this.currentBehaviour != null && !this.currentBehaviour.getControl().hasFinished()) {
             this.currentBehaviour.getControl().finishWithSuccess();
             this.currentBehaviour.getControl().safeEnd();
-            this.lastBehaviour = this.currentBehaviour;
         }
 
         //Set the next behaviour.
@@ -389,10 +401,6 @@ public class BehaviourManagerComp extends Component{
         }
 
         return lineList.toArray(new Line[lineList.size()]);
-    }
-
-    private Task getLastBehaviour(){
-        return this.lastBehaviour;
     }
 
     public String getCurrentTaskName(){
