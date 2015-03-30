@@ -41,6 +41,12 @@
       "description": "Yummy water.",
       "effects": ["hydrate"],
       "strengths":[10]
+    },
+    {
+      "itemName": "hide",
+      "displayName": "Animal Hide",
+      "itemType": "hide",
+      "description": "Awesome animal hide."
     }
   ]
 }

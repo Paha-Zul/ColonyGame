@@ -1,6 +1,13 @@
 {
   "animals": [
     {
+      "name": "Squirrel",
+      "aggressive": false,
+      "img": "squirrel",
+      "items": ["food", "hide"],
+      "itemAmounts":[[1,2], [0,1]]
+    },
+    {
       "name": "Wolf",
       "aggressive": true,
       "pack": true,

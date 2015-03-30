@@ -1,6 +1,17 @@
 {
   "changes": [
     {
+      "version": "0.17",
+      "date": "3/29/2015",
+      "log": [
+        "- Added: Hunting behaviour! Colonist will find the closest animal and track it down, and then the animal will suddenly disappear and not give the colonist any items... (it died I think?)",
+        "- Fixed: Lots of behaviour stuff. Now uses states (ie: Gathering, Exploring, Idling) to determine what behaviour should be repeated.",
+        "- Fixed: Colonists getting stuck trying to consume an item",
+        "- Fixed: Colonists don't try to move to their immediate square when a new path is calculated. This removed a weird 'jitter' when a new path was found.",
+        "- Fixed: Some internal code stuff that caused a crash every once in a while when moving down a path."
+      ]
+    },
+    {
       "version": "0.16",
       "date": "3/16/2015",
       "log": [
@@ -11,7 +22,8 @@
         "- Bug: Colonists will explore when you tell them to gather and no resource is found, but they randomly stop exploring after a bit...",
         "- Bug: Colonists can (a lot?) attempt to harvest the same resource, but only one will get it. All of the colonists that fail at harvesting it will sadly idle around."
       ]
-    },{
+    },
+    {
       "version": "0.15",
       "date": "3/8/2015",
       "log": [
