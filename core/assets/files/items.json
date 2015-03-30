@@ -32,7 +32,7 @@
       "itemType": "food",
       "description": "Yummy food.",
       "effects": ["feed"],
-      "strengths":[5]
+      "strengths":[10]
     },
     {
       "itemName": "water",
@@ -40,7 +40,7 @@
       "itemType": "water",
       "description": "Yummy water.",
       "effects": ["hydrate"],
-      "strengths":[5]
+      "strengths":[10]
     }
   ]
 }
