@@ -24,7 +24,7 @@ public class BlackBoard extends Component{
     public Inventory fromInventory;
     public String itemNameToTake;
 
-    //Related to idle jobs
+    //Related to idleTask jobs
     public float baseIdleTime = 2f;
     public float randomIdleTime = 2f;
     public int idleDistance = 1;
@@ -40,5 +40,9 @@ public class BlackBoard extends Component{
     public BlackBoard() {
 
         this.setActive(false);
+    }
+
+    public Entity getTarget(){
+        return target;
     }
 }

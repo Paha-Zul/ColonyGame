@@ -66,7 +66,7 @@ public class FindPath extends LeafTask {
 
         //If our targetNode is still null somehow, fail and return.
         if(targetNode == null) {
-            System.out.println(this.blackBoard.getEntityOwner().name + " target is null");
+            System.out.println(this.blackBoard.getEntityOwner().name + "'s target is null");
             this.control.finishWithFailure();
             return null;
         }

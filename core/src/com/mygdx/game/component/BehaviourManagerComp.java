@@ -29,6 +29,12 @@ public class BehaviourManagerComp extends Component{
     private ArrayList<Line> lineList = new ArrayList<>();
     private Timer feedTimer = new OneShotTimer(10f, null);
 
+    private State currentState;
+
+    private enum State {
+        Idle, Gathering, Exploring
+    }
+
     public BehaviourManagerComp(String behaviourType) {
         this.behaviourType = behaviourType;
     }
@@ -156,7 +162,7 @@ public class BehaviourManagerComp extends Component{
         return sequence;
     }
 
-    public Task idle(float baseIdleTime, float randomIdleTime, int radius){
+    public Task idleTask(float baseIdleTime, float randomIdleTime, int radius){
         //Find random spot to walk to
         //Find path
         //Move there
@@ -177,9 +183,9 @@ public class BehaviourManagerComp extends Component{
         return sequence;
     }
 
-    private Task consume(String effect){
+    private Task consumeTask(String effect){
         //Find a stockpile (easy for now)
-        //Search for an itemRef to consume.
+        //Search for an itemRef to consumeTask.
         //Pathfind to the stockpile
         //Move to the stockpile
         //Get the itemRef
@@ -224,7 +230,7 @@ public class BehaviourManagerComp extends Component{
         return sequence;
     }
 
-    private Task follow(){
+    private Task followTask(){
         //Seq -> findclosest -> seq -> findpath/moveto...
 
         Sequence seq = new Sequence("Following", this.blackBoard);
@@ -246,15 +252,29 @@ public class BehaviourManagerComp extends Component{
             return tsk.getBlackboard().targetNode == ColonyGame.worldGrid.getNode(tsk.getBlackboard().target);
         };
 
+        mt.getControl().callbacks.successCallback = () -> this.blackBoard.target.setToDestroy();
+
         return seq;
+    }
+
+    public void idle(){
+        this.changeTask(this.idleTask(this.blackBoard.baseIdleTime, this.blackBoard.randomIdleTime, this.blackBoard.idleDistance));
+        this.currentState = State.Idle;
     }
 
     public void gather(){
         this.changeTask(this.gatherResource());
+        this.currentState = State.Gathering;
     }
 
     public void explore(){
-        this.changeTask(this.follow());
+        this.changeTask(this.exploreUnexplored());
+        this.currentState = State.Exploring;
+    }
+
+    public void attack(){
+        this.changeTask(this.followTask());
+        this.currentState = State.Idle;
     }
 
     /**
@@ -282,30 +302,28 @@ public class BehaviourManagerComp extends Component{
         if(this.nextBehaviour == null) {
             //If our behaviour is not null....
             if (currentBehaviour != null) {
-                //If it has finished successfully, safely end it.
-                if (this.currentBehaviour.getControl().hasFinished() && !this.currentBehaviour.getControl().hasFailed()) {
-                    this.currentBehaviour = null;
-                //If it finished but failed.
-                } else if (this.currentBehaviour.getControl().hasFinished()) {
-                    this.currentBehaviour = null;
-
-                    //Otherwise, update it.
-                } else {
+                //If it has finished
+                if (this.currentBehaviour.getControl().hasFinished()) {
+                    if(this.currentState == State.Gathering) gather();
+                    else if(this.currentState == State.Exploring) explore();
+                    else this.idle();
+                    //If it finished but failed.
+                }else {
                     this.currentBehaviour.update(delta); //Update it.
                 }
 
             //If our behaviour is null, set the next behaviour to the default behaviour.
             } else {
                 if (this.behaviourType.equals("colonist"))
-                    this.nextBehaviour = this.idle(this.blackBoard.baseIdleTime, this.blackBoard.randomIdleTime, this.blackBoard.idleDistance);
+                    this.nextBehaviour = this.idleTask(this.blackBoard.baseIdleTime, this.blackBoard.randomIdleTime, this.blackBoard.idleDistance);
                 else if (this.behaviourType.equals("animal"))
-                    this.nextBehaviour = this.idle(this.blackBoard.baseIdleTime, this.blackBoard.randomIdleTime, this.blackBoard.idleDistance);
+                    this.nextBehaviour = this.idleTask(this.blackBoard.baseIdleTime, this.blackBoard.randomIdleTime, this.blackBoard.idleDistance);
             }
 
         //If our next behaviour is not null, we need to start it!
         }else{
             if(this.stats.getFood() <= 20 && feedTimer.isFinished() && this.behaviourType.equals("colonist")) {
-                this.nextBehaviour = this.consume("feed");
+                this.nextBehaviour = this.consumeTask("feed");
                 this.feedTimer.restart();
             }
 
@@ -333,7 +351,7 @@ public class BehaviourManagerComp extends Component{
 
                     //Take a peak at the next point. If it's not null, draw a line from the Entity to the next square
                 }else{
-                    float nextX=0, nextY=0; //Start at 0.
+                    float nextX, nextY; //Start at 0.
                     point = this.blackBoard.path.get(i); //Get the Vector2 start point of our next destination.
 
                     float currX = point.x;

@@ -50,7 +50,7 @@ public class MoveTo extends LeafTask{
         }
 
         if(this.path == null || this.path.size() < 1){
-            this.collider.body.setLinearVelocity(0,0);
+            this.collider.body.setLinearVelocity(0, 0);
             this.control.finishWithSuccess();
             this.path.clear();
             this.path = null;

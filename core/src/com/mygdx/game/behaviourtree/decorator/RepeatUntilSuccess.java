@@ -27,7 +27,6 @@ public class RepeatUntilSuccess extends TaskDecorator{
         //If this task has finished with failure, restart!
         if(this.task.getControl().hasFinished() && this.task.getControl().hasFailed()){
             this.task.getControl().reset();
-            this.task.getControl().safeStart();
         }else if(this.task.getControl().hasFinished())
             this.control.finishWithSuccess();
         else

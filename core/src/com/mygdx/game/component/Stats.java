@@ -1,16 +1,11 @@
 package com.mygdx.game.component;
 
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.Rectangle;
-import com.mygdx.game.helpers.gui.GUI;
 import com.mygdx.game.helpers.timer.RepeatingTimer;
 import com.mygdx.game.helpers.timer.Timer;
-import com.mygdx.game.helpers.worldgeneration.WorldGen;
-import com.mygdx.game.interfaces.IDisplayable;
 
 /**
- * Created by Paha on 1/12/2015.
+ * Stat Component for an Entity that includes stats like health, hunger, thirst, etc. Also uses the update() method to
+ * increment/decrement stats like lowering health due to hunger/thirst.
  */
 public class Stats extends Component{
     private float maxHealth=100, currHealth=100;
@@ -20,8 +15,6 @@ public class Stats extends Component{
 
     public Stats() {
         super();
-
-        this.setActive(false);
     }
 
     @Override
