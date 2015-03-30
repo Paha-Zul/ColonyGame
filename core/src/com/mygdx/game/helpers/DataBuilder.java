@@ -10,13 +10,12 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter;
-import com.mygdx.game.component.Resource;
-import com.mygdx.game.helpers.managers.ItemManager;
-import com.mygdx.game.helpers.managers.ResourceManager;
+import com.mygdx.game.helpers.managers.DataManager;
 import com.mygdx.game.helpers.worldgeneration.WorldGen;
 import com.mygdx.game.interfaces.IDestroyable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created by Paha on 2/19/2015.
@@ -214,7 +213,7 @@ public class DataBuilder implements IDestroyable{
         JsonItems items = json.fromJson(JsonItems.class, Gdx.files.internal(filePath+itemPath));
 
         for(JsonItem jsonItem : items.items)
-            ItemManager.addItemInstance(jsonItem);
+            DataManager.addData(jsonItem.itemName, jsonItem, JsonItem.class);
     }
 
     private void buildResources(){
@@ -252,7 +251,7 @@ public class DataBuilder implements IDestroyable{
                 amounts[i][1] = jRes.amounts[i][1];
             }
 
-            ResourceManager.addResourceInstance(jRes);
+            DataManager.addData(jRes.resourceName, jRes, JsonResource.class);
        }
     }
 

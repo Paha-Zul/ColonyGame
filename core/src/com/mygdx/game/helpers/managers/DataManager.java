@@ -5,7 +5,8 @@ import com.mygdx.game.helpers.GH;
 import java.util.HashMap;
 
 /**
- * Created by Paha on 3/30/2015.
+ * Stores all data that needs to be referenced for information in the future. This is for stuff like
+ * items (JsonItem), resources (JsonResource), animals (JsonAnimal), etc.
  */
 public class DataManager {
     private static HashMap<Class<?>, HashMap<String, Object>> dataMap = new HashMap<>();

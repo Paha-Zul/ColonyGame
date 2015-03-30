@@ -4,7 +4,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.mygdx.game.helpers.DataBuilder;
 import com.mygdx.game.helpers.gui.GUI;
-import com.mygdx.game.helpers.managers.ItemManager;
+import com.mygdx.game.helpers.managers.DataManager;
 import com.mygdx.game.interfaces.IDisplayable;
 
 import java.util.ArrayList;
@@ -202,7 +202,7 @@ public class Inventory extends Component implements IDisplayable{
         }
 
         public InventoryItem(String itemName, int amount){
-            this(ItemManager.getItemReference(itemName), amount);
+            this(DataManager.getData(itemName, DataBuilder.JsonItem.class), amount);
         }
 
         public void addAmount(int amount){

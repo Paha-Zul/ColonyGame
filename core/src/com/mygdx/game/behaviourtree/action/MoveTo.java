@@ -26,7 +26,7 @@ public class MoveTo extends LeafTask{
 
     @Override
     public boolean check() {
-        return (blackBoard.path != null && blackBoard.path.size() > 0);
+        return super.check();
     }
 
     @Override

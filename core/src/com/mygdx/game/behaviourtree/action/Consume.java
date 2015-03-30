@@ -5,7 +5,7 @@ import com.mygdx.game.component.BlackBoard;
 import com.mygdx.game.component.Inventory;
 import com.mygdx.game.component.Stats;
 import com.mygdx.game.helpers.DataBuilder;
-import com.mygdx.game.helpers.managers.ItemManager;
+import com.mygdx.game.helpers.managers.DataManager;
 
 /**
  * Created by Paha on 3/14/2015.
@@ -27,11 +27,10 @@ public class Consume extends LeafTask{
     public void start() {
         super.start();
 
-
         Inventory inv = this.blackBoard.getEntityOwner().getComponent(Inventory.class);
         //Search for an itemRef that has the effect we want. If we find one, consume one!
         for(Inventory.InventoryItem item : inv.getItemList()){
-            DataBuilder.JsonItem ref = ItemManager.getItemReference(item.itemRef.getItemName()); //Get the itemRef list.
+            DataBuilder.JsonItem ref = DataManager.getData(item.itemRef.getItemName(), DataBuilder.JsonItem.class);
             if(ref.hasEffect(effectWanted)) { //If this itemRef has the effect we want, get some and consume it!
                 int itemAmount = inv.removeItemAmount(ref.getItemName(), 1);
                 this.addEffect(ref, itemAmount);

@@ -28,7 +28,7 @@ public class BehaviourManagerComp extends Component{
     private Stats stats;
 
     private ArrayList<Line> lineList = new ArrayList<>();
-    private Timer feedTimer = new OneShotTimer(10f, null);
+    private Timer feedTimer = new OneShotTimer(5f, null);
 
     private State currentState;
 
@@ -211,8 +211,8 @@ public class BehaviourManagerComp extends Component{
         Sequence sequence = new Sequence("Consuming Item", this.blackBoard);
 
         CheckInventoryHas check = new CheckInventoryHas("Checking Inventory", this.blackBoard, effect, 1);
-        FindPath fp = new FindPath("Finding Path", this.blackBoard);
-        MoveTo moveTo = new MoveTo("Moving to...", this.blackBoard);
+        FindPath fp = new FindPath("Finding Path to consume item", this.blackBoard);
+        MoveTo moveTo = new MoveTo("Moving to consume item", this.blackBoard);
         TransferResource tr = new TransferResource("Transferring Consumable", this.blackBoard);
         Consume consume = new Consume("Consuming Item", this.blackBoard, effect);
 
@@ -325,13 +325,12 @@ public class BehaviourManagerComp extends Component{
             if (currentBehaviour != null) {
                 //If it has finished
                 if (this.currentBehaviour.getControl().hasFinished()) {
-                    if(this.currentState == State.Gathering) gather();
-                    else if(this.currentState == State.Exploring) explore();
-                    else this.idle();
+                    if (this.currentState == State.Gathering) gather();
+                    else if (this.currentState == State.Exploring) explore();
+                    else idle();
                     //If it finished but failed.
-                }else {
+                }else
                     this.currentBehaviour.update(delta); //Update it.
-                }
 
             //If our behaviour is null, set the next behaviour to the default behaviour.
             } else {
@@ -343,8 +342,9 @@ public class BehaviourManagerComp extends Component{
 
         //If our next behaviour is not null, we need to start it!
         }else{
+            //If we're hungry, eat!
             if(this.stats.getFood() <= 20 && feedTimer.isFinished() && this.behaviourType.equals("colonist")) {
-                this.nextBehaviour = this.consumeTask("feed");
+                this.changeTask(this.consumeTask("feed"));
                 this.feedTimer.restart();
             }
 

@@ -7,7 +7,7 @@ import com.mygdx.game.ColonyGame;
 import com.mygdx.game.behaviourtree.LeafTask;
 import com.mygdx.game.component.*;
 import com.mygdx.game.helpers.DataBuilder;
-import com.mygdx.game.helpers.managers.ItemManager;
+import com.mygdx.game.helpers.managers.DataManager;
 import com.mygdx.game.helpers.managers.SoundManager;
 import com.mygdx.game.helpers.timer.OneShotTimer;
 import com.mygdx.game.helpers.timer.RepeatingTimer;
@@ -60,7 +60,7 @@ public class Gather extends LeafTask{
 
             //For each resource, random an amount to add to my (the colonists') inventory.
             for(int i=0;i<this.resource.getItemNames().length;i++){
-                DataBuilder.JsonItem item = ItemManager.getItemReference(this.resource.getItemNames()[i]); //Get the reference.
+                DataBuilder.JsonItem item = DataManager.getData(this.resource.getItemNames()[i], DataBuilder.JsonItem.class); //Get the reference.
                 int diff = this.resource.getItemAmounts()[i][1] - this.resource.getItemAmounts()[i][0]; //Get the difference between low and high.
                 int base = this.resource.getItemAmounts()[i][0]; //Get the base amount (which is the low amount).
                 this.blackBoard.myInventory.addItem(item.getItemName(), MathUtils.random(diff) + base); //Random a number!

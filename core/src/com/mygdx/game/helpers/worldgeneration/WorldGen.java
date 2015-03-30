@@ -6,18 +6,16 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.ColonyGame;
-import com.mygdx.game.component.GraphicIdentity;
 import com.mygdx.game.component.Resource;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.entity.ResourceEnt;
 import com.mygdx.game.helpers.Constants;
 import com.mygdx.game.helpers.DataBuilder;
 import com.mygdx.game.helpers.GH;
-import com.mygdx.game.helpers.managers.ResourceManager;
+import com.mygdx.game.helpers.managers.DataManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -309,9 +307,8 @@ public class WorldGen {
             return null;
 
         for (int i=0;i<tile.resources.length;i++) {
-            if (value >= tile.resourcesChance[i][0] && value <= tile.resourcesChance[i][1]) {
-                return ResourceManager.getJsonResourceByName(tile.resources[i]);
-            }
+            if (value >= tile.resourcesChance[i][0] && value <= tile.resourcesChance[i][1])
+                return DataManager.getData(tile.resources[i], DataBuilder.JsonResource.class);
         }
 
         return null;

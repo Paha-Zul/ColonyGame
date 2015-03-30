@@ -33,6 +33,7 @@ public class FindPath extends LeafTask {
 
         this.blackBoard.path = getPath();
         this.control.finishWithSuccess();
+
     }
 
     @Override

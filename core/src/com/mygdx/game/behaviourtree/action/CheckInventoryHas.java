@@ -4,7 +4,7 @@ import com.mygdx.game.behaviourtree.LeafTask;
 import com.mygdx.game.component.BlackBoard;
 import com.mygdx.game.component.Inventory;
 import com.mygdx.game.helpers.DataBuilder;
-import com.mygdx.game.helpers.managers.ItemManager;
+import com.mygdx.game.helpers.managers.DataManager;
 
 /**
  * Created by Paha on 3/15/2015.
@@ -30,7 +30,7 @@ public class CheckInventoryHas extends LeafTask {
         super.start();
 
         for(Inventory.InventoryItem item : this.blackBoard.fromInventory.getItemList()){
-            DataBuilder.JsonItem itemRef = ItemManager.getItemReference(item.itemRef.getItemName());
+            DataBuilder.JsonItem itemRef = DataManager.getData(item.itemRef.getItemName(), DataBuilder.JsonItem.class);
             if(itemRef.getEffects() != null && itemRef.getEffects().length > 0) {
                 if (itemRef.hasEffect(effect) && item.getAmount() >= quantity) {
                     this.control.finishWithSuccess();
