@@ -77,10 +77,10 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
     private Rectangle orderButtonRect = new Rectangle();
 
-    private Texture[] gatherButtonTextures;
-    private Texture[] exploreButtonTextures;
+    private Texture[] gatherButtonTextures, exploreButtonTextures, huntButtonTextures;
     private GUI.GUIStyle gatherStyle = new GUI.GUIStyle();
     private GUI.GUIStyle exploreStyle = new GUI.GUIStyle();
+    private GUI.GUIStyle huntStyle = new GUI.GUIStyle();
 
     private GUI.GUIStyle UIStyle;
 
@@ -93,24 +93,12 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
     private Color gray = new Color(Color.BLACK);
 
-    private GUI.GUIStyle gatherGUIStyle = new GUI.GUIStyle();
-    private GUI.GUIStyle exploreGUIStyle = new GUI.GUIStyle();
-
     private Texture blueSquare = ColonyGame.assetManager.get("blueSquare", Texture.class);
 
-
-    private void loadGatherButtonStyle(){
-        gatherGUIStyle = new GUI.GUIStyle();
-        gatherGUIStyle.normal = ColonyGame.assetManager.get("axebutton_normal", Texture.class);
-        gatherGUIStyle.moused = ColonyGame.assetManager.get("axebutton_moused", Texture.class);
-        gatherGUIStyle.clicked = ColonyGame.assetManager.get("axebutton_clicked", Texture.class);
-    }
-
-    private void loadExploreButtonStyle(){
-        exploreGUIStyle = new GUI.GUIStyle();
-        exploreGUIStyle.normal = ColonyGame.assetManager.get("explorebutton_normal", Texture.class);
-        exploreGUIStyle.moused = ColonyGame.assetManager.get("explorebutton_moused", Texture.class);
-        exploreGUIStyle.clicked = ColonyGame.assetManager.get("explorebutton_clicked", Texture.class);
+    private void loadHuntButtonStyle(){
+        huntStyle.normal = ColonyGame.assetManager.get("huntbutton_normal", Texture.class);
+        huntStyle.moused = ColonyGame.assetManager.get("huntbutton_moused", Texture.class);
+        huntStyle.clicked = ColonyGame.assetManager.get("huntbutton_clicked", Texture.class);
     }
 
     //For selecting a single unit.
@@ -159,10 +147,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         this.FPSTimer = new RepeatingTimer(0.5d, callback);
 
         //Loads and configures stuff about buttons tyles.
-        loadGatherButtonStyle();
-        loadExploreButtonStyle();
-        gatherGUIStyle.font.setColor(new Color(0, 0, 0, 0.5f));
-        exploreGUIStyle.font.setColor(new Color(0, 0, 0, 0.5f));
+        loadHuntButtonStyle();
 
         this.generateFonts();
 
@@ -175,6 +160,14 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         exploreStyle.normal = exploreButtonTextures[0] = ColonyGame.assetManager.get("explorebutton_normal", Texture.class);
         exploreStyle.moused = exploreButtonTextures[1] = ColonyGame.assetManager.get("explorebutton_moused", Texture.class);
         exploreStyle.clicked = exploreButtonTextures[2] = ColonyGame.assetManager.get("explorebutton_clicked", Texture.class);
+
+        huntButtonTextures = new Texture[3];
+        huntStyle.normal = exploreButtonTextures[0] = ColonyGame.assetManager.get("huntbutton_normal", Texture.class);
+        huntStyle.moused = exploreButtonTextures[1] = ColonyGame.assetManager.get("huntbutton_moused", Texture.class);
+        huntStyle.clicked = exploreButtonTextures[2] = ColonyGame.assetManager.get("huntbutton_clicked", Texture.class);
+
+        gatherStyle.font.setColor(new Color(0, 0, 0, 0.5f));
+        exploreStyle.font.setColor(new Color(0, 0, 0, 0.5f));
 
         Gdx.input.setInputProcessor(this);
     }
@@ -308,11 +301,11 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
             profileButtonRect.set(rect.getX() + rect.getWidth() - 115, rect.getY() + rect.getHeight() - 20, 50, 20);
 
             //Tell all to gather.
-            if(GUI.Button(rect.x + rect.getWidth() - 150, rect.y + rect.getHeight() - 35, 30, 30, "ALL", this.batch, gatherGUIStyle))
+            if(GUI.Button(rect.x + rect.getWidth() - 150, rect.y + rect.getHeight() - 35, 30, 30, "ALL", this.batch, gatherStyle))
                 for(UnitProfile prof : selectedList) prof.entity.getComponent(BehaviourManagerComp.class).gather();
 
             //Tell all to explore
-            if(GUI.Button(rect.x + rect.getWidth() - 150, rect.y + rect.getHeight() - 70, 30, 30, "ALL", this.batch, exploreGUIStyle))
+            if(GUI.Button(rect.x + rect.getWidth() - 150, rect.y + rect.getHeight() - 70, 30, 30, "ALL", this.batch, exploreStyle))
                 for(UnitProfile prof : selectedList) prof.entity.getComponent(BehaviourManagerComp.class).explore();
 
             //For each profile, draw a button to access each individual entity.
@@ -380,6 +373,11 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
                     orderButtonRect.set(ordersRect.x + 75, ordersRect.y + ordersRect.getHeight() - 50, 50, 50);
                     if (GUI.Button(orderButtonRect, "", this.batch, this.exploreStyle))
                         interactable.interactable.getBehManager().explore();
+
+                    orderButtonRect.set(ordersRect.x + 140, ordersRect.y + ordersRect.getHeight() - 50, 50, 50);
+                    if (GUI.Button(orderButtonRect, "", this.batch, this.huntStyle))
+                        interactable.interactable.getBehManager().attack();
+
 
                     batch.setProjectionMatrix(ColonyGame.camera.combined);
                     BehaviourManagerComp.Line[] lines = this.interactable.interactable.getBehManager().getLines();
@@ -460,6 +458,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         return this.checkMousedOver() && windowActive;
     }
 
+    //Reveals the entire map by adding a viewer to every tile.
     private void revealMap(){
         Grid.Node[][] grid = ColonyGame.worldGrid.getGrid();
         System.out.println("grid: "+grid.length+"/"+grid[0].length);
