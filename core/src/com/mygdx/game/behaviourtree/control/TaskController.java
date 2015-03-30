@@ -20,6 +20,7 @@ public class TaskController {
      * Finishes this behaviour with failure.
      */
     public void finishWithFailure(){
+
         this.finished = true;
         this.failed = true;
         this.running = false;
@@ -60,13 +61,14 @@ public class TaskController {
      * Ends the task. Also calls any callbacks if valid.
      */
     public void safeEnd(){
-        if(callbacks != null) {
-            if (hasFailed() && this.callbacks.failureCallback != null)
-                this.callbacks.failureCallback.callback();
-            else if (this.callbacks.successCallback != null)
-                this.callbacks.successCallback.callback();
 
-            if(this.callbacks.finishCallback != null)
+        if(callbacks != null) {
+            if (this.hasFailed() && this.callbacks.failureCallback != null)
+                this.callbacks.failureCallback.callback(); //Failure callback
+            else if (!this.hasFailed() && this.callbacks.successCallback != null)
+                this.callbacks.successCallback.callback(); //Success callback
+
+            if(this.callbacks.finishCallback != null) //General finish callback.
                 this.callbacks.finishCallback.callback();
         }
 
