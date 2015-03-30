@@ -157,7 +157,7 @@ public class ServerPlayer {
 		ColonyEntity colonyEnt = new ColonyEntity(start, 0, new TextureRegion(ColonyGame.assetManager.get("Colony", Texture.class)), this.batch, 11);
         Colony colony = colonyEnt.getComponent(Colony.class);
 
-        for(int i=0;i<1;i++) {
+        for(int i=0;i<5;i++) {
             TextureAtlas atlas = ColonyGame.assetManager.get("interactables", TextureAtlas.class);
             new AnimalEnt(start, 0, atlas.findRegion("squirrel"), this.batch, 11);
         }

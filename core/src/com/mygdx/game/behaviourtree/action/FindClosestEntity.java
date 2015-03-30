@@ -110,7 +110,6 @@ public class FindClosestEntity extends LeafTask{
     public void update(float delta) {
         super.update(delta);
 
-
         //This needs to be kept out of the threaded method. Causes issues.
         if(this.done){
             if(failed) this.control.finishWithFailure();
@@ -121,9 +120,5 @@ public class FindClosestEntity extends LeafTask{
     @Override
     public void end() {
         super.end();
-        if(this.control.hasFailed()) {
-            Vector2 pos = this.blackBoard.getEntityOwner().transform.getPosition();
-            new FloatingText("Couldn't find a nearby resource!", new Vector2(pos.x, pos.y + 1), new Vector2(pos.x, pos.y + 10), 1.5f, 0.8f);
-        }
     }
 }

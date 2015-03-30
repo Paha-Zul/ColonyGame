@@ -10,6 +10,7 @@ import com.mygdx.game.behaviourtree.control.ParentTaskController;
 import com.mygdx.game.behaviourtree.decorator.RepeatUntilSuccess;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.Constants;
+import com.mygdx.game.helpers.FloatingText;
 import com.mygdx.game.helpers.timer.OneShotTimer;
 import com.mygdx.game.helpers.timer.Timer;
 import com.mygdx.game.interfaces.Functional;
@@ -83,6 +84,9 @@ public class BehaviourManagerComp extends Component{
 
         //If we fail to find a resource, we need to explore until we find one...
         Functional.Callback fail = () -> {
+            Vector2 pos = this.blackBoard.getEntityOwner().transform.getPosition();
+            new FloatingText("Couldn't find a nearby resource!", new Vector2(pos.x, pos.y + 1), new Vector2(pos.x, pos.y + 10), 1.5f, 0.8f);
+
             //When we finish moving to the newly explored area, try to gather a resource again.
             Task task = this.exploreUnexplored();
             task.getControl().getCallbacks().finishCallback = () -> this.changeTask(this.gatherResource());
@@ -253,6 +257,11 @@ public class BehaviourManagerComp extends Component{
         ((ParentTaskController) mainSeq.getControl()).addTask(rp); //Add the repeated task to the first sequence.
         ((ParentTaskController) repeatSeq.getControl()).addTask(fp); //Add the find path to the second sequence.
         ((ParentTaskController) repeatSeq.getControl()).addTask(mt); //Add the move to the second sequence.
+
+        fc.getControl().callbacks.failureCallback = () -> {
+            Vector2 pos = this.blackBoard.getEntityOwner().transform.getPosition();
+            new FloatingText("Couldn't find a nearby animal to hunt!", new Vector2(pos.x, pos.y + 1), new Vector2(pos.x, pos.y + 10), 1.5f, 0.8f);
+        };
 
         //Since this FindPath behaviour is under a RepeatUntilSuccess, it will get stuck getting a path to nothing (failing).
         //We need to forcefully end the whole behaviour if this happens.

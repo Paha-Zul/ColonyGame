@@ -308,6 +308,10 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
             if(GUI.Button(rect.x + rect.getWidth() - 150, rect.y + rect.getHeight() - 70, 30, 30, "ALL", this.batch, exploreStyle))
                 for(UnitProfile prof : selectedList) prof.entity.getComponent(BehaviourManagerComp.class).explore();
 
+            //Tell all to explore
+            if(GUI.Button(rect.x + rect.getWidth() - 150, rect.y + rect.getHeight() - 105, 30, 30, "ALL", this.batch, huntStyle))
+                for(UnitProfile prof : selectedList) prof.entity.getComponent(BehaviourManagerComp.class).attack();
+
             //For each profile, draw a button to access each individual entity.
             for(UnitProfile profile : selectedList) {
                 if(GUI.Button(profileButtonRect, profile.interactable.interactable.getName(), this.batch)){ //Draw the button.
