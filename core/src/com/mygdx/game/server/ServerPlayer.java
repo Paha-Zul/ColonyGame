@@ -9,19 +9,18 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.physics.box2d.*;
+import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.mygdx.game.ColonyGame;
-import com.mygdx.game.component.*;
 import com.mygdx.game.component.Colony;
+import com.mygdx.game.component.Resource;
 import com.mygdx.game.entity.AnimalEnt;
 import com.mygdx.game.entity.ColonyEntity;
+import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.*;
 import com.mygdx.game.helpers.managers.DataManager;
+import com.mygdx.game.helpers.worldgeneration.WorldGen;
 import com.mygdx.game.interfaces.Functional;
 import com.mygdx.game.ui.PlayerInterface;
-import com.mygdx.game.entity.Entity;
-import com.mygdx.game.helpers.worldgeneration.WorldGen;
 
 import java.util.ArrayList;
 
@@ -155,8 +154,60 @@ public class ServerPlayer {
     }
 
 	private void generateStart(Vector2 start){
-		ColonyEntity colonyEnt = new ColonyEntity(start, 0, new TextureRegion(ColonyGame.assetManager.get("Colony", Texture.class)), this.batch, 11);
+        block: {
+            int radius = 0;
+            boolean placed = false;
+            WorldGen world = WorldGen.getInstance();
+
+            while (!placed) {
+                int[] index = world.getIndex(start);
+                int startX = index[0] - radius;
+                int endX = index[0] + radius;
+                int startY = index[1] - radius;
+                int endY = index[1] + radius;
+
+                //Loop over each tile.
+                for (int x = startX; x <= endX && !placed; x++) {
+                    for (int y = startY; y <= endY && !placed; y++) {
+                        if (x != startX && x != endX && y != startY && y != endY)
+                            continue;
+
+                        if(startX < 0 || endX > world.getWidth() || startY < 0 || endY > world.getHeight())
+                            GH.writeErrorMessage("Couldn't find a place to spawn the base!");
+
+                        //For each tile, we want to check if there is a 4x4 surrounding area.
+                        int innerStartX = x - 1;
+                        int innerEndX = x + 1;
+                        int innerStartY = y - 1;
+                        int innerEndY = y + 1;
+
+                        if (world.getNode(innerStartX, innerStartY) == null || world.getNode(innerEndX, innerEndY) == null)
+                            continue;
+
+                        placed = true;
+
+                        findsquare:
+                        for (int innerX = innerStartX; innerX <= innerEndX; innerX++) {
+                            for (int innerY = innerStartY; innerY <= innerEndY; innerY++) {
+                                if (!world.getNode(innerX, innerY).avoid) { //If there is a single tile set to avoid, break!
+                                    placed = false;
+                                    break findsquare;
+                                }
+                            }
+                        }
+
+                        if(placed)
+                            start.set(x/world.getTileSize(), y/world.getTileSize());
+                    }
+                }
+                radius++;
+            }
+        }
+
+        ColonyEntity colonyEnt = new ColonyEntity(start, 0, new TextureRegion(ColonyGame.assetManager.get("Colony", Texture.class)), this.batch, 11);;
         Colony colony = colonyEnt.getComponent(Colony.class);
+
+        ColonyGame.camera.position.set(colonyEnt.transform.getPosition().x, colonyEnt.transform.getPosition().y, 0);
 
         for(int i=0;i<5;i++) {
             TextureAtlas atlas = ColonyGame.assetManager.get("interactables", TextureAtlas.class);

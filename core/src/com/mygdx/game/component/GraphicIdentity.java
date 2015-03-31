@@ -7,8 +7,8 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.helpers.Constants;
+import com.mygdx.game.helpers.GH;
 import com.mygdx.game.helpers.Grid;
-import com.mygdx.game.helpers.Profiler;
 import com.mygdx.game.helpers.worldgeneration.WorldGen;
 
 public class GraphicIdentity extends Component{
@@ -37,7 +37,7 @@ public class GraphicIdentity extends Component{
         //This is initially needed for getting the sprite to be the right size. If we simply scaled it using this method, then
         //the image would draw the right size, but the offset from the width and height being unaffected causes real problems whenever the image
         //is not centered.
-        this.sprite.setSize(sprite.getRegionWidth()/Constants.SCALE, sprite.getRegionHeight()/Constants.SCALE);
+        this.sprite.setSize(GH.toMeters(sprite.getRegionWidth()), GH.toMeters(sprite.getRegionHeight()));
     }
 
 	@Override

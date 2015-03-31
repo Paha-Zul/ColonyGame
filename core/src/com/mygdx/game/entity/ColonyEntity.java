@@ -1,6 +1,5 @@
 package com.mygdx.game.entity;
 
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
@@ -14,6 +13,7 @@ import com.mygdx.game.component.Interactable;
 import com.mygdx.game.component.Inventory;
 import com.mygdx.game.component.collider.Collider;
 import com.mygdx.game.helpers.Constants;
+import com.mygdx.game.helpers.GH;
 
 /**
  * Created by Paha on 1/18/2015.
@@ -37,7 +37,7 @@ public class ColonyEntity extends Entity{
         bodyDef.position.set(position);
 
         PolygonShape shape = new PolygonShape();
-        shape.setAsBox((identity.sprite.getWidth()/2)/Constants.SCALE, (identity.sprite.getHeight()/2)/Constants.SCALE);
+        shape.setAsBox(GH.toMeters(identity.sprite.getWidth()/2), GH.toMeters(identity.sprite.getHeight()/2));
 
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.restitution = 0;

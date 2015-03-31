@@ -1,6 +1,19 @@
 {
   "changes": [
     {
+      "version": "0.18",
+      "date": "3/30/2015",
+      "log": [
+        "- Added: Animal Components now reference the Animal Json data. They hold all the data from the animals.json file.",
+        "- Added: Colonists now get items from the animals they kill (determined by the animals.json file).",
+        "- Added: Colonists will deposit items in the base after they get items from a kill. They might try to do it even if they didn't get any items... I'm not sure? Well time will tell...",
+        "- Fixed: Colonists not eating when repeating a gathering task.",
+        "- Fixed: Colonists eat more frequently",
+        "- Fixed: Colonists will now die if their health reaches 0",
+        "- Bug: Probably a crash I haven't experienced. In fact, I'm certain there is a crash waiting somewhere in the code. Things just don't magically work so well like they did just now."
+      ]
+    },
+    {
       "version": "0.17",
       "date": "3/29/2015",
       "log": [

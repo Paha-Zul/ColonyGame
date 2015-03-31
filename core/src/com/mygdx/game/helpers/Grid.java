@@ -1,11 +1,9 @@
 package com.mygdx.game.helpers;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.World;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.gui.GUI;
@@ -15,7 +13,6 @@ import com.sun.istack.internal.NotNull;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.function.Function;
 
 /**
  * Created by Paha on 1/17/2015.
@@ -330,7 +327,7 @@ public class Grid {
         }
 
         public float getSquareSize() {
-            return this.squareSize/Constants.SCALE;
+            return GH.toMeters(this.squareSize);
         }
 
         public int[] getIndex(Vector2 position) {

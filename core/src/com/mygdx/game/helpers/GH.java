@@ -44,4 +44,12 @@ public class GH {
         region.setRegion((x + .5f) * invTexWidth, (y+.5f) * invTexHeight, (x + width - .5f) * invTexWidth, (y + height - .5f) * invTexHeight);
     }
 
+    public static float toMeters(float value){
+        return value/Constants.SCALE;
+    }
+
+    public static float toReal(float value){
+        return value*Constants.SCALE;
+    }
+
 }

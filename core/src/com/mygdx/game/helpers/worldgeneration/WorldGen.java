@@ -277,7 +277,7 @@ public class WorldGen {
     }
 
     public int[] getIndex(float x, float y){
-        return new int[]{(int)(x/Constants.GRID_SQUARESIZE), (int)(y/Constants.GRID_SQUARESIZE)};
+        return new int[]{(int)(x*this.getTileSize()), (int)(y*this.getTileSize())};
     }
 
     /**
@@ -363,6 +363,14 @@ public class WorldGen {
         return getNode(index[0], index[1]);
     }
 
+    public int getWidth(){
+        return map.length;
+    }
+
+    public int getHeight(){
+        return map[0].length;
+    }
+
     public int numTiles() {
         return numX*numY;
     }
@@ -376,7 +384,7 @@ public class WorldGen {
     }
 
     public float getTileSize(){
-        return this.tileSize/Constants.SCALE;
+        return GH.toMeters(this.tileSize);
     }
 
     public void setTileSize(int tileSize){

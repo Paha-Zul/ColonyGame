@@ -5,8 +5,7 @@ import com.mygdx.game.behaviourtree.LeafTask;
 import com.mygdx.game.component.BlackBoard;
 import com.mygdx.game.component.Transform;
 import com.mygdx.game.component.collider.Collider;
-import com.mygdx.game.helpers.Callbacks;
-import com.mygdx.game.helpers.Constants;
+import com.mygdx.game.helpers.GH;
 
 import java.util.LinkedList;
 
@@ -18,7 +17,7 @@ public class MoveTo extends LeafTask{
     private LinkedList<Vector2> path;
     private Collider collider;
 
-    private final float completeDst = 1f/ Constants.SCALE;
+    private final float completeDst = GH.toMeters(1);
 
     public MoveTo(String name, BlackBoard blackBoard) {
         super(name, blackBoard);
