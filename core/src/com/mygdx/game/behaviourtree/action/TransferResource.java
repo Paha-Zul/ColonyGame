@@ -12,6 +12,12 @@ public class TransferResource extends LeafTask{
         super(name, blackBoard);
     }
 
+    public TransferResource(String name, BlackBoard blackBoard, Inventory fromInv, Inventory toInv) {
+        super(name, blackBoard);
+        this.blackBoard.fromInventory = fromInv;
+        this.blackBoard.toInventory = toInv;
+    }
+
     @Override
     public boolean check() {
         return this.blackBoard.toInventory != null;

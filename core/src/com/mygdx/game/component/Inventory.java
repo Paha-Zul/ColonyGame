@@ -78,6 +78,8 @@ public class Inventory extends Component implements IDisplayable{
      * @param amount The amount of the item to add.
      */
     public void addItem(String itemName, int amount){
+        if(amount == 0) return;
+
         InventoryItem invItem = this.inventory.get(itemName);
         //If the invItem doesn't exist, create a new one and add it to the hash map.
         if(invItem == null) {

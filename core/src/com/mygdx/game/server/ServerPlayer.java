@@ -17,6 +17,7 @@ import com.mygdx.game.component.Colony;
 import com.mygdx.game.entity.AnimalEnt;
 import com.mygdx.game.entity.ColonyEntity;
 import com.mygdx.game.helpers.*;
+import com.mygdx.game.helpers.managers.DataManager;
 import com.mygdx.game.interfaces.Functional;
 import com.mygdx.game.ui.PlayerInterface;
 import com.mygdx.game.entity.Entity;
@@ -157,9 +158,10 @@ public class ServerPlayer {
 		ColonyEntity colonyEnt = new ColonyEntity(start, 0, new TextureRegion(ColonyGame.assetManager.get("Colony", Texture.class)), this.batch, 11);
         Colony colony = colonyEnt.getComponent(Colony.class);
 
-        for(int i=0;i<0;i++) {
+        for(int i=0;i<5;i++) {
             TextureAtlas atlas = ColonyGame.assetManager.get("interactables", TextureAtlas.class);
-            new AnimalEnt(start, 0, atlas.findRegion("squirrel"), this.batch, 11);
+            DataBuilder.JsonAnimal animalRef = DataManager.getData("squirrel", DataBuilder.JsonAnimal.class);
+            new AnimalEnt(animalRef, start, 0, atlas.findRegion("squirrel"), this.batch, 11);
         }
 
 		int radius = 8;

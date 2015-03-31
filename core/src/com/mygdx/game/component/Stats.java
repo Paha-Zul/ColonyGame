@@ -59,8 +59,11 @@ public class Stats extends Component{
 
     public void addHealth(float health){
         this.currHealth += health;
-        if(currHealth > 100) currHealth = 100;
-        else if(currHealth <= 0) currHealth = 0;
+        if(this.currHealth > 100) this.currHealth = 100;
+        else if(this.currHealth <= 0) {
+            this.currHealth = 0;
+            this.owner.setToDestroy();
+        }
     }
 
     public void addFood(int food){

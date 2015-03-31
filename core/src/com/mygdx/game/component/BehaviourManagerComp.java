@@ -10,6 +10,7 @@ import com.mygdx.game.behaviourtree.control.ParentTaskController;
 import com.mygdx.game.behaviourtree.decorator.RepeatUntilSuccess;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.Constants;
+import com.mygdx.game.helpers.DataBuilder;
 import com.mygdx.game.helpers.FloatingText;
 import com.mygdx.game.helpers.timer.OneShotTimer;
 import com.mygdx.game.helpers.timer.Timer;
@@ -18,7 +19,7 @@ import com.mygdx.game.interfaces.Functional;
 import java.util.ArrayList;
 
 /**
- * Created by Bbent_000 on 12/31/2014.
+ * A Component that manages the behaviour of Entities.
  */
 public class BehaviourManagerComp extends Component{
     private BlackBoard blackBoard;
@@ -240,24 +241,45 @@ public class BehaviourManagerComp extends Component{
         /**
          * Find an Entity to follow
          * Repeat until success...
-         *      Find path to Entity
+         *      Find path to Entity (If getting a path fails because the target is already gone, forcefully fail the main sequence/whole behaviour).
          *      MoveTo - If target moves ^ (fail and repeat), if target is reached, finish the job successfully.
+         *
+         * Find base
+         * Find path to base
+         * Move to base
+         * Transfer resources to base.
          */
+
+        this.blackBoard.fromInventory = this.owner.getComponent(Inventory.class);
+        this.blackBoard.toInventory = this.owner.getComponent(Colonist.class).getColony().getInventory();
+        this.blackBoard.transferAll = true;
 
         Sequence mainSeq = new Sequence("Following", this.blackBoard);
         FindClosestEntity fc = new FindClosestEntity("Finding Closest Animal", this.blackBoard, Constants.ENTITY_ANIMAL);
         ((ParentTaskController) mainSeq.getControl()).addTask(fc);
 
-        Sequence repeatSeq = new Sequence("Moving Towards", this.blackBoard);
-        RepeatUntilSuccess rp = new RepeatUntilSuccess("Following Target", this.blackBoard, repeatSeq);
+        Sequence repeatSeq = new Sequence("Moving Towards", this.blackBoard);                           //Sequence which will be repeated.
+        RepeatUntilSuccess rp = new RepeatUntilSuccess("Following Target", this.blackBoard, repeatSeq); //Repeat decorator
 
-        FindPath fp = new FindPath("Finding Path To Target", this.blackBoard);
-        MoveTo mt = new MoveTo("Moving to Target", this.blackBoard);
+        FindPath fp = new FindPath("Finding Path To Target", this.blackBoard);      //Find a path to the target (repeat)
+        MoveTo mt = new MoveTo("Moving to Target", this.blackBoard);                //Move to the target (repeat)
+
+        FindClosestEntity fcBase = new FindClosestEntity("Finding storage", this.blackBoard, Constants.ENTITY_BUILDING);    //Find the closest base/storage
+        FindPath fpToBase = new FindPath("Finding path to base", this.blackBoard);                                          //Find the path to the base/storage
+        MoveTo mtBase = new MoveTo("Moving to base", this.blackBoard);                                                      //Move to the base/storage
+        TransferResource trToBase = new TransferResource("Transfering items to base", this.blackBoard);                     //Transfer the resource from me/colonist to the base.
 
         ((ParentTaskController) mainSeq.getControl()).addTask(rp); //Add the repeated task to the first sequence.
+
         ((ParentTaskController) repeatSeq.getControl()).addTask(fp); //Add the find path to the second sequence.
         ((ParentTaskController) repeatSeq.getControl()).addTask(mt); //Add the move to the second sequence.
 
+        ((ParentTaskController) mainSeq.getControl()).addTask(fcBase);
+        ((ParentTaskController) mainSeq.getControl()).addTask(fpToBase);
+        ((ParentTaskController) mainSeq.getControl()).addTask(mtBase);
+        ((ParentTaskController) mainSeq.getControl()).addTask(trToBase);
+
+        //Creates a floating text object.
         fc.getControl().callbacks.failureCallback = () -> {
             Vector2 pos = this.blackBoard.getEntityOwner().transform.getPosition();
             new FloatingText("Couldn't find a nearby animal to hunt!", new Vector2(pos.x, pos.y + 1), new Vector2(pos.x, pos.y + 10), 1.5f, 0.8f);
@@ -274,7 +296,23 @@ public class BehaviourManagerComp extends Component{
             return tsk.getBlackboard().targetNode == ColonyGame.worldGrid.getNode(tsk.getBlackboard().target);
         };
 
-        mt.getControl().callbacks.successCallback = () -> this.blackBoard.target.setToDestroy();
+        mt.getControl().callbacks.successCallback = () -> {
+            this.blackBoard.target.setToDestroy(); //Set to destroy.
+
+            //If the Entity doing the killing has no inventory, skip all this!
+            Inventory inv = this.blackBoard.owner.getComponent(Inventory.class);
+            if(inv == null || this.blackBoard.target == null) return;
+            Animal animal = this.blackBoard.target.getComponent(Animal.class);
+            if(animal == null) return; //If the animal is null (somehow?), return.
+
+            //Get the reference and add a random amount of each item.
+            DataBuilder.JsonAnimal ref = animal.getAnimalRef();
+            for(int i=0;i<ref.items.length;i++) {
+                String itemName = ref.items[i];
+                int amount = MathUtils.random(ref.itemAmounts[i][1] - ref.itemAmounts[i][0]) + ref.itemAmounts[i][0];
+                inv.addItem(itemName, amount);
+            }
+        };
 
         return mainSeq;
     }
