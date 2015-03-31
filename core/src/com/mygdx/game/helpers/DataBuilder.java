@@ -24,6 +24,7 @@ public class DataBuilder implements IDestroyable{
     String filePath = "files/";
     String itemPath = "items.json";
     String resourcePath = "resources.json";
+    String animalPath = "animals.json";
     String tilePath = "tiles.json";
     String worldPath = "worldgen.json";
     String changeLogPath = "changelog.json";
@@ -60,6 +61,7 @@ public class DataBuilder implements IDestroyable{
         buildTiles();
         buildWorldGen();
         buildChangeLog();
+        buildAnimals();
     }
 
 
@@ -359,6 +361,21 @@ public class DataBuilder implements IDestroyable{
         DataBuilder.changelog = json.fromJson(JsonChangeLog.class, Gdx.files.internal(filePath+changeLogPath));
     }
 
+    private void buildAnimals(){
+        Json json = new Json();
+        json.setTypeName(null);
+        json.setUsePrototypes(false);
+        json.setIgnoreUnknownFields(true);
+        json.setOutputType(JsonWriter.OutputType.json);
+
+        JsonAnimals animals = json.fromJson(JsonAnimals.class, Gdx.files.internal(filePath+animalPath));
+
+        for(JsonAnimal animal : animals.animals){
+            DataManager.addData(animal.name, animal, JsonAnimal.class);
+        }
+
+    }
+
     private static class JsonItems{
         public Array<JsonItem> items;
     }
@@ -461,6 +478,18 @@ public class DataBuilder implements IDestroyable{
     public static class JsonLog{
         public String version, date;
         public String[] log;
+    }
+
+    private static class JsonAnimals{
+        public JsonAnimal[] animals;
+    }
+
+    public static class JsonAnimal{
+        public String name, img, displayName;
+        public String[] items;
+        public boolean aggressive, pack;
+        public int[] packAmount;
+        public int[][] itemAmounts;
     }
 
     private static class FolderStructure{

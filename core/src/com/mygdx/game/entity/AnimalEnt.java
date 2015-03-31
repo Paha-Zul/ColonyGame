@@ -10,22 +10,23 @@ import com.mygdx.game.ColonyGame;
 import com.mygdx.game.component.*;
 import com.mygdx.game.component.collider.Collider;
 import com.mygdx.game.helpers.Constants;
+import com.mygdx.game.helpers.DataBuilder;
 
 /**
  * Created by Paha on 2/26/2015.
  */
 public class AnimalEnt extends Entity{
-    public AnimalEnt(Vector2 position, float rotation, TextureRegion graphic, SpriteBatch batch, int drawLevel) {
+    public AnimalEnt(DataBuilder.JsonAnimal animalRef, Vector2 position, float rotation, TextureRegion graphic, SpriteBatch batch, int drawLevel) {
         super(position, rotation, graphic, batch, drawLevel);
         this.addTag(Constants.ENTITY_ANIMAL);
 
         this.name = "Squirrel";
 
+        this.addComponent(new Animal(animalRef));
         this.addComponent(new Stats());
         this.addComponent(new Interactable("animal"));
         this.addComponent(new BehaviourManagerComp("animal"));
         this.addComponent(new GridComponent(Constants.GRIDACTIVE, ColonyGame.worldGrid, -1));
-        this.addComponent(new Animal());
 
         this.makeCollider();
 

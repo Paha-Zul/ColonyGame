@@ -1,5 +1,6 @@
 package com.mygdx.game.component;
 
+import com.mygdx.game.helpers.DataBuilder;
 import com.mygdx.game.interfaces.IInteractable;
 
 /**
@@ -8,9 +9,12 @@ import com.mygdx.game.interfaces.IInteractable;
 public class Animal extends Component implements IInteractable{
     private BehaviourManagerComp behComp;
     private Stats stats;
+    private DataBuilder.JsonAnimal animalRef;
 
-    public Animal() {
+    public Animal(DataBuilder.JsonAnimal animalRef) {
         super();
+
+        this.animalRef = animalRef;
     }
 
     @Override
@@ -51,6 +55,10 @@ public class Animal extends Component implements IInteractable{
     @Override
     public String getName() {
         return this.getEntityOwner().name;
+    }
+
+    public DataBuilder.JsonAnimal getAnimalRef() {
+        return animalRef;
     }
 
     @Override
