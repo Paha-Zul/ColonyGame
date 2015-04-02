@@ -17,7 +17,7 @@ public class Collision implements ContactListener {
         Entity first = (Entity)contact.getFixtureA().getBody().getUserData();
         Entity other = (Entity)contact.getFixtureB().getBody().getUserData();
 
-        EventSystem.notify(first, "collidestart", other);
+        EventSystem.notifyEntityEvent(first, "collidestart", other);
     }
 
     @Override
@@ -25,7 +25,7 @@ public class Collision implements ContactListener {
         Entity first = (Entity)contact.getFixtureA().getBody().getUserData();
         Entity other = (Entity)contact.getFixtureB().getBody().getUserData();
 
-        EventSystem.notify(first, "collideend", other);
+        EventSystem.notifyEntityEvent(first, "collideend", other);
     }
 
     @Override

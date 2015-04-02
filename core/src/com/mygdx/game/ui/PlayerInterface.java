@@ -53,6 +53,8 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     private static final float camMoveSpeed = 100f;
     private static final float camZoomSpeed = 5f;
 
+    private final float mainHeight = 0.12f;
+    private final float topHeight = 0.03f;
     private final float infoWidth = 0.13f;
     private final float statusWidth = 0.135f;
     private final float tabsWidth = 0.262f;
@@ -162,12 +164,13 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         exploreStyle.clicked = exploreButtonTextures[2] = ColonyGame.assetManager.get("explorebutton_clicked", Texture.class);
 
         huntButtonTextures = new Texture[3];
-        huntStyle.normal = exploreButtonTextures[0] = ColonyGame.assetManager.get("huntbutton_normal", Texture.class);
-        huntStyle.moused = exploreButtonTextures[1] = ColonyGame.assetManager.get("huntbutton_moused", Texture.class);
-        huntStyle.clicked = exploreButtonTextures[2] = ColonyGame.assetManager.get("huntbutton_clicked", Texture.class);
+        huntStyle.normal = huntButtonTextures[0] = ColonyGame.assetManager.get("huntbutton_normal", Texture.class);
+        huntStyle.moused = huntButtonTextures[1] = ColonyGame.assetManager.get("huntbutton_moused", Texture.class);
+        huntStyle.clicked = huntButtonTextures[2] = ColonyGame.assetManager.get("huntbutton_clicked", Texture.class);
 
-        gatherStyle.font.setColor(new Color(0, 0, 0, 0.5f));
-        exploreStyle.font.setColor(new Color(0, 0, 0, 0.5f));
+        gatherStyle.font.setColor(new Color(126f/255f, 75f/255f, 27f/255f, 1));
+        exploreStyle.font.setColor(new Color(126f/255f, 75f/255f, 27f/255f, 1));
+        huntStyle.font.setColor(126f/255f, 75f/255f, 27f/255f, 1);
 
         Gdx.input.setInputProcessor(this);
     }
@@ -489,13 +492,13 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     public void resize(int width, int height) {
         this.buttonRect.set(0, Gdx.graphics.getHeight() - 100, 200, 100);
 
-        this.uiBackgroundBaseRect.set(0, 0, width, height * 0.1f);
-        this.infoRect.set(0, 0, width * infoWidth, height*0.1f);
-        this.statusRect.set(infoRect.x + infoRect.width, 0, width*statusWidth, height*0.1f);
-        this.tabsRect.set(statusRect.x + statusRect.width, 0, width * tabsWidth, height * 0.1f);
-        this.ordersRect.set(tabsRect.x + tabsRect.width, 0, width - (tabsRect.x + tabsRect.width), height * 0.1f);
+        this.uiBackgroundBaseRect.set(0, 0, width, height * mainHeight);
+        this.infoRect.set(0, 0, width * infoWidth, height* mainHeight);
+        this.statusRect.set(infoRect.x + infoRect.width, 0, width*statusWidth, height*mainHeight);
+        this.tabsRect.set(statusRect.x + statusRect.width, 0, width * tabsWidth, height * mainHeight);
+        this.ordersRect.set(tabsRect.x + tabsRect.width, 0, width - (tabsRect.x + tabsRect.width), height * mainHeight);
 
-        this.uiBackgroundTopRect.set(0, uiBackgroundBaseRect.y + uiBackgroundBaseRect.height, width, height * 0.03f);
+        this.uiBackgroundTopRect.set(0, uiBackgroundBaseRect.y + uiBackgroundBaseRect.height, width, height * topHeight);
         this.infoTopRect.set(uiBackgroundTopRect.x, uiBackgroundTopRect.y, width * infoWidth, uiBackgroundTopRect.height); //The top info area
         this.statusTopRect.set(infoTopRect.x + infoTopRect.width, uiBackgroundTopRect.y, width*statusWidth, uiBackgroundTopRect.height); //The top status area
         this.tabsTopRect.set(statusTopRect.x + statusTopRect.width, uiBackgroundTopRect.y, width * tabsWidth, uiBackgroundTopRect.height); //The top tabs area

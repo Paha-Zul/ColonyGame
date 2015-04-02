@@ -2,7 +2,6 @@ package com.mygdx.game;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -12,8 +11,7 @@ import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
 import com.mygdx.game.helpers.*;
 import com.mygdx.game.helpers.gui.GUI;
-import com.mygdx.game.helpers.managers.DataManager;
-import com.mygdx.game.screens.MainMenuScreen;
+import com.mygdx.game.helpers.managers.ScriptManager;
 import com.mygdx.game.screens.PreLoadingScreen;
 
 import java.util.concurrent.ExecutorService;
@@ -49,6 +47,8 @@ public class ColonyGame extends Game {
 		world.setContactListener(new Collision());
 
         threadPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+
+		ScriptManager.load("./scripts");
 
 		this.setScreen(new PreLoadingScreen(this));
 	}

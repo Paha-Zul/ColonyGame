@@ -100,6 +100,8 @@ public class ServerPlayer {
         ListHolder.update(delta);
         ListHolder.updateFloatingTexts(delta, batch);
 
+        EventSystem.notifyGameEvent("update", delta);
+
         Profiler.end();
 
         this.batch.end();
