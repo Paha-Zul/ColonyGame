@@ -1,11 +1,10 @@
 package com.mygdx.game.helpers;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.mygdx.game.ColonyGame;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.interfaces.Functional;
-import com.mygdx.game.interfaces.IGUI;
 import com.mygdx.game.ui.UI;
-import com.sun.java.accessibility.util.GUIInitializedListener;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -62,6 +61,7 @@ public class ListHolder {
 
 				//Update the Entity
 				e.update(delta);
+				e.render(delta, ColonyGame.batch);
 			}
 		}
 	}

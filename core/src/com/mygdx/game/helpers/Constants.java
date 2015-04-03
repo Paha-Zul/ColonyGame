@@ -39,6 +39,7 @@ public class Constants {
     public final static int ENTITY_ANIMAL = 3;
     public final static int ENTITY_RESOURCE = 4;
     public final static int ENTITY_COLONIST = 5;
+    public final static int ENTITY_PROJECTILE = 6;
 
 
     //Colors

@@ -1,7 +1,5 @@
 package com.mygdx.game.entity;
 
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
@@ -16,8 +14,8 @@ import com.mygdx.game.helpers.DataBuilder;
  * Created by Paha on 2/26/2015.
  */
 public class AnimalEnt extends Entity{
-    public AnimalEnt(DataBuilder.JsonAnimal animalRef, Vector2 position, float rotation, TextureRegion graphic, SpriteBatch batch, int drawLevel) {
-        super(position, rotation, graphic, batch, drawLevel);
+    public AnimalEnt(DataBuilder.JsonAnimal animalRef, Vector2 position, float rotation, TextureRegion graphic, int drawLevel) {
+        super(position, rotation, graphic, drawLevel);
         this.addTag(Constants.ENTITY_ANIMAL);
 
         this.name = "Squirrel";

@@ -1,8 +1,5 @@
 package com.mygdx.game.entity;
 
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
@@ -19,24 +16,11 @@ import com.mygdx.game.helpers.Constants;
  * Created by Paha on 2/28/2015.
  */
 public class ResourceEnt extends Entity{
-    public ResourceEnt(Vector2 position, float rotation, TextureRegion graphic, SpriteBatch batch, int drawLevel) {
-        super(position, rotation, graphic, batch, drawLevel);
+    public ResourceEnt(Vector2 position, float rotation, TextureRegion graphic, int drawLevel) {
+        super(position, rotation, graphic, drawLevel);
         this.addTag(Constants.ENTITY_RESOURCE);
         this.name = "Resource";
 
-        this.addComponent(new Interactable("resource"));
-        this.addComponent(new GridComponent(Constants.GRIDSTATIC, ColonyGame.worldGrid, -1));
-        this.getComponent(GraphicIdentity.class).alignment = 1;
-
-        this.makeCollider();
-    }
-
-    public ResourceEnt(Vector2 position, float rotation, Sprite sprite, SpriteBatch batch, int drawLevel) {
-        super(position, rotation, null, batch, drawLevel);
-        this.addTag(Constants.ENTITY_RESOURCE);
-        this.name = "Resource";
-
-        this.addComponent(new GraphicIdentity(sprite, batch));
         this.addComponent(new Interactable("resource"));
         this.addComponent(new GridComponent(Constants.GRIDSTATIC, ColonyGame.worldGrid, -1));
         this.getComponent(GraphicIdentity.class).alignment = 1;

@@ -47,6 +47,7 @@ public class Consume extends LeafTask{
 
     public void addEffect(DataBuilder.JsonItem item, int amount){
         Stats stats = this.getBlackboard().getEntityOwner().getComponent(Stats.class);
+        if(stats == null) return;
 
         //For each effect in the itemRef we are consuming...
         for(int i=0;i<item.getEffects().length;i++) {
@@ -55,13 +56,13 @@ public class Consume extends LeafTask{
 
             switch (effect) {
                 case "heal":
-                    stats.addHealth(strength*amount);
+                    stats.getStat("health").addToCurrent(strength * amount);
                     break;
                 case "feed":
-                    stats.addFood(strength*amount);
+                    stats.getStat("food").addToCurrent(strength * amount);
                     break;
                 case "hydrate":
-                    stats.addWater(strength*amount);
+                    stats.getStat("water").addToCurrent(strength * amount);
                     break;
             }
         }

@@ -1,6 +1,5 @@
 package com.mygdx.game.entity;
 
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
@@ -20,8 +19,8 @@ import com.mygdx.game.helpers.managers.DataManager;
  * Created by Paha on 1/29/2015.
  */
 public class TreeEnt extends Entity{
-    public TreeEnt(Vector2 position, float rotation, TextureRegion graphic, SpriteBatch batch, int drawLevel) {
-        super(position, rotation, graphic, batch, drawLevel);
+    public TreeEnt(Vector2 position, float rotation, TextureRegion graphic, int drawLevel) {
+        super(position, rotation, graphic, drawLevel);
 
         this.addTag(Constants.ENTITY_RESOURCE);
 

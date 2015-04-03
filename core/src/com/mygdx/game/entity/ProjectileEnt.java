@@ -5,34 +5,25 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.mygdx.game.ColonyGame;
-import com.mygdx.game.component.*;
+import com.mygdx.game.component.Projectile;
 import com.mygdx.game.component.collider.Collider;
 import com.mygdx.game.helpers.Constants;
 
 /**
- * Created by Paha on 1/18/2015.
+ * Created by Paha on 4/2/2015.
  */
-public class ColonistEnt extends Entity{
-    public ColonistEnt(Vector2 position, float rotation, TextureRegion graphic, int drawLevel) {
+public class ProjectileEnt extends Entity{
+    public ProjectileEnt(Vector2 position, float rotation, TextureRegion graphic, int drawLevel) {
         super(position, rotation, graphic, drawLevel);
-        this.name = "Colonist";
+        this.addTag(Constants.ENTITY_PROJECTILE);
 
-        this.addComponent(new Colonist());
-        this.addComponent(new GridComponent(Constants.GRIDACTIVE, ColonyGame.worldGrid, 1));
-        this.addComponent(new Interactable("humanoid"));
-        this.addComponent(new Stats());
-        this.addComponent(new Skills());
-        this.addComponent(new Inventory());
-        this.addComponent(new BehaviourManagerComp("colonist"));
-        this.makeCollider();
-
-        this.addTag(Constants.ENTITY_HUMANOID);
-        this.addTag(Constants.ENTITY_COLONIST);
+        this.addComponent(new Projectile());
+        makeCollider();
     }
 
     private void makeCollider(){
         CircleShape shape = new CircleShape();
-        shape.setRadius(0.5f);
+        shape.setRadius(0.1f);
         Collider collider = this.addComponent(new Collider(ColonyGame.world, shape));
 
         collider.body.setType(BodyDef.BodyType.DynamicBody);

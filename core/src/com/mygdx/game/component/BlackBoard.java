@@ -3,7 +3,6 @@ package com.mygdx.game.component;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.Grid;
-import com.mygdx.game.interfaces.Functional;
 
 import java.util.LinkedList;
 
@@ -30,7 +29,7 @@ public class BlackBoard extends Component{
     public int idleDistance = 1;
 
     //Attack stuff
-    public float attackRange = 5f;
+    public float attackRange = 200f;
     public float disBeforeRepath = 5f;
 
     //My stuff

@@ -1,21 +1,18 @@
 package com.mygdx.game.entity;
 
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
-
-
-import java.util.ArrayList;
-
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.mygdx.game.component.Component;
 import com.mygdx.game.component.GraphicIdentity;
 import com.mygdx.game.component.Transform;
+import com.mygdx.game.helpers.EventSystem;
 import com.mygdx.game.helpers.ListHolder;
 import com.mygdx.game.interfaces.IDelayedDestroyable;
-import com.mygdx.game.interfaces.IDestroyable;
 import com.mygdx.game.interfaces.IScalable;
+
+import java.util.ArrayList;
 
 /**
  * @author Bbent_000
@@ -43,9 +40,8 @@ public class Entity implements IDelayedDestroyable{
 	 * @param position The initial position of the Entity
 	 * @param rotation The initial rotation of the Entity.
 	 * @param graphic The Texture of the Entity
-	 * @param batch The SpriteBatch to draw the Entity.
 	 */
-	public Entity(Vector2 position, float rotation, TextureRegion graphic, SpriteBatch batch, int drawLevel){
+	public Entity(Vector2 position, float rotation, TextureRegion graphic, int drawLevel){
 		this.activeComponentList = new ArrayList<>();
 		this.inactiveComponentList = new ArrayList<>();
 		this.newComponentList = new ArrayList<>();
@@ -53,8 +49,8 @@ public class Entity implements IDelayedDestroyable{
 
 		this.transform = this.addComponent(new Transform(position, rotation, this));
 
-		if(batch != null && graphic != null)
-			this.identity = this.addComponent(new GraphicIdentity(new TextureRegion(graphic), batch));
+		if(graphic != null)
+			this.identity = this.addComponent(new GraphicIdentity(new TextureRegion(graphic)));
 
 		ListHolder.addEntity(drawLevel, this);
 		this.ID = MathUtils.random()*Double.MAX_VALUE;
@@ -67,7 +63,7 @@ public class Entity implements IDelayedDestroyable{
 	 * @param rotation The starting rotation of this Entity.
 	 */
 	public Entity(Vector2 position, float rotation, int drawLevel){
-		this(position, rotation, null, null, drawLevel);
+		this(position, rotation, null, drawLevel);
 	}
 
 	/**
@@ -115,6 +111,10 @@ public class Entity implements IDelayedDestroyable{
 				comp.lateUpdate(delta);
 			}
 		}
+	}
+
+	public void render(float delta, SpriteBatch batch){
+		if(this.identity != null) this.identity.render(delta, batch);
 	}
 
 	/**
@@ -204,14 +204,36 @@ public class Entity implements IDelayedDestroyable{
 		return this.ID;
 	}
 
+	/**
+	 * Adds a tag to this Entity.
+	 * @param tag The tag to add.
+	 */
     public void addTag(int tag){
         this.tagMask |= (1 << tag); //OR the tag to the mask.
-    }
+	}
 
+	/**
+	 * Removes a tag from this Entity.
+	 * @param tag The tag to remove.
+	 */
+	public void removeTag(int tag){
+		this.tagMask &= ~(1 << tag); //AND the inverted tag to zero it out.
+	}
+
+	/**
+	 * Checks if this Entity has the tag passed in.
+	 * @param tag The tag to check for.
+	 * @return True if this Entity has the tag, false otherwise.
+	 */
     public boolean hasTag(int tag){
         return ((1 << tag) & tagMask) == (1 << tag);
     }
 
+	/**
+	 * Checks if the Entity has multiple tags.
+	 * @param tagsToCheck The tags to check for.
+	 * @return True if this Entity has all the tags, false otherwise.
+	 */
     public boolean hasTags(int[] tagsToCheck){
         int tags = 0b0;
         for (int aTagsToCheck : tagsToCheck) tags |= (1 << aTagsToCheck);
@@ -230,6 +252,8 @@ public class Entity implements IDelayedDestroyable{
 
 	@Override
 	public void destroy(){
+		EventSystem.unregisterEntity(this);
+
 		//Destroy all children
         this.transform.getChildren().forEach(com.mygdx.game.entity.Entity::destroy);
 

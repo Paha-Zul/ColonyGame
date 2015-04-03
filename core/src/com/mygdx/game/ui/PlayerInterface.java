@@ -15,10 +15,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.QueryCallback;
 import com.badlogic.gdx.physics.box2d.World;
 import com.mygdx.game.ColonyGame;
-import com.mygdx.game.component.BehaviourManagerComp;
-import com.mygdx.game.component.GridComponent;
-import com.mygdx.game.component.Interactable;
-import com.mygdx.game.component.Inventory;
+import com.mygdx.game.component.*;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.*;
 import com.mygdx.game.helpers.gui.GUI;
@@ -344,12 +341,13 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
             //If it has stats, draw the stats...
             if(this.interactable.interactable.getStats() != null){
                 //GUI.Texture(statusRect, ColonyGame.assetManager.get("menuButton_normal", Texture.class), this.batch);
+                Stats stats = this.interactable.interactable.getStats();
 
                 GUI.Label("Stats", this.batch, this.statusTopRect, true, this.UIStyle);
-                drawBar("Health: ", statusRect.x + 10, statusRect.y + statusRect.height - 25, 100, 20, interactable.interactable.getStats().getCurrHealth(), interactable.interactable.getStats().getMaxHealth());
-                drawBar("Food: ", statusRect.x + 10, statusRect.y + statusRect.height - 50, 100, 20, interactable.interactable.getStats().getFood(), 100);
-                drawBar("Water: ", +statusRect.x + 10, statusRect.y + statusRect.height - 75, 100, 20, interactable.interactable.getStats().getWater(), 100);
-                drawBar("Energy: ", +statusRect.x + 10, statusRect.y + statusRect.height - 100, 100, 20, interactable.interactable.getStats().getEnergy(), 100);
+                drawBar("Health: ", statusRect.x + 10, statusRect.y + statusRect.height - 25, 100, 20, stats.getStat("health").getCurrVal(), stats.getStat("health").getMaxVal());
+                drawBar("Food: ", statusRect.x + 10, statusRect.y + statusRect.height - 50, 100, 20, stats.getStat("food").getCurrVal(), stats.getStat("food").getMaxVal());
+                drawBar("Water: ", +statusRect.x + 10, statusRect.y + statusRect.height - 75, 100, 20, stats.getStat("water").getCurrVal(), stats.getStat("water").getMaxVal());
+                drawBar("Energy: ", +statusRect.x + 10, statusRect.y + statusRect.height - 100, 100, 20, stats.getStat("energy").getCurrVal(), stats.getStat("energy").getMaxVal());
             }
 
             //If it has an inventory, draw the inventory...

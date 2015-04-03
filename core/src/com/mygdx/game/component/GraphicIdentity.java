@@ -15,21 +15,18 @@ public class GraphicIdentity extends Component{
 	public Sprite sprite;
     public int alignment = 0; //center
 
-	private SpriteBatch batch;
     private int currVisibility=0;
 
-	public GraphicIdentity(TextureRegion image, SpriteBatch batch){
+	public GraphicIdentity(TextureRegion image){
 		super();
 
 		this.sprite = new Sprite(image);
-		this.batch = batch;
 	}
 
-    public GraphicIdentity(Sprite sprite, SpriteBatch batch){
+    public GraphicIdentity(Sprite sprite){
         super();
 
-        this.sprite = sprite;
-        this.batch = batch;
+        this.sprite = new Sprite(sprite);
     }
 
 	@Override
@@ -38,15 +35,17 @@ public class GraphicIdentity extends Component{
         //the image would draw the right size, but the offset from the width and height being unaffected causes real problems whenever the image
         //is not centered.
         this.sprite.setSize(GH.toMeters(sprite.getRegionWidth()), GH.toMeters(sprite.getRegionHeight()));
+        this.sprite.setOrigin(this.sprite.getWidth() / 2, this.sprite.getHeight() / 2);
     }
 
-	@Override
-	public void update(float delta) {
-		Vector2 pos = this.owner.transform.getPosition(); //Cache the owner's position.
+    @Override
+    public void render(float delta, SpriteBatch batch) {
+        super.render(delta, batch);
 
-        if(!ColonyGame.camera.frustum.boundsInFrustum(pos.x, pos.y, 0, sprite.getWidth(), sprite.getHeight(), 0)) {
-			return;
-		}
+        Vector2 pos = this.owner.transform.getPosition(); //Cache the owner's position.
+
+        if(!ColonyGame.camera.frustum.boundsInFrustum(pos.x, pos.y, 0, sprite.getWidth(), sprite.getHeight(), 0))
+            return;
 
         Grid.Node node = ColonyGame.worldGrid.getNode(this.owner);
         int visibility = WorldGen.getInstance().getVisibilityMap()[node.getCol()][node.getRow()].getVisibility();
@@ -56,15 +55,15 @@ public class GraphicIdentity extends Component{
         this.changeVisibility(visibility);
 
         this.sprite.setRotation(this.owner.transform.getRotation());
+        this.sprite.setScale(this.owner.transform.getScale());
 
         if(alignment == 0)
-		    this.sprite.setPosition(pos.x - (sprite.getWidth()/2), pos.y - (sprite.getHeight()/2));
-        if(alignment == 1) {
+            this.sprite.setPosition(pos.x - (sprite.getWidth()/2), pos.y - (sprite.getHeight()/2));
+        if(alignment == 1)
             this.sprite.setPosition(pos.x - (sprite.getWidth() / 2), pos.y);
-        }
 
-        this.sprite.draw(this.batch);
-	}
+        this.sprite.draw(batch);
+    }
 
     public void setTexture(Texture texture){
         this.sprite.setTexture(texture);

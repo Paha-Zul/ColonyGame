@@ -76,11 +76,11 @@ public class FindClosestEntity extends LeafTask{
 
                         finished = false; //Set this to false. We still have places to check obviously!
 
-                        //Loop over the Entity list in the current node and try to an entity that matches the criteria.
+                        //Loop over the Entity list in the current node and try to an entity that matches the successCriteria.
                         for(Entity entity : node.getEntityList()) {
                             if (entity.hasTags(tags)) { //If it has the tags required.
                                 //If there is no callback or the callback passes, finish successfully.
-                                if(control.callbacks == null || control.callbacks.criteria == null || control.callbacks.criteria.criteria(entity)) {
+                                if(control.callbacks == null || control.callbacks.successCriteria == null || control.callbacks.successCriteria.criteria(entity)) {
                                     //If we have a valid Entity, store it and finish with success.
                                     this.blackBoard.target = entity;
                                     this.done = true;

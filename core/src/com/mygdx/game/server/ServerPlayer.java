@@ -206,7 +206,7 @@ public class ServerPlayer {
             }
         }
 
-        ColonyEntity colonyEnt = new ColonyEntity(start, 0, new TextureRegion(ColonyGame.assetManager.get("Colony", Texture.class)), this.batch, 11);;
+        ColonyEntity colonyEnt = new ColonyEntity(start, 0, new TextureRegion(ColonyGame.assetManager.get("Colony", Texture.class)), 11);;
         Colony colony = colonyEnt.getComponent(Colony.class);
 
         ColonyGame.camera.position.set(colonyEnt.transform.getPosition().x, colonyEnt.transform.getPosition().y, 0);
@@ -214,7 +214,7 @@ public class ServerPlayer {
         for(int i=0;i<5;i++) {
             TextureAtlas atlas = ColonyGame.assetManager.get("interactables", TextureAtlas.class);
             DataBuilder.JsonAnimal animalRef = DataManager.getData("squirrel", DataBuilder.JsonAnimal.class);
-            new AnimalEnt(animalRef, start, 0, atlas.findRegion("squirrel"), this.batch, 11);
+            new AnimalEnt(animalRef, start, 0, atlas.findRegion("squirrel"), 11);
         }
 
 		int radius = 8;

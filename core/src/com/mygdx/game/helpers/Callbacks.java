@@ -8,6 +8,6 @@ import com.mygdx.game.interfaces.Functional;
  */
 public class Callbacks {
     public Functional.Callback finishCallback, successCallback, failureCallback, startCallback;
-    public Functional.Criteria criteria;
+    public Functional.Criteria successCriteria, failCriteria;
     public Functional.Criteria<Task> checkCriteria;
 }

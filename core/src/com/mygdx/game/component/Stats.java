@@ -2,16 +2,20 @@ package com.mygdx.game.component;
 
 import com.mygdx.game.helpers.timer.RepeatingTimer;
 import com.mygdx.game.helpers.timer.Timer;
+import com.mygdx.game.interfaces.Functional;
+import com.sun.istack.internal.NotNull;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Stat Component for an Entity that includes stats like health, hunger, thirst, etc. Also uses the update() method to
  * increment/decrement stats like lowering health due to hunger/thirst.
  */
 public class Stats extends Component{
-    private float maxHealth=100, currHealth=100;
-    private int food = 15, water = 100, energy = 100;
-
-    private Timer waterTimer, foodTimer, healthTimer;
+    private HashMap<String, Stat> statMap = new HashMap<>();
+    private ArrayList<Stat> statList = new ArrayList<>();
+    private ArrayList<RepeatingTimer> timerList = new ArrayList<>();
 
     public Stats() {
         super();
@@ -20,73 +24,104 @@ public class Stats extends Component{
     @Override
     public void start() {
         super.start();
-
-        waterTimer = new RepeatingTimer(100f, ()->addWater(-1));
-        foodTimer = new RepeatingTimer(2f, ()->addFood(-1));
-        healthTimer = new RepeatingTimer(10f, ()->{
-            if(this.getFood() > 0) this.addHealth(1);
-        });
     }
 
     @Override
     public void update(float delta) {
         super.update(delta);
 
-        waterTimer.update(delta);
-        foodTimer.update(delta);
-        healthTimer.update(delta);
+        for(Timer timer : timerList)
+            timer.update(delta);
     }
 
-    public float getMaxHealth() {
-        return maxHealth;
+    /**
+     * Adds a RepeatingTimer to this Stats Component.
+     * @param timer The RepeatingTimer to add.
+     */
+    public void addTimer(@NotNull RepeatingTimer timer){
+        this.timerList.add(timer);
     }
 
-    public float getCurrHealth() {
-        return currHealth;
+    /**
+     * Adds a new Stat object to the Stats Component.
+     * @param name
+     * @param initCurrValue
+     * @param initMaxValue
+     */
+    public void addStat(String name, float initCurrValue, float initMaxValue){
+        Stat stat = new Stat(name, this, initCurrValue, initMaxValue);
+        this.statMap.put(name, stat);
+        this.statList.add(stat);
     }
 
-    public int getFood() {
-        return food;
+    /**
+     * Gets a Stat from the statMap.
+     * @param name The name of the stat.
+     * @return The Stat object referenced by 'name'. Null if it doesn't exist.
+     */
+    public Stat getStat(String name){
+        if(this.statMap.containsKey(name))
+            return this.statMap.get(name);
+
+        return null;
     }
 
-    public int getWater() {
-        return water;
+    public final ArrayList<Stat> getStatList(){
+        return this.statList;
     }
 
-    public int getEnergy() {
-        return energy;
-    }
-
-    public void addHealth(float health){
-        this.currHealth += health;
-        if(this.currHealth > 100) this.currHealth = 100;
-        else if(this.currHealth <= 0) {
-            this.currHealth = 0;
-            this.owner.setToDestroy();
-        }
-    }
-
-    public void addFood(int food){
-        this.food += food;
-        if(this.food > 100) this.food = 100;
-        else if(this.food <= 0) {
-            this.food = 0;
-            this.addHealth(food);
-        }
-    }
-
-    public void addWater(int water){
-        this.water += water;
-        if(this.water > 100) this.water = 100;
-        else if(this.water <= 0) {
-            this.water = 0;
-            this.addHealth(water);
-        }
-    }
 
     @Override
     public void destroy() {
         super.destroy();
+    }
+
+    public static class Stat{
+        public Functional.Callback onZero;
+
+        private String name;
+        private Stats stats;
+        private float current, max;
+
+        public Stat(String name, Stats stats, float current, float max) {
+            this.name = name;
+            this.current = current;
+            this.max = max;
+            this.stats = stats;
+
+            onZero = stats.owner::setToDestroy;
+        }
+
+        /**
+         * Adds a value to the current value of this Stat.
+         * @param value The value to add to the current value.
+         */
+        public void addToCurrent(float value){
+            this.current += value;
+            if(this.current <= 0 && onZero != null) onZero.callback();
+        }
+
+        /**
+         * Adds a value to add to the max value of this Stat.
+         * @param value The value to add to the max value.
+         */
+        public void addToMax(float value){
+            this.max += value;
+        }
+
+        /**
+         * @return The current value of this Stat.
+         */
+        public float getCurrVal(){
+            return this.current;
+        }
+
+        /**
+         * @return The max value of this Stat.
+         */
+        public float getMaxVal(){
+            return this.max;
+        }
     }
 
 }

@@ -12,6 +12,7 @@ import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.Constants;
 import com.mygdx.game.helpers.DataBuilder;
 import com.mygdx.game.helpers.FloatingText;
+import com.mygdx.game.helpers.GH;
 import com.mygdx.game.helpers.timer.OneShotTimer;
 import com.mygdx.game.helpers.timer.Timer;
 import com.mygdx.game.interfaces.Functional;
@@ -104,7 +105,7 @@ public class BehaviourManagerComp extends Component{
         TransferResource transferItems = new TransferResource("Transferring Resources", this.blackBoard);
 
         fr.getControl().callbacks.failureCallback = fail; //If we fail, call the fail callback.
-        fr.getControl().callbacks.criteria = (e) -> ((Entity)e).hasTag(Constants.ENTITY_RESOURCE) && !((Entity)e).getComponent(Resource.class).isTaken(); //Check to make sure the resource isn't taken.
+        fr.getControl().callbacks.successCriteria = (e) -> ((Entity)e).hasTag(Constants.ENTITY_RESOURCE) && !((Entity)e).getComponent(Resource.class).isTaken(); //Check to make sure the resource isn't taken.
 
         fr.getControl().callbacks.successCallback = () ->  { //On success, take the resource.
             blackBoard.targetResource = blackBoard.target.getComponent(Resource.class);
@@ -263,6 +264,7 @@ public class BehaviourManagerComp extends Component{
 
         FindPath fp = new FindPath("Finding Path To Target", this.blackBoard);      //Find a path to the target (repeat)
         MoveTo mt = new MoveTo("Moving to Target", this.blackBoard);                //Move to the target (repeat)
+        Attack at = new Attack("Attacking", this.blackBoard);
 
         FindClosestEntity fcBase = new FindClosestEntity("Finding storage", this.blackBoard, Constants.ENTITY_BUILDING);    //Find the closest base/storage
         FindPath fpToBase = new FindPath("Finding path to base", this.blackBoard);                                          //Find the path to the base/storage
@@ -273,13 +275,14 @@ public class BehaviourManagerComp extends Component{
 
         ((ParentTaskController) repeatSeq.getControl()).addTask(fp); //Add the find path to the second sequence.
         ((ParentTaskController) repeatSeq.getControl()).addTask(mt); //Add the move to the second sequence.
+        ((ParentTaskController) repeatSeq.getControl()).addTask(at); //Add the attack sequence
 
         ((ParentTaskController) mainSeq.getControl()).addTask(fcBase);
         ((ParentTaskController) mainSeq.getControl()).addTask(fpToBase);
         ((ParentTaskController) mainSeq.getControl()).addTask(mtBase);
         ((ParentTaskController) mainSeq.getControl()).addTask(trToBase);
 
-        //Creates a floating text object.
+        //Creates a floating text object when trying to find an animal fails.
         fc.getControl().callbacks.failureCallback = () -> {
             Vector2 pos = this.blackBoard.getEntityOwner().transform.getPosition();
             new FloatingText("Couldn't find a nearby animal to hunt!", new Vector2(pos.x, pos.y + 1), new Vector2(pos.x, pos.y + 10), 1.5f, 0.8f);
@@ -289,14 +292,20 @@ public class BehaviourManagerComp extends Component{
         //We need to forcefully end the whole behaviour if this happens.
         fp.getControl().callbacks.failureCallback = () -> repeatSeq.getControl().finishWithFailure();
 
-        //On each movement, we need to check if the target has moved nodes. The criteria will fail if the two nodes don't equal each other.
+        //On each movement, we need to check if the target has moved nodes. The successCriteria will fail if the two nodes don't equal each other.
         //The behaviour will fail and a new path will be calculated.
-        mt.getControl().callbacks.criteria = task -> {
+        mt.getControl().callbacks.failCriteria = task -> {
             Task tsk = (Task)task;
             return tsk.getBlackboard().targetNode == ColonyGame.worldGrid.getNode(tsk.getBlackboard().target);
         };
 
-        mt.getControl().callbacks.successCallback = () -> {
+        mt.getControl().callbacks.successCriteria = task -> {
+            Task tsk = (Task)task;
+            return this.blackBoard.target != null && (this.owner.transform.getPosition().dst(tsk.getBlackboard().target.transform.getPosition()) <= GH.toMeters(tsk.getBlackboard().attackRange));
+        };
+
+        //On success, kill the animal and get items from it.
+        rp.getControl().callbacks.successCallback = () -> {
             this.blackBoard.target.setToDestroy(); //Set to destroy.
 
             //If the Entity doing the killing has no inventory, skip all this!
@@ -381,7 +390,7 @@ public class BehaviourManagerComp extends Component{
         //If our next behaviour is not null, we need to start it!
         }else{
             //If we're hungry, eat!
-            if(this.stats.getFood() <= 20 && feedTimer.isFinished() && this.behaviourType.equals("colonist")) {
+            if(this.stats.getStat("food").getCurrVal() <= 20 && feedTimer.isFinished() && this.behaviourType.equals("colonist")) {
                 this.changeTask(this.consumeTask("feed"));
                 this.feedTimer.restart();
             }

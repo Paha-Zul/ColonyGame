@@ -13,7 +13,6 @@ public class Animal extends Component implements IInteractable{
 
     public Animal(DataBuilder.JsonAnimal animalRef) {
         super();
-
         this.animalRef = animalRef;
     }
 
@@ -22,19 +21,18 @@ public class Animal extends Component implements IInteractable{
         super.start();
 
         this.stats = this.getComponent(Stats.class);
-        this.setActive(false);
 
-        //EventSystem.registerEvent(this.owner, "collidestart", args -> this.owner.setToDestroy());
+        stats.addStat("health", 100, 100);
+        stats.addStat("food", 100, 100);
+        stats.addStat("water", 100, 100);
+        stats.addStat("energy", 100, 100);
+
+        this.setActive(false);
     }
 
     @Override
     public void update(float delta) {
         super.update(delta);
-    }
-
-    @Override
-    public void destroy() {
-        super.destroy();
     }
 
     @Override
@@ -64,5 +62,15 @@ public class Animal extends Component implements IInteractable{
     @Override
     public BehaviourManagerComp getBehManager() {
         return null;
+    }
+
+    @Override
+    public void destroy() {
+        super.destroy();
+    }
+
+    @Override
+    public void setToDestroy() {
+        super.setToDestroy();
     }
 }

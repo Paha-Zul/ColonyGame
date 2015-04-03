@@ -59,6 +59,25 @@ public class EventSystem {
     }
 
     /**
+     * Unreigsters all events with 'handlerName' passed in.
+     * @param entity The Entity to remove from.
+     * @param handlerName The name of the handler to remove.
+     */
+    public static void unregisterHandler(Entity entity, String handlerName){
+        if(entityMap.get(entity.getID()) != null && entityMap.get(entity.getID()).get(handlerName) != null)
+            entityMap.get(entity.getID()).remove(handlerName);
+    }
+
+    /**
+     * Removes an Entity from the event system, effectively clearing all events linked to the Entity.
+     * @param entity The Entity to remove from the EventSystem.
+     */
+    public static void unregisterEntity(Entity entity){
+        if(entityMap.get(entity.getID()) != null)
+            entityMap.remove(entity.getID()); //Remove the Entity from the system.
+    }
+
+    /**
      * Calls all Events with the "handleName" on a specific Entity.
      * @param entity The Entity to call the event on.
      * @param handlerName The name of the Event.

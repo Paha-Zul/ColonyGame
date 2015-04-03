@@ -51,11 +51,13 @@ public class Colony extends Component implements IInteractable {
             c.getComponent(Colonist.class).setName(ServerPlayer.firstNames[MathUtils.random(ServerPlayer.firstNames.length-1)], ServerPlayer.lastNames[MathUtils.random(ServerPlayer.lastNames.length-1)]);
             this.addColonist(c.getComponent(Colonist.class));
         }
+
+
     }
 
     private Entity makeColonist(Vector2 start, float offset, TextureRegion texture){
         Vector2 newPos = new Vector2(start.x + MathUtils.random()*offset*2 - offset, start.y + MathUtils.random()*offset*2 - offset);
-        return new ColonistEnt(newPos, 0, texture, ColonyGame.batch, 10);
+        return new ColonistEnt(newPos, 0, texture, 10);
     }
 
     @Override
