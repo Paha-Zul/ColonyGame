@@ -35,7 +35,7 @@ public class Projectile extends Component{
 			Entity other = (Entity) args[0]; //Get the other entity.
 			if (other.hasTag(Constants.ENTITY_ANIMAL)) { //If the other Entity is a projectile, kill both of us!
 				this.owner.setToDestroy();
-				other.setToDestroy();
+				other.getComponent(Stats.class).getStat("health").addToCurrent(-50);
 			}
 		});
 	}

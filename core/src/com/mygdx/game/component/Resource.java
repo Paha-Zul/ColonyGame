@@ -46,6 +46,15 @@ public class Resource extends Component implements IInteractable{
         this.gatherTime = jRes.gatherTime;
     }
 
+    public Resource(DataBuilder.JsonAnimal jAnimal){
+        this(jAnimal.name);
+        this.displayName = jAnimal.displayName;
+        this.resourceType = "animal";
+        this.itemNames = jAnimal.items;
+        this.itemAmounts = jAnimal.itemAmounts;
+        this.gatherTime = 3f;
+    }
+
     @Override
     public void start() {
         super.start();
@@ -86,7 +95,7 @@ public class Resource extends Component implements IInteractable{
     }
 
     /**
-     * @return The type of this Resource.
+     * @return The interType of this Resource.
      */
     public String getResourceType() {
         return resourceType;
@@ -122,8 +131,8 @@ public class Resource extends Component implements IInteractable{
     }
 
     /**
-     * Sets the type for this Resource.
-     * @param resourceType A String denoting the type.
+     * Sets the interType for this Resource.
+     * @param resourceType A String denoting the interType.
      */
     public void setResourceType(String resourceType) {
         this.resourceType = resourceType;

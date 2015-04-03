@@ -1,22 +1,19 @@
 package com.mygdx.game.component;
 
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.Rectangle;
-import com.mygdx.game.helpers.gui.GUI;
-import com.mygdx.game.interfaces.IDisplayable;
+import com.mygdx.game.interfaces.IDelayedDestroyable;
 import com.mygdx.game.interfaces.IInteractable;
 
 /**
  * Created by Paha on 1/10/2015.
  */
 public class Interactable extends Component{
-    public String type;
+    public String interType;
 
-    public IInteractable interactable;
+    private IInteractable interactable;
 
     public Interactable(String type) {
         super();
-        this.type = type;
+        this.interType = type;
     }
 
     public Interactable(){
@@ -28,15 +25,18 @@ public class Interactable extends Component{
     public void start() {
         super.start();
 
-        if(this.type.equals("resource"))
-            this.interactable = this.owner.getComponent(Resource.class);
-        else if(this.type.equals("humanoid"))
-            this.interactable = this.owner.getComponent(Colonist.class);
-        else if(this.type.equals("colony"))
-            this.interactable = this.owner.getComponent(Colony.class);
-        else if(this.type.equals("animal"))
-            this.interactable = this.owner.getComponent(Animal.class);
+        this.changeType(interType);
+    }
 
+    public void changeType(String newType){
+        if(newType.equals("resource"))
+            this.interactable = this.owner.getComponent(Resource.class);
+        else if(newType.equals("humanoid"))
+            this.interactable = this.owner.getComponent(Colonist.class);
+        else if(newType.equals("colony"))
+            this.interactable = this.owner.getComponent(Colony.class);
+        else if(newType.equals("animal"))
+            this.interactable = this.owner.getComponent(Animal.class);
     }
 
     @Override
@@ -44,9 +44,16 @@ public class Interactable extends Component{
         super.update(delta);
     }
 
+    public IInteractable getInteractable(){
+        if(interactable != null && (((IDelayedDestroyable)interactable).isDestroyed() || ((IDelayedDestroyable)interactable).isSetToBeDestroyed()))
+            interactable = null;
+
+        return this.interactable;
+    }
+
     @Override
     public void destroy() {
         super.destroy();
-        this.type = null;
+        this.interType = null;
     }
 }

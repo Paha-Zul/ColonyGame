@@ -28,7 +28,7 @@ public class Inventory extends Component implements IDisplayable{
      * @param allowedTypes The allowed types for this inventory. This should be in the form of "resource,furniture,weapons,...etc". Using "all" will
      *                     indicate that all types can be stored here. (NOT IMPLEMENTED)
      * @param totalTypesAllowed The total number of different types allowed. For instance, if "all" is used but 'totalTypesAllowed' is 2, then if furniture and weapon types are stored first,
-     *                          no other types can be put in until another type is cleared. -1 indicates infinite. (NOT IMPLEMENTED)
+     *                          no other types can be put in until another interType is cleared. -1 indicates infinite. (NOT IMPLEMENTED)
      * @param totalItemsAllowed The total number of items allowed in this inventory. For instance, maybe a person can only hold 10 items? -1 indicates infinite. (NOT IMPLEMENTED)
      * @param totalWeightAllowed The total weight allowed for this inventory. For instance, maybe a person can hold a total weight of 50? -1 indicates infinite. (NOT IMPLEMENTED)
      */

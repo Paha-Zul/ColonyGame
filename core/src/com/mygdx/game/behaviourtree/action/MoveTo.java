@@ -80,6 +80,7 @@ public class MoveTo extends LeafTask{
 
     @Override
     public void end() {
+        if(this.collider != null) this.collider.body.setLinearVelocity(0, 0);
         super.end();
     }
 }

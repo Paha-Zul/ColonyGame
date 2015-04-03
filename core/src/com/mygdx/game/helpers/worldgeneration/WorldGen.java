@@ -111,7 +111,7 @@ public class WorldGen {
                 double noiseValue = SimplexNoise.noise((double) currX / freq, (double) currY / freq); //Generate the noise for this tile.
                 Vector2 position = new Vector2(currX * getTileSize(), currY * getTileSize()); //Set the position.
                 Sprite terrainSprite; //Prepare the sprite object.
-                int type = 0; //The type of tile.
+                int type = 0; //The interType of tile.
                 float rotation = 0; //The rotation of the tile.
 
                 done = false; //Set done to false signifying that we are not finished yet.

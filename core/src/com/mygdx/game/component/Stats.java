@@ -79,7 +79,7 @@ public class Stats extends Component{
     public static class Stat{
         public Functional.Callback onZero;
 
-        private String name;
+        public String name;
         private Stats stats;
         private float current, max;
 

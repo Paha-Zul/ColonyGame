@@ -3,7 +3,6 @@ package com.mygdx.game.component;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.interfaces.IDelayedDestroyable;
-import com.mygdx.game.interfaces.IDestroyable;
 
 
 public abstract class Component implements IDelayedDestroyable {
@@ -79,7 +78,7 @@ public abstract class Component implements IDelayedDestroyable {
 	/**
 	 * A shortcut function to call 'getComponent' on the Entity owner. This cannot be called in the constructor
 	 * as the Entity owner will be null. Use in the 'start' function.
-	 * @param c The Class type to remove.
+	 * @param c The Class interType to remove.
 	 * @param <T> The class.
 	 * @return The Component that was retrieved, or null if it could not be found.
 	 */

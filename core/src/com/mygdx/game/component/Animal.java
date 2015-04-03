@@ -1,5 +1,6 @@
 package com.mygdx.game.component;
 
+import com.mygdx.game.helpers.Constants;
 import com.mygdx.game.helpers.DataBuilder;
 import com.mygdx.game.interfaces.IInteractable;
 
@@ -25,7 +26,17 @@ public class Animal extends Component implements IInteractable{
         stats.addStat("health", 100, 100);
         stats.addStat("food", 100, 100);
         stats.addStat("water", 100, 100);
-        stats.addStat("energy", 100, 100);
+
+        stats.getStat("health").onZero = () -> {
+            Interactable interactable = this.owner.getComponent(Interactable.class);
+
+            this.owner.removeTag(Constants.ENTITY_ANIMAL); //Remove the animal tag
+            this.owner.addTag(Constants.ENTITY_RESOURCE); //Add the resource tag
+            this.owner.addComponent(new Resource(this.animalRef)); //Add a Resource Component.
+            if(interactable != null) interactable.changeType("resource");
+            this.owner.destroyComponent(BehaviourManagerComp.class);
+            this.owner.destroyComponent(Animal.class); //Destroy this (Animal) Component.
+        };
 
         this.setActive(false);
     }

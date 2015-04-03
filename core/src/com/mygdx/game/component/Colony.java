@@ -105,9 +105,9 @@ public class Colony extends Component implements IInteractable {
     }
 
     /**
-     * Returns the list of nearby Resources by type.
-     * @param type The type of resource.
-     * @return An empty ArrayList if there is no list for the given type, otherwise the ArrayList of nearby resources for the given type.
+     * Returns the list of nearby Resources by interType.
+     * @param type The interType of resource.
+     * @return An empty ArrayList if there is no list for the given interType, otherwise the ArrayList of nearby resources for the given interType.
      */
     public ArrayList<Resource> getNearbyResourceListByType(String type){
         if(this.nearbyResources.get(type) == null)
@@ -117,9 +117,9 @@ public class Colony extends Component implements IInteractable {
     }
 
     /**
-     * Returns the list of stocked Resources by type.
-     * @param type The type of resource.
-     * @return An empty ArrayList if there is no list for the given type, otherwise the ArrayList of stocked resources for the given type.
+     * Returns the list of stocked Resources by interType.
+     * @param type The interType of resource.
+     * @return An empty ArrayList if there is no list for the given interType, otherwise the ArrayList of stocked resources for the given interType.
      */
     public ArrayList<Resource> getStockedResourceListByType(String type){
         if(this.stockedResource.get(type) == null)

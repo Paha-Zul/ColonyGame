@@ -24,6 +24,7 @@ import com.mygdx.game.helpers.timer.Timer;
 import com.mygdx.game.helpers.worldgeneration.WorldGen;
 import com.mygdx.game.interfaces.Functional;
 import com.mygdx.game.interfaces.IGUI;
+import com.mygdx.game.interfaces.IInteractable;
 import com.mygdx.game.server.ServerPlayer;
 
 import java.util.ArrayList;
@@ -178,7 +179,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         parameter.size = 12;
         BitmapFont topFont = generator.generateFont(parameter);
         generator.dispose();
-        topFont.setColor(126f/255f, 75f/255f, 27f/255f, 1);
+        topFont.setColor(126f / 255f, 75f / 255f, 27f / 255f, 1);
 
         UIStyle = new GUI.GUIStyle();
         UIStyle.font = topFont;
@@ -314,7 +315,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
             //For each profile, draw a button to access each individual entity.
             for(UnitProfile profile : selectedList) {
-                if(GUI.Button(profileButtonRect, profile.interactable.interactable.getName(), this.batch)){ //Draw the button.
+                if(GUI.Button(profileButtonRect, profile.interactable.getInteractable().getName(), this.batch)){ //Draw the button.
                     this.selected = profile.entity;
                     this.interactable = profile.interactable;
                 }
@@ -333,64 +334,74 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
      */
     private void displaySelected(){
 
-        if(this.interactable != null && !this.interactable.isDestroyed()){
+        if(this.interactable.getInteractable() != null){
+            IInteractable interactable = this.interactable.getInteractable();
             //If it has a name, draw the name...
-            if(this.interactable.interactable.getName() != null)
-                GUI.Label(this.interactable.interactable.getName(), this.batch, this.infoTopRect, true, this.UIStyle);
+            if(interactable.getName() != null)
+                GUI.Label(interactable.getName(), this.batch, this.infoTopRect, true, this.UIStyle);
 
             //If it has stats, draw the stats...
-            if(this.interactable.interactable.getStats() != null){
+            if(interactable.getStats() != null){
                 //GUI.Texture(statusRect, ColonyGame.assetManager.get("menuButton_normal", Texture.class), this.batch);
-                Stats stats = this.interactable.interactable.getStats();
+                Stats stats = interactable.getStats();
 
                 GUI.Label("Stats", this.batch, this.statusTopRect, true, this.UIStyle);
-                drawBar("Health: ", statusRect.x + 10, statusRect.y + statusRect.height - 25, 100, 20, stats.getStat("health").getCurrVal(), stats.getStat("health").getMaxVal());
-                drawBar("Food: ", statusRect.x + 10, statusRect.y + statusRect.height - 50, 100, 20, stats.getStat("food").getCurrVal(), stats.getStat("food").getMaxVal());
-                drawBar("Water: ", +statusRect.x + 10, statusRect.y + statusRect.height - 75, 100, 20, stats.getStat("water").getCurrVal(), stats.getStat("water").getMaxVal());
-                drawBar("Energy: ", +statusRect.x + 10, statusRect.y + statusRect.height - 100, 100, 20, stats.getStat("energy").getCurrVal(), stats.getStat("energy").getMaxVal());
+                ArrayList<Stats.Stat> list = stats.getStatList();
+                float space = ((statusRect.height - list.size()*20)/list.size()+1)/2;
+                float x = statusRect.x + 10;
+                float y = statusRect.y + statusRect.height - 20;
+
+                for(int i=0;i<list.size();i++){
+                    Stats.Stat stat = list.get(i);
+                    drawBar(stat.name, x, y-(i+1)*space - 20*i, 100, 20, stat.getCurrVal(), stat.getMaxVal());
+                }
+
+//                drawBar("Health: ", statusRect.x + 10, statusRect.y + statusRect.height - 25, 100, 20, stats.getStat("health").getCurrVal(), stats.getStat("health").getMaxVal());
+//                drawBar("Food: ", statusRect.x + 10, statusRect.y + statusRect.height - 50, 100, 20, stats.getStat("food").getCurrVal(), stats.getStat("food").getMaxVal());
+//                drawBar("Water: ", +statusRect.x + 10, statusRect.y + statusRect.height - 75, 100, 20, stats.getStat("water").getCurrVal(), stats.getStat("water").getMaxVal());
+//                drawBar("Energy: ", +statusRect.x + 10, statusRect.y + statusRect.height - 100, 100, 20, stats.getStat("energy").getCurrVal(), stats.getStat("energy").getMaxVal());
             }
 
             //If it has an inventory, draw the inventory...
-            if(this.interactable.interactable.getInventory() != null){
+            if(interactable.getInventory() != null){
                 //GUI.Texture(tabsRect, ColonyGame.assetManager.get("menuButton_normal", Texture.class), this.batch);
 
                 GUI.Label("Inventory", this.batch, this.tabsTopRect, true, this.UIStyle);
-                ArrayList<Inventory.InventoryItem> itemList = this.interactable.interactable.getInventory().getItemList();
+                ArrayList<Inventory.InventoryItem> itemList = interactable.getInventory().getItemList();
                 for(int i=0;i<itemList.size();i++){
                     Inventory.InventoryItem item = itemList.get(i);
                     GUI.Label(item.itemRef.getDisplayName(), this.batch, this.tabsRect.x, this.tabsRect.y + this.tabsRect.height - 20 - i*10, false, this.UIStyle);
                     GUI.Label(""+item.getAmount(), this.batch, this.tabsRect.x + 100, this.tabsRect.y + this.tabsRect.height - 20 - i*10, false, this.UIStyle);
-
                 }
                 this.batch.setColor(Color.WHITE);
             }
 
             //If it's a humanoid that we can control, draw some order buttons and its current path.
-            if(this.interactable.type.equals("humanoid")){
+            if(this.interactable.interType.equals("humanoid")){
                 GUI.Label("Orders", this.batch, this.ordersTopRect, true, this.UIStyle);
 
                 //GUI.Texture(ordersRect, ColonyGame.assetManager.get("menuButton_normal", Texture.class), this.batch);
-                if(this.interactable.interactable.getBehManager() != null) {
+                if(interactable.getBehManager() != null) {
                     orderButtonRect.set(ordersRect.x + 10, ordersRect.y + ordersRect.getHeight() - 50, 50, 50);
                     if (GUI.Button(orderButtonRect, "", this.batch, this.gatherStyle))
-                        interactable.interactable.getBehManager().gather();
+                        interactable.getBehManager().gather();
 
                     orderButtonRect.set(ordersRect.x + 75, ordersRect.y + ordersRect.getHeight() - 50, 50, 50);
                     if (GUI.Button(orderButtonRect, "", this.batch, this.exploreStyle))
-                        interactable.interactable.getBehManager().explore();
+                        interactable.getBehManager().explore();
 
                     orderButtonRect.set(ordersRect.x + 140, ordersRect.y + ordersRect.getHeight() - 50, 50, 50);
                     if (GUI.Button(orderButtonRect, "", this.batch, this.huntStyle))
-                        interactable.interactable.getBehManager().attack();
+                        interactable.getBehManager().attack();
 
 
                     batch.setProjectionMatrix(ColonyGame.camera.combined);
-                    BehaviourManagerComp.Line[] lines = this.interactable.interactable.getBehManager().getLines();
+                    BehaviourManagerComp.Line[] lines = interactable.getBehManager().getLines();
                     for(BehaviourManagerComp.Line line : lines)
                         batch.draw(blueSquare, line.startX, line.startY, 0, 0, line.width, 0.1f, 1, 1, line.rotation, 0, 0, blueSquare.getWidth(), blueSquare.getHeight(), false, false);
                     batch.setProjectionMatrix(ColonyGame.UICamera.combined);
 
-                    GUI.Label(this.interactable.interactable.getBehManager().getCurrentTaskName(), this.batch, this.ordersRect.x + this.ordersRect.width/2,
+                    GUI.Label(interactable.getBehManager().getCurrentTaskName(), this.batch, this.ordersRect.x + this.ordersRect.width/2,
                             this.ordersRect.y + this.ordersRect.getHeight()/2, true, this.UIStyle);
                 }
             }

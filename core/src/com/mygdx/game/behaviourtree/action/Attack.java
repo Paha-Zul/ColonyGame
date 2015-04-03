@@ -9,6 +9,7 @@ import com.mygdx.game.component.BlackBoard;
 import com.mygdx.game.component.Transform;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.entity.ProjectileEnt;
+import com.mygdx.game.helpers.Constants;
 import com.mygdx.game.helpers.GH;
 import com.mygdx.game.helpers.timer.RepeatingTimer;
 import com.mygdx.game.helpers.timer.Timer;
@@ -40,6 +41,8 @@ public class Attack extends LeafTask{
             TextureRegion tex = new TextureRegion(ColonyGame.assetManager.get("ball", Texture.class)); //Get a texture for the bullet.
             new ProjectileEnt(trans.getPosition(), rot, tex , 11); //Spawn the projectile.
         });
+
+        this.blackBoard.path = null;
     }
 
     @Override
@@ -49,7 +52,7 @@ public class Attack extends LeafTask{
         fireTimer.update(delta);
 
         //If the target is null or dead, return with success (it died... I or someone else killed it!)
-        if(this.blackBoard.target == null || this.blackBoard.target.isDestroyed() || this.blackBoard.target.isSetToBeDestroyed()) {
+        if(this.blackBoard.target == null || this.blackBoard.target.isDestroyed() || this.blackBoard.target.isSetToBeDestroyed() || !this.blackBoard.target.hasTag(Constants.ENTITY_ANIMAL)) {
             this.control.finishWithSuccess();
             return;
         }

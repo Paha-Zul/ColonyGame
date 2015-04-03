@@ -16,7 +16,7 @@ public class DataManager {
      * @param dataName The name of the data to add.
      * @param data The actual Object of data.
      * @param c The class of the data.
-     * @param <T> The class type of the Data.
+     * @param <T> The class interType of the Data.
      */
     public static <T> void addData(String dataName, T data, Class<T> c){
         HashMap<String, Object> map = dataMap.get(c);
@@ -32,7 +32,7 @@ public class DataManager {
      * Retrieves data from this manager.
      * @param dataName The name of the data we are retrieving.
      * @param c The Class of the data we are retrieving.
-     * @param <T> The Class type of data.
+     * @param <T> The Class interType of data.
      * @return The T data retrieved from this manager. Throws an exception if no data is found.
      */
     public static <T> T getData(String dataName, Class<T> c){

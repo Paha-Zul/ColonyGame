@@ -121,7 +121,7 @@ public class Entity implements IDelayedDestroyable{
 	 * Adds a component to this Entity. The Component is immediately added to the Entity but the 'start' method is not called
 	 * until the next update frame for the Entity. This means any values set in the 'start' method are not set in the same frame.
 	 * @param comp The Component to add to this Entity.
-	 * @param <T> The Component class type of the component being added.
+	 * @param <T> The Component class interType of the component being added.
 	 * @return The Component that was added.
 	 */
 	@SuppressWarnings("unchecked")
@@ -137,7 +137,7 @@ public class Entity implements IDelayedDestroyable{
 
 	/**
 	 * Retrieves a Component from this Entity.
-	 * @param c The Component class type to retrieve.
+	 * @param c The Component class interType to retrieve.
 	 * @return The Component if it was found, otherwise null.
 	 */
 	@SuppressWarnings("unchecked")
@@ -160,20 +160,35 @@ public class Entity implements IDelayedDestroyable{
 	 * @param comp The Component to remove.
 	 * @return True if the Component was removed, false otherwise.
 	 */
-	public final boolean removeComponent(Component comp){
+	public boolean removeComponent(Component comp){
 		if(comp.isActive()) return this.inactiveComponentList.remove(comp);
 		return this.activeComponentList.remove(comp);
 	}
 
 	/**
-	 * Destroyes and removes the passed in Component from its owner. Note that the Entity performing the function
-	 * does not need to be the owner of the Component.
-	 * @param comp The Component to be destroyed and removed.
+	 * Removes a Component from this Entity.
+	 * @param cls The class interType of the Component to remove.
 	 */
-	public void destroyComponent(Component comp){
-		comp.destroy();
-		if(comp.isActive()) comp.getEntityOwner().inactiveComponentList.remove(comp);
-		else comp.getEntityOwner().inactiveComponentList.remove(comp);
+	public <T extends Component> void destroyComponent(Class<T> cls){
+		//Search the inactive list.
+		for(int i=0;i<this.inactiveComponentList.size();i++){
+			Component comp = this.inactiveComponentList.get(i);
+			if(comp.getClass() == cls) {
+				comp.destroy();
+				this.inactiveComponentList.remove(i);
+				return;
+			}
+		}
+
+		//Search the active list.
+		for(int i=0;i<this.activeComponentList.size();i++){
+			Component comp = this.activeComponentList.get(i);
+			if(comp.getClass() == cls) {
+				comp.destroy();
+				this.activeComponentList.remove(i);
+				return;
+			}
+		}
 	}
 
     /**

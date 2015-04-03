@@ -1,6 +1,17 @@
 {
   "changes": [
     {
+      "version": "0.2",
+      "date": "4/3/2015",
+      "log": [
+        "- Added: Colonists will attack at range with a fast moving mysterious black ball from their body. This will currently deal 50 damage to squirrels.",
+        "- Added: When a squirrel is killed, it becomes a stationary resource. If it was targeted and killed by a colonist, the colonist will move to gather it and return the resources to base.",
+        "- Added: Since squirrels become resources, any dead squirrels on the ground will be target by the 'Gather' button on colonists. They currently have a gather time of 3 seconds.",
+        "- Fixed: Reworked stats system. Currently reaching 0 health kills the entity. Unless it's a squirrel, then it becomes a resource.",
+        "- Bugs: Oh you'll find them..."
+      ]
+    },
+    {
       "version": "0.18",
       "date": "3/30/2015",
       "log": [
@@ -10,7 +21,9 @@
         "- Fixed: Colonists not eating when repeating a gathering task.",
         "- Fixed: Colonists eat more frequently",
         "- Fixed: Colonists will now die if their health reaches 0",
-        "- Bug: Probably a crash I haven't experienced. In fact, I'm certain there is a crash waiting somewhere in the code. Things just don't magically work so well like they did just now."
+        "- Bug: Probably a crash I haven't experienced. In fact, I'm certain there is a crash waiting somewhere in the code. Things just don't magically work so well like they did just now.",
+		"- Bug: For some reason animals aren't dying in the dropbox version? I'll have to check that out...",
+		"- Bug: Nevermind for the above... apparently there was just 5 of them on top of each other and it looked like they didn't die"
       ]
     },
     {

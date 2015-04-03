@@ -7,6 +7,8 @@ import com.mygdx.game.ColonyGame;
 import com.mygdx.game.behaviourtree.LeafTask;
 import com.mygdx.game.component.*;
 import com.mygdx.game.helpers.DataBuilder;
+import com.mygdx.game.helpers.FloatingText;
+import com.mygdx.game.helpers.GH;
 import com.mygdx.game.helpers.managers.DataManager;
 import com.mygdx.game.helpers.managers.SoundManager;
 import com.mygdx.game.helpers.timer.OneShotTimer;
@@ -58,13 +60,20 @@ public class Gather extends LeafTask{
                 return;
             }
 
+            String[] itemNames = new String[this.resource.getItemNames().length];
+            int[] amounts = new int[this.resource.getItemNames().length];
             //For each resource, random an amount to add to my (the colonists') inventory.
             for(int i=0;i<this.resource.getItemNames().length;i++){
                 DataBuilder.JsonItem item = DataManager.getData(this.resource.getItemNames()[i], DataBuilder.JsonItem.class); //Get the reference.
                 int diff = this.resource.getItemAmounts()[i][1] - this.resource.getItemAmounts()[i][0]; //Get the difference between low and high.
                 int base = this.resource.getItemAmounts()[i][0]; //Get the base amount (which is the low amount).
-                this.blackBoard.myInventory.addItem(item.getItemName(), MathUtils.random(diff) + base); //Random a number!
+                int amount = MathUtils.random(diff) + base;
+                this.blackBoard.myInventory.addItem(item.getItemName(), amount); //Random a number!
+                itemNames[i] = item.getDisplayName();
+                amounts[i] = amount;
             }
+
+            createGatherMessage(itemNames, amounts);
 
             //This sets up the information for moving and transfering to the colony.
             Colony targetColony = this.blackBoard.getEntityOwner().getComponent(Colonist.class).getColony(); //Get the colony.
@@ -76,6 +85,25 @@ public class Gather extends LeafTask{
             this.resource.getEntityOwner().setToDestroy();
             this.control.finishWithSuccess();
         });
+    }
+
+    private void createGatherMessage(String[] itemNames, int[] amounts){
+        StringBuilder text = new StringBuilder("Gathered ");
+        for(int i=0;i<itemNames.length;i++){
+            text.append(amounts[i]).append(" ").append(itemNames[i]);
+            if(i != itemNames.length-1) text.append(", ");
+        }
+
+        if(itemNames.length == 0)
+            text.append("nothing...");
+
+        Vector2 start = new Vector2(this.blackBoard.getEntityOwner().transform.getPosition());
+        start.y += GH.toMeters(40);
+
+        Vector2 end = new Vector2(this.blackBoard.getEntityOwner().transform.getPosition());
+        end.y += GH.toMeters(90);
+
+        new FloatingText(text.toString(), start, end, 2f, 0.8f);
     }
 
     @Override

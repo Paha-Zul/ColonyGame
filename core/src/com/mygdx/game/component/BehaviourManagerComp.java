@@ -10,7 +10,6 @@ import com.mygdx.game.behaviourtree.control.ParentTaskController;
 import com.mygdx.game.behaviourtree.decorator.RepeatUntilSuccess;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.Constants;
-import com.mygdx.game.helpers.DataBuilder;
 import com.mygdx.game.helpers.FloatingText;
 import com.mygdx.game.helpers.GH;
 import com.mygdx.game.helpers.timer.OneShotTimer;
@@ -264,8 +263,11 @@ public class BehaviourManagerComp extends Component{
 
         FindPath fp = new FindPath("Finding Path To Target", this.blackBoard);      //Find a path to the target (repeat)
         MoveTo mt = new MoveTo("Moving to Target", this.blackBoard);                //Move to the target (repeat)
-        Attack at = new Attack("Attacking", this.blackBoard);
+        Attack at = new Attack("Attacking", this.blackBoard);                       //Attack the squirrel (repeat)
 
+        FindPath fpToResource = new FindPath("Finding Path to Dead Animal", this.blackBoard);                               //Find a path to the newly killed animal which is now a resource.
+        MoveTo mtTargetResource = new MoveTo("Moving to Dead Animal", this.blackBoard);                                     //Move to it.
+        Gather gatherResource = new Gather("Gathering Dead Animal", this.blackBoard);                                       //Gather it.
         FindClosestEntity fcBase = new FindClosestEntity("Finding storage", this.blackBoard, Constants.ENTITY_BUILDING);    //Find the closest base/storage
         FindPath fpToBase = new FindPath("Finding path to base", this.blackBoard);                                          //Find the path to the base/storage
         MoveTo mtBase = new MoveTo("Moving to base", this.blackBoard);                                                      //Move to the base/storage
@@ -277,6 +279,9 @@ public class BehaviourManagerComp extends Component{
         ((ParentTaskController) repeatSeq.getControl()).addTask(mt); //Add the move to the second sequence.
         ((ParentTaskController) repeatSeq.getControl()).addTask(at); //Add the attack sequence
 
+        ((ParentTaskController) mainSeq.getControl()).addTask(fpToResource);
+        ((ParentTaskController) mainSeq.getControl()).addTask(mtTargetResource);
+        ((ParentTaskController) mainSeq.getControl()).addTask(gatherResource);
         ((ParentTaskController) mainSeq.getControl()).addTask(fcBase);
         ((ParentTaskController) mainSeq.getControl()).addTask(fpToBase);
         ((ParentTaskController) mainSeq.getControl()).addTask(mtBase);
@@ -306,21 +311,7 @@ public class BehaviourManagerComp extends Component{
 
         //On success, kill the animal and get items from it.
         rp.getControl().callbacks.successCallback = () -> {
-            this.blackBoard.target.setToDestroy(); //Set to destroy.
-
-            //If the Entity doing the killing has no inventory, skip all this!
-            Inventory inv = this.blackBoard.owner.getComponent(Inventory.class);
-            if(inv == null || this.blackBoard.target == null) return;
-            Animal animal = this.blackBoard.target.getComponent(Animal.class);
-            if(animal == null) return; //If the animal is null (somehow?), return.
-
-            //Get the reference and add a random amount of each item.
-            DataBuilder.JsonAnimal ref = animal.getAnimalRef();
-            for(int i=0;i<ref.items.length;i++) {
-                String itemName = ref.items[i];
-                int amount = MathUtils.random(ref.itemAmounts[i][1] - ref.itemAmounts[i][0]) + ref.itemAmounts[i][0];
-                inv.addItem(itemName, amount);
-            }
+            this.blackBoard.targetNode = null;
         };
 
         return mainSeq;
@@ -468,6 +459,9 @@ public class BehaviourManagerComp extends Component{
 
     @Override
     public void destroy() {
+        this.currentBehaviour.getControl().finishWithFailure();
+        this.currentBehaviour.getControl().safeEnd();
+        this.currentBehaviour = null;
         super.destroy();
     }
 
