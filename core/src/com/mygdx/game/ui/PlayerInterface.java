@@ -355,11 +355,11 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
                     Stats.Stat stat = list.get(i);
                     drawBar(stat.name, x, y-(i+1)*space - 20*i, 100, 20, stat.getCurrVal(), stat.getMaxVal());
                 }
-
-//                drawBar("Health: ", statusRect.x + 10, statusRect.y + statusRect.height - 25, 100, 20, stats.getStat("health").getCurrVal(), stats.getStat("health").getMaxVal());
-//                drawBar("Food: ", statusRect.x + 10, statusRect.y + statusRect.height - 50, 100, 20, stats.getStat("food").getCurrVal(), stats.getStat("food").getMaxVal());
-//                drawBar("Water: ", +statusRect.x + 10, statusRect.y + statusRect.height - 75, 100, 20, stats.getStat("water").getCurrVal(), stats.getStat("water").getMaxVal());
-//                drawBar("Energy: ", +statusRect.x + 10, statusRect.y + statusRect.height - 100, 100, 20, stats.getStat("energy").getCurrVal(), stats.getStat("energy").getMaxVal());
+            }else if(interactable.getStatsText() != null){
+                GUI.Label("Resources", this.batch, this.statusTopRect, true, this.UIStyle);
+                //this.UIStyle.multiline = true;
+                GUI.Label("Such", this.batch, this.statusRect, true, this.UIStyle);
+                //this.UIStyle.multiline = false;
             }
 
             //If it has an inventory, draw the inventory...

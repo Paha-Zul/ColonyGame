@@ -1,5 +1,6 @@
 package com.mygdx.game.component;
 
+import com.badlogic.gdx.math.MathUtils;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.DataBuilder;
 import com.mygdx.game.interfaces.IInteractable;
@@ -10,9 +11,11 @@ import com.mygdx.game.interfaces.IInteractable;
 public class Resource extends Component implements IInteractable{
     private String resourceName = "default", displayName = "default", resourceType = "default";
     private String[] itemNames;
-    private int[][] itemAmounts;
+    private int[] itemAmounts;
     private float gatherTime = 1;
     private volatile Entity taken = null;
+
+    private StringBuilder info = new StringBuilder();
 
     public Resource(String resourceName) {
         super();
@@ -42,8 +45,11 @@ public class Resource extends Component implements IInteractable{
         this.displayName = jRes.displayName;
         this.resourceType = jRes.resourceType;
         this.itemNames = jRes.items;
-        this.itemAmounts = jRes.amounts;
         this.gatherTime = jRes.gatherTime;
+
+        this.itemAmounts = new int[jRes.amounts.length];
+        for(int i=0;i<jRes.amounts.length; i++)
+            this.itemAmounts[i] = MathUtils.random(jRes.amounts[i][1] - jRes.amounts[i][0]) + jRes.amounts[i][0]; //Add diff to base.
     }
 
     public Resource(DataBuilder.JsonAnimal jAnimal){
@@ -51,8 +57,11 @@ public class Resource extends Component implements IInteractable{
         this.displayName = jAnimal.displayName;
         this.resourceType = "animal";
         this.itemNames = jAnimal.items;
-        this.itemAmounts = jAnimal.itemAmounts;
         this.gatherTime = 3f;
+
+        this.itemAmounts = new int[jAnimal.itemAmounts.length];
+        for(int i=0;i<jAnimal.itemAmounts.length; i++)
+            this.itemAmounts[i] = MathUtils.random(jAnimal.itemAmounts[i][1] - jAnimal.itemAmounts[i][0]) + jAnimal.itemAmounts[i][0]; //Add diff to base.
     }
 
     @Override
@@ -60,6 +69,10 @@ public class Resource extends Component implements IInteractable{
         super.start();
 
         this.getEntityOwner().name = this.displayName;
+
+        for(int i=0;i<itemNames.length;i++){
+            info.append(itemAmounts[i]).append(" ").append(itemNames[i]).append(System.lineSeparator());
+        }
     }
 
     @Override
@@ -90,8 +103,17 @@ public class Resource extends Component implements IInteractable{
      * Gets the amounts of the itemRef in this Resource.
      * @return A 2D int array which represents the possible (low-high) range of amount of items.
      */
-    public int[][] getItemAmounts() {
+    public int[] getItemAmounts() {
         return itemAmounts;
+    }
+
+    /**
+     * Gets the item amount for a specific index.
+     * @param index The index to get the amount from.
+     * @return An integer which is the amount of the item.
+     */
+    public int getItemAmount(int index){
+        return this.itemAmounts[index];
     }
 
     /**
@@ -146,38 +168,6 @@ public class Resource extends Component implements IInteractable{
         this.taken = entity;
     }
 
-    /**
-     * Sets the name of this Resource.
-     * @param resourceName The name to set for this Resource.
-     */
-    public void setResourceName(String resourceName) {
-        this.resourceName = resourceName;
-    }
-
-    /**
-     * Sets the display name of this Resource.
-     * @param displayName The display name of this Resource.
-     */
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
-    }
-
-    /**
-     * Sets the itemRef firstNames for this Resource.
-     * @param itemNames A String array which is the itemNames.
-     */
-    public void setItemNames(String[] itemNames) {
-        this.itemNames = itemNames;
-    }
-
-    /**
-     * Sets the itemRef amounts for this Resource.
-     * @param itemAmounts A 2D int array which are the (low-high) range amounts.
-     */
-    public void setItemAmounts(int[][] itemAmounts) {
-        this.itemAmounts = itemAmounts;
-    }
-
     @Override
     public void destroy() {
         super.destroy();
@@ -191,6 +181,11 @@ public class Resource extends Component implements IInteractable{
     @Override
     public Stats getStats() {
         return null;
+    }
+
+    @Override
+    public String getStatsText() {
+        return info.toString();
     }
 
     @Override

@@ -65,12 +65,9 @@ public class Gather extends LeafTask{
             //For each resource, random an amount to add to my (the colonists') inventory.
             for(int i=0;i<this.resource.getItemNames().length;i++){
                 DataBuilder.JsonItem item = DataManager.getData(this.resource.getItemNames()[i], DataBuilder.JsonItem.class); //Get the reference.
-                int diff = this.resource.getItemAmounts()[i][1] - this.resource.getItemAmounts()[i][0]; //Get the difference between low and high.
-                int base = this.resource.getItemAmounts()[i][0]; //Get the base amount (which is the low amount).
-                int amount = MathUtils.random(diff) + base;
-                this.blackBoard.myInventory.addItem(item.getItemName(), amount); //Random a number!
+                this.blackBoard.myInventory.addItem(item.getItemName(), this.resource.getItemAmount(i)); //Random a number!
                 itemNames[i] = item.getDisplayName();
-                amounts[i] = amount;
+                amounts[i] = this.resource.getItemAmount(i);
             }
 
             createGatherMessage(itemNames, amounts);

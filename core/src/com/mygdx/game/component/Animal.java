@@ -27,6 +27,7 @@ public class Animal extends Component implements IInteractable{
         stats.addStat("food", 100, 100);
         stats.addStat("water", 100, 100);
 
+        //Remove its animal properties and make it a resource.
         stats.getStat("health").onZero = () -> {
             Interactable interactable = this.owner.getComponent(Interactable.class);
 
@@ -34,7 +35,8 @@ public class Animal extends Component implements IInteractable{
             this.owner.addTag(Constants.ENTITY_RESOURCE); //Add the resource tag
             this.owner.addComponent(new Resource(this.animalRef)); //Add a Resource Component.
             if(interactable != null) interactable.changeType("resource");
-            this.owner.destroyComponent(BehaviourManagerComp.class);
+            this.owner.destroyComponent(BehaviourManagerComp.class); //Destroy the BehaviourManagerComp
+            this.owner.destroyComponent(Stats.class); //Destroy the Stats component.
             this.owner.destroyComponent(Animal.class); //Destroy this (Animal) Component.
         };
 
@@ -54,6 +56,11 @@ public class Animal extends Component implements IInteractable{
     @Override
     public Stats getStats() {
         return this.stats;
+    }
+
+    @Override
+    public String getStatsText() {
+        return null;
     }
 
     @Override

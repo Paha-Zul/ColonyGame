@@ -69,12 +69,19 @@ public class Colonist extends Component implements IInteractable{
         return this.firstName;
     }
 
+    @Override
     public Inventory getInventory(){
         return this.inventory;
     }
 
+    @Override
     public Stats getStats(){
         return this.stats;
+    }
+
+    @Override
+    public String getStatsText() {
+        return null;
     }
 
     @Override

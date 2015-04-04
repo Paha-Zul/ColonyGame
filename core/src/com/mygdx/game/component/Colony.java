@@ -163,6 +163,11 @@ public class Colony extends Component implements IInteractable {
     }
 
     @Override
+    public String getStatsText() {
+        return null;
+    }
+
+    @Override
     public Skills getSkills() {
         return null;
     }

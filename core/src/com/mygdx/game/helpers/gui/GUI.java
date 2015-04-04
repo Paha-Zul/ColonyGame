@@ -7,7 +7,6 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
-import com.mygdx.game.ColonyGame;
 import com.sun.istack.internal.NotNull;
 
 /**
@@ -74,6 +73,7 @@ public class GUI {
             }else {
                 currTexture = style.moused;
             }
+
         }
 
         batch.draw(currTexture, rect.x, rect.y, rect.getWidth(), rect.getHeight());
@@ -105,7 +105,11 @@ public class GUI {
         }else
             y += style.font.getLineHeight();
 
-        style.font.draw(batch, text, x, y);
+
+        if(!style.multiline)
+            style.font.draw(batch, text, x, y);
+        else
+            style.font.drawMultiLine(batch, text, x, y);
     }
 
     public static String TextBox(String text, SpriteBatch batch, float x, float y){
@@ -124,6 +128,8 @@ public class GUI {
         public Texture clicked = GUI.defaultClickedButton;
 
         public BitmapFont font = defaultFont;
+
+        public boolean multiline = false;
 
         public GUIStyle(){
 
