@@ -14,6 +14,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.QueryCallback;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.scenes.scene2d.utils.Align;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.component.*;
 import com.mygdx.game.entity.Entity;
@@ -289,7 +290,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         int index[] = world.getIndex(GH.toMeters(mouseCoords.x), GH.toMeters(mouseCoords.y));
         WorldGen.TerrainTile tile = world.getNode(index);
         if(tile == null) return;
-        GUI.Label(tile.category, this.batch, rect.x + rect.getWidth()*0.5f, rect.getY() + rect.getHeight()*0.5f, true);
+        GUI.Label(tile.category, this.batch, rect.x, rect.getY(), rect.getWidth()*0.5f, rect.getHeight()*0.5f);
     }
 
     /**
@@ -334,18 +335,21 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
      */
     private void displaySelected(){
 
+        //Make sure the interactable we have selected isn't null!
         if(this.interactable.getInteractable() != null){
-            IInteractable interactable = this.interactable.getInteractable();
+
+            IInteractable interactable = this.interactable.getInteractable(); //Get the interactable!
+
             //If it has a name, draw the name...
             if(interactable.getName() != null)
-                GUI.Label(interactable.getName(), this.batch, this.infoTopRect, true, this.UIStyle);
+                GUI.Label(interactable.getName(), this.batch, this.infoTopRect, this.UIStyle);
 
             //If it has stats, draw the stats...
             if(interactable.getStats() != null){
                 //GUI.Texture(statusRect, ColonyGame.assetManager.get("menuButton_normal", Texture.class), this.batch);
                 Stats stats = interactable.getStats();
 
-                GUI.Label("Stats", this.batch, this.statusTopRect, true, this.UIStyle);
+                GUI.Label("Stats", this.batch, this.statusTopRect, this.UIStyle);
                 ArrayList<Stats.Stat> list = stats.getStatList();
                 float space = ((statusRect.height - list.size()*20)/list.size()+1)/2;
                 float x = statusRect.x + 10;
@@ -355,30 +359,44 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
                     Stats.Stat stat = list.get(i);
                     drawBar(stat.name, x, y-(i+1)*space - 20*i, 100, 20, stat.getCurrVal(), stat.getMaxVal());
                 }
+
+            //If no stats, maybe it has stat text?
             }else if(interactable.getStatsText() != null){
-                GUI.Label("Resources", this.batch, this.statusTopRect, true, this.UIStyle);
-                //this.UIStyle.multiline = true;
-                GUI.Label("Such", this.batch, this.statusRect, true, this.UIStyle);
-                //this.UIStyle.multiline = false;
+                GUI.Label("Resources", this.batch, this.statusTopRect, this.UIStyle);
+                this.UIStyle.multiline = true;
+                this.UIStyle.alignment = Align.topLeft;
+                this.UIStyle.paddingLeft = 10;
+                this.UIStyle.paddingTop = 5;
+                GUI.Label(interactable.getStatsText(), this.batch, this.statusRect, this.UIStyle);
+                this.UIStyle.paddingLeft = 0;
+                this.UIStyle.paddingTop = 0;
+                this.UIStyle.alignment = Align.center;
+                this.UIStyle.multiline = false;
             }
 
             //If it has an inventory, draw the inventory...
             if(interactable.getInventory() != null){
                 //GUI.Texture(tabsRect, ColonyGame.assetManager.get("menuButton_normal", Texture.class), this.batch);
 
-                GUI.Label("Inventory", this.batch, this.tabsTopRect, true, this.UIStyle);
+                GUI.Label("Inventory", this.batch, this.tabsTopRect, this.UIStyle);
                 ArrayList<Inventory.InventoryItem> itemList = interactable.getInventory().getItemList();
+                this.UIStyle.alignment = Align.topLeft;
+                this.UIStyle.paddingLeft = 5;
+                this.UIStyle.paddingTop = 0;
                 for(int i=0;i<itemList.size();i++){
                     Inventory.InventoryItem item = itemList.get(i);
-                    GUI.Label(item.itemRef.getDisplayName(), this.batch, this.tabsRect.x, this.tabsRect.y + this.tabsRect.height - 20 - i*10, false, this.UIStyle);
-                    GUI.Label(""+item.getAmount(), this.batch, this.tabsRect.x + 100, this.tabsRect.y + this.tabsRect.height - 20 - i*10, false, this.UIStyle);
+                    GUI.Label(item.itemRef.getDisplayName(), this.batch, this.tabsRect.x, this.tabsRect.y, this.tabsRect.width, this.tabsRect.height - 20 - i*10, this.UIStyle);
+                    GUI.Label(""+item.getAmount(), this.batch, this.tabsRect.x + 100, this.tabsRect.y, 100, this.tabsRect.height - 20 - i*10, this.UIStyle);
                 }
                 this.batch.setColor(Color.WHITE);
+                this.UIStyle.alignment = Align.center;
+                this.UIStyle.paddingLeft = 0;
+                this.UIStyle.paddingTop = 0;
             }
 
             //If it's a humanoid that we can control, draw some order buttons and its current path.
             if(this.interactable.interType.equals("humanoid")){
-                GUI.Label("Orders", this.batch, this.ordersTopRect, true, this.UIStyle);
+                GUI.Label("Orders", this.batch, this.ordersTopRect, this.UIStyle);
 
                 //GUI.Texture(ordersRect, ColonyGame.assetManager.get("menuButton_normal", Texture.class), this.batch);
                 if(interactable.getBehManager() != null) {
@@ -401,9 +419,16 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
                         batch.draw(blueSquare, line.startX, line.startY, 0, 0, line.width, 0.1f, 1, 1, line.rotation, 0, 0, blueSquare.getWidth(), blueSquare.getHeight(), false, false);
                     batch.setProjectionMatrix(ColonyGame.UICamera.combined);
 
-                    GUI.Label(interactable.getBehManager().getCurrentTaskName(), this.batch, this.ordersRect.x + this.ordersRect.width/2,
-                            this.ordersRect.y + this.ordersRect.getHeight()/2, true, this.UIStyle);
+                    GUI.Label(interactable.getBehManager().getCurrentTaskName(), this.batch, this.ordersRect.x, this.ordersRect.y, this.ordersRect.width, this.ordersRect.height, this.UIStyle);
                 }
+            }
+
+            GridComponent comp = this.interactable.getEntityOwner().getComponent(GridComponent.class);
+            if(comp != null){
+                GUI.Text("Grid location: "+comp.getCurrNode(), batch, 100, 800);
+                GUI.Text("Position: "+this.interactable.getEntityOwner().transform.getPosition(), batch, 100, 780);
+                Vector3 worldCoords = ColonyGame.camera.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
+                GUI.Text("Mouse pos: "+worldCoords.x+" "+worldCoords.y, batch, 100, 760);
             }
         }
     }
@@ -419,15 +444,23 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
      * @param maxVal The maximum value.
      */
     private void drawBar(String text, float x, float y, float width, float height, float currVal, float maxVal){
-        GUI.Label(text, batch, x, y, false, this.UIStyle);
+        this.UIStyle.alignment = Align.left;
+        GUI.Label(text, batch, x, y, 50, height, this.UIStyle);
+        this.UIStyle.alignment = Align.center;
 
+        float outerX = x + 80;
+        float innerX = x + 80 + 2;
+
+        //Draw the out rectangle
         batch.setColor(Color.BLACK);
-        GUI.Texture(WorldGen.getInstance().whiteTex, x + 80, y, width, height, batch);
+        GUI.Texture(WorldGen.getInstance().whiteTex, outerX, y, width, height, batch);
+
+        //Draw the inner rectangle (shrink it by 2 inches on all sides, 'padding')
         batch.setColor(Color.GREEN);
         float newWidth = (currVal/maxVal)*(width-4);
-        GUI.Texture(WorldGen.getInstance().whiteTex, x + 80 + 2, y + 2, newWidth, height - 4, batch);
+        GUI.Texture(WorldGen.getInstance().whiteTex, innerX, y + 2, newWidth, height - 4, batch);
 
-        GUI.Label((int)currVal+"/"+(int)maxVal, batch, x + 80 + width*0.5f, y + height*0.5f, true);
+        GUI.Label((int)currVal+"/"+(int)maxVal, batch, outerX, y, width, height);
     }
 
     /**

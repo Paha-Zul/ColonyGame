@@ -3,7 +3,6 @@ package com.mygdx.game.component;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.Constants;
 import com.mygdx.game.helpers.Grid;
-import com.mygdx.game.helpers.Profiler;
 
 /**
  * Created by Paha on 1/17/2015.
@@ -22,7 +21,6 @@ public class GridComponent extends Component{
         this.gridType = gridType;
         if(this.gridType == Constants.GRIDSTATIC)
             this.setActive(false);
-
     }
 
     @Override

@@ -5,6 +5,8 @@ import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.DataBuilder;
 import com.mygdx.game.interfaces.IInteractable;
 
+import java.util.ArrayList;
+
 /**
  * Created by Paha on 1/10/2015.
  */
@@ -30,7 +32,7 @@ public class Resource extends Component implements IInteractable{
 
     /**
      * A copy constructor that copies the data from another resource.
-     * @param resource
+     * @param resource The Resource Component to copy.
      */
     public Resource(Resource resource) {
         this(resource.resourceName);
@@ -40,18 +42,33 @@ public class Resource extends Component implements IInteractable{
         this.itemAmounts = resource.itemAmounts;
     }
 
+    /**
+     * Copies a JSonResource object.
+     * @param jRes The JSonResource to copy.
+     */
     public Resource(DataBuilder.JsonResource jRes){
         this(jRes.resourceName);
         this.displayName = jRes.displayName;
         this.resourceType = jRes.resourceType;
-        this.itemNames = jRes.items;
         this.gatherTime = jRes.gatherTime;
 
-        this.itemAmounts = new int[jRes.amounts.length];
-        for(int i=0;i<jRes.amounts.length; i++)
-            this.itemAmounts[i] = MathUtils.random(jRes.amounts[i][1] - jRes.amounts[i][0]) + jRes.amounts[i][0]; //Add diff to base.
+        ArrayList<Integer> amounts = new ArrayList<>(10);
+        ArrayList<String> names = new ArrayList<>(10);
+        for(int i=0;i<jRes.amounts.length; i++) {
+            int amount = MathUtils.random(jRes.amounts[i][1] - jRes.amounts[i][0]) + jRes.amounts[i][0]; //Add diff to base.
+            if(amount != 0){
+                amounts.add(amount);
+                names.add(jRes.items[i]);
+            }
+        }
+        this.itemAmounts = amounts.stream().mapToInt(i -> i).toArray();
+        this.itemNames = names.toArray(new String[names.size()]);
     }
 
+    /**
+     * Copies a JSonAnimal object.
+     * @param jAnimal The JsonAnimal to copy.
+     */
     public Resource(DataBuilder.JsonAnimal jAnimal){
         this(jAnimal.name);
         this.displayName = jAnimal.displayName;
@@ -59,9 +76,17 @@ public class Resource extends Component implements IInteractable{
         this.itemNames = jAnimal.items;
         this.gatherTime = 3f;
 
-        this.itemAmounts = new int[jAnimal.itemAmounts.length];
-        for(int i=0;i<jAnimal.itemAmounts.length; i++)
-            this.itemAmounts[i] = MathUtils.random(jAnimal.itemAmounts[i][1] - jAnimal.itemAmounts[i][0]) + jAnimal.itemAmounts[i][0]; //Add diff to base.
+        ArrayList<Integer> amounts = new ArrayList<>(10);
+        ArrayList<String> names = new ArrayList<>(10);
+        for(int i=0;i<jAnimal.itemAmounts.length; i++) {
+            int amount = MathUtils.random(jAnimal.itemAmounts[i][1] - jAnimal.itemAmounts[i][0]) + jAnimal.itemAmounts[i][0]; //Add diff to base.
+            if(amount != 0){
+                amounts.add(amount);
+                names.add(jAnimal.items[i]);
+            }
+        }
+        this.itemAmounts = amounts.stream().mapToInt(i -> i).toArray();
+        this.itemNames = names.toArray(new String[names.size()]);
     }
 
     @Override

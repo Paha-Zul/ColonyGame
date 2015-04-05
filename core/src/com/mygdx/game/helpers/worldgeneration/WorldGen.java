@@ -278,7 +278,7 @@ public class WorldGen {
     }
 
     public int[] getIndex(float x, float y){
-        return new int[]{(int)(x*this.getTileSize()), (int)(y*this.getTileSize())};
+        return new int[]{(int)(x/this.getTileSize()), (int)(y/this.getTileSize())};
     }
 
     /**

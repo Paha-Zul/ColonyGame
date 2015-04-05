@@ -149,8 +149,9 @@ public class Grid {
         public Node checkNode(Node currNode, Entity entity, boolean changeVisibility, int radius) {
             Vector2 pos = entity.transform.getPosition();
 
+            int[] index = this.getIndex(pos);
             //If the currNode still matches our current position, return it.
-            if (currNode != null && (((int)pos.x / this.getSquareSize()) == currNode.getCol() && ((int)pos.y / this.getSquareSize()) == currNode.getRow())) {
+            if (currNode != null && (index[0] == currNode.getCol() && index[1] == currNode.getRow())) {
                 return currNode;
             }
 

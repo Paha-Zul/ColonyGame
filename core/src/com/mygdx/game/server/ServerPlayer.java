@@ -160,9 +160,9 @@ public class ServerPlayer {
             int radius = 0;
             boolean placed = false;
             WorldGen world = WorldGen.getInstance();
+            int[] index = world.getIndex(start);
 
             while (!placed) {
-                int[] index = world.getIndex(start);
                 int startX = index[0] - radius;
                 int endX = index[0] + radius;
                 int startY = index[1] - radius;
@@ -178,35 +178,33 @@ public class ServerPlayer {
                             GH.writeErrorMessage("Couldn't find a place to spawn the base!");
 
                         //For each tile, we want to check if there is a 4x4 surrounding area.
-                        int innerStartX = x - 1;
-                        int innerEndX = x + 1;
-                        int innerStartY = y - 1;
-                        int innerEndY = y + 1;
+                        int innerStartX = x - 5;
+                        int innerEndX = x + 5;
+                        int innerStartY = y - 5;
+                        int innerEndY = y + 5;
 
                         if (world.getNode(innerStartX, innerStartY) == null || world.getNode(innerEndX, innerEndY) == null)
                             continue;
 
                         placed = true;
 
-                        findsquare:
-                        for (int innerX = innerStartX; innerX <= innerEndX; innerX++) {
-                            for (int innerY = innerStartY; innerY <= innerEndY; innerY++) {
-                                if (!world.getNode(innerX, innerY).avoid) { //If there is a single tile set to avoid, break!
+                        for (int innerX = innerStartX; innerX <= innerEndX && placed; innerX++) {
+                            for (int innerY = innerStartY; innerY <= innerEndY && placed; innerY++) {
+                                WorldGen.TerrainTile tile = world.getNode(innerX, innerY);
+                                if (tile.avoid)//If there is a single tile set to avoid, break!
                                     placed = false;
-                                    break findsquare;
-                                }
                             }
                         }
 
                         if(placed)
-                            start.set(x/world.getTileSize(), y/world.getTileSize());
+                            start.set(x * world.getTileSize(), y * world.getTileSize());
                     }
                 }
                 radius++;
             }
         }
 
-        ColonyEntity colonyEnt = new ColonyEntity(start, 0, new TextureRegion(ColonyGame.assetManager.get("Colony", Texture.class)), 11);;
+        ColonyEntity colonyEnt = new ColonyEntity(start, 0, new TextureRegion(ColonyGame.assetManager.get("Colony", Texture.class)), 10);
         Colony colony = colonyEnt.getComponent(Colony.class);
 
         ColonyGame.camera.position.set(colonyEnt.transform.getPosition().x, colonyEnt.transform.getPosition().y, 0);

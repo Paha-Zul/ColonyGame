@@ -76,7 +76,7 @@ public class FloatingText implements IDestroyable{
         style.font.setColor(color);
         batch.setProjectionMatrix(ColonyGame.UICamera.combined);
         Vector3 pos = ColonyGame.camera.project(new Vector3(currPos.x, currPos.y, 0));
-        GUI.Label(this.text, batch, pos.x, pos.y, true, style);
+        GUI.Text(this.text, batch, pos.x, pos.y, true, style);
     }
 
     @Override

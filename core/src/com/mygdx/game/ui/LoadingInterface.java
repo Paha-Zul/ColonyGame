@@ -6,11 +6,9 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.mygdx.game.ColonyGame;
-import com.mygdx.game.component.Component;
-import com.mygdx.game.helpers.gui.GUI;
 import com.mygdx.game.helpers.ListHolder;
+import com.mygdx.game.helpers.gui.GUI;
 import com.mygdx.game.helpers.worldgeneration.WorldGen;
-import com.mygdx.game.interfaces.IGUI;
 
 /**
  * Created by Bbent_000 on 12/29/2014.
@@ -48,7 +46,7 @@ public class LoadingInterface extends UI {
 
             GUI.Texture(this.outline, this.loadingBar, this.batch);
             GUI.Texture(this.bar, this.loadingBar.x, this.loadingBar.y, this.loadingBar.width*WorldGen.getInstance().percentageDone, this.loadingBar.height, this.batch);
-            GUI.Label("Loading Terrain", this.batch, this.loadingBar.getX() + this.loadingBar.width/2, this.loadingBar.getY() + 40, true);
+            GUI.Label("Loading Terrain", this.batch, this.loadingBar.getX(), this.loadingBar.getY(), loadingBar.getWidth(), 40);
         }
     }
 
