@@ -25,6 +25,8 @@ public class DataBuilder implements IDestroyable{
     String itemPath = "items.json";
     String resourcePath = "resources.json";
     String animalPath = "animals.json";
+    String weaponPath = "weapon.json";
+    String ammoPath = "ammunition.json";
     String tilePath = "tiles.json";
     String worldPath = "worldgen.json";
     String changeLogPath = "changelog.json";
@@ -62,8 +64,9 @@ public class DataBuilder implements IDestroyable{
         buildWorldGen();
         buildChangeLog();
         buildAnimals();
+        buildWeapons();
+        buildAmmuntion();
     }
-
 
     private void buildFilesInDir(FileHandle dirHandle, Class<?> type, AssetLoaderParameters param, String[] extensions) {
         for (FileHandle entry : dirHandle.list()) {
@@ -376,6 +379,34 @@ public class DataBuilder implements IDestroyable{
 
     }
 
+    private void buildWeapons(){
+        Json json = new Json();
+        json.setTypeName(null);
+        json.setUsePrototypes(false);
+        json.setIgnoreUnknownFields(true);
+        json.setOutputType(JsonWriter.OutputType.json);
+
+        JsonWeapons weapons = json.fromJson(JsonWeapons.class, Gdx.files.internal(weaponPath+animalPath));
+
+        for(JsonWeapon weapon : weapons.weapons){
+            DataManager.addData(weapon.name, weapon, JsonWeapon.class);
+        }
+    }
+
+    private void buildAmmuntion(){
+        Json json = new Json();
+        json.setTypeName(null);
+        json.setUsePrototypes(false);
+        json.setIgnoreUnknownFields(true);
+        json.setOutputType(JsonWriter.OutputType.json);
+
+        JsonAmmunitions ammunitions = json.fromJson(JsonAmmunitions.class, Gdx.files.internal(ammoPath+animalPath));
+
+        for(JsonAmmunition ammo : ammunitions.ammunitions){
+            DataManager.addData(ammo.name, ammo, JsonAmmunition.class);
+        }
+    }
+
     private static class JsonItems{
         public Array<JsonItem> items;
     }
@@ -490,6 +521,24 @@ public class DataBuilder implements IDestroyable{
         public boolean aggressive, pack;
         public int[] packAmount;
         public int[][] itemAmounts;
+    }
+
+    private static class JsonWeapons{
+        public JsonWeapon[] weapons;
+    }
+
+    public static class JsonWeapon{
+        public String name, displayName, weaponType, ammunition;
+        public float reloadTime;
+    }
+
+    private static class JsonAmmunitions{
+        public JsonAmmunition[] ammunitions;
+    }
+
+    public static class JsonAmmunition{
+        public String name, displayName, ammoType;
+        public float damage, travelSpeed, accuracy;
     }
 
     private static class FolderStructure{

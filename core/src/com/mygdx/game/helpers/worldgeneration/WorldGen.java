@@ -26,7 +26,7 @@ import java.util.LinkedList;
  * Created by Bbent_000 on 12/24/2014.
  */
 public class WorldGen {
-    public static TerrainTile[][] map;
+    public TerrainTile[][] map;
 
     //Some default values that can be modified globally.
     private int tileSize = 25;

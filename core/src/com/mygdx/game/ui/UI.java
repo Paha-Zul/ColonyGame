@@ -10,8 +10,6 @@ import com.mygdx.game.interfaces.IGUI;
  * Created by Paha on 1/13/2015.
  */
 public abstract class UI implements IGUI, IDestroyable{
-    public boolean done = false;
-
     protected boolean destroyed = false;
 
     protected ColonyGame game;
@@ -25,7 +23,7 @@ public abstract class UI implements IGUI, IDestroyable{
     }
 
     @Override
-    public void drawGUI(float delta) {
+    public void render(float delta, SpriteBatch batch) {
 
     }
 

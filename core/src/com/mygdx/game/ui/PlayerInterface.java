@@ -18,7 +18,10 @@ import com.badlogic.gdx.scenes.scene2d.utils.Align;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.component.*;
 import com.mygdx.game.entity.Entity;
-import com.mygdx.game.helpers.*;
+import com.mygdx.game.helpers.Constants;
+import com.mygdx.game.helpers.Grid;
+import com.mygdx.game.helpers.ListHolder;
+import com.mygdx.game.helpers.Profiler;
 import com.mygdx.game.helpers.gui.GUI;
 import com.mygdx.game.helpers.timer.RepeatingTimer;
 import com.mygdx.game.helpers.timer.Timer;
@@ -43,6 +46,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     private boolean drawingProfiler = false;
     private boolean mouseDown = false;
     private boolean dragging = false;
+    private boolean drawGrid = false;
 
     private Rectangle buttonRect = new Rectangle();
     private Rectangle uiBackgroundBaseRect = new Rectangle();
@@ -189,22 +193,26 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     }
 
     @Override
-    public void drawGUI(float delta) {
-        super.drawGUI(delta);
+    public void render(float delta, SpriteBatch batch) {
+        super.render(delta, batch);
         GUI.font.setColor(Color.WHITE);
 
         int height = Gdx.graphics.getHeight();
         FPSTimer.update(delta);
 
         this.moveCamera(); //Move the camera
-        this.drawSelectionBox();
-        //Draws info about the game
-        this.drawInfo(height);
-
-        this.drawTerrainInfo(this.bottomLeftRect);
+        this.drawSelectionBox(); //Draws the selection box.
+        this.drawDebugInfo(height); //Draws some debug information.
+        this.drawTerrainInfo(this.bottomLeftRect); //Draws information about the moused over terrain piece.
 
         if(this.drawingProfiler)
-            Profiler.drawDebug(ColonyGame.batch, 200, height - 20);
+            Profiler.drawDebug(batch, 200, height - 20);
+
+        //Draw the grid squares if enabled.
+        if(drawGrid) {
+            ColonyGame.worldGrid.debugDraw();
+            drawBox2DDebug();
+        }
 
         //Draw stuff about the selected entity.
         if((this.selected != null && this.interactable != null) || this.selectedList.size() > 0){
@@ -265,7 +273,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
      * Draws info (like FPS) on the screen.
      * @param height
      */
-    private void drawInfo(int height){
+    private void drawDebugInfo(int height){
         if(this.drawingInfo) {
             GUI.Text("FPS: " + FPS, this.batch, 0, height - 20);
             GUI.Text("Zoom: " + ColonyGame.camera.zoom, this.batch, 0, height - 40);
@@ -287,7 +295,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
         GUI.Texture(this.background, rect, this.batch);
         WorldGen world = WorldGen.getInstance();
-        int index[] = world.getIndex(GH.toMeters(mouseCoords.x), GH.toMeters(mouseCoords.y));
+        int index[] = world.getIndex(mouseCoords.x, mouseCoords.y);
         WorldGen.TerrainTile tile = world.getNode(index);
         if(tile == null) return;
         GUI.Label(tile.category, this.batch, rect.x, rect.getY(), rect.getWidth()*0.5f, rect.getHeight()*0.5f);
@@ -422,14 +430,6 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
                     GUI.Label(interactable.getBehManager().getCurrentTaskName(), this.batch, this.ordersRect.x, this.ordersRect.y, this.ordersRect.width, this.ordersRect.height, this.UIStyle);
                 }
             }
-
-            GridComponent comp = this.interactable.getEntityOwner().getComponent(GridComponent.class);
-            if(comp != null){
-                GUI.Text("Grid location: "+comp.getCurrNode(), batch, 100, 800);
-                GUI.Text("Position: "+this.interactable.getEntityOwner().transform.getPosition(), batch, 100, 780);
-                Vector3 worldCoords = ColonyGame.camera.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
-                GUI.Text("Mouse pos: "+worldCoords.x+" "+worldCoords.y, batch, 100, 760);
-            }
         }
     }
 
@@ -519,6 +519,15 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         }
     }
 
+    //Draws the box2D debug.
+    private void drawBox2DDebug(){
+        this.batch.end();
+        this.batch.begin();
+        ColonyGame.debugRenderer.render(ColonyGame.world, ColonyGame.camera.combined);
+        this.batch.end();
+        this.batch.begin();
+    }
+
     @Override
     public void destroy() {
         super.destroy();
@@ -561,7 +570,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         else if(keycode == Input.Keys.F2)
             Profiler.enabled = this.drawingProfiler = !this.drawingProfiler;
         else if(keycode == Input.Keys.F3) {
-            ServerPlayer.drawGrid = !ServerPlayer.drawGrid;
+            this.drawGrid = !this.drawGrid;
         }else if(keycode == Input.Keys.SPACE)
             this.gameScreen.setPaused(!this.gameScreen.getPaused());
         else if(keycode == Input.Keys.F4)

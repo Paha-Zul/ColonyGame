@@ -15,8 +15,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.helpers.DataBuilder;
 import com.mygdx.game.helpers.GH;
-import com.mygdx.game.helpers.gui.GUI;
 import com.mygdx.game.helpers.ListHolder;
+import com.mygdx.game.helpers.gui.GUI;
 import com.mygdx.game.screens.LoadingScreen;
 
 /**
@@ -137,8 +137,8 @@ public class MainMenuInterface extends UI{
     }
 
     @Override
-    public void drawGUI(float delta) {
-        super.drawGUI(delta);
+    public void render(float delta, SpriteBatch batch) {
+        super.render(delta, batch);
 
         this.batch.draw(mainMenuTexture, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
@@ -152,7 +152,7 @@ public class MainMenuInterface extends UI{
 
         //Start button.
         if(GUI.Button(startRect, "", this.batch, startButtonStyle)){
-            this.done = true;
+            this.destroy();
             this.game.setScreen(new LoadingScreen(this.game));
             return;
         }

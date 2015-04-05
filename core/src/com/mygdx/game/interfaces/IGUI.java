@@ -1,5 +1,7 @@
 package com.mygdx.game.interfaces;
 
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+
 /**
  * Created by Bbent_000 on 12/25/2014.
  * An interface that requires methods specific to GUI classes such as 'resize'.
@@ -17,5 +19,5 @@ public interface IGUI {
      */
     public void addToList();
 
-    public void drawGUI(float delta);
+    public void render(float delta, SpriteBatch batch);
 }

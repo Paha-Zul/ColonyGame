@@ -33,7 +33,7 @@ public class ListHolder {
 	}
 
 	public static void iterate(Functional.Perform perform){
-		entityList.forEach((e)->perform.perform(e));
+		entityList.forEach((e) -> perform.perform(e));
 	}
 
     /**
@@ -70,17 +70,14 @@ public class ListHolder {
      * Updates the GUI elements
      * @param delta The time between frames.
      */
-	public static void updateGUI(float delta){
+	public static void updateGUI(float delta, SpriteBatch batch){
 		for (int i=0;i<GUIList.size();i++) {
 			UI gui = GUIList.get(i);
-			if(gui.done){
-				gui.destroy();
+			if(gui.isDestroyed()){
 				GUIList.remove(i);
 				i--;
-				continue;
-			}
-
-			gui.drawGUI(delta);
+			}else
+				gui.render(delta, batch);
 		}
 	}
 

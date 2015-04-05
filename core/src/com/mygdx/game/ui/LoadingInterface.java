@@ -13,7 +13,7 @@ import com.mygdx.game.helpers.worldgeneration.WorldGen;
 /**
  * Created by Bbent_000 on 12/29/2014.
  */
-public class LoadingInterface extends UI {
+public class LoadingInterface extends UI{
     private SpriteBatch batch;
     private float width = 200, height = 20;
     private boolean done;
@@ -35,8 +35,8 @@ public class LoadingInterface extends UI {
     }
 
     @Override
-    public void drawGUI(float delta) {
-        super.drawGUI(delta);
+    public void render(float delta, SpriteBatch batch) {
+        super.render(delta, batch);
 
         if(!done) {
             Color color = this.batch.getColor();
@@ -46,8 +46,9 @@ public class LoadingInterface extends UI {
 
             GUI.Texture(this.outline, this.loadingBar, this.batch);
             GUI.Texture(this.bar, this.loadingBar.x, this.loadingBar.y, this.loadingBar.width*WorldGen.getInstance().percentageDone, this.loadingBar.height, this.batch);
-            GUI.Label("Loading Terrain", this.batch, this.loadingBar.getX(), this.loadingBar.getY(), loadingBar.getWidth(), 40);
-        }
+            GUI.Label("Loading Terrain", this.batch, this.loadingBar.getX(), this.loadingBar.getY(), loadingBar.getWidth(), loadingBar.getHeight());
+        }else
+            this.destroy();
     }
 
     public void setDone(){
@@ -76,4 +77,5 @@ public class LoadingInterface extends UI {
         bar.dispose();
         bar = null;
     }
+
 }

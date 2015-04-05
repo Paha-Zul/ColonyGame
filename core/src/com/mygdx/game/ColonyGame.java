@@ -12,6 +12,7 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.mygdx.game.helpers.*;
 import com.mygdx.game.helpers.gui.GUI;
 import com.mygdx.game.helpers.managers.ScriptManager;
+import com.mygdx.game.helpers.worldgeneration.WorldGen;
 import com.mygdx.game.screens.PreLoadingScreen;
 
 import java.util.concurrent.ExecutorService;
@@ -43,6 +44,7 @@ public class ColonyGame extends Game {
 		ColonyGame.UICamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		world = new World(new Vector2(0,0), true);
         ColonyGame.assetManager = new EasyAssetManager();
+		ColonyGame.debugRenderer = new Box2DDebugRenderer(); //Create the Box2D world.
 
 		world.setContactListener(new Collision());
 
@@ -57,19 +59,74 @@ public class ColonyGame extends Game {
 	public void render () {
 		super.render();
 
+		//Update the profile and GUI.
 		float delta = Gdx.graphics.getDeltaTime();
-		Profiler.update(delta);
+		updateVarious(delta);
 
-        GUI.checkState();
-        ColonyGame.batch.setProjectionMatrix(camera.combined);
-		//Draw everything that is modified by the regular camera.
         ColonyGame.batch.begin();
-
-        batch.setProjectionMatrix(UICamera.combined);
-		ListHolder.updateGUI(delta);
-
+		updateEntities(delta);
+		updateGUI(delta);
         ColonyGame.batch.end();
 
+		//Update the camera.
         camera.update();
     }
+
+	private void updateVarious(float delta){
+		Profiler.update(delta);
+		GUI.checkState();
+	}
+
+	private void updateEntities(float delta){
+		batch.setProjectionMatrix(ColonyGame.camera.combined);
+		Profiler.begin("ServerPlayer: Rendering Terrain"); //Start the profiler.
+		this.renderMap(); //Render the map.
+		batch.setColor(Color.WHITE); //Set the color back to white.
+		Profiler.end(); //End the profiler.
+		Profiler.begin("ServerPlayer: Updating Entities");
+		ListHolder.update(delta);
+		ListHolder.updateFloatingTexts(delta, batch);
+		EventSystem.notifyGameEvent("update", delta);
+		Profiler.end();
+
+		//Step the Box2D simulation.
+		ColonyGame.world.step(1f / 60f, 8, 3);
+	}
+
+	private void updateGUI(float delta){
+		//Draw GUI stuff.
+		batch.setProjectionMatrix(UICamera.combined);
+		ListHolder.updateGUI(delta, batch);
+	}
+
+	//Renders the map
+	private void renderMap(){
+		if(worldGrid == null) return;
+
+		WorldGen.TerrainTile[][] map = WorldGen.getInstance().map;
+		int off = 5;
+
+		if(map == null) return;
+
+		float squareSize = ColonyGame.worldGrid.getSquareSize();
+		int halfWidth = (int)((ColonyGame.camera.viewportWidth*ColonyGame.camera.zoom)/2f);
+		int halfHeight = (int)((ColonyGame.camera.viewportHeight*ColonyGame.camera.zoom)/2f);
+		int xc = (int)ColonyGame.camera.position.x;
+		int yc = (int)ColonyGame.camera.position.y;
+
+		int startX = ((xc - halfWidth)/squareSize) - off >= 0 ? (int)((xc - halfWidth)/squareSize) - off : 0;
+		int endX = ((xc + halfWidth)/squareSize) + off < ColonyGame.worldGrid.getNumCols() ? (int)((xc + halfWidth)/squareSize) + off : ColonyGame.worldGrid.getNumCols()-1;
+		int startY = ((yc - halfHeight)/squareSize) - off >= 0 ? (int)((yc - halfHeight)/squareSize) - off : 0;
+		int endY = ((yc + halfHeight)/squareSize) + off < ColonyGame.worldGrid.getNumRows() ? (int)((yc + halfHeight)/squareSize) + off : ColonyGame.worldGrid.getNumRows()-1;
+
+		//Loop over the array
+		for(int x=startX;x<=endX;x++) {
+			for (int y = startY; y <= endY; y++) {
+				WorldGen.TerrainTile tile = map[x][y];
+				if(tile == null) continue;
+				tile.changeVisibility(WorldGen.getInstance().getVisibilityMap()[x][y].getVisibility());
+				tile.terrainSprite.draw(batch);
+			}
+		}
+	}
 }
