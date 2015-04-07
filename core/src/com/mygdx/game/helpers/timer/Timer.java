@@ -6,6 +6,7 @@ import com.mygdx.game.interfaces.Functional;
  * Created by Bbent_000 on 11/24/2014.
  */
 public abstract class Timer {
+	protected boolean oneShot = false;
 	protected double length;
 	protected double currCounter;
 	protected boolean canceled = false;
@@ -43,6 +44,10 @@ public abstract class Timer {
 	 */
 	public void restart(){
 		this.restart(this.length);
+	}
+
+	public boolean isOneShot(){
+		return this.oneShot;
 	}
 
 	/**

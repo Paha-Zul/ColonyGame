@@ -221,6 +221,9 @@ public class DataBuilder implements IDestroyable{
             DataManager.addData(jsonItem.itemName, jsonItem, JsonItem.class);
     }
 
+    /**
+     * Builds the resource Json stuff.
+     */
     private void buildResources(){
         Json json = new Json();
         json.setTypeName(null);
@@ -364,6 +367,9 @@ public class DataBuilder implements IDestroyable{
         DataBuilder.changelog = json.fromJson(JsonChangeLog.class, Gdx.files.internal(filePath+changeLogPath));
     }
 
+    /**
+     * Builds the animal Json stuff.
+     */
     private void buildAnimals(){
         Json json = new Json();
         json.setTypeName(null);
@@ -379,6 +385,9 @@ public class DataBuilder implements IDestroyable{
 
     }
 
+    /**
+     * Builds the weapon Json stuff.
+     */
     private void buildWeapons(){
         Json json = new Json();
         json.setTypeName(null);
@@ -386,13 +395,16 @@ public class DataBuilder implements IDestroyable{
         json.setIgnoreUnknownFields(true);
         json.setOutputType(JsonWriter.OutputType.json);
 
-        JsonWeapons weapons = json.fromJson(JsonWeapons.class, Gdx.files.internal(weaponPath+animalPath));
+        JsonWeapons weapons = json.fromJson(JsonWeapons.class, Gdx.files.internal(filePath+weaponPath));
 
         for(JsonWeapon weapon : weapons.weapons){
             DataManager.addData(weapon.name, weapon, JsonWeapon.class);
         }
     }
 
+    /**
+     * Builds the ammunition Json stuff.
+     */
     private void buildAmmuntion(){
         Json json = new Json();
         json.setTypeName(null);
@@ -400,7 +412,7 @@ public class DataBuilder implements IDestroyable{
         json.setIgnoreUnknownFields(true);
         json.setOutputType(JsonWriter.OutputType.json);
 
-        JsonAmmunitions ammunitions = json.fromJson(JsonAmmunitions.class, Gdx.files.internal(ammoPath+animalPath));
+        JsonAmmunitions ammunitions = json.fromJson(JsonAmmunitions.class, Gdx.files.internal(filePath+ammoPath));
 
         for(JsonAmmunition ammo : ammunitions.ammunitions){
             DataManager.addData(ammo.name, ammo, JsonAmmunition.class);

@@ -14,6 +14,7 @@ public class OneShotTimer extends Timer{
 	 */
 	public OneShotTimer(double length, Functional.Callback callback) {
 		super(length, callback);
+		this.oneShot = true;
 	}
 
 	@Override

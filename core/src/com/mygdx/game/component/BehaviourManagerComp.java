@@ -341,7 +341,7 @@ public class BehaviourManagerComp extends Component{
      * Changes the next Task to the Task passed in. This essentially saves the current task to 'lastBehaviour' and sets the 'nextBehaviour' to the Task passed in.
      * @param task The Task to start immediately.
      */
-    private void changeTask(Task task){
+    public void changeTask(Task task){
         //End the current task.
         if(this.currentBehaviour != null && !this.currentBehaviour.getControl().hasFinished()) {
             this.currentBehaviour.getControl().finishWithSuccess();

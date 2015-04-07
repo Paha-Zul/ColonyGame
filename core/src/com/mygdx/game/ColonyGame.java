@@ -3,6 +3,7 @@ package com.mygdx.game;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -58,6 +59,8 @@ public class ColonyGame extends Game {
 	@Override
 	public void render () {
 		super.render();
+		Gdx.gl.glClearColor(screenColor.r, screenColor.g, screenColor.b, screenColor.a);
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
 		//Update the profile and GUI.
 		float delta = Gdx.graphics.getDeltaTime();
@@ -66,6 +69,7 @@ public class ColonyGame extends Game {
         ColonyGame.batch.begin();
 		updateEntities(delta);
 		updateGUI(delta);
+		ListHolder.updateTimers(delta);
         ColonyGame.batch.end();
 
 		//Update the camera.

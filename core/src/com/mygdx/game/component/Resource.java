@@ -4,6 +4,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.DataBuilder;
 import com.mygdx.game.interfaces.IInteractable;
+import gnu.trove.list.array.TIntArrayList;
 
 import java.util.ArrayList;
 
@@ -52,7 +53,7 @@ public class Resource extends Component implements IInteractable{
         this.resourceType = jRes.resourceType;
         this.gatherTime = jRes.gatherTime;
 
-        ArrayList<Integer> amounts = new ArrayList<>(10);
+        TIntArrayList amounts = new TIntArrayList(10);
         ArrayList<String> names = new ArrayList<>(10);
         for(int i=0;i<jRes.amounts.length; i++) {
             int amount = MathUtils.random(jRes.amounts[i][1] - jRes.amounts[i][0]) + jRes.amounts[i][0]; //Add diff to base.
@@ -61,7 +62,7 @@ public class Resource extends Component implements IInteractable{
                 names.add(jRes.items[i]);
             }
         }
-        this.itemAmounts = amounts.stream().mapToInt(i -> i).toArray();
+        this.itemAmounts = amounts.toArray();
         this.itemNames = names.toArray(new String[names.size()]);
     }
 
@@ -76,7 +77,7 @@ public class Resource extends Component implements IInteractable{
         this.itemNames = jAnimal.items;
         this.gatherTime = 3f;
 
-        ArrayList<Integer> amounts = new ArrayList<>(10);
+        TIntArrayList amounts = new TIntArrayList(10);
         ArrayList<String> names = new ArrayList<>(10);
         for(int i=0;i<jAnimal.itemAmounts.length; i++) {
             int amount = MathUtils.random(jAnimal.itemAmounts[i][1] - jAnimal.itemAmounts[i][0]) + jAnimal.itemAmounts[i][0]; //Add diff to base.
@@ -85,7 +86,8 @@ public class Resource extends Component implements IInteractable{
                 names.add(jAnimal.items[i]);
             }
         }
-        this.itemAmounts = amounts.stream().mapToInt(i -> i).toArray();
+
+        this.itemAmounts = amounts.toArray();
         this.itemNames = names.toArray(new String[names.size()]);
     }
 

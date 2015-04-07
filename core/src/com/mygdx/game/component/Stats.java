@@ -38,8 +38,9 @@ public class Stats extends Component{
      * Adds a RepeatingTimer to this Stats Component.
      * @param timer The RepeatingTimer to add.
      */
-    public void addTimer(@NotNull RepeatingTimer timer){
+    public Timer addTimer(@NotNull RepeatingTimer timer){
         this.timerList.add(timer);
+        return timer;
     }
 
     /**
@@ -48,10 +49,11 @@ public class Stats extends Component{
      * @param initCurrValue
      * @param initMaxValue
      */
-    public void addStat(String name, float initCurrValue, float initMaxValue){
+    public Stat addStat(String name, float initCurrValue, float initMaxValue){
         Stat stat = new Stat(name, this, initCurrValue, initMaxValue);
         this.statMap.put(name, stat);
         this.statList.add(stat);
+        return stat;
     }
 
     /**
@@ -77,7 +79,7 @@ public class Stats extends Component{
     }
 
     public static class Stat{
-        public Functional.Callback onZero;
+        public Functional.Callback onZero, onFull;
 
         public String name;
         private Stats stats;
@@ -97,8 +99,16 @@ public class Stats extends Component{
          * @param value The value to add to the current value.
          */
         public void addToCurrent(float value){
-            this.current += value;
-            if(this.current <= 0 && onZero != null) onZero.callback();
+            this.current += value; //Add the value.
+            //If empty (at or below 0), call the onZero callback and set to 0.
+            if(this.current <= 0){
+                if(onZero != null) onZero.callback();
+                this.current = 0;
+            //If full (at or above the max value), call the onFull callback and set to the max value.
+            }else if(this.current >= this.max){
+                if(onFull != null) onFull.callback();
+                this.current = this.max;
+            }
         }
 
         /**

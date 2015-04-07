@@ -24,7 +24,7 @@ public class ScriptManager {
 
                 int index = file.name().lastIndexOf('.'); //get the index of the extension...
                 if(index < 0 || !file.name().substring(index, file.name().length()).equals(".class")) //If it doesn't have the ".class" extension
-                    return;
+                    continue;
 
                 String fileName = file.name().substring(0, index); //Get the file name without the extension.
 

@@ -18,6 +18,7 @@ allprojects {
         box2DLightsVersion = '1.3'
         ashleyVersion = '1.3.1'
         aiVersion = '1.4.0'
+        troveVersion = '3.0.3'
     }
 
     repositories {
@@ -40,6 +41,7 @@ project(":desktop") {
         compile "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop"
         compile "com.badlogicgames.gdx:gdx-tools:$gdxVersion"
         compile "com.badlogicgames.gdx:gdx-tools:$gdxVersion"
+        compile "net.sf.trove4j:trove4j:$troveVersion"
     }
 }
 
@@ -52,6 +54,7 @@ project(":core") {
         compile "com.badlogicgames.gdx:gdx-bullet:$gdxVersion"
         compile "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
         compile "com.badlogicgames.box2dlights:box2dlights:$box2DLightsVersion"
+        compile "net.sf.trove4j:trove4j:$troveVersion"
     }
 }
 

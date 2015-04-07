@@ -54,8 +54,6 @@ public class ServerPlayer {
     }
 
 	public void render(float delta){
-        if(paused)
-            delta = 0f;
 
         if(!generatedTrees) {
             generatedTrees = WorldGen.getInstance().generateResources(new Vector2((ColonyGame.worldGrid.getNumCols() - 1) * WorldGen.getInstance().getTileSize(), (ColonyGame.worldGrid.getNumRows() - 1) * WorldGen.getInstance().getTileSize()), 0, Constants.WORLDGEN_RESOURCEGENERATESPEED);

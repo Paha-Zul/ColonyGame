@@ -54,6 +54,7 @@ public class Entity implements IDelayedDestroyable{
 
 		ListHolder.addEntity(drawLevel, this);
 		this.ID = MathUtils.random()*Double.MAX_VALUE;
+		this.drawLevel = drawLevel;
 	}
 
 	/**
@@ -84,6 +85,11 @@ public class Entity implements IDelayedDestroyable{
 
 		ListHolder.addEntity(drawLevel, this);
 		this.ID = MathUtils.random()*Double.MAX_VALUE;
+		this.drawLevel = drawLevel;
+	}
+
+	public void init(){
+		EventSystem.notifyGameEvent("entity_created", this);
 	}
 
     /**

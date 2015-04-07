@@ -3,6 +3,7 @@ package com.mygdx.game.helpers;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.entity.Entity;
+import com.mygdx.game.helpers.timer.Timer;
 import com.mygdx.game.interfaces.Functional;
 import com.mygdx.game.ui.UI;
 
@@ -14,8 +15,10 @@ import java.util.ListIterator;
  * Created by Bbent_000 on 11/24/2014.
  */
 public class ListHolder {
+	private static ArrayList<Entity> newList = new ArrayList<>();
 	private static ArrayList<ArrayList<Entity>> entityList = new ArrayList<>();
 	private static ArrayList<UI> GUIList = new ArrayList<>();
+	private static ArrayList<Timer> timerList = new ArrayList<>();
 
     private static LinkedList<FloatingText> floatingTexts = new LinkedList<>();
 
@@ -24,12 +27,17 @@ public class ListHolder {
 		if(entityList.size() <= drawLevel){
 			int diff =  drawLevel - entityList.size();
 			for(int i=0;i<=diff;i++){
-				entityList.add(new ArrayList<Entity>());
+				entityList.add(new ArrayList<>());
 			}
 		}
 
 		//Add the Entity
-		ListHolder.entityList.get(drawLevel).add(e);
+		newList.add(e);
+		entityList.get(drawLevel).add(e);
+	}
+
+	public static void addTimer(Timer timer){
+		timerList.add(timer);
 	}
 
 	public static void iterate(Functional.Perform perform){
@@ -42,19 +50,19 @@ public class ListHolder {
      */
 	public static void update(float delta){
 		//Loop over each layer.
-		for(int i=0;i<entityList.size();i++){
+		for (ArrayList<Entity> anEntityList : entityList) {
 			//For each entity in this layer
-			for(int j=0;j<entityList.get(i).size(); j++){
-				Entity e = entityList.get(i).get(j);
+			for (int j = 0; j < anEntityList.size(); j++) {
+				Entity e = anEntityList.get(j);
 				//If it is set to be destroyed, destroy it, remove it, decrement, continue.
-				if(e.isSetToBeDestroyed()){
-					entityList.get(i).get(j).destroy();
-					entityList.get(i).remove(j);
+				if (e.isSetToBeDestroyed()) {
+					anEntityList.get(j).destroy();
+					anEntityList.remove(j);
 					j--;
 					continue;
-				//If it is already destroyed (an immediate destroy call from somewhere else), remove it, decrement, continue.
-				}else if(e.isDestroyed()){
-					entityList.get(i).remove(j);
+					//If it is already destroyed (an immediate destroy call from somewhere else), remove it, decrement, continue.
+				} else if (e.isDestroyed()) {
+					anEntityList.remove(j);
 					j--;
 					continue;
 				}
@@ -63,6 +71,12 @@ public class ListHolder {
 				e.update(delta);
 				e.render(delta, ColonyGame.batch);
 			}
+		}
+
+		//We call init after the list has updated to allow all initial components to be started.
+		if(newList.size() > 0){
+			newList.forEach(Entity::init);
+			newList.clear();
 		}
 	}
 
@@ -98,6 +112,21 @@ public class ListHolder {
             }
         }
     }
+
+	/**
+	 * Updates the timer list.
+	 * @param delta The delta time between frames.
+	 */
+	public static void updateTimers(float delta){
+		for(int i=0;i<timerList.size();i++){
+			Timer timer = timerList.get(i);
+			if(timer.isOneShot() && timer.isFinished()){
+				timerList.remove(i);
+				i--;
+			}else
+				timerList.get(i).update(delta);
+		}
+	}
 
     public static void addFloatingText(FloatingText text){
         floatingTexts.add(text);
