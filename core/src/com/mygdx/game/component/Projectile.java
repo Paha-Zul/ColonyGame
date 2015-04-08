@@ -2,9 +2,6 @@ package com.mygdx.game.component;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.mygdx.game.component.collider.Collider;
-import com.mygdx.game.entity.Entity;
-import com.mygdx.game.helpers.Constants;
-import com.mygdx.game.helpers.EventSystem;
 import com.mygdx.game.helpers.timer.OneShotTimer;
 import com.mygdx.game.helpers.timer.Timer;
 
@@ -31,13 +28,7 @@ public class Projectile extends Component{
 		this.coll = this.getComponent(Collider.class);
 		this.lifetimeTimer = new OneShotTimer(this.lifetime, this.owner::setToDestroy);
 
-		EventSystem.registerEntityEvent(this.owner, "collidestart", args -> {
-			Entity other = (Entity) args[0]; //Get the other entity.
-			if (other.hasTag(Constants.ENTITY_ANIMAL)) { //If the other Entity is a projectile, kill both of us!
-				this.owner.setToDestroy();
-				other.getComponent(Stats.class).getStat("health").addToCurrent(-50);
-			}
-		});
+
 	}
 
 	@Override

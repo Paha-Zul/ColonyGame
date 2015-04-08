@@ -21,19 +21,13 @@ public class LeafTask extends Task{
     }
 
     @Override
-    public void start() {
-
-    }
+    public void start() {}
 
     @Override
-    public void update(float delta) {
-
-    }
+    public void update(float delta) {}
 
     @Override
-    public void end() {
-
-    }
+    public void end() {}
 
     @Override
     public TaskController getControl() {

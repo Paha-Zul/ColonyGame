@@ -1,6 +1,14 @@
 {
   "items": [
     {
+      "itemName": "fish",
+      "displayName": "Fish",
+      "itemType": "food",
+      "description": "A slippery fish.",
+      "effects": ["feed"],
+      "strengths":[10]
+    },
+    {
       "itemName": "woodlog",
       "displayName": "Wood Log",
       "itemType": "wood",

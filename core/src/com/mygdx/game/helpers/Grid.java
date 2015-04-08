@@ -71,10 +71,10 @@ public class Grid {
             int counter = 0;
             Node[] neighbors = new Node[4];
 
-            int startX = node.getCol() - 1;
-            int endX = node.getCol() + 1;
-            int startY = node.getRow() - 1;
-            int endY = node.getRow() + 1;
+            int startX = node.getX() - 1;
+            int endX = node.getX() + 1;
+            int startY = node.getY() - 1;
+            int endY = node.getY() + 1;
 
             for (int col = startX; col <= endX; col++) {
                 for (int row = startY; row <= endY; row++) {
@@ -100,14 +100,14 @@ public class Grid {
             int counter = 0;
             Node[] neighbors = new Node[8];
 
-            int startX = node.getCol() - 1;
-            int endX = node.getCol() + 1;
-            int startY = node.getRow() - 1;
-            int endY = node.getRow() + 1;
+            int startX = node.getX() - 1;
+            int endX = node.getX() + 1;
+            int startY = node.getY() - 1;
+            int endY = node.getY() + 1;
 
             for (int col = startX; col <= endX; col++) {
                 for (int row = startY; row <= endY; row++) {
-                    if (col == node.getCol() && row == node.getRow())
+                    if (col == node.getX() && row == node.getY())
                         continue;
                     neighbors[counter] = getNode(col, row);
                     counter++;
@@ -121,10 +121,10 @@ public class Grid {
             Node node = this.getNode(entity);
             node.addEntity(entity);
 
-            int startX = node.getCol()-exploreRadius;
-            int endX = node.getCol()+exploreRadius;
-            int startY = node.getRow()-exploreRadius;
-            int endY = node.getRow()+exploreRadius;
+            int startX = node.getX()-exploreRadius;
+            int endX = node.getX()+exploreRadius;
+            int startY = node.getY()-exploreRadius;
+            int endY = node.getY()+exploreRadius;
             WorldGen.VisibilityTile[][] visMap = WorldGen.getInstance().getVisibilityMap();
 
             for(int x=startX;x<=endX;x++){
@@ -151,7 +151,7 @@ public class Grid {
 
             int[] index = this.getIndex(pos);
             //If the currNode still matches our current position, return it.
-            if (currNode != null && (index[0] == currNode.getCol() && index[1] == currNode.getRow())) {
+            if (currNode != null && (index[0] == currNode.getX() && index[1] == currNode.getY())) {
                 return currNode;
             }
 
@@ -162,10 +162,10 @@ public class Grid {
             //Under work!
             if(changeVisibility){
                 this.perform((grid)->{
-                    int startX = newNode.getCol()-radius < currNode.getCol()-radius ? newNode.getCol()-radius : currNode.getCol()-radius; //Get the least
-                    int endX = newNode.getCol()+radius > currNode.getCol()+radius ? newNode.getCol()+radius : currNode.getCol()+radius; //Get the greatest
-                    int startY = newNode.getRow()-radius < currNode.getRow()-radius ? newNode.getRow()-radius : currNode.getRow()-radius; //get the least
-                    int endY = newNode.getRow()+radius > currNode.getRow()+radius ? newNode.getRow()+radius : currNode.getRow()+radius; //get greatest
+                    int startX = newNode.getX()-radius < currNode.getX()-radius ? newNode.getX()-radius : currNode.getX()-radius; //Get the least
+                    int endX = newNode.getX()+radius > currNode.getX()+radius ? newNode.getX()+radius : currNode.getX()+radius; //Get the greatest
+                    int startY = newNode.getY()-radius < currNode.getY()-radius ? newNode.getY()-radius : currNode.getY()-radius; //get the least
+                    int endY = newNode.getY()+radius > currNode.getY()+radius ? newNode.getY()+radius : currNode.getY()+radius; //get greatest
 
                     //Gdx.app.log("Startx/Endx/StartY/EndY: ",startX+"/"+endX+"/"+startY+"/"+endY);
 
@@ -176,10 +176,10 @@ public class Grid {
                             Node n = this.getNode(x, y);
                             if(n == null) continue;
 
-                            int nXRange = Math.abs(x - newNode.getCol()); //Current node's range from x
-                            int nYRange = Math.abs(y - newNode.getRow()); //Current node's range from y
-                            int lastXRange = Math.abs(x - currNode.getCol()); //Last node's range from x
-                            int lastYRange = Math.abs(y - currNode.getRow()); //Last node's range from y
+                            int nXRange = Math.abs(x - newNode.getX()); //Current node's range from x
+                            int nYRange = Math.abs(y - newNode.getY()); //Current node's range from y
+                            int lastXRange = Math.abs(x - currNode.getX()); //Last node's range from x
+                            int lastYRange = Math.abs(y - currNode.getY()); //Last node's range from y
                             boolean currInRange = nXRange <= radius && nYRange <= radius;
                             boolean lastInRange = lastXRange <= radius && lastYRange <= radius;
 
@@ -189,15 +189,15 @@ public class Grid {
 
                             //If we are on new territory, add a viewer.
                             else if(currInRange) {
-                                //if((Math.abs(newNode.getCol() - n.getCol()) + Math.abs(newNode.getRow() - n.getRow()) <= radius*1.5f))
+                                //if((Math.abs(newNode.getX() - n.getX()) + Math.abs(newNode.getY() - n.getY()) <= radius*1.5f))
                                     visibilityMap[x][y].addViewer();
                             //If leaving old territory, remove a viewer
                             }else if(lastInRange){
-                                //if((Math.abs(newNode.getCol() - n.getCol()) + Math.abs(newNode.getRow() - n.getRow()) <= radius*1.5f))
+                                //if((Math.abs(newNode.getX() - n.getX()) + Math.abs(newNode.getY() - n.getY()) <= radius*1.5f))
                                     visibilityMap[x][y].removeViewer();
                              }
 
-                            if((Math.abs(x - newNode.getCol()) + Math.abs(y - newNode.getRow()) > radius*1.5f))
+                            if((Math.abs(x - newNode.getX()) + Math.abs(y - newNode.getY()) > radius*1.5f))
                                 continue;
 
                             //WorldGen.getVisibilityMap()[x][y].addViewer();
@@ -245,8 +245,8 @@ public class Grid {
         /**
          * Gets a Node by a X and Y index.
          *
-         * @param x The X (col) index to get the Node at.
-         * @param y The Y (row) index to get the Node at.
+         * @param x The X (x) index to get the Node at.
+         * @param y The Y (y) index to get the Node at.
          * @return The Node if the index was valid, null otherwise.
          */
         public Node getNode(int x, int y) {
@@ -301,19 +301,19 @@ public class Grid {
          *
          * @param n1 The Node to get the direction of.
          * @param n2 The Node.
-         * @return An integer array which holds the col(x) and row(y) direction.
+         * @return An integer array which holds the x(x) and y(y) direction.
          */
         public int[] getDirection(Node n1, Node n2) {
             int[] dir = new int[]{0, 0};
 
-            if (n1.getCol() > n2.getCol())
+            if (n1.getX() > n2.getX())
                 dir[0] = 1;
-            else if (n1.getCol() < n2.getCol())
+            else if (n1.getX() < n2.getX())
                 dir[0] = -1;
 
-            if (n1.getRow() > n2.getRow())
+            if (n1.getY() > n2.getY())
                 dir[1] = 1;
-            else if (n1.getRow() < n2.getRow())
+            else if (n1.getY() < n2.getY())
                 dir[1] = -1;
 
             return dir;
@@ -345,7 +345,7 @@ public class Grid {
             for (int col = 0; col < grid.length; col++) {
                 for (int row = 0; row < grid[col].length; row++) {
                     Node node = grid[col][row];
-                    renderer.rect(node.getCol() * getSquareSize(), node.getRow() * getSquareSize(), getSquareSize(), getSquareSize());
+                    renderer.rect(node.getX() * getSquareSize(), node.getY() * getSquareSize(), getSquareSize(), getSquareSize());
                 }
             }
             renderer.end();
@@ -355,7 +355,7 @@ public class Grid {
             for (int col = 0; col < grid.length; col++) {
                 for (int row = 0; row < grid[col].length; row++) {
                     Node node = grid[col][row];
-                    GUI.Text("index: " + node.getCol() + " " + node.getRow(), batch, col * getSquareSize(), row * getSquareSize() + getSquareSize());
+                    GUI.Text("index: " + node.getX() + " " + node.getY(), batch, col * getSquareSize(), row * getSquareSize() + getSquareSize());
                     GUI.Text("G: " + ((PathNode) node).G, batch, col * getSquareSize(), row * getSquareSize() + getSquareSize() - 20);
                     GUI.Text("H: " + ((PathNode) node).H, batch, col * getSquareSize(), row * getSquareSize() + getSquareSize() - 40);
                     GUI.Text("B: " + ((PathNode) node).B, batch, col * getSquareSize(), row * getSquareSize() + getSquareSize() - 60);
@@ -366,12 +366,12 @@ public class Grid {
     }
 
     public static class Node{
-        private int col, row;
+        private int x, y;
         private ArrayList<Entity> entList = new ArrayList<>();
 
-        public Node(int col, int row){
-            this.col = col;
-            this.row = row;
+        public Node(int x, int y){
+            this.x = x;
+            this.y = y;
         }
 
         public void addEntity(Entity entity){
@@ -391,18 +391,18 @@ public class Grid {
             return getEntFunc.getEnt(entList);
         }
 
-        public int getCol(){
-            return this.col;
+        public int getX(){
+            return this.x;
         }
 
-        public int getRow(){
-            return this.row;
+        public int getY(){
+            return this.y;
         }
 
 
         @Override
         public String toString() {
-            return "["+col+","+row+"]";
+            return "["+ x +","+ y +"]";
         }
     }
 

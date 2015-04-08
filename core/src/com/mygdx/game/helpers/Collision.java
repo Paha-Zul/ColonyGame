@@ -1,10 +1,7 @@
 package com.mygdx.game.helpers;
 
 
-import com.badlogic.gdx.physics.box2d.Contact;
-import com.badlogic.gdx.physics.box2d.ContactImpulse;
-import com.badlogic.gdx.physics.box2d.ContactListener;
-import com.badlogic.gdx.physics.box2d.Manifold;
+import com.badlogic.gdx.physics.box2d.*;
 import com.mygdx.game.entity.Entity;
 
 /**
@@ -14,20 +11,26 @@ public class Collision implements ContactListener {
 
     @Override
     public void beginContact(Contact contact) {
-        Entity first = (Entity)contact.getFixtureA().getBody().getUserData();
-        Entity other = (Entity)contact.getFixtureB().getBody().getUserData();
+        Fixture first = contact.getFixtureA();
+        Fixture other = contact.getFixtureB();
 
-        EventSystem.notifyEntityEvent(first, "collidestart", other);
-        EventSystem.notifyEntityEvent(other, "collidestart", first);
+        Entity firstEntity = (Entity)first.getUserData();
+        Entity otherEntity = (Entity)other.getUserData();
+
+        EventSystem.notifyEntityEvent(firstEntity, "collide_start", first, other);
+        EventSystem.notifyEntityEvent(otherEntity, "collide_start", other, first);
     }
 
     @Override
     public void endContact(Contact contact) {
-        Entity first = (Entity)contact.getFixtureA().getBody().getUserData();
-        Entity other = (Entity)contact.getFixtureB().getBody().getUserData();
+        Fixture first = contact.getFixtureA();
+        Fixture other = contact.getFixtureB();
 
-        EventSystem.notifyEntityEvent(first, "collideend", other);
-        EventSystem.notifyEntityEvent(other, "collideend", first);
+        Entity firstEntity = (Entity)first.getUserData();
+        Entity otherEntity = (Entity)other.getUserData();
+
+        EventSystem.notifyEntityEvent(firstEntity, "collide_end", first, other);
+        EventSystem.notifyEntityEvent(otherEntity, "collide_end", other, first);
     }
 
     @Override

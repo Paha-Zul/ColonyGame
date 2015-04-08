@@ -69,4 +69,12 @@ public abstract class Timer {
 			this.callback.callback();
 	}
 
+	/**
+	 * Gets the percentage completed of this Timer.
+	 * @return A float between 0 and 1 representing its percentage towards being done.
+	 */
+	public float getPercentDone(){
+		return (float)(this.length/this.currCounter);
+	}
+
 }

@@ -1,7 +1,12 @@
 package com.mygdx.game.component;
 
+import com.badlogic.gdx.physics.box2d.CircleShape;
+import com.badlogic.gdx.physics.box2d.Fixture;
+import com.mygdx.game.component.collider.Collider;
+import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.Constants;
 import com.mygdx.game.helpers.DataBuilder;
+import com.mygdx.game.helpers.EventSystem;
 import com.mygdx.game.interfaces.IInteractable;
 
 /**
@@ -11,6 +16,7 @@ public class Animal extends Component implements IInteractable{
     private BehaviourManagerComp behComp;
     private Stats stats;
     private DataBuilder.JsonAnimal animalRef;
+    private Collider collider;
 
     public Animal(DataBuilder.JsonAnimal animalRef) {
         super();
@@ -22,6 +28,12 @@ public class Animal extends Component implements IInteractable{
         super.start();
 
         this.stats = this.getComponent(Stats.class);
+        this.behComp = this.getComponent(BehaviourManagerComp.class);
+        this.collider = this.getComponent(Collider.class);
+
+        behComp.getBlackBoard().attackRange = 10f;
+
+        addCircleSensor();
 
         stats.addStat("health", 100, 100);
         stats.addStat("food", 100, 100);
@@ -40,7 +52,34 @@ public class Animal extends Component implements IInteractable{
             this.owner.destroyComponent(Animal.class); //Destroy this (Animal) Component.
         };
 
+        //Add a collide_start event for getting hit by a projectile.
+        EventSystem.registerEntityEvent(this.owner, "collide_start", args -> {
+            Fixture mine = (Fixture) args[0];
+            Fixture other = (Fixture) args[1]; //Get the other entity.
+
+            Entity otherEnt = (Entity) other.getUserData();
+
+            //If the other Entity is a projectile, kill both of us!
+            if (!mine.isSensor() && otherEnt.hasTag(Constants.ENTITY_PROJECTILE) && this.owner.hasTag(Constants.ENTITY_ANIMAL)) {
+                this.getComponent(Stats.class).getStat("health").addToCurrent(-50);
+                otherEnt.setToDestroy();
+            } else if (mine.isSensor() && otherEnt.hasTag(Constants.ENTITY_COLONIST)) {
+                if (behComp.getBlackBoard().target != null) return;
+                behComp.getBlackBoard().target = otherEnt;
+                behComp.attack();
+            }
+        });
+
         this.setActive(false);
+    }
+
+    public void addCircleSensor(){
+        CircleShape circle = new CircleShape();
+        circle.setRadius(10f);
+        Fixture sensor = collider.body.createFixture(circle, 1f);
+        sensor.setSensor(true);
+        sensor.setUserData(this.owner);
+        circle.dispose();
     }
 
     @Override
@@ -79,7 +118,7 @@ public class Animal extends Component implements IInteractable{
 
     @Override
     public BehaviourManagerComp getBehManager() {
-        return null;
+        return this.behComp;
     }
 
     @Override

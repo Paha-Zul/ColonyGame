@@ -7,7 +7,9 @@ import com.mygdx.game.component.BlackBoard;
 import com.mygdx.game.helpers.Grid;
 import com.mygdx.game.helpers.worldgeneration.WorldGen;
 
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.LinkedList;
+import java.util.PriorityQueue;
 
 /**
  * Created by Paha on 1/21/2015.
@@ -82,7 +84,7 @@ public class FindPath extends LeafTask {
         Grid.PathNode currNode = (Grid.PathNode)this.blackBoard.colonyGrid.getNode(this.blackBoard.getEntityOwner());
         currNode.parentNode = null;
         currNode.G = 0;
-        currNode.H = Math.abs(targetNode.getCol() - currNode.getCol()) + Math.abs(targetNode.getRow() - currNode.getRow())*10;
+        currNode.H = Math.abs(targetNode.getX() - currNode.getX()) + Math.abs(targetNode.getY() - currNode.getY())*10;
         currNode.visited = true;
 
         while(currNode != null && !found){
@@ -107,12 +109,12 @@ public class FindPath extends LeafTask {
                 else
                     node.G = currNode.G + 20; //Diagonal.
 
-                WorldGen.TerrainTile tile = WorldGen.getInstance().getNode(node.getCol(), node.getRow());
+                WorldGen.TerrainTile tile = WorldGen.getInstance().getNode(node.getX(), node.getY());
                 if (node.getEntityList().size() > 0 || (tile != null && tile.avoid))
                     node.B = 500;
 
                 //Set the H value, add it to the openList, and make its parent the current Node.
-                node.H = Math.abs(targetNode.getCol() - currNode.getCol()) + Math.abs(targetNode.getRow() - currNode.getRow()) * 10;
+                node.H = Math.abs(targetNode.getX() - currNode.getX()) + Math.abs(targetNode.getY() - currNode.getY()) * 10;
                 node.visited = true;
                 openList.add(node);
                 node.parentNode = currNode;
@@ -149,7 +151,7 @@ public class FindPath extends LeafTask {
         if(found) {
             currNode = target;
             while (currNode.parentNode != null) {
-                path.add(new Vector2(currNode.getCol()*squareSize + squareSize*0.5f, currNode.getRow()*squareSize + squareSize*0.5f));
+                path.add(new Vector2(currNode.getX()*squareSize + squareSize*0.5f, currNode.getY()*squareSize + squareSize*0.5f));
                 currNode.visited = false;
                 currNode = currNode.parentNode;
             }

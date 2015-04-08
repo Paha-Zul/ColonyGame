@@ -34,7 +34,7 @@ public class ColonyGame extends Game {
 
     public static EasyAssetManager assetManager;
 
-	private Color screenColor = new Color(163f/255f, 154f/255f, 124f/255f, 1);
+	private Color screenColor = new Color(0, 0, 0, 1);
 
 
 	@Override

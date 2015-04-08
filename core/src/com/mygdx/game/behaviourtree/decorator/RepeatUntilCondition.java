@@ -23,7 +23,7 @@ public class RepeatUntilCondition extends TaskDecorator{
 
     @Override
     public void update(float delta) {
-        if(control.callbacks.checkCriteria != null && control.callbacks.checkCriteria.criteria(this.task)){
+        if(control.callbacks.successCriteria != null && control.callbacks.successCriteria.criteria(this.task)){
             this.control.finishWithSuccess();
         }else {
             if(this.task.getControl().hasFinished())

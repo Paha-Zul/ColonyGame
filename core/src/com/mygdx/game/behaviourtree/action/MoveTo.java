@@ -42,6 +42,15 @@ public class MoveTo extends LeafTask{
     public void update(float delta) {
         super.update(delta);
 
+        //If the target is null, path is null, or path is empty, end this job with failure!
+        if(this.path == null || this.path.size() < 1){
+            this.collider.body.setLinearVelocity(0, 0);
+            this.control.finishWithSuccess();
+            if(this.path != null) this.path.clear();
+            this.path = null;
+            return;
+        }
+
         if(this.getControl().getCallbacks().failCriteria != null && !this.getControl().getCallbacks().failCriteria.criteria(this)){
             this.collider.body.setLinearVelocity(0, 0);
             this.control.finishWithFailure();
@@ -51,14 +60,6 @@ public class MoveTo extends LeafTask{
         if(this.getControl().getCallbacks().successCriteria != null && this.getControl().getCallbacks().successCriteria.criteria(this)){
             this.collider.body.setLinearVelocity(0, 0);
             this.control.finishWithSuccess();
-            return;
-        }
-
-        if(this.path == null || this.path.size() < 1){
-            this.collider.body.setLinearVelocity(0, 0);
-            this.control.finishWithSuccess();
-            this.path.clear();
-            this.path = null;
             return;
         }
 

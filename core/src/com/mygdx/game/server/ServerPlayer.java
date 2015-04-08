@@ -131,7 +131,7 @@ public class ServerPlayer {
         ColonyGame.camera.position.set(colonyEnt.transform.getPosition().x, colonyEnt.transform.getPosition().y, 0);
 
         //Spawns some squirrels
-        for(int i=0;i<5;i++) {
+        for(int i=0;i<1;i++) {
             TextureAtlas atlas = ColonyGame.assetManager.get("interactables", TextureAtlas.class);
             DataBuilder.JsonAnimal animalRef = DataManager.getData("squirrel", DataBuilder.JsonAnimal.class);
             new AnimalEnt(animalRef, start, 0, atlas.findRegion("squirrel"), 11);
@@ -151,7 +151,7 @@ public class ServerPlayer {
 				for(int row = startY; row <= endY; row++){
 					Grid.Node node = this.grid.getNode(col, row);
 					if(node == null) continue;
-                    if(Math.abs(node.getCol() - index[0]) + Math.abs(node.getRow() - index[1]) >= radius*1.5) continue;
+                    if(Math.abs(node.getX() - index[0]) + Math.abs(node.getY() - index[1]) >= radius*1.5) continue;
 
                     new ArrayList<>(node.getEntityList()).stream().filter(ent -> ent.hasTag(Constants.ENTITY_RESOURCE)).forEach(com.mygdx.game.entity.Entity::setToDestroy);
 

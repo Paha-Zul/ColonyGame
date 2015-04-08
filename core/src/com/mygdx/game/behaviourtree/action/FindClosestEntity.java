@@ -54,10 +54,10 @@ public class FindClosestEntity extends LeafTask{
             //While the flag is still false, go!
             while(!finished) {
                 //Get the starting and ending bounds.
-                int startX = (currNode.getCol() - radius < 0) ? -1 : currNode.getCol() - radius;
-                int endX = (currNode.getCol() + radius >= grid.length) ? grid.length : currNode.getCol() + radius;
-                int startY = (currNode.getRow() - radius < 0) ? -1 : currNode.getRow() - radius;
-                int endY = (currNode.getRow() + radius >= grid[currNode.getCol()].length) ? grid.length : currNode.getRow() + radius;
+                int startX = (currNode.getX() - radius < 0) ? -1 : currNode.getX() - radius;
+                int endX = (currNode.getX() + radius >= grid.length) ? grid.length : currNode.getX() + radius;
+                int startY = (currNode.getY() - radius < 0) ? -1 : currNode.getY() - radius;
+                int endY = (currNode.getY() + radius >= grid[currNode.getX()].length) ? grid.length : currNode.getY() + radius;
 
                 finished = true;
 

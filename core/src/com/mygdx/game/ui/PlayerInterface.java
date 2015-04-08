@@ -320,7 +320,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
             //Tell all to explore
             if(GUI.Button(rect.x + rect.getWidth() - 150, rect.y + rect.getHeight() - 105, 30, 30, "ALL", this.batch, huntStyle))
-                for(UnitProfile prof : selectedList) prof.entity.getComponent(BehaviourManagerComp.class).attack();
+                for(UnitProfile prof : selectedList) prof.entity.getComponent(BehaviourManagerComp.class).searchAndAttack();
 
             //For each profile, draw a button to access each individual entity.
             for(UnitProfile profile : selectedList) {
@@ -418,7 +418,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
                     orderButtonRect.set(ordersRect.x + 140, ordersRect.y + ordersRect.getHeight() - 50, 50, 50);
                     if (GUI.Button(orderButtonRect, "", this.batch, this.huntStyle))
-                        interactable.getBehManager().attack();
+                        interactable.getBehManager().searchAndAttack();
 
 
                     batch.setProjectionMatrix(ColonyGame.camera.combined);

@@ -7,13 +7,16 @@ import com.mygdx.game.behaviourtree.Task;
 import com.mygdx.game.behaviourtree.action.*;
 import com.mygdx.game.behaviourtree.composite.Sequence;
 import com.mygdx.game.behaviourtree.control.ParentTaskController;
+import com.mygdx.game.behaviourtree.decorator.RepeatUntilCondition;
 import com.mygdx.game.behaviourtree.decorator.RepeatUntilSuccess;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.Constants;
 import com.mygdx.game.helpers.FloatingText;
 import com.mygdx.game.helpers.GH;
+import com.mygdx.game.helpers.Grid;
 import com.mygdx.game.helpers.timer.OneShotTimer;
 import com.mygdx.game.helpers.timer.Timer;
+import com.mygdx.game.helpers.worldgeneration.WorldGen;
 import com.mygdx.game.interfaces.Functional;
 
 import java.util.ArrayList;
@@ -237,7 +240,7 @@ public class BehaviourManagerComp extends Component{
         return sequence;
     }
 
-    private Task followTask(){
+    private Task searchAndDestroy(){
         /**
          * Find an Entity to follow
          * Repeat until success...
@@ -277,7 +280,7 @@ public class BehaviourManagerComp extends Component{
 
         ((ParentTaskController) repeatSeq.getControl()).addTask(fp); //Add the find path to the second sequence.
         ((ParentTaskController) repeatSeq.getControl()).addTask(mt); //Add the move to the second sequence.
-        ((ParentTaskController) repeatSeq.getControl()).addTask(at); //Add the attack sequence
+        ((ParentTaskController) repeatSeq.getControl()).addTask(at); //Add the searchAndAttack sequence
 
         ((ParentTaskController) mainSeq.getControl()).addTask(fpToResource);
         ((ParentTaskController) mainSeq.getControl()).addTask(mtTargetResource);
@@ -317,6 +320,88 @@ public class BehaviourManagerComp extends Component{
         return mainSeq;
     }
 
+    private Task fish(){
+        /**
+         * Find a fishing spot.
+         * Path to it.
+         * Move to it.
+         * Fish.
+         * Find base.
+         * Path to it.
+         * Move to it.
+         * Transfer all resources.
+         */
+
+        this.blackBoard.transferAll = true;
+        this.blackBoard.itemNameToTake = null;
+        this.blackBoard.fromInventory = this.blackBoard.owner.getComponent(Inventory.class);
+
+        Sequence seq = new Sequence("Fishing", this.blackBoard);
+
+        FindClosestTile fct = new FindClosestTile("Finding fishing spot", this.blackBoard);
+        FindPath fp = new FindPath("Finding path to fishing spot", this.blackBoard);
+        MoveTo mt = new MoveTo("Moving to fishing spot", this.blackBoard);
+        Fish fish = new Fish("Fishing", this.blackBoard);
+        FindClosestEntity fc = new FindClosestEntity("Finding base", this.blackBoard, Constants.ENTITY_BUILDING);
+        FindPath fpBase = new FindPath("Finding path to base", this.blackBoard);
+        MoveTo mtBase = new MoveTo("Moving to base", this.blackBoard);
+        TransferResource tr = new TransferResource("Transfering resources", this.blackBoard);
+
+        //We need to tell this fct what can pass as a valid tile.
+        fct.getControl().callbacks.successCriteria = nd -> {
+            Grid.Node node = (Grid.Node)nd;
+            WorldGen.TerrainTile tile = WorldGen.getInstance().getNode(node.getX(), node.getY());
+            int visibility = WorldGen.getInstance().getVisibilityMap()[node.getX()][node.getY()].getVisibility();
+
+            return tile.category.equals("LightWater") && visibility != Constants.VISIBILITY_UNEXPLORED;
+        };
+
+        //We want to remove the last step in our destination (first in the list) since it will be on the shore line.
+        fp.getControl().callbacks.successCallback = () -> this.blackBoard.path.removeFirst();
+
+        fc.getControl().callbacks.successCallback = () -> this.blackBoard.toInventory = this.blackBoard.target.getComponent(Inventory.class);
+
+        ((ParentTaskController)seq.getControl()).addTask(fct);
+        ((ParentTaskController)seq.getControl()).addTask(fp);
+        ((ParentTaskController)seq.getControl()).addTask(mt);
+        ((ParentTaskController)seq.getControl()).addTask(fish);
+        ((ParentTaskController)seq.getControl()).addTask(fc);
+        ((ParentTaskController)seq.getControl()).addTask(fpBase);
+        ((ParentTaskController)seq.getControl()).addTask(mtBase);
+        ((ParentTaskController)seq.getControl()).addTask(tr);
+
+        return seq;
+    }
+
+    private Task attackTarget(){
+
+        Sequence seq = new Sequence("Attacking", this.getBlackBoard());
+        RepeatUntilCondition repeat = new RepeatUntilCondition("Repeating", this.getBlackBoard(), seq);
+
+        FindPath fp = new FindPath("Finding path", this.getBlackBoard());
+        MoveTo mt = new MoveTo("Moving", this.getBlackBoard());
+        Attack attack = new Attack("Attacking", this.getBlackBoard());
+
+        ((ParentTaskController)seq.getControl()).addTask(fp);
+        ((ParentTaskController)seq.getControl()).addTask(mt);
+        ((ParentTaskController)seq.getControl()).addTask(attack);
+
+        repeat.getControl().callbacks.checkCriteria = task -> task.getBlackboard().target != null;
+
+        mt.getControl().callbacks.successCriteria = tsk -> {
+            Task task = (Task)tsk;
+            float dis = task.getBlackboard().target.transform.getPosition().dst(this.owner.transform.getPosition());
+            return dis <= GH.toMeters(task.getBlackboard().attackRange);
+        };
+
+        repeat.getControl().callbacks.successCriteria = tsk -> {
+            Task task = (Task)tsk;
+            return task.getBlackboard().target == null;
+        };
+
+        return repeat;
+    }
+
     public void idle(){
         this.changeTask(this.idleTask(this.blackBoard.baseIdleTime, this.blackBoard.randomIdleTime, this.blackBoard.idleDistance));
         this.currentState = State.Idle;
@@ -332,9 +417,13 @@ public class BehaviourManagerComp extends Component{
         this.currentState = State.Exploring;
     }
 
-    public void attack(){
-        this.changeTask(this.followTask());
+    public void searchAndAttack(){
+        this.changeTask(this.searchAndDestroy());
         this.currentState = State.Idle;
+    }
+
+    public void attack(){
+        this.changeTask(this.attackTarget());
     }
 
     /**

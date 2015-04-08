@@ -39,15 +39,18 @@ public class Gather extends LeafTask{
     public void start() {
         super.start();
 
+        //If the 'myInventory' field is null of the blackboard, get it from the blackboard's owner.
         if(this.blackBoard.myInventory == null)
             this.blackBoard.myInventory = this.blackBoard.getEntityOwner().getComponent(Inventory.class);
 
+        //If we can't get a resource component from the target, end this with failure.
         this.resource = this.blackBoard.target.getComponent(Resource.class);
         if(this.resource == null){
             this.control.finishWithFailure();
             return;
         }
 
+        //Not used currently...
         this.soundTimer = new RepeatingTimer(0.5f, ()->{
             SoundManager.play(chopTreeSounds[MathUtils.random(chopTreeSounds.length - 1)], this.blackBoard.getEntityOwner().transform.getPosition(),
                     new Vector2(ColonyGame.camera.position.x, ColonyGame.camera.position.y), 200, 1000);

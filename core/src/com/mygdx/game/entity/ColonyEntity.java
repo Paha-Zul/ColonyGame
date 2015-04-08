@@ -23,7 +23,7 @@ public class ColonyEntity extends Entity{
         this.name = "Colony";
         this.addTag(Constants.ENTITY_BUILDING);
 
-        this.addComponent(new GridComponent(Constants.GRIDSTATIC, ColonyGame.worldGrid, 5));
+        this.addComponent(new GridComponent(Constants.GRIDSTATIC, ColonyGame.worldGrid, 8));
         this.addComponent(new Colony());
         this.addComponent(new Interactable("colony"));
         this.addComponent(new Inventory("all", 100, 100, 100));
