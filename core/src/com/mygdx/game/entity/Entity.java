@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.component.Component;
 import com.mygdx.game.component.GraphicIdentity;
 import com.mygdx.game.component.Transform;
@@ -32,6 +33,7 @@ public class Entity implements IDelayedDestroyable{
 	protected ArrayList<Component> activeComponentList;
 	protected ArrayList<Component> inactiveComponentList;
 	protected ArrayList<IScalable> scalableComponents;
+	protected Array<Component> destroyComponentList;
 
 	protected boolean destroyed=false, setToDestroy=false;
 	protected double ID;
@@ -47,6 +49,7 @@ public class Entity implements IDelayedDestroyable{
 		this.inactiveComponentList = new ArrayList<>();
 		this.newComponentList = new ArrayList<>();
 		this.scalableComponents = new ArrayList<>();
+		destroyComponentList = new Array<>();
 
 		this.transform = this.addComponent(new Transform(position, rotation, this));
 
@@ -79,6 +82,7 @@ public class Entity implements IDelayedDestroyable{
 		this.inactiveComponentList = new ArrayList<>(); //Init the inactive list.
 		this.newComponentList = new ArrayList<>(); //Init the inactive list.
 		this.scalableComponents = new ArrayList<>();
+		destroyComponentList = new Array<>();
 
 		this.transform = this.addComponent(new Transform(position, rotation, this));
 		for(Component comp : comps)
@@ -100,13 +104,17 @@ public class Entity implements IDelayedDestroyable{
 	public void update(float delta){
 		//Only update if active.
 		if(this.active && !this.destroyed) {
+			if(destroyComponentList.size > 0) {
+				for (Component comp : destroyComponentList) destroyComponent(comp); //Destory the component
+				destroyComponentList.clear(); //Clear the list.
+			}
+
 			//Start all new components.
 			if (this.newComponentList.size() > 0) {
 				ArrayList<Component> newCompCopy = new ArrayList<>(this.newComponentList);
 				//Call start on all new Components. This is where the component can access other
 				//components on this Entity.
-				for (Component comp : newCompCopy)
-					comp.start();
+				newCompCopy.forEach(com.mygdx.game.component.Component::start);
 
 				this.newComponentList.clear(); //Clear the new Component list.
 			}
@@ -117,9 +125,16 @@ public class Entity implements IDelayedDestroyable{
 				comp.update(delta);
 				comp.lateUpdate(delta);
 			}
+
+
 		}
 	}
 
+	/**
+	 * Renders the renderable components.
+	 * @param delta Delta time between frames.
+	 * @param batch The SpriteBatch to draw with.
+	 */
 	public void render(float delta, SpriteBatch batch){
 		if(this.identity != null) this.identity.render(delta, batch);
 	}
@@ -164,38 +179,45 @@ public class Entity implements IDelayedDestroyable{
 
 	/**
 	 * Removes a Component from this Entity.
+	 * @param cls The class interType of the Component to remove.
+	 */
+	public <T extends Component> void destroyComponent(Class<T> cls){
+		//Search the inactive list.
+		for (Component comp : this.inactiveComponentList)
+			if (comp.getClass() == cls) {
+				destroyComponentList.add(comp);
+				return;
+			}
+
+		//Search the active list.
+		for (Component comp : this.activeComponentList)
+			if (comp.getClass() == cls) {
+				destroyComponentList.add(comp);
+				return;
+			}
+	}
+
+	/**
+	 *	Destroys and removes a Component from this Entity.
+	 * @param component The Component to destroy and remove.
+	 */
+	protected void destroyComponent(Component component){
+		if(component.isActive())
+			this.activeComponentList.remove(component);
+		else
+			this.inactiveComponentList.remove(component);
+
+		component.destroy();
+	}
+
+	/**
+	 * Removes a Component from this Entity.
 	 * @param comp The Component to remove.
 	 * @return True if the Component was removed, false otherwise.
 	 */
 	public boolean removeComponent(Component comp){
 		if(comp.isActive()) return this.inactiveComponentList.remove(comp);
 		return this.activeComponentList.remove(comp);
-	}
-
-	/**
-	 * Removes a Component from this Entity.
-	 * @param cls The class interType of the Component to remove.
-	 */
-	public <T extends Component> void destroyComponent(Class<T> cls){
-		//Search the inactive list.
-		for(int i=0;i<this.inactiveComponentList.size();i++){
-			Component comp = this.inactiveComponentList.get(i);
-			if(comp.getClass() == cls) {
-				comp.destroy();
-				this.inactiveComponentList.remove(i);
-				return;
-			}
-		}
-
-		//Search the active list.
-		for(int i=0;i<this.activeComponentList.size();i++){
-			Component comp = this.activeComponentList.get(i);
-			if(comp.getClass() == cls) {
-				comp.destroy();
-				this.activeComponentList.remove(i);
-				return;
-			}
-		}
 	}
 
     /**
@@ -211,7 +233,7 @@ public class Entity implements IDelayedDestroyable{
         for(Component comp : inactiveComponentList)
             System.out.print(""+comp.getClass().getSimpleName()+ " ");
 
-        System.out.println();
+		System.out.println();
     }
 
 	/**
@@ -220,6 +242,13 @@ public class Entity implements IDelayedDestroyable{
 	@Override
 	public boolean isDestroyed(){
 		return this.destroyed;
+	}
+
+	/**
+	 * @return True if this Entity is valid (not destroyed or set to be destroyed), false otherwise.
+	 */
+	public boolean isValid(){
+		return !this.destroyed && !this.isSetToBeDestroyed();
 	}
 
 	public double getID(){

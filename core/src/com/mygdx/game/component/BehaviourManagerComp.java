@@ -390,7 +390,7 @@ public class BehaviourManagerComp extends Component{
 
         mt.getControl().callbacks.failCriteria = task -> {
             Entity target = ((Task)task).getBlackboard().target;
-            return target == null || target.isDestroyed() || target.isSetToBeDestroyed() || !target.hasTag(Constants.ENTITY_ALIVE);
+            return target == null || !target.isValid() || !target.hasTag(Constants.ENTITY_ALIVE);
         };
 
         mt.getControl().callbacks.successCriteria = tsk -> {
@@ -401,7 +401,7 @@ public class BehaviourManagerComp extends Component{
 
         repeat.getControl().callbacks.successCriteria = tsk -> {
             Task task = (Task)tsk;
-            return task.getBlackboard().target == null;
+            return task.getBlackboard().target == null || !task.getBlackboard().target.isValid() || !task.getBlackboard().target.hasTag(Constants.ENTITY_ALIVE);
         };
 
         return repeat;
@@ -478,7 +478,7 @@ public class BehaviourManagerComp extends Component{
         //If our next behaviour is not null, we need to start it!
         }else{
             //If we're hungry, eat!
-            if(this.stats.getStat("food").getCurrVal() <= 20 && feedTimer.isFinished() && this.behaviourType.equals("colonist")) {
+            if(this.behaviourType.equals("colonist") && this.stats.getStat("food").getCurrVal() <= 20 && feedTimer.isFinished()) {
                 this.changeTask(this.consumeTask("feed"));
                 this.feedTimer.restart();
             }

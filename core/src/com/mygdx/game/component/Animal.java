@@ -9,6 +9,8 @@ import com.mygdx.game.helpers.DataBuilder;
 import com.mygdx.game.helpers.EventSystem;
 import com.mygdx.game.interfaces.IInteractable;
 
+import java.util.LinkedList;
+
 /**
  * Created by Paha on 2/26/2015.
  */
@@ -17,6 +19,9 @@ public class Animal extends Component implements IInteractable{
     private Stats stats;
     private DataBuilder.JsonAnimal animalRef;
     private Collider collider;
+
+    private LinkedList<Entity> attackList = new LinkedList<>();
+    private Fixture attackSensor;
 
     public Animal(DataBuilder.JsonAnimal animalRef) {
         super();
@@ -44,6 +49,7 @@ public class Animal extends Component implements IInteractable{
             Interactable interactable = this.owner.getComponent(Interactable.class);
 
             EventSystem.unregisterEntity(this.owner); //Unregister for events.
+            this.collider.body.setLinearVelocity(0, 0);
             this.owner.clearTags(); //Clear all tags
             this.owner.addTag(Constants.ENTITY_RESOURCE); //Add the resource tag
             this.owner.addComponent(new Resource(this.animalRef)); //Add a Resource Component.
@@ -66,40 +72,55 @@ public class Animal extends Component implements IInteractable{
                 this.getComponent(Stats.class).getStat("health").addToCurrent(-50);
                 otherInfo.owner.setToDestroy();
             //If I am a detector and the other is a colonist, we must attack it!
-            } else if (myInfo.tags.hasTag(Constants.COLLIDER_DETECTOR) && otherInfo.owner.hasTag(Constants.ENTITY_COLONIST)) {
-                if (behComp.getBlackBoard().target != null) return;
-                behComp.getBlackBoard().target = otherInfo.owner;
-                behComp.attack();
+            } else if (myInfo.tags.hasTag(Constants.COLLIDER_DETECTOR) && otherInfo.owner.hasTag(Constants.ENTITY_COLONIST))
+                attackList.add(otherInfo.owner);
+        });
+
+        //Add a collide_start event for getting hit by a projectile.
+        EventSystem.registerEntityEvent(this.owner, "collide_end", args -> {
+            Fixture mine = (Fixture) args[0];
+            Fixture other = (Fixture) args[1]; //Get the other entity.
+
+            Collider.ColliderInfo otherInfo = (Collider.ColliderInfo) other.getUserData();
+            Collider.ColliderInfo myInfo = (Collider.ColliderInfo) mine.getUserData();
+
+            if(myInfo.tags.hasTag(Constants.COLLIDER_DETECTOR) && otherInfo.owner.hasTag(Constants.ENTITY_COLONIST)){
+                attackList.remove(otherInfo.owner);
             }
         });
 
         EventSystem.registerEntityEvent(this.owner, "damage", args -> {
-            Entity other = (Entity)args[0];
-            float damage = (float)args[1];
+            Entity other = (Entity) args[0];
+            float damage = (float) args[1];
 
             Stats.Stat stat = stats.getStat("health");
-            if(stat == null) return;
+            if (stat == null) return;
             stat.addToCurrent(damage);
         });
 
-        this.setActive(false);
+        //this.setActive(false);
     }
 
     //Adds a circle sensor to this animal.
     public void addCircleSensor(){
         CircleShape circle = new CircleShape();
         circle.setRadius(10f);
-        Fixture sensor = collider.body.createFixture(circle, 1f);
-        sensor.setSensor(true);
+        attackSensor = collider.body.createFixture(circle, 1f);
+        attackSensor.setSensor(true);
         Collider.ColliderInfo fixtureInfo = new Collider.ColliderInfo(this.owner);
         fixtureInfo.tags.addTag(Constants.COLLIDER_DETECTOR);
-        sensor.setUserData(fixtureInfo);
+        attackSensor.setUserData(fixtureInfo);
         circle.dispose();
     }
 
     @Override
     public void update(float delta) {
         super.update(delta);
+
+        if(attackList.size() > 0) {
+            behComp.getBlackBoard().target = attackList.getFirst();
+            behComp.attack();
+        }
     }
 
     @Override
@@ -139,6 +160,7 @@ public class Animal extends Component implements IInteractable{
     @Override
     public void destroy() {
         super.destroy();
+        this.collider.body.destroyFixture(attackSensor);
     }
 
     @Override

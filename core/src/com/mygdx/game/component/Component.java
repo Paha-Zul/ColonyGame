@@ -142,4 +142,8 @@ public abstract class Component implements IDelayedDestroyable {
 	public boolean isDestroyed(){
 		return this.destroyed;
 	}
+
+	public boolean isValid(){
+		return !isDestroyed() && !isSetToBeDestroyed();
+	}
 }

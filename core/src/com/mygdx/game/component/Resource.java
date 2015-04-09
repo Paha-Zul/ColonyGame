@@ -111,9 +111,9 @@ public class Resource extends Component implements IInteractable{
 
         this.getEntityOwner().name = this.displayName;
 
-        for(int i=0;i<itemNames.length;i++){
+        //Build the item name string for displaying in the UI.
+        for(int i=0;i<itemNames.length;i++)
             info.append(itemAmounts[i]).append(" ").append(itemNames[i]).append(System.lineSeparator());
-        }
     }
 
     @Override

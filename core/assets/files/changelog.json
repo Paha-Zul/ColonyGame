@@ -1,6 +1,20 @@
 {
   "changes": [
     {
+      "version": "0.21",
+      "date": "4/8/2015",
+      "log": [
+        "- Added: Squirrels spawn throughout the map.",
+        "- Added: Squirrels will viciously attack any colonist they see. Colonists can 1v1 them bro and win though.",
+        "- Added: Colonists will fight back when squirrels attack them.",
+        "- Added: Colonists will attack with the mysterious black circle if they are more than 15 units (arbitrary number...), otherwise, both units fighting will stand still in a ferocious and exciting staring contest until one dies...",
+        "- Added: You can see contents of each research",
+        "- Added: A message will appear saying what items were collected.",
+        "- Bugs: Probably a ton..."
+        "- Technical: Set up things for better gathering system."
+      ]
+    },
+    {
       "version": "0.2",
       "date": "4/3/2015",
       "log": [

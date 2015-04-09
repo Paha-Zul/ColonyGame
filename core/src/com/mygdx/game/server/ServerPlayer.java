@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.component.Colony;
@@ -131,10 +132,11 @@ public class ServerPlayer {
         ColonyGame.camera.position.set(colonyEnt.transform.getPosition().x, colonyEnt.transform.getPosition().y, 0);
 
         //Spawns some squirrels
-        for(int i=0;i<1;i++) {
+        for(int i=0;i<100;i++) {
             TextureAtlas atlas = ColonyGame.assetManager.get("interactables", TextureAtlas.class);
             DataBuilder.JsonAnimal animalRef = DataManager.getData("squirrel", DataBuilder.JsonAnimal.class);
-            new AnimalEnt(animalRef, start, 0, atlas.findRegion("squirrel"), 11);
+            Vector2 pos = new Vector2(MathUtils.random(grid.getNumCols())*grid.getSquareSize(), MathUtils.random(grid.getNumRows())*grid.getSquareSize());
+            new AnimalEnt(animalRef, pos, 0, atlas.findRegion("squirrel"), 11);
         }
 
         //Destroys resources in an area around the Colony Entity.

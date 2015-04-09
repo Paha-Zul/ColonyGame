@@ -1,5 +1,6 @@
 package com.mygdx.game.behaviourtree.action;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.behaviourtree.LeafTask;
@@ -69,7 +70,7 @@ public class FindPath extends LeafTask {
 
         //If our targetNode is still null somehow, fail and return.
         if(targetNode == null) {
-            System.out.println(this.blackBoard.getEntityOwner().name + "'s target is null");
+            Gdx.app.log("[FindPath]:",this.blackBoard.getEntityOwner().name + "'s target is null");
             this.control.finishWithFailure();
             return null;
         }
