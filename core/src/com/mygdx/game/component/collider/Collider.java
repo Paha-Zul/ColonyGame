@@ -3,6 +3,9 @@ package com.mygdx.game.component.collider;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.mygdx.game.component.Component;
+import com.mygdx.game.entity.Entity;
+import com.mygdx.game.helpers.Constants;
+import com.mygdx.game.helpers.Tags;
 import com.mygdx.game.interfaces.IScalable;
 
 /**
@@ -57,8 +60,13 @@ public class Collider extends Component implements IScalable{
 
         Vector2 ownerPos = this.owner.transform.getPosition();
         this.body.setTransform(ownerPos.x, ownerPos.y, this.owner.transform.getRotation());
-        this.body.setUserData(this.owner);
-        this.fixture.setUserData(this.owner);
+
+        ColliderInfo bodyInfo = new ColliderInfo(this.owner);
+        ColliderInfo fixtureInfo = new ColliderInfo(this.owner);
+        fixtureInfo.tags.addTag(Constants.COLLIDER_CLICKABLE);
+        this.body.setUserData(bodyInfo);
+        this.fixture.setUserData(fixtureInfo);
+
         this.owner.registerScalable(this);
     }
 
@@ -80,5 +88,16 @@ public class Collider extends Component implements IScalable{
     @Override
     public void scale(float scale) {
         this.fixture.getShape().setRadius(this.originalRadius*scale);
+    }
+
+    public static class ColliderInfo{
+        public String name;
+        public Tags tags = new Tags();
+        public Entity owner;
+
+        public ColliderInfo(Entity owner){
+            this.owner = owner;
+        }
+
     }
 }

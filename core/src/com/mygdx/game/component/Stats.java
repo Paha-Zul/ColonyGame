@@ -72,10 +72,16 @@ public class Stats extends Component{
         return this.statList;
     }
 
+    public void clearAllStats(){
+        this.statMap.clear();
+    }
 
     @Override
     public void destroy() {
         super.destroy();
+        statMap.clear();
+        statList.clear();
+        timerList.clear();
     }
 
     public static class Stat{

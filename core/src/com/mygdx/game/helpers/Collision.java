@@ -2,6 +2,7 @@ package com.mygdx.game.helpers;
 
 
 import com.badlogic.gdx.physics.box2d.*;
+import com.mygdx.game.component.collider.Collider;
 import com.mygdx.game.entity.Entity;
 
 /**
@@ -14,8 +15,8 @@ public class Collision implements ContactListener {
         Fixture first = contact.getFixtureA();
         Fixture other = contact.getFixtureB();
 
-        Entity firstEntity = (Entity)first.getUserData();
-        Entity otherEntity = (Entity)other.getUserData();
+        Entity firstEntity = ((Collider.ColliderInfo)first.getUserData()).owner;
+        Entity otherEntity = ((Collider.ColliderInfo)other.getUserData()).owner;
 
         EventSystem.notifyEntityEvent(firstEntity, "collide_start", first, other);
         EventSystem.notifyEntityEvent(otherEntity, "collide_start", other, first);
@@ -26,8 +27,8 @@ public class Collision implements ContactListener {
         Fixture first = contact.getFixtureA();
         Fixture other = contact.getFixtureB();
 
-        Entity firstEntity = (Entity)first.getUserData();
-        Entity otherEntity = (Entity)other.getUserData();
+        Entity firstEntity = ((Collider.ColliderInfo)first.getUserData()).owner;
+        Entity otherEntity = ((Collider.ColliderInfo)other.getUserData()).owner;
 
         EventSystem.notifyEntityEvent(firstEntity, "collide_end", first, other);
         EventSystem.notifyEntityEvent(otherEntity, "collide_end", other, first);

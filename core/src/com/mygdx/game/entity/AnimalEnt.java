@@ -17,6 +17,7 @@ public class AnimalEnt extends Entity{
     public AnimalEnt(DataBuilder.JsonAnimal animalRef, Vector2 position, float rotation, TextureRegion graphic, int drawLevel) {
         super(position, rotation, graphic, drawLevel);
         this.addTag(Constants.ENTITY_ANIMAL);
+        this.addTag(Constants.ENTITY_ALIVE);
 
         this.name = "Squirrel";
 

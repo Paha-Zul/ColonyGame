@@ -31,6 +31,7 @@ public class BlackBoard extends Component{
     //Attack stuff
     public float attackRange = 200f;
     public float disBeforeRepath = 5f;
+    public float attackDamage = 10f;
 
     //My stuff
     public Inventory myInventory;

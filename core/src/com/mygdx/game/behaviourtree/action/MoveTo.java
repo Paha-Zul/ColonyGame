@@ -51,7 +51,7 @@ public class MoveTo extends LeafTask{
             return;
         }
 
-        if(this.getControl().getCallbacks().failCriteria != null && !this.getControl().getCallbacks().failCriteria.criteria(this)){
+        if(this.getControl().getCallbacks().failCriteria != null && this.getControl().getCallbacks().failCriteria.criteria(this)){
             this.collider.body.setLinearVelocity(0, 0);
             this.control.finishWithFailure();
             return;

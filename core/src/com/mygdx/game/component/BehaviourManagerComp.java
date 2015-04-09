@@ -37,7 +37,7 @@ public class BehaviourManagerComp extends Component{
     private State currentState;
 
     private enum State {
-        Idle, Gathering, Exploring
+        Idle, Gathering, Exploring, Attacking
     }
 
     public BehaviourManagerComp(String behaviourType) {
@@ -304,7 +304,7 @@ public class BehaviourManagerComp extends Component{
         //The behaviour will fail and a new path will be calculated.
         mt.getControl().callbacks.failCriteria = task -> {
             Task tsk = (Task)task;
-            return tsk.getBlackboard().targetNode == ColonyGame.worldGrid.getNode(tsk.getBlackboard().target);
+            return tsk.getBlackboard().targetNode != ColonyGame.worldGrid.getNode(tsk.getBlackboard().target);
         };
 
         mt.getControl().callbacks.successCriteria = task -> {
@@ -380,13 +380,18 @@ public class BehaviourManagerComp extends Component{
 
         FindPath fp = new FindPath("Finding path", this.getBlackBoard());
         MoveTo mt = new MoveTo("Moving", this.getBlackBoard());
-        Attack attack = new Attack("Attacking", this.getBlackBoard());
+        Attack attack = new Attack("Attacking Target", this.getBlackBoard());
 
         ((ParentTaskController)seq.getControl()).addTask(fp);
         ((ParentTaskController)seq.getControl()).addTask(mt);
         ((ParentTaskController)seq.getControl()).addTask(attack);
 
         repeat.getControl().callbacks.checkCriteria = task -> task.getBlackboard().target != null;
+
+        mt.getControl().callbacks.failCriteria = task -> {
+            Entity target = ((Task)task).getBlackboard().target;
+            return target == null || target.isDestroyed() || target.isSetToBeDestroyed() || !target.hasTag(Constants.ENTITY_ALIVE);
+        };
 
         mt.getControl().callbacks.successCriteria = tsk -> {
             Task task = (Task)tsk;
@@ -423,7 +428,10 @@ public class BehaviourManagerComp extends Component{
     }
 
     public void attack(){
-        this.changeTask(this.attackTarget());
+        if(this.currentState != State.Attacking) {
+            this.changeTask(this.attackTarget());
+            this.currentState = State.Attacking;
+        }
     }
 
     /**
@@ -544,6 +552,10 @@ public class BehaviourManagerComp extends Component{
             return this.currentBehaviour.getName();
 
         return "Nothing";
+    }
+
+    public State getCurrentState(){
+        return this.currentState;
     }
 
     @Override

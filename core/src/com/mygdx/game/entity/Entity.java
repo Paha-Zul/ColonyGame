@@ -9,6 +9,7 @@ import com.mygdx.game.component.GraphicIdentity;
 import com.mygdx.game.component.Transform;
 import com.mygdx.game.helpers.EventSystem;
 import com.mygdx.game.helpers.ListHolder;
+import com.mygdx.game.helpers.Tags;
 import com.mygdx.game.interfaces.IDelayedDestroyable;
 import com.mygdx.game.interfaces.IScalable;
 
@@ -25,7 +26,7 @@ public class Entity implements IDelayedDestroyable{
 	public GraphicIdentity identity;
 	public boolean active = true;
 
-    protected int tagMask;
+    protected Tags tags = new Tags();
 
 	protected ArrayList<Component> newComponentList;
 	protected ArrayList<Component> activeComponentList;
@@ -230,7 +231,7 @@ public class Entity implements IDelayedDestroyable{
 	 * @param tag The tag to add.
 	 */
     public void addTag(int tag){
-        this.tagMask |= (1 << tag); //OR the tag to the mask.
+        this.tags.addTag(tag);
 	}
 
 	/**
@@ -238,7 +239,14 @@ public class Entity implements IDelayedDestroyable{
 	 * @param tag The tag to remove.
 	 */
 	public void removeTag(int tag){
-		this.tagMask &= ~(1 << tag); //AND the inverted tag to zero it out.
+		this.tags.removeTag(tag);
+	}
+
+	/**
+	 * Removes all tags for this Entity.
+	 */
+	public void clearTags(){
+		this.tags.clearTags();
 	}
 
 	/**
@@ -247,7 +255,7 @@ public class Entity implements IDelayedDestroyable{
 	 * @return True if this Entity has the tag, false otherwise.
 	 */
     public boolean hasTag(int tag){
-        return ((1 << tag) & tagMask) == (1 << tag);
+		return this.tags.hasTag(tag);
     }
 
 	/**
@@ -256,9 +264,7 @@ public class Entity implements IDelayedDestroyable{
 	 * @return True if this Entity has all the tags, false otherwise.
 	 */
     public boolean hasTags(int[] tagsToCheck){
-        int tags = 0b0;
-        for (int aTagsToCheck : tagsToCheck) tags |= (1 << aTagsToCheck);
-        return (tags & tagMask) == tags;
+        return this.tags.hasTags(tagsToCheck);
     }
 
 	@Override

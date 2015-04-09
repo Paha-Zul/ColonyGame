@@ -40,7 +40,11 @@ public class Constants {
     public final static int ENTITY_RESOURCE = 4;
     public final static int ENTITY_COLONIST = 5;
     public final static int ENTITY_PROJECTILE = 6;
+    public final static int ENTITY_ALIVE = 7;
 
+    //Collider tags
+    public final static int COLLIDER_CLICKABLE = 1;
+    public final static int COLLIDER_DETECTOR = 2;
 
     //Colors
     public final static Color COLOR_UNEXPLORED = new Color(Color.BLACK);

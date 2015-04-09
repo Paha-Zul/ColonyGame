@@ -36,4 +36,9 @@ public class RepeatUntilCondition extends TaskDecorator{
     public void end() {
         super.end();
     }
+
+    @Override
+    public String getName() {
+        return super.getName()+" "+this.task.getName();
+    }
 }

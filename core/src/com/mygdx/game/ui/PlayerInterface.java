@@ -17,6 +17,7 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.utils.Align;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.component.*;
+import com.mygdx.game.component.collider.Collider;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.Constants;
 import com.mygdx.game.helpers.Grid;
@@ -108,8 +109,9 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
     //For selecting a single unit.
     private QueryCallback callback = fixture -> {
-        if(fixture.testPoint(testPoint.x, testPoint.y)){
-            this.selected = (Entity)fixture.getBody().getUserData();
+        Collider.ColliderInfo info = (Collider.ColliderInfo)fixture.getUserData();
+        if(info.tags.hasTag(Constants.COLLIDER_CLICKABLE) && fixture.testPoint(testPoint.x, testPoint.y)){
+            this.selected = info.owner;
             this.interactable = this.selected.getComponent(Interactable.class);
             return false;
         }
@@ -120,11 +122,12 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     //For selecting multiple units.
     private ArrayList<UnitProfile> selectedList = new ArrayList<>();
     private QueryCallback selectionCallback = fixture -> {
-        Entity selected = (Entity)fixture.getBody().getUserData();
-        if(selected != null && selected.hasTag(Constants.ENTITY_COLONIST)) {
-            UnitProfile profile = new UnitProfile();
-            profile.entity = this.selected = selected;
-            profile.interactable = this.interactable = selected.getComponent(Interactable.class);
+        Collider.ColliderInfo selectedInfo = (Collider.ColliderInfo)fixture.getUserData();
+        //If not null, the entity is a colonist, and the collider is clickable.
+        if(selectedInfo != null && selectedInfo.owner.hasTag(Constants.ENTITY_COLONIST) && selectedInfo.tags.hasTag(Constants.COLLIDER_CLICKABLE)) {
+            UnitProfile profile = new UnitProfile(); //Make a unit profile.
+            profile.entity = this.selected = selectedInfo.owner; //Get the Entity that we clicked.
+            profile.interactable = this.interactable = selectedInfo.owner.getComponent(Interactable.class); //Get teh interactable Component.
             selectedList.add(profile);
             return true;
         }

@@ -1,5 +1,7 @@
 package com.mygdx.game.component;
 
+import com.mygdx.game.entity.Entity;
+import com.mygdx.game.helpers.EventSystem;
 import com.mygdx.game.helpers.timer.RepeatingTimer;
 import com.mygdx.game.interfaces.IInteractable;
 
@@ -44,6 +46,20 @@ public class Colonist extends Component implements IInteractable{
             if (stats.getStat("food").getCurrVal() <= 0 || stats.getStat("water").getCurrVal() <= 0)
                 stats.getStat("health").addToCurrent(-1);
         }));
+
+        EventSystem.registerEntityEvent(this.owner, "damage", args -> {
+            Entity entity = (Entity) args[0];
+            float amount = (float) args[1];
+
+            Stats.Stat stat = this.stats.getStat("health");
+            if(stat == null) return;
+
+            stat.addToCurrent(amount);
+            this.manager.getBlackBoard().target = entity;
+            this.getBehManager().attack();
+        });
+
+        this.getBehManager().getBlackBoard().attackDamage = 30f;
     }
 
     public Colony getColony() {

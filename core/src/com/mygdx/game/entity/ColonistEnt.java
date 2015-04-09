@@ -28,6 +28,8 @@ public class ColonistEnt extends Entity{
 
         this.addTag(Constants.ENTITY_HUMANOID);
         this.addTag(Constants.ENTITY_COLONIST);
+        this.addTag(Constants.ENTITY_ALIVE);
+
     }
 
     private void makeCollider(){

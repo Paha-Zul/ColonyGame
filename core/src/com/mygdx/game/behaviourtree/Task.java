@@ -3,8 +3,6 @@ package com.mygdx.game.behaviourtree;
 import com.mygdx.game.behaviourtree.control.TaskController;
 import com.mygdx.game.component.BlackBoard;
 
-import java.lang.annotation.Repeatable;
-
 /**
  * Created by Bbent_000 on 12/31/2014.
  */
@@ -30,7 +28,7 @@ public abstract class Task {
     public abstract void start();
 
     /**
-     * The end of the Task. Override for speicifc needs.
+     * The end of the Task. Override for specific needs.
      */
     public abstract void end();
 

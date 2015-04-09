@@ -6,10 +6,11 @@ import com.badlogic.gdx.math.MathUtils;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.behaviourtree.LeafTask;
 import com.mygdx.game.component.BlackBoard;
-import com.mygdx.game.component.Stats;
 import com.mygdx.game.component.Transform;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.entity.ProjectileEnt;
+import com.mygdx.game.helpers.Constants;
+import com.mygdx.game.helpers.EventSystem;
 import com.mygdx.game.helpers.GH;
 import com.mygdx.game.helpers.timer.RepeatingTimer;
 import com.mygdx.game.helpers.timer.Timer;
@@ -35,14 +36,14 @@ public class Attack extends LeafTask{
 
         //Spawn a projectile
         fireTimer = new RepeatingTimer(1f, () -> {
-            if(this.blackBoard.target.transform.getPosition().dst(this.blackBoard.getEntityOwner().transform.getPosition()) <= GH.toMeters(12)) {
-                Transform trans = this.blackBoard.getEntityOwner().transform; //Cache the transform.
-                Entity target = this.blackBoard.target; //Cache the target
+            if(this.blackBoard.target.transform.getPosition().dst(this.blackBoard.getEntityOwner().transform.getPosition()) >= GH.toMeters(20)) {
+                Transform trans = this.blackBoard.getEntityOwner().transform;   //Cache the transform.
+                Entity target = this.blackBoard.target;                         //Cache the target
                 float rot = (float) Math.atan2(target.transform.getPosition().y - trans.getPosition().y, target.transform.getPosition().x - trans.getPosition().x) * MathUtils.radDeg; //Get the rotation to the target
                 TextureRegion tex = new TextureRegion(ColonyGame.assetManager.get("ball", Texture.class)); //Get a texture for the bullet.
                 new ProjectileEnt(trans.getPosition(), rot, tex, 11); //Spawn the projectile.
             }else
-                this.blackBoard.target.getComponent(Stats.class).getStat("health").addToCurrent(-20f);
+                EventSystem.notifyEntityEvent(this.blackBoard.target, "damage", this.blackBoard.getEntityOwner(), -this.blackBoard.attackDamage);
         });
 
         this.blackBoard.path = null;
@@ -55,7 +56,7 @@ public class Attack extends LeafTask{
         fireTimer.update(delta);
 
         //If the target is null or dead, return with success (it died... I or someone else killed it!)
-        if(this.blackBoard.target == null || this.blackBoard.target.isDestroyed() || this.blackBoard.target.isSetToBeDestroyed()) {
+        if(this.blackBoard.target == null || this.blackBoard.target.isDestroyed() || this.blackBoard.target.isSetToBeDestroyed() || !this.blackBoard.target.hasTag(Constants.ENTITY_ALIVE)) {
             this.control.finishWithSuccess();
             this.blackBoard.target = null;
             return;
