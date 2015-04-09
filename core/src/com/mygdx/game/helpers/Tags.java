@@ -48,4 +48,9 @@ public class Tags {
         for (int aTagsToCheck : tagsToCheck) tags |= (1 << aTagsToCheck);
         return (tags & tagMask) == tags;
     }
+
+    @Override
+    public String toString() {
+        return ""+tagMask;
+    }
 }

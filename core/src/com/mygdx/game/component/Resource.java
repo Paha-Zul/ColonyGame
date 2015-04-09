@@ -3,6 +3,9 @@ package com.mygdx.game.component;
 import com.badlogic.gdx.math.MathUtils;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.DataBuilder;
+import com.mygdx.game.helpers.StringTable;
+import com.mygdx.game.helpers.Tags;
+import com.mygdx.game.helpers.managers.DataManager;
 import com.mygdx.game.interfaces.IInteractable;
 import gnu.trove.list.array.TIntArrayList;
 
@@ -19,6 +22,8 @@ public class Resource extends Component implements IInteractable{
     private volatile Entity taken = null;
 
     private StringBuilder info = new StringBuilder();
+
+    public Tags effectTags = new Tags();
 
     public Resource(String resourceName) {
         super();
@@ -60,8 +65,13 @@ public class Resource extends Component implements IInteractable{
             if(amount != 0){
                 amounts.add(amount);
                 names.add(jRes.items[i]);
+                DataBuilder.JsonItem itemRef = DataManager.getData(jRes.items[i], DataBuilder.JsonItem.class);
+                if(itemRef.getEffects() != null)
+                    for(String effect : itemRef.getEffects())
+                        effectTags.addTag(StringTable.getString("item_effect", effect));
             }
         }
+
         this.itemAmounts = amounts.toArray();
         this.itemNames = names.toArray(new String[names.size()]);
     }
@@ -84,6 +94,10 @@ public class Resource extends Component implements IInteractable{
             if(amount != 0){
                 amounts.add(amount);
                 names.add(jAnimal.items[i]);
+                DataBuilder.JsonItem itemRef = DataManager.getData(jAnimal.items[i], DataBuilder.JsonItem.class);
+                if(itemRef.getEffects() != null)
+                    for(String effect : itemRef.getEffects())
+                        effectTags.addTag(StringTable.getString("item_effect", effect));
             }
         }
 
