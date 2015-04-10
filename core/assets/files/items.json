@@ -29,7 +29,7 @@
     {
       "itemName": "herbs",
       "displayName": "Herbs",
-      "itemType": "plant",
+      "itemType": "herbs",
       "description": "Medicinal Herbs.",
       "effects": ["heal"],
       "strengths":[5]

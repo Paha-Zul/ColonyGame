@@ -1,6 +1,7 @@
 package com.mygdx.game.helpers;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
@@ -319,18 +320,32 @@ public class Grid {
             return dir;
         }
 
-        public int getNumCols() {
+        /**
+         * @return The total width (num of X tiles across) of this Grid.
+         */
+        public int getWidth() {
             return this.numCols;
         }
 
-        public int getNumRows() {
+        /**
+         * @return Gets the height (total Y tiles) of this Grid.
+         */
+        public int getHeight() {
             return this.numRows;
         }
 
+        /**
+         * @return The square size of this Grid.
+         */
         public float getSquareSize() {
             return GH.toMeters(this.squareSize);
         }
 
+        /**
+         * Gets the index from the Vector2 position passed in.
+         * @param position The Vector2 position to get an index of.
+         * @return An integer array containing 2 values, the X and Y index.
+         */
         public int[] getIndex(Vector2 position) {
             return new int[]{(int) (position.x / getSquareSize()), (int) (position.y / getSquareSize())};
         }
@@ -368,6 +383,7 @@ public class Grid {
     public static class Node{
         private int x, y;
         private ArrayList<Entity> entList = new ArrayList<>();
+        private TerrainTile terrainTile;
 
         public Node(int x, int y){
             this.x = x;
@@ -383,7 +399,6 @@ public class Grid {
         }
 
         public ArrayList<Entity> getEntityList(){
-            //System.out.println(Thread.currentThread().getStackTrace()[3]+" GET THAT ENTITY LIST");
             return this.entList;
         }
 
@@ -399,6 +414,10 @@ public class Grid {
             return this.y;
         }
 
+        public void setTerrainTile(TerrainTile terrainTile){
+            this.terrainTile = terrainTile;
+        }
+
 
         @Override
         public String toString() {
@@ -406,6 +425,9 @@ public class Grid {
         }
     }
 
+    /**
+     * Nodes that contain path information for pathfinding tasks.
+     */
     public static class PathNode extends Node{
         public float G, H, B;
         public boolean visited = false, open = false, closed = false;
@@ -417,6 +439,104 @@ public class Grid {
 
         public float getF(){
             return G+H+B;
+        }
+    }
+
+    /**
+     * A class that contains terrain information and graphics for the tile it is attached to.
+     */
+    public class TerrainTile {
+        public String tileName, category;
+        public Sprite terrainSprite;
+        public double noiseValue;
+        public int type;
+        public boolean avoid = false;
+        private int visibility = Constants.VISIBILITY_UNEXPLORED;
+
+        public TerrainTile(){
+
+        }
+
+        public TerrainTile(Sprite sprite, double noiseValue, float rotation, int type, Vector2 position) {
+            this.terrainSprite = new Sprite(sprite);
+            this.terrainSprite.setColor(Constants.COLOR_UNEXPLORED);
+            this.noiseValue = noiseValue;
+            this.type = type;
+            this.terrainSprite.setPosition(position.x, position.y);
+            this.terrainSprite.setRotation(rotation);
+        }
+
+        public void changeVisibility(int visibility){
+            if(this.visibility == visibility)
+                return;
+
+            this.visibility = visibility;
+            if(visibility == Constants.VISIBILITY_UNEXPLORED) this.terrainSprite.setColor(Constants.COLOR_UNEXPLORED);
+            if(visibility == Constants.VISIBILITY_EXPLORED) this.terrainSprite.setColor(Constants.COLOR_EXPLORED);
+            if(visibility == Constants.VISIBILITY_VISIBLE) this.terrainSprite.setColor(Constants.COLOR_VISIBILE);
+        }
+
+        public void set(Sprite sprite, double noiseValue, float rotation, int type, Vector2 position){
+            if(terrainSprite != null)
+                this.terrainSprite.set(sprite);
+            else this.terrainSprite = sprite;
+
+            this.noiseValue = noiseValue;
+            this.terrainSprite.setRotation(rotation);
+            this.type = type;
+            this.terrainSprite.setPosition(position.x, position.y);
+            this.terrainSprite.setColor(Constants.COLOR_UNEXPLORED);
+        }
+
+        @Override
+        public int hashCode() {
+            int hash = (int)(terrainSprite.getX() + terrainSprite.getY() + terrainSprite.getWidth() + terrainSprite.getY());
+            hash += hash*type;
+            hash += noiseValue*10000d;
+            hash += terrainSprite.hashCode();
+
+            return hash;
+        }
+    }
+
+    /**
+     * A class that contains visibility information about the tile it is attached to.
+     */
+    public class VisibilityTile{
+        private int visibility = Constants.VISIBILITY_UNEXPLORED;
+        private int currViewers = 0;
+
+        public VisibilityTile(){
+            this.visibility = Constants.VISIBILITY_UNEXPLORED;
+        }
+
+        /**
+         * Adds a viewer to this Tile. This will immediately mark the Tile as visible.
+         */
+        public void addViewer(){
+            this.currViewers++;
+            this.changeVisibility(Constants.VISIBILITY_VISIBLE);
+        }
+
+        /**
+         * Removes a viewer from this tile. If it reaches 0, the terrain is set to explored and not visibile.
+         */
+        public void removeViewer(){
+            this.currViewers--;
+            if(currViewers <= 0)
+                this.changeVisibility(Constants.VISIBILITY_EXPLORED);
+        }
+
+        public int getVisibility() {
+            return visibility;
+        }
+
+        public void changeVisibility(int visibility){
+            this.visibility = visibility;
+        }
+
+        public int getCurrViewers() {
+            return currViewers;
         }
     }
 }

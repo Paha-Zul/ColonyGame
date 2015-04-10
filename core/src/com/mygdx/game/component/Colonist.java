@@ -60,6 +60,7 @@ public class Colonist extends Component implements IInteractable{
         });
 
         this.getBehManager().getBlackBoard().attackDamage = 30f;
+        this.getBehManager().getBlackBoard().attackRange = 500f;
     }
 
     public Colony getColony() {

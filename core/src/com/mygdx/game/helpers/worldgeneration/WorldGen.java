@@ -251,6 +251,7 @@ public class WorldGen {
         return done;
     }
 
+    //Spawns a tree.
     private void spawnTree(DataBuilder.JsonTile jtile, Vector2 centerPos, TerrainTile currTile){
         if(jtile == null || currTile == null || !currTile.category.equals(jtile.category))
             return;
@@ -260,8 +261,10 @@ public class WorldGen {
         if(jRes == null)
             return;
 
+        //Create a new resource from the JsonResource.
         Resource res = new Resource(jRes);
 
+        //Get the atlas so we can get the image from it.
         TextureAtlas interactableAtlas = ColonyGame.assetManager.get("interactables", TextureAtlas.class); //Get the atlas
         String textureName = jRes.img[MathUtils.random(jRes.img.length-1)]; //Get the texture name.
         TextureRegion reg = interactableAtlas.findRegion(textureName);

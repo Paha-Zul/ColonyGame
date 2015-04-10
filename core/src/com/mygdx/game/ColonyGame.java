@@ -119,9 +119,9 @@ public class ColonyGame extends Game {
 		int yc = (int)ColonyGame.camera.position.y;
 
 		int startX = ((xc - halfWidth)/squareSize) - off >= 0 ? (int)((xc - halfWidth)/squareSize) - off : 0;
-		int endX = ((xc + halfWidth)/squareSize) + off < ColonyGame.worldGrid.getNumCols() ? (int)((xc + halfWidth)/squareSize) + off : ColonyGame.worldGrid.getNumCols()-1;
+		int endX = ((xc + halfWidth)/squareSize) + off < ColonyGame.worldGrid.getWidth() ? (int)((xc + halfWidth)/squareSize) + off : ColonyGame.worldGrid.getWidth()-1;
 		int startY = ((yc - halfHeight)/squareSize) - off >= 0 ? (int)((yc - halfHeight)/squareSize) - off : 0;
-		int endY = ((yc + halfHeight)/squareSize) + off < ColonyGame.worldGrid.getNumRows() ? (int)((yc + halfHeight)/squareSize) + off : ColonyGame.worldGrid.getNumRows()-1;
+		int endY = ((yc + halfHeight)/squareSize) + off < ColonyGame.worldGrid.getHeight() ? (int)((yc + halfHeight)/squareSize) + off : ColonyGame.worldGrid.getHeight()-1;
 
 		//Loop over the array
 		for(int x=startX;x<=endX;x++) {

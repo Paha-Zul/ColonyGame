@@ -234,15 +234,15 @@ public class DataBuilder implements IDestroyable{
         JsonResources resources = json.fromJson(JsonResources.class, Gdx.files.internal(filePath+resourcePath));
 
         for(JsonResource jRes : resources.resources){
-
             //If the dir field is not null, we have a directory to pull images from.
             if(jRes.dir != null){
                 ArrayList<String> list = new ArrayList<>();
+
                 //If we have the field 'allimgwith', loop through all of them and get the images from the dir.
                 if(jRes.allimgwith != null && jRes.allimgwith.length != 0){
                     for(String base : jRes.allimgwith)
                         getFileNamesFromDir(Gdx.files.internal(jRes.dir), list, base);
-                    jRes.img = list.toArray(new String[list.size()]);
+
                 //Otherwise, just load all from the dir.
                 }else
                     this.getFileNamesFromDir(Gdx.files.internal(jRes.dir), list);
@@ -250,6 +250,8 @@ public class DataBuilder implements IDestroyable{
                 //Set the img array as the list.
                 jRes.img = list.toArray(new String[list.size()]);
                 if(jRes.img.length == 0) GH.writeErrorMessage("No images loaded for "+jRes.resourceName+". Check that the directory "+jRes.dir+" has files and they are named correctly.");
+
+                list.clear();
             }
 
             //Build the amounts array

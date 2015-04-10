@@ -106,17 +106,6 @@ public class BehaviourManagerComp extends Component{
         MoveTo moveToStorage = new MoveTo("Moving to Storage", this.blackBoard);
         TransferResource transferItems = new TransferResource("Transferring Resources", this.blackBoard);
 
-        fr.getControl().callbacks.failureCallback = fail; //If we fail, call the fail callback.
-        fr.getControl().callbacks.successCriteria = (e) -> ((Entity)e).hasTag(Constants.ENTITY_RESOURCE) && !((Entity)e).getComponent(Resource.class).isTaken(); //Check to make sure the resource isn't taken.
-
-        fr.getControl().callbacks.successCallback = () ->  { //On success, take the resource.
-            blackBoard.targetResource = blackBoard.target.getComponent(Resource.class);
-            if(!blackBoard.targetResource.isTaken())
-                blackBoard.targetResource.setTaken(this.blackBoard.getEntityOwner());
-        };
-
-        findPath.getControl().callbacks.checkCriteria = (task) -> (task).getBlackboard().targetResource.getTaken() == ((Task) task).getBlackboard().getEntityOwner();
-
         ((ParentTaskController)sequence.getControl()).addTask(fr);
         ((ParentTaskController)sequence.getControl()).addTask(findPath);
         ((ParentTaskController)sequence.getControl()).addTask(move);
@@ -125,15 +114,28 @@ public class BehaviourManagerComp extends Component{
         ((ParentTaskController)sequence.getControl()).addTask(moveToStorage);
         ((ParentTaskController)sequence.getControl()).addTask(transferItems);
 
+        //If we fail, call the fail callback.
+        fr.getControl().callbacks.failureCallback = fail;
+
+        //Check to make sure the resource isn't taken.
+        fr.getControl().callbacks.successCriteria = (e) -> ((Entity)e).hasTag(Constants.ENTITY_RESOURCE) && !((Entity)e).getComponent(Resource.class).isTaken();
+
+        //On success, set the resource as taken if not already taken.
+        fr.getControl().callbacks.successCallback = () ->  {
+            blackBoard.targetResource = blackBoard.target.getComponent(Resource.class);
+            if(!blackBoard.targetResource.isTaken())
+                blackBoard.targetResource.setTaken(this.blackBoard.getEntityOwner());
+        };
+
+        //When finding a path, if the resource is taken by someone other than me, fail it!
+        findPath.getControl().callbacks.checkCriteria = (task) -> (task).getBlackboard().targetResource.getTaken() == task.getBlackboard().getEntityOwner();
+
         //When we finish, set the target back to not taken IF it is still a valid target (if we ended early).
         sequence.getControl().callbacks.finishCallback = () -> {
-            if (sequence.getBlackboard().target != null && !sequence.getBlackboard().target.isDestroyed() && sequence.getBlackboard().target.hasTag(Constants.ENTITY_RESOURCE)) {
-                if(sequence.getBlackboard().targetResource.getTaken() == sequence.getBlackboard().getEntityOwner()) {
+            if (sequence.getBlackboard().target != null && !sequence.getBlackboard().target.isValid() && sequence.getBlackboard().target.hasTag(Constants.ENTITY_RESOURCE)) {
+                if(sequence.getBlackboard().targetResource.getTaken() == sequence.getBlackboard().getEntityOwner())
                     sequence.getBlackboard().targetResource.setTaken(null);
-                    System.out.println("Set taken to null");
-                }
             }
-
         };
 
         sequence.getControl().callbacks.startCallback = ()->{

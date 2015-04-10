@@ -57,9 +57,9 @@ public class ServerPlayer {
 	public void render(float delta){
 
         if(!generatedTrees) {
-            generatedTrees = WorldGen.getInstance().generateResources(new Vector2((ColonyGame.worldGrid.getNumCols() - 1) * WorldGen.getInstance().getTileSize(), (ColonyGame.worldGrid.getNumRows() - 1) * WorldGen.getInstance().getTileSize()), 0, Constants.WORLDGEN_RESOURCEGENERATESPEED);
+            generatedTrees = WorldGen.getInstance().generateResources(new Vector2((ColonyGame.worldGrid.getWidth() - 1) * WorldGen.getInstance().getTileSize(), (ColonyGame.worldGrid.getHeight() - 1) * WorldGen.getInstance().getTileSize()), 0, Constants.WORLDGEN_RESOURCEGENERATESPEED);
             if(generatedTrees){
-                startLocation.set((ColonyGame.worldGrid.getNumCols()/2)*ColonyGame.worldGrid.getSquareSize(), (ColonyGame.worldGrid.getNumRows()/2)*ColonyGame.worldGrid.getSquareSize());
+                startLocation.set((ColonyGame.worldGrid.getWidth()/2)*ColonyGame.worldGrid.getSquareSize(), (ColonyGame.worldGrid.getHeight()/2)*ColonyGame.worldGrid.getSquareSize());
                 generateStart(startLocation);
             }
         }
@@ -135,7 +135,7 @@ public class ServerPlayer {
         for(int i=0;i<100;i++) {
             TextureAtlas atlas = ColonyGame.assetManager.get("interactables", TextureAtlas.class);
             DataBuilder.JsonAnimal animalRef = DataManager.getData("squirrel", DataBuilder.JsonAnimal.class);
-            Vector2 pos = new Vector2(MathUtils.random(grid.getNumCols())*grid.getSquareSize(), MathUtils.random(grid.getNumRows())*grid.getSquareSize());
+            Vector2 pos = new Vector2(MathUtils.random(grid.getWidth())*grid.getSquareSize(), MathUtils.random(grid.getHeight())*grid.getSquareSize());
             new AnimalEnt(animalRef, pos, 0, atlas.findRegion("squirrel"), 11);
         }
 

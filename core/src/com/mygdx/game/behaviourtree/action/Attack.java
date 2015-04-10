@@ -6,6 +6,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.behaviourtree.LeafTask;
 import com.mygdx.game.component.BlackBoard;
+import com.mygdx.game.component.Projectile;
 import com.mygdx.game.component.Transform;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.entity.ProjectileEnt;
@@ -36,12 +37,23 @@ public class Attack extends LeafTask{
 
         //Spawn a projectile
         fireTimer = new RepeatingTimer(1f, () -> {
-            if(this.blackBoard.target.transform.getPosition().dst(this.blackBoard.getEntityOwner().transform.getPosition()) >= GH.toMeters(20)) {
-                Transform trans = this.blackBoard.getEntityOwner().transform;   //Cache the transform.
-                Entity target = this.blackBoard.target;                         //Cache the target
-                float rot = (float) Math.atan2(target.transform.getPosition().y - trans.getPosition().y, target.transform.getPosition().x - trans.getPosition().x) * MathUtils.radDeg; //Get the rotation to the target
+            float dis =  this.blackBoard.target.transform.getPosition().dst(this.blackBoard.getEntityOwner().transform.getPosition());
+            if(dis >= GH.toMeters(20)) {
                 TextureRegion tex = new TextureRegion(ColonyGame.assetManager.get("ball", Texture.class)); //Get a texture for the bullet.
-                new ProjectileEnt(trans.getPosition(), rot, tex, 11); //Spawn the projectile.
+                Transform trans = this.blackBoard.getEntityOwner().transform;               //Cache the transform.
+                Entity target = this.blackBoard.target;                                      //Cache the target
+                float rot = (float) Math.atan2(target.transform.getPosition().y - trans.getPosition().y, target.transform.getPosition().x - trans.getPosition().x) * MathUtils.radDeg; //Get the rotation to the target
+                rot += MathUtils.random(20) - 10;
+                Entity ent = new ProjectileEnt(trans.getPosition(), rot, tex, 11);           //Spawn the projectile.
+                Projectile projectile = ent.getComponent(Projectile.class);
+                if(projectile == null) GH.writeErrorMessage("Somehow making a projectile didn't make a projectile...");
+                else {
+                    projectile.projOwner = this.blackBoard.getEntityOwner();
+                    projectile.lifetime = dis / GH.toMeters(projectile.speed);
+                    projectile.lifetime += projectile.lifetime*0.5f;
+                    projectile.lifetime += MathUtils.random(projectile.lifetime*0.2f) - projectile.lifetime*0.1f;
+                    System.out.println("projectile lifetime: "+projectile.lifetime);
+                }
             }else
                 EventSystem.notifyEntityEvent(this.blackBoard.target, "damage", this.blackBoard.getEntityOwner(), -this.blackBoard.attackDamage);
         });

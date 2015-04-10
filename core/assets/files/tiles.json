@@ -8,54 +8,56 @@
           "category": "Grass",
           "dir": "img/terrain/0",
           "height": [0.8, 1],
-          "resources":["bunchberry"],
-          "resourcesChance": [[0, 0.01]]
+          "resources":["bunchberry", "blackspruce", "whitespruce", "americanlarch"],
+          "resourcesChance": [[0, 0.01], [0.01, 0.02], [0.02, 0.03], [0.03, 0.04]]
         },
         {
           "tileNames": ["1"],
           "category": "Grass",
           "dir": "img/terrain/1",
-          "height": [0.6, 0.8]
+          "height": [0.6, 0.8],
+		  "resources":["blackspruce", "whitespruce", "americanlarch"],
+          "resourcesChance": [[0, 0.01], [0.01, 0.02], [0.02, 0.03]]
         },
         {
           "tileNames": ["2"],
           "category": "Grass",
           "dir": "img/terrain/2",
           "height": [0.4, 0.6],
-          "resources":["cloudberry"],
-          "resourcesChance": [[0, 0.01]]
+          "resources":["cloudberry", "blackspruce", "whitespruce", "americanlarch"],
+          "resourcesChance": [[0, 0.01], [0.01, 0.02], [0.02, 0.03], [0.03, 0.04]]
         },
         {
           "tileNames": ["3"],
           "category": "Grass",
           "dir": "img/terrain/3",
           "height": [-0.4, 0.4],
-          "resources":["redwood", "cloudberry"],
-          "resourcesChance": [[0, 0.01], [0.01, 0.02]]
+          "resources":["cloudberry", "blackspruce", "whitespruce", "americanlarch"],
+          "resourcesChance": [[0, 0.01], [0.01, 0.02], [0.02, 0.03], [0.03, 0.04]]
         },
         {
           "tileNames": ["4"],
           "category": "Grass",
           "dir": "img/terrain/4",
           "height": [-0.6, -0.4],
-          "resources":["cranberry"],
-          "resourcesChance": [[0, 0.01]]
+          "resources":["cranberry", "blackspruce", "whitespruce", "americanlarch"],
+          "resourcesChance": [[0, 0.01], [0.01, 0.02], [0.02, 0.03], [0.03, 0.04]]
         },
         {
           "tileNames": ["5"],
           "category": "Grass",
           "dir": "img/terrain/5",
           "height": [-0.8, -0.6],
-          "resources":["lingonberry", "elderberry"],
-          "resourcesChance": [[0, 0.01], [0.01, 0.02]]
+          "resources":["lingonberry", "elderberry", "blackspruce", "whitespruce", "americanlarch"],
+          "resourcesChance": [[0, 0.01], [0.01, 0.02], [0.02, 0.03], [0.03, 0.04], [0.04, 0.05]]
         },
         {
           "tileNames": ["6"],
           "category": "Grass",
           "dir": "img/terrain/6",
           "height": [-1, -0.8],
-          "resources":["partridgeberry", "huckleberry"],
-          "resourcesChance": [[0, 0.01], [0.01, 0.02]]
+          "resources":["partridgeberry", "huckleberry", "blackspruce", "whitespruce", "americanlarch"],
+          "resourcesChance": [[0, 0.01], [0.01, 0.02], [0.02, 0.03], [0.03, 0.04], [0.04, 0.05]]
         }]
     },
     {

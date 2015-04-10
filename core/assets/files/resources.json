@@ -1,23 +1,31 @@
 {
   "resources": [
     {
-      "resourceName": "redwood",
-      "displayName": "RedWood",
+      "resourceName": "americanlarch",
+      "displayName": "AmericanLarch",
       "resourceType": "tree",
-      "items": ["woodlog", "twig"],
-      "amounts": [[3,10],[1,3]],
-      "dir": "img/Interactable",
-      "allimgwith": ["tree"],
-      "gatherTime": 3
+      "items": ["woodlog"],
+      "amounts": [[5,10]],
+      "dir": "img/Interactable/AmericanLarch",
+      "gatherTime": 7
     },
     {
-      "resourceName": "pine",
-      "displayName": "Pine",
+      "resourceName": "blackspruce",
+      "displayName": "Black Spruce",
       "resourceType": "tree",
       "items": ["woodlog"],
       "amounts": [[1,3]],
-      "img": ["greentree"],
+      "dir": "img/Interactable/BlackSpruce",
       "gatherTime": 3
+    },
+    {
+      "resourceName": "whitespruce",
+      "displayName": "White Spruce",
+      "resourceType": "tree",
+      "items": ["woodlog"],
+      "amounts": [[10,20]],
+      "dir": "img/Interactable/WhiteSpruce",
+      "gatherTime": 10
     },
     {
       "resourceName": "rock",
