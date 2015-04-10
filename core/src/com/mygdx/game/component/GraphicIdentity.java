@@ -9,7 +9,6 @@ import com.mygdx.game.ColonyGame;
 import com.mygdx.game.helpers.Constants;
 import com.mygdx.game.helpers.GH;
 import com.mygdx.game.helpers.Grid;
-import com.mygdx.game.helpers.worldgeneration.WorldGen;
 
 public class GraphicIdentity extends Component{
 	public Sprite sprite;
@@ -41,14 +40,15 @@ public class GraphicIdentity extends Component{
     @Override
     public void render(float delta, SpriteBatch batch) {
         super.render(delta, batch);
+        Grid.GridInstance grid = ColonyGame.worldGrid;
 
         Vector2 pos = this.owner.transform.getPosition(); //Cache the owner's position.
 
         if(!ColonyGame.camera.frustum.boundsInFrustum(pos.x, pos.y, 0, sprite.getWidth(), sprite.getHeight(), 0))
             return;
 
-        Grid.Node node = ColonyGame.worldGrid.getNode(this.owner);
-        int visibility = WorldGen.getInstance().getVisibilityMap()[node.getX()][node.getY()].getVisibility();
+        Grid.Node node = grid.getNode(this.owner);
+        int visibility = grid.getVisibilityMap()[node.getX()][node.getY()].getVisibility();
         if(visibility == Constants.VISIBILITY_UNEXPLORED)
             return;
 

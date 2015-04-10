@@ -57,7 +57,7 @@ public class ServerPlayer {
 	public void render(float delta){
 
         if(!generatedTrees) {
-            generatedTrees = WorldGen.getInstance().generateResources(new Vector2((ColonyGame.worldGrid.getWidth() - 1) * WorldGen.getInstance().getTileSize(), (ColonyGame.worldGrid.getHeight() - 1) * WorldGen.getInstance().getTileSize()), 0, Constants.WORLDGEN_RESOURCEGENERATESPEED);
+            generatedTrees = WorldGen.getInstance().generateResources(new Vector2((ColonyGame.worldGrid.getWidth() - 1) * ColonyGame.worldGrid.getSquareSize(), (ColonyGame.worldGrid.getHeight() - 1) * ColonyGame.worldGrid.getSquareSize()), 0, Constants.WORLDGEN_RESOURCEGENERATESPEED);
             if(generatedTrees){
                 startLocation.set((ColonyGame.worldGrid.getWidth()/2)*ColonyGame.worldGrid.getSquareSize(), (ColonyGame.worldGrid.getHeight()/2)*ColonyGame.worldGrid.getSquareSize());
                 generateStart(startLocation);
@@ -78,8 +78,8 @@ public class ServerPlayer {
         block: {
             int radius = 0;
             boolean placed = false;
-            WorldGen world = WorldGen.getInstance();
-            int[] index = world.getIndex(start);
+            Grid.GridInstance grid = ColonyGame.worldGrid;
+            int[] index = grid.getIndex(start);
 
             while (!placed) {
                 int startX = index[0] - radius;
@@ -93,7 +93,7 @@ public class ServerPlayer {
                         if (x != startX && x != endX && y != startY && y != endY)
                             continue;
 
-                        if(startX < 0 || endX > world.getWidth() || startY < 0 || endY > world.getHeight())
+                        if(startX < 0 || endX > grid.getWidth() || startY < 0 || endY > grid.getHeight())
                             GH.writeErrorMessage("Couldn't find a place to spawn the base!");
 
                         //For each tile, we want to check if there is a 4x4 surrounding area.
@@ -103,7 +103,7 @@ public class ServerPlayer {
                         int innerEndY = y + 5;
 
                         //If the node is null (outside the bounds), continue.
-                        if (world.getNode(innerStartX, innerStartY) == null || world.getNode(innerEndX, innerEndY) == null)
+                        if (grid.getNode(innerStartX, innerStartY) == null || grid.getNode(innerEndX, innerEndY) == null)
                             continue;
 
                         placed = true;
@@ -111,7 +111,7 @@ public class ServerPlayer {
                         //Check over the inner area. If all tiles are not set to avoid, we have a place we can spawn our Colony.
                         for (int innerX = innerStartX; innerX <= innerEndX && placed; innerX++) {
                             for (int innerY = innerStartY; innerY <= innerEndY && placed; innerY++) {
-                                WorldGen.TerrainTile tile = world.getNode(innerX, innerY);
+                                Grid.TerrainTile tile = grid.getNode(innerX, innerY).getTerrainTile();
                                 if (tile.avoid)//If there is a single tile set to avoid, break!
                                     placed = false;
                             }
@@ -119,7 +119,7 @@ public class ServerPlayer {
 
                         //If passed, calculate the start vector.
                         if(placed)
-                            start.set(x * world.getTileSize(), y * world.getTileSize());
+                            start.set(x * grid.getSquareSize(), y * grid.getSquareSize());
                     }
                 }
                 radius++;

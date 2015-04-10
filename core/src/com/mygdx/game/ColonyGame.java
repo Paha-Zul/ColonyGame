@@ -13,7 +13,6 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.mygdx.game.helpers.*;
 import com.mygdx.game.helpers.gui.GUI;
 import com.mygdx.game.helpers.managers.ScriptManager;
-import com.mygdx.game.helpers.worldgeneration.WorldGen;
 import com.mygdx.game.screens.PreLoadingScreen;
 
 import java.util.concurrent.ExecutorService;
@@ -107,10 +106,7 @@ public class ColonyGame extends Game {
 	private void renderMap(){
 		if(worldGrid == null) return;
 
-		WorldGen.TerrainTile[][] map = WorldGen.getInstance().map;
 		int off = 5;
-
-		if(map == null) return;
 
 		float squareSize = ColonyGame.worldGrid.getSquareSize();
 		int halfWidth = (int)((ColonyGame.camera.viewportWidth*ColonyGame.camera.zoom)/2f);
@@ -126,9 +122,9 @@ public class ColonyGame extends Game {
 		//Loop over the array
 		for(int x=startX;x<=endX;x++) {
 			for (int y = startY; y <= endY; y++) {
-				WorldGen.TerrainTile tile = map[x][y];
+				Grid.TerrainTile tile = worldGrid.getNode(x, y).getTerrainTile();
 				if(tile == null) continue;
-				tile.changeVisibility(WorldGen.getInstance().getVisibilityMap()[x][y].getVisibility());
+				tile.changeVisibility(worldGrid.getVisibilityMap()[x][y].getVisibility());
 				tile.terrainSprite.draw(batch);
 			}
 		}

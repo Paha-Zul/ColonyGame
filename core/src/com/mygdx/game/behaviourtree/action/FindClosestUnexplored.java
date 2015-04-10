@@ -7,7 +7,6 @@ import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.Constants;
 import com.mygdx.game.helpers.Grid;
 import com.mygdx.game.helpers.runnables.CallbackRunnable;
-import com.mygdx.game.helpers.worldgeneration.WorldGen;
 import com.mygdx.game.interfaces.Functional;
 
 /**
@@ -39,7 +38,8 @@ public class FindClosestUnexplored extends LeafTask{
         if(this.target == null)
             this.target = this.blackBoard.getEntityOwner();
 
-        Grid.Node[][] grid = ColonyGame.worldGrid.getGrid();
+        Grid.GridInstance grid = ColonyGame.worldGrid;
+        Grid.Node[][] gridMap = grid.getGrid();
         Functional.Callback findClosestUnexplored = () -> {
             int radius = 0;
             float closestDst = 999999999999999f;
@@ -53,9 +53,9 @@ public class FindClosestUnexplored extends LeafTask{
 
             while(closestNode == null || radius < minRadius) {
                 int startX = targetNode.getX() - radius < 0 ? -1 : targetNode.getX() - radius;
-                int endX = targetNode.getX() + radius >= grid.length ? -1 : targetNode.getX() + radius;
+                int endX = targetNode.getX() + radius >= gridMap.length ? -1 : targetNode.getX() + radius;
                 int startY = targetNode.getY() - radius < 0 ? -1 : targetNode.getY() - radius;
-                int endY = targetNode.getY() + radius >= grid[targetNode.getX()].length ? -1 : targetNode.getY() + radius;
+                int endY = targetNode.getY() + radius >= gridMap[targetNode.getX()].length ? -1 : targetNode.getY() + radius;
 
                 if(startX == -1 && endX == -1 && startY == -1 && endY == -1){
                     this.blackBoard.targetNode = null;
@@ -64,14 +64,14 @@ public class FindClosestUnexplored extends LeafTask{
 
                 for(int x = startX; x <= endX; x++){
                     for(int y = startY; y <= endY; y++){
-                        //Check if we are still on the grid.
+                        //Check if we are still on the gridMap.
                         Grid.Node tmpNode = this.blackBoard.colonyGrid.getNode(x, y);
                         if(tmpNode == null)
                             continue;
 
                         //Check terrain and visibility.
-                        boolean avoid = WorldGen.getInstance().getNode(x,y).avoid;
-                        int visibility = WorldGen.getInstance().getVisibilityMap()[x][y].getVisibility();
+                        boolean avoid = grid.getNode(x, y).getTerrainTile().avoid;
+                        int visibility = grid.getVisibilityMap()[x][y].getVisibility();
                         if(visibility != Constants.VISIBILITY_UNEXPLORED || avoid)
                             continue;
 

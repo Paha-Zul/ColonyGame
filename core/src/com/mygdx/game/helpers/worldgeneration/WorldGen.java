@@ -11,11 +11,11 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.component.Resource;
-import com.mygdx.game.entity.Entity;
 import com.mygdx.game.entity.ResourceEnt;
 import com.mygdx.game.helpers.Constants;
 import com.mygdx.game.helpers.DataBuilder;
 import com.mygdx.game.helpers.GH;
+import com.mygdx.game.helpers.Grid;
 import com.mygdx.game.helpers.managers.DataManager;
 
 import java.util.ArrayList;
@@ -26,8 +26,6 @@ import java.util.LinkedList;
  * Created by Bbent_000 on 12/24/2014.
  */
 public class WorldGen {
-    public TerrainTile[][] map;
-
     //Some default values that can be modified globally.
     private int tileSize = 25;
     public float treeScale = 0.8f;
@@ -38,9 +36,8 @@ public class WorldGen {
 
     private TextureAtlas terrainAtlas;
 
-    private VisibilityTile[][] visibilityMap;
 
-    private int numX, numY, currX = 0, currY = 0;
+    private int currX = 0, currY = 0;
     private int numTrees = 0;
 
     private ColonyGame game;
@@ -51,9 +48,9 @@ public class WorldGen {
     private int lastIndex = -1;
 
     //Variables for performing breadth first resource spawning;
-    private LinkedList<TerrainTile> neighbors = new LinkedList<>();
-    private HashMap<Integer, TerrainTile> visitedMap = new HashMap<>(1000);
-    private ArrayList<TerrainTile> tmpNeighbors = new ArrayList<>(4);
+    private LinkedList<Grid.TerrainTile> neighbors = new LinkedList<>();
+    private HashMap<Integer, Grid.TerrainTile> visitedMap = new HashMap<>(1000);
+    private ArrayList<Grid.TerrainTile> tmpNeighbors = new ArrayList<>(4);
     private int[] startIndex;
     private Vector2 center = new Vector2();
     private boolean started = false;
@@ -65,15 +62,6 @@ public class WorldGen {
      */
     public void init(ColonyGame game){
         this.game = game;
-
-        //Sets the number of tiles in X (numX) and Y (numY) by getting the screen width/height.
-        numX = Constants.GRID_WIDTH/tileSize + 1;
-        numY = Constants.GRID_HEIGHT/tileSize + 1;
-
-        //Initializes a new array
-        map = new TerrainTile[numX][numY];
-        //Initialize a new int array.
-        this.visibilityMap = new VisibilityTile[numX][numY];
 
         //Generate a white square (pixel).
         Pixmap pixmap = new Pixmap(1,1, Pixmap.Format.RGBA4444);
@@ -91,25 +79,27 @@ public class WorldGen {
      * @return True when finished, false otherwise.
      */
     public boolean generateWorld(){
-        int maxAmount = numTiles() * DataBuilder.worldData.noiseMapHashMap.size();
+        int maxAmount = ColonyGame.worldGrid.getWidth()*ColonyGame.worldGrid.getHeight() * DataBuilder.worldData.noiseMapHashMap.size();
         int stepsLeft = Constants.WORLDGEN_GENERATESPEED;
         boolean done = true; //Flag for completion.
         HashMap<String, DataBuilder.JsonTileGroup> tileGroupsMap = DataBuilder.tileGroupsMap;
+        Grid.GridInstance grid = ColonyGame.worldGrid;
 
         //This will loop until everything is done.
         while(this.currDone < maxAmount && stepsLeft > 0) {
-            freq = DataBuilder.worldData.noiseMapHashMap.get(this.currIndex).freq;
-            String noiseMapName = DataBuilder.worldData.noiseMapHashMap.get(this.currIndex).name;
+            freq = DataBuilder.worldData.noiseMapHashMap.get(this.currIndex).freq; //Get the frequency of the current noise map.
+            String noiseMapName = DataBuilder.worldData.noiseMapHashMap.get(this.currIndex).name; //Get the name of the current noise map.
 
+            //If the index has changed, we need to increment and get the next noise level.
             if(this.lastIndex != this.currIndex){
                 this.lastIndex = this.currIndex;
                 SimplexNoise.genGrad(DataBuilder.worldData.noiseMapHashMap.get(this.currIndex).noiseSeed);
             }
 
             //Loop for a certain amount of steps. This is done for each noise level. Resets after each one.
-            while (stepsLeft > 0 && currX < numX) {
+            while (stepsLeft > 0 && currX < grid.getWidth()) {
                 double noiseValue = SimplexNoise.noise((double) currX / freq, (double) currY / freq); //Generate the noise for this tile.
-                Vector2 position = new Vector2(currX * getTileSize(), currY * getTileSize()); //Set the position.
+                Vector2 position = new Vector2(currX * grid.getSquareSize(), currY * grid.getSquareSize()); //Set the position.
                 Sprite terrainSprite; //Prepare the sprite object.
                 int type = 0; //The interType of tile.
                 float rotation = 0; //The rotation of the tile.
@@ -124,34 +114,32 @@ public class WorldGen {
                 else if(jtile != null) {
                     //Gets the texture that the tile should be.
                     int randTileIndex = MathUtils.random(jtile.img.length - 1);
-                    TerrainTile tile;
+                    Grid.TerrainTile tile = grid.getGrid()[currX][currY].getTerrainTile();
 
-                    if(map[currX][currY] != null){
-                        tile = map[currX][currY];
-                    }else{
-                        tile = new TerrainTile();
-                    }
+                    if(tile == null)
+                        tile = new Grid.TerrainTile();
 
                     //Creates a new sprite and a new tile, assigns the Sprite to the tile and puts it into the map array.
                     terrainSprite = terrainAtlas.createSprite(jtile.img[randTileIndex]);
-                    terrainSprite.setSize(getTileSize(), getTileSize());
+                    terrainSprite.setSize(grid.getSquareSize(), grid.getSquareSize());
                     tile.set(terrainSprite, noiseValue, rotation, type, position); //Create a new terrain tile.
                     tile.avoid = jtile.avoid;
                     if(jtile.tileNames.length <= randTileIndex) GH.writeErrorMessage("Tile with image "+jtile.img[randTileIndex]+" and category "+jtile.category+" does not have a name assigned to it");
                     tile.tileName = jtile.tileNames[randTileIndex]; //Assign the name
                     tile.category = jtile.category; //Assign the category.
-                    map[currX][currY] = tile; //Assign the tile to the map.
+                    grid.getGrid()[currX][currY].setTerrainTile(tile); //Assign the tile to the map.
                 }
 
                 //Generate the visibility tile for this location
-                this.visibilityMap[currX][currY] = new VisibilityTile();
+                grid.getVisibilityMap()[currX][currY] = new Grid.VisibilityTile();
 
                 //Decrement steps remaining and increment currDone.
                 stepsLeft--;
                 this.currDone++;
 
-                if (currY < numY - 1) currY++; //Increment currY
-                //Otherwise, set currY to 0 and increment X.
+                //If we still have Y tiles to cover, simply increment currY.
+                if (currY < grid.getHeight() - 1) currY++;
+                //If our currY went past the grid height, we need to reset currY to 0 and start over, increment X to move over 1.
                 else {
                     currY = 0; //Reset currY
                     currX++; //Increment currX
@@ -173,6 +161,7 @@ public class WorldGen {
             stepsLeft = 0;
         }
 
+        //If we're done, clear some values.
         if(done){
             currIndex = 0;
             currX = currY = 0;
@@ -183,23 +172,24 @@ public class WorldGen {
 
     public boolean generateResources(Vector2 startPos, int blockRadius, int step){
         boolean done = false;
+        Grid.GridInstance grid = ColonyGame.worldGrid;
 
         if(!started){
-            this.neighbors.add(this.getNode(startPos));
-            this.startIndex = this.getIndex(startPos);
+            this.neighbors.add(grid.getNode(startPos).getTerrainTile());
+            this.startIndex = grid.getIndex(startPos);
             this.started = true;
             noiseMapName = DataBuilder.worldData.noiseMapHashMap.get(this.currIndex).name;
         }
 
         //Partially executes a breadth first search.
         for (int i = 0; i < step; i++) {
-            TerrainTile currTile = neighbors.pop(); //Pop the first neighbor
-            int[] index = {(int) (currTile.terrainSprite.getX() / getTileSize()), (int) (currTile.terrainSprite.getY() / getTileSize())}; //Get the index.
+            Grid.TerrainTile currTile = neighbors.pop(); //Pop the first neighbor
+            int[] index = {(int) (currTile.terrainSprite.getX() / grid.getSquareSize()), (int) (currTile.terrainSprite.getY() / grid.getSquareSize())}; //Get the index.
             //Get left/right/up/down
-            TerrainTile left = this.getNode(index[0] - 1, index[1]);
-            TerrainTile right = this.getNode(index[0] + 1, index[1]);
-            TerrainTile up = this.getNode(index[0], index[1] + 1);
-            TerrainTile down = this.getNode(index[0] - 1, index[1] - 1);
+            Grid.TerrainTile left = grid.getNode(index[0] - 1, index[1]).getTerrainTile();
+            Grid.TerrainTile right = grid.getNode(index[0] + 1, index[1]).getTerrainTile();
+            Grid.TerrainTile up = grid.getNode(index[0], index[1] + 1).getTerrainTile();
+            Grid.TerrainTile down = grid.getNode(index[0] - 1, index[1] - 1).getTerrainTile();
 
             //If a neighbor is not null and it hasn't been visited already...
             if (left != null && !visitedMap.containsKey(left.hashCode())) {
@@ -222,13 +212,13 @@ public class WorldGen {
             //Add the current tile to the visitedMap.
             visitedMap.put(currTile.hashCode(), currTile);
 
-            int[] currIndex = getIndex(currTile.terrainSprite.getX(), currTile.terrainSprite.getY()); //Get the current index.
+            int[] currIndex = grid.getIndex(currTile.terrainSprite.getX(), currTile.terrainSprite.getY()); //Get the current index.
             //If the resource is within the blockRadius, simply continue.
             if (Math.abs(currIndex[0] - startIndex[0]) <= blockRadius && Math.abs(currIndex[1] - startIndex[1]) <= blockRadius)
                 continue;
 
             //Set the center Vector2 and spawn the tree using the center position.
-            center.set(currTile.terrainSprite.getX() + WorldGen.getInstance().getTileSize() * 0.5f, currTile.terrainSprite.getY() + WorldGen.getInstance().getTileSize() * 0.5f);
+            center.set(currTile.terrainSprite.getX() + grid.getSquareSize() * 0.5f, currTile.terrainSprite.getY() + grid.getSquareSize() * 0.5f);
             spawnTree(getTileAtHeight(DataBuilder.tileGroupsMap.get(noiseMapName).tiles, (float) currTile.noiseValue), center, currTile);
 
             //If there are no more neighbors, we are done.
@@ -252,7 +242,7 @@ public class WorldGen {
     }
 
     //Spawns a tree.
-    private void spawnTree(DataBuilder.JsonTile jtile, Vector2 centerPos, TerrainTile currTile){
+    private void spawnTree(DataBuilder.JsonTile jtile, Vector2 centerPos, Grid.TerrainTile currTile){
         if(jtile == null || currTile == null || !currTile.category.equals(jtile.category))
             return;
 
@@ -274,14 +264,6 @@ public class WorldGen {
         resEnt.addComponent(res);
         resEnt.transform.setScale(treeScale);
         resEnt.name = res.getDisplayName();
-    }
-
-    public int[] getIndex(Vector2 pos){
-        return getIndex(pos.x, pos.y);
-    }
-
-    public int[] getIndex(float x, float y){
-        return new int[]{(int)(x/this.getTileSize()), (int)(y/this.getTileSize())};
     }
 
     /**
@@ -318,173 +300,8 @@ public class WorldGen {
         return null;
     }
 
-    /**
-     * Gets the Node at the Entity's location.
-     *
-     * @param entity The Entity to use for a location.
-     * @return A Node at the Entity's location.
-     */
-    public TerrainTile getNode(Entity entity) {
-        return getNode((int) (entity.transform.getPosition().x / getTileSize()), (int) (entity.transform.getPosition().y / getTileSize()));
-    }
-
-    /**
-     * Gets the Node at the Vector2 position.
-     *
-     * @param pos The Vector2 position to get a Node at.
-     * @return A Node at the Vector2 position.
-     */
-    public TerrainTile getNode(Vector2 pos) {
-        System.out.println("Getting node at: "+(int) (pos.x / getTileSize()) +"/"+ (int) (pos.y / getTileSize()));
-        return getNode((int) (pos.x / getTileSize()), (int) (pos.y / getTileSize()));
-    }
-
-    /**
-     * Gets a Node by a X and Y index.
-     *
-     * @param x The X (col) index to get the Node at.
-     * @param y The Y (row) index to get the Node at.
-     * @return The Node if the index was valid, null otherwise.
-     */
-    public TerrainTile getNode(int x, int y) {
-        //If the index is not in bounds, return null.
-        if (x < 0 || x >= map.length || y < 0 || y >= map[x].length)
-            return null;
-
-        return map[x][y];
-    }
-
-    /**
-     * Gets a Node by an index.
-     *
-     * @param index An integer array containing X and Y index.
-     * @return The Node if the index was valid, null otherwise.
-     */
-    public TerrainTile getNode(int[] index) {
-        if (index.length < 2)
-            return null;
-
-        return getNode(index[0], index[1]);
-    }
-
-    public int getWidth(){
-        return map.length;
-    }
-
-    public int getHeight(){
-        return map[0].length;
-    }
-
-    public int numTiles() {
-        return numX*numY;
-    }
-
-    public VisibilityTile[][] getVisibilityMap(){
-        return this.visibilityMap;
-    }
-
     public int numTrees(){
         return numTrees;
-    }
-
-    public float getTileSize(){
-        return GH.toMeters(this.tileSize);
-    }
-
-    public void setTileSize(int tileSize){
-        this.tileSize = tileSize;
-    }
-
-    public class TerrainTile {
-        public String tileName, category;
-        public Sprite terrainSprite;
-        public double noiseValue;
-        public int type;
-        public boolean avoid = false;
-        private int visibility = Constants.VISIBILITY_UNEXPLORED;
-
-        public TerrainTile(){
-
-        }
-
-        public TerrainTile(Sprite sprite, double noiseValue, float rotation, int type, Vector2 position) {
-            this.terrainSprite = new Sprite(sprite);
-            this.terrainSprite.setColor(Constants.COLOR_UNEXPLORED);
-            this.noiseValue = noiseValue;
-            this.type = type;
-            this.terrainSprite.setPosition(position.x, position.y);
-            this.terrainSprite.setRotation(rotation);
-        }
-
-        public void changeVisibility(int visibility){
-            if(this.visibility == visibility)
-                return;
-
-            this.visibility = visibility;
-            if(visibility == Constants.VISIBILITY_UNEXPLORED) this.terrainSprite.setColor(Constants.COLOR_UNEXPLORED);
-            if(visibility == Constants.VISIBILITY_EXPLORED) this.terrainSprite.setColor(Constants.COLOR_EXPLORED);
-            if(visibility == Constants.VISIBILITY_VISIBLE) this.terrainSprite.setColor(Constants.COLOR_VISIBILE);
-        }
-
-        public void set(Sprite sprite, double noiseValue, float rotation, int type, Vector2 position){
-            if(terrainSprite != null)
-                this.terrainSprite.set(sprite);
-            else this.terrainSprite = sprite;
-
-            this.noiseValue = noiseValue;
-            this.terrainSprite.setRotation(rotation);
-            this.type = type;
-            this.terrainSprite.setPosition(position.x, position.y);
-            this.terrainSprite.setColor(Constants.COLOR_UNEXPLORED);
-        }
-
-        @Override
-        public int hashCode() {
-            int hash = (int)(terrainSprite.getX() + terrainSprite.getY() + terrainSprite.getWidth() + terrainSprite.getY());
-            hash += hash*type;
-            hash += noiseValue*10000d;
-            hash += terrainSprite.hashCode();
-
-            return hash;
-        }
-    }
-
-    public class VisibilityTile{
-        private int visibility = Constants.VISIBILITY_UNEXPLORED;
-        private int currViewers = 0;
-
-        public VisibilityTile(){
-            this.visibility = Constants.VISIBILITY_UNEXPLORED;
-        }
-
-        /**
-         * Adds a viewer to this Tile. This will immediately mark the Tile as visible.
-         */
-        public void addViewer(){
-            this.currViewers++;
-            this.changeVisibility(Constants.VISIBILITY_VISIBLE);
-        }
-
-        /**
-         * Removes a viewer from this tile. If it reaches 0, the terrain is set to explored and not visibile.
-         */
-        public void removeViewer(){
-            this.currViewers--;
-            if(currViewers <= 0)
-                this.changeVisibility(Constants.VISIBILITY_EXPLORED);
-        }
-
-        public int getVisibility() {
-            return visibility;
-        }
-
-        public void changeVisibility(int visibility){
-            this.visibility = visibility;
-        }
-
-        public int getCurrViewers() {
-            return currViewers;
-        }
     }
 
     public void clean(){

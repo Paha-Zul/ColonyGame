@@ -6,7 +6,6 @@ import com.mygdx.game.ColonyGame;
 import com.mygdx.game.behaviourtree.LeafTask;
 import com.mygdx.game.component.BlackBoard;
 import com.mygdx.game.helpers.Grid;
-import com.mygdx.game.helpers.worldgeneration.WorldGen;
 
 import java.util.ArrayDeque;
 import java.util.LinkedList;
@@ -110,7 +109,7 @@ public class FindPath extends LeafTask {
                 else
                     node.G = currNode.G + 20; //Diagonal.
 
-                WorldGen.TerrainTile tile = WorldGen.getInstance().getNode(node.getX(), node.getY());
+                Grid.TerrainTile tile = ColonyGame.worldGrid.getNode(node.getX(), node.getY()).getTerrainTile();
                 if (node.getEntityList().size() > 0 || (tile != null && tile.avoid))
                     node.B = 500;
 

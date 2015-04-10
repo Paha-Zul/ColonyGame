@@ -282,7 +282,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
             GUI.Text("Zoom: " + ColonyGame.camera.zoom, this.batch, 0, height - 40);
             GUI.Text("Resolution: " + Gdx.graphics.getDesktopDisplayMode().width + "X" + Gdx.graphics.getDesktopDisplayMode().height, this.batch, 0, height - 60);
             GUI.Text("NumTrees: " + WorldGen.getInstance().numTrees(), this.batch, 0, height - 80);
-            GUI.Text("NumTiles: " + WorldGen.getInstance().numTiles(), this.batch, 0, height - 100);
+            GUI.Text("NumTiles: " + ColonyGame.worldGrid.getWidth()*ColonyGame.worldGrid.getHeight(), this.batch, 0, height - 100);
             GUI.Text("NumGridCols(X): " + ColonyGame.worldGrid.getWidth(), this.batch, 0, height - 120);
             GUI.Text("NumGridRows(Y): " + ColonyGame.worldGrid.getHeight(), this.batch, 0, height - 140);
         }
@@ -295,11 +295,11 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     private void drawTerrainInfo(Rectangle rect){
         OrthographicCamera camera = ColonyGame.camera;
         Vector3 mouseCoords = camera.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
+        Grid.GridInstance grid = ColonyGame.worldGrid;
 
         GUI.Texture(this.background, rect, this.batch);
-        WorldGen world = WorldGen.getInstance();
-        int index[] = world.getIndex(mouseCoords.x, mouseCoords.y);
-        WorldGen.TerrainTile tile = world.getNode(index);
+        int index[] = grid.getIndex(mouseCoords.x, mouseCoords.y);
+        Grid.TerrainTile tile = grid.getNode(index).getTerrainTile();
         if(tile == null) return;
         GUI.Label(tile.category, this.batch, rect.x, rect.getY(), rect.getWidth()*0.5f, rect.getHeight()*0.5f);
     }
@@ -512,11 +512,10 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
     //Reveals the entire map by adding a viewer to every tile.
     private void revealMap(){
-        Grid.Node[][] grid = ColonyGame.worldGrid.getGrid();
-        System.out.println("grid: "+grid.length+"/"+grid[0].length);
-        WorldGen.VisibilityTile[][] visMap = WorldGen.getInstance().getVisibilityMap();
-        for (WorldGen.VisibilityTile[] aVisMap : visMap) {
-            for (WorldGen.VisibilityTile anAVisMap : aVisMap) {
+        Grid.GridInstance grid = ColonyGame.worldGrid;
+        Grid.VisibilityTile[][] visMap = grid.getVisibilityMap();
+        for (Grid.VisibilityTile[] aVisMap : visMap) {
+            for (Grid.VisibilityTile anAVisMap : aVisMap) {
                 anAVisMap.addViewer();
             }
         }

@@ -346,7 +346,6 @@ public class DataBuilder implements IDestroyable{
 
         WorldGen.getInstance().treeScale = world.treeScale;
         WorldGen.getInstance().freq = world.noiseMapHashMap.get(0).freq;
-        WorldGen.getInstance().setTileSize(world.tileSize);
         Constants.GRID_SQUARESIZE = world.tileSize;
         Constants.GRID_WIDTH = world.worldWidth;
         Constants.GRID_HEIGHT = world.worldHeight;

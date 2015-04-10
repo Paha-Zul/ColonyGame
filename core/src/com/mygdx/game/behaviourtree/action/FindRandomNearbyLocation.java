@@ -5,7 +5,6 @@ import com.mygdx.game.behaviourtree.LeafTask;
 import com.mygdx.game.component.BlackBoard;
 import com.mygdx.game.component.Transform;
 import com.mygdx.game.helpers.Grid;
-import com.mygdx.game.helpers.worldgeneration.WorldGen;
 import com.mygdx.game.interfaces.Functional;
 
 import java.util.ArrayList;
@@ -51,7 +50,7 @@ public class FindRandomNearbyLocation extends LeafTask{
                 for (int col = startX; col <= endX; col++) {
                     for (int row = startY; row <= endY; row++) {
                         Grid.Node node = this.blackBoard.colonyGrid.getNode(col, row);
-                        if (node != null && (col == startX || col == endX || row == startY || row == endY) && !WorldGen.getInstance().getNode(node.getX(), node.getY()).avoid)
+                        if (node != null && (col == startX || col == endX || row == startY || row == endY) && !blackBoard.colonyGrid.getNode(node.getX(), node.getY()).getTerrainTile().avoid)
                             nodes.add(node);
                     }
                 }

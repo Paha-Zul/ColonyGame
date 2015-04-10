@@ -16,7 +16,6 @@ import com.mygdx.game.helpers.GH;
 import com.mygdx.game.helpers.Grid;
 import com.mygdx.game.helpers.timer.OneShotTimer;
 import com.mygdx.game.helpers.timer.Timer;
-import com.mygdx.game.helpers.worldgeneration.WorldGen;
 import com.mygdx.game.interfaces.Functional;
 
 import java.util.ArrayList;
@@ -352,8 +351,8 @@ public class BehaviourManagerComp extends Component{
         //We need to tell this fct what can pass as a valid tile.
         fct.getControl().callbacks.successCriteria = nd -> {
             Grid.Node node = (Grid.Node)nd;
-            WorldGen.TerrainTile tile = WorldGen.getInstance().getNode(node.getX(), node.getY());
-            int visibility = WorldGen.getInstance().getVisibilityMap()[node.getX()][node.getY()].getVisibility();
+            Grid.TerrainTile tile = blackBoard.colonyGrid.getNode(node.getX(), node.getY()).getTerrainTile();
+            int visibility = blackBoard.colonyGrid.getVisibilityMap()[node.getX()][node.getY()].getVisibility();
 
             return tile.category.equals("LightWater") && visibility != Constants.VISIBILITY_UNEXPLORED;
         };

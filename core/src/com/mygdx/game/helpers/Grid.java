@@ -8,7 +8,6 @@ import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.gui.GUI;
-import com.mygdx.game.helpers.worldgeneration.WorldGen;
 import com.mygdx.game.interfaces.Functional;
 import com.sun.istack.internal.NotNull;
 
@@ -34,6 +33,7 @@ public class Grid {
     public static class GridInstance {
         private int numCols, numRows, squareSize;
         private Node[][] grid;
+        private VisibilityTile[][] visibilityMap;
 
         public GridInstance(int width, int height, int squareSize) {
             //Set some values.
@@ -48,6 +48,8 @@ public class Grid {
                     this.grid[col][row] = new Grid.PathNode(col, row);
                 }
             }
+
+            this.visibilityMap = new VisibilityTile[numCols][numRows];
         }
 
         /**
@@ -126,7 +128,7 @@ public class Grid {
             int endX = node.getX()+exploreRadius;
             int startY = node.getY()-exploreRadius;
             int endY = node.getY()+exploreRadius;
-            WorldGen.VisibilityTile[][] visMap = WorldGen.getInstance().getVisibilityMap();
+            VisibilityTile[][] visMap = getVisibilityMap();
 
             for(int x=startX;x<=endX;x++){
                 for(int y=startY;y<=endY;y++){
@@ -170,7 +172,7 @@ public class Grid {
 
                     //Gdx.app.log("Startx/Endx/StartY/EndY: ",startX+"/"+endX+"/"+startY+"/"+endY);
 
-                    WorldGen.VisibilityTile[][] visibilityMap = WorldGen.getInstance().getVisibilityMap();
+                    VisibilityTile[][] visibilityMap = getVisibilityMap();
 
                     for(int x = startX; x <= endX ; x++){
                         for(int y = startY; y <= endY; y++){
@@ -347,7 +349,15 @@ public class Grid {
          * @return An integer array containing 2 values, the X and Y index.
          */
         public int[] getIndex(Vector2 position) {
-            return new int[]{(int) (position.x / getSquareSize()), (int) (position.y / getSquareSize())};
+            return getIndex(position.x, position.y);
+        }
+
+        public int[] getIndex(float x, float y) {
+            return new int[]{(int) (x / getSquareSize()), (int) (y / getSquareSize())};
+        }
+
+        public final VisibilityTile[][] getVisibilityMap(){
+            return this.visibilityMap;
         }
 
         public void debugDraw() {
@@ -380,6 +390,9 @@ public class Grid {
         }
     }
 
+    /**
+     * A Node for the GridInstance class. Holds information about each Node such as Entities in the Node, Terrain information... etc.
+     */
     public static class Node{
         private int x, y;
         private ArrayList<Entity> entList = new ArrayList<>();
@@ -418,6 +431,9 @@ public class Grid {
             this.terrainTile = terrainTile;
         }
 
+        public TerrainTile getTerrainTile(){
+            return this.terrainTile;
+        }
 
         @Override
         public String toString() {
@@ -445,7 +461,7 @@ public class Grid {
     /**
      * A class that contains terrain information and graphics for the tile it is attached to.
      */
-    public class TerrainTile {
+    public static class TerrainTile {
         public String tileName, category;
         public Sprite terrainSprite;
         public double noiseValue;
@@ -502,7 +518,7 @@ public class Grid {
     /**
      * A class that contains visibility information about the tile it is attached to.
      */
-    public class VisibilityTile{
+    public static class VisibilityTile{
         private int visibility = Constants.VISIBILITY_UNEXPLORED;
         private int currViewers = 0;
 

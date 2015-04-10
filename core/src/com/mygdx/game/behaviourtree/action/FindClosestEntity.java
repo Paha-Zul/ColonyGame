@@ -7,7 +7,6 @@ import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.Constants;
 import com.mygdx.game.helpers.Grid;
 import com.mygdx.game.helpers.runnables.CallbackRunnable;
-import com.mygdx.game.helpers.worldgeneration.WorldGen;
 import com.mygdx.game.interfaces.Functional;
 
 /**
@@ -37,7 +36,8 @@ public class FindClosestEntity extends LeafTask{
     }
 
     private void getClosestResource(){
-        Grid.Node[][] grid = ColonyGame.worldGrid.getGrid();
+        Grid.GridInstance grid = ColonyGame.worldGrid;
+        Grid.Node[][] gridMap = grid.getGrid();
         Functional.Callback getClosestResource = () -> {
             Grid.Node currNode = this.blackBoard.colonyGrid.getNode(this.blackBoard.getEntityOwner()); //Get the nod we are standing on.
             boolean finished = false; //Flag
@@ -55,9 +55,9 @@ public class FindClosestEntity extends LeafTask{
             while(!finished) {
                 //Get the starting and ending bounds.
                 int startX = (currNode.getX() - radius < 0) ? -1 : currNode.getX() - radius;
-                int endX = (currNode.getX() + radius >= grid.length) ? grid.length : currNode.getX() + radius;
+                int endX = (currNode.getX() + radius >= gridMap.length) ? gridMap.length : currNode.getX() + radius;
                 int startY = (currNode.getY() - radius < 0) ? -1 : currNode.getY() - radius;
-                int endY = (currNode.getY() + radius >= grid[currNode.getX()].length) ? grid.length : currNode.getY() + radius;
+                int endY = (currNode.getY() + radius >= gridMap[currNode.getX()].length) ? gridMap.length : currNode.getY() + radius;
 
                 finished = true;
 
@@ -71,7 +71,7 @@ public class FindClosestEntity extends LeafTask{
 
                         //If we try to get the node and it's null, continue.
                         Grid.Node node = this.blackBoard.colonyGrid.getNode(col, row);
-                        if(node == null || WorldGen.getInstance().getVisibilityMap()[col][row].getVisibility() == Constants.VISIBILITY_UNEXPLORED)
+                        if(node == null || grid.getVisibilityMap()[col][row].getVisibility() == Constants.VISIBILITY_UNEXPLORED)
                             continue;
 
                         finished = false; //Set this to false. We still have places to check obviously!
