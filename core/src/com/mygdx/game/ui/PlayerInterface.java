@@ -299,6 +299,8 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
         GUI.Texture(this.background, rect, this.batch);
         int index[] = grid.getIndex(mouseCoords.x, mouseCoords.y);
+        Grid.Node node = grid.getNode(index);
+        if(node == null) return;
         Grid.TerrainTile tile = grid.getNode(index).getTerrainTile();
         if(tile == null) return;
         GUI.Label(tile.category, this.batch, rect.x, rect.getY(), rect.getWidth()*0.5f, rect.getHeight()*0.5f);

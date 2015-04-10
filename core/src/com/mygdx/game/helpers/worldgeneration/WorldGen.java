@@ -185,28 +185,29 @@ public class WorldGen {
         for (int i = 0; i < step; i++) {
             Grid.TerrainTile currTile = neighbors.pop(); //Pop the first neighbor
             int[] index = {(int) (currTile.terrainSprite.getX() / grid.getSquareSize()), (int) (currTile.terrainSprite.getY() / grid.getSquareSize())}; //Get the index.
+
             //Get left/right/up/down
-            Grid.TerrainTile left = grid.getNode(index[0] - 1, index[1]).getTerrainTile();
-            Grid.TerrainTile right = grid.getNode(index[0] + 1, index[1]).getTerrainTile();
-            Grid.TerrainTile up = grid.getNode(index[0], index[1] + 1).getTerrainTile();
-            Grid.TerrainTile down = grid.getNode(index[0] - 1, index[1] - 1).getTerrainTile();
+            Grid.Node left = grid.getNode(index[0] - 1, index[1]);
+            Grid.Node right = grid.getNode(index[0] + 1, index[1]);
+            Grid.Node up = grid.getNode(index[0], index[1] + 1);
+            Grid.Node down = grid.getNode(index[0] - 1, index[1] - 1);
 
             //If a neighbor is not null and it hasn't been visited already...
-            if (left != null && !visitedMap.containsKey(left.hashCode())) {
-                neighbors.add(left);
-                visitedMap.put(left.hashCode(), left);
+            if (left != null && left.getTerrainTile() != null && !visitedMap.containsKey(left.hashCode())) {
+                neighbors.add(left.getTerrainTile());
+                visitedMap.put(left.hashCode(), left.getTerrainTile());
             }
-            if (right != null && !visitedMap.containsKey(right.hashCode())) {
-                neighbors.add(right);
-                visitedMap.put(right.hashCode(), right);
+            if (right != null && right.getTerrainTile() != null && !visitedMap.containsKey(right.hashCode())) {
+                neighbors.add(right.getTerrainTile());
+                visitedMap.put(right.hashCode(), right.getTerrainTile());
             }
-            if (up != null && !visitedMap.containsKey(up.hashCode())) {
-                neighbors.add(up);
-                visitedMap.put(up.hashCode(), up);
+            if (up != null && up.getTerrainTile() != null && !visitedMap.containsKey(up.hashCode())) {
+                neighbors.add(up.getTerrainTile());
+                visitedMap.put(up.hashCode(), up.getTerrainTile());
             }
-            if (down != null && !visitedMap.containsKey(down.hashCode())) {
-                neighbors.add(down);
-                visitedMap.put(down.hashCode(), down);
+            if (down != null && down.getTerrainTile() != null && !visitedMap.containsKey(down.hashCode())) {
+                neighbors.add(down.getTerrainTile());
+                visitedMap.put(down.hashCode(), down.getTerrainTile());
             }
 
             //Add the current tile to the visitedMap.

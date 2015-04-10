@@ -268,7 +268,7 @@ public class Grid {
          */
         public Node getNode(int[] index) {
             if (index.length < 2)
-                return null;
+                GH.writeErrorMessage("Trying to get a node via index but passed in an index of less than size 2.");
 
             return this.getNode(index[0], index[1]);
         }
@@ -394,9 +394,9 @@ public class Grid {
      * A Node for the GridInstance class. Holds information about each Node such as Entities in the Node, Terrain information... etc.
      */
     public static class Node{
-        private int x, y;
+        private int x=-1, y=-1;
         private ArrayList<Entity> entList = new ArrayList<>();
-        private TerrainTile terrainTile;
+        private TerrainTile terrainTile = null;
 
         public Node(int x, int y){
             this.x = x;
