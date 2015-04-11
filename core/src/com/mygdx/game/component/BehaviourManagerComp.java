@@ -131,7 +131,7 @@ public class BehaviourManagerComp extends Component{
 
         //When we finish, set the target back to not taken IF it is still a valid target (if we ended early).
         sequence.getControl().callbacks.finishCallback = () -> {
-            if (sequence.getBlackboard().target != null && !sequence.getBlackboard().target.isValid() && sequence.getBlackboard().target.hasTag(Constants.ENTITY_RESOURCE)) {
+            if (sequence.getBlackboard().target != null && sequence.getBlackboard().target.isValid() && sequence.getBlackboard().target.hasTag(Constants.ENTITY_RESOURCE)) {
                 if(sequence.getBlackboard().targetResource.getTaken() == sequence.getBlackboard().getEntityOwner())
                     sequence.getBlackboard().targetResource.setTaken(null);
             }
@@ -387,19 +387,27 @@ public class BehaviourManagerComp extends Component{
         ((ParentTaskController)seq.getControl()).addTask(mt);
         ((ParentTaskController)seq.getControl()).addTask(attack);
 
+        //Make sure the target is not null.
         repeat.getControl().callbacks.checkCriteria = task -> task.getBlackboard().target != null;
 
+        //If the target is null, not valid, or not alive, fail the MoveTo task.
+        //If the target has moved from the spot it once was, fail this MoveTo task
         mt.getControl().callbacks.failCriteria = task -> {
             Entity target = ((Task)task).getBlackboard().target;
-            return target == null || !target.isValid() || !target.hasTag(Constants.ENTITY_ALIVE);
+            boolean valid = target == null || !target.isValid() || !target.hasTag(Constants.ENTITY_ALIVE);
+            boolean moved = ((Task)task).getBlackboard().targetNode != ColonyGame.worldGrid.getNode(((Task)task).getBlackboard().target);
+
+            return valid || moved;
         };
 
+        //If we are within range of the target, succeed the MoveTo task.
         mt.getControl().callbacks.successCriteria = tsk -> {
             Task task = (Task)tsk;
             float dis = task.getBlackboard().target.transform.getPosition().dst(this.owner.transform.getPosition());
             return dis <= GH.toMeters(task.getBlackboard().attackRange);
         };
 
+        //Repeat until the target is null, not valud, or is not alive.
         repeat.getControl().callbacks.successCriteria = tsk -> {
             Task task = (Task)tsk;
             return task.getBlackboard().target == null || !task.getBlackboard().target.isValid() || !task.getBlackboard().target.hasTag(Constants.ENTITY_ALIVE);

@@ -45,7 +45,7 @@ public class Grid {
             this.grid = new Node[this.numCols][this.numRows];
             for (int col = 0; col < grid.length; col++) {
                 for (int row = 0; row < grid[col].length; row++) {
-                    this.grid[col][row] = new Grid.PathNode(col, row);
+                    this.grid[col][row] = new Grid.Node(col, row);
                 }
             }
 
@@ -381,10 +381,6 @@ public class Grid {
                 for (int row = 0; row < grid[col].length; row++) {
                     Node node = grid[col][row];
                     GUI.Text("index: " + node.getX() + " " + node.getY(), batch, col * getSquareSize(), row * getSquareSize() + getSquareSize());
-                    GUI.Text("G: " + ((PathNode) node).G, batch, col * getSquareSize(), row * getSquareSize() + getSquareSize() - 20);
-                    GUI.Text("H: " + ((PathNode) node).H, batch, col * getSquareSize(), row * getSquareSize() + getSquareSize() - 40);
-                    GUI.Text("B: " + ((PathNode) node).B, batch, col * getSquareSize(), row * getSquareSize() + getSquareSize() - 60);
-                    GUI.Text("F: " + ((PathNode) node).getF(), batch, col * getSquareSize(), row * getSquareSize() + getSquareSize() - 80);
                 }
             }
         }
@@ -444,17 +440,28 @@ public class Grid {
     /**
      * Nodes that contain path information for pathfinding tasks.
      */
-    public static class PathNode extends Node{
+    public static class PathNode{
+        public int x, y;
         public float G, H, B;
-        public boolean visited = false, open = false, closed = false;
         public PathNode parentNode;
+        public Node node;
 
-        public PathNode(int col, int row) {
-            super(col, row);
+        public PathNode(int x, int y) {
+            this.x = x;
+            this.y = y;
+        }
+
+        public PathNode(Node node) {
+            this(node.x, node.y);
+            this.node = node;
         }
 
         public float getF(){
             return G+H+B;
+        }
+
+        public boolean hasEnts(){
+            return node.getEntityList().size() > 0;
         }
     }
 

@@ -7,7 +7,7 @@ import com.mygdx.game.behaviourtree.LeafTask;
 import com.mygdx.game.component.BlackBoard;
 import com.mygdx.game.helpers.Grid;
 
-import java.util.ArrayDeque;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.PriorityQueue;
 
@@ -51,15 +51,15 @@ public class FindPath extends LeafTask {
     public LinkedList<Vector2> getPath(){
         boolean found = false;
         Grid.PathNode target = null;
-        Grid.PathNode targetNode;
+        Grid.Node targetNode;
 
         //If we have a target node in the blackboard, use it.
         if(this.blackBoard.targetNode != null)
-            targetNode = (Grid.PathNode)this.blackBoard.targetNode;
+            targetNode = this.blackBoard.targetNode;
 
         //Otherwise, if we have an Entity target, get the node from that.
         else if(this.blackBoard.target != null)
-            targetNode = (Grid.PathNode)this.blackBoard.colonyGrid.getNode(this.blackBoard.target);
+            targetNode = this.blackBoard.colonyGrid.getNode(this.blackBoard.target);
 
         //Otherwise, end with failure.
         else{
@@ -75,75 +75,57 @@ public class FindPath extends LeafTask {
         }
 
         LinkedList<Vector2> path = new LinkedList<>(); //Will hold the end path.
-        ArrayDeque<Grid.PathNode> closedList = new ArrayDeque<>(20); //Holds already visited nodes.
+        HashMap<Grid.Node, Grid.Node> visitedMap = new HashMap<>();
 
         //Priority queue that sorts by the lowest F value of the PathNode.
         PriorityQueue<Grid.PathNode> openList = new PriorityQueue<>((n1, n2) -> (int)((n1.getF() - n2.getF())*100));
 
         //Set the starting currNode and its G and H value.
-        Grid.PathNode currNode = (Grid.PathNode)this.blackBoard.colonyGrid.getNode(this.blackBoard.getEntityOwner());
+        Grid.PathNode currNode = new Grid.PathNode(this.blackBoard.colonyGrid.getNode(this.blackBoard.getEntityOwner()));
         currNode.parentNode = null;
         currNode.G = 0;
-        currNode.H = Math.abs(targetNode.getX() - currNode.getX()) + Math.abs(targetNode.getY() - currNode.getY())*10;
-        currNode.visited = true;
+        currNode.H = Math.abs(targetNode.getX() - currNode.x) + Math.abs(targetNode.getY() - currNode.y)*10;
+        visitedMap.put(currNode.node, currNode.node);
 
         while(currNode != null && !found){
-            if(currNode == targetNode){
+            if(currNode.node == targetNode){
                 found = true;
                 target = currNode;
+                currNode = null;
                 break;
             }
 
-            Grid.Node[] neighbors = this.blackBoard.colonyGrid.getNeighbors8(currNode);
+            visitedMap.put(currNode.node, currNode.node);
+            Grid.Node[] neighbors = this.blackBoard.colonyGrid.getNeighbors8(currNode.node);
 
             //Add all the (valid) neighbors to the openList.
             for (Grid.Node neighbor : neighbors) {
-                Grid.PathNode node = (Grid.PathNode) neighbor;
-                if (node == null || node.visited)
-                    continue;
+                if (neighbor == null || visitedMap.containsKey(neighbor)) continue;
+                visitedMap.put(neighbor, neighbor);
+
+                //Add the neighbor node to the visited map and open list.
+                Grid.PathNode neighborNode = new Grid.PathNode(neighbor);
 
                 //Set this neighbors values and add it to the openList.
-                int[] dir = this.blackBoard.colonyGrid.getDirection(node, currNode);
+                int[] dir = this.blackBoard.colonyGrid.getDirection(neighborNode.node, currNode.node);
                 if (dir[0] == 0 || dir[1] == 0) //This is straight, not diagonal.
-                    node.G = currNode.G + 10;
+                    neighborNode.G = currNode.G + 10;
                 else
-                    node.G = currNode.G + 20; //Diagonal.
+                    neighborNode.G = currNode.G + 14; //Diagonal.
 
-                Grid.TerrainTile tile = ColonyGame.worldGrid.getNode(node.getX(), node.getY()).getTerrainTile();
-                if (node.getEntityList().size() > 0 || (tile != null && tile.avoid))
-                    node.B = 500;
+                //Get the TerrainTile and check if the tile is to be avoided.
+                Grid.TerrainTile tile = ColonyGame.worldGrid.getNode(neighborNode.x, neighborNode.y).getTerrainTile();
+                if (neighborNode.hasEnts() || (tile != null && tile.avoid))
+                    neighborNode.B = 500;
 
                 //Set the H value, add it to the openList, and make its parent the current Node.
-                node.H = Math.abs(targetNode.getX() - currNode.getX()) + Math.abs(targetNode.getY() - currNode.getY()) * 10;
-                node.visited = true;
-                openList.add(node);
-                node.parentNode = currNode;
+                neighborNode.H = Math.abs(targetNode.getX() - currNode.x) + Math.abs(targetNode.getY() - currNode.y) * 10;
+
+                openList.add(neighborNode);
+                neighborNode.parentNode = currNode;
             }
 
-            //Add currNode to the path and closedList.
-            closedList.add(currNode);
-
-            //Get a new Node.
-            if(openList.size() > 0)
-                currNode = openList.remove();
-            else
-                currNode = null;
-        }
-
-        //Set visited to false for all in the closed list and clear it.
-        for(Grid.PathNode node : closedList) {
-            node.visited = false;
-            node.B = 0;
-            node.G = 0;
-            node.H = 0;
-        }
-
-        //Set visited to false for all in the closed list and clear it.
-        for(Grid.PathNode node : openList) {
-            node.visited = false;
-            node.B = 0;
-            node.G = 0;
-            node.H = 0;
+            currNode = openList.poll();
         }
 
         float squareSize = this.blackBoard.colonyGrid.getSquareSize();
@@ -151,14 +133,13 @@ public class FindPath extends LeafTask {
         if(found) {
             currNode = target;
             while (currNode.parentNode != null) {
-                path.add(new Vector2(currNode.getX()*squareSize + squareSize*0.5f, currNode.getY()*squareSize + squareSize*0.5f));
-                currNode.visited = false;
+                path.add(new Vector2(currNode.x*squareSize + squareSize*0.5f, currNode.y*squareSize + squareSize*0.5f));
                 currNode = currNode.parentNode;
             }
         }
 
-        closedList.clear();
         openList.clear();
+        visitedMap.clear();
         return path;
     }
 }
