@@ -54,7 +54,6 @@ public class FindRandomNearbyLocation extends LeafTask{
                             nodes.add(node);
                     }
                 }
-
                 radius++;
             }
 

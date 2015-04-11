@@ -35,7 +35,6 @@ public class ColonyGame extends Game {
 
 	private Color screenColor = new Color(0, 0, 0, 1);
 
-
 	@Override
 	public void create () {
 		batch = new SpriteBatch();

@@ -68,7 +68,6 @@
           "category": "Shore",
           "dir": "img/terrain/shore",
           "height": [-0.55, -0.5],
-          "avoid": true
         },
 		{
           "tileNames": ["LightWater"],

@@ -375,7 +375,6 @@ public class BehaviourManagerComp extends Component{
     }
 
     private Task attackTarget(){
-
         Sequence seq = new Sequence("Attacking", this.getBlackBoard());
         RepeatUntilCondition repeat = new RepeatUntilCondition("Repeating", this.getBlackBoard(), seq);
 

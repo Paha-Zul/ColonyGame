@@ -12,7 +12,7 @@ import java.util.LinkedList;
 import java.util.PriorityQueue;
 
 /**
- * Created by Paha on 1/21/2015.
+ * A Task that finds a path from where the Entity owner of this task is standing to a target Entity or target node.
  */
 public class FindPath extends LeafTask {
 
@@ -87,7 +87,7 @@ public class FindPath extends LeafTask {
         currNode.H = Math.abs(targetNode.getX() - currNode.x) + Math.abs(targetNode.getY() - currNode.y)*10;
         visitedMap.put(currNode.node, currNode.node);
 
-        while(currNode != null && !found){
+        while(currNode != null){
             if(currNode.node == targetNode){
                 found = true;
                 target = currNode;
