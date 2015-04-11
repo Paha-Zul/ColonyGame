@@ -22,7 +22,7 @@ public class FindPath extends LeafTask {
 
     @Override
     public boolean check() {
-        return control.callbacks.checkCriteria == null || control.callbacks.checkCriteria.criteria(this);
+        return super.check() || (this.blackBoard.target != null && this.blackBoard.targetNode != null);
     }
 
     @Override
@@ -35,7 +35,6 @@ public class FindPath extends LeafTask {
 
         this.blackBoard.path = getPath();
         this.control.finishWithSuccess();
-
     }
 
     @Override

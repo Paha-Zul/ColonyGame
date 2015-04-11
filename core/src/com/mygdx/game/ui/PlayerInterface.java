@@ -19,10 +19,7 @@ import com.mygdx.game.ColonyGame;
 import com.mygdx.game.component.*;
 import com.mygdx.game.component.collider.Collider;
 import com.mygdx.game.entity.Entity;
-import com.mygdx.game.helpers.Constants;
-import com.mygdx.game.helpers.Grid;
-import com.mygdx.game.helpers.ListHolder;
-import com.mygdx.game.helpers.Profiler;
+import com.mygdx.game.helpers.*;
 import com.mygdx.game.helpers.gui.GUI;
 import com.mygdx.game.helpers.timer.RepeatingTimer;
 import com.mygdx.game.helpers.timer.Timer;
@@ -42,6 +39,8 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     private Texture background, UIBackgroundBase, UIBackgroundTop;
     private World world;
     private ServerPlayer gameScreen;
+
+    private State buttonState = new State();
 
     private boolean drawingInfo = false;
     private boolean drawingProfiler = false;
@@ -179,6 +178,11 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         huntStyle.font.setColor(126f/255f, 75f/255f, 27f/255f, 1);
 
         Gdx.input.setInputProcessor(this);
+
+        buttonState.addState("main", true);
+        buttonState.addState("gather_list");
+        buttonState.addState("hunt_list");
+        buttonState.setCurrState("main");
     }
 
     private void generateFonts(){
@@ -222,7 +226,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
             GUI.Texture(this.UIBackgroundBase, this.uiBackgroundBaseRect, this.batch);
             GUI.Texture(this.UIBackgroundTop, this.uiBackgroundTopRect, this.batch);
             this.drawMultipleProfiles(this.ordersRect);
-            this.displaySelected();
+            this.drawSelected();
         }
 
     }
@@ -346,11 +350,9 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     /**
      * Displays the selected Entity.
      */
-    private void displaySelected(){
-
+    private void drawSelected(){
         //Make sure the interactable we have selected isn't null!
         if(this.interactable.getInteractable() != null){
-
             IInteractable interactable = this.interactable.getInteractable(); //Get the interactable!
 
             //If it has a name, draw the name...
@@ -413,18 +415,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
                 //GUI.Texture(ordersRect, ColonyGame.assetManager.get("menuButton_normal", Texture.class), this.batch);
                 if(interactable.getBehManager() != null) {
-                    orderButtonRect.set(ordersRect.x + 10, ordersRect.y + ordersRect.getHeight() - 50, 50, 50);
-                    if (GUI.Button(orderButtonRect, "", this.batch, this.gatherStyle))
-                        interactable.getBehManager().gather();
-
-                    orderButtonRect.set(ordersRect.x + 75, ordersRect.y + ordersRect.getHeight() - 50, 50, 50);
-                    if (GUI.Button(orderButtonRect, "", this.batch, this.exploreStyle))
-                        interactable.getBehManager().explore();
-
-                    orderButtonRect.set(ordersRect.x + 140, ordersRect.y + ordersRect.getHeight() - 50, 50, 50);
-                    if (GUI.Button(orderButtonRect, "", this.batch, this.huntStyle))
-                        interactable.getBehManager().searchAndAttack();
-
+                    drawButtons(interactable);
 
                     batch.setProjectionMatrix(ColonyGame.camera.combined);
                     BehaviourManagerComp.Line[] lines = interactable.getBehManager().getLines();
@@ -434,6 +425,29 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
                     GUI.Label(interactable.getBehManager().getCurrentTaskName(), this.batch, this.ordersRect.x, this.ordersRect.y, this.ordersRect.width, this.ordersRect.height, this.UIStyle);
                 }
+            }
+        }
+    }
+
+    private void drawButtons(IInteractable interactable){
+        if(buttonState.isState("main")) {
+            float middleX = ordersRect.x + ordersRect.width/2;
+            float bottomY = ordersRect.y + 25;
+            float start = 75 + 50/2;
+
+            orderButtonRect.set(middleX - start, bottomY, 50, 50);
+            if (GUI.Button(orderButtonRect, "", this.batch, this.gatherStyle)) {
+                interactable.getBehManager().gather();
+            }
+
+            orderButtonRect.set(middleX, bottomY, 50, 50);
+            if (GUI.Button(orderButtonRect, "", this.batch, this.exploreStyle)) {
+                interactable.getBehManager().explore();
+            }
+
+            orderButtonRect.set(middleX + start, bottomY, 50, 50);
+            if (GUI.Button(orderButtonRect, "", this.batch, this.huntStyle)) {
+                interactable.getBehManager().searchAndAttack();
             }
         }
     }

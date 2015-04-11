@@ -24,15 +24,16 @@ public class FindClosestTile extends LeafTask{
     @Override
     public void start() {
         super.start();
+        this.blackBoard.target = null;
+        this.blackBoard.targetNode = null;
 
         Entity target = this.blackBoard.getEntityOwner();
-
         Grid.Node[][] grid = ColonyGame.worldGrid.getGrid();
+
         Functional.Callback findClosestUnexplored = () -> {
             int radius = 0; //Start off with 0 radius.
             float closestDst = 999999999999999f; //Start with a really high distance...
             Grid.Node closestNode = null; //Closest
-
             Grid.Node myNode = this.blackBoard.colonyGrid.getNode(this.blackBoard.getEntityOwner());
 
             while(closestNode == null) {
