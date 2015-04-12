@@ -7,6 +7,7 @@ import com.mygdx.game.ColonyGame;
 import com.mygdx.game.behaviourtree.PrebuiltTasks;
 import com.mygdx.game.behaviourtree.Task;
 import com.mygdx.game.entity.Entity;
+import com.mygdx.game.helpers.Tree;
 import com.mygdx.game.helpers.timer.OneShotTimer;
 import com.mygdx.game.helpers.timer.Timer;
 
@@ -27,6 +28,8 @@ public class BehaviourManagerComp extends Component{
 
     private State currentState;
     private Array<TaskState> taskStates = new Array<>();
+
+    private Tree taskTree = new Tree("taskTree", "root");
 
     private enum State {
         Idle, Gathering, Exploring, Attacking
@@ -200,6 +203,13 @@ public class BehaviourManagerComp extends Component{
     }
 
     /**
+     * @return The task Tree of this Behaviour Component.
+     */
+    public Tree getTaskTree(){
+        return this.taskTree;
+    }
+
+    /**
      * @return The current State of this BehaviourManager.
      */
     public State getCurrentState(){
@@ -208,6 +218,14 @@ public class BehaviourManagerComp extends Component{
 
     public void addTaskState(String taskStateName){
         taskStates.add(new TaskState(taskStateName));
+    }
+
+    public TaskState getTaskState(String taskStateName){
+        for(TaskState taskState : taskStates)
+            if(taskState.taskName.equals(taskStateName))
+                return taskState;
+
+        return null;
     }
 
     public Array<TaskState> getTaskStates(){

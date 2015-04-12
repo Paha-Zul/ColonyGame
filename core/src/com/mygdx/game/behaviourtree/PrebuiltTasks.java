@@ -77,6 +77,8 @@ public class PrebuiltTasks {
         //If we fail, call the fail callback.
         fr.getControl().callbacks.failureCallback = fail;
 
+        fr.control.callbacks.checkCriteria = task -> !task.blackBoard.resourceTypeTags.isEmpty();
+
         //Check to make sure the resource isn't taken.
         fr.getControl().callbacks.successCriteria = (e) -> {
             Entity ent = (Entity)e;

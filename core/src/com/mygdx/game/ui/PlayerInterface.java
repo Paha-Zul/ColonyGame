@@ -326,18 +326,6 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         if(selectedList.size() > 1){
             profileButtonRect.set(rect.getX() + rect.getWidth() - 115, rect.getY() + rect.getHeight() - 20, 50, 20);
 
-            //Tell all to gather.
-            if(GUI.Button(rect.x + rect.getWidth() - 150, rect.y + rect.getHeight() - 35, 30, 30, "ALL", this.batch, gatherStyle))
-                for(UnitProfile prof : selectedList) prof.entity.getComponent(BehaviourManagerComp.class).gather();
-
-            //Tell all to explore
-            if(GUI.Button(rect.x + rect.getWidth() - 150, rect.y + rect.getHeight() - 70, 30, 30, "ALL", this.batch, exploreStyle))
-                for(UnitProfile prof : selectedList) prof.entity.getComponent(BehaviourManagerComp.class).explore();
-
-            //Tell all to explore
-            if(GUI.Button(rect.x + rect.getWidth() - 150, rect.y + rect.getHeight() - 105, 30, 30, "ALL", this.batch, huntStyle))
-                for(UnitProfile prof : selectedList) prof.entity.getComponent(BehaviourManagerComp.class).searchAndAttack();
-
             //For each profile, draw a button to access each individual entity.
             for(UnitProfile profile : selectedList) {
                 if(GUI.Button(profileButtonRect, profile.interactable.getInteractable().getName(), this.batch)){ //Draw the button.
@@ -445,42 +433,59 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
             float bottomY = ordersRect.y + 25;
             float start = 75 + 50/2;
 
+            //Draw the gather button.
             orderButtonRect.set(middleX - start, bottomY, 50, 50);
             if (GUI.Button(orderButtonRect, "", this.batch, this.gatherStyle)) {
-                interactable.getBehManager().gather();
+                for(UnitProfile profile : selectedList)
+                    profile.interactable.getInteractable().getBehManager().gather();
                 buttonState.setCurrState("gather_list");
             }
 
+            //Draw the explore button.
             orderButtonRect.set(middleX, bottomY, 50, 50);
             if (GUI.Button(orderButtonRect, "", this.batch, this.exploreStyle)) {
                 interactable.getBehManager().explore();
             }
 
+            //Draw the hunt button.
             orderButtonRect.set(middleX + start, bottomY, 50, 50);
             if (GUI.Button(orderButtonRect, "", this.batch, this.huntStyle)) {
                 interactable.getBehManager().searchAndAttack();
                 buttonState.setCurrState("hunt_list");
             }
 
+        //If we are in the 'gather_list' state, then list the gather tasks.
         }else if(buttonState.isState("gather_list")){
             Array<BehaviourManagerComp.TaskState> taskList = interactable.getBehManager().getTaskStates();
 
+            //Set some position variables.
             float width = (ordersRect.getWidth()/(taskList.size+1));
             float height = ordersRect.y + 25;
             float x = ordersRect.x;
 
+            //For each available task...
             for(int i=0;i<taskList.size;i++){
                 BehaviourManagerComp.TaskState taskState = taskList.get(i); //Get the taskState
                 orderButtonRect.set(x + (i+1)*width, height, 50, 50); //Set the location.
                 this.blankStyle.toggled = taskState.toggled; //Set the value of the toggle.
-                if(this.blankStyle.toggled) this.blankStyle.normal = this.blankButtonTextures[2];
+                if(this.blankStyle.toggled) this.blankStyle.normal = this.blankButtonTextures[2]; //If toggled, set the icon to 'clicked' for the normal state. Makes it look toggled!
 
                 //The button press...
                 if (GUI.Button(orderButtonRect, taskState.taskName, this.batch, this.blankStyle)) {
-                    int tag = StringTable.getString("resource_type", taskState.taskName); //Get the tag
-                    //System.out.println("adding tag: "+tag);
+                    int tag = StringTable.getString("resource_type", taskState.taskName);   //Get the tag
                     interactable.getBehManager().getBlackBoard().resourceTypeTags.toggleTag(tag); //Toggle the tag
-                    taskState.toggled = !taskState.toggled; //Toggle the toggle!
+                    taskState.toggled = !taskState.toggled;                                 //Toggle the toggle!
+
+                    //Foreach profile, tell them to do the same thing and sync them up with the currently selected interactable.
+                    for(UnitProfile profile : selectedList) {
+                        //Get the behaviour component and add or remove the tag.
+                        BehaviourManagerComp profileBeh = profile.interactable.getInteractable().getBehManager();
+                        if(taskState.toggled) profileBeh.getBlackBoard().resourceTypeTags.addTag(tag); //Toggle the tag
+                        else profileBeh.getBlackBoard().resourceTypeTags.removeTag(tag); //Toggle the tag
+
+                        //Match up the other interactables with the currently selected one.
+                        profileBeh.getTaskState(taskState.taskName).toggled = taskState.toggled;
+                    }
                 }
 
                 this.blankStyle.toggled = false; //Reset this value.
@@ -672,9 +677,10 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
             this.selected = null;
             this.interactable = null;
             this.finishDragging(worldCoords.x, worldCoords.y);
-
-            this.testPoint.set(worldCoords.x, worldCoords.y);
-            this.world.QueryAABB(this.callback, worldCoords.x - 0.01f, worldCoords.y - 0.011f, worldCoords.x + 0.01f, worldCoords.y + 0.01f);
+            if(this.selectedList.size() < 1) {
+                this.testPoint.set(worldCoords.x, worldCoords.y);
+                this.world.QueryAABB(this.callback, worldCoords.x - 0.01f, worldCoords.y - 0.011f, worldCoords.x + 0.01f, worldCoords.y + 0.01f);
+            }
             return true;
         }
 

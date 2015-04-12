@@ -101,6 +101,6 @@ public class Tags {
 
     @Override
     public String toString() {
-        return ""+tagMask;
+        return ""+Integer.toBinaryString(tagMask);
     }
 }

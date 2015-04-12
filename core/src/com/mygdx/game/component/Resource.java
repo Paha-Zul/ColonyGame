@@ -230,7 +230,7 @@ public class Resource extends Component implements IInteractable{
 
     @Override
     public String getStatsText() {
-        return info.toString();
+        return effectTags.toString();
     }
 
     @Override

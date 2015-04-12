@@ -2,6 +2,7 @@ package com.mygdx.game.component;
 
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.EventSystem;
+import com.mygdx.game.helpers.Tree;
 import com.mygdx.game.helpers.timer.RepeatingTimer;
 import com.mygdx.game.interfaces.IInteractable;
 
@@ -65,6 +66,11 @@ public class Colonist extends Component implements IInteractable{
         this.getBehManager().addTaskState("water");
         this.getBehManager().addTaskState("herbs");
         this.getBehManager().addTaskState("wood");
+
+        Tree taskTree = this.getBehManager().getTaskTree();
+
+        taskTree.addNode("root", "gather", "hunt", "explore");
+        taskTree.addNode("gather", "food", "water", "herbs", "wood");
     }
 
     public Colony getColony() {
