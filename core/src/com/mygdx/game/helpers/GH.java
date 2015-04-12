@@ -19,6 +19,10 @@ public class GH {
 	}
 
     public static void writeErrorMessage(String err){
+        writeErrorMessage(err, false);
+    }
+
+    public static void writeErrorMessage(String err, boolean writeStackTrace){
         DateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy HH-mm-ss");
         Date date = new Date();
 
@@ -26,6 +30,11 @@ public class GH {
         File file = new File(handle.file().getAbsolutePath()+"/"+"err_"+dateFormat.format(date)+".txt"); //Create a new file with the pathname.
         FileHandle errorLog = new FileHandle(file); //Get a file handle to the error log that we create.
         errorLog.writeString(err, false); //Write the error.
+        if(writeStackTrace){
+            StackTraceElement[] trace = Thread.currentThread().getStackTrace();
+            for(StackTraceElement elem : trace)
+                errorLog.writeString(elem.toString(), true);
+        }
 
         throw new RuntimeException("An error was written to an error file. Check the base directory. (For quick reference, err: "+err+")");
     }

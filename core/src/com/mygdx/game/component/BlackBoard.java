@@ -3,6 +3,7 @@ package com.mygdx.game.component;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.Grid;
+import com.mygdx.game.helpers.Tags;
 
 import java.util.LinkedList;
 
@@ -15,6 +16,9 @@ public class BlackBoard extends Component{
     public Entity target;
     public LinkedList<Vector2> path;
     public Resource targetResource;
+
+    //Related to gathering resources
+    public Tags resourceTypeTags = new Tags();
 
     //Transfering variables
     public boolean transferAll = false;

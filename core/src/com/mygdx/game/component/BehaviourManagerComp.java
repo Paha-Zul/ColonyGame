@@ -2,6 +2,7 @@ package com.mygdx.game.component;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.behaviourtree.PrebuiltTasks;
 import com.mygdx.game.behaviourtree.Task;
@@ -25,6 +26,7 @@ public class BehaviourManagerComp extends Component{
     private Timer feedTimer = new OneShotTimer(5f, null);
 
     private State currentState;
+    private Array<TaskState> taskStates = new Array<>();
 
     private enum State {
         Idle, Gathering, Exploring, Attacking
@@ -45,12 +47,8 @@ public class BehaviourManagerComp extends Component{
     @Override
     public void start() {
         super.start();
-//        this.currentBehaviour = this.gatherResource();
-//        this.currentBehaviour.start();
         this.stats = this.owner.getComponent(Stats.class);
     }
-
-
 
     public void idle(){
         this.changeTask(PrebuiltTasks.idleTask(this.blackBoard.baseIdleTime, this.blackBoard.randomIdleTime, this.blackBoard.idleDistance, this.blackBoard, this));
@@ -58,7 +56,7 @@ public class BehaviourManagerComp extends Component{
     }
 
     public void gather(){
-        this.changeTask(PrebuiltTasks.gatherWaterTask(this.blackBoard, this));
+        this.changeTask(PrebuiltTasks.gatherResource(this.blackBoard, this));
         this.currentState = State.Gathering;
     }
 
@@ -131,10 +129,6 @@ public class BehaviourManagerComp extends Component{
         }
     }
 
-    public BlackBoard getBlackBoard(){
-        return this.blackBoard;
-    }
-
     public Line[] getLines() {
         lineList.clear(); //Clear the list.
 
@@ -188,6 +182,9 @@ public class BehaviourManagerComp extends Component{
         return lineList.toArray(new Line[lineList.size()]);
     }
 
+    /**
+     * @return The current task name.
+     */
     public String getCurrentTaskName(){
         if(this.currentBehaviour != null)
             return this.currentBehaviour.getName();
@@ -195,8 +192,26 @@ public class BehaviourManagerComp extends Component{
         return "Nothing";
     }
 
+    /**
+     * @return The blackboard of this Component.
+     */
+    public BlackBoard getBlackBoard(){
+        return this.blackBoard;
+    }
+
+    /**
+     * @return The current State of this BehaviourManager.
+     */
     public State getCurrentState(){
         return this.currentState;
+    }
+
+    public void addTaskState(String taskStateName){
+        taskStates.add(new TaskState(taskStateName));
+    }
+
+    public Array<TaskState> getTaskStates(){
+        return this.taskStates;
     }
 
     @Override
@@ -209,5 +224,14 @@ public class BehaviourManagerComp extends Component{
 
     public class Line{
         public float startX, startY, width, height, rotation;
+    }
+
+    public static class TaskState{
+        public boolean toggled = false;
+        public String taskName = "";
+
+        public TaskState(String taskName){
+            this.taskName = taskName;
+        }
     }
 }

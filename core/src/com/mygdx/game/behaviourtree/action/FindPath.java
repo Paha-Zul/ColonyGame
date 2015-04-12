@@ -5,6 +5,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.behaviourtree.LeafTask;
 import com.mygdx.game.component.BlackBoard;
+import com.mygdx.game.helpers.GH;
 import com.mygdx.game.helpers.Grid;
 
 import java.util.HashMap;
@@ -80,7 +81,9 @@ public class FindPath extends LeafTask {
         PriorityQueue<Grid.PathNode> openList = new PriorityQueue<>((n1, n2) -> (int)((n1.getF() - n2.getF())*100));
 
         //Set the starting currNode and its G and H value.
-        Grid.PathNode currNode = new Grid.PathNode(this.blackBoard.colonyGrid.getNode(this.blackBoard.getEntityOwner()));
+        Grid.Node node = this.blackBoard.colonyGrid.getNode(this.blackBoard.getEntityOwner());
+        if(node == null) GH.writeErrorMessage("Node was null for entity: "+this.blackBoard.getEntityOwner().name+" at "+this.blackBoard.getEntityOwner().transform.getPosition());
+        Grid.PathNode currNode = new Grid.PathNode(node);
         currNode.parentNode = null;
         currNode.G = 0;
         currNode.H = Math.abs(targetNode.getX() - currNode.x) + Math.abs(targetNode.getY() - currNode.y)*10;

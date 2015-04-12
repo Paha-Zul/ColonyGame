@@ -15,6 +15,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.QueryCallback;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.utils.Align;
+import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.component.*;
 import com.mygdx.game.component.collider.Collider;
@@ -179,9 +180,9 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         blankStyle.moused = blankButtonTextures[1] = ColonyGame.assetManager.get("blankbutton_moused", Texture.class);
         blankStyle.clicked = blankButtonTextures[2] = ColonyGame.assetManager.get("blankbutton_clicked", Texture.class);
 
-        gatherStyle.font.setColor(new Color(126f/255f, 75f/255f, 27f/255f, 1));
-        exploreStyle.font.setColor(new Color(126f/255f, 75f/255f, 27f/255f, 1));
-        huntStyle.font.setColor(126f/255f, 75f/255f, 27f/255f, 1);
+        gatherStyle.font.setColor(new Color(126f / 255f, 75f / 255f, 27f / 255f, 1));
+        exploreStyle.font.setColor(new Color(126f / 255f, 75f / 255f, 27f / 255f, 1));
+        huntStyle.font.setColor(126f / 255f, 75f / 255f, 27f / 255f, 1);
 
         Gdx.input.setInputProcessor(this);
 
@@ -423,18 +424,21 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
                 if(interactable.getBehManager() != null) {
                     drawButtons(interactable);
 
+                    //Set to world camera and draw the path lines.
                     batch.setProjectionMatrix(ColonyGame.camera.combined);
                     BehaviourManagerComp.Line[] lines = interactable.getBehManager().getLines();
                     for(BehaviourManagerComp.Line line : lines)
                         batch.draw(blueSquare, line.startX, line.startY, 0, 0, line.width, 0.1f, 1, 1, line.rotation, 0, 0, blueSquare.getWidth(), blueSquare.getHeight(), false, false);
-                    batch.setProjectionMatrix(ColonyGame.UICamera.combined);
 
-                    GUI.Label(interactable.getBehManager().getCurrentTaskName(), this.batch, this.ordersRect.x, this.ordersRect.y, this.ordersRect.width, this.ordersRect.height, this.UIStyle);
+                    //Set back to UI camera.
+                    batch.setProjectionMatrix(ColonyGame.UICamera.combined);
+                    GUI.Label(interactable.getBehManager().getCurrentTaskName(), this.batch, this.ordersRect.x, this.ordersRect.y + 70, this.ordersRect.width, this.ordersRect.height - 50, this.UIStyle);
                 }
             }
         }
     }
 
+    //Draws the buttons for each selected colonist that we have control of.
     private void drawButtons(IInteractable interactable){
         if(buttonState.isState("main")) {
             float middleX = ordersRect.x + ordersRect.width/2;
@@ -457,24 +461,30 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
                 interactable.getBehManager().searchAndAttack();
                 buttonState.setCurrState("hunt_list");
             }
+
         }else if(buttonState.isState("gather_list")){
-            float middleX = ordersRect.x + ordersRect.width/2;
-            float bottomY = ordersRect.y + 25;
-            float start = 75 + 50/2;
+            Array<BehaviourManagerComp.TaskState> taskList = interactable.getBehManager().getTaskStates();
 
-            orderButtonRect.set(middleX - start, bottomY, 50, 50);
-            if (GUI.Button(orderButtonRect, "Food", this.batch, this.blankStyle)) {
-                interactable.getBehManager().gather();
-            }
+            float width = (ordersRect.getWidth()/(taskList.size+1));
+            float height = ordersRect.y + 25;
+            float x = ordersRect.x;
 
-            orderButtonRect.set(middleX, bottomY, 50, 50);
-            if (GUI.Button(orderButtonRect, "Water", this.batch, this.blankStyle)) {
-                interactable.getBehManager().explore();
-            }
+            for(int i=0;i<taskList.size;i++){
+                BehaviourManagerComp.TaskState taskState = taskList.get(i); //Get the taskState
+                orderButtonRect.set(x + (i+1)*width, height, 50, 50); //Set the location.
+                this.blankStyle.toggled = taskState.toggled; //Set the value of the toggle.
+                if(this.blankStyle.toggled) this.blankStyle.normal = this.blankButtonTextures[2];
 
-            orderButtonRect.set(middleX + start, bottomY, 50, 50);
-            if (GUI.Button(orderButtonRect, "Herbs", this.batch, this.blankStyle)) {
-                interactable.getBehManager().searchAndAttack();
+                //The button press...
+                if (GUI.Button(orderButtonRect, taskState.taskName, this.batch, this.blankStyle)) {
+                    int tag = StringTable.getString("resource_type", taskState.taskName); //Get the tag
+                    //System.out.println("adding tag: "+tag);
+                    interactable.getBehManager().getBlackBoard().resourceTypeTags.toggleTag(tag); //Toggle the tag
+                    taskState.toggled = !taskState.toggled; //Toggle the toggle!
+                }
+
+                this.blankStyle.toggled = false; //Reset this value.
+                this.blankStyle.normal = this.blankButtonTextures[0];
             }
         }
     }
@@ -658,6 +668,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
         if(button == Input.Buttons.LEFT){
             this.selectedList.clear();
+            this.buttonState.setToDefaultState();
             this.selected = null;
             this.interactable = null;
             this.finishDragging(worldCoords.x, worldCoords.y);
@@ -665,13 +676,6 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
             this.testPoint.set(worldCoords.x, worldCoords.y);
             this.world.QueryAABB(this.callback, worldCoords.x - 0.01f, worldCoords.y - 0.011f, worldCoords.x + 0.01f, worldCoords.y + 0.01f);
             return true;
-        }else if(button == Input.Buttons.RIGHT){
-            if(this.selected != null){
-//                BehaviourManagerComp manager = this.selected.getComponent(BehaviourManagerComp.class);
-//                if(manager!=null){
-//                    manager.move(new Vector2(worldCoords.x, worldCoords.y));
-//                }
-            }
         }
 
         return false;
@@ -704,4 +708,6 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         public Interactable interactable;
         public GridComponent gridComp;
     }
+
+
 }

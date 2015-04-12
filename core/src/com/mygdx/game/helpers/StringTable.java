@@ -13,13 +13,20 @@ public class StringTable {
 
     /**
      * Gets a string from the string table.
-     * @param category The category of the String balue.
+     * @param category The category of the String value.
      * @param string The actual String value.
      * @return The integer which is the key of the String value.
      */
     @SuppressWarnings("unchecked")
     public static int getString(String category, String string){
         table.putIfAbsent(category, new TObjectIntHashMap<>()); //Puts the category if absent.
-        return table.get(category).adjustOrPutValue(string, 0, counterMap.adjustOrPutValue(category, 1, 1));
+        int value = table.get(category).get(string);
+        if(value == 0){
+            int val = counterMap.adjustOrPutValue(category, 1, 1);
+            table.get(category).put(string, val);
+            value = val;
+        }
+
+        return value;
     }
 }

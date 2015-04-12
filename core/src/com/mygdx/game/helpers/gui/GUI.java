@@ -156,7 +156,7 @@ public class GUI {
         public Texture moused = GUI.defaultMousedButton;
         public Texture clicked = GUI.defaultClickedButton;
         public BitmapFont font = defaultFont;
-        public boolean multiline = false;
+        public boolean multiline = false, toggled = false;
         public int alignment = Align.center;
         public int paddingLeft, paddingRight, paddingTop, paddingBottom;
 

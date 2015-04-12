@@ -16,7 +16,7 @@ import com.mygdx.game.helpers.timer.RepeatingTimer;
 import com.mygdx.game.helpers.timer.Timer;
 
 /**
- * Created by Paha on 1/29/2015.
+ * A task that gathers a resource when the right criteria is met.
  */
 public class Gather extends LeafTask{
     private Resource resource;

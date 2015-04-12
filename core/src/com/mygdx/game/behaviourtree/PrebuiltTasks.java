@@ -78,7 +78,18 @@ public class PrebuiltTasks {
         fr.getControl().callbacks.failureCallback = fail;
 
         //Check to make sure the resource isn't taken.
-        fr.getControl().callbacks.successCriteria = (e) -> ((Entity)e).hasTag(Constants.ENTITY_RESOURCE) && !((Entity)e).getComponent(Resource.class).isTaken();
+        fr.getControl().callbacks.successCriteria = (e) -> {
+            Entity ent = (Entity)e;
+            Resource resource = ent.getComponent(Resource.class);
+            if(resource == null || blackBoard.resourceTypeTags.isEmpty()) return false;
+
+            boolean taken = !resource.isTaken();
+            boolean hasTag = resource.resourceTypeTags.hasAnyTag(blackBoard.resourceTypeTags.getTags());
+            //System.out.println("resource tags: "+Integer.toBinaryString(resource.resourceTypeTags.getTagMask()));
+            //System.out.println("blackboard tags: "+Integer.toBinaryString(blackBoard.resourceTypeTags.getTagMask()));
+
+            return taken && hasTag;
+        };
 
         //On success, set the resource as taken if not already taken.
         fr.getControl().callbacks.successCallback = () ->  {

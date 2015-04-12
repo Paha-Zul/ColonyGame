@@ -24,6 +24,7 @@ public class Resource extends Component implements IInteractable{
     private StringBuilder info = new StringBuilder();
 
     public Tags effectTags = new Tags();
+    public Tags resourceTypeTags = new Tags();
 
     public Resource(String resourceName) {
         super();
@@ -66,6 +67,7 @@ public class Resource extends Component implements IInteractable{
                 amounts.add(amount);
                 names.add(jRes.items[i]);
                 DataBuilder.JsonItem itemRef = DataManager.getData(jRes.items[i], DataBuilder.JsonItem.class);
+                resourceTypeTags.addTag(StringTable.getString("resource_type", itemRef.getItemType()));
                 if(itemRef.getEffects() != null)
                     for(String effect : itemRef.getEffects())
                         effectTags.addTag(StringTable.getString("item_effect", effect));
@@ -92,9 +94,11 @@ public class Resource extends Component implements IInteractable{
         for(int i=0;i<jAnimal.itemAmounts.length; i++) {
             int amount = MathUtils.random(jAnimal.itemAmounts[i][1] - jAnimal.itemAmounts[i][0]) + jAnimal.itemAmounts[i][0]; //Add diff to base.
             if(amount != 0){
-                amounts.add(amount);
-                names.add(jAnimal.items[i]);
-                DataBuilder.JsonItem itemRef = DataManager.getData(jAnimal.items[i], DataBuilder.JsonItem.class);
+                amounts.add(amount); //Adds the item amount to this resource.
+                names.add(jAnimal.items[i]); //Adds the item name to this resource.
+                DataBuilder.JsonItem itemRef = DataManager.getData(jAnimal.items[i], DataBuilder.JsonItem.class); //Get the itemRef
+                resourceTypeTags.addTag(StringTable.getString("resource_type", itemRef.getItemType())); //Adds the type to the resource type tags.
+                //For every item effect, add the effect to the effectTags.
                 if(itemRef.getEffects() != null)
                     for(String effect : itemRef.getEffects())
                         effectTags.addTag(StringTable.getString("item_effect", effect));

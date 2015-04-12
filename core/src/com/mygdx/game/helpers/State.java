@@ -8,7 +8,7 @@ import java.util.HashMap;
 public class State {
     private HashMap<String, String> stateMap = new HashMap<>();
     private String currState = "invalid";
-    private String defaultString = "invalid";
+    private String defaultState = "invalid";
 
     public State(){
 
@@ -20,7 +20,7 @@ public class State {
 
     public void addState(String stateName, boolean defaultString){
         this.stateMap.putIfAbsent(stateName, stateName);
-        if(defaultString) this.defaultString = stateName;
+        if(defaultString) this.defaultState = stateName;
     }
 
     public String getCurrState(){
@@ -33,5 +33,9 @@ public class State {
 
     public void setCurrState(String stateName){
         this.currState = this.stateMap.getOrDefault(stateName, "invalid");
+    }
+
+    public void setToDefaultState(){
+        this.currState = defaultState;
     }
 }
