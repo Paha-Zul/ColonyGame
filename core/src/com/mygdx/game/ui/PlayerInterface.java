@@ -82,10 +82,11 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
     private Rectangle orderButtonRect = new Rectangle();
 
-    private Texture[] gatherButtonTextures, exploreButtonTextures, huntButtonTextures;
+    private Texture[] gatherButtonTextures, exploreButtonTextures, huntButtonTextures, blankButtonTextures;
     private GUI.GUIStyle gatherStyle = new GUI.GUIStyle();
     private GUI.GUIStyle exploreStyle = new GUI.GUIStyle();
     private GUI.GUIStyle huntStyle = new GUI.GUIStyle();
+    private GUI.GUIStyle blankStyle = new GUI.GUIStyle();
 
     private GUI.GUIStyle UIStyle;
 
@@ -172,6 +173,11 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         huntStyle.normal = huntButtonTextures[0] = ColonyGame.assetManager.get("huntbutton_normal", Texture.class);
         huntStyle.moused = huntButtonTextures[1] = ColonyGame.assetManager.get("huntbutton_moused", Texture.class);
         huntStyle.clicked = huntButtonTextures[2] = ColonyGame.assetManager.get("huntbutton_clicked", Texture.class);
+
+        blankButtonTextures = new Texture[3];
+        blankStyle.normal = blankButtonTextures[0] = ColonyGame.assetManager.get("blankbutton_normal", Texture.class);
+        blankStyle.moused = blankButtonTextures[1] = ColonyGame.assetManager.get("blankbutton_moused", Texture.class);
+        blankStyle.clicked = blankButtonTextures[2] = ColonyGame.assetManager.get("blankbutton_clicked", Texture.class);
 
         gatherStyle.font.setColor(new Color(126f/255f, 75f/255f, 27f/255f, 1));
         exploreStyle.font.setColor(new Color(126f/255f, 75f/255f, 27f/255f, 1));
@@ -438,6 +444,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
             orderButtonRect.set(middleX - start, bottomY, 50, 50);
             if (GUI.Button(orderButtonRect, "", this.batch, this.gatherStyle)) {
                 interactable.getBehManager().gather();
+                buttonState.setCurrState("gather_list");
             }
 
             orderButtonRect.set(middleX, bottomY, 50, 50);
@@ -447,6 +454,26 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
             orderButtonRect.set(middleX + start, bottomY, 50, 50);
             if (GUI.Button(orderButtonRect, "", this.batch, this.huntStyle)) {
+                interactable.getBehManager().searchAndAttack();
+                buttonState.setCurrState("hunt_list");
+            }
+        }else if(buttonState.isState("gather_list")){
+            float middleX = ordersRect.x + ordersRect.width/2;
+            float bottomY = ordersRect.y + 25;
+            float start = 75 + 50/2;
+
+            orderButtonRect.set(middleX - start, bottomY, 50, 50);
+            if (GUI.Button(orderButtonRect, "Food", this.batch, this.blankStyle)) {
+                interactable.getBehManager().gather();
+            }
+
+            orderButtonRect.set(middleX, bottomY, 50, 50);
+            if (GUI.Button(orderButtonRect, "Water", this.batch, this.blankStyle)) {
+                interactable.getBehManager().explore();
+            }
+
+            orderButtonRect.set(middleX + start, bottomY, 50, 50);
+            if (GUI.Button(orderButtonRect, "Herbs", this.batch, this.blankStyle)) {
                 interactable.getBehManager().searchAndAttack();
             }
         }
