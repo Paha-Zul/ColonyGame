@@ -21,7 +21,7 @@ public class Resource extends Component implements IInteractable{
     private float gatherTime = 1;
     private volatile Entity taken = null;
 
-    private StringBuilder info = new StringBuilder();
+    private StringBuilder contents = new StringBuilder();
 
     public Tags effectTags = new Tags();
     public Tags resourceTypeTags = new Tags();
@@ -117,7 +117,7 @@ public class Resource extends Component implements IInteractable{
 
         //Build the item name string for displaying in the UI.
         for(int i=0;i<itemNames.length;i++)
-            info.append(itemAmounts[i]).append(" ").append(itemNames[i]).append(System.lineSeparator());
+            contents.append(itemAmounts[i]).append(" ").append(itemNames[i]).append(System.lineSeparator());
     }
 
     @Override
@@ -230,7 +230,7 @@ public class Resource extends Component implements IInteractable{
 
     @Override
     public String getStatsText() {
-        return effectTags.toString();
+        return contents.toString();
     }
 
     @Override

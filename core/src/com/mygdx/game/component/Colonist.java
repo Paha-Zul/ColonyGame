@@ -2,6 +2,7 @@ package com.mygdx.game.component;
 
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.EventSystem;
+import com.mygdx.game.helpers.StringTable;
 import com.mygdx.game.helpers.Tree;
 import com.mygdx.game.helpers.timer.RepeatingTimer;
 import com.mygdx.game.interfaces.IInteractable;
@@ -53,7 +54,7 @@ public class Colonist extends Component implements IInteractable{
             float amount = (float) args[1];
 
             Stats.Stat stat = this.stats.getStat("health");
-            if(stat == null) return;
+            if (stat == null) return;
 
             stat.addToCurrent(amount);
             this.manager.getBlackBoard().target = entity;
@@ -62,15 +63,29 @@ public class Colonist extends Component implements IInteractable{
 
         this.getBehManager().getBlackBoard().attackDamage = 30f;
         this.getBehManager().getBlackBoard().attackRange = 500f;
-        this.getBehManager().addTaskState("food");
-        this.getBehManager().addTaskState("water");
-        this.getBehManager().addTaskState("herbs");
-        this.getBehManager().addTaskState("wood");
 
         Tree taskTree = this.getBehManager().getTaskTree();
 
-        taskTree.addNode("root", "gather", "hunt", "explore");
-        taskTree.addNode("gather", "food", "water", "herbs", "wood");
+        Tree.TreeNode[] nodeList = taskTree.addNode("root", "gather", "hunt", "explore");
+
+        for(Tree.TreeNode node : nodeList) {
+            BehaviourManagerComp.TaskState taskState = new BehaviourManagerComp.TaskState(node.nodeName);
+            taskState.callback = () -> getBehManager().changeTask(node.nodeName);
+            node.userData = taskState;
+        }
+
+        nodeList = taskTree.addNode("gather", "food", "water", "herbs", "wood");
+
+        for(Tree.TreeNode node : nodeList) {
+            BehaviourManagerComp.TaskState taskState = new BehaviourManagerComp.TaskState(node.nodeName);
+            taskState.callback = () -> {
+                taskState.toggled = !taskState.toggled;
+                getBehManager().getBlackBoard().resourceTypeTags.toggleTag(StringTable.getString("resource_type", node.nodeName));
+            };
+            node.userData = taskState;
+        }
+
+
     }
 
     public Colony getColony() {

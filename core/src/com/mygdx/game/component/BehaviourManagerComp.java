@@ -10,6 +10,7 @@ import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.Tree;
 import com.mygdx.game.helpers.timer.OneShotTimer;
 import com.mygdx.game.helpers.timer.Timer;
+import com.mygdx.game.interfaces.Functional;
 
 import java.util.ArrayList;
 
@@ -93,6 +94,17 @@ public class BehaviourManagerComp extends Component{
 
         //Set the next behaviour.
         this.nextBehaviour = task;
+    }
+
+    public void changeTask(String taskName){
+        switch(taskName){
+            case "gather":
+                gather();
+                break;
+            case "hunt":
+                attack();
+                break;
+        }
     }
 
     @Override
@@ -209,29 +221,6 @@ public class BehaviourManagerComp extends Component{
         return this.taskTree;
     }
 
-    /**
-     * @return The current State of this BehaviourManager.
-     */
-    public State getCurrentState(){
-        return this.currentState;
-    }
-
-    public void addTaskState(String taskStateName){
-        taskStates.add(new TaskState(taskStateName));
-    }
-
-    public TaskState getTaskState(String taskStateName){
-        for(TaskState taskState : taskStates)
-            if(taskState.taskName.equals(taskStateName))
-                return taskState;
-
-        return null;
-    }
-
-    public Array<TaskState> getTaskStates(){
-        return this.taskStates;
-    }
-
     @Override
     public void destroy() {
         this.currentBehaviour.getControl().finishWithFailure();
@@ -247,9 +236,14 @@ public class BehaviourManagerComp extends Component{
     public static class TaskState{
         public boolean toggled = false;
         public String taskName = "";
+        public Functional.Callback callback;
 
         public TaskState(String taskName){
             this.taskName = taskName;
+        }
+
+        public void doCallback(){
+            if(callback!=null) callback.callback();
         }
     }
 }

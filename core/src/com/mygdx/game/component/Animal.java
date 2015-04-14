@@ -98,6 +98,7 @@ public class Animal extends Component implements IInteractable{
             stat.addToCurrent(damage);
         });
 
+        this.behComp.getBlackBoard().moveSpeed = 200f;
         //this.setActive(false);
     }
 

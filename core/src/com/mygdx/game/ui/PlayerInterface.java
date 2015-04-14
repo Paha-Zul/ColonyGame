@@ -88,7 +88,6 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     private GUI.GUIStyle exploreStyle = new GUI.GUIStyle();
     private GUI.GUIStyle huntStyle = new GUI.GUIStyle();
     private GUI.GUIStyle blankStyle = new GUI.GUIStyle();
-
     private GUI.GUIStyle UIStyle;
 
     private Interactable interactable = null;
@@ -101,6 +100,8 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     private Color gray = new Color(Color.BLACK);
 
     private Texture blueSquare = ColonyGame.assetManager.get("blueSquare", Texture.class);
+
+    private Tree.TreeNode currStateNode = null;
 
     private void loadHuntButtonStyle(){
         huntStyle.normal = ColonyGame.assetManager.get("huntbutton_normal", Texture.class);
@@ -187,8 +188,8 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         Gdx.input.setInputProcessor(this);
 
         buttonState.addState("main", true);
-        buttonState.addState("gather_list");
-        buttonState.addState("hunt_list");
+        buttonState.addState("gather");
+        buttonState.addState("hunt");
         buttonState.setCurrState("main");
     }
 
@@ -428,69 +429,53 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
     //Draws the buttons for each selected colonist that we have control of.
     private void drawButtons(IInteractable interactable){
-        if(buttonState.isState("main")) {
-            float middleX = ordersRect.x + ordersRect.width/2;
-            float bottomY = ordersRect.y + 25;
-            float start = 75 + 50/2;
+        //If this interactable was recently selected, this will be null. Set it to the root of the currently selected interactable.
+        if(currStateNode == null)
+            currStateNode = interactable.getBehManager().getTaskTree().getNode(node -> node.nodeName.equals("root"));
 
-            //Draw the gather button.
-            orderButtonRect.set(middleX - start, bottomY, 50, 50);
-            if (GUI.Button(orderButtonRect, "", this.batch, this.gatherStyle)) {
-                for(UnitProfile profile : selectedList)
-                    profile.interactable.getInteractable().getBehManager().gather();
-                buttonState.setCurrState("gather_list");
+        //Set some position variables.
+        float width = (ordersRect.getWidth()/(currStateNode.getChildren().size+1));
+        float height = ordersRect.y + 25;
+        float x = ordersRect.x;
+
+        Array<Tree.TreeNode> nodeList = currStateNode.getChildren();
+        for(int i=0;i<nodeList.size;i++) {
+            Tree.TreeNode currTaskNode = nodeList.get(i); //Get the child task node.
+            BehaviourManagerComp.TaskState taskState = (BehaviourManagerComp.TaskState)currTaskNode.userData;
+
+            if(taskState.toggled){
+                this.blankStyle.normal = this.blankButtonTextures[2];
             }
 
-            //Draw the explore button.
-            orderButtonRect.set(middleX, bottomY, 50, 50);
-            if (GUI.Button(orderButtonRect, "", this.batch, this.exploreStyle)) {
-                interactable.getBehManager().explore();
-            }
+            //Set the location and draw the button. If clicked, we need to do some tricky things...
+            orderButtonRect.set(x + (i + 1) * width, height, 50, 50);
+            if (GUI.Button(orderButtonRect, currTaskNode.nodeName, this.batch, this.blankStyle)) {
+                taskState.doCallback();
 
-            //Draw the hunt button.
-            orderButtonRect.set(middleX + start, bottomY, 50, 50);
-            if (GUI.Button(orderButtonRect, "", this.batch, this.huntStyle)) {
-                interactable.getBehManager().searchAndAttack();
-                buttonState.setCurrState("hunt_list");
-            }
+                //For each profile selected, tell them to gather.
+                for (UnitProfile profile : selectedList) {
+                    //Get the BehaviourComponent and TreeNode.
+                    BehaviourManagerComp comp = profile.interactable.getInteractable().getBehManager();
+                    Tree.TreeNode treeNode = comp.getTaskTree().getNode(node -> node.nodeName.equals(currTaskNode.nodeName));
 
-        //If we are in the 'gather_list' state, then list the gather tasks.
-        }else if(buttonState.isState("gather_list")){
-            Array<BehaviourManagerComp.TaskState> taskList = interactable.getBehManager().getTaskStates();
+                    //We have to do this instead of calling the callback because we need to sync the state and tags up for ALL colonists selected.
+                    comp.changeTask(currTaskNode.nodeName); //Change the task to the button we pressed.
+                    ((BehaviourManagerComp.TaskState) treeNode.userData).toggled = taskState.toggled; //Toggle the treeNode.
 
-            //Set some position variables.
-            float width = (ordersRect.getWidth()/(taskList.size+1));
-            float height = ordersRect.y + 25;
-            float x = ordersRect.x;
-
-            //For each available task...
-            for(int i=0;i<taskList.size;i++){
-                BehaviourManagerComp.TaskState taskState = taskList.get(i); //Get the taskState
-                orderButtonRect.set(x + (i+1)*width, height, 50, 50); //Set the location.
-                this.blankStyle.toggled = taskState.toggled; //Set the value of the toggle.
-                if(this.blankStyle.toggled) this.blankStyle.normal = this.blankButtonTextures[2]; //If toggled, set the icon to 'clicked' for the normal state. Makes it look toggled!
-
-                //The button press...
-                if (GUI.Button(orderButtonRect, taskState.taskName, this.batch, this.blankStyle)) {
-                    int tag = StringTable.getString("resource_type", taskState.taskName);   //Get the tag
-                    interactable.getBehManager().getBlackBoard().resourceTypeTags.toggleTag(tag); //Toggle the tag
-                    taskState.toggled = !taskState.toggled;                                 //Toggle the toggle!
-
-                    //Foreach profile, tell them to do the same thing and sync them up with the currently selected interactable.
-                    for(UnitProfile profile : selectedList) {
-                        //Get the behaviour component and add or remove the tag.
-                        BehaviourManagerComp profileBeh = profile.interactable.getInteractable().getBehManager();
-                        if(taskState.toggled) profileBeh.getBlackBoard().resourceTypeTags.addTag(tag); //Toggle the tag
-                        else profileBeh.getBlackBoard().resourceTypeTags.removeTag(tag); //Toggle the tag
-
-                        //Match up the other interactables with the currently selected one.
-                        profileBeh.getTaskState(taskState.taskName).toggled = taskState.toggled;
-                    }
+                    //If it's toggled, add the tag, otherwise, remove the tag.
+                    if(((BehaviourManagerComp.TaskState) treeNode.userData).toggled) comp.getBlackBoard().resourceTypeTags.addTag(StringTable.getString("resource_type", treeNode.nodeName));
+                    else comp.getBlackBoard().resourceTypeTags.removeTag(StringTable.getString("resource_type", treeNode.nodeName));
                 }
 
-                this.blankStyle.toggled = false; //Reset this value.
-                this.blankStyle.normal = this.blankButtonTextures[0];
+                //Get the node from the gather TreeNode. If it has children, set the currStateNode
+                Tree.TreeNode tmpNode = interactable.getBehManager().getTaskTree().getNode(node -> node.nodeName.equals(currTaskNode.nodeName));
+                if (tmpNode.hasChildren()) {
+                    buttonState.setCurrState(currTaskNode.nodeName);
+                    currStateNode = tmpNode;
+                }
             }
+
+            this.blankStyle.normal = this.blankButtonTextures[0];
         }
     }
 
@@ -674,6 +659,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         if(button == Input.Buttons.LEFT){
             this.selectedList.clear();
             this.buttonState.setToDefaultState();
+            this.currStateNode = null;
             this.selected = null;
             this.interactable = null;
             this.finishDragging(worldCoords.x, worldCoords.y);

@@ -80,9 +80,9 @@ public class Tags {
      */
     public int[] getTags(){
         TIntArrayList tagList = new TIntArrayList();
-        for(int i=1;i<33;i++){
+        for(int i=0;i<33;i++){
             if(((tagMask >> i) & 1) == 1)
-                tagList.add((int)Math.pow(2, i-1));
+                tagList.add(i);
         }
 
         return tagList.toArray();

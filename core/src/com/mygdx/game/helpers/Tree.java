@@ -35,14 +35,15 @@ public class Tree {
      * @param nodeNames The names of the new nodes to add.
      * @return This Tree object.
      */
-    public Tree addNode(String parent, String... nodeNames){
+    public TreeNode[] addNode(String parent, String... nodeNames){
         TreeNode parentNode = getNode(node -> node.nodeName.equals(parent));
-        if(parentNode == null) return this;
+        if(parentNode == null) return null;
 
+        Array<TreeNode> nodeList = new Array<>();
         for(String name : nodeNames)
-            parentNode.addChild(new TreeNode(name));
+            nodeList.add(parentNode.addChild(new TreeNode(name)));
 
-        return this;
+        return nodeList.toArray(TreeNode.class);
     }
 
     /**
@@ -96,7 +97,7 @@ public class Tree {
         return str.toString();
     }
 
-    private class TreeNode {
+    public static class TreeNode {
         public String nodeName;
         public TreeNode parent;
         public Object userData;
@@ -119,6 +120,14 @@ public class Tree {
                     return treeNode;
 
             return null;
+        }
+
+        public boolean hasChildren(){
+            return children.size > 0;
+        }
+
+        public Array<TreeNode> getChildren(){
+            return this.children;
         }
     }
 }

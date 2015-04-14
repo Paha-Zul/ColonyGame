@@ -86,9 +86,8 @@ public class PrebuiltTasks {
             if(resource == null || blackBoard.resourceTypeTags.isEmpty()) return false;
 
             boolean taken = !resource.isTaken();
-            boolean hasTag = resource.resourceTypeTags.hasAnyTag(blackBoard.resourceTypeTags.getTags());
-            //System.out.println("resource tags: "+Integer.toBinaryString(resource.resourceTypeTags.getTagMask()));
-            //System.out.println("blackboard tags: "+Integer.toBinaryString(blackBoard.resourceTypeTags.getTagMask()));
+            int[] blackTags = blackBoard.resourceTypeTags.getTags();
+            boolean hasTag = resource.resourceTypeTags.hasAnyTag(blackTags);
 
             return taken && hasTag;
         };
@@ -249,7 +248,7 @@ public class PrebuiltTasks {
         FindClosestEntity fcBase = new FindClosestEntity("Finding storage", blackBoard, Constants.ENTITY_BUILDING);    //Find the closest base/storage
         FindPath fpToBase = new FindPath("Finding path to base", blackBoard);                                          //Find the path to the base/storage
         MoveTo mtBase = new MoveTo("Moving to base", blackBoard);                                                      //Move to the base/storage
-        TransferResource trToBase = new TransferResource("Transfering items to base", blackBoard);                     //Transfer the resource from me/colonist to the base.
+        TransferResource trToBase = new TransferResource("Transferring items to base", blackBoard);                     //Transfer the resource from me/colonist to the base.
 
         ((ParentTaskController) mainSeq.getControl()).addTask(rp); //Add the repeated task to the first sequence.
 
