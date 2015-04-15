@@ -6,13 +6,18 @@ import com.mygdx.game.interfaces.Functional;
  * Created by Bbent_000 on 11/24/2014.
  */
 public class RepeatingTimer extends Timer{
+	public RepeatingTimer(double length, boolean immediate, Functional.Callback callback){
+		super(length, callback);
+		if(immediate) this.currCounter = length;
+	}
+
 	/**
 	 * Creates a repeating timer that will continue to repeat and call the callback at each completion.
 	 * @param length The length of the timer to run.
 	 * @param callback The Callback function to run when completed.
 	 */
 	public RepeatingTimer(double length, Functional.Callback callback) {
-		super(length, callback);
+		this(length, false, callback);
 	}
 
 	@Override

@@ -32,10 +32,10 @@ public class PMoveTo extends LeafTask{
     public void start() {
         super.start();
 
-        this.transform = this.blackBoard.getEntityOwner().transform;
-        this.name = this.transform.getEntityOwner().name;
-        this.path = this.blackBoard.path;
-        this.collider = this.transform.getComponent(Collider.class);
+        if(transform == null) this.transform = this.blackBoard.getEntityOwner().transform;
+        if(collider == null) this.collider = this.transform.getComponent(Collider.class);
+        if(name == null) this.name = this.transform.getEntityOwner().name;
+        if(path == null) this.path = this.blackBoard.path;
     }
 
     @Override
@@ -79,6 +79,10 @@ public class PMoveTo extends LeafTask{
     @Override
     public void end() {
         if(this.collider != null) this.collider.body.setLinearVelocity(0, 0);
+        this.transform = null;
+        this.collider = null;
+        this.name = null;
+        this.path = null;
         super.end();
     }
 }

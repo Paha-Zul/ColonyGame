@@ -26,8 +26,11 @@ public class RepeatUntilCondition extends TaskDecorator{
         if(control.callbacks.successCriteria != null && control.callbacks.successCriteria.criteria(this.task)){
             this.control.finishWithSuccess();
         }else {
-            if(this.task.getControl().hasFinished())
+            //If the job finished and this repeat job has not met it's criteria, restart the job.
+            if(this.task.getControl().hasFinished()) {
                 this.task.getControl().reset();
+                this.task.getControl().safeStart();
+            }
             this.task.update(delta);
         }
     }

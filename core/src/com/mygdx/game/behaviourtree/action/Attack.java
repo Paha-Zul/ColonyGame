@@ -35,24 +35,23 @@ public class Attack extends LeafTask{
     public void start() {
         super.start();
 
-        //Spawn a projectile
-        fireTimer = new RepeatingTimer(1f, () -> {
+        //Attack!
+        fireTimer = new RepeatingTimer(1f, true, () -> {
             float dis =  this.blackBoard.target.transform.getPosition().dst(this.blackBoard.getEntityOwner().transform.getPosition());
             if(dis >= GH.toMeters(20)) {
                 TextureRegion tex = new TextureRegion(ColonyGame.assetManager.get("ball", Texture.class)); //Get a texture for the bullet.
                 Transform trans = this.blackBoard.getEntityOwner().transform;               //Cache the transform.
-                Entity target = this.blackBoard.target;                                      //Cache the target
+                Entity target = this.blackBoard.target;                                     //Cache the target
                 float rot = (float) Math.atan2(target.transform.getPosition().y - trans.getPosition().y, target.transform.getPosition().x - trans.getPosition().x) * MathUtils.radDeg; //Get the rotation to the target
-                rot += MathUtils.random(20) - 10;
-                Entity ent = new ProjectileEnt(trans.getPosition(), rot, tex, 11);           //Spawn the projectile.
-                Projectile projectile = ent.getComponent(Projectile.class);
+                rot += MathUtils.random(20) - 10;                                           //Randomize rotation a little bit
+                Entity ent = new ProjectileEnt(trans.getPosition(), rot, tex, 11);          //Spawn the projectile.
+                Projectile projectile = ent.getComponent(Projectile.class);                 //Get the projectile component.
                 if(projectile == null) GH.writeErrorMessage("Somehow making a projectile didn't make a projectile...");
                 else {
-                    projectile.projOwner = this.blackBoard.getEntityOwner();
-                    projectile.lifetime = dis / GH.toMeters(projectile.speed);
-                    projectile.lifetime += projectile.lifetime*0.5f;
-                    projectile.lifetime += MathUtils.random(projectile.lifetime*0.2f) - projectile.lifetime*0.1f;
-                    System.out.println("projectile lifetime: "+projectile.lifetime);
+//                    projectile.projOwner = this.blackBoard.getEntityOwner();
+//                    projectile.lifetime = dis / GH.toMeters(projectile.speed);
+//                    projectile.lifetime += projectile.lifetime*0.5f;
+//                    projectile.lifetime += MathUtils.random(projectile.lifetime*0.2f) - projectile.lifetime*0.1f;
                 }
             }else
                 EventSystem.notifyEntityEvent(this.blackBoard.target, "damage", this.blackBoard.getEntityOwner(), -this.blackBoard.attackDamage);
@@ -64,9 +63,6 @@ public class Attack extends LeafTask{
     @Override
     public void update(float delta) {
         super.update(delta);
-
-        fireTimer.update(delta);
-
         //If the target is null or dead, return with success (it died... I or someone else killed it!)
         if(this.blackBoard.target == null || this.blackBoard.target.isDestroyed() || this.blackBoard.target.isSetToBeDestroyed() || !this.blackBoard.target.hasTag(Constants.ENTITY_ALIVE)) {
             this.control.finishWithSuccess();
@@ -77,7 +73,11 @@ public class Attack extends LeafTask{
         //If we are out of range, finish with failure.
         if(GH.toMeters(this.blackBoard.attackRange + this.blackBoard.attackRange*0.2f) < this.blackBoard.getEntityOwner().transform.getPosition().dst(this.blackBoard.target.transform.getPosition())) {
             this.control.finishWithFailure();
+            return;
         }
+
+
+        fireTimer.update(delta);
     }
 
     @Override

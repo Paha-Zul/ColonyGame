@@ -102,7 +102,7 @@ public class BehaviourManagerComp extends Component{
                 gather();
                 break;
             case "hunt":
-                attack();
+                searchAndAttack();
                 break;
         }
     }

@@ -3,10 +3,10 @@ package com.mygdx.game.behaviourtree;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.behaviourtree.action.*;
+import com.mygdx.game.behaviourtree.composite.Parallel;
 import com.mygdx.game.behaviourtree.composite.Sequence;
 import com.mygdx.game.behaviourtree.control.ParentTaskController;
 import com.mygdx.game.behaviourtree.decorator.RepeatUntilCondition;
-import com.mygdx.game.behaviourtree.decorator.RepeatUntilSuccess;
 import com.mygdx.game.component.*;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.Constants;
@@ -232,16 +232,8 @@ public class PrebuiltTasks {
         blackBoard.transferAll = true;
 
         Sequence mainSeq = new Sequence("Following", blackBoard);
+
         FindClosestEntity fc = new FindClosestEntity("Finding Closest Animal", blackBoard, Constants.ENTITY_ANIMAL);
-        ((ParentTaskController) mainSeq.getControl()).addTask(fc);
-
-        Sequence repeatSeq = new Sequence("Moving Towards", blackBoard);                           //Sequence which will be repeated.
-        RepeatUntilSuccess rp = new RepeatUntilSuccess("Following Target", blackBoard, repeatSeq); //Repeat decorator
-
-        FindPath fp = new FindPath("Finding Path To Target", blackBoard);      //Find a path to the target (repeat)
-        MoveTo mt = new MoveTo("Moving to Target", blackBoard);                //Move to the target (repeat)
-        Attack at = new Attack("Attacking", blackBoard);                       //Attack the squirrel (repeat)
-
         FindPath fpToResource = new FindPath("Finding Path to Dead Animal", blackBoard);                               //Find a path to the newly killed animal which is now a resource.
         MoveTo mtTargetResource = new MoveTo("Moving to Dead Animal", blackBoard);                                     //Move to it.
         Gather gatherResource = new Gather("Gathering Dead Animal", blackBoard);                                       //Gather it.
@@ -250,12 +242,8 @@ public class PrebuiltTasks {
         MoveTo mtBase = new MoveTo("Moving to base", blackBoard);                                                      //Move to the base/storage
         TransferResource trToBase = new TransferResource("Transferring items to base", blackBoard);                     //Transfer the resource from me/colonist to the base.
 
-        ((ParentTaskController) mainSeq.getControl()).addTask(rp); //Add the repeated task to the first sequence.
-
-        ((ParentTaskController) repeatSeq.getControl()).addTask(fp); //Add the find path to the second sequence.
-        ((ParentTaskController) repeatSeq.getControl()).addTask(mt); //Add the move to the second sequence.
-        ((ParentTaskController) repeatSeq.getControl()).addTask(at); //Add the searchAndAttack sequence
-
+        ((ParentTaskController) mainSeq.getControl()).addTask(fc); //Add the find closest entity job.
+        ((ParentTaskController) mainSeq.getControl()).addTask(attackTarget(blackBoard, behComp)); //Add the repeated task to the first sequence.
         ((ParentTaskController) mainSeq.getControl()).addTask(fpToResource);
         ((ParentTaskController) mainSeq.getControl()).addTask(mtTargetResource);
         ((ParentTaskController) mainSeq.getControl()).addTask(gatherResource);
@@ -268,27 +256,6 @@ public class PrebuiltTasks {
         fc.getControl().callbacks.failureCallback = () -> {
             Vector2 pos = blackBoard.getEntityOwner().transform.getPosition();
             new FloatingText("Couldn't find a nearby animal to hunt!", new Vector2(pos.x, pos.y + 1), new Vector2(pos.x, pos.y + 10), 1.5f, 0.8f);
-        };
-
-        //Since this FindPath behaviour is under a RepeatUntilSuccess, it will get stuck getting a path to nothing (failing).
-        //We need to forcefully end the whole behaviour if this happens.
-        fp.getControl().callbacks.failureCallback = () -> repeatSeq.getControl().finishWithFailure();
-
-        //On each movement, we need to check if the target has moved nodes. The successCriteria will fail if the two nodes don't equal each other.
-        //The behaviour will fail and a new path will be calculated.
-        mt.getControl().callbacks.failCriteria = task -> {
-            Task tsk = (Task)task;
-            return tsk.getBlackboard().targetNode != ColonyGame.worldGrid.getNode(tsk.getBlackboard().target);
-        };
-
-        mt.getControl().callbacks.successCriteria = task -> {
-            Task tsk = (Task)task;
-            return blackBoard.target != null && (blackBoard.getEntityOwner().transform.getPosition().dst(tsk.getBlackboard().target.transform.getPosition()) <= GH.toMeters(tsk.getBlackboard().attackRange));
-        };
-
-        //On success, kill the animal and get items from it.
-        rp.getControl().callbacks.successCallback = () -> {
-            blackBoard.targetNode = null;
         };
 
         return mainSeq;
@@ -348,28 +315,35 @@ public class PrebuiltTasks {
     }
 
     public static Task attackTarget(BlackBoard blackBoard, BehaviourManagerComp behComp){
-        Sequence seq = new Sequence("Attacking", blackBoard);
-        RepeatUntilCondition repeat = new RepeatUntilCondition("Repeating", blackBoard, seq);
+
+        Parallel parallel = new Parallel("Attacking", blackBoard);
+        RepeatUntilCondition repeat = new RepeatUntilCondition("Repeating", blackBoard, parallel);
 
         FindPath fp = new FindPath("Finding path", blackBoard);
         MoveTo mt = new MoveTo("Moving", blackBoard);
         Attack attack = new Attack("Attacking Target", blackBoard);
 
-        ((ParentTaskController)seq.getControl()).addTask(fp);
-        ((ParentTaskController)seq.getControl()).addTask(mt);
-        ((ParentTaskController)seq.getControl()).addTask(attack);
+        ((ParentTaskController)parallel.getControl()).addTask(fp);
+        ((ParentTaskController)parallel.getControl()).addTask(mt);
+        ((ParentTaskController)parallel.getControl()).addTask(attack);
 
         //Make sure the target is not null.
         repeat.getControl().callbacks.checkCriteria = task -> task.getBlackboard().target != null;
 
-        //If the target is null, not valid, or not alive, fail the MoveTo task.
-        //If the target has moved from the spot it once was, fail this MoveTo task
-        mt.getControl().callbacks.failCriteria = task -> {
+        //To succeed this repeat job, the target must be null, not valid, or not alive.
+        repeat.getControl().callbacks.successCriteria = task -> {
             Entity target = ((Task)task).getBlackboard().target;
-            boolean valid = target == null || !target.isValid() || !target.hasTag(Constants.ENTITY_ALIVE);
-            boolean moved = ((Task)task).getBlackboard().targetNode != ColonyGame.worldGrid.getNode(((Task)task).getBlackboard().target);
+            return target == null || !target.isValid() || !target.hasTag(Constants.ENTITY_ALIVE);
+        };
 
-            return valid || moved;
+        //If the target has moved away from it's last square AND the move job is still active (why repath if not moving?), fail the parallel job.
+        parallel.getControl().callbacks.failCriteria = tsk -> {
+            Task task = (Task)tsk;
+            boolean moved = task.getBlackboard().targetNode != ColonyGame.worldGrid.getNode((task.getBlackboard().target));
+            boolean moveJobAlive = !mt.control.hasFinished();
+            boolean outOfRange = attack.control.hasFinished() && attack.control.hasFailed();
+
+            return (moveJobAlive && moved) || (!moveJobAlive && outOfRange);
         };
 
         //If we are within range of the target, succeed the MoveTo task.
@@ -377,12 +351,6 @@ public class PrebuiltTasks {
             Task task = (Task)tsk;
             float dis = task.getBlackboard().target.transform.getPosition().dst(task.getBlackboard().getEntityOwner().transform.getPosition());
             return dis <= GH.toMeters(task.getBlackboard().attackRange);
-        };
-
-        //Repeat until the target is null, not valud, or is not alive.
-        repeat.getControl().callbacks.successCriteria = tsk -> {
-            Task task = (Task)tsk;
-            return task.getBlackboard().target == null || !task.getBlackboard().target.isValid() || !task.getBlackboard().target.hasTag(Constants.ENTITY_ALIVE);
         };
 
         return repeat;
