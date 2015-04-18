@@ -70,7 +70,7 @@ public class BehaviourManagerComp extends Component{
     }
 
     public void searchAndAttack(){
-        this.changeTask(PrebuiltTasks.searchAndDestroy(this.blackBoard, this));
+        this.changeTask(PrebuiltTasks.huntTarget(this.blackBoard, this));
         this.currentState = State.Idle;
     }
 

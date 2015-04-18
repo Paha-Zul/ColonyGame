@@ -20,7 +20,6 @@ public class TaskController {
      * Finishes this behaviour with failure.
      */
     public void finishWithFailure(){
-
         this.finished = true;
         this.failed = true;
         this.running = false;
