@@ -14,12 +14,9 @@ import com.mygdx.game.interfaces.Functional;
  */
 public class FindClosestEntity extends LeafTask{
     private boolean done = false, failed = false;
-    private int[] tags;
 
-    public FindClosestEntity(String name, BlackBoard blackBoard, int... tags) {
+    public FindClosestEntity(String name, BlackBoard blackBoard) {
         super(name, blackBoard);
-
-        this.tags = tags;
     }
 
     @Override
@@ -78,15 +75,13 @@ public class FindClosestEntity extends LeafTask{
 
                         //Loop over the Entity list in the current node and try to an entity that matches the successCriteria.
                         for(Entity entity : node.getEntityList()) {
-                            if (entity.hasTags(tags)) { //If it has the tags required.
-                                //If there is no callback or the callback passes, finish successfully.
-                                if(control.callbacks == null || control.callbacks.successCriteria == null || control.callbacks.successCriteria.criteria(entity)) {
-                                    //If we have a valid Entity, store it and finish with success.
-                                    this.blackBoard.target = entity;
-                                    this.done = true;
-                                    this.failed = false;
-                                    return;
-                                }
+                            //If there is no callback or the callback passes, finish successfully.
+                            if(control.callbacks == null || control.callbacks.successCriteria == null || control.callbacks.successCriteria.criteria(entity)) {
+                                //If we have a valid Entity, store it and finish with success.
+                                this.blackBoard.target = entity;
+                                this.done = true;
+                                this.failed = false;
+                                return;
                             }
                         }
                     }

@@ -33,7 +33,7 @@ public class TransferResource extends LeafTask{
                 this.blackBoard.toInventory.addItem(item.itemRef.getItemName(), item.getAmount());
             this.blackBoard.fromInventory.clearInventory();
 
-        //Otherwise, take the number of items specified.
+        //Otherwise, take the number of itemNames specified.
         }else{
             int amount = this.blackBoard.fromInventory.removeItemAmount(this.blackBoard.itemNameToTake, this.blackBoard.takeAmount);
             this.blackBoard.toInventory.addItem(this.blackBoard.itemNameToTake, this.blackBoard.takeAmount);

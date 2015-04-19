@@ -7,6 +7,8 @@ import com.mygdx.game.helpers.Tree;
 import com.mygdx.game.helpers.timer.RepeatingTimer;
 import com.mygdx.game.interfaces.IInteractable;
 
+import java.util.function.Consumer;
+
 /**
  * Created by Paha on 1/17/2015.
  */
@@ -34,8 +36,15 @@ public class Colonist extends Component implements IInteractable{
         this.inventory = this.getComponent(Inventory.class);
         this.stats = this.getComponent(Stats.class);
         this.manager = this.getComponent(BehaviourManagerComp.class);
-        this.getComponent(BlackBoard.class).moveSpeed = 200f;
+        this.manager.getBlackBoard().moveSpeed = 200f;
 
+        EventSystem.registerEntityEvent(this.owner, "damage", onDamage);
+
+        this.createStats();
+        this.createBehaviourButtons();
+    }
+
+    private void createStats(){
         stats.addStat("health", 100, 100);
         stats.addStat("food", 100, 100);
         stats.addStat("water", 100, 100);
@@ -48,19 +57,10 @@ public class Colonist extends Component implements IInteractable{
             if (stats.getStat("food").getCurrVal() <= 0 || stats.getStat("water").getCurrVal() <= 0)
                 stats.getStat("health").addToCurrent(-1);
         }));
+    }
 
-        EventSystem.registerEntityEvent(this.owner, "damage", args -> {
-            Entity entity = (Entity) args[0];
-            float amount = (float) args[1];
-
-            Stats.Stat stat = this.stats.getStat("health");
-            if (stat == null) return;
-
-            stat.addToCurrent(amount);
-            this.manager.getBlackBoard().target = entity;
-            this.getBehManager().attack();
-        });
-
+    //Creates all the buttons for the colonists behaviours.
+    private void createBehaviourButtons(){
         this.getBehManager().getBlackBoard().attackDamage = 30f;
         this.getBehManager().getBlackBoard().attackRange = 500f;
 
@@ -84,9 +84,19 @@ public class Colonist extends Component implements IInteractable{
             };
             node.userData = taskState;
         }
-
-
     }
+
+    private Consumer<Object[]> onDamage = args -> {
+        Entity entity = (Entity) args[0];
+        float amount = (float) args[1];
+
+        Stats.Stat stat = this.stats.getStat("health");
+        if (stat == null) return;
+
+        stat.addToCurrent(amount);
+        this.manager.getBlackBoard().target = entity;
+        this.getBehManager().attack();
+    };
 
     public Colony getColony() {
         return colony;

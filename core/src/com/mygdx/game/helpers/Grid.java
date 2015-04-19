@@ -156,9 +156,10 @@ public class Grid {
             //If the currNode still matches our current position, return it.
             if (currNode != null && (index[0] == currNode.getX() && index[1] == currNode.getY())) {
                 return currNode;
-            }
+            }else if(currNode == null)
+                return null;
 
-            if (currNode != null) currNode.removeEntity(entity); //Remove from the old Node if it's not null.
+            currNode.removeEntity(entity); //Remove from the old Node if it's not null.
             Node newNode = getNode(pos); //Get the new Node.
             if (newNode == null) return null; //If it's null, return null.
 

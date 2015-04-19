@@ -1,6 +1,7 @@
 package com.mygdx.game.component;
 
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.DataBuilder;
 import com.mygdx.game.helpers.StringTable;
@@ -17,11 +18,15 @@ import java.util.ArrayList;
 public class Resource extends Component implements IInteractable{
     private String resourceName = "default", displayName = "default", resourceType = "default";
     private String[] itemNames;
+    private int itemIndex = 0;
     private int[] itemAmounts;
-    private float gatherTime = 1;
+    private float gatherTime = 1f;
+    private float gatherTick = 1f;
     private volatile Entity taken = null;
+    private Array<String> gatherList = new Array<>(false, 10, String.class);
 
     private StringBuilder contents = new StringBuilder();
+    private DataBuilder.JsonResource resRef;
 
     public Tags effectTags = new Tags();
     public Tags resourceTypeTags = new Tags();
@@ -55,58 +60,51 @@ public class Resource extends Component implements IInteractable{
      */
     public Resource(DataBuilder.JsonResource jRes){
         this(jRes.resourceName);
+        this.resRef = jRes;
+        initItem(jRes);
+    }
+
+    //Initializes the item.
+    private void initItem(DataBuilder.JsonResource jRes){
         this.displayName = jRes.displayName;
         this.resourceType = jRes.resourceType;
+        this.itemNames = jRes.itemNames;
         this.gatherTime = jRes.gatherTime;
 
-        TIntArrayList amounts = new TIntArrayList(10);
-        ArrayList<String> names = new ArrayList<>(10);
-        for(int i=0;i<jRes.amounts.length; i++) {
-            int amount = MathUtils.random(jRes.amounts[i][1] - jRes.amounts[i][0]) + jRes.amounts[i][0]; //Add diff to base.
-            if(amount != 0){
-                amounts.add(amount);
-                names.add(jRes.items[i]);
-                DataBuilder.JsonItem itemRef = DataManager.getData(jRes.items[i], DataBuilder.JsonItem.class);
-                resourceTypeTags.addTag(StringTable.getString("resource_type", itemRef.getItemType()));
-                if(itemRef.getEffects() != null)
-                    for(String effect : itemRef.getEffects())
-                        effectTags.addTag(StringTable.getString("item_effect", effect));
-            }
-        }
-
-        this.itemAmounts = amounts.toArray();
-        this.itemNames = names.toArray(new String[names.size()]);
+        generateItemInfo(jRes.itemNames, jRes.itemAmounts);
     }
 
     /**
-     * Copies a JSonAnimal object.
-     * @param jAnimal The JsonAnimal to copy.
+     * Generates the item information about the resource being created, such as the names and item itemAmounts.
+     * @param itemNames The String array of item names.
+     * @param itemAmounts The 2D int array of itemAmounts for each item name.
      */
-    public Resource(DataBuilder.JsonAnimal jAnimal){
-        this(jAnimal.name);
-        this.displayName = jAnimal.displayName;
-        this.resourceType = "animal";
-        this.itemNames = jAnimal.items;
-        this.gatherTime = 3f;
-
+    private void generateItemInfo(String[] itemNames, int[][] itemAmounts){
         TIntArrayList amounts = new TIntArrayList(10);
         ArrayList<String> names = new ArrayList<>(10);
-        for(int i=0;i<jAnimal.itemAmounts.length; i++) {
-            int amount = MathUtils.random(jAnimal.itemAmounts[i][1] - jAnimal.itemAmounts[i][0]) + jAnimal.itemAmounts[i][0]; //Add diff to base.
+        int total = 0, highest = 0;
+
+        for(int i=0;i<itemAmounts.length; i++) {
+            int amount = MathUtils.random(itemAmounts[i][1] - itemAmounts[i][0]) + itemAmounts[i][0]; //Add diff to base.
             if(amount != 0){
                 amounts.add(amount); //Adds the item amount to this resource.
-                names.add(jAnimal.items[i]); //Adds the item name to this resource.
-                DataBuilder.JsonItem itemRef = DataManager.getData(jAnimal.items[i], DataBuilder.JsonItem.class); //Get the itemRef
+                names.add(itemNames[i]); //Adds the item name to this resource.
+                DataBuilder.JsonItem itemRef = DataManager.getData(itemNames[i], DataBuilder.JsonItem.class); //Get the itemRef
                 resourceTypeTags.addTag(StringTable.getString("resource_type", itemRef.getItemType())); //Adds the type to the resource type tags.
+
                 //For every item effect, add the effect to the effectTags.
                 if(itemRef.getEffects() != null)
                     for(String effect : itemRef.getEffects())
                         effectTags.addTag(StringTable.getString("item_effect", effect));
+
+                if(amount > highest) highest = amount;
+                total += amount;
             }
         }
 
         this.itemAmounts = amounts.toArray();
         this.itemNames = names.toArray(new String[names.size()]);
+        this.gatherTick = gatherTime/total;
     }
 
     @Override
@@ -137,42 +135,63 @@ public class Resource extends Component implements IInteractable{
     }
 
     /**
-     * Gets the array of itemRef firstNames for this Resource. This is essentially the inventory of this Resource.
-     * @return A String array of itemRef firstNames.
+     * @return An array of item names gathered from this resource. Empty array if nothing was gathered.
      */
-    public String[] getItemNames() {
-        return itemNames;
+    public String[] gatherFrom(){
+        gatherItemRotating(gatherList); //Get the items to give to the one gathering the item.
+
+        //If the gather list is 0, it means it's empty. If not infinite, destroy. Otherwise, re-initialize it.
+        if(gatherList.size == 0 && !DataManager.getData(this.resourceName, DataBuilder.JsonResource.class).infinite)
+            this.owner.setToDestroy();
+        else if(gatherList.size == 0)
+            this.initItem(this.resRef);
+
+        return gatherList.toArray();
     }
 
-    /**
-     * Gets the amounts of the itemRef in this Resource.
-     * @return A 2D int array which represents the possible (low-high) range of amount of items.
-     */
-    public int[] getItemAmounts() {
-        return itemAmounts;
+    //Add exactly one item to the list, rotating each time.
+    private void gatherItemRotating(Array<String> list) {
+        int flag = itemIndex;
+        list.clear();
+
+        do {
+            //If the amount is more than 0, take it and decrement the amount in this resource.
+            if (itemAmounts[itemIndex] > 0) {
+                list.add(itemNames[itemIndex]);
+                itemAmounts[itemIndex]--;
+                //If we do a full circle and meet the initial value, return null which means this resource is spent.
+            }
+            itemIndex = (itemIndex + 1) % itemNames.length;
+            if (itemIndex == flag) return;
+            //Loop this until we have at least one item in the list.
+        } while (list.size < 1);
     }
 
-    /**
-     * Gets the item amount for a specific index.
-     * @param index The index to get the amount from.
-     * @return An integer which is the amount of the item.
-     */
-    public int getItemAmount(int index){
-        return this.itemAmounts[index];
+    //Add each item to the list if available (amount more than 0).
+    private void gatherItemEach(Array<String> list){
+        gatherList.clear();
+
+        for(int i=0;i<itemNames.length;i++){
+            if(itemAmounts[i] <= 0) continue;
+            gatherList.add(itemNames[i]);
+            itemAmounts[i]--;
+        }
     }
 
-    /**
-     * @return The interType of this Resource.
-     */
-    public String getResourceType() {
-        return resourceType;
-    }
 
     /**
-     * @return The gather time for this Resource.
+     * @return The gather time for this resource. This is the total time it takes to fully gather the resource.
      */
     public float getGatherTime(){
         return this.gatherTime;
+    }
+
+    /**
+     * @return The gather tick for this resource. This is the time it takes to gather part of the resource. The gather tick will be an X number of ticks
+     * for the gather time, meaning if a resource takes 5 seconds to gather, there could be 5 ticks (one per second) to gather.
+     */
+    public float getGatherTick(){
+        return this.gatherTick;
     }
 
     /**
@@ -190,6 +209,14 @@ public class Resource extends Component implements IInteractable{
     }
 
     /**
+     * Sets this Resource as taken or not taken.
+     * @param entity The Entity to take this resource. Null if setting the resource as not taken.
+     */
+    public void setTaken(Entity entity){
+        this.taken = entity;
+    }
+
+    /**
      * Sets the gather time for this Resource.
      * @param gatherTime The amount of time to gather.
      */
@@ -203,14 +230,6 @@ public class Resource extends Component implements IInteractable{
      */
     public void setResourceType(String resourceType) {
         this.resourceType = resourceType;
-    }
-
-    /**
-     * Sets this Resource as taken or not taken.
-     * @param entity The Entity to take this resource. Null if setting the resource as not taken.
-     */
-    public void setTaken(Entity entity){
-        this.taken = entity;
     }
 
     @Override
@@ -230,7 +249,8 @@ public class Resource extends Component implements IInteractable{
 
     @Override
     public String getStatsText() {
-        return contents.toString();
+        String takenBy = this.taken == null ? "null" : this.taken.getComponent(Colonist.class).getName();
+        return contents.toString() + "\ntaken: "+this.isTaken()+" by: "+takenBy+"\ntags: "+this.resourceTypeTags.toString();
     }
 
     @Override

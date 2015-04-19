@@ -111,7 +111,7 @@ public class Profiler {
         if(!enabled)
             return;
 
-        //If there are no items in the stack, throw an error.
+        //If there are no itemNames in the stack, throw an error.
         if(stack.size() < 1)
             throw new RuntimeException("Profiler: begin() must be called before an end()");
 

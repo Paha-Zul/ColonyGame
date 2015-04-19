@@ -5,8 +5,9 @@
       "displayName": "Squirrel",
       "aggressive": false,
       "img": "squirrel",
-      "items": ["food", "hide"],
-      "itemAmounts":[[1,2], [0,1]]
+      "itemNames": ["food", "hide"],
+      "itemAmounts":[[1,2], [0,1]],
+      "resourceName": "squirrelCarcass"
     },
     {
       "name": "wolf",
@@ -15,7 +16,7 @@
       "pack": true,
       "packAmount": [2, 10],
       "img": "Wolf",
-      "items": ["food"],
+      "itemNames": ["food"],
       "itemAmounts":[[0,2]]
     },
     {
@@ -23,7 +24,7 @@
       "displayName": "Deer",
       "aggressive": false,
       "img": "Deer",
-      "items": ["food"],
+      "itemNames": ["food"],
       "itemAmounts":[[0,2]]
     },
     {
@@ -31,7 +32,7 @@
       "displayName": "Bear",
       "aggressive": true,
       "img": "Bear",
-      "items": ["food"],
+      "itemNames": ["food"],
       "itemAmounts":[[0,2]]
     }
   ]

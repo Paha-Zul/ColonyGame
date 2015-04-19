@@ -7,9 +7,12 @@ import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.Constants;
 import com.mygdx.game.helpers.DataBuilder;
 import com.mygdx.game.helpers.EventSystem;
+import com.mygdx.game.helpers.managers.DataManager;
+import com.mygdx.game.interfaces.Functional;
 import com.mygdx.game.interfaces.IInteractable;
 
 import java.util.LinkedList;
+import java.util.function.Consumer;
 
 /**
  * Created by Paha on 2/26/2015.
@@ -45,60 +48,17 @@ public class Animal extends Component implements IInteractable{
         stats.addStat("water", 100, 100);
 
         //Remove its animal properties and make it a resource.
-        stats.getStat("health").onZero = () -> {
-            Interactable interactable = this.owner.getComponent(Interactable.class);
-
-            EventSystem.unregisterEntity(this.owner); //Unregister for events.
-            this.collider.body.setLinearVelocity(0, 0);
-            this.owner.clearTags(); //Clear all tags
-            this.owner.addTag(Constants.ENTITY_RESOURCE); //Add the resource tag
-            this.owner.addComponent(new Resource(this.animalRef)); //Add a Resource Component.
-            if(interactable != null) interactable.changeType("resource");
-            this.owner.destroyComponent(BehaviourManagerComp.class); //Destroy the BehaviourManagerComp
-            this.owner.destroyComponent(Stats.class); //Destroy the Stats component.
-            this.owner.destroyComponent(Animal.class); //Destroy this (Animal) Component.
-        };
+        stats.getStat("health").onZero = onDeath();
 
         //Add a collide_start event for getting hit by a projectile.
-        EventSystem.registerEntityEvent(this.owner, "collide_start", args -> {
-            Fixture mine = (Fixture) args[0];
-            Fixture other = (Fixture) args[1]; //Get the other entity.
-
-            Collider.ColliderInfo otherInfo = (Collider.ColliderInfo) other.getUserData();
-            Collider.ColliderInfo myInfo = (Collider.ColliderInfo) mine.getUserData();
-
-            //If it is not a detector, the other is a bullet, and I am an animal, hurt me! and kill the bullet!
-            if (!myInfo.tags.hasTag(Constants.COLLIDER_DETECTOR) && otherInfo.owner.hasTag(Constants.ENTITY_PROJECTILE) && this.owner.hasTag(Constants.ENTITY_ANIMAL)) {
-                this.getComponent(Stats.class).getStat("health").addToCurrent(-50);
-                otherInfo.owner.setToDestroy();
-            //If I am a detector and the other is a colonist, we must attack it!
-            } else if (myInfo.tags.hasTag(Constants.COLLIDER_DETECTOR) && otherInfo.owner.hasTag(Constants.ENTITY_COLONIST))
-                attackList.add(otherInfo.owner);
-        });
+        EventSystem.registerEntityEvent(this.owner, "collide_start", onCollideStart);
 
         //Add a collide_start event for getting hit by a projectile.
-        EventSystem.registerEntityEvent(this.owner, "collide_end", args -> {
-            Fixture mine = (Fixture) args[0];
-            Fixture other = (Fixture) args[1]; //Get the other entity.
+        EventSystem.registerEntityEvent(this.owner, "collide_end", onCollideEnd);
 
-            Collider.ColliderInfo otherInfo = (Collider.ColliderInfo) other.getUserData();
-            Collider.ColliderInfo myInfo = (Collider.ColliderInfo) mine.getUserData();
+        EventSystem.registerEntityEvent(this.owner, "damage", onDamage);
 
-            if(myInfo.tags.hasTag(Constants.COLLIDER_DETECTOR) && otherInfo.owner.hasTag(Constants.ENTITY_COLONIST)){
-                attackList.remove(otherInfo.owner);
-            }
-        });
-
-        EventSystem.registerEntityEvent(this.owner, "damage", args -> {
-            Entity other = (Entity) args[0];
-            float damage = (float) args[1];
-
-            Stats.Stat stat = stats.getStat("health");
-            if (stat == null) return;
-            stat.addToCurrent(damage);
-        });
-
-        this.behComp.getBlackBoard().moveSpeed = 200f;
+        this.behComp.getBlackBoard().moveSpeed = 250f;
         //this.setActive(false);
     }
 
@@ -123,6 +83,71 @@ public class Animal extends Component implements IInteractable{
             behComp.attack();
         }
     }
+
+    //The callback to be called when I die!
+    private Functional.Callback onDeath(){
+        return () -> {
+            Interactable interactable = this.owner.getComponent(Interactable.class);
+
+            //If we don't have a resource to turn into, simply die.
+            if(animalRef.resourceName == null)
+                this.owner.setToDestroy();
+
+            //Otherwise, prepare to be a resource!
+            else {
+                EventSystem.unregisterEntity(this.owner); //Unregister for events.
+                this.owner.transform.setRotation(180);
+                this.collider.body.setLinearVelocity(0, 0);
+                this.owner.clearTags(); //Clear all tags
+                this.owner.addTag(Constants.ENTITY_RESOURCE); //Add the resource tag
+                this.owner.addComponent(new Resource(DataManager.getData(animalRef.resourceName, DataBuilder.JsonResource.class))); //Add a Resource Component.
+                if (interactable != null) interactable.changeType("resource");
+                this.owner.destroyComponent(BehaviourManagerComp.class); //Destroy the BehaviourManagerComp
+                this.owner.destroyComponent(Stats.class); //Destroy the Stats component.
+                this.owner.destroyComponent(Animal.class); //Destroy this (Animal) Component.
+            }
+        };
+    }
+
+    //The Consumer function to call when I collide with something.
+    private Consumer<Object[]> onCollideStart = args -> {
+        Fixture me = (Fixture)args[0];
+        Fixture other = (Fixture)args[1];
+
+        Collider.ColliderInfo otherInfo = (Collider.ColliderInfo) other.getUserData();
+        Collider.ColliderInfo myInfo = (Collider.ColliderInfo) me.getUserData();
+
+        //If it is not a detector, the other is a bullet, and I am an animal, hurt me! and kill the bullet!
+        if (!myInfo.tags.hasTag(Constants.COLLIDER_DETECTOR) && otherInfo.owner.hasTag(Constants.ENTITY_PROJECTILE) && this.owner.hasTag(Constants.ENTITY_ANIMAL)) {
+            this.getComponent(Stats.class).getStat("health").addToCurrent(-50);
+            otherInfo.owner.setToDestroy();
+            //If I am a detector and the other is a colonist, we must attack it!
+        } else if (myInfo.tags.hasTag(Constants.COLLIDER_DETECTOR) && otherInfo.owner.hasTag(Constants.ENTITY_COLONIST))
+            attackList.add(otherInfo.owner);
+    };
+
+    //The Consumer function to call when I stop colliding with something.
+    private Consumer<Object[]> onCollideEnd = args -> {
+        Fixture me = (Fixture) args[0];
+        Fixture other = (Fixture) args[1]; //Get the other entity.
+
+        Collider.ColliderInfo otherInfo = (Collider.ColliderInfo) other.getUserData();
+        Collider.ColliderInfo myInfo = (Collider.ColliderInfo) me.getUserData();
+
+        if (myInfo.tags.hasTag(Constants.COLLIDER_DETECTOR) && otherInfo.owner.hasTag(Constants.ENTITY_COLONIST)) {
+            attackList.remove(otherInfo.owner);
+        }
+    };
+
+    //The Consume function to call when I take damage.
+    private Consumer<Object[]> onDamage = args -> {
+        Entity other = (Entity) args[0];
+        float damage = (float) args[1];
+
+        Stats.Stat stat = stats.getStat("health");
+        if (stat == null) return;
+        stat.addToCurrent(damage);
+    };
 
     @Override
     public Inventory getInventory() {

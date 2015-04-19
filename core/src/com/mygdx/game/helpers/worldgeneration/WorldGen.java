@@ -257,8 +257,11 @@ public class WorldGen {
 
         //Get the atlas so we can get the image from it.
         TextureAtlas interactableAtlas = ColonyGame.assetManager.get("interactables", TextureAtlas.class); //Get the atlas
-        String textureName = jRes.img[MathUtils.random(jRes.img.length-1)]; //Get the texture name.
-        TextureRegion reg = interactableAtlas.findRegion(textureName);
+        TextureRegion reg = null;
+        if(jRes.img != null && jRes.img.length > 0) {
+            String textureName = jRes.img[MathUtils.random(jRes.img.length - 1)]; //Get the texture name.
+            reg = interactableAtlas.findRegion(textureName);
+        }
 
         //Create the resource and stuff.
         ResourceEnt resEnt = new ResourceEnt(centerPos, 0, reg, 11);

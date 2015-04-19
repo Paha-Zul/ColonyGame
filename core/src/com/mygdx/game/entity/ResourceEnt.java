@@ -16,6 +16,7 @@ import com.mygdx.game.helpers.Constants;
  * Created by Paha on 2/28/2015.
  */
 public class ResourceEnt extends Entity{
+
     public ResourceEnt(Vector2 position, float rotation, TextureRegion graphic, int drawLevel) {
         super(position, rotation, graphic, drawLevel);
         this.addTag(Constants.ENTITY_RESOURCE);
@@ -23,7 +24,8 @@ public class ResourceEnt extends Entity{
 
         this.addComponent(new Interactable("resource"));
         this.addComponent(new GridComponent(Constants.GRIDSTATIC, ColonyGame.worldGrid, -1));
-        this.getComponent(GraphicIdentity.class).alignment = 1;
+        GraphicIdentity identity = this.getComponent(GraphicIdentity.class);
+        if(identity != null) identity.alignment = 1;
 
         this.makeCollider();
     }

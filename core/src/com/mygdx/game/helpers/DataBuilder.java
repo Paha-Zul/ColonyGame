@@ -249,16 +249,16 @@ public class DataBuilder implements IDestroyable{
 
                 //Set the img array as the list.
                 jRes.img = list.toArray(new String[list.size()]);
-                if(jRes.img.length == 0) GH.writeErrorMessage("No images loaded for "+jRes.resourceName+". Check that the directory "+jRes.dir+" has files and they are named correctly.");
+                if(jRes.img.length == 0 && !jRes.noimg) GH.writeErrorMessage("No images loaded for "+jRes.resourceName+". Check that the directory "+jRes.dir+" has files and they are named correctly.");
 
                 list.clear();
             }
 
-            //Build the amounts array
-            int[][] amounts = new int[jRes.amounts.length][2];
-            for(int i=0;i<jRes.amounts.length;i++) {
-                amounts[i][0] = jRes.amounts[i][0];
-                amounts[i][1] = jRes.amounts[i][1];
+            //Build the itemAmounts array
+            int[][] amounts = new int[jRes.itemAmounts.length][2];
+            for(int i=0;i<jRes.itemAmounts.length;i++) {
+                amounts[i][0] = jRes.itemAmounts[i][0];
+                amounts[i][1] = jRes.itemAmounts[i][1];
             }
 
             DataManager.addData(jRes.resourceName, jRes, JsonResource.class);
@@ -474,9 +474,10 @@ public class DataBuilder implements IDestroyable{
 
     public static class JsonResource{
         public String resourceName, displayName, resourceType, description, dir;
-        public String[] img, allimgwith, items;
-        public int[][] amounts;
+        public String[] img, allimgwith, itemNames;
+        public int[][] itemAmounts;
         public int gatherTime;
+        public boolean noimg, infinite;
     }
 
     private static class JsonTiles{
@@ -529,8 +530,8 @@ public class DataBuilder implements IDestroyable{
     }
 
     public static class JsonAnimal{
-        public String name, img, displayName;
-        public String[] items;
+        public String name, img, displayName, resourceName;
+        public String[] itemNames;
         public boolean aggressive, pack;
         public int[] packAmount;
         public int[][] itemAmounts;

@@ -47,6 +47,10 @@ public class PrebuiltTasks {
          *  Store the resource.
          */
 
+        //Reset blackboard values...
+        blackBoard.fromInventory = blackBoard.getEntityOwner().getComponent(Colonist.class).getInventory();
+        blackBoard.toInventory = blackBoard.getEntityOwner().getComponent(Colonist.class).getColony().getInventory();
+
         //If we fail to find a resource, we need to explore until we find one...
         Functional.Callback fail = () -> {
             Vector2 pos = blackBoard.getEntityOwner().transform.getPosition();
@@ -59,14 +63,25 @@ public class PrebuiltTasks {
         };
 
         Sequence sequence = new Sequence("Gathering Resource", blackBoard);
-        FindClosestEntity fr = new FindClosestEntity("Finding Closest Resource", blackBoard, Constants.ENTITY_RESOURCE);
+        FindClosestEntity fr = new FindClosestEntity("Finding Closest Resource", blackBoard);
 
         ((ParentTaskController)sequence.getControl()).addTask(fr);
         ((ParentTaskController)sequence.getControl()).addTask(gatherTarget(blackBoard, behComp));
 
+        //Reset some values.
+        sequence.control.callbacks.startCallback = () -> {
+            blackBoard.transferAll = true;
+            blackBoard.takeAmount = 0;
+            blackBoard.itemNameToTake = null;
+            blackBoard.targetResource = null;
+            blackBoard.target = null;
+            blackBoard.targetNode = null;
+        };
+
         //If we fail, call the fail callback.
         fr.getControl().callbacks.failureCallback = fail;
 
+        //Check if our resourceTypeTags are empty. If so, no use trying to find an entity.
         fr.control.callbacks.checkCriteria = task -> !task.blackBoard.resourceTypeTags.isEmpty();
 
         //Check to make sure the resource isn't taken.
@@ -75,30 +90,19 @@ public class PrebuiltTasks {
             Resource resource = ent.getComponent(Resource.class);
             if(resource == null || blackBoard.resourceTypeTags.isEmpty()) return false;
 
-            boolean taken = !resource.isTaken();
             int[] blackTags = blackBoard.resourceTypeTags.getTags();
+            boolean notTaken = !resource.isTaken();
             boolean hasTag = resource.resourceTypeTags.hasAnyTag(blackTags);
 
-            return taken && hasTag;
+            return notTaken && hasTag;
         };
 
         //On success, set the resource as taken if not already taken.
         fr.getControl().callbacks.successCallback = () ->  {
             blackBoard.targetResource = blackBoard.target.getComponent(Resource.class);
-            if(!blackBoard.targetResource.isTaken())
+            if(!blackBoard.targetResource.isTaken() || blackBoard.targetResource.getTaken() == blackBoard.getEntityOwner()) {
                 blackBoard.targetResource.setTaken(blackBoard.getEntityOwner());
-        };
-
-        sequence.getControl().callbacks.startCallback = ()->{
-            //Reset blackboard values...
-            blackBoard.fromInventory = blackBoard.getEntityOwner().getComponent(Colonist.class).getInventory();
-            blackBoard.toInventory = blackBoard.getEntityOwner().getComponent(Colonist.class).getColony().getInventory();
-            blackBoard.transferAll = true;
-            blackBoard.takeAmount = 0;
-            blackBoard.itemNameToTake = null;
-            blackBoard.targetResource = null;
-            blackBoard.target = null;
-            blackBoard.targetNode = null;
+            }
         };
 
         return sequence;
@@ -112,7 +116,7 @@ public class PrebuiltTasks {
          *  gather resource
          *  find path to storage
          *  move to storage
-         *  transfer items to storage
+         *  transfer itemNames to storage
          */
 
         Sequence sequence = new Sequence("Gathering", blackBoard);
@@ -132,6 +136,13 @@ public class PrebuiltTasks {
         ((ParentTaskController)sequence.getControl()).addTask(moveToStorage);
         ((ParentTaskController)sequence.getControl()).addTask(transferItems);
 
+        //When we finish, set the target back to not taken IF it is still a valid target (if we ended early).
+        sequence.getControl().callbacks.finishCallback = () -> {
+            if (blackBoard.targetResource != null && blackBoard.targetResource.isValid() && sequence.getBlackboard().targetResource.getTaken() == sequence.getBlackboard().getEntityOwner()) {
+                sequence.getBlackboard().targetResource.setTaken(null);
+            }
+        };
+
         //When finding a path to the resource, make sure it's actually a resource and we are the ones that have claimed it!
         findPath.getControl().callbacks.checkCriteria = task -> {
             Resource res = task.blackBoard.targetResource; //Get the target resource from the blackboard.
@@ -139,12 +150,11 @@ public class PrebuiltTasks {
             return res != null && task.getBlackboard().targetResource.getTaken() == task.getBlackboard().getEntityOwner(); //Return true if not null and we are the ones that took it. False otherwise.
         };
 
-        //When we finish, set the target back to not taken IF it is still a valid target (if we ended early).
-        sequence.getControl().callbacks.finishCallback = () -> {
-            if (sequence.getBlackboard().target != null && sequence.getBlackboard().target.isValid() && sequence.getBlackboard().target.hasTag(Constants.ENTITY_RESOURCE)) {
-                if(sequence.getBlackboard().targetResource.getTaken() == sequence.getBlackboard().getEntityOwner())
-                    sequence.getBlackboard().targetResource.setTaken(null);
-            }
+        //When we finish gathering from a source, try to untake it in case it's infinite (like a water source)
+        gather.getControl().callbacks.finishCallback = () -> {
+            if(blackBoard.targetResource != null && blackBoard.targetResource.isValid())
+                if(blackBoard.targetResource.getTaken() == blackBoard.getEntityOwner())
+                    blackBoard.targetResource.setTaken(null);
         };
 
         return sequence;
@@ -210,12 +220,8 @@ public class PrebuiltTasks {
          */
 
         blackBoard.target = blackBoard.getEntityOwner().getComponent(Colonist.class).getColony().getEntityOwner();
-        blackBoard.targetNode = null;
         blackBoard.fromInventory = blackBoard.getEntityOwner().getComponent(Colonist.class).getColony().getInventory();
         blackBoard.toInventory = blackBoard.getEntityOwner().getComponent(Inventory.class);
-        blackBoard.transferAll = false;
-        blackBoard.takeAmount = 1;
-        blackBoard.itemNameToTake = null;
 
         Sequence sequence = new Sequence("Consuming Item", blackBoard);
 
@@ -233,10 +239,7 @@ public class PrebuiltTasks {
 
         sequence.getControl().callbacks.startCallback = ()->{
             //Reset blackboard values.
-            blackBoard.target = blackBoard.getEntityOwner().getComponent(Colonist.class).getColony().getEntityOwner();
             blackBoard.targetNode = null;
-            blackBoard.fromInventory = blackBoard.getEntityOwner().getComponent(Colonist.class).getColony().getInventory();
-            blackBoard.toInventory = blackBoard.getEntityOwner().getComponent(Inventory.class);
             blackBoard.transferAll = false;
             blackBoard.takeAmount = 1;
             blackBoard.itemNameToTake = null;
@@ -261,7 +264,7 @@ public class PrebuiltTasks {
          *      find storage building
          *      find path to building
          *      move to building
-         *      transfer items to storage
+         *      transfer itemNames to storage
          */
 
         blackBoard.fromInventory = blackBoard.getEntityOwner().getComponent(Inventory.class);
@@ -270,11 +273,16 @@ public class PrebuiltTasks {
 
         Sequence mainSeq = new Sequence("Following", blackBoard);
 
-        FindClosestEntity fc = new FindClosestEntity("Finding Closest Animal", blackBoard, Constants.ENTITY_ANIMAL);
+        FindClosestEntity fc = new FindClosestEntity("Finding Closest Animal", blackBoard);
 
         ((ParentTaskController) mainSeq.getControl()).addTask(fc); //Add the find closest entity job.
         ((ParentTaskController) mainSeq.getControl()).addTask(attackTarget(blackBoard, behComp)); //Add the attack target task to this sequence.
         ((ParentTaskController) mainSeq.getControl()).addTask(gatherTarget(blackBoard, behComp)); //Add the gather target task to this sequence.
+
+        fc.control.callbacks.successCriteria = ent -> {
+            Entity entity = (Entity)ent;
+            return entity.hasTag(Constants.ENTITY_ANIMAL) && entity.hasTag(Constants.ENTITY_ALIVE);
+        };
 
         //Creates a floating text object when trying to find an animal fails.
         fc.getControl().callbacks.failureCallback = () -> {
@@ -307,7 +315,7 @@ public class PrebuiltTasks {
         FindPath fp = new FindPath("Finding path to fishing spot", blackBoard);
         MoveTo mt = new MoveTo("Moving to fishing spot", blackBoard);
         Fish fish = new Fish("Fishing", blackBoard);
-        FindClosestEntity fc = new FindClosestEntity("Finding base", blackBoard, Constants.ENTITY_BUILDING);
+        FindClosestEntity fc = new FindClosestEntity("Finding base", blackBoard);
         FindPath fpBase = new FindPath("Finding path to base", blackBoard);
         MoveTo mtBase = new MoveTo("Moving to base", blackBoard);
         TransferResource tr = new TransferResource("Transfering resources", blackBoard);
@@ -408,7 +416,7 @@ public class PrebuiltTasks {
         FindPath fp = new FindPath("Finding path to water", blackBoard);
         MoveTo mt = new MoveTo("Moving to water", blackBoard);
         GatherWater gatherWater = new GatherWater("Gathering water", blackBoard);
-        FindClosestEntity fb = new FindClosestEntity("Finding base", blackBoard, Constants.ENTITY_BUILDING);
+        FindClosestEntity fb = new FindClosestEntity("Finding base", blackBoard);
         FindPath fpBase = new FindPath("Finding path to base", blackBoard);
         MoveTo mtBase = new MoveTo("Moving to base", blackBoard);
         TransferResource transfer = new TransferResource("Transferring to base", blackBoard);

@@ -4,6 +4,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.Grid;
 import com.mygdx.game.helpers.Tags;
+import com.mygdx.game.helpers.timer.Timer;
 
 import java.util.LinkedList;
 
@@ -36,6 +37,7 @@ public class BlackBoard extends Component{
     public float attackRange = 200f;
     public float disBeforeRepath = 5f;
     public float attackDamage = 10f;
+    public Timer attackTimer = null;
 
     //My stuff
     public Inventory myInventory;

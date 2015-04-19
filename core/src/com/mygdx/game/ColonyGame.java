@@ -56,22 +56,29 @@ public class ColonyGame extends Game {
 
 	@Override
 	public void render () {
-		super.render();
-		Gdx.gl.glClearColor(screenColor.r, screenColor.g, screenColor.b, screenColor.a);
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+		try {
+			super.render();
+			Gdx.gl.glClearColor(screenColor.r, screenColor.g, screenColor.b, screenColor.a);
+			Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-		//Update the profile and GUI.
-		float delta = Gdx.graphics.getDeltaTime();
-		updateVarious(delta);
+			//Update the profile and GUI.
+			float delta = Gdx.graphics.getDeltaTime();
+			updateVarious(delta);
 
-        ColonyGame.batch.begin();
-		updateEntities(delta);
-		updateGUI(delta);
-		ListHolder.updateTimers(delta);
-        ColonyGame.batch.end();
+			ColonyGame.batch.begin();
+			updateEntities(delta);
+			updateGUI(delta);
+			ListHolder.updateTimers(delta);
+			ColonyGame.batch.end();
 
-		//Update the camera.
-        camera.update();
+			//Update the camera.
+			camera.update();
+		}catch(Exception e){
+			e.printStackTrace();
+			threadPool.shutdownNow();
+			Gdx.app.exit();
+		}
+
     }
 
 	private void updateVarious(float delta){

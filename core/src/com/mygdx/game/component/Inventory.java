@@ -29,7 +29,7 @@ public class Inventory extends Component implements IDisplayable{
      *                     indicate that all types can be stored here. (NOT IMPLEMENTED)
      * @param totalTypesAllowed The total number of different types allowed. For instance, if "all" is used but 'totalTypesAllowed' is 2, then if furniture and weapon types are stored first,
      *                          no other types can be put in until another interType is cleared. -1 indicates infinite. (NOT IMPLEMENTED)
-     * @param totalItemsAllowed The total number of items allowed in this inventory. For instance, maybe a person can only hold 10 items? -1 indicates infinite. (NOT IMPLEMENTED)
+     * @param totalItemsAllowed The total number of itemNames allowed in this inventory. For instance, maybe a person can only hold 10 itemNames? -1 indicates infinite. (NOT IMPLEMENTED)
      * @param totalWeightAllowed The total weight allowed for this inventory. For instance, maybe a person can hold a total weight of 50? -1 indicates infinite. (NOT IMPLEMENTED)
      */
     public Inventory(String allowedTypes, int totalTypesAllowed, int totalItemsAllowed, int totalWeightAllowed) {
@@ -68,7 +68,7 @@ public class Inventory extends Component implements IDisplayable{
         }else
             invItem.addAmount(1);
 
-        //Keeps track of total items in this inventory.
+        //Keeps track of total itemNames in this inventory.
         this.currTotalItems+=1;
     }
 
@@ -89,7 +89,7 @@ public class Inventory extends Component implements IDisplayable{
         }else
             invItem.addAmount(amount);
 
-        //Keeps track of total items in this inventory.
+        //Keeps track of total itemNames in this inventory.
         this.currTotalItems+=amount;
     }
 
@@ -146,7 +146,7 @@ public class Inventory extends Component implements IDisplayable{
 
     /**
      * Gets a list of the inventory.
-     * @return An ArrayList containing the items of the inventory.
+     * @return An ArrayList containing the itemNames of the inventory.
      */
     public final ArrayList<InventoryItem> getItemList(){
         return new ArrayList<>(inventory.values());

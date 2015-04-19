@@ -27,30 +27,34 @@ public abstract class ParentTask extends Task{
         Task currTask = this.control.getCurrTask();
 
         //If we have finished, return.
-        if(this.control.hasFinished() || this.control.getCurrTask() == null)
+        if(this.control.hasFinished()) {
             return;
 
-        //If this curr task has finished, handle it!
-        if(currTask.getControl().hasFinished()) {
-            currTask.getControl().safeEnd(); //End the task.
-            //If failed, call childFailed.
-            if (currTask.getControl().hasFailed())
-                this.childFailed();
-            //If succeeded, call childSucceeded.
-            else this.childSucceeded();
-        }
+        //If we have a null task, something went wrong, return.
+        }else if(this.control.getCurrTask() == null) {
+            return;
 
         //If the task hasn't been started, start it!
-        if(!this.control.getCurrTask().getControl().hasStarted()) {
+        }else if(!this.control.getCurrTask().getControl().hasStarted()) {
             if(!currTask.check())
                 this.control.finishWithFailure();
             else
                 currTask.getControl().safeStart();
-        }
 
-        //If the current task is not finished and has started already, update it!
-        if(!this.control.getCurrTask().getControl().hasFinished() && this.control.getCurrTask().getControl().hasStarted())
+        //If the task has finished, end it!
+        }else if(currTask.getControl().hasFinished()){
+            currTask.getControl().safeEnd(); //End the task.
+            //If failed, call childFailed.
+            if(currTask.getControl().hasFailed())
+                this.childFailed();
+            //If succeeded, call childSucceeded.
+            else
+                this.childSucceeded();
+
+        //We're ready! Update the task!
+        }else {
             this.control.getCurrTask().update(delta);
+        }
     }
 
     @Override

@@ -11,9 +11,10 @@ import com.mygdx.game.helpers.FloatingText;
 import com.mygdx.game.helpers.GH;
 import com.mygdx.game.helpers.managers.DataManager;
 import com.mygdx.game.helpers.managers.SoundManager;
-import com.mygdx.game.helpers.timer.OneShotTimer;
 import com.mygdx.game.helpers.timer.RepeatingTimer;
 import com.mygdx.game.helpers.timer.Timer;
+
+import java.util.Arrays;
 
 /**
  * A task that gathers a resource when the right criteria is met.
@@ -57,40 +58,40 @@ public class Gather extends LeafTask{
         });
 
         //Gather after the amount of time needed.
-        this.gatherTimer = new OneShotTimer(this.resource.getGatherTime(), ()->{
+        this.gatherTimer = new RepeatingTimer(this.resource.getGatherTick(), ()->{
             if(this.resource.isDestroyed()){
                 this.control.finishWithFailure();
                 return;
             }
 
-            String[] itemNames = new String[this.resource.getItemNames().length];
-            int[] amounts = new int[this.resource.getItemNames().length];
-            //For each resource, random an amount to add to my (the colonists') inventory.
-            for(int i=0;i<this.resource.getItemNames().length;i++){
-                DataBuilder.JsonItem item = DataManager.getData(this.resource.getItemNames()[i], DataBuilder.JsonItem.class); //Get the reference.
-                this.blackBoard.myInventory.addItem(item.getItemName(), this.resource.getItemAmount(i)); //Random a number!
-                itemNames[i] = item.getDisplayName();
-                amounts[i] = this.resource.getItemAmount(i);
+            //get the item names to gather. If the size is 0, we are done gathering this resource.
+            String[] itemNames = this.resource.gatherFrom();
+            if(itemNames.length == 0){
+                //This sets up the information for moving and transfering to the colony.
+                Colony targetColony = this.blackBoard.getEntityOwner().getComponent(Colonist.class).getColony(); //Get the colony.
+                this.blackBoard.targetNode = null; //Set the target node to null to make sure we use the target (not the node)
+                this.blackBoard.target = targetColony.getEntityOwner(); //Set the target to the entity owner of the colony.
+                this.blackBoard.toInventory = targetColony.getInventory(); //Set the inventory to the colony's inventory.
+
+                this.control.finishWithSuccess();
+                return;
             }
 
+            int[] amounts = new int[itemNames.length];
+            Arrays.fill(amounts, 1);
+
+            for (String itemName : itemNames)
+                this.blackBoard.myInventory.addItem(itemName);
+
             createGatherMessage(itemNames, amounts);
-
-            //This sets up the information for moving and transfering to the colony.
-            Colony targetColony = this.blackBoard.getEntityOwner().getComponent(Colonist.class).getColony(); //Get the colony.
-            this.blackBoard.targetNode = null; //Set the target node to null to make sure we use the target (not the node)
-            this.blackBoard.target = targetColony.getEntityOwner(); //Set the target to the entity owner of the colony.
-            this.blackBoard.toInventory = targetColony.getInventory(); //Set the inventory to the colony's inventory.
-
-            //Destroy the resource and finish with success..
-            this.resource.getEntityOwner().setToDestroy();
-            this.control.finishWithSuccess();
         });
     }
 
     private void createGatherMessage(String[] itemNames, int[] amounts){
         StringBuilder text = new StringBuilder("Gathered ");
         for(int i=0;i<itemNames.length;i++){
-            text.append(amounts[i]).append(" ").append(itemNames[i]);
+            DataBuilder.JsonItem ref = DataManager.getData(itemNames[i], DataBuilder.JsonItem.class);
+            text.append(amounts[i]).append(" ").append(ref.getDisplayName());
             if(i != itemNames.length-1) text.append(", ");
         }
 

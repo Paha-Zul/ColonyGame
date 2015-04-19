@@ -24,8 +24,10 @@ public class RepeatingTimer extends Timer{
 	public void update(float delta) {
 		if(!canceled && !finished) {
 			if (this.currCounter >= this.length) {
-				this.currCounter -= this.length;
-				this.finish();
+				while(this.currCounter >= this.length) {
+					this.currCounter -= this.length;
+					this.finish();
+				}
 			}
 
 			this.currCounter += delta;
