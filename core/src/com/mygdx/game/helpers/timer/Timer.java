@@ -24,6 +24,22 @@ public abstract class Timer {
 	public abstract void update(float delta);
 
 	/**
+	 * Sets the lenght of this timer.
+	 * @param length The length to make the timer;
+	 */
+	public void setLength(double length){
+		this.length = length;
+	}
+
+	/**
+	 * Sets the callback of this timer. This is mostly used for cases where we can't lazy evaluate.
+	 * @param callback The callback to use for the timer.
+	 */
+	public void setCallback(Functional.Callback callback){
+		this.callback = callback;
+	}
+
+	/**
 	 * Cancels this Timer and stops and further ticking or callback calls.
 	 */
 	public void cancel(){

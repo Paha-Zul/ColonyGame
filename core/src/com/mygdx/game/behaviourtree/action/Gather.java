@@ -67,24 +67,35 @@ public class Gather extends LeafTask{
             //get the item names to gather. If the size is 0, we are done gathering this resource.
             String[] itemNames = this.resource.gatherFrom();
             if(itemNames.length == 0){
-                //This sets up the information for moving and transfering to the colony.
-                Colony targetColony = this.blackBoard.getEntityOwner().getComponent(Colonist.class).getColony(); //Get the colony.
-                this.blackBoard.targetNode = null; //Set the target node to null to make sure we use the target (not the node)
-                this.blackBoard.target = targetColony.getEntityOwner(); //Set the target to the entity owner of the colony.
-                this.blackBoard.toInventory = targetColony.getInventory(); //Set the inventory to the colony's inventory.
-
-                this.control.finishWithSuccess();
+                endWithSuccess();
                 return;
             }
 
+            //Fill an array with 1s
             int[] amounts = new int[itemNames.length];
             Arrays.fill(amounts, 1);
 
+            //For each item name, add it to the inventory.
             for (String itemName : itemNames)
                 this.blackBoard.myInventory.addItem(itemName);
 
+            //Create the gather message
             createGatherMessage(itemNames, amounts);
+
+            //Peek into the resource. If the next tick is empty, end this job with success.
+            if(!resource.peek())
+                endWithSuccess();
         });
+    }
+
+    private void endWithSuccess(){
+        //This sets up the information for moving and transfering to the colony.
+        Colony targetColony = this.blackBoard.getEntityOwner().getComponent(Colonist.class).getColony(); //Get the colony.
+        this.blackBoard.targetNode = null; //Set the target node to null to make sure we use the target (not the node)
+        this.blackBoard.target = targetColony.getEntityOwner(); //Set the target to the entity owner of the colony.
+        this.blackBoard.toInventory = targetColony.getInventory(); //Set the inventory to the colony's inventory.
+
+        this.control.finishWithSuccess();
     }
 
     private void createGatherMessage(String[] itemNames, int[] amounts){

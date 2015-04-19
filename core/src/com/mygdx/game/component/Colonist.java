@@ -5,6 +5,7 @@ import com.mygdx.game.helpers.EventSystem;
 import com.mygdx.game.helpers.StringTable;
 import com.mygdx.game.helpers.Tree;
 import com.mygdx.game.helpers.timer.RepeatingTimer;
+import com.mygdx.game.helpers.timer.Timer;
 import com.mygdx.game.interfaces.IInteractable;
 
 import java.util.function.Consumer;
@@ -47,16 +48,23 @@ public class Colonist extends Component implements IInteractable{
     private void createStats(){
         stats.addStat("health", 100, 100);
         stats.addStat("food", 100, 100);
-        stats.addStat("water", 100, 100);
+        stats.addStat("water", 20, 100);
         stats.addStat("energy", 100, 100);
 
         stats.addTimer(new RepeatingTimer(5f, () -> stats.getStat("food").addToCurrent(-1))); //Subtract food every 5 seconds
         stats.addTimer(new RepeatingTimer(10f, () -> stats.getStat("water").addToCurrent(-1))); //Subtract water every 10 seconds.
+
         //If food or water is 0, subtract health.
-        stats.addTimer(new RepeatingTimer(10f, () -> {
-            if (stats.getStat("food").getCurrVal() <= 0 || stats.getStat("water").getCurrVal() <= 0)
+        Timer timer = stats.addTimer(new RepeatingTimer(5f, null));
+        timer.setCallback(() -> {
+            if (stats.getStat("food").getCurrVal() <= 0 || stats.getStat("water").getCurrVal() <= 0) {
                 stats.getStat("health").addToCurrent(-1);
-        }));
+                timer.setLength(5f);
+            }else if(stats.getStat("food").getCurrVal() > 0 && stats.getStat("water").getCurrVal() > 0){
+                stats.getStat("health").addToCurrent(1);
+                timer.setLength(10f);
+            }
+        });
     }
 
     //Creates all the buttons for the colonists behaviours.

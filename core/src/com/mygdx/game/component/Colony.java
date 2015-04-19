@@ -46,7 +46,8 @@ public class Colony extends Component implements IInteractable {
 
         TextureRegion colonistTexture = new TextureRegion(ColonyGame.assetManager.get("colonist", Texture.class));
 
-        for(int i=0;i<1;i++) {
+        //Make some colonists!
+        for(int i=0;i<5;i++) {
             Entity c = this.makeColonist(this.owner.transform.getPosition(), GH.toMeters(200), colonistTexture);
             c.getComponent(Colonist.class).setName(ServerPlayer.firstNames[MathUtils.random(ServerPlayer.firstNames.length - 1)], ServerPlayer.lastNames[MathUtils.random(ServerPlayer.lastNames.length - 1)]);
             this.addColonist(c.getComponent(Colonist.class));
@@ -89,7 +90,6 @@ public class Colony extends Component implements IInteractable {
         this.nearbyResources.get(resource.getResourceName()).add(resource);
         this.totalNearbyResources++;
     }
-
 
     /**
      * Removes a nearby Resource from this colony.

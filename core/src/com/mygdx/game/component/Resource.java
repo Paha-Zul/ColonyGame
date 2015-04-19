@@ -107,6 +107,38 @@ public class Resource extends Component implements IInteractable{
         this.gatherTick = gatherTime/total;
     }
 
+    /**
+     * Generates the item information about the resource being created, such as the names and item itemAmounts.
+     * @param itemNames The String array of item names.
+     * @param itemAmounts The 2D int array of itemAmounts for each item name.
+     */
+    private void generateItemInfo(String[] itemNames, int[] itemAmounts){
+        TIntArrayList amounts = new TIntArrayList(10);
+        ArrayList<String> names = new ArrayList<>(10);
+        int total = 0, highest = 0;
+
+        for(int i=0;i<itemAmounts.length; i++) {
+            if(itemAmounts[i] != 0){
+                amounts.add(itemAmounts[i]); //Adds the item amount to this resource.
+                names.add(itemNames[i]); //Adds the item name to this resource.
+                DataBuilder.JsonItem itemRef = DataManager.getData(itemNames[i], DataBuilder.JsonItem.class); //Get the itemRef
+                resourceTypeTags.addTag(StringTable.getString("resource_type", itemRef.getItemType())); //Adds the type to the resource type tags.
+
+                //For every item effect, add the effect to the effectTags.
+                if(itemRef.getEffects() != null)
+                    for(String effect : itemRef.getEffects())
+                        effectTags.addTag(StringTable.getString("item_effect", effect));
+
+                if(itemAmounts[i] > highest) highest = itemAmounts[i];
+                total += itemAmounts[i];
+            }
+        }
+
+        this.itemAmounts = amounts.toArray();
+        this.itemNames = names.toArray(new String[names.size()]);
+        this.gatherTick = gatherTime/total;
+    }
+
     @Override
     public void start() {
         super.start();
@@ -135,6 +167,22 @@ public class Resource extends Component implements IInteractable{
     }
 
     /**
+     * @return True if the resource has resources left, false otherwise. If false, also either destroys the resource or re-initializes it.
+     */
+    public boolean peek(){
+        int val = 0;
+        for(int amt : itemAmounts) val += amt;
+
+        //If it's empty, either destroy it or re-initialize it.
+        if(val == 0 && !DataManager.getData(this.resourceName, DataBuilder.JsonResource.class).infinite)
+            this.owner.setToDestroy();
+        else if(val == 0)
+            this.initItem(this.resRef);
+
+        return val != 0;
+    }
+
+    /**
      * @return An array of item names gathered from this resource. Empty array if nothing was gathered.
      */
     public String[] gatherFrom(){
@@ -145,6 +193,8 @@ public class Resource extends Component implements IInteractable{
             this.owner.setToDestroy();
         else if(gatherList.size == 0)
             this.initItem(this.resRef);
+
+        //generateItemInfo(itemNames, itemAmounts);
 
         return gatherList.toArray();
     }
@@ -159,9 +209,10 @@ public class Resource extends Component implements IInteractable{
             if (itemAmounts[itemIndex] > 0) {
                 list.add(itemNames[itemIndex]);
                 itemAmounts[itemIndex]--;
-                //If we do a full circle and meet the initial value, return null which means this resource is spent.
             }
+
             itemIndex = (itemIndex + 1) % itemNames.length;
+            //If we do a full circle and meet the initial value, return.
             if (itemIndex == flag) return;
             //Loop this until we have at least one item in the list.
         } while (list.size < 1);
@@ -169,11 +220,11 @@ public class Resource extends Component implements IInteractable{
 
     //Add each item to the list if available (amount more than 0).
     private void gatherItemEach(Array<String> list){
-        gatherList.clear();
+        list.clear();
 
         for(int i=0;i<itemNames.length;i++){
             if(itemAmounts[i] <= 0) continue;
-            gatherList.add(itemNames[i]);
+            list.add(itemNames[i]);
             itemAmounts[i]--;
         }
     }

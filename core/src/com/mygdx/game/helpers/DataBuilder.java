@@ -254,6 +254,9 @@ public class DataBuilder implements IDestroyable{
                 list.clear();
             }
 
+            if(jRes.itemAmounts == null)
+                GH.writeErrorMessage("No item amounts for the resource: "+jRes.resourceName, true);
+
             //Build the itemAmounts array
             int[][] amounts = new int[jRes.itemAmounts.length][2];
             for(int i=0;i<jRes.itemAmounts.length;i++) {

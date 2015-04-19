@@ -1,6 +1,23 @@
 {
   "changes": [
     {
+      "version": "0.23",
+      "date": "4/19/2015",
+      "log": [
+        "- Added: Jobs now display more dynamically. Clicking gather will open a new list of buttons to toggle. Clicking hunt/explore will simply tell them to hunt/explore for now.",
+        "- Added: Things (squirrels/colonists) move smoothly now when attacking. No more weird jerking (YES) around anymore!",
+        "- Added: Water is gatherable now. Water is a node on each water tile. They are infinite for now and will be collected one at a time.",
+        "- Added: Water can be DRANK to restore some thirst need.",
+        "- Changed: Resources are gathered one resource at a time, round robin style. So if a resource has 2 food and 2 herbs, it will collect 1 food, 1 herb, 1 food, 1 herb. This was the easiest way for now.",
+        "- Changed: Squirrels are faster than colonists now. Sometimes a swarm will fly into the camp and kill everything (not intended...)",
+        "- Fixed: No more weird resource claiming problems. Should be all peachy now!",
+        "- Fixed: Resources should be collected with no problem now. Last patch, either wood, food, or herbs couldn't be gathered because I was failing at coding. Should all be good now.",
+        "- Bugs: If you want to see the grid/hitboxes, hit F3 only for a second. It lags terribly and sends squirrels off the map which will crash the game.",
+        "- Bugs: The resources have some really stupid information on them. It's for my debugging purposes so it's staying for now, deal with it.",
+        "- Bugs/Unintended/NotSure?: When colonists are attacked, they will fight back but do nothing after the fight is over. They need to be told what to do again."
+      ]
+    },
+    {
       "version": "0.22",
       "date": "4/12/2015",
       "log": [

@@ -26,7 +26,6 @@ public class Consume extends LeafTask{
     @Override
     public void start() {
         super.start();
-
         Inventory inv = this.blackBoard.getEntityOwner().getComponent(Inventory.class);
         //Search for an itemRef that has the effect we want. If we find one, consume one!
         for(Inventory.InventoryItem item : inv.getItemList()){
@@ -61,7 +60,7 @@ public class Consume extends LeafTask{
                 case "feed":
                     stats.getStat("food").addToCurrent(strength * amount);
                     break;
-                case "hydrate":
+                case "thirst":
                     stats.getStat("water").addToCurrent(strength * amount);
                     break;
             }

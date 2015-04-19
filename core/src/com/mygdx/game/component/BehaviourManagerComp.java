@@ -137,6 +137,12 @@ public class BehaviourManagerComp extends Component{
                 this.feedTimer.restart();
             }
 
+            //If we're thirsty, drink!
+            if(this.behaviourType.equals("colonist") && this.stats.getStat("water").getCurrVal() <= 20 && feedTimer.isFinished()) {
+                this.changeTask(PrebuiltTasks.consumeTask("thirst", this.blackBoard, this));
+                this.feedTimer.restart();
+            }
+
             this.currentBehaviour = this.nextBehaviour;
             this.currentBehaviour.getControl().reset();
             this.currentBehaviour.getControl().safeStart();

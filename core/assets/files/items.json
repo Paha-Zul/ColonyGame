@@ -47,7 +47,7 @@
       "displayName": "Water",
       "itemType": "water",
       "description": "Yummy water.",
-      "effects": ["hydrate"],
+      "effects": ["thirst"],
       "strengths":[10]
     },
     {
