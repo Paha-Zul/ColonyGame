@@ -61,6 +61,7 @@ public class Resource extends Component implements IInteractable{
     public Resource(DataBuilder.JsonResource jRes){
         this(jRes.resourceName);
         this.resRef = jRes;
+
         initItem(jRes);
     }
 
@@ -140,14 +141,22 @@ public class Resource extends Component implements IInteractable{
     }
 
     @Override
-    public void start() {
-        super.start();
-
-        this.getEntityOwner().name = this.displayName;
+    public void init(Entity owner) {
+        super.init(owner);
+        owner.name = this.displayName;
 
         //Build the item name string for displaying in the UI.
         for(int i=0;i<itemNames.length;i++)
             contents.append(itemAmounts[i]).append(" ").append(itemNames[i]).append(System.lineSeparator());
+
+        if(resRef.resourceType.equals("water"))
+            owner.active = false;
+    }
+
+    @Override
+    public void start() {
+        super.start();
+
     }
 
     @Override

@@ -45,12 +45,30 @@ public class Stats extends Component{
 
     /**
      * Adds a new Stat object to the Stats Component.
-     * @param name
-     * @param initCurrValue
-     * @param initMaxValue
+     * @param name The name of the Stat.
+     * @param initCurrValue The initial current value to start.
+     * @param initMaxValue THe initial maximum value to start.
+     * @return The Stat that was created.
      */
     public Stat addStat(String name, float initCurrValue, float initMaxValue){
         Stat stat = new Stat(name, this, initCurrValue, initMaxValue);
+        this.statMap.put(name, stat);
+        this.statList.add(stat);
+        return stat;
+    }
+
+    /**
+     *
+     * Adds a new Stat object to the Stats Component.
+     * @param name The name of the Stat.
+     * @param effect The effect to put on this Stat.
+     * @param initCurrValue The initial current value to start.
+     * @param initMaxValue THe initial maximum value to start.
+     * @return The Stat that was created.
+     */
+    public Stat addStat(String name, String effect, float initCurrValue, float initMaxValue){
+        Stat stat = new Stat(name, this, initCurrValue, initMaxValue);
+        stat.effect = effect;
         this.statMap.put(name, stat);
         this.statList.add(stat);
         return stat;
@@ -64,6 +82,19 @@ public class Stats extends Component{
     public Stat getStat(String name){
         if(this.statMap.containsKey(name))
             return this.statMap.get(name);
+
+        return null;
+    }
+
+    /**
+     * Attempts to get the stat with the effect desired.
+     * @param effect The name of the effect.
+     * @return The stat the contains the effect if found, otherwise null.
+     */
+    public Stat getStatWithEffect(String effect){
+        for(Stat stat : statList)
+            if(stat.effect != null && stat.effect.equals(effect))
+                return stat;
 
         return null;
     }
@@ -87,7 +118,7 @@ public class Stats extends Component{
     public static class Stat{
         public Functional.Callback onZero, onFull;
 
-        public String name;
+        public String name, effect;
         private Stats stats;
         private float current, max;
 
@@ -138,6 +169,15 @@ public class Stats extends Component{
         public float getMaxVal(){
             return this.max;
         }
+
+        public String getEffect(){
+            return this.effect;
+        }
+
+        public void setEffect(String effect){
+            this.effect = effect;
+        }
+
     }
 
 }

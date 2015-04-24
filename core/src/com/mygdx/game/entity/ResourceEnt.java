@@ -33,6 +33,7 @@ public class ResourceEnt extends Entity{
     private void makeCollider(){
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.StaticBody;
+        bodyDef.active = false;
 
         CircleShape circle = new CircleShape();
         circle.setRadius(0.5f);

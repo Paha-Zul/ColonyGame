@@ -21,12 +21,16 @@ public class BlackBoard extends Component{
     //Related to gathering resources
     public Tags resourceTypeTags = new Tags();
 
-    //Transfering variables
+    //Transferring variables
     public boolean transferAll = false;
     public int takeAmount = 0;
     public Inventory toInventory;
     public Inventory fromInventory;
     public String itemNameToTake;
+
+    //Consuming task stuff
+    public String itemEffect;
+    public int itemEffectAmount;
 
     //Related to idleTask jobs
     public float baseIdleTime = 2f;

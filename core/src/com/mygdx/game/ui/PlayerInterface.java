@@ -41,7 +41,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     private World world;
     private ServerPlayer gameScreen;
 
-    private State buttonState = new State();
+    private StateSystem buttonStateSystem = new StateSystem();
 
     private boolean drawingInfo = false;
     private boolean drawingProfiler = false;
@@ -187,10 +187,10 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
         Gdx.input.setInputProcessor(this);
 
-        buttonState.addState("main", true);
-        buttonState.addState("gather");
-        buttonState.addState("hunt");
-        buttonState.setCurrState("main");
+        buttonStateSystem.addState("main", true);
+        buttonStateSystem.addState("gather");
+        buttonStateSystem.addState("hunt");
+        buttonStateSystem.setCurrState("main");
     }
 
     private void generateFonts(){
@@ -440,12 +440,12 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
         Array<Tree.TreeNode> nodeList = currStateNode.getChildren();
         for(int i=0;i<nodeList.size;i++) {
-            Tree.TreeNode currTaskNode = nodeList.get(i); //Get the child task node.
+            //Get the task node and its user data.
+            Tree.TreeNode currTaskNode = nodeList.get(i);
             BehaviourManagerComp.TaskState taskState = (BehaviourManagerComp.TaskState)currTaskNode.userData;
 
-            if(taskState.toggled){
+            if(taskState.toggled)
                 this.blankStyle.normal = this.blankButtonTextures[2];
-            }
 
             //Set the location and draw the button. If clicked, we need to do some tricky things...
             orderButtonRect.set(x + (i + 1) * width, height, 50, 50);
@@ -454,12 +454,14 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
                 //For each profile selected, tell them to gather.
                 for (UnitProfile profile : selectedList) {
+                    if(profile.entity == this.selected) continue;
+
                     //Get the BehaviourComponent and TreeNode.
                     BehaviourManagerComp comp = profile.interactable.getInteractable().getBehManager();
                     Tree.TreeNode treeNode = comp.getTaskTree().getNode(node -> node.nodeName.equals(currTaskNode.nodeName));
+                    BehaviourManagerComp.TaskState profTaskState = (BehaviourManagerComp.TaskState)treeNode.userData;
 
-                    //We have to do this instead of calling the callback because we need to sync the state and tags up for ALL colonists selected.
-                    comp.changeTask(currTaskNode.nodeName); //Change the task to the button we pressed.
+                    profTaskState.doCallback();
                     ((BehaviourManagerComp.TaskState) treeNode.userData).toggled = taskState.toggled; //Toggle the treeNode.
 
                     //If it's toggled, add the tag, otherwise, remove the tag.
@@ -470,7 +472,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
                 //Get the node from the gather TreeNode. If it has children, set the currStateNode
                 Tree.TreeNode tmpNode = interactable.getBehManager().getTaskTree().getNode(node -> node.nodeName.equals(currTaskNode.nodeName));
                 if (tmpNode.hasChildren()) {
-                    buttonState.setCurrState(currTaskNode.nodeName);
+                    buttonStateSystem.setCurrState(currTaskNode.nodeName);
                     currStateNode = tmpNode;
                 }
             }
@@ -658,7 +660,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
         if(button == Input.Buttons.LEFT){
             this.selectedList.clear();
-            this.buttonState.setToDefaultState();
+            this.buttonStateSystem.setToDefaultState();
             this.currStateNode = null;
             this.selected = null;
             this.interactable = null;

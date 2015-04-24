@@ -2,17 +2,18 @@ package com.mygdx.game.component;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.behaviourtree.PrebuiltTasks;
 import com.mygdx.game.behaviourtree.Task;
 import com.mygdx.game.entity.Entity;
+import com.mygdx.game.helpers.StateSystem;
 import com.mygdx.game.helpers.Tree;
 import com.mygdx.game.helpers.timer.OneShotTimer;
 import com.mygdx.game.helpers.timer.Timer;
 import com.mygdx.game.interfaces.Functional;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * A Component that manages the behaviour of Entities.
@@ -27,14 +28,10 @@ public class BehaviourManagerComp extends Component{
     private ArrayList<Line> lineList = new ArrayList<>();
     private Timer feedTimer = new OneShotTimer(5f, null);
 
-    private State currentState;
-    private Array<TaskState> taskStates = new Array<>();
-
+    private StateSystem behaviourStates = new StateSystem();
     private Tree taskTree = new Tree("taskTree", "root");
 
-    private enum State {
-        Idle, Gathering, Exploring, Attacking
-    }
+    private HashMap<String, Task> taskMap = new HashMap<>();
 
     public BehaviourManagerComp(String behaviourType) {
         this.behaviourType = behaviourType;
@@ -52,59 +49,66 @@ public class BehaviourManagerComp extends Component{
     public void start() {
         super.start();
         this.stats = this.owner.getComponent(Stats.class);
+        this.blackBoard = this.getComponent(BlackBoard.class);
+
+        behaviourStates.addState("idle", true, PrebuiltTasks.idleTask(this.blackBoard, this));
+        taskMap.put("idle", PrebuiltTasks.idleTask(this.blackBoard, this));
     }
 
     public void idle(){
-        this.changeTask(PrebuiltTasks.idleTask(this.blackBoard.baseIdleTime, this.blackBoard.randomIdleTime, this.blackBoard.idleDistance, this.blackBoard, this));
-        this.currentState = State.Idle;
+        this.changeTaskImmediate(PrebuiltTasks.idleTask(this.blackBoard, this));
     }
 
     public void gather(){
-        this.changeTask(PrebuiltTasks.gatherResource(this.blackBoard, this));
-        this.currentState = State.Gathering;
+        this.changeTaskImmediate(PrebuiltTasks.gatherResource(this.blackBoard, this));
     }
 
     public void explore(){
-        this.changeTask(PrebuiltTasks.exploreUnexplored(this.blackBoard, this));
-        this.currentState = State.Exploring;
+        this.changeTaskImmediate(PrebuiltTasks.exploreUnexplored(this.blackBoard, this));
     }
 
     public void searchAndAttack(){
-        this.changeTask(PrebuiltTasks.huntTarget(this.blackBoard, this));
-        this.currentState = State.Idle;
+        this.changeTaskImmediate(PrebuiltTasks.searchAndHunt(this.blackBoard, this));
     }
 
     public void attack(){
-        if(this.currentState != State.Attacking) {
-            this.changeTask(PrebuiltTasks.attackTarget(this.blackBoard, this));
-            this.currentState = State.Attacking;
-        }
+        this.changeTaskImmediate(PrebuiltTasks.attackTarget(this.blackBoard, this));
     }
 
     /**
      * Changes the next Task to the Task passed in. This essentially saves the current task to 'lastBehaviour' and sets the 'nextBehaviour' to the Task passed in.
      * @param task The Task to start immediately.
      */
-    public void changeTask(Task task){
+    public void changeTaskImmediate(Task task){
         //End the current task.
         if(this.currentBehaviour != null && !this.currentBehaviour.getControl().hasFinished()) {
             this.currentBehaviour.getControl().finishWithSuccess();
             this.currentBehaviour.getControl().safeEnd();
         }
 
+        this.currentBehaviour = task;
+        this.currentBehaviour.getControl().reset();
+        this.currentBehaviour.getControl().safeStart();
+
         //Set the next behaviour.
+        //this.nextBehaviour = task;
+    }
+
+    /**
+     * Queues the task to be the next task to be executed.
+     * @param task The next task.
+     */
+    public void changeTaskQueued(Task task){
         this.nextBehaviour = task;
     }
 
-    public void changeTask(String taskName){
-        switch(taskName){
-            case "gather":
-                gather();
-                break;
-            case "hunt":
-                searchAndAttack();
-                break;
-        }
+    public void changeTaskImmediate(String taskName){
+        this.behaviourStates.setCurrState(taskName);
+        changeTaskImmediate(taskMap.get(taskName));
+    }
+
+    public void changeTaskQueued(String taskName){
+        changeTaskQueued(taskMap.get(taskName));
     }
 
     @Override
@@ -113,41 +117,30 @@ public class BehaviourManagerComp extends Component{
 
         feedTimer.update(delta);
 
-        if(this.nextBehaviour == null) {
-            //If our behaviour is not null....
-            if (currentBehaviour != null) {
-                //If it has finished
-                if (this.currentBehaviour.getControl().hasFinished()) {
-                    if (this.currentState == State.Gathering) gather();
-                    else if (this.currentState == State.Exploring) explore();
-                    else idle();
-                    //If it finished but failed.
-                }else
-                    this.currentBehaviour.update(delta); //Update it.
+        //If our current behaviour is not null.. execute it.
+        if (this.currentBehaviour != null) {
+            //If it has finished, try to start the next behaviour if there is one, repeat the last if
+            if (this.currentBehaviour.getControl().hasFinished()) {
 
-            //If our behaviour is null, set the next behaviour to the default behaviour.
-            } else
-                this.idle();
+                //If our next behaviour is a task waiting to be executed, start it!
+                if(this.nextBehaviour != null){
+                    this.changeTaskImmediate(nextBehaviour);
+                    this.nextBehaviour = null;
 
-        //If our next behaviour is not null, we need to start it!
-        }else{
-            //If we're hungry, eat!
-            if(this.behaviourType.equals("colonist") && this.stats.getStat("food").getCurrVal() <= 20 && feedTimer.isFinished()) {
-                this.changeTask(PrebuiltTasks.consumeTask("feed", this.blackBoard, this));
-                this.feedTimer.restart();
-            }
+                //If the next behaviour is empty, do something based on the state.
+                }else {
+                    Object data = behaviourStates.getCurrState().userData;
+                    if(data != null) this.changeTaskImmediate((Task)data);
+                    else this.changeTaskImmediate((Task)behaviourStates.getDefaultState().userData);
+                }
 
-            //If we're thirsty, drink!
-            if(this.behaviourType.equals("colonist") && this.stats.getStat("water").getCurrVal() <= 20 && feedTimer.isFinished()) {
-                this.changeTask(PrebuiltTasks.consumeTask("thirst", this.blackBoard, this));
-                this.feedTimer.restart();
-            }
+            //Update the job.
+            }else
+                this.currentBehaviour.update(delta); //Update it.
 
-            this.currentBehaviour = this.nextBehaviour;
-            this.currentBehaviour.getControl().reset();
-            this.currentBehaviour.getControl().safeStart();
-            this.nextBehaviour = null;
-        }
+        //If our behaviour is null, set the next behaviour to the default behaviour.
+        } else
+            this.idle();
     }
 
     public Line[] getLines() {
@@ -225,6 +218,14 @@ public class BehaviourManagerComp extends Component{
      */
     public Tree getTaskTree(){
         return this.taskTree;
+    }
+
+    public StateSystem getBehaviourStates(){
+        return this.behaviourStates;
+    }
+
+    public void addTaskToMap(String name, Task task){
+        this.taskMap.put(name, task);
     }
 
     @Override

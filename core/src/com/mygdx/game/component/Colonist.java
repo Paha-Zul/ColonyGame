@@ -1,5 +1,6 @@
 package com.mygdx.game.component;
 
+import com.mygdx.game.behaviourtree.PrebuiltTasks;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.EventSystem;
 import com.mygdx.game.helpers.StringTable;
@@ -45,21 +46,48 @@ public class Colonist extends Component implements IInteractable{
         this.createBehaviourButtons();
     }
 
+    //Creates the stats for this colonist.
     private void createStats(){
+        //Create these 4 stats.
         stats.addStat("health", 100, 100);
-        stats.addStat("food", 100, 100);
-        stats.addStat("water", 20, 100);
+        Stats.Stat foodStat = stats.addStat("food", 100, 100);
+        Stats.Stat waterStat = stats.addStat("water", 20, 100);
         stats.addStat("energy", 100, 100);
 
-        stats.addTimer(new RepeatingTimer(5f, () -> stats.getStat("food").addToCurrent(-1))); //Subtract food every 5 seconds
-        stats.addTimer(new RepeatingTimer(10f, () -> stats.getStat("water").addToCurrent(-1))); //Subtract water every 10 seconds.
+        foodStat.effect = "feed";
+        waterStat.effect = "thirst";
+
+        //Add some timers.
+        //Subtract food every 5 seconds and try to eat when it's too low.
+        stats.addTimer(new RepeatingTimer(5f, () -> {
+            foodStat.addToCurrent(-1);
+            //If under 20, try to eat.
+            if(foodStat.getCurrVal() <= 20) {
+                getBehManager().getBlackBoard().itemEffect = "feed";
+                getBehManager().getBlackBoard().itemEffectAmount = 1;
+                getBehManager().changeTaskQueued("consume");
+            }
+        }));
+
+        //Subtract water every 10 seconds and try to drink when it's too low.
+        stats.addTimer(new RepeatingTimer(10f, () -> {
+            waterStat.addToCurrent(-1);
+            //If under 20, try to drink.
+            if(waterStat.getCurrVal() <= 20) {
+                getBehManager().getBlackBoard().itemEffect = "thirst";
+                getBehManager().getBlackBoard().itemEffectAmount = 1;
+                getBehManager().changeTaskQueued("consume");
+            }
+        })); //Subtract water every 10 seconds.
 
         //If food or water is 0, subtract health.
         Timer timer = stats.addTimer(new RepeatingTimer(5f, null));
         timer.setCallback(() -> {
+            //If out of food OR water, degrade health.
             if (stats.getStat("food").getCurrVal() <= 0 || stats.getStat("water").getCurrVal() <= 0) {
                 stats.getStat("health").addToCurrent(-1);
                 timer.setLength(5f);
+            //If we have both food AND water, improve health.
             }else if(stats.getStat("food").getCurrVal() > 0 && stats.getStat("water").getCurrVal() > 0){
                 stats.getStat("health").addToCurrent(1);
                 timer.setLength(10f);
@@ -78,7 +106,7 @@ public class Colonist extends Component implements IInteractable{
 
         for(Tree.TreeNode node : nodeList) {
             BehaviourManagerComp.TaskState taskState = new BehaviourManagerComp.TaskState(node.nodeName);
-            taskState.callback = () -> getBehManager().changeTask(node.nodeName);
+            taskState.callback = () -> getBehManager().changeTaskImmediate(node.nodeName);
             node.userData = taskState;
         }
 
@@ -92,6 +120,15 @@ public class Colonist extends Component implements IInteractable{
             };
             node.userData = taskState;
         }
+
+        getBehManager().getBehaviourStates().addState("gather", true, PrebuiltTasks.gatherResource(getBehManager().getBlackBoard(), getBehManager()));
+        getBehManager().getBehaviourStates().addState("explore", true, PrebuiltTasks.exploreUnexplored(getBehManager().getBlackBoard(), getBehManager()));
+        getBehManager().getBehaviourStates().addState("consume", true, PrebuiltTasks.consumeTask(getBehManager().getBlackBoard(), getBehManager()));
+
+        getBehManager().addTaskToMap("gather", PrebuiltTasks.gatherResource(getBehManager().getBlackBoard(), getBehManager()));
+        getBehManager().addTaskToMap("hunt", PrebuiltTasks.searchAndHunt(getBehManager().getBlackBoard(), getBehManager()));
+        getBehManager().addTaskToMap("explore", PrebuiltTasks.exploreUnexplored(getBehManager().getBlackBoard(), getBehManager()));
+        getBehManager().addTaskToMap("consume", PrebuiltTasks.consumeTask(getBehManager().getBlackBoard(), getBehManager()));
     }
 
     private Consumer<Object[]> onDamage = args -> {

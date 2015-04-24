@@ -3,6 +3,7 @@ package com.mygdx.game.screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.client.ClientPlayer;
 import com.mygdx.game.helpers.GH;
@@ -10,8 +11,6 @@ import com.mygdx.game.helpers.Grid;
 import com.mygdx.game.helpers.ListHolder;
 import com.mygdx.game.server.ServerPlayer;
 import com.mygdx.game.ui.UI;
-
-import java.util.ArrayList;
 
 /**
  * Created by Bbent_000 on 12/25/2014.
@@ -60,8 +59,8 @@ public class GameScreen implements Screen{
         ColonyGame.camera.position.set(pos);
 
         //Resizes all the GUI elements of the game (hopefully!)
-        ArrayList<UI> list = ListHolder.getGUIList();
-        for(int i=0;i< list.size();i++){
+        Array<UI> list = ListHolder.getGUIList();
+        for(int i=0;i< list.size;i++){
             list.get(i).resize(width, height);
         }
     }

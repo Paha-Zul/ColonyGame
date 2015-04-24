@@ -27,7 +27,7 @@ public class Entity implements IDelayedDestroyable{
 	public GraphicIdentity identity;
 	public boolean active = true;
 
-    protected Tags tags = new Tags();
+    public Tags tags = new Tags();
 
 	protected ArrayList<Component> newComponentList;
 	protected ArrayList<Component> activeComponentList;
@@ -56,9 +56,10 @@ public class Entity implements IDelayedDestroyable{
 		if(graphic != null)
 			this.identity = this.addComponent(new GraphicIdentity(new TextureRegion(graphic)));
 
-		ListHolder.addEntity(drawLevel, this);
 		this.ID = MathUtils.random()*Double.MAX_VALUE;
 		this.drawLevel = drawLevel;
+
+		ListHolder.addEntity(drawLevel, this);
 	}
 
 	/**
@@ -93,7 +94,7 @@ public class Entity implements IDelayedDestroyable{
 		this.drawLevel = drawLevel;
 	}
 
-	public void init(){
+	public void start(){
 		EventSystem.notifyGameEvent("entity_created", this);
 	}
 
@@ -313,7 +314,7 @@ public class Entity implements IDelayedDestroyable{
 		//Destroy all children
         this.transform.getChildren().forEach(com.mygdx.game.entity.Entity::destroy);
 
-		//Remove all children
+		//Remove myself from any parent.
 		if(this.transform.parent != null){
 			this.transform.parent.removeChild(this);
 			this.transform.parent = null;

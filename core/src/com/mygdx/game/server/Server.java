@@ -1,13 +1,13 @@
 package com.mygdx.game.server;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Net;
 import com.badlogic.gdx.net.ServerSocket;
 import com.badlogic.gdx.net.Socket;
 import com.mygdx.game.helpers.BytesUtil;
 import com.mygdx.game.helpers.GH;
 
-import java.io.*;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -67,7 +67,7 @@ public class Server{
 
         private void init(){
             System.out.println("initializing server");
-            // We do not want to call init() twice and recreate the selector or the serverChannel.
+            // We do not want to call start() twice and recreate the selector or the serverChannel.
             if (selector != null) return;
             if (serverChannel != null) return;
 

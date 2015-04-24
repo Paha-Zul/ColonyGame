@@ -55,19 +55,26 @@ public class Collider extends Component implements IScalable{
     }
 
     @Override
-    public void start() {
-        super.start();
+    public void init(Entity owner) {
+        super.init(owner);
 
-        Vector2 ownerPos = this.owner.transform.getPosition();
+        Vector2 ownerPos = owner.transform.getPosition();
         this.body.setTransform(ownerPos.x, ownerPos.y, this.owner.transform.getRotation());
 
-        ColliderInfo bodyInfo = new ColliderInfo(this.owner);
-        ColliderInfo fixtureInfo = new ColliderInfo(this.owner);
+        ColliderInfo bodyInfo = new ColliderInfo(owner);
+        ColliderInfo fixtureInfo = new ColliderInfo(owner);
         fixtureInfo.tags.addTag(Constants.COLLIDER_CLICKABLE);
         this.body.setUserData(bodyInfo);
         this.fixture.setUserData(fixtureInfo);
 
         this.owner.registerScalable(this);
+
+        this.body.setActive(true);
+    }
+
+    @Override
+    public void start() {
+        super.start();
     }
 
     @Override

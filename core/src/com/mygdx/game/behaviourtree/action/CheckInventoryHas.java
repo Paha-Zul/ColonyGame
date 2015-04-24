@@ -10,14 +10,10 @@ import com.mygdx.game.helpers.managers.DataManager;
  * Created by Paha on 3/15/2015.
  */
 public class CheckInventoryHas extends LeafTask {
-    private String itemName, effect;
-    private int quantity;
 
-    public CheckInventoryHas(String name, BlackBoard blackBoard, String effect, int quantity) {
+    public CheckInventoryHas(String name, BlackBoard blackBoard) {
         super(name, blackBoard);
 
-        this.effect = effect;
-        this.quantity = quantity;
     }
 
     @Override
@@ -29,10 +25,11 @@ public class CheckInventoryHas extends LeafTask {
     public void start() {
         super.start();
 
+        //Loop over each item in the "fromInventory" and check if any of the items has the effect we want.
         for(Inventory.InventoryItem item : this.blackBoard.fromInventory.getItemList()){
             DataBuilder.JsonItem itemRef = DataManager.getData(item.itemRef.getItemName(), DataBuilder.JsonItem.class);
             if(itemRef.getEffects() != null && itemRef.getEffects().length > 0) {
-                if (itemRef.hasEffect(effect) && item.getAmount() >= quantity) {
+                if (itemRef.hasEffect(this.blackBoard.itemEffect) && item.getAmount() >= this.blackBoard.itemEffectAmount) {
                     this.control.finishWithSuccess();
                     this.blackBoard.itemNameToTake = itemRef.getItemName();
                     return;

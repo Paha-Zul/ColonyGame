@@ -1,6 +1,7 @@
 package com.mygdx.game.helpers;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.timer.Timer;
@@ -15,17 +16,17 @@ import java.util.ListIterator;
  * Created by Bbent_000 on 11/24/2014.
  */
 public class ListHolder {
-	private static ArrayList<Entity> newList = new ArrayList<>();
-	private static ArrayList<ArrayList<Entity>> entityList = new ArrayList<>();
-	private static ArrayList<UI> GUIList = new ArrayList<>();
-	private static ArrayList<Timer> timerList = new ArrayList<>();
+	private static Array<Entity> newList = new Array<>();
+	private static Array<ArrayList<Entity>> entityList = new Array<>();
+	private static Array<UI> GUIList = new Array<>();
+	private static Array<Timer> timerList = new Array<>();
 
     private static LinkedList<FloatingText> floatingTexts = new LinkedList<>();
 
 	public static void addEntity(int drawLevel, Entity e){
 		//If our list doesn't have enough layers to put something at 'drawLevel', add the layers!
-		if(entityList.size() <= drawLevel){
-			int diff =  drawLevel - entityList.size();
+		if(entityList.size <= drawLevel){
+			int diff =  drawLevel - entityList.size;
 			for(int i=0;i<=diff;i++){
 				entityList.add(new ArrayList<>());
 			}
@@ -33,7 +34,6 @@ public class ListHolder {
 
 		//Add the Entity
 		newList.add(e);
-		entityList.get(drawLevel).add(e);
 	}
 
 	public static void addTimer(Timer timer){
@@ -73,9 +73,14 @@ public class ListHolder {
 			}
 		}
 
-		//We call init after the list has updated to allow all initial components to be started.
-		if(newList.size() > 0){
-			newList.forEach(Entity::init);
+		//We call start after the list has updated to allow all initial components to be started.
+		if(newList.size > 0){
+			newList.forEach(entity -> {
+				entity.start();
+				if(entity.active) entityList.get(entity.drawLevel).add(entity);
+                entity.update(delta); //Do one update even if the Entity is not active. This will allows initial stuff to be set up.
+			});
+
 			newList.clear();
 		}
 	}
@@ -85,10 +90,10 @@ public class ListHolder {
      * @param delta The time between frames.
      */
 	public static void updateGUI(float delta, SpriteBatch batch){
-		for (int i=0;i<GUIList.size();i++) {
+		for (int i=0;i<GUIList.size;i++) {
 			UI gui = GUIList.get(i);
 			if(gui.isDestroyed()){
-				GUIList.remove(i);
+				GUIList.removeIndex(i);
 				i--;
 			}else
 				gui.render(delta, batch);
@@ -118,10 +123,10 @@ public class ListHolder {
 	 * @param delta The delta time between frames.
 	 */
 	public static void updateTimers(float delta){
-		for(int i=0;i<timerList.size();i++){
+		for(int i=0;i<timerList.size;i++){
 			Timer timer = timerList.get(i);
 			if(timer.isOneShot() && timer.isFinished()){
-				timerList.remove(i);
+				timerList.removeIndex(i);
 				i--;
 			}else
 				timerList.get(i).update(delta);
@@ -145,14 +150,14 @@ public class ListHolder {
 	 * @param ui The UI Component to remove.
 	 */
 	public static void removeGUI(UI ui){
-		GUIList.remove(ui);
+		GUIList.removeValue(ui, false);
 	}
 
 	/**
 	 * Gets the ArrayList for the GUI stuff.
 	 * @return An ArrayList holding GUI elements.
 	 */
-	public static ArrayList<UI> getGUIList(){
+	public static Array<UI> getGUIList(){
 		return GUIList;
 	}
 
@@ -162,7 +167,7 @@ public class ListHolder {
 	 * @return The first Entity found with 'name', null otherwise.
 	 */
 	public static Entity findEntityByName(String name){
-		for(int i=0; i<entityList.size(); i++){
+		for(int i=0; i<entityList.size; i++){
 			for(int j=0; j<entityList.get(i).size(); j++){
 				Entity ent = entityList.get(i).get(j);
 				if(ent.name == name)

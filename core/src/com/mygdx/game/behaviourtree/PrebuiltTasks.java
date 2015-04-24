@@ -19,14 +19,12 @@ import com.mygdx.game.interfaces.Functional;
  * Created by Paha on 4/11/2015.
  */
 public class PrebuiltTasks {
-    
     public static Task moveTo(BlackBoard blackBoard){
         //Get the target node/Entity.
         //Find the path.
         //Move to the target.
 
         Sequence sequence = new Sequence("MoveTo", blackBoard);
-
         FindPath findPath = new FindPath("FindPath",  blackBoard);
         MoveTo followPath = new MoveTo("FollowPath",  blackBoard);
 
@@ -47,10 +45,6 @@ public class PrebuiltTasks {
          *  Store the resource.
          */
 
-        //Reset blackboard values...
-        blackBoard.fromInventory = blackBoard.getEntityOwner().getComponent(Colonist.class).getInventory();
-        blackBoard.toInventory = blackBoard.getEntityOwner().getComponent(Colonist.class).getColony().getInventory();
-
         //If we fail to find a resource, we need to explore until we find one...
         Functional.Callback fail = () -> {
             Vector2 pos = blackBoard.getEntityOwner().transform.getPosition();
@@ -58,8 +52,8 @@ public class PrebuiltTasks {
 
             //When we finish moving to the newly explored area, try to gather a resource again.
             Task task = exploreUnexplored(blackBoard, behComp);
-            task.getControl().getCallbacks().finishCallback = () -> behComp.changeTask(gatherResource(blackBoard, behComp));
-            behComp.changeTask(task);
+            task.getControl().getCallbacks().finishCallback = () -> behComp.changeTaskImmediate(gatherResource(blackBoard, behComp));
+            behComp.changeTaskImmediate(task);
         };
 
         Sequence sequence = new Sequence("Gathering Resource", blackBoard);
@@ -70,6 +64,14 @@ public class PrebuiltTasks {
 
         //Reset some values.
         sequence.control.callbacks.startCallback = () -> {
+            //Reset blackboard values...
+            if(blackBoard.getEntityOwner() == null) System.out.println("Owner null, owner has tags: ");
+            if(blackBoard.getEntityOwner().getComponent(Colonist.class) == null) System.out.println("Colonist null, owner tags: "+blackBoard.getEntityOwner().tags.toString());
+            if (blackBoard.getEntityOwner().getComponent(Colonist.class).getInventory() == null) System.out.println("Colonist inv null");
+            if(blackBoard.getEntityOwner().getComponent(Colonist.class).getColony() == null) System.out.println("Colony null");
+            if(blackBoard.getEntityOwner().getComponent(Colonist.class).getColony().getInventory() == null) System.out.println("Colony inv null");
+            blackBoard.fromInventory = blackBoard.getEntityOwner().getComponent(Colonist.class).getInventory();
+            blackBoard.toInventory = blackBoard.getEntityOwner().getComponent(Colonist.class).getColony().getInventory();
             blackBoard.transferAll = true;
             blackBoard.takeAmount = 0;
             blackBoard.itemNameToTake = null;
@@ -185,7 +187,7 @@ public class PrebuiltTasks {
         return sequence;
     }
 
-    public static Task idleTask(float baseIdleTime, float randomIdleTime, int radius, BlackBoard blackBoard, BehaviourManagerComp behComp){
+    public static Task idleTask(BlackBoard blackBoard, BehaviourManagerComp behComp){
         /**
          * Sequence:
          *  find random nearby location
@@ -196,10 +198,10 @@ public class PrebuiltTasks {
 
         Sequence sequence = new Sequence("Idling", blackBoard);
 
-        FindRandomNearbyLocation findNearbyLocation = new FindRandomNearbyLocation("Finding Nearby Location", blackBoard, radius);
+        FindRandomNearbyLocation findNearbyLocation = new FindRandomNearbyLocation("Finding Nearby Location", blackBoard, blackBoard.idleDistance);
         FindPath findPath = new FindPath("Finding Path to Nearby Location", blackBoard);
         MoveTo moveTo = new MoveTo("Moving to Nearby Location", blackBoard);
-        Idle idle = new Idle("Standing Still", blackBoard, baseIdleTime, randomIdleTime);
+        Idle idle = new Idle("Standing Still", blackBoard, blackBoard.baseIdleTime, blackBoard.randomIdleTime);
 
         ((ParentTaskController) sequence.getControl()).addTask(findNearbyLocation);
         ((ParentTaskController) sequence.getControl()).addTask(findPath);
@@ -209,7 +211,7 @@ public class PrebuiltTasks {
         return sequence;
     }
 
-    public static Task consumeTask(String effect, BlackBoard blackBoard, BehaviourManagerComp behComp){
+    public static Task consumeTask(BlackBoard blackBoard, BehaviourManagerComp behComp){
         /**
          * Sequence:
          *  check that the inventory of the storage has the item effect we want/need
@@ -219,17 +221,13 @@ public class PrebuiltTasks {
          *  consume item
          */
 
-        blackBoard.target = blackBoard.getEntityOwner().getComponent(Colonist.class).getColony().getEntityOwner();
-        blackBoard.fromInventory = blackBoard.getEntityOwner().getComponent(Colonist.class).getColony().getInventory();
-        blackBoard.toInventory = blackBoard.getEntityOwner().getComponent(Inventory.class);
-
         Sequence sequence = new Sequence("Consuming Item", blackBoard);
 
-        CheckInventoryHas check = new CheckInventoryHas("Checking Inventory", blackBoard, effect, 1);
+        CheckInventoryHas check = new CheckInventoryHas("Checking Inventory", blackBoard);
         FindPath fp = new FindPath("Finding Path to consume item", blackBoard);
         MoveTo moveTo = new MoveTo("Moving to consume item", blackBoard);
         TransferResource tr = new TransferResource("Transferring Consumable", blackBoard);
-        Consume consume = new Consume("Consuming Item", blackBoard, effect);
+        Consume consume = new Consume("Consuming Item", blackBoard);
 
         ((ParentTaskController) sequence.getControl()).addTask(check);
         ((ParentTaskController) sequence.getControl()).addTask(fp);
@@ -243,12 +241,22 @@ public class PrebuiltTasks {
             blackBoard.transferAll = false;
             blackBoard.takeAmount = 1;
             blackBoard.itemNameToTake = null;
+
+            blackBoard.target = blackBoard.getEntityOwner().getComponent(Colonist.class).getColony().getEntityOwner();
+            blackBoard.fromInventory = blackBoard.getEntityOwner().getComponent(Colonist.class).getColony().getInventory();
+            blackBoard.toInventory = blackBoard.getEntityOwner().getComponent(Inventory.class);
         };
 
         return sequence;
     }
 
-    public static Task huntTarget(BlackBoard blackBoard, BehaviourManagerComp behComp){
+    /**
+     * Searches for a target, hunts the target, and gathers the resources from it. This Task is composed of the attackTarget and gatherResource Tasks.
+     * @param blackBoard The blackboard of this Task.
+     * @param behComp THe BehaviourManager that owns this Task.
+     * @return The created Task.
+     */
+    public static Task searchAndHunt(BlackBoard blackBoard, BehaviourManagerComp behComp){
         /**
          * Sequence:
          *  find closest entity (animal to hunt)
@@ -267,8 +275,6 @@ public class PrebuiltTasks {
          *      transfer itemNames to storage
          */
 
-        blackBoard.fromInventory = blackBoard.getEntityOwner().getComponent(Inventory.class);
-        blackBoard.toInventory = blackBoard.getEntityOwner().getComponent(Colonist.class).getColony().getInventory();
         blackBoard.transferAll = true;
 
         Sequence mainSeq = new Sequence("Following", blackBoard);
@@ -288,9 +294,65 @@ public class PrebuiltTasks {
         fc.getControl().callbacks.failureCallback = () -> {
             Vector2 pos = blackBoard.getEntityOwner().transform.getPosition();
             new FloatingText("Couldn't find a nearby animal to hunt!", new Vector2(pos.x, pos.y + 1), new Vector2(pos.x, pos.y + 10), 1.5f, 0.8f);
+            behComp.changeTaskImmediate((Task)behComp.getBehaviourStates().getDefaultState().userData);
         };
 
         return mainSeq;
+    }
+
+    /**
+     * Generates the Task for hunting a target. This Task requires that the blackboard has the 'target' parameter set or it will fail.
+     * @param blackBoard The blackboard of the Task.
+     * @param behComp The BehaviourComponentComp that will own this Task.
+     * @return The created Task.
+     */
+    public static Task attackTarget(BlackBoard blackBoard, BehaviourManagerComp behComp){
+        /**
+         * repeatUntilCondition:
+         *  Parallel:
+         *      find path to target
+         *      move to target
+         *      attack target
+         */
+
+        Parallel parallel = new Parallel("Attacking", blackBoard);
+        RepeatUntilCondition repeat = new RepeatUntilCondition("Repeating", blackBoard, parallel);
+
+        FindPath fp = new FindPath("Finding path", blackBoard);
+        MoveTo mt = new MoveTo("Moving", blackBoard);
+        Attack attack = new Attack("Attacking Target", blackBoard);
+
+        ((ParentTaskController)parallel.getControl()).addTask(fp);
+        ((ParentTaskController)parallel.getControl()).addTask(mt);
+        ((ParentTaskController)parallel.getControl()).addTask(attack);
+
+        //Make sure the target is not null.
+        repeat.getControl().callbacks.checkCriteria = task -> task.getBlackboard().target != null;
+
+        //To succeed this repeat job, the target must be null, not valid, or not alive.
+        repeat.getControl().callbacks.successCriteria = task -> {
+            Entity target = ((Task)task).getBlackboard().target;
+            return target == null || !target.isValid() || !target.hasTag(Constants.ENTITY_ALIVE);
+        };
+
+        //If the target has moved away from it's last square AND the move job is still active (why repath if not moving?), fail the parallel job.
+        parallel.getControl().callbacks.failCriteria = tsk -> {
+            Task task = (Task)tsk;
+            boolean moved = task.getBlackboard().targetNode != ColonyGame.worldGrid.getNode((task.getBlackboard().target));
+            boolean moveJobAlive = !mt.control.hasFinished();
+            boolean outOfRange = attack.control.hasFinished() && attack.control.hasFailed();
+
+            return (moveJobAlive && moved) || (!moveJobAlive && outOfRange);
+        };
+
+        //If we are within range of the target, succeed the MoveTo task.
+        mt.getControl().callbacks.successCriteria = tsk -> {
+            Task task = (Task)tsk;
+            float dis = task.getBlackboard().target.transform.getPosition().dst(task.getBlackboard().getEntityOwner().transform.getPosition());
+            return dis <= GH.toMeters(task.getBlackboard().attackRange);
+        };
+
+        return repeat;
     }
 
     public static Task fish(BlackBoard blackBoard, BehaviourManagerComp behComp){
@@ -346,54 +408,7 @@ public class PrebuiltTasks {
         return seq;
     }
 
-    public static Task attackTarget(BlackBoard blackBoard, BehaviourManagerComp behComp){
-        /**
-         * repeatUntilCondition:
-         *  Parallel:
-         *      find path to target
-         *      move to target
-         *      attack target
-         */
 
-        Parallel parallel = new Parallel("Attacking", blackBoard);
-        RepeatUntilCondition repeat = new RepeatUntilCondition("Repeating", blackBoard, parallel);
-
-        FindPath fp = new FindPath("Finding path", blackBoard);
-        MoveTo mt = new MoveTo("Moving", blackBoard);
-        Attack attack = new Attack("Attacking Target", blackBoard);
-
-        ((ParentTaskController)parallel.getControl()).addTask(fp);
-        ((ParentTaskController)parallel.getControl()).addTask(mt);
-        ((ParentTaskController)parallel.getControl()).addTask(attack);
-
-        //Make sure the target is not null.
-        repeat.getControl().callbacks.checkCriteria = task -> task.getBlackboard().target != null;
-
-        //To succeed this repeat job, the target must be null, not valid, or not alive.
-        repeat.getControl().callbacks.successCriteria = task -> {
-            Entity target = ((Task)task).getBlackboard().target;
-            return target == null || !target.isValid() || !target.hasTag(Constants.ENTITY_ALIVE);
-        };
-
-        //If the target has moved away from it's last square AND the move job is still active (why repath if not moving?), fail the parallel job.
-        parallel.getControl().callbacks.failCriteria = tsk -> {
-            Task task = (Task)tsk;
-            boolean moved = task.getBlackboard().targetNode != ColonyGame.worldGrid.getNode((task.getBlackboard().target));
-            boolean moveJobAlive = !mt.control.hasFinished();
-            boolean outOfRange = attack.control.hasFinished() && attack.control.hasFailed();
-
-            return (moveJobAlive && moved) || (!moveJobAlive && outOfRange);
-        };
-
-        //If we are within range of the target, succeed the MoveTo task.
-        mt.getControl().callbacks.successCriteria = tsk -> {
-            Task task = (Task)tsk;
-            float dis = task.getBlackboard().target.transform.getPosition().dst(task.getBlackboard().getEntityOwner().transform.getPosition());
-            return dis <= GH.toMeters(task.getBlackboard().attackRange);
-        };
-
-        return repeat;
-    }
     
     public static Task gatherWaterTask(BlackBoard blackBoard, BehaviourManagerComp behComp){
         /**

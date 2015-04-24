@@ -82,7 +82,10 @@ public class FindPath extends LeafTask {
 
         //Set the starting currNode and its G and H value.
         Grid.Node node = this.blackBoard.colonyGrid.getNode(this.blackBoard.getEntityOwner());
-        if(node == null) GH.writeErrorMessage("Node was null for entity: "+this.blackBoard.getEntityOwner().name+" at "+this.blackBoard.getEntityOwner().transform.getPosition());
+        int[] index = this.blackBoard.colonyGrid.getIndex(this.blackBoard.getEntityOwner().transform.getPosition());
+        if(node == null) GH.writeErrorMessage("Node was null for entity: "+this.blackBoard.getEntityOwner().name+" at "+this.blackBoard.getEntityOwner().transform.getPosition()
+                +" which is index "+index[0]+" "+index[1]+" when grid is size "+this.blackBoard.colonyGrid.getWidth()+" "+this.blackBoard.colonyGrid.getHeight());
+
         Grid.PathNode currNode = new Grid.PathNode(node);
         currNode.parentNode = null;
         currNode.G = 0;
