@@ -104,13 +104,14 @@ public class Colonist extends Component implements IInteractable{
 
         Tree taskTree = this.getBehManager().getTaskTree();
 
-        Tree.TreeNode[] nodeList = taskTree.addNode("root", "gather", "hunt", "explore");
+        Tree.TreeNode[] nodeList = taskTree.addNode("root", "gather", "hunt", "explore", "idle");
 
         //For each node, we set up a TaskInfo object and assign it to the node's userData field.
         for(Tree.TreeNode node : nodeList) {
             BehaviourManagerComp.TaskInfo taskInfo = new BehaviourManagerComp.TaskInfo(node.nodeName);
             taskInfo.callback = () -> getBehManager().changeTaskImmediate(node.nodeName);
             taskInfo.userData = DataManager.getData(node.nodeName+"Style", GUI.GUIStyle.class);
+            if(taskInfo.userData == null) taskInfo.userData = DataManager.getData("blankStyle", GUI.GUIStyle.class);
 
             node.userData = taskInfo;
         }

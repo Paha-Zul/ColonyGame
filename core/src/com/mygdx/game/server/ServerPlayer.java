@@ -21,6 +21,7 @@ import com.mygdx.game.helpers.worldgeneration.WorldGen;
 import com.mygdx.game.ui.PlayerInterface;
 
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 /**
  * Created by Bbent_000 on 11/23/2014.
@@ -139,13 +140,15 @@ public class ServerPlayer {
 
         //Destroys resources in an area around the Colony Entity.
 		int radius = 8;
+        Predicate<Grid.Node> notWaterNode = node -> !node.getTerrainTile().category.equals("water");
+
         Consumer<Entity> treeConsumer = ent -> {
             if(ent.hasTag(Constants.ENTITY_RESOURCE)) ent.setToDestroy();
         };
 
         //Perform the things.
 		//this.grid.perform(destroyNearbyResources);
-        this.grid.performOnEntityInRadius(treeConsumer, null, radius, grid.getIndex(colonyEnt.transform.getPosition()));
+        this.grid.performOnEntityInRadius(treeConsumer, notWaterNode, radius, grid.getIndex(colonyEnt.transform.getPosition()));
 	}
 
 	private void initPlayer(){

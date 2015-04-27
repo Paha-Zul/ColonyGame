@@ -11,6 +11,14 @@ import java.util.LinkedList;
 
 /**
  * Created by Paha on 1/28/2015.
+ *
+ * <p>This task will move the {@link com.mygdx.game.entity.Entity Entity} that owns this Task towards a target {@link com.mygdx.game.helpers.Grid.Node Node }
+ * following the blackBoard.path that was generated beforehand.</p>
+ *
+ * <p>During the update, {@link com.mygdx.game.helpers.Callbacks#successCriteria control.callbacks.successCriteria } and {@link com.mygdx.game.helpers.Callbacks#failCriteria control.callbacks.failCriteria }
+ * are tested to succeed or fail the task, respectively. To move the Entity of this Task,
+ * the Entity must have a {@link Collider collider} to apply velocity to. The collider will be applied velocity that is dependant upon the {@link BlackBoard#moveSpeed moveSpeed} blackBoard.moveSpeed field.
+ * When the path is completed, the Entity's collider velocity will be set to 0 and the task will succeed.</p>
  */
 public class MoveTo extends LeafTask{
     private Transform transform;
@@ -51,13 +59,13 @@ public class MoveTo extends LeafTask{
             return;
         }
 
-        if(this.getControl().getCallbacks().failCriteria != null && this.getControl().getCallbacks().failCriteria.criteria(this)){
+        if(this.getControl().getCallbacks().failCriteria != null && this.getControl().getCallbacks().failCriteria.test(this)){
             this.collider.body.setLinearVelocity(0, 0);
             this.control.finishWithFailure();
             return;
         }
 
-        if(this.getControl().getCallbacks().successCriteria != null && this.getControl().getCallbacks().successCriteria.criteria(this)){
+        if(this.getControl().getCallbacks().successCriteria != null && this.getControl().getCallbacks().successCriteria.test(this)){
             this.collider.body.setLinearVelocity(0, 0);
             this.control.finishWithSuccess();
             return;

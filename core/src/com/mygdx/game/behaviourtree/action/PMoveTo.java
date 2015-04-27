@@ -43,18 +43,18 @@ public class PMoveTo extends LeafTask{
         super.update(delta);
 
         //If the path is null or empty, simply set velocity to 0 and return.
-        if(this.path == null || this.path.size() < 1 || (control.callbacks.returnCriteria != null && control.callbacks.returnCriteria.criteria(this))){
+        if(this.path == null || this.path.size() < 1 || (control.callbacks.returnCriteria != null && control.callbacks.returnCriteria.test(this))){
             this.collider.body.setLinearVelocity(0, 0);
             return;
         }
 
-        if(this.getControl().getCallbacks().failCriteria != null && this.getControl().getCallbacks().failCriteria.criteria(this)){
+        if(this.getControl().getCallbacks().failCriteria != null && this.getControl().getCallbacks().failCriteria.test(this)){
             this.collider.body.setLinearVelocity(0, 0);
             this.control.finishWithFailure();
             return;
         }
 
-        if(this.getControl().getCallbacks().successCriteria != null && this.getControl().getCallbacks().successCriteria.criteria(this)){
+        if(this.getControl().getCallbacks().successCriteria != null && this.getControl().getCallbacks().successCriteria.test(this)){
             this.collider.body.setLinearVelocity(0, 0);
             this.control.finishWithSuccess();
             return;

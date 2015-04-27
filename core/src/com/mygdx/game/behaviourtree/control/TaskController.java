@@ -53,7 +53,7 @@ public class TaskController {
         this.task.start();
 
         if(this.callbacks != null && this.callbacks.startCallback != null)
-            this.callbacks.startCallback.callback();
+            this.callbacks.startCallback.accept(this.task);
     }
 
     /**
@@ -63,12 +63,12 @@ public class TaskController {
 
         if(callbacks != null) {
             if (this.hasFailed() && this.callbacks.failureCallback != null)
-                this.callbacks.failureCallback.callback(); //Failure callback
+                this.callbacks.failureCallback.accept(this.task); //Failure callback
             else if (!this.hasFailed() && this.callbacks.successCallback != null)
-                this.callbacks.successCallback.callback(); //Success callback
+                this.callbacks.successCallback.accept(this.task); //Success callback
 
             if(this.callbacks.finishCallback != null) //General finish callback.
-                this.callbacks.finishCallback.callback();
+                this.callbacks.finishCallback.accept(this.task);
         }
 
         this.task.end();

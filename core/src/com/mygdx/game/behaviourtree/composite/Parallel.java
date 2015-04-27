@@ -30,13 +30,13 @@ public class Parallel extends ParentTask{
     @Override
     public void update(float delta) {
         //If we succeed, finish with success.
-        if(control.callbacks.successCriteria != null && control.callbacks.successCriteria.criteria(this)){
+        if(control.callbacks.successCriteria != null && control.callbacks.successCriteria.test(this)){
             this.control.finishWithSuccess();
             return;
         }
 
         //If we fail, finish with failure.
-        if(control.callbacks.failCriteria != null && control.callbacks.failCriteria.criteria(this)){
+        if(control.callbacks.failCriteria != null && control.callbacks.failCriteria.test(this)){
             this.control.finishWithFailure();
             return;
         }

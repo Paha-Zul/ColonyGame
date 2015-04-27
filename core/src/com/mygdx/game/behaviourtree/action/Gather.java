@@ -17,7 +17,10 @@ import com.mygdx.game.helpers.timer.Timer;
 import java.util.Arrays;
 
 /**
- * A task that gathers a resource when the right criteria is met.
+ * <p>A task that gathers a resource when the right criteria is met.</p>
+ *
+ * <p>If the 'blackBoard.myInventory' field is null, the inventory from the Entity owner of the blackboard will be used. The 'blackBoard.targetResource' field will
+ * be used to gather from. If this field is null, the task will end with failure.</p>
  */
 public class Gather extends LeafTask{
     private Resource resource;
@@ -45,7 +48,7 @@ public class Gather extends LeafTask{
             this.blackBoard.myInventory = this.blackBoard.getEntityOwner().getComponent(Inventory.class);
 
         //If we can't get a resource component from the target, end this with failure.
-        this.resource = this.blackBoard.target.getComponent(Resource.class);
+        this.resource = this.blackBoard.targetResource;
         if(this.resource == null){
             this.control.finishWithFailure();
             return;

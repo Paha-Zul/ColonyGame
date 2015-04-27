@@ -58,7 +58,7 @@ public class FindClosestTile extends LeafTask{
                             continue;
 
                         //Check the success criteria.
-                        if(!this.control.callbacks.successCriteria.criteria(tmpNode))
+                        if(!this.control.callbacks.successCriteria.test(tmpNode))
                             continue;
 
                         //Get the distance from the current node to the tmpNode on the graph. If the closestNode is null or the dst is less than the closestDst, assign a new node!

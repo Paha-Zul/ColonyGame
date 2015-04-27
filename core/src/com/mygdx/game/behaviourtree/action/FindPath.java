@@ -105,7 +105,7 @@ public class FindPath extends LeafTask {
 
             //Add all the (valid) neighbors to the openList.
             for (Grid.Node neighbor : neighbors) {
-                if (neighbor == null || visitedMap.containsKey(neighbor)) continue;
+                if (neighbor == null || visitedMap.containsKey(neighbor) || neighbor.getTerrainTile() == null) continue;
                 visitedMap.put(neighbor, neighbor);
 
                 //Add the neighbor node to the visited map and open list.

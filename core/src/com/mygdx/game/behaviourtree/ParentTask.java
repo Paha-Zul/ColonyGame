@@ -17,7 +17,9 @@ public abstract class ParentTask extends Task{
     }
 
     @Override
-    public abstract boolean check();
+    public boolean check(){
+        return this.control.callbacks.checkCriteria == null || this.control.callbacks.checkCriteria.test(this);
+    }
 
     @Override
     public abstract void start();

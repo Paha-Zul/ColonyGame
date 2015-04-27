@@ -1,6 +1,18 @@
 {
   "changes": [
     {
+      "version": "0.24",
+      "date": "4/27/2015",
+      "log": [
+        "- Added: Idle button so you can tell the annoying workaholics to STOP WORKING!",
+        "- Fixed: Original button icons are back, but they have crappy text on them. The other buttons are still blank.",
+        "- Fixed: Squirrels running off of the map and crashing the game. If there is SEVERE lag, it could probably still happen. I will wait and see if I need to increase my safeguard against it.",
+        "- Fixed: I guess nobody was claiming squirrels that were being killed, and it resulted in at least one colonist trying to gather from a squirrel that didn't exist, which meant a crash.",
+        "- Bug: The 'loading map' screen doesn't display the 'done' bar correctly anymore. Not sure how that broke, but it's programming... things like this happen.",
+        "- Bug: Squirrels will sometimes scoot right behind a colonist trying to attack it but not landing an attack until the colonist stops. I will address this by creating a new behaviour in the future."
+      ]
+    },
+    {
       "version": "0.23",
       "date": "4/19/2015",
       "log": [

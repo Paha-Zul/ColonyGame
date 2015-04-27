@@ -98,63 +98,67 @@ public class WorldGen {
 
             //Loop for a certain amount of steps. This is done for each noise level. Resets after each one.
             while (stepsLeft > 0 && currX < grid.getWidth()) {
-                double noiseValue = SimplexNoise.noise((double) currX / freq, (double) currY / freq); //Generate the noise for this tile.
-                Vector2 position = new Vector2(currX * grid.getSquareSize(), currY * grid.getSquareSize()); //Set the position.
-                Sprite terrainSprite; //Prepare the sprite object.
-                int type = 0; //The interType of tile.
-                float rotation = 0; //The rotation of the tile.
+                if (!(currX < grid.padding || currX >= grid.getWidth() - grid.padding || currY < grid.padding || currY >= grid.getHeight() - grid.padding)) {
 
-                done = false; //Set done to false signifying that we are not finished yet.
-                //Gets the jTile as the noise height.
-                DataBuilder.JsonTile jtile = this.getTileAtHeight(tileGroupsMap.get(noiseMapName).tiles, (float) noiseValue);
-                if (jtile == null && noiseMapName.equals("main"))
-                    GH.writeErrorMessage("No tile found at height "+noiseValue+" for noise map '"+noiseMapName+"'. A tile must exist for all heights on noise map '"+noiseMapName+"'.");
+                    double noiseValue = SimplexNoise.noise((double) currX / freq, (double) currY / freq); //Generate the noise for this tile.
+                    Vector2 position = new Vector2(currX * grid.getSquareSize(), currY * grid.getSquareSize()); //Set the position.
+                    Sprite terrainSprite; //Prepare the sprite object.
+                    int type = 0; //The interType of tile.
+                    float rotation = 0; //The rotation of the tile.
 
-                //If the tile is not null, let use assign a new tile to the terrain.
-                else if(jtile != null) {
-                    //Gets the texture that the tile should be.
-                    int randTileIndex = MathUtils.random(jtile.img.length - 1);
-                    Grid.TerrainTile tile = grid.getGrid()[currX][currY].getTerrainTile();
+                    done = false; //Set done to false signifying that we are not finished yet.
 
-                    if(tile == null)
-                        tile = new Grid.TerrainTile();
+                    //Gets the jTile as the noise height.
+                    DataBuilder.JsonTile jtile = this.getTileAtHeight(tileGroupsMap.get(noiseMapName).tiles, (float) noiseValue);
+                    if (jtile == null && noiseMapName.equals("main"))
+                        GH.writeErrorMessage("No tile found at height " + noiseValue + " for noise map '" + noiseMapName + "'. A tile must exist for all heights on noise map '" + noiseMapName + "'.");
 
-                    //Creates a new sprite and a new tile, assigns the Sprite to the tile and puts it into the map array.
-                    terrainSprite = terrainAtlas.createSprite(jtile.img[randTileIndex]);
-                    terrainSprite.setSize(grid.getSquareSize(), grid.getSquareSize());
-                    tile.set(terrainSprite, noiseValue, rotation, type, position); //Create a new terrain tile.
-                    tile.avoid = jtile.avoid;
-                    if(jtile.tileNames.length <= randTileIndex) GH.writeErrorMessage("Tile with image "+jtile.img[randTileIndex]+" and category "+jtile.category+" does not have a name assigned to it");
-                    tile.tileName = jtile.tileNames[randTileIndex]; //Assign the name
-                    tile.category = jtile.category; //Assign the category.
-                    grid.getGrid()[currX][currY].setTerrainTile(tile); //Assign the tile to the map.
+                        //If the tile is not null, let use assign a new tile to the terrain.
+                    else if (jtile != null) {
+                        //Gets the texture that the tile should be.
+                        int randTileIndex = MathUtils.random(jtile.img.length - 1);
+                        Grid.TerrainTile tile = grid.getGrid()[currX][currY].getTerrainTile();
+
+                        if (tile == null)
+                            tile = new Grid.TerrainTile();
+
+                        //Creates a new sprite and a new tile, assigns the Sprite to the tile and puts it into the map array.
+                        terrainSprite = terrainAtlas.createSprite(jtile.img[randTileIndex]);
+                        terrainSprite.setSize(grid.getSquareSize(), grid.getSquareSize());
+                        tile.set(terrainSprite, noiseValue, rotation, type, position); //Create a new terrain tile.
+                        tile.avoid = jtile.avoid;
+                        if (jtile.tileNames.length <= randTileIndex)
+                            GH.writeErrorMessage("Tile with image " + jtile.img[randTileIndex] + " and category " + jtile.category + " does not have a name assigned to it");
+                        tile.tileName = jtile.tileNames[randTileIndex]; //Assign the name
+                        tile.category = jtile.category; //Assign the category.
+                        grid.getGrid()[currX][currY].setTerrainTile(tile); //Assign the tile to the map.
+                    }
+
+                    //Decrement steps remaining and increment currDone.
+                    stepsLeft--;
                 }
 
                 //Generate the visibility tile for this location
                 grid.getVisibilityMap()[currX][currY] = new Grid.VisibilityTile();
 
-                //Decrement steps remaining and increment currDone.
-                stepsLeft--;
-                this.currDone++;
-
                 //If we still have Y tiles to cover, simply increment currY.
                 if (currY < grid.getHeight() - 1) currY++;
-                //If our currY went past the grid height, we need to reset currY to 0 and start over, increment X to move over 1.
                 else {
+                    //If our currY went past the grid height, we need to reset currY to 0 and start over, increment X to move over 1.
                     currY = 0; //Reset currY
                     currX++; //Increment currX
                 }
 
-                float currDone = this.currDone;
-                percentageDone = currDone / maxAmount; //Calcs the percentage done so that the player's UI can use this.
+                this.currDone++;
             }
+
+            percentageDone = this.currDone / maxAmount; //Calcs the percentage done so that the player's UI can use this.
 
             //If we are done with the current noise level but we have more levels to go, reset the currX and currY, increment currIndex and continue.
             if (done && this.currIndex < DataBuilder.worldData.noiseMapHashMap.size()) {
                 currX = currY = 0;
                 this.currIndex++;
                 done = false;
-            //Otherwise, if we are simply done, let's be done!
             }
 
             //If we exit the loop, set stepsLeft to 0 so we can restart if we need to.

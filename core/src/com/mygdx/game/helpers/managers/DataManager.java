@@ -1,7 +1,5 @@
 package com.mygdx.game.helpers.managers;
 
-import com.mygdx.game.helpers.GH;
-
 import java.util.HashMap;
 
 /**
@@ -37,8 +35,9 @@ public class DataManager {
      */
     public static <T> T getData(String dataName, Class<T> c){
         HashMap<String, Object> map = dataMap.get(c);
-        if(map == null || !map.containsKey(dataName)) GH.writeErrorMessage("Data of class "+c.getName()+" with name "+dataName+" does not exist!");
+        //if(map == null || !map.containsKey(dataName)) GH.writeErrorMessage("Data of class "+c.getName()+" with name "+dataName+" does not exist!");
 
         return (T)map.get(dataName);
     }
+
 }

@@ -10,7 +10,13 @@ import com.mygdx.game.helpers.runnables.CallbackRunnable;
 import com.mygdx.game.interfaces.Functional;
 
 /**
- * Created by Paha on 1/29/2015.
+ * <p> A Task that will find the closest Entity on the map and assign it to the 'target' field of the blackboard. The 'successCriteria' field of control.callbacks
+ * will be used to determine if the Entity is valid for using or not. In short...</p>
+ *
+ * <ul>
+ * <li>Uses: control.callbacks.successCriteria to determine valid target. This will have an Entity parameter so a cast is needed.</li>
+ * <li>Assigns: task.blackBoard.target the valid Entity that passed the criteria check.</li>
+ * </ul>
  */
 public class FindClosestEntity extends LeafTask{
     private boolean done = false, failed = false;
@@ -76,7 +82,7 @@ public class FindClosestEntity extends LeafTask{
                         //Loop over the Entity list in the current node and try to an entity that matches the successCriteria.
                         for(Entity entity : node.getEntityList()) {
                             //If there is no callback or the callback passes, finish successfully.
-                            if(control.callbacks == null || control.callbacks.successCriteria == null || control.callbacks.successCriteria.criteria(entity)) {
+                            if(control.callbacks == null || control.callbacks.successCriteria == null || control.callbacks.successCriteria.test(entity)) {
                                 //If we have a valid Entity, store it and finish with success.
                                 this.blackBoard.target = entity;
                                 this.done = true;

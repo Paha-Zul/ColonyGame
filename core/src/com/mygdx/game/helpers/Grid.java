@@ -34,6 +34,7 @@ public class Grid {
 
     public static class GridInstance {
         private int numCols, numRows, squareSize;
+        public int padding = 1;
         private Node[][] grid;
         private VisibilityTile[][] visibilityMap;
 

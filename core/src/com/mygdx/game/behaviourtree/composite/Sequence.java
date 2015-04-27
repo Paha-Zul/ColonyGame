@@ -1,8 +1,6 @@
 package com.mygdx.game.behaviourtree.composite;
 
 import com.mygdx.game.behaviourtree.ParentTask;
-import com.mygdx.game.behaviourtree.Task;
-import com.mygdx.game.behaviourtree.control.ParentTaskController;
 import com.mygdx.game.component.BlackBoard;
 
 /**
@@ -16,7 +14,7 @@ public class Sequence extends ParentTask {
 
     @Override
     public boolean check() {
-        return control.getSubTasks().size() > 0;
+        return super.check() && control.getSubTasks().size() > 0;
     }
 
     @Override
