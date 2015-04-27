@@ -34,6 +34,7 @@ public class MainMenuScreen implements Screen {
     @Override
     public void resize(int width, int height) {
         Gdx.graphics.setDisplayMode(width, height, false);
+
         ColonyGame.camera.setToOrtho(false, GH.toMeters(width), GH.toMeters(height));
         ColonyGame.UICamera.setToOrtho(false, width, height);
 

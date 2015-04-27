@@ -5,13 +5,15 @@ import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Container;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.Align;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.helpers.DataBuilder;
 import com.mygdx.game.helpers.GH;
@@ -39,7 +41,10 @@ public class MainMenuInterface extends UI{
     private GUI.GUIStyle changeLogStyle = new GUI.GUIStyle();
     private Rectangle startRect = new Rectangle(), quitRect = new Rectangle(), blank1Rect = new Rectangle();
     private Rectangle blank2Rect = new Rectangle(), blank3Rect = new Rectangle(), changelogRect = new Rectangle(), titleRect = new Rectangle();
-    private Label logLabel, versionLabel;
+    private Label logLabel, versionLabel, versionHistoryLabel;
+    private ScrollPane versionHistoryScroll;
+
+    private Stage stage;
 
     public MainMenuInterface(SpriteBatch batch, ColonyGame game) {
         super(batch, game);
@@ -80,6 +85,7 @@ public class MainMenuInterface extends UI{
         generator.dispose();
 
         this.makeLabels(changelogRect);
+        this.makeVersionHistoryScrollbar();
     }
 
     /**
@@ -111,24 +117,44 @@ public class MainMenuInterface extends UI{
         setLabelBounds(rect);
     }
 
-    private void makeVersionHistory(){
-        Label.LabelStyle style = new Label.LabelStyle();
-        style.font = changeLogStyle.font;
+    private void makeVersionHistoryScrollbar(){
+        Label.LabelStyle historyStyle = new Label.LabelStyle();
+        historyStyle.font = changeLogStyle.font;
 
-        ScrollPane.ScrollPaneStyle scrollStyle = new ScrollPane.ScrollPaneStyle();
-        scrollStyle.background = new TextureRegionDrawable(new TextureRegion(ColonyGame.assetManager.get("blueSquare", Texture.class)));
+        StringBuilder str;
+        for(int i = 1;i<DataBuilder.changelog.changes.length;i++){
+            DataBuilder.JsonLog log = DataBuilder.changelog.changes[i];
 
-        //Gather all changes
-        for(DataBuilder.JsonLog logs : DataBuilder.changelog.changes) {
+            str = new StringBuilder();
+            str.append("Version: ").append(log.version).append("\n").append("Date: ").append(log.date).append("\n");
 
-            DataBuilder.JsonLog log = DataBuilder.changelog.changes[0];
-            String text = "";
-            for (String txt : log.log)
-                text += txt + "\n";
+            for(String txt : log.log)
+                str.append(txt).append("\n");
+
+            str.append("\n");
         }
 
-        //Label versionLabel = new Label();
-        //ScrollPane scrollPane = new ScrollPane(versionLabel);
+        //Make the label, set wrapping to true.
+        versionHistoryLabel = new Label(str.toString(), historyStyle);
+        versionHistoryLabel.setWrap(true);
+
+        //A container to hold the label.
+        Container<Label> labelCont = new Container<>(versionHistoryLabel);
+
+        //The scrollpane that holds the container.
+        ScrollPane.ScrollPaneStyle scrollStyle = new ScrollPane.ScrollPaneStyle();
+        versionHistoryScroll = new ScrollPane(versionHistoryLabel, scrollStyle);
+        versionHistoryLabel.layout();
+
+        Table table = new Table();
+        table.add(versionHistoryScroll).width(500).height(Gdx.graphics.getHeight() * 0.8f);
+        table.setBounds(0, Gdx.graphics.getHeight() - Gdx.graphics.getHeight() * 0.8f, 500, Gdx.graphics.getHeight() * 0.8f);
+
+
+        stage = new Stage(new ScreenViewport(ColonyGame.UICamera), this.batch);
+        stage.addActor(table);
+        stage.setDebugAll(true);
+        Gdx.input.setInputProcessor(stage);
     }
 
     private void setLabelBounds(Rectangle rect){
@@ -165,6 +191,13 @@ public class MainMenuInterface extends UI{
         if(GUI.Button(quitRect, "", this.batch, quitButtonStyle)){
             Gdx.app.exit();
         }
+
+        this.batch.end();
+
+        stage.act(delta);
+        stage.draw();
+
+        this.batch.begin();
     }
 
     @Override
@@ -178,12 +211,14 @@ public class MainMenuInterface extends UI{
         titleFont = null;
         startRect = null;
         quitRect = null;
+
+        stage.dispose();
     }
 
     @Override
     public void resize(int width, int height) {
         this.changelogRect.set(width - width * 0.3f, 0, width * 0.3f, height - height * 0.1f);
-        this.titleRect.set(width / 2 - titleTexture.getWidth()/2, height - titleTexture.getHeight() - height*0.02f, titleTexture.getWidth(), titleTexture.getHeight());
+        this.titleRect.set(width / 2 - titleTexture.getWidth() / 2, height - titleTexture.getHeight() - height * 0.02f, titleTexture.getWidth(), titleTexture.getHeight());
         this.setLabelBounds(this.changelogRect);
 
         for(int i=0;i<buttonRects.length;i++){
