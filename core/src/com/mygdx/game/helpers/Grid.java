@@ -13,6 +13,8 @@ import com.sun.istack.internal.NotNull;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 /**
  * Created by Paha on 1/17/2015.
@@ -60,7 +62,28 @@ public class Grid {
             perform.perform(this.grid);
         }
 
-        public <V extends Object> V performAndGet(Functional.PerformAndGet<V, Node[][]> performAndGet){
+        /**
+         * Preforms a function on each Entity in each Node within the radius from the start index.
+         * @param entityConsumer The Consumer function to execute on the Entity in the Node.
+         * @param nodePredicate The Node predicate that the Node must pass in order to be used. For instance, we don't want to destroy water sources in water near our base, so ignore water tiles.
+         * @param radius The radius to extends out to.
+         * @param startIndex The start index of this perform task.
+         */
+        public void performOnEntityInRadius(Consumer<Entity> entityConsumer, Predicate<Node> nodePredicate, int radius, int[] startIndex){
+            int[] ranges = GH.fixRanges(startIndex[0] - radius, startIndex[0] + radius, startIndex[1] - radius, startIndex[1] + radius, getWidth(), getHeight());
+
+            for(int x = ranges[0]; x <= ranges[1]; x++){
+                for(int y = ranges[2]; y <= ranges[3]; y++){
+                    Node node = getNode(x, y);
+                    if(node == null) continue; //If null, continue
+                    if(nodePredicate != null && !nodePredicate.test(node)) continue; //If we test the predicate and it's false, continue.
+
+                    node.getEntityList().forEach(entityConsumer::accept);
+                }
+            }
+        }
+
+        public <V> V performAndGet(Functional.PerformAndGet<V, Node[][]> performAndGet){
             return performAndGet.performAndGet(this.grid);
         }
 

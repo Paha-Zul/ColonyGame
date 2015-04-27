@@ -39,6 +39,16 @@ public class GH {
         throw new RuntimeException("An error was written to an error file. Check the base directory. (For quick reference, err: "+err+")");
     }
 
+    public static int[] fixRanges(int startX, int endX, int startY, int endY, int width, int height){
+        int[] nums = new int[4];
+        nums[0] = startX < 0 ? 0 : startX;
+        nums[1] = endX >= width ? width - 1 : endX;
+        nums[2] = startY < 0 ? 0 : startY;
+        nums[3] = endY >= height ? height - 1 : endY;
+
+        return nums;
+    }
+
 	public static class Message implements Serializable {
         public String message;
     }

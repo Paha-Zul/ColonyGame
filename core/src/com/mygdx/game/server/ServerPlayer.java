@@ -9,7 +9,6 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.component.Colony;
-import com.mygdx.game.component.Resource;
 import com.mygdx.game.entity.AnimalEnt;
 import com.mygdx.game.entity.ColonyEntity;
 import com.mygdx.game.entity.Entity;
@@ -19,10 +18,9 @@ import com.mygdx.game.helpers.GH;
 import com.mygdx.game.helpers.Grid;
 import com.mygdx.game.helpers.managers.DataManager;
 import com.mygdx.game.helpers.worldgeneration.WorldGen;
-import com.mygdx.game.interfaces.Functional;
 import com.mygdx.game.ui.PlayerInterface;
 
-import java.util.ArrayList;
+import java.util.function.Consumer;
 
 /**
  * Created by Bbent_000 on 11/23/2014.
@@ -141,46 +139,13 @@ public class ServerPlayer {
 
         //Destroys resources in an area around the Colony Entity.
 		int radius = 8;
-		Functional.Perform<Grid.Node[][]> destroyNearbyResources = (grid) -> {
-			int[] index= this.grid.getIndex(colonyEnt.transform.getPosition());
-			int startX = index[0]-radius;
-			int endX = index[0]+radius;
-			int startY = index[1]-radius;
-			int endY = index[1]+radius;
-
-            //Loops over the boundaries and draws the map.
-			for(int col = startX; col<=endX; col++){
-				for(int row = startY; row <= endY; row++){
-					Grid.Node node = this.grid.getNode(col, row);
-					if(node == null) continue;
-                    if(Math.abs(node.getX() - index[0]) + Math.abs(node.getY() - index[1]) >= radius*1.5) continue;
-
-                    new ArrayList<>(node.getEntityList()).stream().filter(ent -> ent.hasTag(Constants.ENTITY_RESOURCE)).forEach(com.mygdx.game.entity.Entity::setToDestroy);
-
-                    //WorldGen.getVisibilityMap()[col][row].addViewer();
-				}
-			}
-		};
-
-        //Detects resources around the Colony Entity.
-		Functional.Perform<Grid.Node[][]> detectNearbyResources = (grid) -> {
-			for(int col = 0; col<grid.length; col++){
-				for(int row = 0; row < grid[col].length; row++){
-					Grid.Node node = this.grid.getNode(col, row);
-					if(node == null) continue;
-					for(Entity ent : node.getEntityList()){
-						Resource resource;
-						if((resource = ent.getComponent(Resource.class)) != null) {
-                            colony.addNearbyResource(resource);
-                        }
-					}
-				}
-			}
-		};
+        Consumer<Entity> treeConsumer = ent -> {
+            if(ent.hasTag(Constants.ENTITY_RESOURCE)) ent.setToDestroy();
+        };
 
         //Perform the things.
-		this.grid.perform(destroyNearbyResources);
-		this.grid.perform(detectNearbyResources);
+		//this.grid.perform(destroyNearbyResources);
+        this.grid.performOnEntityInRadius(treeConsumer, null, radius, grid.getIndex(colonyEnt.transform.getPosition()));
 	}
 
 	private void initPlayer(){

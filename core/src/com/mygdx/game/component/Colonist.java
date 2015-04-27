@@ -5,6 +5,8 @@ import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.EventSystem;
 import com.mygdx.game.helpers.StringTable;
 import com.mygdx.game.helpers.Tree;
+import com.mygdx.game.helpers.gui.GUI;
+import com.mygdx.game.helpers.managers.DataManager;
 import com.mygdx.game.helpers.timer.RepeatingTimer;
 import com.mygdx.game.helpers.timer.Timer;
 import com.mygdx.game.interfaces.IInteractable;
@@ -104,21 +106,26 @@ public class Colonist extends Component implements IInteractable{
 
         Tree.TreeNode[] nodeList = taskTree.addNode("root", "gather", "hunt", "explore");
 
+        //For each node, we set up a TaskInfo object and assign it to the node's userData field.
         for(Tree.TreeNode node : nodeList) {
-            BehaviourManagerComp.TaskState taskState = new BehaviourManagerComp.TaskState(node.nodeName);
-            taskState.callback = () -> getBehManager().changeTaskImmediate(node.nodeName);
-            node.userData = taskState;
+            BehaviourManagerComp.TaskInfo taskInfo = new BehaviourManagerComp.TaskInfo(node.nodeName);
+            taskInfo.callback = () -> getBehManager().changeTaskImmediate(node.nodeName);
+            taskInfo.userData = DataManager.getData(node.nodeName+"Style", GUI.GUIStyle.class);
+
+            node.userData = taskInfo;
         }
 
         nodeList = taskTree.addNode("gather", "food", "water", "herbs", "wood");
 
         for(Tree.TreeNode node : nodeList) {
-            BehaviourManagerComp.TaskState taskState = new BehaviourManagerComp.TaskState(node.nodeName);
-            taskState.callback = () -> {
-                taskState.toggled = !taskState.toggled;
+            BehaviourManagerComp.TaskInfo taskInfo = new BehaviourManagerComp.TaskInfo(node.nodeName);
+            taskInfo.callback = () -> {
+                taskInfo.active = !taskInfo.active;
                 getBehManager().getBlackBoard().resourceTypeTags.toggleTag(StringTable.getString("resource_type", node.nodeName));
             };
-            node.userData = taskState;
+            taskInfo.userData = DataManager.getData("blankStyle", GUI.GUIStyle.class);
+
+            node.userData = taskInfo;
         }
 
         getBehManager().getBehaviourStates().addState("gather", true, PrebuiltTasks.gatherResource(getBehManager().getBlackBoard(), getBehManager()));

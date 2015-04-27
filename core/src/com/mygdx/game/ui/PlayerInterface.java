@@ -22,6 +22,7 @@ import com.mygdx.game.component.collider.Collider;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.*;
 import com.mygdx.game.helpers.gui.GUI;
+import com.mygdx.game.helpers.managers.DataManager;
 import com.mygdx.game.helpers.timer.RepeatingTimer;
 import com.mygdx.game.helpers.timer.Timer;
 import com.mygdx.game.helpers.worldgeneration.WorldGen;
@@ -83,7 +84,6 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
     private Rectangle orderButtonRect = new Rectangle();
 
-    private Texture[] gatherButtonTextures, exploreButtonTextures, huntButtonTextures, blankButtonTextures;
     private GUI.GUIStyle gatherStyle = new GUI.GUIStyle();
     private GUI.GUIStyle exploreStyle = new GUI.GUIStyle();
     private GUI.GUIStyle huntStyle = new GUI.GUIStyle();
@@ -161,25 +161,33 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
         this.generateFonts();
 
-        gatherButtonTextures = new Texture[3];
-        gatherStyle.normal = gatherButtonTextures[0] = ColonyGame.assetManager.get("axebutton_normal", Texture.class);
-        gatherStyle.moused = gatherButtonTextures[1] = ColonyGame.assetManager.get("axebutton_moused", Texture.class);
-        gatherStyle.clicked = gatherButtonTextures[2] = ColonyGame.assetManager.get("axebutton_clicked", Texture.class);
+        gatherStyle.normal =  ColonyGame.assetManager.get("axebutton_normal", Texture.class);
+        gatherStyle.moused = ColonyGame.assetManager.get("axebutton_moused", Texture.class);
+        gatherStyle.clicked = ColonyGame.assetManager.get("axebutton_clicked", Texture.class);
+        gatherStyle.active = ColonyGame.assetManager.get("axebutton_clicked", Texture.class);
 
-        exploreButtonTextures = new Texture[3];
-        exploreStyle.normal = exploreButtonTextures[0] = ColonyGame.assetManager.get("explorebutton_normal", Texture.class);
-        exploreStyle.moused = exploreButtonTextures[1] = ColonyGame.assetManager.get("explorebutton_moused", Texture.class);
-        exploreStyle.clicked = exploreButtonTextures[2] = ColonyGame.assetManager.get("explorebutton_clicked", Texture.class);
+        DataManager.addData("gatherStyle", gatherStyle, GUI.GUIStyle.class);
 
-        huntButtonTextures = new Texture[3];
-        huntStyle.normal = huntButtonTextures[0] = ColonyGame.assetManager.get("huntbutton_normal", Texture.class);
-        huntStyle.moused = huntButtonTextures[1] = ColonyGame.assetManager.get("huntbutton_moused", Texture.class);
-        huntStyle.clicked = huntButtonTextures[2] = ColonyGame.assetManager.get("huntbutton_clicked", Texture.class);
+        exploreStyle.normal = ColonyGame.assetManager.get("explorebutton_normal", Texture.class);
+        exploreStyle.moused = ColonyGame.assetManager.get("explorebutton_moused", Texture.class);
+        exploreStyle.clicked = ColonyGame.assetManager.get("explorebutton_clicked", Texture.class);
+        exploreStyle.active = ColonyGame.assetManager.get("explorebutton_clicked", Texture.class);
 
-        blankButtonTextures = new Texture[3];
-        blankStyle.normal = blankButtonTextures[0] = ColonyGame.assetManager.get("blankbutton_normal", Texture.class);
-        blankStyle.moused = blankButtonTextures[1] = ColonyGame.assetManager.get("blankbutton_moused", Texture.class);
-        blankStyle.clicked = blankButtonTextures[2] = ColonyGame.assetManager.get("blankbutton_clicked", Texture.class);
+        DataManager.addData("exploreStyle", exploreStyle, GUI.GUIStyle.class);
+
+        huntStyle.normal = ColonyGame.assetManager.get("huntbutton_normal", Texture.class);
+        huntStyle.moused = ColonyGame.assetManager.get("huntbutton_moused", Texture.class);
+        huntStyle.clicked = ColonyGame.assetManager.get("huntbutton_clicked", Texture.class);
+        huntStyle.active = ColonyGame.assetManager.get("huntbutton_clicked", Texture.class);
+
+        DataManager.addData("huntStyle", huntStyle, GUI.GUIStyle.class);
+
+        blankStyle.normal = ColonyGame.assetManager.get("blankbutton_normal", Texture.class);
+        blankStyle.moused = ColonyGame.assetManager.get("blankbutton_moused", Texture.class);
+        blankStyle.clicked = ColonyGame.assetManager.get("blankbutton_clicked", Texture.class);
+        blankStyle.active = ColonyGame.assetManager.get("blankbutton_clicked", Texture.class);
+
+        DataManager.addData("blankStyle", blankStyle, GUI.GUIStyle.class);
 
         gatherStyle.font.setColor(new Color(126f / 255f, 75f / 255f, 27f / 255f, 1));
         exploreStyle.font.setColor(new Color(126f / 255f, 75f / 255f, 27f / 255f, 1));
@@ -438,19 +446,25 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         float height = ordersRect.y + 25;
         float x = ordersRect.x;
 
+        //Get the children of the current root node. This will display all children buttons of our current selection.
         Array<Tree.TreeNode> nodeList = currStateNode.getChildren();
         for(int i=0;i<nodeList.size;i++) {
             //Get the task node and its user data.
             Tree.TreeNode currTaskNode = nodeList.get(i);
-            BehaviourManagerComp.TaskState taskState = (BehaviourManagerComp.TaskState)currTaskNode.userData;
+            BehaviourManagerComp.TaskInfo taskInfo = (BehaviourManagerComp.TaskInfo)currTaskNode.userData;
 
-            if(taskState.toggled)
-                this.blankStyle.normal = this.blankButtonTextures[2];
+            Object userData = taskInfo.userData;
+            GUI.GUIStyle style;
+            if(userData != null) {
+                style = (GUI.GUIStyle) userData;
+                style.activated = taskInfo.active;
+            }else
+                style = GUI.defaultGUIStyle;
 
             //Set the location and draw the button. If clicked, we need to do some tricky things...
             orderButtonRect.set(x + (i + 1) * width, height, 50, 50);
-            if (GUI.Button(orderButtonRect, currTaskNode.nodeName, this.batch, this.blankStyle)) {
-                taskState.doCallback();
+            if (GUI.Button(orderButtonRect, currTaskNode.nodeName, this.batch, style)) {
+                taskInfo.doCallback();
 
                 //For each profile selected, tell them to gather.
                 for (UnitProfile profile : selectedList) {
@@ -459,13 +473,14 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
                     //Get the BehaviourComponent and TreeNode.
                     BehaviourManagerComp comp = profile.interactable.getInteractable().getBehManager();
                     Tree.TreeNode treeNode = comp.getTaskTree().getNode(node -> node.nodeName.equals(currTaskNode.nodeName));
-                    BehaviourManagerComp.TaskState profTaskState = (BehaviourManagerComp.TaskState)treeNode.userData;
+                    BehaviourManagerComp.TaskInfo profTaskInfo = (BehaviourManagerComp.TaskInfo)treeNode.userData;
 
-                    profTaskState.doCallback();
-                    ((BehaviourManagerComp.TaskState) treeNode.userData).toggled = taskState.toggled; //Toggle the treeNode.
+                    //Do the callback and sync the active booleans. Assign this profile's active state to the main selected profile.
+                    profTaskInfo.doCallback();
+                    ((BehaviourManagerComp.TaskInfo) treeNode.userData).active = taskInfo.active; //Toggle the treeNode.
 
                     //If it's toggled, add the tag, otherwise, remove the tag.
-                    if(((BehaviourManagerComp.TaskState) treeNode.userData).toggled) comp.getBlackBoard().resourceTypeTags.addTag(StringTable.getString("resource_type", treeNode.nodeName));
+                    if(((BehaviourManagerComp.TaskInfo) treeNode.userData).active) comp.getBlackBoard().resourceTypeTags.addTag(StringTable.getString("resource_type", treeNode.nodeName));
                     else comp.getBlackBoard().resourceTypeTags.removeTag(StringTable.getString("resource_type", treeNode.nodeName));
                 }
 
@@ -476,8 +491,6 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
                     currStateNode = tmpNode;
                 }
             }
-
-            this.blankStyle.normal = this.blankButtonTextures[0];
         }
     }
 

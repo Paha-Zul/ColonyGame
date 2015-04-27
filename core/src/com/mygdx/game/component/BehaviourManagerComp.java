@@ -240,12 +240,16 @@ public class BehaviourManagerComp extends Component{
         public float startX, startY, width, height, rotation;
     }
 
-    public static class TaskState{
-        public boolean toggled = false;
+    /**
+     * A class used for the userData of the Tree class.
+     */
+    public static class TaskInfo {
         public String taskName = "";
         public Functional.Callback callback;
+        public boolean active;
+        public Object userData;
 
-        public TaskState(String taskName){
+        public TaskInfo(String taskName){
             this.taskName = taskName;
         }
 

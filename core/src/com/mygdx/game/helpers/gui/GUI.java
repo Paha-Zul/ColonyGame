@@ -22,7 +22,7 @@ public class GUI {
     private static Texture defaultMousedButton = new Texture("img/ui/buttons/defaultButton_moused.png");
     private static Texture defaultClickedButton = new Texture("img/ui/buttons/defaultButton_clicked.png");
 
-    private static GUIStyle defaultGUIStyle = new GUIStyle();
+    public static GUIStyle defaultGUIStyle = new GUIStyle();
 
     private static boolean clicked = false;
     private static boolean up = false;
@@ -85,6 +85,7 @@ public class GUI {
             style = defaultGUIStyle;
 
         Texture currTexture = style.normal;
+        if(style.activated) currTexture = style.active;
 
         if(rect.contains(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY())){
             if(GUI.clicked){
@@ -155,8 +156,10 @@ public class GUI {
         public Texture normal = GUI.defaultNormalButton;
         public Texture moused = GUI.defaultMousedButton;
         public Texture clicked = GUI.defaultClickedButton;
+        public Texture active = GUI.defaultClickedButton;
+
         public BitmapFont font = defaultFont;
-        public boolean multiline = false, toggled = false;
+        public boolean multiline = false, toggled = false, activated = false;
         public int alignment = Align.center;
         public int paddingLeft, paddingRight, paddingTop, paddingBottom;
 
