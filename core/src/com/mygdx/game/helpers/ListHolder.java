@@ -76,9 +76,9 @@ public class ListHolder {
 		//We call start after the list has updated to allow all initial components to be started.
 		if(newList.size > 0){
 			newList.forEach(entity -> {
-				entity.start();
 				if(entity.active) entityList.get(entity.drawLevel).add(entity);
-                entity.update(delta); //Do one update even if the Entity is not active. This will allows initial stuff to be set up.
+				entity.update(delta); //Do one update even if the Entity is not active. This will allows initial stuff to be set up.
+				entity.start();
 			});
 
 			newList.clear();

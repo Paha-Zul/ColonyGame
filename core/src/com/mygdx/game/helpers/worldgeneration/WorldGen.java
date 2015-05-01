@@ -32,7 +32,7 @@ public class WorldGen {
     public float freq = 5;
     public float percentageDone = 0;
 
-    public Texture whiteTex;
+    public static Texture whiteTex;
 
     private TextureAtlas terrainAtlas;
 
@@ -56,13 +56,7 @@ public class WorldGen {
     private boolean started = false;
     private String noiseMapName = "";
 
-
-    /**
-     * Initializes the World Generator. For now, most stuff is temporary for prototyping.
-     */
-    public void init(ColonyGame game){
-        this.game = game;
-
+    static{
         //Generate a white square (pixel).
         Pixmap pixmap = new Pixmap(1,1, Pixmap.Format.RGBA4444);
         Color color = new Color(Color.WHITE);
@@ -70,7 +64,14 @@ public class WorldGen {
         pixmap.fillRectangle(0,0,1,1);
         whiteTex = new Texture(pixmap);
         pixmap.dispose();
+    }
 
+
+    /**
+     * Initializes the World Generator. For now, most stuff is temporary for prototyping.
+     */
+    public void init(ColonyGame game){
+        this.game = game;
         terrainAtlas = new TextureAtlas(Gdx.files.internal("atlas/terrain.atlas"));
     }
 

@@ -44,9 +44,11 @@ public class Attack extends LeafTask{
                     rot += MathUtils.random(20) - 10;                                           //Randomize rotation a little bit
                     Entity ent = new ProjectileEnt(trans.getPosition(), rot, tex, 11);          //Spawn the projectile.
                     Projectile projectile = ent.getComponent(Projectile.class);                 //Get the projectile component.
+
                     if (projectile == null)
                         GH.writeErrorMessage("Somehow making a projectile didn't make a projectile...");
                     else {
+                        projectile.projOwner = this.blackBoard.getEntityOwner();
 //                    projectile.projOwner = this.blackBoard.getEntityOwner();
 //                    projectile.lifetime = dis / GH.toMeters(projectile.speed);
 //                    projectile.lifetime += projectile.lifetime*0.5f;

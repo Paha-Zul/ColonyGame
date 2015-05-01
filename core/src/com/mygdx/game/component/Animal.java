@@ -2,6 +2,7 @@ package com.mygdx.game.component;
 
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.Fixture;
+import com.mygdx.game.behaviourtree.PrebuiltTasks;
 import com.mygdx.game.component.collider.Collider;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.Constants;
@@ -119,8 +120,11 @@ public class Animal extends Component implements IInteractable{
 
         //If it is not a detector, the other is a bullet, and I am an animal, hurt me! and kill the bullet!
         if (!myInfo.tags.hasTag(Constants.COLLIDER_DETECTOR) && otherInfo.owner.hasTag(Constants.ENTITY_PROJECTILE) && this.owner.hasTag(Constants.ENTITY_ANIMAL)) {
-            this.getComponent(Stats.class).getStat("health").addToCurrent(-50);
+            this.getComponent(Stats.class).getStat("health").addToCurrent(-20);
+            behComp.getBlackBoard().target = otherInfo.owner.getComponent(Projectile.class).projOwner;
+            behComp.changeTaskImmediate(PrebuiltTasks.fleeTarget(behComp.getBlackBoard(), behComp));
             otherInfo.owner.setToDestroy();
+
             //If I am a detector and the other is a colonist, we must attack it!
         } else if (myInfo.tags.hasTag(Constants.COLLIDER_DETECTOR) && otherInfo.owner.hasTag(Constants.ENTITY_COLONIST))
             attackList.add(otherInfo.owner);

@@ -5,6 +5,7 @@ import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -13,12 +14,13 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.Align;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.helpers.DataBuilder;
-import com.mygdx.game.helpers.GH;
 import com.mygdx.game.helpers.ListHolder;
 import com.mygdx.game.helpers.gui.GUI;
+import com.mygdx.game.helpers.worldgeneration.WorldGen;
 import com.mygdx.game.screens.LoadingScreen;
 
 /**
@@ -41,8 +43,7 @@ public class MainMenuInterface extends UI{
     private GUI.GUIStyle changeLogStyle = new GUI.GUIStyle();
     private Rectangle startRect = new Rectangle(), quitRect = new Rectangle(), blank1Rect = new Rectangle();
     private Rectangle blank2Rect = new Rectangle(), blank3Rect = new Rectangle(), changelogRect = new Rectangle(), titleRect = new Rectangle();
-    private Label logLabel, versionLabel, versionHistoryLabel;
-    private ScrollPane versionHistoryScroll;
+    private Container<ScrollPane> outsideScrollContainer;
 
     private Stage stage;
 
@@ -84,82 +85,56 @@ public class MainMenuInterface extends UI{
         changeLogStyle.font = generator.generateFont(parameter);
         generator.dispose();
 
-        this.makeLabels(changelogRect);
+        //Create a new stage and configure it!
+        stage = new Stage(new ScreenViewport(ColonyGame.UICamera), this.batch);
+        //stage.setDebugAll(true);
+        Gdx.input.setInputProcessor(stage);
+
         this.makeVersionHistoryScrollbar();
-    }
-
-    /**
-     * Makes the labels for the changelog.
-     * @param rect
-     */
-    private void makeLabels(Rectangle rect){
-        if(DataBuilder.changelog == null || DataBuilder.changelog.changes == null)
-            GH.writeErrorMessage("changelog.json has something wrong with it or does not exist.");
-
-        //Sets the font and stuff.
-        Label.LabelStyle style = new Label.LabelStyle();
-        style.font = changeLogStyle.font;
-
-        //Combines all the lines from the Json log, adding newlines.
-        DataBuilder.JsonLog log = DataBuilder.changelog.changes[0];
-        String text = "";
-        for(String txt : log.log)
-            text += txt+"\n";
-
-        //Sets the label text and style.
-        logLabel = new Label(text, style);
-        logLabel.setAlignment(Align.topLeft);
-        logLabel.setWrap(true);
-
-        //Version and date label.
-        versionLabel = new Label("Version: "+log.version+"\n"+log.date, style);
-        versionLabel.setAlignment(Align.center);
-        setLabelBounds(rect);
     }
 
     private void makeVersionHistoryScrollbar(){
         Label.LabelStyle historyStyle = new Label.LabelStyle();
         historyStyle.font = changeLogStyle.font;
 
-        StringBuilder str;
-        for(int i = 1;i<DataBuilder.changelog.changes.length;i++){
-            DataBuilder.JsonLog log = DataBuilder.changelog.changes[i];
-
-            str = new StringBuilder();
-            str.append("Version: ").append(log.version).append("\n").append("Date: ").append(log.date).append("\n");
-
-            for(String txt : log.log)
-                str.append(txt).append("\n");
-
-            str.append("\n");
-        }
-
-        //Make the label, set wrapping to true.
-        versionHistoryLabel = new Label(str.toString(), historyStyle);
-        versionHistoryLabel.setWrap(true);
-
-        //A container to hold the label.
-        Container<Label> labelCont = new Container<>(versionHistoryLabel);
+        //Create the table for this inside text.
+        Table insideScrollTextTable = new Table();
 
         //The scrollpane that holds the container.
         ScrollPane.ScrollPaneStyle scrollStyle = new ScrollPane.ScrollPaneStyle();
-        versionHistoryScroll = new ScrollPane(versionHistoryLabel, scrollStyle);
-        versionHistoryLabel.layout();
+        scrollStyle.vScrollKnob = new TextureRegionDrawable(new TextureRegion(WorldGen.whiteTex));
+        ScrollPane versionHistoryScroll = new ScrollPane(insideScrollTextTable, scrollStyle);
 
-        Table table = new Table();
-        table.add(versionHistoryScroll).width(500).height(Gdx.graphics.getHeight() * 0.8f);
-        table.setBounds(0, Gdx.graphics.getHeight() - Gdx.graphics.getHeight() * 0.8f, 500, Gdx.graphics.getHeight() * 0.8f);
+        //Create the outside table that will hold the scrollpane
+        this.outsideScrollContainer = new Container<>(versionHistoryScroll).fill();
 
+        StringBuilder str;
+        for(int i = 0;i<DataBuilder.changelog.changes.length;i++){
+            DataBuilder.JsonLog log = DataBuilder.changelog.changes[i];
 
-        stage = new Stage(new ScreenViewport(ColonyGame.UICamera), this.batch);
-        stage.addActor(table);
-        stage.setDebugAll(true);
-        Gdx.input.setInputProcessor(stage);
-    }
+            Label title = new Label("Version: " + log.version+"\nDate: "+log.date, historyStyle);
+            title.setAlignment(Align.center);
 
-    private void setLabelBounds(Rectangle rect){
-        logLabel.setBounds(rect.x, rect.y, rect.getWidth(), rect.getHeight());
-        versionLabel.setBounds(rect.x, rect.y + rect.getHeight(), rect.getWidth(), 100);
+            Label text = new Label("", historyStyle);
+            text.setWrap(true);
+
+            str = new StringBuilder();
+            for(String txt : log.log)
+                str.append(txt).append("\n");
+
+            text.setText(str.toString());
+
+            insideScrollTextTable.add(title).fillX().expandX();
+            insideScrollTextTable.row();
+            insideScrollTextTable.add(text).fillX().expandX();
+            insideScrollTextTable.row().padTop(20f);
+        }
+
+        stage.addActor(outsideScrollContainer);
+
+//        Table table = new Table();
+//        table.add(versionHistoryScroll).width(500).height(Gdx.graphics.getHeight() * 0.8f);
+//        table.setBounds(0, Gdx.graphics.getHeight() - Gdx.graphics.getHeight() * 0.8f, 500, Gdx.graphics.getHeight() * 0.8f);
     }
 
     @Override
@@ -172,9 +147,6 @@ public class MainMenuInterface extends UI{
         GUI.font = titleFont;
         GUI.Texture(titleTexture, titleRect, this.batch);
         GUI.ResetFont();
-
-        this.logLabel.draw(this.batch, 1f);
-        this.versionLabel.draw(this.batch, 1f);
 
         //Start button.
         if(GUI.Button(startRect, "", this.batch, startButtonStyle)){
@@ -219,7 +191,15 @@ public class MainMenuInterface extends UI{
     public void resize(int width, int height) {
         this.changelogRect.set(width - width * 0.3f, 0, width * 0.3f, height - height * 0.1f);
         this.titleRect.set(width / 2 - titleTexture.getWidth() / 2, height - titleTexture.getHeight() - height * 0.02f, titleTexture.getWidth(), titleTexture.getHeight());
-        this.setLabelBounds(this.changelogRect);
+
+        this.outsideScrollContainer.setBounds(width * 0.66f, height * 0.1f, width * 0.3f, height * 0.8f);
+        //this.outsideScrollContainer.getActor().setWidth(width * 0.33f);
+        //this.outsideScrollContainer.getActor().setHeight(height * 0.8f);
+        //this.outsideScrollContainer.getActor().invalidate();
+        this.outsideScrollContainer.invalidate();
+        //outsideScrollContainer.setClip(false);
+
+        stage.getViewport().update(width, height);
 
         for(int i=0;i<buttonRects.length;i++){
             Rectangle rect = buttonRects[i];

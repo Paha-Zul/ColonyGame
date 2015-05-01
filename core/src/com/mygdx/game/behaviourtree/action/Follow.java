@@ -12,14 +12,14 @@ import java.util.LinkedList;
 /**
  * Created by Paha on 4/13/2015.
  */
-public class PMoveTo extends LeafTask{
+public class Follow extends LeafTask{
     private Transform transform;
     private LinkedList<Vector2> path;
     private Collider collider;
 
     private final float completeDst = GH.toMeters(1);
 
-    public PMoveTo(String name, BlackBoard blackBoard) {
+    public Follow(String name, BlackBoard blackBoard) {
         super(name, blackBoard);
     }
 
@@ -34,8 +34,8 @@ public class PMoveTo extends LeafTask{
 
         if(transform == null) this.transform = this.blackBoard.getEntityOwner().transform;
         if(collider == null) this.collider = this.transform.getComponent(Collider.class);
-        if(name == null) this.name = this.transform.getEntityOwner().name;
-        if(path == null) this.path = this.blackBoard.path;
+        this.name = this.transform.getEntityOwner().name;
+        this.path = this.blackBoard.path;
     }
 
     @Override
@@ -61,19 +61,36 @@ public class PMoveTo extends LeafTask{
         }
 
         Vector2 currPoint = path.peekLast();
-        float nodeX = currPoint.x;
-        float nodeY = currPoint.y;
+        float nodeX, nodeY, x, y;
+        double rot;
 
-        double rot = (Math.atan2(nodeY - transform.getPosition().y, nodeX - transform.getPosition().x));
+        //If we are still outside our range to move towards the target, move!
+        if(blackBoard.target.transform.getPosition().dst(blackBoard.getEntityOwner().transform.getPosition()) >= GH.toMeters(blackBoard.followDis)){
 
-        float x = (float)Math.cos(rot)*this.blackBoard.moveSpeed*delta;
-        float y = (float)Math.sin(rot)*this.blackBoard.moveSpeed*delta;
+            //If the node of our target that we are following matches ours (we're on the same tile!), direct move to it!
+            if(blackBoard.colonyGrid.getNode(blackBoard.target) == blackBoard.colonyGrid.getNode(blackBoard.getEntityOwner())){
+                nodeX = blackBoard.target.transform.getPosition().x;
+                nodeY = blackBoard.target.transform.getPosition().y;
 
-        this.collider.body.setLinearVelocity(x, y);
+            //Otherwise, let's move towards our next path destination.
+            }else{
+                nodeX = currPoint.x;
+                nodeY = currPoint.y;
 
-        if((Math.abs(transform.getPosition().x - nodeX) + Math.abs(transform.getPosition().y - nodeY) < completeDst*(delta*100))) {
-            this.path.removeLast();
-        }
+                if((Math.abs(transform.getPosition().x - nodeX) + Math.abs(transform.getPosition().y - nodeY) < completeDst*(delta*100))) {
+                    this.path.removeLast();
+                }
+            }
+
+            //Move!
+            rot = (Math.atan2(nodeY - transform.getPosition().y, nodeX - transform.getPosition().x));
+            x = (float)Math.cos(rot)*this.blackBoard.moveSpeed*delta;
+            y = (float)Math.sin(rot)*this.blackBoard.moveSpeed*delta;
+            this.collider.body.setLinearVelocity(x, y);
+
+        //If we are within the stop range, then don't move!
+        }else
+            collider.body.setLinearVelocity(0, 0);
     }
 
     @Override

@@ -332,7 +332,7 @@ public class PrebuiltTasks {
         RepeatUntilCondition repeat = new RepeatUntilCondition("Repeating", blackBoard, parallel);
 
         FindPath fp = new FindPath("Finding path", blackBoard);
-        MoveTo mt = new MoveTo("Moving", blackBoard);
+        Follow mt = new Follow("Following", blackBoard);
         Attack attack = new Attack("Attacking Target", blackBoard);
 
         ((ParentTaskController)parallel.getControl()).addTask(fp);
@@ -471,5 +471,60 @@ public class PrebuiltTasks {
         return seq;
     }
 
+    public static Task fleeTarget(BlackBoard blackBoard, BehaviourManagerComp behComp){
+        /**
+         * Sequence
+         *  FindNearbyTile - find a tile away from the target we are fleeing
+         *  MoveTo - Move directly to the tile, no need to find a path
+         */
 
+        Task sequence = new Sequence("Fleeing!", blackBoard);
+        Task repeatFiveTimes = new RepeatUntilCondition("Fleeing", blackBoard, sequence);
+        Task findNearbyTile = new FindNearbyTile("Finding place to flee to!", blackBoard);
+        Task moveTo = new MoveTo("Moving away!", blackBoard);
+
+        ((ParentTaskController)sequence.getControl()).addTask(findNearbyTile);
+        ((ParentTaskController)sequence.getControl()).addTask(moveTo);
+
+        repeatFiveTimes.getControl().callbacks.successCriteria = tsk -> {
+            Task task = (Task)tsk;
+            task.blackBoard.counter++;
+            return task.blackBoard.counter > 5 || (findNearbyTile.getControl().hasFinished() && findNearbyTile.getControl().hasFailed());
+        };
+
+        //Reset some stuff.
+        sequence.getControl().callbacks.startCallback = task -> {
+            task.blackBoard.target = null;
+            task.blackBoard.targetNode = null;
+            task.blackBoard.counter = 0;
+        };
+
+        //Calculate my distance.
+        sequence.getControl().callbacks.startCallback = task -> {
+            task.blackBoard.myDisToTarget = (int)(Math.abs(blackBoard.getEntityOwner().transform.getPosition().x - blackBoard.target.transform.getPosition().x)
+                + Math.abs(blackBoard.getEntityOwner().transform.getPosition().y - blackBoard.target.transform.getPosition().y));
+        };
+
+        //Try to find a tile away from our target to flee to.
+        findNearbyTile.getControl().callbacks.successCriteria = n -> {
+            Grid.Node node = (Grid.Node)n;
+
+            //The distance to the target (node distance).
+            float nodeDisToTarget = Math.abs(node.getXCenter() - blackBoard.target.transform.getPosition().x)
+                    + Math.abs(node.getYCenter() - blackBoard.target.transform.getPosition().y);
+
+            //If the node distance is greater than my distance to the target, we'll take it!
+            if(nodeDisToTarget > blackBoard.myDisToTarget){
+                blackBoard.targetNode = node;
+                blackBoard.path.clear();
+                blackBoard.path.add(new Vector2(node.getXCenter(), node.getYCenter()));
+                return true;
+            }
+
+            return false;
+        };
+
+        return sequence;
+
+    }
 }

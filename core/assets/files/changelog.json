@@ -1,6 +1,13 @@
 {
   "changes": [
     {
+      "version": "0.25",
+      "date": "4/28/2015",
+      "log": [
+        "- Added: This awesome scrolling changelog! It literally took me all day to make it work, but whatever.... You can scroll or drag with the mouse!"
+      ]
+    },
+    {
       "version": "0.24",
       "date": "4/27/2015",
       "log": [
@@ -35,7 +42,7 @@
       "log": [
         "- Added: Gather now displays button options to gather different stuff. Currently only 'food' and 'wood' works.",
         "- Added: The first thing took a freaking long time, but there were inner technical reworkings too.",
-        "- Fixed: Colonists will now unset a tree as 'taken' when the job is cancelled fro any reason.",
+        "- Fixed: Colonists will now unset a tree as 'taken' when the job is cancelled for any reason.",
         "- Bug: There is a crash somewhere... very sneaky. I think it's a squirrel going off the map.",
         "- Bug: If you select a colonist and select the gather button, it will stop its current gathering task to start a new one.",
         "- Bug: Searching for water is super inefficient. But it's not working currently so meh.",

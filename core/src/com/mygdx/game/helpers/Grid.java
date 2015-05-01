@@ -48,7 +48,7 @@ public class Grid {
             this.grid = new Node[this.numCols][this.numRows];
             for (int col = 0; col < grid.length; col++) {
                 for (int row = 0; row < grid[col].length; row++) {
-                    this.grid[col][row] = new Grid.Node(col, row);
+                    this.grid[col][row] = new Grid.Node(col, row, this);
                 }
             }
 
@@ -82,6 +82,27 @@ public class Grid {
                     node.getEntityList().forEach(entityConsumer::accept);
                 }
             }
+        }
+
+        /**
+         * Performs a Predicate function on Nodes within the radius from the start index. If any Predicate test returns true, the function returns.
+         * @param nodePredicate The Predicate function to test and perform on the Node. If this return true, the function returns and does not process any further.
+         * @param radius The radius of the search.
+         * @param startIndex The start index.
+         */
+        public boolean performOnNodeInRadius(Predicate<Node> nodePredicate, int radius, int[] startIndex){
+            int[] ranges = GH.fixRanges(startIndex[0] - radius, startIndex[0] + radius, startIndex[1] - radius, startIndex[1] + radius, getWidth(), getHeight());
+
+            for(int x = ranges[0]; x <= ranges[1]; x++){
+                for(int y = ranges[2]; y <= ranges[3]; y++){
+                    Node node = getNode(x, y);
+                    if(node == null) continue; //If null, continue
+                    if(nodePredicate.test(node))
+                        return true;
+                }
+            }
+
+            return false;
         }
 
         public <V> V performAndGet(Functional.PerformAndGet<V, Node[][]> performAndGet){
@@ -368,6 +389,10 @@ public class Grid {
             return GH.toMeters(this.squareSize);
         }
 
+        public int[] getIndex(Entity entity) {
+            return getIndex(entity.transform.getPosition());
+        }
+
         /**
          * Gets the index from the Vector2 position passed in.
          * @param position The Vector2 position to get an index of.
@@ -418,10 +443,12 @@ public class Grid {
         private int x=-1, y=-1;
         private ArrayList<Entity> entList = new ArrayList<>();
         private TerrainTile terrainTile = null;
+        private GridInstance gridOwner;
 
-        public Node(int x, int y){
+        public Node(int x, int y, GridInstance gridOwner){
             this.x = x;
             this.y = y;
+            this.gridOwner = gridOwner;
         }
 
         public void addEntity(Entity entity){
@@ -454,6 +481,18 @@ public class Grid {
 
         public TerrainTile getTerrainTile(){
             return this.terrainTile;
+        }
+
+        public int getNumNodesAway(Node otherNode){
+            return Math.abs(this.getX() - otherNode.getX()) + Math.abs(this.getY() - otherNode.getY());
+        }
+
+        public float getXCenter(){
+            return this.x * gridOwner.getSquareSize();
+        }
+
+        public float getYCenter(){
+            return this.y * gridOwner.getSquareSize();
         }
 
         @Override

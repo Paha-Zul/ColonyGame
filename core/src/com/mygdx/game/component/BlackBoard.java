@@ -37,6 +37,10 @@ public class BlackBoard extends Component{
     public float randomIdleTime = 2f;
     public int idleDistance = 1;
 
+    //Moving stuff
+    public float followDis = 0f;
+    public int myDisToTarget = 0;
+
     //Attack stuff
     public float attackRange = 200f;
     public float disBeforeRepath = 5f;
@@ -46,6 +50,9 @@ public class BlackBoard extends Component{
     //My stuff
     public Inventory myInventory;
     public float moveSpeed = 100f;
+
+    //Random
+    public int counter;
 
     public BlackBoard() {
 
