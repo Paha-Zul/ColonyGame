@@ -9,6 +9,7 @@ import com.mygdx.game.ColonyGame;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.gui.GUI;
 import com.mygdx.game.interfaces.Functional;
+import com.mygdx.game.interfaces.IRecyclable;
 import com.sun.istack.internal.NotNull;
 
 import java.util.ArrayList;
@@ -504,7 +505,7 @@ public class Grid {
     /**
      * Nodes that contain path information for pathfinding tasks.
      */
-    public static class PathNode{
+    public static class PathNode implements IRecyclable{
         public int x, y;
         public float G, H, B;
         public PathNode parentNode;
@@ -526,6 +527,19 @@ public class Grid {
 
         public boolean hasEnts(){
             return node.getEntityList().size() > 0;
+        }
+
+        @Override
+        public void recycle() {
+            ObjectPool.recycleObject(this, PathNode.class);
+        }
+
+        @Override
+        public void clear() {
+            node = null;
+            parentNode = null;
+            G=H=B=0;
+            x=y=0;
         }
     }
 

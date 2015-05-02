@@ -1,5 +1,6 @@
 package com.mygdx.game.component;
 
+import com.badlogic.gdx.graphics.Color;
 import com.mygdx.game.behaviourtree.PrebuiltTasks;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.EventSystem;
@@ -23,6 +24,10 @@ public class Colonist extends Component implements IInteractable{
     private BehaviourManagerComp manager;
     private String firstName, lastName;
 
+    static{
+
+    }
+
     public Colonist() {
         super();
         this.setActive(false);
@@ -36,6 +41,8 @@ public class Colonist extends Component implements IInteractable{
     @Override
     public void start() {
         super.start();
+
+//        getBehManager().getBehaviourStates().addState("idle", (BlackBoard blackBoard, BehaviourManagerComp behComp) -> PrebuiltTasks::idleTask);
 
         this.inventory = this.getComponent(Inventory.class);
         this.stats = this.getComponent(Stats.class);
@@ -51,10 +58,13 @@ public class Colonist extends Component implements IInteractable{
     //Creates the stats for this colonist.
     private void createStats(){
         //Create these 4 stats.
-        stats.addStat("health", 100, 100);
+        stats.addStat("health", 100, 100).color = Color.GREEN;
         Stats.Stat foodStat = stats.addStat("food", 100, 100);
         Stats.Stat waterStat = stats.addStat("water", 20, 100);
-        stats.addStat("energy", 100, 100);
+        stats.addStat("energy", 100, 100).color = Color.YELLOW;
+
+        foodStat.color = Color.RED;
+        waterStat.color = Color.CYAN;
 
         foodStat.effect = "feed";
         waterStat.effect = "thirst";
@@ -129,14 +139,9 @@ public class Colonist extends Component implements IInteractable{
             node.userData = taskInfo;
         }
 
-        getBehManager().getBehaviourStates().addState("gather", true, PrebuiltTasks.gatherResource(getBehManager().getBlackBoard(), getBehManager()));
-        getBehManager().getBehaviourStates().addState("explore", true, PrebuiltTasks.exploreUnexplored(getBehManager().getBlackBoard(), getBehManager()));
-        getBehManager().getBehaviourStates().addState("consume", true, PrebuiltTasks.consumeTask(getBehManager().getBlackBoard(), getBehManager()));
-
-        getBehManager().addTaskToMap("gather", PrebuiltTasks.gatherResource(getBehManager().getBlackBoard(), getBehManager()));
-        getBehManager().addTaskToMap("hunt", PrebuiltTasks.searchAndHunt(getBehManager().getBlackBoard(), getBehManager()));
-        getBehManager().addTaskToMap("explore", PrebuiltTasks.exploreUnexplored(getBehManager().getBlackBoard(), getBehManager()));
-        getBehManager().addTaskToMap("consume", PrebuiltTasks.consumeTask(getBehManager().getBlackBoard(), getBehManager()));
+        getBehManager().getBehaviourStates().addState("gather", false, PrebuiltTasks::gatherResource);
+        getBehManager().getBehaviourStates().addState("explore", false, PrebuiltTasks::exploreUnexplored);
+        getBehManager().getBehaviourStates().addState("consume", false, PrebuiltTasks::consumeTask);
     }
 
     private Consumer<Object[]> onDamage = args -> {
@@ -148,7 +153,7 @@ public class Colonist extends Component implements IInteractable{
 
         stat.addToCurrent(amount);
         this.manager.getBlackBoard().target = entity;
-        this.getBehManager().attack();
+        this.getBehManager().changeTaskImmediate("attackTarget");
     };
 
     public Colony getColony() {

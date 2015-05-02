@@ -14,6 +14,7 @@ import com.mygdx.game.interfaces.Functional;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.function.BiFunction;
 
 /**
  * A Component that manages the behaviour of Entities.
@@ -28,13 +29,21 @@ public class BehaviourManagerComp extends Component{
     private ArrayList<Line> lineList = new ArrayList<>();
     private Timer feedTimer = new OneShotTimer(5f, null);
 
-    private StateSystem behaviourStates = new StateSystem();
     private Tree taskTree = new Tree("taskTree", "root");
-
-    private HashMap<String, Task> taskMap = new HashMap<>();
+    private StateSystem<BiFunction<BlackBoard, BehaviourManagerComp, Task>> behaviourStates = new StateSystem<>();
+    private static HashMap<String, BiFunction<BlackBoard, BehaviourManagerComp, Task>> taskMap = new HashMap<>();
 
     public BehaviourManagerComp(String behaviourType) {
         this.behaviourType = behaviourType;
+    }
+
+    static{
+        BehaviourManagerComp.addTaskToMap("gather", PrebuiltTasks::gatherResource);
+        BehaviourManagerComp.addTaskToMap("hunt", PrebuiltTasks::searchAndHunt);
+        BehaviourManagerComp.addTaskToMap("explore", PrebuiltTasks::exploreUnexplored);
+        BehaviourManagerComp.addTaskToMap("consume", PrebuiltTasks::consumeTask);
+        BehaviourManagerComp.addTaskToMap("attackTarget", PrebuiltTasks::attackTarget);
+        BehaviourManagerComp.addTaskToMap("idle", PrebuiltTasks::idleTask);
     }
 
     @Override
@@ -51,28 +60,7 @@ public class BehaviourManagerComp extends Component{
         this.stats = this.owner.getComponent(Stats.class);
         this.blackBoard = this.getComponent(BlackBoard.class);
 
-        behaviourStates.addState("idle", true, PrebuiltTasks.idleTask(this.blackBoard, this));
-        taskMap.put("idle", PrebuiltTasks.idleTask(this.blackBoard, this));
-    }
-
-    public void idle(){
-        this.changeTaskImmediate(PrebuiltTasks.idleTask(this.blackBoard, this));
-    }
-
-    public void gather(){
-        this.changeTaskImmediate(PrebuiltTasks.gatherResource(this.blackBoard, this));
-    }
-
-    public void explore(){
-        this.changeTaskImmediate(PrebuiltTasks.exploreUnexplored(this.blackBoard, this));
-    }
-
-    public void searchAndAttack(){
-        this.changeTaskImmediate(PrebuiltTasks.searchAndHunt(this.blackBoard, this));
-    }
-
-    public void attack(){
-        this.changeTaskImmediate(PrebuiltTasks.attackTarget(this.blackBoard, this));
+        getBehaviourStates().addState("idle", true, PrebuiltTasks::idleTask);
     }
 
     /**
@@ -103,12 +91,12 @@ public class BehaviourManagerComp extends Component{
     }
 
     public void changeTaskImmediate(String taskName){
-        this.behaviourStates.setCurrState(taskName);
-        changeTaskImmediate(taskMap.get(taskName));
+        behaviourStates.setCurrState(taskName);
+        changeTaskImmediate(taskMap.get(taskName).apply(this.blackBoard, this));
     }
 
     public void changeTaskQueued(String taskName){
-        changeTaskQueued(taskMap.get(taskName));
+        changeTaskQueued(taskMap.get(taskName).apply(this.blackBoard, this));
     }
 
     @Override
@@ -129,9 +117,9 @@ public class BehaviourManagerComp extends Component{
 
                 //If the next behaviour is empty, do something based on the state.
                 }else {
-                    Object data = behaviourStates.getCurrState().userData;
-                    if(data != null) this.changeTaskImmediate((Task)data);
-                    else this.changeTaskImmediate((Task)behaviourStates.getDefaultState().userData);
+                    BiFunction<BlackBoard, BehaviourManagerComp, Task> data = behaviourStates.getCurrState().getUserData();
+                    if(data != null) this.changeTaskImmediate(data.apply(blackBoard, this));
+                    else this.changeTaskImmediate(behaviourStates.getDefaultState().getUserData().apply(blackBoard, this));
                 }
 
             //Update the job.
@@ -140,7 +128,7 @@ public class BehaviourManagerComp extends Component{
 
         //If our behaviour is null, set the next behaviour to the default behaviour.
         } else
-            this.idle();
+            this.changeTaskImmediate(behaviourStates.getDefaultState().getUserData().apply(blackBoard, this));
     }
 
     public Line[] getLines() {
@@ -220,12 +208,12 @@ public class BehaviourManagerComp extends Component{
         return this.taskTree;
     }
 
-    public StateSystem getBehaviourStates(){
-        return this.behaviourStates;
+    public StateSystem<BiFunction<BlackBoard, BehaviourManagerComp, Task>> getBehaviourStates(){
+        return behaviourStates;
     }
 
-    public void addTaskToMap(String name, Task task){
-        this.taskMap.put(name, task);
+    public static void addTaskToMap(String name, BiFunction<BlackBoard, BehaviourManagerComp, Task> taskFunction){
+        taskMap.put(name, taskFunction);
     }
 
     @Override

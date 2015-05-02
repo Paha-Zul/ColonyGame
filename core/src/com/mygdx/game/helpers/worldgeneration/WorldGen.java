@@ -66,6 +66,15 @@ public class WorldGen {
         pixmap.dispose();
     }
 
+    public static Texture makeTexture(Color color){
+        Pixmap pixmap = new Pixmap(1,1, Pixmap.Format.RGBA4444);
+        pixmap.setColor(color);
+        pixmap.fillRectangle(0,0,1,1);
+        Texture texture = new Texture(pixmap);
+        pixmap.dispose();
+
+        return texture;
+    }
 
     /**
      * Initializes the World Generator. For now, most stuff is temporary for prototyping.

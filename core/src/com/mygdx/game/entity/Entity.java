@@ -14,8 +14,6 @@ import com.mygdx.game.helpers.Tags;
 import com.mygdx.game.interfaces.IDelayedDestroyable;
 import com.mygdx.game.interfaces.IScalable;
 
-import java.util.ArrayList;
-
 /**
  * @author Bbent_000
  *
@@ -29,10 +27,10 @@ public class Entity implements IDelayedDestroyable{
 
     public Tags tags = new Tags();
 
-	protected ArrayList<Component> newComponentList;
-	protected ArrayList<Component> activeComponentList;
-	protected ArrayList<Component> inactiveComponentList;
-	protected ArrayList<IScalable> scalableComponents;
+	protected Array<Component> newComponentList;
+	protected Array<Component> activeComponentList;
+	protected Array<Component> inactiveComponentList;
+	protected Array<IScalable> scalableComponents;
 	protected Array<Component> destroyComponentList;
 
 	protected boolean destroyed=false, setToDestroy=false;
@@ -45,10 +43,10 @@ public class Entity implements IDelayedDestroyable{
 	 * @param graphic The Texture of the Entity
 	 */
 	public Entity(Vector2 position, float rotation, TextureRegion graphic, int drawLevel){
-		this.activeComponentList = new ArrayList<>();
-		this.inactiveComponentList = new ArrayList<>();
-		this.newComponentList = new ArrayList<>();
-		this.scalableComponents = new ArrayList<>();
+		this.activeComponentList = new Array<>();
+		this.inactiveComponentList = new Array<>();
+		this.newComponentList = new Array<>();
+		this.scalableComponents = new Array<>();
 		destroyComponentList = new Array<>();
 
 		this.transform = this.addComponent(new Transform(position, rotation, this));
@@ -79,10 +77,10 @@ public class Entity implements IDelayedDestroyable{
 	 * @param comps A variable amount of Components to construct this Entity with.
 	 */
 	public Entity(Vector2 position, float rotation, int drawLevel, Component... comps){
-		this.activeComponentList = new ArrayList<>(); //Init the active list.
-		this.inactiveComponentList = new ArrayList<>(); //Init the inactive list.
-		this.newComponentList = new ArrayList<>(); //Init the inactive list.
-		this.scalableComponents = new ArrayList<>();
+		this.activeComponentList = new Array<>(); //Init the active list.
+		this.inactiveComponentList = new Array<>(); //Init the inactive list.
+		this.newComponentList = new Array<>(); //Init the inactive list.
+		this.scalableComponents = new Array<>();
 		destroyComponentList = new Array<>();
 
 		this.transform = this.addComponent(new Transform(position, rotation, this));
@@ -111,8 +109,8 @@ public class Entity implements IDelayedDestroyable{
 			}
 
 			//Start all new components.
-			if (this.newComponentList.size() > 0) {
-				ArrayList<Component> newCompCopy = new ArrayList<>(this.newComponentList);
+			if (this.newComponentList.size > 0) {
+				Array<Component> newCompCopy = new Array<>(this.newComponentList);
 				//Call start on all new Components. This is where the component can access other
 				//components on this Entity.
 				newCompCopy.forEach(com.mygdx.game.component.Component::start);
@@ -120,7 +118,7 @@ public class Entity implements IDelayedDestroyable{
 				this.newComponentList.clear(); //Clear the new Component list.
 			}
 
-			ArrayList<Component> activeCompCopy = new ArrayList<>(this.activeComponentList);
+			Array<Component> activeCompCopy = new Array<>(this.activeComponentList);
 			//Update all Components
 			for (Component comp : activeCompCopy) {
 				comp.update(delta);
@@ -204,9 +202,9 @@ public class Entity implements IDelayedDestroyable{
 	 */
 	protected void destroyComponent(Component component){
 		if(component.isActive())
-			this.activeComponentList.remove(component);
+			this.activeComponentList.removeValue(component, false);
 		else
-			this.inactiveComponentList.remove(component);
+			this.inactiveComponentList.removeValue(component, false);
 
 		component.destroy();
 	}
@@ -217,8 +215,8 @@ public class Entity implements IDelayedDestroyable{
 	 * @return True if the Component was removed, false otherwise.
 	 */
 	public boolean removeComponent(Component comp){
-		if(comp.isActive()) return this.inactiveComponentList.remove(comp);
-		return this.activeComponentList.remove(comp);
+		if(comp.isActive()) return this.inactiveComponentList.removeValue(comp, false);
+		return this.activeComponentList.removeValue(comp, false);
 	}
 
     /**

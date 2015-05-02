@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.utils.Align;
+import com.mygdx.game.helpers.worldgeneration.WorldGen;
 import com.sun.istack.internal.NotNull;
 
 /**
@@ -63,6 +64,40 @@ public class GUI {
             style.font.draw(batch, text, x, y);
         else
             style.font.drawMultiLine(batch, text, x, y);
+    }
+
+    /**
+     * Draws a bar for a current and maximum value.
+     * @param x The x location to start at.
+     * @param y The Y location to start at.
+     * @param width The width of the bar.
+     * @param height The height of the bar.
+     * @param currVal THe current value.
+     * @param maxVal The maximum value.
+     */
+    public static void DrawBar(SpriteBatch batch, float x, float y, float width, float height, float currVal, float maxVal, boolean displayText, GUIStyle style, Color color){
+        if(style == null) style = defaultGUIStyle;
+        if(color == null) color = Color.GREEN;
+
+        style.alignment = Align.left;
+        style.alignment = Align.center;
+
+        float outerX = x;
+        float innerX = x + 2;
+
+        Color batchColor = batch.getColor();
+        //Draw the out rectangle
+        batch.setColor(Color.BLACK);
+        GUI.Texture(WorldGen.whiteTex, outerX, y, width, height, batch);
+
+        //Draw the inner rectangle (shrink it by 2 inches on all sides, 'padding')
+        batch.setColor(color);
+        float newWidth = (currVal/maxVal)*(width-4);
+        GUI.Texture(WorldGen.whiteTex, innerX, y + 2, newWidth, height - 4, batch);
+
+        if(displayText) GUI.Label((int)currVal+"/"+(int)maxVal, batch, outerX, y, width, height);
+
+        batch.setColor(batchColor);
     }
 
     public static boolean Button(Rectangle rect, SpriteBatch batch){

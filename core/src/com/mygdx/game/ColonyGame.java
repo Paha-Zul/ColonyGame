@@ -89,13 +89,20 @@ public class ColonyGame extends Game {
 	private void updateEntities(float delta){
 		batch.setProjectionMatrix(ColonyGame.camera.combined);
 		Profiler.begin("ServerPlayer: Rendering Terrain"); //Start the profiler.
+
 		this.renderMap(); //Render the map.
+
 		batch.setColor(Color.WHITE); //Set the color back to white.
 		Profiler.end(); //End the profiler.
+
 		Profiler.begin("ServerPlayer: Updating Entities");
 		ListHolder.update(delta);
 		ListHolder.updateFloatingTexts(delta, batch);
+
+		//Update and render events
 		EventSystem.notifyGameEvent("update", delta);
+		EventSystem.notifyGameEvent("render", delta, batch);
+
 		Profiler.end();
 
 		//Step the Box2D simulation.
@@ -106,7 +113,8 @@ public class ColonyGame extends Game {
 		//Draw GUI stuff.
 		batch.setProjectionMatrix(UICamera.combined);
 		ListHolder.updateGUI(delta, batch);
-	}
+        EventSystem.notifyGameEvent("render_GUI", delta, batch);
+    }
 
 	//Renders the map
 	private void renderMap(){

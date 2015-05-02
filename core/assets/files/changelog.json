@@ -4,6 +4,16 @@
       "version": "0.25",
       "date": "4/28/2015",
       "log": [
+        "- Added: Really ugly checkboxes (lower left of this screen) for scripts. If they have an ugly grey box, they are not active. Otherwise, green ugly checkboxes means they are active. When start is clicked, it will start the scripts selected.",
+        "- Added: The script that's being tested adds quick view boxes at the top of the screen for all colonists. Just a silly test and it allowed me to move things here and there to tidy up a bit."
+        "- Bug: Colonists sometimes will either get stuck trying to find a place to explore, or will outright refuse to do it.",
+        "- Bug: Probably a few hundred crashes."
+      ]
+    },
+    {
+      "version": "0.25",
+      "date": "4/28/2015",
+      "log": [
         "- Added: This awesome scrolling changelog! It literally took me all day to make it work, but whatever.... You can scroll or drag with the mouse!"
       ]
     },

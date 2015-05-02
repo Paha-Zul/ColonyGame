@@ -2,6 +2,7 @@ package com.mygdx.game.helpers.managers;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.interfaces.IScript;
 
 import java.net.MalformedURLException;
@@ -12,6 +13,7 @@ import java.net.URLClassLoader;
  * Created by Paha on 4/1/2015.
  */
 public class ScriptManager {
+    public static Array<IScript> scripts = new Array<>();
 
     public static void load(String path){
 
@@ -47,8 +49,7 @@ public class ScriptManager {
 
                 //Start the script.
                 if (IScript.class.isAssignableFrom(cls)) {
-                    IScript script = (IScript) cls.newInstance();
-                    script.start();
+                    scripts.add((IScript) cls.newInstance());
                 }
             }
 

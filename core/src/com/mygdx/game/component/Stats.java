@@ -1,5 +1,6 @@
 package com.mygdx.game.component;
 
+import com.badlogic.gdx.graphics.Color;
 import com.mygdx.game.helpers.timer.RepeatingTimer;
 import com.mygdx.game.helpers.timer.Timer;
 import com.mygdx.game.interfaces.Functional;
@@ -117,6 +118,7 @@ public class Stats extends Component{
 
     public static class Stat{
         public Functional.Callback onZero, onFull;
+        public Color color = Color.GREEN;
 
         public String name, effect;
         private Stats stats;

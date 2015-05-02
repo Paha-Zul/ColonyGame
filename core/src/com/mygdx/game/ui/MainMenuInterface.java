@@ -2,6 +2,7 @@ package com.mygdx.game.ui;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -9,18 +10,18 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Container;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.Align;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.helpers.DataBuilder;
 import com.mygdx.game.helpers.ListHolder;
 import com.mygdx.game.helpers.gui.GUI;
+import com.mygdx.game.helpers.managers.ScriptManager;
 import com.mygdx.game.helpers.worldgeneration.WorldGen;
+import com.mygdx.game.interfaces.IScript;
 import com.mygdx.game.screens.LoadingScreen;
 
 /**
@@ -44,6 +45,8 @@ public class MainMenuInterface extends UI{
     private Rectangle startRect = new Rectangle(), quitRect = new Rectangle(), blank1Rect = new Rectangle();
     private Rectangle blank2Rect = new Rectangle(), blank3Rect = new Rectangle(), changelogRect = new Rectangle(), titleRect = new Rectangle();
     private Container<ScrollPane> outsideScrollContainer;
+
+    private Array<CheckBox> scriptCheckBoxList = new Array<>();
 
     private Stage stage;
 
@@ -91,6 +94,7 @@ public class MainMenuInterface extends UI{
         Gdx.input.setInputProcessor(stage);
 
         this.makeVersionHistoryScrollbar();
+        this.addScriptCheckBoxes();
     }
 
     private void makeVersionHistoryScrollbar(){
@@ -137,6 +141,37 @@ public class MainMenuInterface extends UI{
 //        table.setBounds(0, Gdx.graphics.getHeight() - Gdx.graphics.getHeight() * 0.8f, 500, Gdx.graphics.getHeight() * 0.8f);
     }
 
+    private void addScriptCheckBoxes(){
+        Table table = new Table();
+        table.setBounds(0, 0, 200, 500);
+
+        TextureRegion over = new TextureRegion(WorldGen.whiteTex);
+        over.setRegion(0,0,20,20);
+
+        TextureRegion on = new TextureRegion(WorldGen.makeTexture(Color.GREEN));
+        on.setRegion(0,0,20,20);
+
+        TextureRegion off = new TextureRegion(WorldGen.makeTexture(Color.GRAY));
+        off.setRegion(0, 0, 20, 20);
+
+        for(IScript script : ScriptManager.scripts){
+            CheckBox.CheckBoxStyle style = new CheckBox.CheckBoxStyle();
+            style.font = changeLogStyle.font;
+
+            style.checkboxOver = new TextureRegionDrawable(over);
+            style.checkboxOn = new TextureRegionDrawable(on);
+            style.checkboxOff = new TextureRegionDrawable(off);
+
+            CheckBox checkBox = new CheckBox(script.getClass().getSimpleName(), style);
+            scriptCheckBoxList.add(checkBox);
+
+            table.add(checkBox).left();
+            table.row().left();
+        }
+
+        stage.addActor(table);
+    }
+
     @Override
     public void render(float delta, SpriteBatch batch) {
         super.render(delta, batch);
@@ -150,8 +185,13 @@ public class MainMenuInterface extends UI{
 
         //Start button.
         if(GUI.Button(startRect, "", this.batch, startButtonStyle)){
-            this.destroy();
+            for(int i=0;i<scriptCheckBoxList.size;i++){
+                if(scriptCheckBoxList.get(i).isChecked())
+                    ScriptManager.scripts.get(i).start();
+            }
+
             this.game.setScreen(new LoadingScreen(this.game));
+            this.destroy();
             return;
         }
 

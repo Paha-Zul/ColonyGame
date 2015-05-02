@@ -5,10 +5,10 @@ import java.util.HashMap;
 /**
  * Created by Paha on 4/11/2015.
  */
-public class StateSystem {
-    private HashMap<String, State> stateMap = new HashMap<>();
-    private State currState = new State("default", null);
-    private State defaultState = currState;
+public class StateSystem<T>{
+    private HashMap<String, State<T>> stateMap = new HashMap<>();
+    private State<T> currState = new State<>("default", null);
+    private State<T> defaultState = currState;
 
     public StateSystem(){
 
@@ -27,7 +27,7 @@ public class StateSystem {
      * @param stateName The name for the state.
      * @param userData The data for the state to hold.
      */
-    public void addState(String stateName, Object userData){
+    public void addState(String stateName, T userData){
         this.addState(stateName, false, userData);
     }
 
@@ -46,8 +46,8 @@ public class StateSystem {
      * @param defaultState True if it the state should be the default state, false otherwise.
      * @param userData The user data for this state.
      */
-    public void addState(String stateName, boolean defaultState, Object userData){
-        State newState = new State(stateName, userData);
+    public void addState(String stateName, boolean defaultState, T userData){
+        State<T> newState = new State<>(stateName, userData);
         this.stateMap.putIfAbsent(stateName, newState);
         if(defaultState) this.defaultState = newState;
     }
@@ -55,8 +55,15 @@ public class StateSystem {
     /**
      * @return The current State of this system.
      */
-    public State getCurrState(){
+    public State<T> getCurrState(){
         return this.currState;
+    }
+
+    /**
+     * @return The default State of this system.
+     */
+    public State<T> getDefaultState(){
+        return this.defaultState;
     }
 
     /**
@@ -90,20 +97,17 @@ public class StateSystem {
         return this.stateMap.containsKey(stateName);
     }
 
-    /**
-     * @return The default State of this system.
-     */
-    public State getDefaultState(){
-        return this.defaultState;
-    }
-
-    public static class State{
+    public static class State<T>{
         public String stateName;
-        public Object userData;
+        private T userData;
 
-        public State(String stateName, Object userData){
+        public State(String stateName, T userData){
             this.stateName = stateName;
             this.userData = userData;
+        }
+
+        public T getUserData(){
+            return this.userData;
         }
     }
 }

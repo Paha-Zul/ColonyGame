@@ -66,8 +66,8 @@ public class PrebuiltTasks {
         //Reset some values.
         sequence.control.callbacks.startCallback = task -> {
             //Reset blackboard values...
-            task.blackBoard.fromInventory = blackBoard.getEntityOwner().getComponent(Colonist.class).getInventory();
-            task.blackBoard.toInventory = blackBoard.getEntityOwner().getComponent(Colonist.class).getColony().getInventory();
+            task.blackBoard.fromInventory = task.blackBoard.getEntityOwner().getComponent(Colonist.class).getInventory();
+            task.blackBoard.toInventory = task.blackBoard.getEntityOwner().getComponent(Colonist.class).getColony().getInventory();
             task.blackBoard.transferAll = true;
             task.blackBoard.takeAmount = 0;
             task.blackBoard.itemNameToTake = null;
@@ -307,7 +307,7 @@ public class PrebuiltTasks {
         fc.getControl().callbacks.failureCallback = task -> {
             Vector2 pos = blackBoard.getEntityOwner().transform.getPosition();
             new FloatingText("Couldn't find a nearby animal to hunt!", new Vector2(pos.x, pos.y + 1), new Vector2(pos.x, pos.y + 10), 1.5f, 0.8f);
-            behComp.changeTaskImmediate((Task)behComp.getBehaviourStates().getDefaultState().userData);
+            behComp.changeTaskImmediate(behComp.getBehaviourStates().getDefaultState().getUserData().apply(behComp.getBlackBoard(), behComp));
         };
 
         return mainSeq;
@@ -464,9 +464,10 @@ public class PrebuiltTasks {
             boolean vis = ColonyGame.worldGrid.getVisibilityMap()[n.getX()][n.getY()].getVisibility() != Constants.VISIBILITY_UNEXPLORED;
             return cat && vis;
         };
+
         fp.control.callbacks.successCallback = task -> blackBoard.path.poll();
         fpBase.control.callbacks.successCallback = task -> blackBoard.toInventory = blackBoard.target.getComponent(Inventory.class);
-        seq.control.callbacks.failureCallback = task -> behComp.idle();
+        //seq.control.callbacks.failureCallback = task -> behComp.idle();
 
         return seq;
     }

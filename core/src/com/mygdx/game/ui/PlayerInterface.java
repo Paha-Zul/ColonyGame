@@ -89,13 +89,11 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     private GUI.GUIStyle huntStyle = new GUI.GUIStyle();
     private GUI.GUIStyle blankStyle = new GUI.GUIStyle();
     private GUI.GUIStyle UIStyle;
-
-    private Interactable interactable = null;
-
     private Timer FPSTimer;
 
     private Vector2 testPoint = new Vector2();
-    private Entity selected = null;
+    private static Entity selected = null, newlySelected;
+    private static Interactable interactable = null;
 
     private Color gray = new Color(Color.BLACK);
 
@@ -113,8 +111,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     private QueryCallback callback = fixture -> {
         Collider.ColliderInfo info = (Collider.ColliderInfo)fixture.getUserData();
         if(info.tags.hasTag(Constants.COLLIDER_CLICKABLE) && fixture.testPoint(testPoint.x, testPoint.y)){
-            this.selected = info.owner;
-            this.interactable = this.selected.getComponent(Interactable.class);
+            setSelected(info.owner);
             return false;
         }
 
@@ -125,12 +122,14 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     private ArrayList<UnitProfile> selectedList = new ArrayList<>();
     private QueryCallback selectionCallback = fixture -> {
         Collider.ColliderInfo selectedInfo = (Collider.ColliderInfo)fixture.getUserData();
+
         //If not null, the entity is a colonist, and the collider is clickable.
         if(selectedInfo != null && selectedInfo.owner.hasTag(Constants.ENTITY_COLONIST) && selectedInfo.tags.hasTag(Constants.COLLIDER_CLICKABLE)) {
             UnitProfile profile = new UnitProfile(); //Make a unit profile.
-            profile.entity = this.selected = selectedInfo.owner; //Get the Entity that we clicked.
-            profile.interactable = this.interactable = selectedInfo.owner.getComponent(Interactable.class); //Get teh interactable Component.
-            selectedList.add(profile);
+            setSelected(selectedInfo.owner); //Set our selected
+            profile.entity = selectedInfo.owner; //Get the Entity that we clicked.
+            profile.interactable = selectedInfo.owner.getComponent(Interactable.class); //Get teh interactable Component.
+            selectedList.add(profile); //Add it to the list.
             return true;
         }
         return true;
@@ -238,7 +237,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         }
 
         //Draw stuff about the selected entity.
-        if((this.selected != null && this.interactable != null) || this.selectedList.size() > 0){
+        if((selected != null && interactable != null) || this.selectedList.size() > 0){
             GUI.Texture(this.UIBackgroundBase, this.uiBackgroundBaseRect, this.batch);
             GUI.Texture(this.UIBackgroundTop, this.uiBackgroundTopRect, this.batch);
             this.drawMultipleProfiles(this.ordersRect);
@@ -273,7 +272,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
             //Save the color from the batch, apply the gray, draw the texture (with color), and reset the original color.
             Color saved = this.batch.getColor();
             this.batch.setColor(gray);
-            this.batch.draw(WorldGen.getInstance().whiteTex, start.x, start.y, end.x - start.x, end.y - start.y);
+            this.batch.draw(WorldGen.whiteTex, start.x, start.y, end.x - start.x, end.y - start.y);
             this.batch.setColor(saved);
         }
     }
@@ -294,7 +293,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
     /**
      * Draws info (like FPS) on the screen.
-     * @param height
+     * @param height The height of the screen.
      */
     private void drawDebugInfo(int height){
         if(this.drawingInfo) {
@@ -338,8 +337,8 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
             //For each profile, draw a button to access each individual entity.
             for(UnitProfile profile : selectedList) {
                 if(GUI.Button(profileButtonRect, profile.interactable.getInteractable().getName(), this.batch)){ //Draw the button.
-                    this.selected = profile.entity;
-                    this.interactable = profile.interactable;
+                    selected = profile.entity;
+                    interactable = profile.interactable;
                 }
 
                 //If we go too far down the screen, move over.
@@ -356,17 +355,17 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
      */
     private void drawSelected(){
         //Make sure the interactable we have selected isn't null!
-        if(this.interactable.getInteractable() != null){
-            IInteractable interactable = this.interactable.getInteractable(); //Get the interactable!
+        if(interactable.getInteractable() != null){
+            IInteractable innerInter = interactable.getInteractable(); //Get the interactable!
 
             //If it has a name, draw the name...
-            if(interactable.getName() != null)
-                GUI.Label(interactable.getName(), this.batch, this.infoTopRect, this.UIStyle);
+            if(innerInter.getName() != null)
+                GUI.Label(innerInter.getName(), this.batch, this.infoTopRect, this.UIStyle);
 
             //If it has stats, draw the stats...
-            if(interactable.getStats() != null){
+            if(innerInter.getStats() != null){
                 //GUI.Texture(statusRect, ColonyGame.assetManager.get("menuButton_normal", Texture.class), this.batch);
-                Stats stats = interactable.getStats();
+                Stats stats = innerInter.getStats();
 
                 GUI.Label("Stats", this.batch, this.statusTopRect, this.UIStyle);
                 ArrayList<Stats.Stat> list = stats.getStatList();
@@ -380,13 +379,13 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
                 }
 
             //If no stats, maybe it has stat text?
-            }else if(interactable.getStatsText() != null){
+            }else if(innerInter.getStatsText() != null){
                 GUI.Label("Resources", this.batch, this.statusTopRect, this.UIStyle);
                 this.UIStyle.multiline = true;
                 this.UIStyle.alignment = Align.topLeft;
                 this.UIStyle.paddingLeft = 10;
                 this.UIStyle.paddingTop = 5;
-                GUI.Label(interactable.getStatsText(), this.batch, this.statusRect, this.UIStyle);
+                GUI.Label(innerInter.getStatsText(), this.batch, this.statusRect, this.UIStyle);
                 this.UIStyle.paddingLeft = 0;
                 this.UIStyle.paddingTop = 0;
                 this.UIStyle.alignment = Align.center;
@@ -394,11 +393,11 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
             }
 
             //If it has an inventory, draw the inventory...
-            if(interactable.getInventory() != null){
+            if(innerInter.getInventory() != null){
                 //GUI.Texture(tabsRect, ColonyGame.assetManager.get("menuButton_normal", Texture.class), this.batch);
 
                 GUI.Label("Inventory", this.batch, this.tabsTopRect, this.UIStyle);
-                ArrayList<Inventory.InventoryItem> itemList = interactable.getInventory().getItemList();
+                ArrayList<Inventory.InventoryItem> itemList = innerInter.getInventory().getItemList();
                 this.UIStyle.alignment = Align.topLeft;
                 this.UIStyle.paddingLeft = 5;
                 this.UIStyle.paddingTop = 0;
@@ -414,22 +413,22 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
             }
 
             //If it's a humanoid that we can control, draw some order buttons and its current path.
-            if(this.interactable.interType.equals("humanoid")){
+            if(interactable.interType.equals("humanoid")){
                 GUI.Label("Orders", this.batch, this.ordersTopRect, this.UIStyle);
 
                 //GUI.Texture(ordersRect, ColonyGame.assetManager.get("menuButton_normal", Texture.class), this.batch);
-                if(interactable.getBehManager() != null) {
-                    drawButtons(interactable);
+                if(innerInter.getBehManager() != null) {
+                    drawButtons(innerInter);
 
                     //Set to world camera and draw the path lines.
                     batch.setProjectionMatrix(ColonyGame.camera.combined);
-                    BehaviourManagerComp.Line[] lines = interactable.getBehManager().getLines();
+                    BehaviourManagerComp.Line[] lines = innerInter.getBehManager().getLines();
                     for(BehaviourManagerComp.Line line : lines)
                         batch.draw(blueSquare, line.startX, line.startY, 0, 0, line.width, 0.1f, 1, 1, line.rotation, 0, 0, blueSquare.getWidth(), blueSquare.getHeight(), false, false);
 
                     //Set back to UI camera.
                     batch.setProjectionMatrix(ColonyGame.UICamera.combined);
-                    GUI.Label(interactable.getBehManager().getCurrentTaskName(), this.batch, this.ordersRect.x, this.ordersRect.y + 70, this.ordersRect.width, this.ordersRect.height - 50, this.UIStyle);
+                    GUI.Label(innerInter.getBehManager().getCurrentTaskName(), this.batch, this.ordersRect.x, this.ordersRect.y + 70, this.ordersRect.width, this.ordersRect.height - 50, this.UIStyle);
                 }
             }
         }
@@ -468,7 +467,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
                 //For each profile selected, tell them to gather.
                 for (UnitProfile profile : selectedList) {
-                    if(profile.entity == this.selected) continue;
+                    if(profile.entity == selected) continue;
 
                     //Get the BehaviourComponent and TreeNode.
                     BehaviourManagerComp comp = profile.interactable.getInteractable().getBehManager();
@@ -514,12 +513,12 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
         //Draw the out rectangle
         batch.setColor(Color.BLACK);
-        GUI.Texture(WorldGen.getInstance().whiteTex, outerX, y, width, height, batch);
+        GUI.Texture(WorldGen.whiteTex, outerX, y, width, height, batch);
 
         //Draw the inner rectangle (shrink it by 2 inches on all sides, 'padding')
         batch.setColor(Color.GREEN);
         float newWidth = (currVal/maxVal)*(width-4);
-        GUI.Texture(WorldGen.getInstance().whiteTex, innerX, y + 2, newWidth, height - 4, batch);
+        GUI.Texture(WorldGen.whiteTex, innerX, y + 2, newWidth, height - 4, batch);
 
         GUI.Label((int)currVal+"/"+(int)maxVal, batch, outerX, y, width, height);
     }
@@ -549,12 +548,17 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
      * @param y The Y location.
      */
     private void finishDragging(float x, float y){
+        //Set the final selection box.
         selectionBox.set(selectionBox.x, selectionBox.y, x - selectionBox.x, y - selectionBox.y);
+
+        //For easier understanding, we get the center and use half widths to get the bounds.
         Vector2 center = new Vector2();
         selectionBox.getCenter(center);
         float halfWidth = Math.abs(selectionBox.getWidth()/2);
         float halfHeight = Math.abs(selectionBox.getHeight()/2);
         selectionBox.set(center.x - halfWidth, center.y - halfHeight, center.x + halfWidth, center.y + halfHeight);
+
+        //Query the world and set dragging to false.
         this.world.QueryAABB(this.selectionCallback, selectionBox.x, selectionBox.y, selectionBox.getWidth(), selectionBox.getHeight());
         this.dragging = false;
     }
@@ -564,8 +568,17 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
      * @return True if moused over, false otherwise.
      */
     public boolean isOnUI(){
-        boolean windowActive = ((this.selected != null && this.interactable != null) || this.selectedList.size() > 0);
+        boolean windowActive = ((selected != null && interactable != null) || this.selectedList.size() > 0);
         return this.checkMousedOver() && windowActive;
+    }
+
+    /**
+     * Sets the selected entity for viewing.
+     * @param entity The Entity to set as the selected Entity.
+     */
+    public static void setSelected(Entity entity){
+        newlySelected = entity;
+        interactable = newlySelected.getComponent(Interactable.class);
     }
 
     //Reveals the entire map by adding a viewer to every tile.
@@ -593,7 +606,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         super.destroy();
         this.background.dispose();
         this.batch = null;
-        this.interactable = null;
+        interactable = null;
         this.world = null;
         this.buttonRect = null;
         this.infoRect = null;
@@ -675,13 +688,25 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
             this.selectedList.clear();
             this.buttonStateSystem.setToDefaultState();
             this.currStateNode = null;
-            this.selected = null;
-            this.interactable = null;
             this.finishDragging(worldCoords.x, worldCoords.y);
-            if(this.selectedList.size() < 1) {
-                this.testPoint.set(worldCoords.x, worldCoords.y);
-                this.world.QueryAABB(this.callback, worldCoords.x - 0.01f, worldCoords.y - 0.011f, worldCoords.x + 0.01f, worldCoords.y + 0.01f);
+
+            if(newlySelected != null)
+                selected = newlySelected;
+            else {
+                newlySelected = null;
+                selected = null;
+                interactable = null;
+
+                //Try to get a selection of Entities. If not, maybe we clicked just one?
+                if (this.selectedList.size() < 1) {
+                    this.testPoint.set(worldCoords.x, worldCoords.y);
+                    this.world.QueryAABB(this.callback, worldCoords.x - 0.01f, worldCoords.y - 0.011f, worldCoords.x + 0.01f, worldCoords.y + 0.01f);
+                }
+
+                selected = newlySelected;
             }
+
+            newlySelected = null;
             return true;
         }
 

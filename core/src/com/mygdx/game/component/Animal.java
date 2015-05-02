@@ -81,7 +81,7 @@ public class Animal extends Component implements IInteractable{
 
         if(attackList.size() > 0) {
             behComp.getBlackBoard().target = attackList.getFirst();
-            behComp.attack();
+            behComp.changeTaskImmediate("attackTarget");
         }
     }
 
