@@ -20,12 +20,6 @@ public class FindClosestUnexplored extends LeafTask{
 
     }
 
-    public FindClosestUnexplored(String name, BlackBoard blackBoard, Entity target) {
-        this(name, blackBoard);
-
-        this.target = target;
-    }
-
     @Override
     public boolean check() {
         return true;
@@ -44,8 +38,10 @@ public class FindClosestUnexplored extends LeafTask{
             int radius = 0;
             float closestDst = 999999999999999f;
             Grid.Node closestNode = null;
+
             Grid.Node targetNode = this.blackBoard.colonyGrid.getNode(this.target);
             Grid.Node myNode = this.blackBoard.colonyGrid.getNode(this.blackBoard.getEntityOwner());
+
             int xDiff = Math.abs(targetNode.getX() - myNode.getX());
             int yDiff = Math.abs(targetNode.getY() - myNode.getY());
             int minRadius = xDiff > yDiff ? xDiff : yDiff;
@@ -80,10 +76,11 @@ public class FindClosestUnexplored extends LeafTask{
 
 
                         //Get the distance from the current node to the tmpNode on the graph. If the closestNode is null or the dst is less than the closestDst, assign a new node!
-                        float dst = Math.abs(myNode.getX() - tmpNode.getX()) + Math.abs(myNode.getY() - tmpNode.getY());
-                        if(closestNode == null || dst < closestDst){
+                        float dstToMe = Math.abs(myNode.getX() - tmpNode.getX()) + Math.abs(myNode.getY() - tmpNode.getY());
+                        float dstToTarget = Math.abs(targetNode.getX() - tmpNode.getX()) + Math.abs(targetNode.getY() - tmpNode.getY());
+                        if(closestNode == null || dstToMe + dstToTarget < closestDst){
                             closestNode = tmpNode;
-                            closestDst = dst;
+                            closestDst = dstToMe + dstToTarget;
                         }
                     }
                 }
