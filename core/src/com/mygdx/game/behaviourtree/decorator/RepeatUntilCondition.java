@@ -27,6 +27,7 @@ public class RepeatUntilCondition extends TaskDecorator{
     @Override
     public void update(float delta) {
         if(control.callbacks.successCriteria != null && control.callbacks.successCriteria.test(this.task)){
+            System.out.println("RepeatUntilCondition: done");
             this.control.finishWithSuccess();
         }else {
             //If the job finished and this repeat job has not met it's criteria, restart the job.

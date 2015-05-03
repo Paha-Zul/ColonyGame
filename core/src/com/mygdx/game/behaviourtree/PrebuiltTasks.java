@@ -53,7 +53,7 @@ public class PrebuiltTasks {
 
             //When we finish moving to the newly explored area, try to gather a resource again.
             Task task = exploreUnexplored(blackBoard, behComp);
-            task.getControl().getCallbacks().finishCallback = tsk2 -> behComp.changeTaskImmediate(gatherResource(blackBoard, behComp));
+            task.getControl().getCallbacks().finishCallback = tsk2 -> behComp.changeTaskImmediate("gather"); //When we finish, try to gather.
             behComp.changeTaskImmediate(task);
         };
 
@@ -117,7 +117,7 @@ public class PrebuiltTasks {
          *  transfer itemNames to storage
          */
 
-        Sequence sequence = new Sequence("Gathering", blackBoard);
+        Sequence sequence = new Sequence("gatherTarget", blackBoard);
 
         //Create all the job objects we need...
         FindPath findPath = new FindPath("Finding Path to Resource", blackBoard);
@@ -187,7 +187,7 @@ public class PrebuiltTasks {
         blackBoard.target = null;
         blackBoard.targetNode = null;
 
-        Sequence sequence = new Sequence("Exploring", blackBoard);
+        Sequence sequence = new Sequence("exploreUnexplored", blackBoard);
 
         FindClosestUnexplored findClosestUnexplored = new FindClosestUnexplored("Finding Closest Unexplored Location", blackBoard);
         FindPath findPathToUnexplored = new FindPath("Finding Path to Unexplored", blackBoard);
@@ -209,7 +209,7 @@ public class PrebuiltTasks {
          *  idle for random amount of time
          */
 
-        Sequence sequence = new Sequence("Idling", blackBoard);
+        Sequence sequence = new Sequence("idle", blackBoard);
 
         FindRandomNearbyLocation findNearbyLocation = new FindRandomNearbyLocation("Finding Nearby Location", blackBoard, blackBoard.idleDistance);
         FindPath findPath = new FindPath("Finding Path to Nearby Location", blackBoard);
@@ -234,7 +234,7 @@ public class PrebuiltTasks {
          *  consume item
          */
 
-        Sequence sequence = new Sequence("Consuming Item", blackBoard);
+        Sequence sequence = new Sequence("consume", blackBoard);
 
         CheckInventoryHas check = new CheckInventoryHas("Checking Inventory", blackBoard);
         FindPath fp = new FindPath("Finding Path to consume item", blackBoard);
@@ -290,7 +290,7 @@ public class PrebuiltTasks {
 
         blackBoard.transferAll = true;
 
-        Sequence mainSeq = new Sequence("Following", blackBoard);
+        Sequence mainSeq = new Sequence("hunt", blackBoard);
 
         FindClosestEntity fc = new FindClosestEntity("Finding Closest Animal", blackBoard);
 
@@ -329,7 +329,7 @@ public class PrebuiltTasks {
          */
 
         Parallel parallel = new Parallel("Attacking", blackBoard);
-        RepeatUntilCondition repeat = new RepeatUntilCondition("Repeating", blackBoard, parallel);
+        RepeatUntilCondition mainRepeat = new RepeatUntilCondition("attackTarget", blackBoard, parallel);
 
         FindPath fp = new FindPath("Finding path", blackBoard);
         Follow mt = new Follow("Following", blackBoard);
@@ -340,10 +340,10 @@ public class PrebuiltTasks {
         ((ParentTaskController)parallel.getControl()).addTask(attack);
 
         //Make sure the target is not null.
-        repeat.getControl().callbacks.checkCriteria = task -> task.getBlackboard().target != null;
+        mainRepeat.getControl().callbacks.checkCriteria = task -> task.getBlackboard().target != null;
 
         //To succeed this repeat job, the target must be null, not valid, or not alive.
-        repeat.getControl().callbacks.successCriteria = task -> {
+        mainRepeat.getControl().callbacks.successCriteria = task -> {
             Entity target = ((Task)task).getBlackboard().target;
             return target == null || !target.isValid() || !target.hasTag(Constants.ENTITY_ALIVE);
         };
@@ -365,7 +365,7 @@ public class PrebuiltTasks {
             return dis <= GH.toMeters(task.getBlackboard().attackRange);
         };
 
-        return repeat;
+        return mainRepeat;
     }
 
     public static Task fish(BlackBoard blackBoard, BehaviourManagerComp behComp){
@@ -384,7 +384,7 @@ public class PrebuiltTasks {
         blackBoard.itemNameToTake = null;
         blackBoard.fromInventory = blackBoard.getEntityOwner().getComponent(Inventory.class);
 
-        Sequence seq = new Sequence("Fishing", blackBoard);
+        Sequence seq = new Sequence("fish", blackBoard);
 
         FindClosestTile fct = new FindClosestTile("Finding fishing spot", blackBoard);
         FindPath fp = new FindPath("Finding path to fishing spot", blackBoard);
@@ -421,57 +421,6 @@ public class PrebuiltTasks {
         return seq;
     }
 
-
-    
-    public static Task gatherWaterTask(BlackBoard blackBoard, BehaviourManagerComp behComp){
-        /**
-         * Sequence:
-         *  find closest tile with water on it
-         *  find path to tile
-         *  move to tile
-         *  gather water from tile
-         *  find storage
-         *  move to storage
-         *  transfer to storage
-         */
-
-        blackBoard.transferAll = true;
-        blackBoard.fromInventory = blackBoard.getEntityOwner().getComponent(Inventory.class);
-
-        Sequence seq = new Sequence("Gathering Water", blackBoard);
-
-        FindClosestTile findWater = new FindClosestTile("Finding water", blackBoard);
-        FindPath fp = new FindPath("Finding path to water", blackBoard);
-        MoveTo mt = new MoveTo("Moving to water", blackBoard);
-        GatherWater gatherWater = new GatherWater("Gathering water", blackBoard);
-        FindClosestEntity fb = new FindClosestEntity("Finding base", blackBoard);
-        FindPath fpBase = new FindPath("Finding path to base", blackBoard);
-        MoveTo mtBase = new MoveTo("Moving to base", blackBoard);
-        TransferResource transfer = new TransferResource("Transferring to base", blackBoard);
-
-        seq.control.addTask(findWater);
-        seq.control.addTask(fp);
-        seq.control.addTask(mt);
-        seq.control.addTask(gatherWater);
-        seq.control.addTask(fb);
-        seq.control.addTask(fpBase);
-        seq.control.addTask(mtBase);
-        seq.control.addTask(transfer);
-
-        findWater.control.callbacks.successCriteria = node -> {
-            Grid.Node n = (Grid.Node)node;
-            boolean cat = n.getTerrainTile().category.equals("LightWater");
-            boolean vis = ColonyGame.worldGrid.getVisibilityMap()[n.getX()][n.getY()].getVisibility() != Constants.VISIBILITY_UNEXPLORED;
-            return cat && vis;
-        };
-
-        fp.control.callbacks.successCallback = task -> blackBoard.path.poll();
-        fpBase.control.callbacks.successCallback = task -> blackBoard.toInventory = blackBoard.target.getComponent(Inventory.class);
-        //seq.control.callbacks.failureCallback = task -> behComp.idle();
-
-        return seq;
-    }
-
     public static Task fleeTarget(BlackBoard blackBoard, BehaviourManagerComp behComp){
         /**
          * Sequence
@@ -479,7 +428,7 @@ public class PrebuiltTasks {
          *  MoveTo - Move directly to the tile, no need to find a path
          */
 
-        Task sequence = new Sequence("Fleeing!", blackBoard);
+        Task sequence = new Sequence("flee", blackBoard);
         Task repeatFiveTimes = new RepeatUntilCondition("Fleeing", blackBoard, sequence);
         Task findNearbyTile = new FindNearbyTile("Finding place to flee to!", blackBoard);
         Task moveTo = new MoveTo("Moving away!", blackBoard);
@@ -489,9 +438,10 @@ public class PrebuiltTasks {
 
         repeatFiveTimes.getControl().callbacks.successCriteria = tsk -> {
             Task task = (Task)tsk;
-            task.blackBoard.counter++;
             return task.blackBoard.counter > 5 || (findNearbyTile.getControl().hasFinished() && findNearbyTile.getControl().hasFailed());
         };
+
+        repeatFiveTimes.getControl().callbacks.startCallback = task -> task.blackBoard.counter = 0;
 
         //Reset some stuff.
         sequence.getControl().callbacks.startCallback = task -> {
@@ -525,7 +475,9 @@ public class PrebuiltTasks {
             return false;
         };
 
-        return sequence;
+        moveTo.getControl().callbacks.finishCallback = task -> task.blackBoard.counter++;
+
+        return repeatFiveTimes;
 
     }
 }

@@ -6,6 +6,7 @@ import com.mygdx.game.ColonyGame;
 import com.mygdx.game.behaviourtree.PrebuiltTasks;
 import com.mygdx.game.behaviourtree.Task;
 import com.mygdx.game.entity.Entity;
+import com.mygdx.game.helpers.EventSystem;
 import com.mygdx.game.helpers.StateSystem;
 import com.mygdx.game.helpers.Tree;
 import com.mygdx.game.helpers.timer.OneShotTimer;
@@ -80,6 +81,8 @@ public class BehaviourManagerComp extends Component{
 
         //Set the next behaviour.
         //this.nextBehaviour = task;
+
+        EventSystem.notifyEntityEvent(this.getEntityOwner(), "task_started", task);
     }
 
     /**

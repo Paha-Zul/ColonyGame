@@ -81,7 +81,7 @@ public abstract class ParentTask extends Task{
     @Override
     public String getName() {
         if(this.control.currTask != null)
-            return this.name+": "+this.control.currTask.getName();
+            return this.name;
 
         return "Nothing";
     }

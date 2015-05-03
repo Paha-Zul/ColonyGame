@@ -52,12 +52,12 @@ public class Animal extends Component implements IInteractable{
         stats.getStat("health").onZero = onDeath();
 
         //Add a collide_start event for getting hit by a projectile.
-        EventSystem.registerEntityEvent(this.owner, "collide_start", onCollideStart);
+        EventSystem.onEntityEvent(this.owner, "collide_start", onCollideStart);
 
         //Add a collide_start event for getting hit by a projectile.
-        EventSystem.registerEntityEvent(this.owner, "collide_end", onCollideEnd);
+        EventSystem.onEntityEvent(this.owner, "collide_end", onCollideEnd);
 
-        EventSystem.registerEntityEvent(this.owner, "damage", onDamage);
+        EventSystem.onEntityEvent(this.owner, "damage", onDamage);
 
         this.behComp.getBlackBoard().moveSpeed = 250f;
         //this.setActive(false);
@@ -126,8 +126,7 @@ public class Animal extends Component implements IInteractable{
             otherInfo.owner.setToDestroy();
 
             //If I am a detector and the other is a colonist, we must attack it!
-        } else if (myInfo.tags.hasTag(Constants.COLLIDER_DETECTOR) && otherInfo.owner.hasTag(Constants.ENTITY_COLONIST))
-            attackList.add(otherInfo.owner);
+        }
     };
 
     //The Consumer function to call when I stop colliding with something.

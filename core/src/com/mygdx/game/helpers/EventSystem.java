@@ -16,32 +16,37 @@ public class EventSystem {
     /**
      * Adds a function to the EventSystem.
      * @param entity The Entity to use for its ID. This will direct the call to the correct Entity.
-     * @param handlerName The handler name, ie: "collidestart" to indicate which event to call.
+     * @param eventName The event name, ie: "collidestart" to indicate which event to call.
      * @param function The Consumer function to be called on an event.
      */
-    public static void registerEntityEvent(Entity entity, String handlerName, java.util.function.Consumer<Object[]> function){
-        registerEvent(entity.getID(), handlerName, function);
+    public static void onEntityEvent(Entity entity, String eventName, java.util.function.Consumer<Object[]> function){
+        registerEvent(entity.getID(), eventName, function);
     }
 
-    public static void registerGameEvent(String handlerName, java.util.function.Consumer<Object[]> function){
-        registerEvent(-1, handlerName, function);
+    /**
+     * Adds a function to the EventSystem for a game event.
+     * @param eventName The name of the event.
+     * @param function THe Consumer function to be called on an event.
+     */
+    public static void onGameEvent(String eventName, java.util.function.Consumer<Object[]> function){
+        registerEvent(-1, eventName, function);
     }
 
-    private static void registerEvent(double id, String handlerName, java.util.function.Consumer<Object[]> function){
+    private static void registerEvent(double id, String eventName, java.util.function.Consumer<Object[]> function){
         //If the map for the Entity id is null, add a new map.
         if(entityMap.get(id) == null)
             entityMap.put(id, new HashMap<>());
 
         //If the list of the handlers is null, add a new list.
-        if(entityMap.get(id).get(handlerName) == null)
-            entityMap.get(id).put(handlerName, new ArrayList<>());
+        if(entityMap.get(id).get(eventName) == null)
+            entityMap.get(id).put(eventName, new ArrayList<>());
 
         //Get the list.
-        ArrayList<java.util.function.Consumer<Object[]>> list = entityMap.get(id).get(handlerName);
+        ArrayList<java.util.function.Consumer<Object[]>> list = entityMap.get(id).get(eventName);
         //If the list is null, add a new one.
         if(list == null) {
             list = new ArrayList<>();
-            entityMap.get(id).put(handlerName, new ArrayList<>());
+            entityMap.get(id).put(eventName, new ArrayList<>());
         }
 
         list.add(function);

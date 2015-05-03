@@ -412,25 +412,30 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
                 this.UIStyle.paddingTop = 0;
             }
 
-            //If it's a humanoid that we can control, draw some order buttons and its current path.
-            if(interactable.interType.equals("humanoid")){
-                GUI.Label("Orders", this.batch, this.ordersTopRect, this.UIStyle);
+            if(innerInter.getBehManager() != null){
+                GUI.Label(innerInter.getBehManager().getCurrentTaskName(), this.batch, this.ordersRect.x, this.ordersRect.y + 70, this.ordersRect.width, this.ordersRect.height - 50, this.UIStyle);
 
-                //GUI.Texture(ordersRect, ColonyGame.assetManager.get("menuButton_normal", Texture.class), this.batch);
-                if(innerInter.getBehManager() != null) {
-                    drawButtons(innerInter);
+                //If it's a humanoid that we can control, draw some order buttons and its current path.
+                if(interactable.interType.equals("humanoid")){
+                    GUI.Label("Orders", this.batch, this.ordersTopRect, this.UIStyle);
 
-                    //Set to world camera and draw the path lines.
-                    batch.setProjectionMatrix(ColonyGame.camera.combined);
-                    BehaviourManagerComp.Line[] lines = innerInter.getBehManager().getLines();
-                    for(BehaviourManagerComp.Line line : lines)
-                        batch.draw(blueSquare, line.startX, line.startY, 0, 0, line.width, 0.1f, 1, 1, line.rotation, 0, 0, blueSquare.getWidth(), blueSquare.getHeight(), false, false);
+                    //GUI.Texture(ordersRect, ColonyGame.assetManager.get("menuButton_normal", Texture.class), this.batch);
+                    if(innerInter.getBehManager() != null) {
+                        drawButtons(innerInter);
 
-                    //Set back to UI camera.
-                    batch.setProjectionMatrix(ColonyGame.UICamera.combined);
-                    GUI.Label(innerInter.getBehManager().getCurrentTaskName(), this.batch, this.ordersRect.x, this.ordersRect.y + 70, this.ordersRect.width, this.ordersRect.height - 50, this.UIStyle);
+                        //Set to world camera and draw the path lines.
+                        batch.setProjectionMatrix(ColonyGame.camera.combined);
+                        BehaviourManagerComp.Line[] lines = innerInter.getBehManager().getLines();
+                        for(BehaviourManagerComp.Line line : lines)
+                            batch.draw(blueSquare, line.startX, line.startY, 0, 0, line.width, 0.1f, 1, 1, line.rotation, 0, 0, blueSquare.getWidth(), blueSquare.getHeight(), false, false);
+
+                        //Set back to UI camera.
+                        batch.setProjectionMatrix(ColonyGame.UICamera.combined);
+
+                    }
                 }
             }
+
         }
     }
 

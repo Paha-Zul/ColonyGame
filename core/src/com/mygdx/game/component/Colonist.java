@@ -3,6 +3,7 @@ package com.mygdx.game.component;
 import com.badlogic.gdx.graphics.Color;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.behaviourtree.PrebuiltTasks;
+import com.mygdx.game.behaviourtree.Task;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.Constants;
 import com.mygdx.game.helpers.EventSystem;
@@ -48,7 +49,7 @@ public class Colonist extends Component implements IInteractable{
         this.manager = this.getComponent(BehaviourManagerComp.class);
         this.manager.getBlackBoard().moveSpeed = 200f;
 
-        EventSystem.registerEntityEvent(this.owner, "damage", onDamage);
+        EventSystem.onEntityEvent(this.owner, "damage", onDamage);
 
         this.createStats();
         this.createBehaviourButtons();
@@ -144,6 +145,11 @@ public class Colonist extends Component implements IInteractable{
         getBehManager().getBehaviourStates().addState("gather", false, PrebuiltTasks::gatherResource);
         getBehManager().getBehaviourStates().addState("explore", false, PrebuiltTasks::exploreUnexplored);
         getBehManager().getBehaviourStates().addState("consume", false, PrebuiltTasks::consumeTask);
+
+        EventSystem.onEntityEvent(this.owner, "task_started", args -> {
+            Task task = (Task)args[0];
+            if(task.getName().equals("exploreUnexplored")) task.getBlackboard().target = this.getColony().getEntityOwner();
+        });
     }
 
     private Consumer<Object[]> onDamage = args -> {

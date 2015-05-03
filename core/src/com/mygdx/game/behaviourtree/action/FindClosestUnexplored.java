@@ -3,7 +3,6 @@ package com.mygdx.game.behaviourtree.action;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.behaviourtree.LeafTask;
 import com.mygdx.game.component.BlackBoard;
-import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.Constants;
 import com.mygdx.game.helpers.Grid;
 import com.mygdx.game.helpers.runnables.CallbackRunnable;
@@ -13,8 +12,6 @@ import com.mygdx.game.interfaces.Functional;
  * Created by Paha on 2/17/2015.
  */
 public class FindClosestUnexplored extends LeafTask{
-    Entity target;
-
     public FindClosestUnexplored(String name, BlackBoard blackBoard) {
         super(name, blackBoard);
 
@@ -29,8 +26,8 @@ public class FindClosestUnexplored extends LeafTask{
     public void start() {
         super.start();
 
-        if(this.target == null)
-            this.target = this.blackBoard.getEntityOwner();
+        if(this.blackBoard.target == null)
+            this.blackBoard.target = this.blackBoard.getEntityOwner();
 
         Grid.GridInstance grid = ColonyGame.worldGrid;
         Grid.Node[][] gridMap = grid.getGrid();
@@ -39,15 +36,10 @@ public class FindClosestUnexplored extends LeafTask{
             float closestDst = 999999999999999f;
             Grid.Node closestNode = null;
 
-            Grid.Node targetNode = this.blackBoard.colonyGrid.getNode(this.target);
-            Grid.Node myNode = this.blackBoard.colonyGrid.getNode(this.blackBoard.getEntityOwner());
+            Grid.Node targetNode = this.blackBoard.colonyGrid.getNode(this.blackBoard.target);
+            Grid.Node myNode = this.blackBoard.colonyGrid.getNode(this.getBlackboard().getEntityOwner());
 
-            int xDiff = Math.abs(targetNode.getX() - myNode.getX());
-            int yDiff = Math.abs(targetNode.getY() - myNode.getY());
-            int minRadius = xDiff > yDiff ? xDiff : yDiff;
-            minRadius+=2;
-
-            while(closestNode == null || radius < minRadius) {
+            while(closestNode == null) {
                 //Some bounds stuff.
                 int startX = targetNode.getX() - radius < 0 ? -1 : targetNode.getX() - radius;
                 int endX = targetNode.getX() + radius >= gridMap.length ? -1 : targetNode.getX() + radius;
@@ -74,13 +66,12 @@ public class FindClosestUnexplored extends LeafTask{
                         if(visibility != Constants.VISIBILITY_UNEXPLORED || avoid)
                             continue;
 
-
                         //Get the distance from the current node to the tmpNode on the graph. If the closestNode is null or the dst is less than the closestDst, assign a new node!
+                        float dst = Math.abs(targetNode.getX() - tmpNode.getX()) + Math.abs(targetNode.getY() - tmpNode.getY());
                         float dstToMe = Math.abs(myNode.getX() - tmpNode.getX()) + Math.abs(myNode.getY() - tmpNode.getY());
-                        float dstToTarget = Math.abs(targetNode.getX() - tmpNode.getX()) + Math.abs(targetNode.getY() - tmpNode.getY());
-                        if(closestNode == null || dstToMe + dstToTarget < closestDst){
+                        if(closestNode == null || dst + dstToMe < closestDst){
                             closestNode = tmpNode;
-                            closestDst = dstToMe + dstToTarget;
+                            closestDst = dst + dstToMe;
                         }
                     }
                 }
@@ -89,10 +80,12 @@ public class FindClosestUnexplored extends LeafTask{
             }
 
             this.blackBoard.targetNode = closestNode;
+            this.blackBoard.target = null;
             if(this.blackBoard.targetNode == null)
                 this.control.finishWithFailure();
             else
                 this.control.finishWithSuccess();
+
         };
 
         ColonyGame.threadPool.submit(new CallbackRunnable(findClosestUnexplored));
