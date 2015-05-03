@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.ColonyGame;
+import com.mygdx.game.component.GridComponent;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.gui.GUI;
 import com.mygdx.game.interfaces.Functional;
@@ -166,14 +167,27 @@ public class Grid {
             return neighbors;
         }
 
-        public Node addToGrid(Entity entity, int exploreRadius){
+        /**
+         * Adds an Entity to the grid, using it's postion to find the Node.
+         * @param entity The Entity to add.
+         * @return The Node that the Entity was added to.
+         */
+        public Node addToGrid(Entity entity){
             Node node = this.getNode(entity);
             node.addEntity(entity);
+            return node;
+        }
 
-            int startX = node.getX()-exploreRadius;
-            int endX = node.getX()+exploreRadius;
-            int startY = node.getY()-exploreRadius;
-            int endY = node.getY()+exploreRadius;
+        /**
+         * Adds a viewer to the VisibilityTiles within the Node's position plus radius.
+         * @param startingNode The starting Node to begin at.
+         * @param exploreRadius The radius to add viewers.
+         */
+        public void addViewer(Node startingNode, int exploreRadius){
+            int startX = startingNode.getX()-exploreRadius;
+            int endX = startingNode.getX()+exploreRadius;
+            int startY = startingNode.getY()-exploreRadius;
+            int endY = startingNode.getY()+exploreRadius;
             VisibilityTile[][] visMap = getVisibilityMap();
 
             for(int x=startX;x<=endX;x++){
@@ -184,13 +198,36 @@ public class Grid {
                     visMap[x][y].addViewer();
                 }
             }
+        }
 
-            return node;
+        public void removeViewer(GridComponent gridComp){
+            this.removeViewer(gridComp.getCurrNode(), gridComp.exploreRadius);
+        }
+
+        /**
+         * Removes a viewer to the VisibilityTiles within the Node's position plus radius.
+         * @param startingNode The Node to start at.
+         * @param exploreRadius The radius to remove viewers.
+         */
+        public void removeViewer(Node startingNode, int exploreRadius){
+            int startX = startingNode.getX()-exploreRadius;
+            int endX = startingNode.getX()+exploreRadius;
+            int startY = startingNode.getY()-exploreRadius;
+            int endY = startingNode.getY()+exploreRadius;
+            VisibilityTile[][] visMap = getVisibilityMap();
+
+            for(int x=startX;x<=endX;x++){
+                for(int y=startY;y<=endY;y++){
+                    Node tmpNode = this.getNode(x, y);
+                    if(tmpNode == null) continue;
+
+                    visMap[x][y].removeViewer();
+                }
+            }
         }
 
         /**
          * Checks a Node to see if the Entity is still in the same Node as previously. If not, removes the Entity from the old Node and adds the Entity to the new Node.
-         *
          * @param currNode The current Node to check.
          * @param entity   The Entity that should be in the Node.
          * @return The Node that the Entity is in. This could be the same as the currNode passed in, or a new Node.
@@ -198,29 +235,34 @@ public class Grid {
         public Node checkNode(Node currNode, Entity entity, boolean changeVisibility, int radius) {
             Vector2 pos = entity.transform.getPosition();
 
+            //Get the index of the node we need.
             int[] index = this.getIndex(pos);
-            //If the currNode still matches our current position, return it.
+
+            //If the currNode isn't null and the node we are getting matches the position of our old one, simply return with the old node.
             if (currNode != null && (index[0] == currNode.getX() && index[1] == currNode.getY())) {
                 return currNode;
+
+            //If the currNode is null, return null.
             }else if(currNode == null)
                 return null;
 
-            currNode.removeEntity(entity); //Remove from the old Node if it's not null.
-            Node newNode = getNode(pos); //Get the new Node.
-            if (newNode == null) return null; //If it's null, return null.
+            //Remove us from the currentNode and get a new node.
+            currNode.removeEntity(entity);
+            Node newNode = getNode(pos);
+            if (newNode == null) return null;
 
             //Under work!
             if(changeVisibility){
                 this.perform((grid)->{
+                    //Get the range.
                     int startX = newNode.getX()-radius < currNode.getX()-radius ? newNode.getX()-radius : currNode.getX()-radius; //Get the least
                     int endX = newNode.getX()+radius > currNode.getX()+radius ? newNode.getX()+radius : currNode.getX()+radius; //Get the greatest
                     int startY = newNode.getY()-radius < currNode.getY()-radius ? newNode.getY()-radius : currNode.getY()-radius; //get the least
                     int endY = newNode.getY()+radius > currNode.getY()+radius ? newNode.getY()+radius : currNode.getY()+radius; //get greatest
 
-                    //Gdx.app.log("Startx/Endx/StartY/EndY: ",startX+"/"+endX+"/"+startY+"/"+endY);
-
                     VisibilityTile[][] visibilityMap = getVisibilityMap();
 
+                    //Loop over the range adding viewers.
                     for(int x = startX; x <= endX ; x++){
                         for(int y = startY; y <= endY; y++){
                             Node n = this.getNode(x, y);
@@ -234,6 +276,8 @@ public class Grid {
                             boolean lastInRange = lastXRange <= radius && lastYRange <= radius;
 
                             //TODO FIX THIS!
+
+                            //If we're in an area that shouldn't be touched, continue past it.
                             if(currInRange && lastInRange)
                                 continue;
 
@@ -247,8 +291,8 @@ public class Grid {
                                     visibilityMap[x][y].removeViewer();
                              }
 
-                            if((Math.abs(x - newNode.getX()) + Math.abs(y - newNode.getY()) > radius*1.5f))
-                                continue;
+//                            if((Math.abs(x - newNode.getX()) + Math.abs(y - newNode.getY()) > radius*1.5f))
+//                                continue;
 
                             //WorldGen.getVisibilityMap()[x][y].addViewer();
                         }
@@ -262,7 +306,6 @@ public class Grid {
 
         /**
          * Gets the grid array of this Grid.
-         *
          * @return the Node[][] array of this Grid.
          */
         public Node[][] getGrid() {
@@ -271,7 +314,6 @@ public class Grid {
 
         /**
          * Gets the Node at the Entity's location.
-         *
          * @param entity The Entity to use for a location.
          * @return A Node at the Entity's location.
          */
@@ -284,7 +326,6 @@ public class Grid {
 
         /**
          * Gets the Node at the Vector2 position.
-         *
          * @param pos The Vector2 position to get a Node at.
          * @return A Node at the Vector2 position.
          */
@@ -294,7 +335,6 @@ public class Grid {
 
         /**
          * Gets a Node by a X and Y index.
-         *
          * @param x The X (x) index to get the Node at.
          * @param y The Y (y) index to get the Node at.
          * @return The Node if the index was valid, null otherwise.
@@ -309,7 +349,6 @@ public class Grid {
 
         /**
          * Gets a Node by an index.
-         *
          * @param index An integer array containing X and Y index.
          * @return The Node if the index was valid, null otherwise.
          */
@@ -322,7 +361,6 @@ public class Grid {
 
         /**
          * Adds an Entity to the Grid.
-         *
          * @param entity The Entity to add.
          */
         public void addEntity(Entity entity) {
@@ -390,6 +428,11 @@ public class Grid {
             return GH.toMeters(this.squareSize);
         }
 
+        /**
+         * Gets the index for the location of the Entity on the GridInstance.
+         * @param entity The Entity to use for position.
+         * @return An integer array containing the X and Y values of the index.
+         */
         public int[] getIndex(Entity entity) {
             return getIndex(entity.transform.getPosition());
         }
@@ -403,6 +446,12 @@ public class Grid {
             return getIndex(position.x, position.y);
         }
 
+        /**
+         * Gets the index of a float X and Y value.
+         * @param x The X position.
+         * @param y The Y position.
+         * @return The index of the position.
+         */
         public int[] getIndex(float x, float y) {
             return new int[]{(int) (x / getSquareSize()), (int) (y / getSquareSize())};
         }

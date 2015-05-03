@@ -52,16 +52,19 @@ public class FindClosestUnexplored extends LeafTask{
             minRadius+=2;
 
             while(closestNode == null || radius < minRadius) {
+                //Some bounds stuff.
                 int startX = targetNode.getX() - radius < 0 ? -1 : targetNode.getX() - radius;
                 int endX = targetNode.getX() + radius >= gridMap.length ? -1 : targetNode.getX() + radius;
                 int startY = targetNode.getY() - radius < 0 ? -1 : targetNode.getY() - radius;
                 int endY = targetNode.getY() + radius >= gridMap[targetNode.getX()].length ? -1 : targetNode.getY() + radius;
 
+                //So we don't keep checking the whole map or more than we need to.
                 if(startX == -1 && endX == -1 && startY == -1 && endY == -1){
                     this.blackBoard.targetNode = null;
                     break;
                 }
 
+                //Iterate over the radius
                 for(int x = startX; x <= endX; x++){
                     for(int y = startY; y <= endY; y++){
                         //Check if we are still on the gridMap.

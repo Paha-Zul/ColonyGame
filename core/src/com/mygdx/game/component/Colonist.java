@@ -1,8 +1,10 @@
 package com.mygdx.game.component;
 
 import com.badlogic.gdx.graphics.Color;
+import com.mygdx.game.ColonyGame;
 import com.mygdx.game.behaviourtree.PrebuiltTasks;
 import com.mygdx.game.entity.Entity;
+import com.mygdx.game.helpers.Constants;
 import com.mygdx.game.helpers.EventSystem;
 import com.mygdx.game.helpers.StringTable;
 import com.mygdx.game.helpers.Tree;
@@ -10,6 +12,7 @@ import com.mygdx.game.helpers.gui.GUI;
 import com.mygdx.game.helpers.managers.DataManager;
 import com.mygdx.game.helpers.timer.RepeatingTimer;
 import com.mygdx.game.helpers.timer.Timer;
+import com.mygdx.game.interfaces.Functional;
 import com.mygdx.game.interfaces.IInteractable;
 
 import java.util.function.Consumer;
@@ -23,10 +26,6 @@ public class Colonist extends Component implements IInteractable{
     private Stats stats;
     private BehaviourManagerComp manager;
     private String firstName, lastName;
-
-    static{
-
-    }
 
     public Colonist() {
         super();
@@ -58,11 +57,12 @@ public class Colonist extends Component implements IInteractable{
     //Creates the stats for this colonist.
     private void createStats(){
         //Create these 4 stats.
-        stats.addStat("health", 100, 100).color = Color.GREEN;
+        Stats.Stat healthStat = stats.addStat("health", 100, 100);
         Stats.Stat foodStat = stats.addStat("food", 100, 100);
         Stats.Stat waterStat = stats.addStat("water", 20, 100);
         stats.addStat("energy", 100, 100).color = Color.YELLOW;
 
+        healthStat.color = Color.GREEN;
         foodStat.color = Color.RED;
         waterStat.color = Color.CYAN;
 
@@ -105,6 +105,8 @@ public class Colonist extends Component implements IInteractable{
                 timer.setLength(10f);
             }
         });
+
+        healthStat.onZero = onZero;
     }
 
     //Creates all the buttons for the colonists behaviours.
@@ -148,13 +150,28 @@ public class Colonist extends Component implements IInteractable{
         Entity entity = (Entity) args[0];
         float amount = (float) args[1];
 
-        Stats.Stat stat = this.stats.getStat("health");
-        if (stat == null) return;
+        Stats.Stat health = this.stats.getStat("health");
+        if (health == null) return;
 
-        stat.addToCurrent(amount);
-        this.manager.getBlackBoard().target = entity;
-        this.getBehManager().changeTaskImmediate("attackTarget");
+        health.addToCurrent(amount);
+        if(this.manager != null) {
+            this.manager.getBlackBoard().target = entity;
+            this.manager.changeTaskImmediate("attackTarget");
+        }
     };
+
+    //The callback for when our health is 0.
+    private Functional.Callback onZero = () -> {
+        this.owner.transform.setRotation(90f);
+        this.stats.clearTimers();
+        this.owner.destroyComponent(BehaviourManagerComp.class);
+        this.manager = null;
+        GridComponent gridComp = this.getComponent(GridComponent.class);
+        gridComp.setActive(false);
+        ColonyGame.worldGrid.removeViewer(gridComp);
+        this.owner.removeTag(Constants.ENTITY_ALIVE);
+    };
+
 
     public Colony getColony() {
         return colony;
@@ -202,5 +219,7 @@ public class Colonist extends Component implements IInteractable{
     @Override
     public void destroy() {
         super.destroy();
+
+
     }
 }

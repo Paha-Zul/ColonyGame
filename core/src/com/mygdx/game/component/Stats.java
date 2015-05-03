@@ -45,6 +45,13 @@ public class Stats extends Component{
     }
 
     /**
+     * Clears the timers from this Stats Component.
+     */
+    public void clearTimers(){
+        this.timerList.clear();
+    }
+
+    /**
      * Adds a new Stat object to the Stats Component.
      * @param name The name of the Stat.
      * @param initCurrValue The initial current value to start.

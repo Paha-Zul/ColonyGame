@@ -192,9 +192,4 @@ public class Animal extends Component implements IInteractable{
         super.destroy();
         this.collider.body.destroyFixture(attackSensor);
     }
-
-    @Override
-    public void setToDestroy() {
-        super.setToDestroy();
-    }
 }

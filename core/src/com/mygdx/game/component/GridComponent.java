@@ -11,7 +11,7 @@ public class GridComponent extends Component{
     private int gridType;
     private Grid.Node currNode;
     private Grid.GridInstance grid;
-    private int exploreRadius = 3;
+    public int exploreRadius = 3;
 
     public GridComponent(int gridType, Grid.GridInstance grid, int exploreRadius) {
         super();
@@ -28,7 +28,8 @@ public class GridComponent extends Component{
         super.init(owner);
 
         //Gets a node to start.
-        this.currNode = this.grid.addToGrid(this.owner, exploreRadius);
+        this.currNode = this.grid.addToGrid(this.owner);
+        this.grid.addViewer(this.currNode, this.exploreRadius);
     }
 
     @Override
