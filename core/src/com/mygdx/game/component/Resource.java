@@ -164,6 +164,10 @@ public class Resource extends Component implements IInteractable{
         super.update(delta);
     }
 
+    public DataBuilder.JsonResource getResRef() {
+        return resRef;
+    }
+
     public String getResourceName(){
         return this.resourceName;
     }
@@ -290,6 +294,15 @@ public class Resource extends Component implements IInteractable{
      */
     public void setResourceType(String resourceType) {
         this.resourceType = resourceType;
+    }
+
+    /**
+     * Checks if the Skills Component passed needs and has the required Skill.
+     * @param skills The Skills Component to check the Skill for.
+     * @return True if it has the required skill or does not need a skill, false otherwise.
+     */
+    public boolean hasRequiredSkill(Skills skills) {
+        return !resRef.skillRequired || skills.getSkill(resRef.skill) != null;
     }
 
     @Override

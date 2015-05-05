@@ -393,7 +393,7 @@ public class PrebuiltTasks {
         FindClosestEntity fc = new FindClosestEntity("Finding base", blackBoard);
         FindPath fpBase = new FindPath("Finding path to base", blackBoard);
         MoveTo mtBase = new MoveTo("Moving to base", blackBoard);
-        TransferResource tr = new TransferResource("Transfering resources", blackBoard);
+        TransferResource tr = new TransferResource("Transferring resources", blackBoard);
 
         //We need to tell this fct what can pass as a valid tile.
         fct.getControl().callbacks.successCriteria = nd -> {

@@ -25,6 +25,7 @@ public class Colonist extends Component implements IInteractable{
     private Colony colony;
     private Inventory inventory;
     private Stats stats;
+    private Skills skills;
     private BehaviourManagerComp manager;
     private String firstName, lastName;
 
@@ -46,6 +47,7 @@ public class Colonist extends Component implements IInteractable{
 
         this.inventory = this.getComponent(Inventory.class);
         this.stats = this.getComponent(Stats.class);
+        this.skills = this.getComponent(Skills.class);
         this.manager = this.getComponent(BehaviourManagerComp.class);
         this.manager.getBlackBoard().moveSpeed = 200f;
 
@@ -53,6 +55,7 @@ public class Colonist extends Component implements IInteractable{
 
         this.createStats();
         this.createBehaviourButtons();
+        this.createSkills();
     }
 
     //Creates the stats for this colonist.
@@ -86,7 +89,7 @@ public class Colonist extends Component implements IInteractable{
         stats.addTimer(new RepeatingTimer(10f, () -> {
             waterStat.addToCurrent(-1);
             //If under 20, try to drink.
-            if(waterStat.getCurrVal() <= 20) {
+            if (waterStat.getCurrVal() <= 20) {
                 getBehManager().getBlackBoard().itemEffect = "thirst";
                 getBehManager().getBlackBoard().itemEffectAmount = 1;
                 getBehManager().changeTaskQueued("consume");
@@ -100,8 +103,8 @@ public class Colonist extends Component implements IInteractable{
             if (stats.getStat("food").getCurrVal() <= 0 || stats.getStat("water").getCurrVal() <= 0) {
                 stats.getStat("health").addToCurrent(-1);
                 timer.setLength(5f);
-            //If we have both food AND water, improve health.
-            }else if(stats.getStat("food").getCurrVal() > 0 && stats.getStat("water").getCurrVal() > 0){
+                //If we have both food AND water, improve health.
+            } else if (stats.getStat("food").getCurrVal() > 0 && stats.getStat("water").getCurrVal() > 0) {
                 stats.getStat("health").addToCurrent(1);
                 timer.setLength(10f);
             }
@@ -152,6 +155,15 @@ public class Colonist extends Component implements IInteractable{
         });
     }
 
+    private void createSkills(){
+        this.skills.addSkill("foraging", 10, 100, 2.25f, 0.1f);
+        this.skills.addSkill("lumberjack", 10, 100, 2.25f, 0.1f);
+        this.skills.addSkill("hunting", 10, 100, 2.25f, 0.1f);
+        this.skills.addSkill("exploration", 10, 100, 2.25f, 1.5f);
+        this.skills.addSkill("butchering", 10, 100, 2.25f, 0.1f);
+        this.skills.addSkill("mining", 10, 100, 2.25f, 0.1f);
+    }
+
     private Consumer<Object[]> onDamage = args -> {
         Entity entity = (Entity) args[0];
         float amount = (float) args[1];
@@ -194,7 +206,7 @@ public class Colonist extends Component implements IInteractable{
 
     @Override
     public Skills getSkills() {
-        return null;
+        return this.skills;
     }
 
     @Override

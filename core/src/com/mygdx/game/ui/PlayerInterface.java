@@ -88,6 +88,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     private GUI.GUIStyle exploreStyle = new GUI.GUIStyle();
     private GUI.GUIStyle huntStyle = new GUI.GUIStyle();
     private GUI.GUIStyle blankStyle = new GUI.GUIStyle();
+    private GUI.GUIStyle skillsStyle = new GUI.GUIStyle();
     private GUI.GUIStyle UIStyle;
     private Timer FPSTimer;
 
@@ -362,34 +363,56 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
             if(innerInter.getName() != null)
                 GUI.Label(innerInter.getName(), this.batch, this.infoTopRect, this.UIStyle);
 
-            //If it has stats, draw the stats...
-            if(innerInter.getStats() != null){
-                //GUI.Texture(statusRect, ColonyGame.assetManager.get("menuButton_normal", Texture.class), this.batch);
-                Stats stats = innerInter.getStats();
+//            //If it has stats, draw the stats...
+//            if(innerInter.getStats() != null){
+//                //GUI.Texture(statusRect, ColonyGame.assetManager.get("menuButton_normal", Texture.class), this.batch);
+//                Stats stats = innerInter.getStats();
+//
+//                GUI.Label("Stats", this.batch, this.statusTopRect, this.UIStyle);
+//                ArrayList<Stats.Stat> list = stats.getStatList();
+//                float space = ((statusRect.height - list.size()*20)/list.size()+1)/2;
+//                float x = statusRect.x + 10;
+//                float y = statusRect.y + statusRect.height - 20;
+//
+//                for(int i=0;i<list.size();i++){
+//                    Stats.Stat stat = list.get(i);
+//                    drawBar(stat.name, x, y-(i+1)*space - 20*i, 100, 20, stat.getCurrVal(), stat.getMaxVal());
+//                }
+//
+//            //If no stats, maybe it has stat text?
+//            }else if(innerInter.getStatsText() != null){
+//                GUI.Label("Resources", this.batch, this.statusTopRect, this.UIStyle);
+//                this.UIStyle.multiline = true;
+//                this.UIStyle.alignment = Align.topLeft;
+//                this.UIStyle.paddingLeft = 10;
+//                this.UIStyle.paddingTop = 5;
+//                GUI.Label(innerInter.getStatsText(), this.batch, this.statusRect, this.UIStyle);
+//                this.UIStyle.paddingLeft = 0;
+//                this.UIStyle.paddingTop = 0;
+//                this.UIStyle.alignment = Align.center;
+//                this.UIStyle.multiline = false;
+//            }
 
-                GUI.Label("Stats", this.batch, this.statusTopRect, this.UIStyle);
-                ArrayList<Stats.Stat> list = stats.getStatList();
-                float space = ((statusRect.height - list.size()*20)/list.size()+1)/2;
+            if(innerInter.getSkills() != null){
+                Skills skills = innerInter.getSkills();
+
+                GUI.Label("Skills", this.batch, this.statusTopRect, this.UIStyle);
+                Array<Skills.Skill> list = skills.getSkillList();
+                float space = ((statusRect.height - list.size*20)/list.size+1)/2;
                 float x = statusRect.x + 10;
                 float y = statusRect.y + statusRect.height - 20;
 
-                for(int i=0;i<list.size();i++){
-                    Stats.Stat stat = list.get(i);
-                    drawBar(stat.name, x, y-(i+1)*space - 20*i, 100, 20, stat.getCurrVal(), stat.getMaxVal());
+                StringBuilder str = new StringBuilder();
+                for(int i=0;i<list.size;i++){
+                    Skills.Skill skill = list.get(i);
+                    str.append(skill.getSkillName()).append(": ").append(skill.getCurrLevel()).append("/").append(skill.getMaxLevel()).append("   ").append(skill.getCurrXP()).append("/").append(skill.getCurrLvlMaxXp()).append("\n");
+                    //drawBar(stat.name, x, y-(i+1)*space - 20*i, 100, 20, stat.getCurrVal(), stat.getMaxVal());
                 }
 
-            //If no stats, maybe it has stat text?
-            }else if(innerInter.getStatsText() != null){
-                GUI.Label("Resources", this.batch, this.statusTopRect, this.UIStyle);
-                this.UIStyle.multiline = true;
-                this.UIStyle.alignment = Align.topLeft;
-                this.UIStyle.paddingLeft = 10;
-                this.UIStyle.paddingTop = 5;
-                GUI.Label(innerInter.getStatsText(), this.batch, this.statusRect, this.UIStyle);
-                this.UIStyle.paddingLeft = 0;
-                this.UIStyle.paddingTop = 0;
-                this.UIStyle.alignment = Align.center;
-                this.UIStyle.multiline = false;
+                skillsStyle.alignment = Align.topLeft;
+                skillsStyle.multiline = true;
+                skillsStyle.paddingLeft = 5;
+                GUI.Label(str.toString(), batch, statusRect, skillsStyle);
             }
 
             //If it has an inventory, draw the inventory...

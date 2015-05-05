@@ -476,11 +476,12 @@ public class DataBuilder implements IDestroyable{
     }
 
     public static class JsonResource{
-        public String resourceName, displayName, resourceType, description, dir;
+        public String resourceName, displayName, resourceType, description, dir, skill;
         public String[] img, allimgwith, itemNames;
         public int[][] itemAmounts;
         public int gatherTime;
-        public boolean noimg, infinite;
+        public float skillIncrease = 0;
+        public boolean noimg, infinite, skillRequired = false;
     }
 
     private static class JsonTiles{

@@ -7,7 +7,10 @@
       "itemNames": ["woodlog"],
       "itemAmounts": [[5,10]],
       "dir": "img/Interactable/AmericanLarch",
-      "gatherTime": 7
+      "gatherTime": 7,
+      "skill": "lumberjack",
+      "skillRequired": false,
+      "skillIncrease": 10
     },
     {
       "resourceName": "blackspruce",
@@ -16,7 +19,8 @@
       "itemNames": ["woodlog"],
       "itemAmounts": [[1,3]],
       "dir": "img/Interactable/BlackSpruce",
-      "gatherTime": 3
+      "gatherTime": 3,
+      "skill": "lumberjack"
     },
     {
       "resourceName": "whitespruce",
@@ -25,7 +29,8 @@
       "itemNames": ["woodlog"],
       "itemAmounts": [[10,20]],
       "dir": "img/Interactable/WhiteSpruce",
-      "gatherTime": 10
+      "gatherTime": 10,
+      "skill": "lumberjack"
     },
     {
       "resourceName": "rock",
@@ -34,7 +39,8 @@
       "itemNames": ["stone"],
       "itemAmounts": [[1,5]],
       "img": ["rock"],
-      "gatherTime": 3
+      "gatherTime": 3,
+      "skill": "mining"
     },
     {
       "resourceName": "bunchberry",
@@ -43,7 +49,8 @@
       "itemNames": ["food", "herbs"],
       "itemAmounts": [[1,1], [3,3]],
       "img": ["Canadian Bunchberry"],
-      "gatherTime": 3
+      "gatherTime": 3,
+      "skill": "foraging"
     },
     {
       "resourceName": "cloudberry",
@@ -52,7 +59,8 @@
       "itemNames": ["food", "herbs"],
       "itemAmounts": [[3,3], [1,1]],
       "img": ["Cloudberry"],
-      "gatherTime": 3
+      "gatherTime": 3,
+      "skill": "foraging"
     },
     {
       "resourceName": "cranberry",
@@ -61,7 +69,8 @@
       "itemNames": ["food", "herbs"],
       "itemAmounts": [[3,3], [3,3]],
       "img": ["Cranberry"],
-      "gatherTime": 3
+      "gatherTime": 3,
+      "skill": "foraging"
     },
     {
       "resourceName": "lingonberry",
@@ -70,7 +79,8 @@
       "itemNames": ["food", "herbs"],
       "itemAmounts": [[1,1], [4,4]],
       "img": ["Lingonberry"],
-      "gatherTime": 3
+      "gatherTime": 3,
+      "skill": "foraging"
     },
     {
       "resourceName": "partridgeberry",
@@ -79,7 +89,8 @@
       "itemNames": ["food", "herbs"],
       "itemAmounts": [[1,1], [1,1]],
       "img": ["Partridge Berry"],
-      "gatherTime": 3
+      "gatherTime": 3,
+      "skill": "foraging"
     },
     {
       "resourceName": "elderberry",
@@ -88,7 +99,8 @@
       "itemNames": ["food", "herbs"],
       "itemAmounts": [[1,1], [4,4]],
       "img": ["Elderberry"],
-      "gatherTime": 3
+      "gatherTime": 3,
+      "skill": "foraging"
     },
     {
       "resourceName": "huckleberry",
@@ -97,7 +109,8 @@
       "itemNames": ["food", "herbs"],
       "itemAmounts": [[2,2], [2,2]],
       "img": ["Huckleberry"],
-      "gatherTime": 3
+      "gatherTime": 3,
+      "skill": "foraging"
     },
     {
       "resourceName": "squirrelCarcass",
@@ -107,6 +120,7 @@
       "itemAmounts": [[1,3],[0, 2]],
       "noimg": true,
       "gatherTime": 3,
+      "skill": "butchering"
     },
     {
       "resourceName": "waterSource",
