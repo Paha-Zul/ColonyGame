@@ -12,7 +12,6 @@ import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
 import com.mygdx.game.helpers.*;
 import com.mygdx.game.helpers.gui.GUI;
-import com.mygdx.game.helpers.managers.ScriptManager;
 import com.mygdx.game.screens.PreLoadingScreen;
 
 import java.util.concurrent.ExecutorService;
@@ -48,8 +47,6 @@ public class ColonyGame extends Game {
 		world.setContactListener(new Collision());
 
         threadPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-
-		ScriptManager.load("./scripts");
 
 		this.setScreen(new PreLoadingScreen(this));
 	}

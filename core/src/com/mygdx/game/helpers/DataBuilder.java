@@ -11,6 +11,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter;
 import com.mygdx.game.helpers.managers.DataManager;
+import com.mygdx.game.helpers.managers.ScriptManager;
 import com.mygdx.game.helpers.worldgeneration.WorldGen;
 import com.mygdx.game.interfaces.IDestroyable;
 
@@ -33,6 +34,7 @@ public class DataBuilder implements IDestroyable{
     String imgPath = "img/misc";
     String soundPath = "sounds/";
     String atlasPath = "atlas/";
+    String modPath = "mods/";
 
     private EasyAssetManager assetManager;
 
@@ -41,33 +43,76 @@ public class DataBuilder implements IDestroyable{
     public static JsonWorld worldData;
 
     public DataBuilder(EasyAssetManager assetManager){
-        TextureLoader.TextureParameter param = new TextureLoader.TextureParameter();
-        param.minFilter = Texture.TextureFilter.MipMapLinearLinear;
-        param.magFilter = Texture.TextureFilter.MipMapLinearLinear;
-        param.genMipMaps = true;
-
         this.assetManager = assetManager;
-
-        buildFilesInDir(Gdx.files.internal(this.imgPath), Texture.class, param, new String[]{"png"});
-        buildFilesInDir(Gdx.files.internal(this.soundPath), Sound.class, null, new String[]{"ogg"});
-        buildFilesInDir(Gdx.files.internal(this.atlasPath), TextureAtlas.class, null, new String[]{"atlas"});
     }
 
     public boolean update(){
         return assetManager.update();
     }
 
+    /**
+     * Loads all files needed for the game. This starts in the base directory where the jar file is located.
+     */
     public void loadFiles(){
-        buildItems();
-        buildResources();
-        buildTiles();
-        buildWorldGen();
-        buildChangeLog();
-        buildAnimals();
-        buildWeapons();
-        buildAmmuntion();
+        //Load all the base game stuff.
+        loadFilesForMod(Gdx.files.internal(""));
+
+        //Get the FileHandle for the mod directoy.
+        FileHandle modDirHandle = Gdx.files.internal(modPath);
+
+        //For each folder in the mod directory, load the files!
+        for(FileHandle file : modDirHandle.list()){
+            if(file.isDirectory()){
+                FileHandle modHandle = Gdx.files.internal(file.path()+"/");
+                loadFilesForMod(modHandle);
+                ScriptManager.load(modHandle.path(), modHandle.path());
+            }
+        }
     }
 
+    /**
+     * Loads all assets for a particular mod.
+     * @param fileHandle The FileHandle for the folder that the assets reside in.
+     */
+    private void loadFilesForMod(FileHandle fileHandle){
+        buildAssets(fileHandle);
+
+        String path = fileHandle.path();
+        if(!path.isEmpty()) path += "/";
+
+        buildItems(Gdx.files.internal(path + filePath + itemPath));
+        buildResources(Gdx.files.internal(path + filePath + resourcePath));
+        buildTiles(Gdx.files.internal(path + filePath + tilePath));
+        buildWorldGen(Gdx.files.internal(path + filePath + worldPath));
+        buildChangeLog(Gdx.files.internal(path + filePath + changeLogPath));
+        buildAnimals(Gdx.files.internal(path + filePath + animalPath));
+        buildWeapons(Gdx.files.internal(path + filePath + weaponPath));
+        buildAmmuntion(Gdx.files.internal(path + filePath + ammoPath));
+    }
+
+    /**
+     * Builds the assets (images, sounds, atlas files) using the fileHandle passed in.
+     * @param fileHandle The base directory to load assets from.
+     */
+    private void buildAssets(FileHandle fileHandle){
+        TextureLoader.TextureParameter param = new TextureLoader.TextureParameter();
+        param.minFilter = Texture.TextureFilter.MipMapLinearLinear;
+        param.magFilter = Texture.TextureFilter.MipMapLinearLinear;
+        param.genMipMaps = true;
+
+        buildFilesInDir(Gdx.files.internal(fileHandle.path() + this.imgPath), Texture.class, param, new String[]{"png"});
+        buildFilesInDir(Gdx.files.internal(fileHandle.path() + this.soundPath), Sound.class, null, new String[]{"ogg"});
+        buildFilesInDir(Gdx.files.internal(fileHandle.path() + this.atlasPath), TextureAtlas.class, null, new String[]{"atlas"});
+    }
+
+    /**
+     * This function will recursively traverse folders and load all assets starting in the base directory (dirHandle). Only loads files that
+     * match an extension from 'extensions'
+     * @param dirHandle The base directory to begin loading files in.
+     * @param type The class type that the file should be loaded into (ex: Texture.class).
+     * @param param The LoaderParameters to load the file with.
+     * @param extensions The extensions that the file must match one of.
+     */
     private void buildFilesInDir(FileHandle dirHandle, Class<?> type, AssetLoaderParameters param, String[] extensions) {
         for (FileHandle entry : dirHandle.list()) {
             if (entry.isDirectory()) //For every directory, call this function again to load the images.
@@ -77,26 +122,32 @@ public class DataBuilder implements IDestroyable{
         }
     }
 
+    /**
+     * Loads an individual file using the AssetLoaderParameter passed in.
+     * @param entry The FileHandle to get the file from.
+     * @param type The class of the file to be loaded (Texture.class for instance).
+     * @param param The Loader parameters to load the file.
+     * @param extensions The extensions the file needs to match (png for instance).
+     */
     private void loadFile(FileHandle entry, Class<?> type, AssetLoaderParameters param, String[] extensions){
         String extension = "";
         String commonName = "";
 
+        //Get the index of the extension
         int i = entry.name().lastIndexOf('.');
         if (i > 0) {
-            extension = entry.name().substring(i + 1);
+            extension = entry.name().substring(i + 1); //Get the extension.
             commonName = entry.name().substring(0, i); //Get the common name (no path or extension).
         }
 
         //If it matches one of the extensions, load it!
-        for(String ext : extensions)
-            if(extension.equals(ext)) {
-                if(param != null)
-                    assetManager.load(entry.path(), commonName, type, param);
-                else
-                    assetManager.load(entry.path(), commonName, type);
+        for(String ext : extensions) {
+            if (extension.equals(ext)) {
+                if (param != null) assetManager.load(entry.path(), commonName, type, param);
+                else assetManager.load(entry.path(), commonName, type);
                 return;
             }
-
+        }
     }
 
     /**
@@ -186,29 +237,42 @@ public class DataBuilder implements IDestroyable{
         return "";
     }
 
-    private ArrayList<FolderStructure> buildFolderStructure(FileHandle handle){
+    /**
+     * Develops a list of folders that have ranks (ex: tree_2) and returns the sorted list from lowest to highest.
+     * @param handle The directory to gather folders from.
+     * @return An ArrayList of {@link com.mygdx.game.helpers.DataBuilder.FolderStructure FolderStructures} that is sorted from lowest to highest ranks.
+     */
+    private ArrayList<FolderStructure> listFoldersWithRanks(FileHandle handle){
         ArrayList<FolderStructure> list = new ArrayList<>();
-        ArrayList<String> fileList = new ArrayList<>();
+        ArrayList<String> fileList = new ArrayList<>(); //To hold all the file names.
 
+        //For every file, if it is a directory...
         for(FileHandle entry : handle.list()){
             if(entry.isDirectory()){
+
                 fileList.clear();
                 int index = entry.nameWithoutExtension().lastIndexOf('_'); //Get the index of the last _.
                 if(index == -1) GH.writeErrorMessage("Using 'autoLayered' in tiles.json and "+entry.nameWithoutExtension() + " has no rank attached to it! (ex: 'file_1, file_2'"); //Throw an error if it doesn't exist.
                 int rank = Integer.parseInt(entry.nameWithoutExtension().substring(index+1)); //Record the rank of the folder.
                 String fullName = entry.nameWithoutExtension(); //Record the full name.
-                this.getFileNamesFromDir(entry, fileList);
-                String[] img = fileList.toArray(new String[fileList.size()]);
+                this.getFileNamesFromDir(entry, fileList); //Get all file names inside the folder.
+                String[] img = fileList.toArray(new String[fileList.size()]); //Convert it into a String array.
 
-                list.add(new FolderStructure(rank, fullName, img));
+                list.add(new FolderStructure(rank, fullName, img)); //Add a new FolderStructure object.
             }
         }
 
-        list.sort((fs1, fs2) -> fs1.rank - fs2.rank);
+        list.sort((fs1, fs2) -> fs1.rank - fs2.rank); //Sort the list.
         return list;
     }
 
-    private void buildItems() {
+    /**
+     * Builds the items from the items.json file.
+     * @param fileHandle The location of the file.
+     */
+    private void buildItems(FileHandle fileHandle) {
+        if(!fileHandle.exists()) return;
+
         Json json = new Json();
         json.setTypeName(null);
         json.setUsePrototypes(false);
@@ -223,15 +287,18 @@ public class DataBuilder implements IDestroyable{
 
     /**
      * Builds the resource Json stuff.
+     * @param fileHandle
      */
-    private void buildResources(){
+    private void buildResources(FileHandle fileHandle){
+        if(!fileHandle.exists()) return;
+
         Json json = new Json();
         json.setTypeName(null);
         json.setUsePrototypes(false);
         json.setIgnoreUnknownFields(true);
         json.setOutputType(JsonWriter.OutputType.json);
 
-        JsonResources resources = json.fromJson(JsonResources.class, Gdx.files.internal(filePath+resourcePath));
+        JsonResources resources = json.fromJson(JsonResources.class, fileHandle);
 
         for(JsonResource jRes : resources.resources){
             //If the dir field is not null, we have a directory to pull images from.
@@ -270,21 +337,24 @@ public class DataBuilder implements IDestroyable{
 
     /**
      * Builds the tile data from the json file.
+     * @param fileHandle
      */
-    private void buildTiles(){
+    private void buildTiles(FileHandle fileHandle){
+        if(!fileHandle.exists()) return;
+
         Json json = new Json();
         json.setTypeName(null);
         json.setUsePrototypes(false);
         json.setIgnoreUnknownFields(true);
         json.setOutputType(JsonWriter.OutputType.json);
 
-        JsonTiles tiles = json.fromJson(JsonTiles.class, Gdx.files.internal(filePath+tilePath));
+        JsonTiles tiles = json.fromJson(JsonTiles.class, fileHandle);
 
         //For each group of tiles
         for (JsonTileGroup group : tiles.tileGroups) {
             //If the group of tiles is auto layered...
             if(group.autoLayered && group.dir != null){
-                ArrayList<FolderStructure> list = this.buildFolderStructure(Gdx.files.internal(group.dir)); //Build the folder structure.
+                ArrayList<FolderStructure> list = this.listFoldersWithRanks(Gdx.files.internal(group.dir)); //Build the folder structure.
                 ArrayList<JsonTile> tileList = new ArrayList<>(); //a list.
                 for(int i=0;i<list.size();i++){
                     FolderStructure struct = list.get(i);
@@ -319,21 +389,25 @@ public class DataBuilder implements IDestroyable{
                 if(group.tiles == null || group.tiles.length <= 0)
                     GH.writeErrorMessage("Something is wrong with group "+group.noiseMap+" in tiles.json");
             }
+
             tileGroupsMap.put(group.noiseMap, group);
         }
     }
 
     /**
      * Builds the WorldGen data for things like noise maps, frequency of noise maps, size, tile sizes....
+     * @param fileHandle
      */
-    private void buildWorldGen(){
+    private void buildWorldGen(FileHandle fileHandle){
+        if(!fileHandle.exists()) return;
+
         Json json = new Json();
         json.setTypeName(null);
         json.setUsePrototypes(false);
         json.setIgnoreUnknownFields(true);
         json.setOutputType(JsonWriter.OutputType.json);
 
-        JsonWorld world = json.fromJson(JsonWorld.class, Gdx.files.internal(filePath+worldPath));
+        JsonWorld world = json.fromJson(JsonWorld.class, fileHandle);
         for(NoiseMap map : world.noiseMaps) {
             world.noiseMapHashMap.put(map.rank, map);
             //If the seed is null or empty, generate one. Otherwise, use the seed from worldgen.json.
@@ -360,28 +434,34 @@ public class DataBuilder implements IDestroyable{
 
     /**
      * Builds the changelog data for displaying in game.
+     * @param fileHandle
      */
-    private void buildChangeLog(){
+    private void buildChangeLog(FileHandle fileHandle){
+        if(!fileHandle.exists()) return;
+
         Json json = new Json();
         json.setTypeName(null);
         json.setUsePrototypes(false);
         json.setIgnoreUnknownFields(true);
         json.setOutputType(JsonWriter.OutputType.json);
 
-        DataBuilder.changelog = json.fromJson(JsonChangeLog.class, Gdx.files.internal(filePath+changeLogPath));
+        DataBuilder.changelog = json.fromJson(JsonChangeLog.class, fileHandle);
     }
 
     /**
      * Builds the animal Json stuff.
+     * @param fileHandle
      */
-    private void buildAnimals(){
+    private void buildAnimals(FileHandle fileHandle){
+        if(!fileHandle.exists()) return;
+
         Json json = new Json();
         json.setTypeName(null);
         json.setUsePrototypes(false);
         json.setIgnoreUnknownFields(true);
         json.setOutputType(JsonWriter.OutputType.json);
 
-        JsonAnimals animals = json.fromJson(JsonAnimals.class, Gdx.files.internal(filePath+animalPath));
+        JsonAnimals animals = json.fromJson(JsonAnimals.class, fileHandle);
 
         for(JsonAnimal animal : animals.animals){
             DataManager.addData(animal.name, animal, JsonAnimal.class);
@@ -391,15 +471,18 @@ public class DataBuilder implements IDestroyable{
 
     /**
      * Builds the weapon Json stuff.
+     * @param fileHandle
      */
-    private void buildWeapons(){
+    private void buildWeapons(FileHandle fileHandle){
+        if(!fileHandle.exists()) return;
+
         Json json = new Json();
         json.setTypeName(null);
         json.setUsePrototypes(false);
         json.setIgnoreUnknownFields(true);
         json.setOutputType(JsonWriter.OutputType.json);
 
-        JsonWeapons weapons = json.fromJson(JsonWeapons.class, Gdx.files.internal(filePath+weaponPath));
+        JsonWeapons weapons = json.fromJson(JsonWeapons.class, fileHandle);
 
         for(JsonWeapon weapon : weapons.weapons){
             DataManager.addData(weapon.name, weapon, JsonWeapon.class);
@@ -408,15 +491,18 @@ public class DataBuilder implements IDestroyable{
 
     /**
      * Builds the ammunition Json stuff.
+     * @param fileHandle
      */
-    private void buildAmmuntion(){
+    private void buildAmmuntion(FileHandle fileHandle){
+        if(!fileHandle.exists()) return;
+
         Json json = new Json();
         json.setTypeName(null);
         json.setUsePrototypes(false);
         json.setIgnoreUnknownFields(true);
         json.setOutputType(JsonWriter.OutputType.json);
 
-        JsonAmmunitions ammunitions = json.fromJson(JsonAmmunitions.class, Gdx.files.internal(filePath+ammoPath));
+        JsonAmmunitions ammunitions = json.fromJson(JsonAmmunitions.class, fileHandle);
 
         for(JsonAmmunition ammo : ammunitions.ammunitions){
             DataManager.addData(ammo.name, ammo, JsonAmmunition.class);

@@ -15,14 +15,14 @@ import java.net.URLClassLoader;
 public class ScriptManager {
     public static Array<IScript> scripts = new Array<>();
 
-    public static void load(String path){
+    public static void load(String path, String original){
 
         // Create a File object on the root of the directory containing the class file
         FileHandle handle = Gdx.files.internal(path);
         try {
             for(FileHandle file : handle.list()) {
                 if(file.isDirectory())
-                    load(path+"/"+file.name());
+                    load(path+"/"+file.name(), path);
 
                 int index = file.path().lastIndexOf('.'); //get the index of the extension...
                 if(index < 0 || !file.path().substring(index, file.path().length()).equals(".class")) //If it doesn't have the ".class" extension
@@ -37,7 +37,7 @@ public class ScriptManager {
                 fileName = fileName.replace('/', '.');
 
                 // Convert File to a URL. This should be the absolute directory to the './scripts' directory.
-                URL url = Gdx.files.internal("./scripts").file().toURI().toURL();    // file: 'absoultepath'/scripts
+                URL url = Gdx.files.internal(original).file().toURI().toURL();    // file: 'absoultepath'/scripts
                 URL[] urls = new URL[]{url};
 
                 // Create a new class loader with the directory

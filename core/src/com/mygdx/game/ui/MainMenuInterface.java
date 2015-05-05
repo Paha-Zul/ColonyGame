@@ -28,8 +28,8 @@ import com.mygdx.game.screens.LoadingScreen;
  * A UI that controls the main menu. This is responsible for all buttons, images, music, and sounds of the main menu.
  */
 public class MainMenuInterface extends UI{
-    public static Texture mainMenuTexture = ColonyGame.assetManager.get("Space2", Texture.class);
-    public static Music music = Gdx.audio.newMusic(Gdx.files.internal("music/Karkarakacrrot.ogg"));
+    public static Texture mainMenuTexture;
+    public static Music music;
 
     GUI.GUIStyle startButtonStyle = new GUI.GUIStyle();
     GUI.GUIStyle quitButtonStyle = new GUI.GUIStyle();
@@ -40,7 +40,7 @@ public class MainMenuInterface extends UI{
     Rectangle[] buttonRects = new Rectangle[5];
 
     private Texture titleTexture;
-    private BitmapFont titleFont = new BitmapFont(Gdx.files.internal("fonts/titlefont.fnt"));
+    private BitmapFont titleFont;
     private GUI.GUIStyle changeLogStyle = new GUI.GUIStyle();
     private Rectangle startRect = new Rectangle(), quitRect = new Rectangle(), blank1Rect = new Rectangle();
     private Rectangle blank2Rect = new Rectangle(), blank3Rect = new Rectangle(), changelogRect = new Rectangle(), titleRect = new Rectangle();
@@ -54,6 +54,9 @@ public class MainMenuInterface extends UI{
         super(batch, game);
 
         titleTexture = ColonyGame.assetManager.get("Auroris", Texture.class);
+        music = Gdx.audio.newMusic(Gdx.files.internal("music/Karkarakacrrot.ogg"));
+        titleFont = new BitmapFont(Gdx.files.internal("fonts/titlefont.fnt"));
+        mainMenuTexture = ColonyGame.assetManager.get("Space2", Texture.class);
 
         //Set the states for the start button
         startButtonStyle.normal = ColonyGame.assetManager.get("startbutton_normal", Texture.class);

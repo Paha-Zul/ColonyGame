@@ -20,12 +20,12 @@ public class PreLoadingScreen implements Screen{
     @Override
     public void show() {
         builder = new DataBuilder(ColonyGame.assetManager);
+        builder.loadFiles();
     }
 
     @Override
     public void render(float delta) {
         if(builder.update()) {
-            builder.loadFiles();
             ColonyGame.worldGrid = Grid.newGridInstance("grid", Constants.GRID_WIDTH, Constants.GRID_HEIGHT, Constants.GRID_SQUARESIZE);
             this.game.setScreen(new MainMenuScreen(this.game));
         }
