@@ -15,6 +15,8 @@ import com.mygdx.game.helpers.managers.ScriptManager;
 import com.mygdx.game.helpers.worldgeneration.WorldGen;
 import com.mygdx.game.interfaces.IDestroyable;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -42,6 +44,8 @@ public class DataBuilder implements IDestroyable{
     public static JsonChangeLog changelog;
     public static JsonWorld worldData;
 
+    private static ModList modList;
+
     public DataBuilder(EasyAssetManager assetManager){
         this.assetManager = assetManager;
     }
@@ -54,20 +58,113 @@ public class DataBuilder implements IDestroyable{
      * Loads all files needed for the game. This starts in the base directory where the jar file is located.
      */
     public void loadFiles(){
-        //Load all the base game stuff.
+
+        //Load all the base game stuff and the mod list.
         loadFilesForMod(Gdx.files.internal(""));
+        loadMods();
+    }
+
+    private void loadMods(){
+        boolean existed = false;
+
+        ModList modList = loadModList(Gdx.files.internal("./"));
+        if(modList == null) {
+            System.out.println("modlist is null");
+            modList = new ModList();
+        }
 
         //Get the FileHandle for the mod directoy.
         FileHandle modDirHandle = Gdx.files.internal(modPath);
 
         //For each folder in the mod directory, load the files!
         for(FileHandle file : modDirHandle.list()){
-            if(file.isDirectory()){
-                FileHandle modHandle = Gdx.files.internal(file.path()+"/");
-                loadFilesForMod(modHandle);
-                ScriptManager.load(modHandle.path(), modHandle.path());
+            if(!file.isDirectory()) continue; //If not a directory, continue
+
+            ModInfo info = loadModInfo(file);
+
+            if(info == null) continue; //If the mod doesn't have an info.json file, continue
+
+            //For each mod in the mod list, check to see if the info is in the list.
+            for(Mod mod : modList.modList){
+                if(mod.modName.equals(info.name)){ //If it matches the name and is enabled, load the files of the mod.
+                    existed = true;
+                    if(mod.enabled) {
+                        this.loadFilesForMod(file); //Load files
+                        ScriptManager.load(file.path(), file.path()); //Load scripts.
+                    }
+                    break;
+                }
+            }
+
+            if(!existed) {
+                //Create the Mod and add it to the modList.
+                Mod mod = new Mod();
+                mod.modName = info.name;
+                mod.enabled = false;
+                modList.modList.add(mod);
+            }
+
+            existed = false;
+        }
+
+        writeToModList(Gdx.files.internal("./"), modList);
+    }
+
+    private ModList loadModList(FileHandle handle){
+        //Find the file names "mods.json" and parse it.
+        for(FileHandle file : handle.list()){
+            if(file.name().equals("mods.json")){
+                Json json = new Json();
+                json.setTypeName(null);
+                json.setUsePrototypes(false);
+                json.setIgnoreUnknownFields(true);
+                json.setOutputType(JsonWriter.OutputType.json);
+
+                return json.fromJson(ModList.class, file);
             }
         }
+
+        //If we didn't return after getting the json, then we're missing the file. Create a new one!
+        try {
+            FileHandle hand = Gdx.files.internal(handle+"/mods.json");
+            hand.file().createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    private void writeToModList(FileHandle handle, ModList modList){
+        for(FileHandle file : handle.list()){
+            if(file.name().equals("mods.json")){
+                Json json = new Json();
+                json.setUsePrototypes(false);
+                json.setOutputType(JsonWriter.OutputType.json);
+                try {
+                    FileWriter writer = new FileWriter(file.file());
+                    writer.write(json.prettyPrint(modList));
+                    writer.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    private ModInfo loadModInfo(FileHandle handle){
+        for(FileHandle file : handle.list()){
+            if(file.name().equals("info.json")){
+                Json json = new Json();
+                json.setTypeName(null);
+                json.setUsePrototypes(false);
+                json.setIgnoreUnknownFields(true);
+                json.setOutputType(JsonWriter.OutputType.json);
+
+                return json.fromJson(ModInfo.class, file);
+            }
+        }
+        return null;
     }
 
     /**
@@ -100,9 +197,14 @@ public class DataBuilder implements IDestroyable{
         param.magFilter = Texture.TextureFilter.MipMapLinearLinear;
         param.genMipMaps = true;
 
-        buildFilesInDir(Gdx.files.internal(fileHandle.path() + this.imgPath), Texture.class, param, new String[]{"png"});
-        buildFilesInDir(Gdx.files.internal(fileHandle.path() + this.soundPath), Sound.class, null, new String[]{"ogg"});
-        buildFilesInDir(Gdx.files.internal(fileHandle.path() + this.atlasPath), TextureAtlas.class, null, new String[]{"atlas"});
+        String path = fileHandle.path();
+        if(!path.isEmpty()) path += "/";
+
+        System.out.println("Loading: " + path);
+
+        buildFilesInDir(Gdx.files.internal(path + this.imgPath), Texture.class, param, new String[]{"png"});
+        buildFilesInDir(Gdx.files.internal(path + this.soundPath), Sound.class, null, new String[]{"ogg"});
+        buildFilesInDir(Gdx.files.internal(path + this.atlasPath), TextureAtlas.class, null, new String[]{"atlas"});
     }
 
     /**
@@ -264,6 +366,10 @@ public class DataBuilder implements IDestroyable{
 
         list.sort((fs1, fs2) -> fs1.rank - fs2.rank); //Sort the list.
         return list;
+    }
+
+    private void buildModList(){
+
     }
 
     /**
@@ -655,6 +761,19 @@ public class DataBuilder implements IDestroyable{
             this.fullName = fullName;
             this.img = img;
         }
+    }
+
+    private static class ModInfo{
+        public String name, version, description;
+    }
+
+    private static class ModList{
+        private Array<Mod> modList = new Array<>();
+    }
+
+    private static class Mod{
+        public String modName;
+        public boolean enabled = false;
     }
 
     @Override

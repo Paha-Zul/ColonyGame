@@ -49,7 +49,9 @@ public class ScriptManager {
 
                 //Start the script.
                 if (IScript.class.isAssignableFrom(cls)) {
-                    scripts.add((IScript) cls.newInstance());
+                    IScript script = (IScript) cls.newInstance();
+                    script.start();
+                    //scripts.add((IScript) cls.newInstance());
                 }
             }
 
