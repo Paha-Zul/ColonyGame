@@ -1,8 +1,6 @@
 {
-"modList": [
-	{
-		"modName": "ProfileMod",
-		"enabled": true
-	}
-]
+  "modList" : [ {
+    "modName" : "ProfileMod",
+    "enabled" : true
+  } ]
 }

@@ -13,6 +13,7 @@ import com.mygdx.game.helpers.Constants;
 import com.mygdx.game.helpers.FloatingText;
 import com.mygdx.game.helpers.GH;
 import com.mygdx.game.helpers.Grid;
+import com.mygdx.game.objects.Group;
 
 import java.util.function.Consumer;
 
@@ -341,6 +342,29 @@ public class PrebuiltTasks {
 
         //Make sure the target is not null.
         mainRepeat.getControl().callbacks.checkCriteria = task -> task.getBlackboard().target != null;
+
+        mainRepeat.getControl().callbacks.startCallback = task -> {
+            Group group = task.blackBoard.getEntityOwner().getComponent(Group.class);
+            if(group == null) return;
+
+            //Make the leader attack.
+            if(task.blackBoard.getEntityOwner() != group.getLeader()) {
+                BehaviourManagerComp leaderComp = group.getLeader().getComponent(BehaviourManagerComp.class);
+                if (leaderComp == null) return;
+                leaderComp.getBlackBoard().target = task.blackBoard.target;
+                leaderComp.changeTaskImmediate("attackTarget");
+            }
+
+            //Make the followers attack.
+            group.getGroupList().forEach(entity -> {
+                if(task.blackBoard.getEntityOwner() == entity) return;
+                BehaviourManagerComp comp = entity.getComponent(BehaviourManagerComp.class);
+                if (comp == null) return;
+                comp.getBlackBoard().target = task.blackBoard.target;
+                comp.changeTaskImmediate("attackTarget");
+            });
+
+        };
 
         //To succeed this repeat job, the target must be null, not valid, or not alive.
         mainRepeat.getControl().callbacks.successCriteria = task -> {

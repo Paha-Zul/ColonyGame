@@ -15,8 +15,6 @@ import com.mygdx.game.helpers.managers.ScriptManager;
 import com.mygdx.game.helpers.worldgeneration.WorldGen;
 import com.mygdx.game.interfaces.IDestroyable;
 
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -37,6 +35,7 @@ public class DataBuilder implements IDestroyable{
     String soundPath = "sounds/";
     String atlasPath = "atlas/";
     String modPath = "mods/";
+    String scriptPath = "scripts/";
 
     private EasyAssetManager assetManager;
 
@@ -61,98 +60,28 @@ public class DataBuilder implements IDestroyable{
 
         //Load all the base game stuff and the mod list.
         loadFilesForMod(Gdx.files.internal(""));
-        loadMods();
-    }
+        //Load the changelog separately as mods don't have changelogs that display in game.
+        changelog = buildJson(Gdx.files.internal("./"+filePath+changeLogPath), JsonChangeLog.class);
 
-    private void loadMods(){
-        boolean existed = false;
+        //Get the base mod dir.
+        FileHandle modBaseDir = Gdx.files.internal("mods");
+        ModList modList = buildJson(Gdx.files.internal("./mods.json"), ModList.class);
+        if(modList == null) return; //End if there is no mods.json file.
 
-        ModList modList = loadModList(Gdx.files.internal("./"));
-        if(modList == null) {
-            System.out.println("modlist is null");
-            modList = new ModList();
-        }
-
-        //Get the FileHandle for the mod directoy.
-        FileHandle modDirHandle = Gdx.files.internal(modPath);
-
-        //For each folder in the mod directory, load the files!
-        for(FileHandle file : modDirHandle.list()){
-            if(!file.isDirectory()) continue; //If not a directory, continue
-
-            ModInfo info = loadModInfo(file);
-
-            if(info == null) continue; //If the mod doesn't have an info.json file, continue
-
-            //For each mod in the mod list, check to see if the info is in the list.
-            for(Mod mod : modList.modList){
-                if(mod.modName.equals(info.name)){ //If it matches the name and is enabled, load the files of the mod.
-                    existed = true;
-                    if(mod.enabled) {
-                        this.loadFilesForMod(file); //Load files
-                        ScriptManager.load(file.path(), file.path()); //Load scripts.
-                    }
+        //Loop over each mod directory and load it if it's enabled.
+        for(FileHandle modDir : modBaseDir.list()){
+            ModInfo modInfo = buildJson(Gdx.files.internal(modDir.path()+"/info.json"), ModInfo.class);
+            if(modInfo == null) continue;
+            for(Mod mod : modList.modList)
+                if(mod.modName.equals(modInfo.name)){
+                    if(mod.enabled) loadFilesForMod(modDir);
                     break;
                 }
-            }
-
-            if(!existed) {
-                //Create the Mod and add it to the modList.
-                Mod mod = new Mod();
-                mod.modName = info.name;
-                mod.enabled = false;
-                modList.modList.add(mod);
-            }
-
-            existed = false;
-        }
-
-        writeToModList(Gdx.files.internal("./"), modList);
-    }
-
-    private ModList loadModList(FileHandle handle){
-        //Find the file names "mods.json" and parse it.
-        for(FileHandle file : handle.list()){
-            if(file.name().equals("mods.json")){
-                Json json = new Json();
-                json.setTypeName(null);
-                json.setUsePrototypes(false);
-                json.setIgnoreUnknownFields(true);
-                json.setOutputType(JsonWriter.OutputType.json);
-
-                return json.fromJson(ModList.class, file);
-            }
-        }
-
-        //If we didn't return after getting the json, then we're missing the file. Create a new one!
-        try {
-            FileHandle hand = Gdx.files.internal(handle+"/mods.json");
-            hand.file().createNewFile();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return null;
-    }
-
-    private void writeToModList(FileHandle handle, ModList modList){
-        for(FileHandle file : handle.list()){
-            if(file.name().equals("mods.json")){
-                Json json = new Json();
-                json.setUsePrototypes(false);
-                json.setOutputType(JsonWriter.OutputType.json);
-                try {
-                    FileWriter writer = new FileWriter(file.file());
-                    writer.write(json.prettyPrint(modList));
-                    writer.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
         }
     }
 
     private ModInfo loadModInfo(FileHandle handle){
+        //Find the file names "mods.json" and parse it.
         for(FileHandle file : handle.list()){
             if(file.name().equals("info.json")){
                 Json json = new Json();
@@ -164,6 +93,7 @@ public class DataBuilder implements IDestroyable{
                 return json.fromJson(ModInfo.class, file);
             }
         }
+
         return null;
     }
 
@@ -181,10 +111,10 @@ public class DataBuilder implements IDestroyable{
         buildResources(Gdx.files.internal(path + filePath + resourcePath));
         buildTiles(Gdx.files.internal(path + filePath + tilePath));
         buildWorldGen(Gdx.files.internal(path + filePath + worldPath));
-        buildChangeLog(Gdx.files.internal(path + filePath + changeLogPath));
         buildAnimals(Gdx.files.internal(path + filePath + animalPath));
         buildWeapons(Gdx.files.internal(path + filePath + weaponPath));
         buildAmmuntion(Gdx.files.internal(path + filePath + ammoPath));
+        ScriptManager.load(path + scriptPath, path + scriptPath);
     }
 
     /**
@@ -368,8 +298,18 @@ public class DataBuilder implements IDestroyable{
         return list;
     }
 
-    private void buildModList(){
+    private <T> T buildJson(FileHandle fileHandle, Class<T> cls){
+        System.out.println("In dir: "+fileHandle);
 
+        if(!fileHandle.exists()) return null;
+
+        Json json = new Json();
+        json.setTypeName(null);
+        json.setUsePrototypes(false);
+        json.setIgnoreUnknownFields(true);
+        json.setOutputType(JsonWriter.OutputType.json);
+
+        return json.fromJson(cls, fileHandle);
     }
 
     /**
@@ -393,7 +333,7 @@ public class DataBuilder implements IDestroyable{
 
     /**
      * Builds the resource Json stuff.
-     * @param fileHandle
+     * @param fileHandle The FileHandle to get the resources file from.
      */
     private void buildResources(FileHandle fileHandle){
         if(!fileHandle.exists()) return;
@@ -443,7 +383,7 @@ public class DataBuilder implements IDestroyable{
 
     /**
      * Builds the tile data from the json file.
-     * @param fileHandle
+     * @param fileHandle The FileHandle to get the tiles from.
      */
     private void buildTiles(FileHandle fileHandle){
         if(!fileHandle.exists()) return;
@@ -502,7 +442,7 @@ public class DataBuilder implements IDestroyable{
 
     /**
      * Builds the WorldGen data for things like noise maps, frequency of noise maps, size, tile sizes....
-     * @param fileHandle
+     * @param fileHandle The FileHandle to get the world gen stuff from.
      */
     private void buildWorldGen(FileHandle fileHandle){
         if(!fileHandle.exists()) return;
@@ -538,9 +478,10 @@ public class DataBuilder implements IDestroyable{
         worldData = world;
     }
 
+
     /**
      * Builds the changelog data for displaying in game.
-     * @param fileHandle
+     * @param fileHandle The FileHandle to get the changelog stuff from
      */
     private void buildChangeLog(FileHandle fileHandle){
         if(!fileHandle.exists()) return;
@@ -556,7 +497,7 @@ public class DataBuilder implements IDestroyable{
 
     /**
      * Builds the animal Json stuff.
-     * @param fileHandle
+     * @param fileHandle The FileHandle to get the animal stuff from.
      */
     private void buildAnimals(FileHandle fileHandle){
         if(!fileHandle.exists()) return;
@@ -577,7 +518,7 @@ public class DataBuilder implements IDestroyable{
 
     /**
      * Builds the weapon Json stuff.
-     * @param fileHandle
+     * @param fileHandle The FileHandle to get the weapon stuff from.
      */
     private void buildWeapons(FileHandle fileHandle){
         if(!fileHandle.exists()) return;
@@ -597,7 +538,7 @@ public class DataBuilder implements IDestroyable{
 
     /**
      * Builds the ammunition Json stuff.
-     * @param fileHandle
+     * @param fileHandle The FileHandle to get the ammunition stuff from.
      */
     private void buildAmmuntion(FileHandle fileHandle){
         if(!fileHandle.exists()) return;

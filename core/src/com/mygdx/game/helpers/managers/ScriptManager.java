@@ -11,6 +11,9 @@ import java.net.URLClassLoader;
 
 /**
  * Created by Paha on 4/1/2015.
+ *
+ * <p>Loads any .class files in the /scripts directory of the path passed in. Any .class files that implement IScript will be instantiated and the
+ * start() method will be called.</p>
  */
 public class ScriptManager {
     public static Array<IScript> scripts = new Array<>();
@@ -28,10 +31,11 @@ public class ScriptManager {
                 if(index < 0 || !file.path().substring(index, file.path().length()).equals(".class")) //If it doesn't have the ".class" extension
                     continue;
 
-                //We get the fileName without the extension, this will look like './scripts/whateverdir/ClassNameHere'
-                //We then need to strip away the first and second '/' characters, which will make it look like 'wahteverdir/ClassNameHere'
+                //We get the fileName without the extension, this will look like './modname/scripts/whateverdir/ClassNameHere'
+                //We then need to strip away the first and second AND THIRD '/' characters, which will make it look like 'wahteverdir/ClassNameHere'
                 //Then we turn each '/' into a '.' because that's how packages work, which looks like 'waheteverdir.ClassNameHere'
                 String fileName = file.path().substring(0, index);
+                fileName = fileName.substring(fileName.indexOf('/')+1, fileName.length());
                 fileName = fileName.substring(fileName.indexOf('/')+1, fileName.length());
                 fileName = fileName.substring(fileName.indexOf('/')+1, fileName.length());
                 fileName = fileName.replace('/', '.');

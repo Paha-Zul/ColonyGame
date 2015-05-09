@@ -9,18 +9,19 @@ import com.mygdx.game.component.*;
 import com.mygdx.game.component.collider.Collider;
 import com.mygdx.game.helpers.Constants;
 import com.mygdx.game.helpers.DataBuilder;
+import com.mygdx.game.helpers.managers.DataManager;
 
 /**
  * Created by Paha on 2/26/2015.
  */
 public class AnimalEnt extends Entity{
-    public AnimalEnt(DataBuilder.JsonAnimal animalRef, Vector2 position, float rotation, TextureRegion graphic, int drawLevel) {
+    public AnimalEnt(String animalName, Vector2 position, float rotation, TextureRegion graphic, int drawLevel) {
         super(position, rotation, graphic, drawLevel);
         this.addTag(Constants.ENTITY_ANIMAL);
         this.addTag(Constants.ENTITY_ALIVE);
-
         this.name = "Squirrel";
 
+        DataBuilder.JsonAnimal animalRef = DataManager.getData(animalName, DataBuilder.JsonAnimal.class);
         this.addComponent(new Animal(animalRef));
         this.addComponent(new Stats());
         this.addComponent(new Interactable("animal"));

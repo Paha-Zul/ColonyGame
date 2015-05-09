@@ -11,6 +11,7 @@ import com.mygdx.game.helpers.EventSystem;
 import com.mygdx.game.helpers.managers.DataManager;
 import com.mygdx.game.interfaces.Functional;
 import com.mygdx.game.interfaces.IInteractable;
+import com.mygdx.game.objects.Group;
 
 import java.util.LinkedList;
 import java.util.function.Consumer;
@@ -23,6 +24,7 @@ public class Animal extends Component implements IInteractable{
     private Stats stats;
     private DataBuilder.JsonAnimal animalRef;
     private Collider collider;
+    private Group group;
 
     private LinkedList<Entity> attackList = new LinkedList<>();
     private Fixture attackSensor;
@@ -42,8 +44,6 @@ public class Animal extends Component implements IInteractable{
 
         behComp.getBlackBoard().attackRange = 15f;
 
-        addCircleSensor();
-
         stats.addStat("health", 100, 100);
         stats.addStat("food", 100, 100);
         stats.addStat("water", 100, 100);
@@ -61,6 +61,8 @@ public class Animal extends Component implements IInteractable{
 
         this.behComp.getBlackBoard().moveSpeed = 250f;
         //this.setActive(false);
+
+        if(animalRef.aggressive) addCircleSensor();
     }
 
     //Adds a circle sensor to this animal.
@@ -126,7 +128,8 @@ public class Animal extends Component implements IInteractable{
             otherInfo.owner.setToDestroy();
 
             //If I am a detector and the other is a colonist, we must attack it!
-        }
+        }else if (myInfo.tags.hasTag(Constants.COLLIDER_DETECTOR) && otherInfo.owner.hasTag(Constants.ENTITY_COLONIST) && animalRef.aggressive)
+            attackList.add(otherInfo.owner);
     };
 
     //The Consumer function to call when I stop colliding with something.
@@ -151,6 +154,10 @@ public class Animal extends Component implements IInteractable{
         if (stat == null) return;
         stat.addToCurrent(damage);
     };
+
+    public void setGroup(Group group){
+        this.group = group;
+    }
 
     @Override
     public Inventory getInventory() {
@@ -189,6 +196,6 @@ public class Animal extends Component implements IInteractable{
     @Override
     public void destroy() {
         super.destroy();
-        this.collider.body.destroyFixture(attackSensor);
+        if(attackSensor != null) this.collider.body.destroyFixture(attackSensor);
     }
 }

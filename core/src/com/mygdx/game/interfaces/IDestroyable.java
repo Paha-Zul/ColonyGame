@@ -1,7 +1,7 @@
 package com.mygdx.game.interfaces;
 
 /**
- * An Interface to be implemented on any Objects that can be destroyed. This will clear any objects that may cause memory leaks
+ * An Interface to be implemented on any objects that can be destroyed. This will clear any objects that may cause memory leaks
  * and remove it from the respective update list.
  */
 public interface IDestroyable {

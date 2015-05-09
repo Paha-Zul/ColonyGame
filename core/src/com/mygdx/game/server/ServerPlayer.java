@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.ColonyGame;
+import com.mygdx.game.component.Animal;
 import com.mygdx.game.component.Colony;
 import com.mygdx.game.entity.AnimalEnt;
 import com.mygdx.game.entity.ColonyEntity;
@@ -16,8 +17,8 @@ import com.mygdx.game.helpers.Constants;
 import com.mygdx.game.helpers.DataBuilder;
 import com.mygdx.game.helpers.GH;
 import com.mygdx.game.helpers.Grid;
-import com.mygdx.game.helpers.managers.DataManager;
 import com.mygdx.game.helpers.worldgeneration.WorldGen;
+import com.mygdx.game.objects.Group;
 import com.mygdx.game.ui.PlayerInterface;
 
 import java.util.function.Consumer;
@@ -129,13 +130,29 @@ public class ServerPlayer {
         ColonyEntity colonyEnt = new ColonyEntity(start, 0, new TextureRegion(ColonyGame.assetManager.get("Colony", Texture.class)), 10);
         Colony colony = colonyEnt.getComponent(Colony.class);
         ColonyGame.camera.position.set(colonyEnt.transform.getPosition().x, colonyEnt.transform.getPosition().y, 0);
+        TextureAtlas atlas = ColonyGame.assetManager.get("interactables", TextureAtlas.class);
 
         //Spawns some squirrels
         for(int i=0;i<100;i++) {
-            TextureAtlas atlas = ColonyGame.assetManager.get("interactables", TextureAtlas.class);
-            DataBuilder.JsonAnimal animalRef = DataManager.getData("squirrel", DataBuilder.JsonAnimal.class);
             Vector2 pos = new Vector2(MathUtils.random(grid.getWidth())*grid.getSquareSize(), MathUtils.random(grid.getHeight())*grid.getSquareSize());
-            new AnimalEnt(animalRef, pos, 0, atlas.findRegion("squirrel"), 11);
+            new AnimalEnt("squirrel", pos, 0, atlas.findRegion("squirrel"), 11);
+        }
+
+        //Spawn some angry wolf packs.
+        for(int i=0;i<5;i++){
+            Group group = new Group();
+            Vector2 pos = new Vector2(10 + MathUtils.random(grid.getWidth()-10)*grid.getSquareSize(), 10 + MathUtils.random(grid.getHeight()-10)*grid.getSquareSize());
+            AnimalEnt wolfLeader = new AnimalEnt("wolf", pos, 0, atlas.findRegion("wolf"), 11);
+            group.setLeader(wolfLeader);
+
+            DataBuilder.JsonAnimal animal = wolfLeader.getComponent(Animal.class).getAnimalRef();
+            int amount = (int)(animal.packAmount[0] + Math.random()*(animal.packAmount[1] - animal.packAmount[0]));
+            for(int j=0;j<amount; j++){
+                Vector2 pos2 = new Vector2(pos.x + MathUtils.random()*5 - 10, pos.y + MathUtils.random()*5 - 10);
+                AnimalEnt wolf = new AnimalEnt("wolf", pos2, 0, atlas.findRegion("wolf"), 11);
+                wolf.addComponent(group);
+                group.addEntityToGroup(wolf);
+            }
         }
 
         //Destroys resources in an area around the Colony Entity.
