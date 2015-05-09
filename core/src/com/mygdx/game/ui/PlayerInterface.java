@@ -17,6 +17,7 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.ColonyGame;
+import com.mygdx.game.behaviourtree.PrebuiltTasks;
 import com.mygdx.game.component.*;
 import com.mygdx.game.component.collider.Collider;
 import com.mygdx.game.entity.Entity;
@@ -736,6 +737,13 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
             newlySelected = null;
             return true;
+        }if(button == Input.Buttons.RIGHT){
+            if(selected != null && interactable != null){
+                BehaviourManagerComp comp = interactable.getInteractable().getBehManager();
+                comp.getBlackBoard().target = null;
+                comp.getBlackBoard().targetNode = comp.getBlackBoard().colonyGrid.getNode(new Vector2(worldCoords.x, worldCoords.y));
+                comp.changeTaskImmediate(PrebuiltTasks.moveTo(comp.getBlackBoard()));
+            }
         }
 
         return false;

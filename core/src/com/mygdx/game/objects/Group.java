@@ -15,6 +15,8 @@ public class Group extends Component{
 
     private boolean stayNearLeader = true, attackLeaderTarget = true;
 
+    public boolean busy = false;
+
     @Override
     public void start() {
         super.start();

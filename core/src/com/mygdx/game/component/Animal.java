@@ -124,7 +124,8 @@ public class Animal extends Component implements IInteractable{
         if (!myInfo.tags.hasTag(Constants.COLLIDER_DETECTOR) && otherInfo.owner.hasTag(Constants.ENTITY_PROJECTILE) && this.owner.hasTag(Constants.ENTITY_ANIMAL)) {
             this.getComponent(Stats.class).getStat("health").addToCurrent(-20);
             behComp.getBlackBoard().target = otherInfo.owner.getComponent(Projectile.class).projOwner;
-            behComp.changeTaskImmediate(PrebuiltTasks.fleeTarget(behComp.getBlackBoard(), behComp));
+            if(!animalRef.aggressive) behComp.changeTaskImmediate(PrebuiltTasks.fleeTarget(behComp.getBlackBoard(), behComp));
+            else behComp.changeTaskImmediate(PrebuiltTasks.attackTarget(behComp.getBlackBoard(), behComp));
             otherInfo.owner.setToDestroy();
 
             //If I am a detector and the other is a colonist, we must attack it!

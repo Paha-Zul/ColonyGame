@@ -17,7 +17,8 @@
       "packAmount": [2, 10],
       "img": "Wolf",
       "itemNames": ["food"],
-      "itemAmounts":[[0,2]]
+      "itemAmounts":[[0,2]],
+      "resourceName": "squirrelCarcass"
     },
     {
       "name": "deer",
