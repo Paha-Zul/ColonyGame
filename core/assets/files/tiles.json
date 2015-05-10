@@ -1,5 +1,4 @@
-{
-  "tileGroups":  [
+[
     {
       "noiseMap": "main",
       "tiles": [
@@ -87,5 +86,5 @@
           "resources":["waterSource"],
           "resourcesChance": [[0, 100]]
         }]
-    }]
-}
+    }
+]

@@ -1,5 +1,4 @@
-{
-  "resources": [
+[
     {
       "resourceName": "americanlarch",
       "displayName": "AmericanLarch",
@@ -132,5 +131,4 @@
       "gatherTime": 3,
       "infinite": true
     }
-  ]
-}
+ ]

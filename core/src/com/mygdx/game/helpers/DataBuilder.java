@@ -17,6 +17,7 @@ import com.mygdx.game.interfaces.IDestroyable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.function.Consumer;
 
 /**
  * Created by Paha on 2/19/2015.
@@ -61,16 +62,16 @@ public class DataBuilder implements IDestroyable{
         //Load all the base game stuff and the mod list.
         loadFilesForMod(Gdx.files.internal(""));
         //Load the changelog separately as mods don't have changelogs that display in game.
-        changelog = buildJson(Gdx.files.internal("./"+filePath+changeLogPath), JsonChangeLog.class);
+        changelog = buildJson(Gdx.files.internal("./"+filePath+changeLogPath), JsonChangeLog.class, null);
 
         //Get the base mod dir.
         FileHandle modBaseDir = Gdx.files.internal("mods");
-        ModList modList = buildJson(Gdx.files.internal("./mods.json"), ModList.class);
+        ModList modList = buildJson(Gdx.files.internal("./mods.json"), ModList.class, null);
         if(modList == null) return; //End if there is no mods.json file.
 
         //Loop over each mod directory and load it if it's enabled.
         for(FileHandle modDir : modBaseDir.list()){
-            ModInfo modInfo = buildJson(Gdx.files.internal(modDir.path()+"/info.json"), ModInfo.class);
+            ModInfo modInfo = buildJson(Gdx.files.internal(modDir.path()+"/info.json"), ModInfo.class, null);
             if(modInfo == null) continue;
             for(Mod mod : modList.modList)
                 if(mod.modName.equals(modInfo.name)){
@@ -78,23 +79,6 @@ public class DataBuilder implements IDestroyable{
                     break;
                 }
         }
-    }
-
-    private ModInfo loadModInfo(FileHandle handle){
-        //Find the file names "mods.json" and parse it.
-        for(FileHandle file : handle.list()){
-            if(file.name().equals("info.json")){
-                Json json = new Json();
-                json.setTypeName(null);
-                json.setUsePrototypes(false);
-                json.setIgnoreUnknownFields(true);
-                json.setOutputType(JsonWriter.OutputType.json);
-
-                return json.fromJson(ModInfo.class, file);
-            }
-        }
-
-        return null;
     }
 
     /**
@@ -107,13 +91,31 @@ public class DataBuilder implements IDestroyable{
         String path = fileHandle.path();
         if(!path.isEmpty()) path += "/";
 
-        buildItems(Gdx.files.internal(path + filePath + itemPath));
-        buildResources(Gdx.files.internal(path + filePath + resourcePath));
-        buildTiles(Gdx.files.internal(path + filePath + tilePath));
-        buildWorldGen(Gdx.files.internal(path + filePath + worldPath));
-        buildAnimals(Gdx.files.internal(path + filePath + animalPath));
-        buildWeapons(Gdx.files.internal(path + filePath + weaponPath));
-        buildAmmuntion(Gdx.files.internal(path + filePath + ammoPath));
+        //Build items
+        buildJson(Gdx.files.internal(path + filePath + itemPath), JsonItem[].class, value -> {
+            for (JsonItem jsonItem : value) DataManager.addData(jsonItem.itemName, jsonItem, JsonItem.class);
+        });
+
+        buildJson(Gdx.files.internal(path + filePath + resourcePath), JsonResource[].class, compileResources);
+        buildJson(Gdx.files.internal(path + filePath + tilePath), JsonTileGroup[].class, compileTiles);
+        buildJson(Gdx.files.internal(path + filePath + worldPath), JsonWorld.class, compileWorldGen);
+
+        //Build animals
+        buildJson(Gdx.files.internal(path + filePath + animalPath), JsonAnimal[].class, value -> {
+            for (JsonAnimal animal : value) DataManager.addData(animal.name, animal, JsonAnimal.class);
+        });
+
+        //Build weapons
+        buildJson(Gdx.files.internal(path + filePath + weaponPath), JsonWeapon[].class, value -> {
+            for (JsonWeapon weapon : value) DataManager.addData(weapon.name, weapon, JsonWeapon.class);
+        });
+
+        //Build ammo
+        buildJson(Gdx.files.internal(path + filePath + ammoPath), JsonAmmunition[].class, value -> {
+            for (JsonAmmunition ammo : value) DataManager.addData(ammo.name, ammo, JsonAmmunition.class);
+        });
+
+        //Load scripts
         ScriptManager.load(path + scriptPath, path + scriptPath);
     }
 
@@ -161,6 +163,7 @@ public class DataBuilder implements IDestroyable{
      * @param param The Loader parameters to load the file.
      * @param extensions The extensions the file needs to match (png for instance).
      */
+    @SuppressWarnings("unchecked")
     private void loadFile(FileHandle entry, Class<?> type, AssetLoaderParameters param, String[] extensions){
         String extension = "";
         String commonName = "";
@@ -298,7 +301,7 @@ public class DataBuilder implements IDestroyable{
         return list;
     }
 
-    private <T> T buildJson(FileHandle fileHandle, Class<T> cls){
+    private <T> T buildJson(FileHandle fileHandle, Class<T> cls, Consumer<T> doWithResult){
         System.out.println("In dir: "+fileHandle);
 
         if(!fileHandle.exists()) return null;
@@ -309,44 +312,14 @@ public class DataBuilder implements IDestroyable{
         json.setIgnoreUnknownFields(true);
         json.setOutputType(JsonWriter.OutputType.json);
 
-        return json.fromJson(cls, fileHandle);
+        T value = json.fromJson(cls, fileHandle);
+        if(value != null && doWithResult != null) doWithResult.accept(value);
+
+        return value;
     }
 
-    /**
-     * Builds the items from the items.json file.
-     * @param fileHandle The location of the file.
-     */
-    private void buildItems(FileHandle fileHandle) {
-        if(!fileHandle.exists()) return;
-
-        Json json = new Json();
-        json.setTypeName(null);
-        json.setUsePrototypes(false);
-        json.setIgnoreUnknownFields(true);
-        json.setOutputType(JsonWriter.OutputType.json);
-
-        JsonItems items = json.fromJson(JsonItems.class, Gdx.files.internal(filePath+itemPath));
-
-        for(JsonItem jsonItem : items.items)
-            DataManager.addData(jsonItem.itemName, jsonItem, JsonItem.class);
-    }
-
-    /**
-     * Builds the resource Json stuff.
-     * @param fileHandle The FileHandle to get the resources file from.
-     */
-    private void buildResources(FileHandle fileHandle){
-        if(!fileHandle.exists()) return;
-
-        Json json = new Json();
-        json.setTypeName(null);
-        json.setUsePrototypes(false);
-        json.setIgnoreUnknownFields(true);
-        json.setOutputType(JsonWriter.OutputType.json);
-
-        JsonResources resources = json.fromJson(JsonResources.class, fileHandle);
-
-        for(JsonResource jRes : resources.resources){
+    Consumer<JsonResource[]> compileResources = value -> {
+        for(JsonResource jRes : value){
             //If the dir field is not null, we have a directory to pull images from.
             if(jRes.dir != null){
                 ArrayList<String> list = new ArrayList<>();
@@ -356,7 +329,7 @@ public class DataBuilder implements IDestroyable{
                     for(String base : jRes.allimgwith)
                         getFileNamesFromDir(Gdx.files.internal(jRes.dir), list, base);
 
-                //Otherwise, just load all from the dir.
+                    //Otherwise, just load all from the dir.
                 }else
                     this.getFileNamesFromDir(Gdx.files.internal(jRes.dir), list);
 
@@ -378,26 +351,12 @@ public class DataBuilder implements IDestroyable{
             }
 
             DataManager.addData(jRes.resourceName, jRes, JsonResource.class);
-       }
-    }
+        }
+    };
 
-    /**
-     * Builds the tile data from the json file.
-     * @param fileHandle The FileHandle to get the tiles from.
-     */
-    private void buildTiles(FileHandle fileHandle){
-        if(!fileHandle.exists()) return;
-
-        Json json = new Json();
-        json.setTypeName(null);
-        json.setUsePrototypes(false);
-        json.setIgnoreUnknownFields(true);
-        json.setOutputType(JsonWriter.OutputType.json);
-
-        JsonTiles tiles = json.fromJson(JsonTiles.class, fileHandle);
-
+    Consumer<JsonTileGroup[]> compileTiles = value -> {
         //For each group of tiles
-        for (JsonTileGroup group : tiles.tileGroups) {
+        for (JsonTileGroup group : value) {
             //If the group of tiles is auto layered...
             if(group.autoLayered && group.dir != null){
                 ArrayList<FolderStructure> list = this.listFoldersWithRanks(Gdx.files.internal(group.dir)); //Build the folder structure.
@@ -411,7 +370,7 @@ public class DataBuilder implements IDestroyable{
                 }
                 group.tiles = tileList.toArray(new JsonTile[tileList.size()]);
 
-            //Otherwise, for each tile we check if we have a 'dir' to get images from. If so, get images from the directory. Otherwise, they listed the images manually.
+                //Otherwise, for each tile we check if we have a 'dir' to get images from. If so, get images from the directory. Otherwise, they listed the images manually.
             }else {
                 //For each tile.
                 for (JsonTile tile : group.tiles) {
@@ -438,22 +397,9 @@ public class DataBuilder implements IDestroyable{
 
             tileGroupsMap.put(group.noiseMap, group);
         }
-    }
+    };
 
-    /**
-     * Builds the WorldGen data for things like noise maps, frequency of noise maps, size, tile sizes....
-     * @param fileHandle The FileHandle to get the world gen stuff from.
-     */
-    private void buildWorldGen(FileHandle fileHandle){
-        if(!fileHandle.exists()) return;
-
-        Json json = new Json();
-        json.setTypeName(null);
-        json.setUsePrototypes(false);
-        json.setIgnoreUnknownFields(true);
-        json.setOutputType(JsonWriter.OutputType.json);
-
-        JsonWorld world = json.fromJson(JsonWorld.class, fileHandle);
+    Consumer<JsonWorld> compileWorldGen = world -> {
         for(NoiseMap map : world.noiseMaps) {
             world.noiseMapHashMap.put(map.rank, map);
             //If the seed is null or empty, generate one. Otherwise, use the seed from worldgen.json.
@@ -476,89 +422,7 @@ public class DataBuilder implements IDestroyable{
         Constants.WORLDGEN_RESOURCEGENERATESPEED = world.resourceGenerateSpeed;
 
         worldData = world;
-    }
-
-
-    /**
-     * Builds the changelog data for displaying in game.
-     * @param fileHandle The FileHandle to get the changelog stuff from
-     */
-    private void buildChangeLog(FileHandle fileHandle){
-        if(!fileHandle.exists()) return;
-
-        Json json = new Json();
-        json.setTypeName(null);
-        json.setUsePrototypes(false);
-        json.setIgnoreUnknownFields(true);
-        json.setOutputType(JsonWriter.OutputType.json);
-
-        DataBuilder.changelog = json.fromJson(JsonChangeLog.class, fileHandle);
-    }
-
-    /**
-     * Builds the animal Json stuff.
-     * @param fileHandle The FileHandle to get the animal stuff from.
-     */
-    private void buildAnimals(FileHandle fileHandle){
-        if(!fileHandle.exists()) return;
-
-        Json json = new Json();
-        json.setTypeName(null);
-        json.setUsePrototypes(false);
-        json.setIgnoreUnknownFields(true);
-        json.setOutputType(JsonWriter.OutputType.json);
-
-        JsonAnimals animals = json.fromJson(JsonAnimals.class, fileHandle);
-
-        for(JsonAnimal animal : animals.animals){
-            DataManager.addData(animal.name, animal, JsonAnimal.class);
-        }
-
-    }
-
-    /**
-     * Builds the weapon Json stuff.
-     * @param fileHandle The FileHandle to get the weapon stuff from.
-     */
-    private void buildWeapons(FileHandle fileHandle){
-        if(!fileHandle.exists()) return;
-
-        Json json = new Json();
-        json.setTypeName(null);
-        json.setUsePrototypes(false);
-        json.setIgnoreUnknownFields(true);
-        json.setOutputType(JsonWriter.OutputType.json);
-
-        JsonWeapons weapons = json.fromJson(JsonWeapons.class, fileHandle);
-
-        for(JsonWeapon weapon : weapons.weapons){
-            DataManager.addData(weapon.name, weapon, JsonWeapon.class);
-        }
-    }
-
-    /**
-     * Builds the ammunition Json stuff.
-     * @param fileHandle The FileHandle to get the ammunition stuff from.
-     */
-    private void buildAmmuntion(FileHandle fileHandle){
-        if(!fileHandle.exists()) return;
-
-        Json json = new Json();
-        json.setTypeName(null);
-        json.setUsePrototypes(false);
-        json.setIgnoreUnknownFields(true);
-        json.setOutputType(JsonWriter.OutputType.json);
-
-        JsonAmmunitions ammunitions = json.fromJson(JsonAmmunitions.class, fileHandle);
-
-        for(JsonAmmunition ammo : ammunitions.ammunitions){
-            DataManager.addData(ammo.name, ammo, JsonAmmunition.class);
-        }
-    }
-
-    private static class JsonItems{
-        public Array<JsonItem> items;
-    }
+    };
 
     public static class JsonItem{
         private String itemName, displayName, itemType, description, img;
@@ -604,10 +468,6 @@ public class DataBuilder implements IDestroyable{
         }
     }
 
-    private static class JsonResources{
-        public Array<JsonResource> resources;
-    }
-
     public static class JsonResource{
         public String resourceName, displayName, resourceType, description, dir, skill;
         public String[] img, allimgwith, itemNames;
@@ -615,11 +475,6 @@ public class DataBuilder implements IDestroyable{
         public int gatherTime;
         public float skillIncrease = 0;
         public boolean noimg, infinite, skillRequired = false;
-    }
-
-    private static class JsonTiles{
-        public JsonTileGroup[] tileGroups;
-
     }
 
     public static class JsonTileGroup{
@@ -662,10 +517,6 @@ public class DataBuilder implements IDestroyable{
         public String[] log;
     }
 
-    private static class JsonAnimals{
-        public JsonAnimal[] animals;
-    }
-
     public static class JsonAnimal{
         public String name, img, displayName, resourceName;
         public String[] itemNames;
@@ -674,17 +525,9 @@ public class DataBuilder implements IDestroyable{
         public int[][] itemAmounts;
     }
 
-    private static class JsonWeapons{
-        public JsonWeapon[] weapons;
-    }
-
     public static class JsonWeapon{
         public String name, displayName, weaponType, ammunition;
         public float reloadTime;
-    }
-
-    private static class JsonAmmunitions{
-        public JsonAmmunition[] ammunitions;
     }
 
     public static class JsonAmmunition{

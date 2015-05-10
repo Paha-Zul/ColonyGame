@@ -1,5 +1,4 @@
-{
-  "animals": [
+[
     {
       "name": "squirrel",
       "displayName": "Squirrel",
@@ -36,5 +35,4 @@
       "itemNames": ["food"],
       "itemAmounts":[[0,2]]
     }
-  ]
-}
+]

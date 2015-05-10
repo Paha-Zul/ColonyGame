@@ -1,5 +1,4 @@
-{
-  "items": [
+[
     {
       "itemName": "fish",
       "displayName": "Fish",
@@ -56,5 +55,4 @@
       "itemType": "hide",
       "description": "Awesome animal hide."
     }
-  ]
-}
+]
