@@ -161,6 +161,7 @@ public class Animal extends Component implements IInteractable{
         BehaviourManagerComp leaderComp = group.getLeader().getComponent(BehaviourManagerComp.class);
         leaderComp.getBlackBoard().target = target;
         leaderComp.changeTaskImmediate("attackTarget");
+        EventSystem.notifyEntityEvent(target, "attacking", this.getEntityOwner());
 
         group.getGroupList().forEach(ent ->{
             BehaviourManagerComp entComp = ent.getComponent(BehaviourManagerComp.class);

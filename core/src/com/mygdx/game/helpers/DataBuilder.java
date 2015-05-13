@@ -39,6 +39,7 @@ public class DataBuilder implements IDestroyable{
     private final String scriptPath = "/scripts";
     private final String modInfoFilePath = "/info.json";
     private final String modFilePath = "/mods.json";
+    private final String eventsFilePath = "/events.json";
 
     private EasyAssetManager assetManager;
 
@@ -116,6 +117,11 @@ public class DataBuilder implements IDestroyable{
         //Build ammo
         buildJson(Gdx.files.internal(path + filePath + ammoPath), JsonAmmunition[].class, value -> {
             for (JsonAmmunition ammo : value) DataManager.addData(ammo.name, ammo, JsonAmmunition.class);
+        });
+
+        //Build player events
+        buildJson(Gdx.files.internal(path + filePath + eventsFilePath), JsonPlayerEvent[].class, value -> {
+            for (JsonPlayerEvent event : value) DataManager.addData(event.eventName, event, JsonPlayerEvent.class);
         });
 
         //Load scripts
@@ -553,6 +559,12 @@ public class DataBuilder implements IDestroyable{
         public String modName;
         public boolean enabled = false;
         public ModInfo modInfo;
+    }
+
+    public static class JsonPlayerEvent{
+        public String eventName, eventDisplayName;
+        public String[] eventDescription, choices;
+        public boolean focusOnEvent, pauseGame;
     }
 
     @Override

@@ -53,6 +53,7 @@ public class ColonyGame extends Game {
 
 	@Override
 	public void render () {
+
 		try {
 			super.render();
 			Gdx.gl.glClearColor(screenColor.r, screenColor.g, screenColor.b, screenColor.a);
@@ -61,6 +62,8 @@ public class ColonyGame extends Game {
 			//Update the profile and GUI.
 			float delta = Gdx.graphics.getDeltaTime();
 			updateVarious(delta);
+
+			delta = 0;
 
 			ColonyGame.batch.begin();
 			updateEntities(delta);

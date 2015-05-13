@@ -480,6 +480,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
             Tree.TreeNode currTaskNode = nodeList.get(i);
             BehaviourManagerComp.TaskInfo taskInfo = (BehaviourManagerComp.TaskInfo)currTaskNode.userData;
 
+            //Get the GUIStyle from the taskInfo's object data. If it's null, get the default style from the GUI class.
             Object userData = taskInfo.userData;
             GUI.GUIStyle style;
             if(userData != null) {

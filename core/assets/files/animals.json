@@ -18,6 +18,7 @@
   {
     "name": "bosswolf",
     "displayName": "Big Bad Wolf",
+    "boss": true,
     "aggressive": true,
     "pack": true,
     "packAmount": [10, 30],
