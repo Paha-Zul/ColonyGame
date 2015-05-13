@@ -17,6 +17,7 @@ import com.mygdx.game.helpers.Constants;
 import com.mygdx.game.helpers.DataBuilder;
 import com.mygdx.game.helpers.GH;
 import com.mygdx.game.helpers.Grid;
+import com.mygdx.game.helpers.managers.DataManager;
 import com.mygdx.game.helpers.worldgeneration.WorldGen;
 import com.mygdx.game.objects.Group;
 import com.mygdx.game.ui.PlayerInterface;
@@ -130,8 +131,25 @@ public class ServerPlayer {
         ColonyEntity colonyEnt = new ColonyEntity(start, 0, new TextureRegion(ColonyGame.assetManager.get("Colony", Texture.class)), 10);
         Colony colony = colonyEnt.getComponent(Colony.class);
         ColonyGame.camera.position.set(colonyEnt.transform.getPosition().x, colonyEnt.transform.getPosition().y, 0);
-        TextureAtlas atlas = ColonyGame.assetManager.get("interactables", TextureAtlas.class);
 
+        this.spawnAnimals();
+
+        //Destroys resources in an area around the Colony Entity.
+		int radius = 8;
+        Predicate<Grid.Node> notWaterNode = node -> !node.getTerrainTile().category.equals("water");
+
+        Consumer<Entity> treeConsumer = ent -> {
+            if(ent.hasTag(Constants.ENTITY_RESOURCE)) ent.setToDestroy();
+        };
+
+        //Perform the things.
+		//this.grid.perform(destroyNearbyResources);
+        this.grid.performOnEntityInRadius(treeConsumer, notWaterNode, radius, grid.getIndex(colonyEnt.transform.getPosition()));
+	}
+
+    private void spawnAnimals(){
+
+        TextureAtlas atlas = ColonyGame.assetManager.get("interactables", TextureAtlas.class);
         //Spawns some squirrels
         for(int i=0;i<100;i++) {
             Vector2 pos = new Vector2(MathUtils.random(grid.getWidth())*grid.getSquareSize(), MathUtils.random(grid.getHeight())*grid.getSquareSize());
@@ -155,18 +173,24 @@ public class ServerPlayer {
             }
         }
 
-        //Destroys resources in an area around the Colony Entity.
-		int radius = 8;
-        Predicate<Grid.Node> notWaterNode = node -> !node.getTerrainTile().category.equals("water");
+        //spawn big boss wolf
+        Group group = new Group();
+        Vector2 pos = new Vector2(10 + MathUtils.random(grid.getWidth()-10)*grid.getSquareSize(), 20 + MathUtils.random(grid.getHeight()-20)*grid.getSquareSize());
+        DataBuilder.JsonAnimal bossWolfRef = DataManager.getData("bosswolf", DataBuilder.JsonAnimal.class);
+        AnimalEnt bossWolf = new AnimalEnt(bossWolfRef, pos, 0, atlas.findRegion(bossWolfRef.img), 11);
+        group.setLeader(bossWolf);
+        bossWolf.transform.setScale(2f);
 
-        Consumer<Entity> treeConsumer = ent -> {
-            if(ent.hasTag(Constants.ENTITY_RESOURCE)) ent.setToDestroy();
-        };
+        int amount = (int)(bossWolfRef.packAmount[0] + Math.random()*(bossWolfRef.packAmount[1] - bossWolfRef.packAmount[0]));
+        for(int j=0;j<amount; j++){
+            DataBuilder.JsonAnimal childWolf = DataManager.getData(bossWolfRef.typeInPack[0], DataBuilder.JsonAnimal.class);
 
-        //Perform the things.
-		//this.grid.perform(destroyNearbyResources);
-        this.grid.performOnEntityInRadius(treeConsumer, notWaterNode, radius, grid.getIndex(colonyEnt.transform.getPosition()));
-	}
+            Vector2 pos2 = new Vector2(pos.x + MathUtils.random()*5 - 10, pos.y + MathUtils.random()*5 - 10);
+            AnimalEnt wolf = new AnimalEnt(childWolf, pos2, 0, atlas.findRegion(childWolf.img), 11);
+            wolf.addComponent(group);
+            group.addEntityToGroup(wolf);
+        }
+    }
 
 	private void initPlayer(){
 		new PlayerInterface(ColonyGame.batch, this.game, this, ColonyGame.world);

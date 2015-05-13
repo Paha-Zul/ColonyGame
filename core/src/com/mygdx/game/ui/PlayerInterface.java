@@ -459,7 +459,6 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
                     }
                 }
             }
-
         }
     }
 
@@ -740,9 +739,11 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         }if(button == Input.Buttons.RIGHT){
             if(selected != null && interactable != null){
                 BehaviourManagerComp comp = interactable.getInteractable().getBehManager();
-                comp.getBlackBoard().target = null;
-                comp.getBlackBoard().targetNode = comp.getBlackBoard().colonyGrid.getNode(new Vector2(worldCoords.x, worldCoords.y));
-                comp.changeTaskImmediate(PrebuiltTasks.moveTo(comp.getBlackBoard()));
+                if(comp != null) {
+                    comp.getBlackBoard().target = null;
+                    comp.getBlackBoard().targetNode = comp.getBlackBoard().colonyGrid.getNode(new Vector2(worldCoords.x, worldCoords.y));
+                    comp.changeTaskImmediate(PrebuiltTasks.moveTo(comp.getBlackBoard()));
+                }
             }
         }
 

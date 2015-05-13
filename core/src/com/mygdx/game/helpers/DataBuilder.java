@@ -23,20 +23,22 @@ import java.util.function.Consumer;
  * Created by Paha on 2/19/2015.
  */
 public class DataBuilder implements IDestroyable{
-    String filePath = "files/";
-    String itemPath = "items.json";
-    String resourcePath = "resources.json";
-    String animalPath = "animals.json";
-    String weaponPath = "weapon.json";
-    String ammoPath = "ammunition.json";
-    String tilePath = "tiles.json";
-    String worldPath = "worldgen.json";
-    String changeLogPath = "changelog.json";
-    String imgPath = "img/misc";
-    String soundPath = "sounds/";
-    String atlasPath = "atlas/";
-    String modPath = "mods/";
-    String scriptPath = "scripts/";
+    private final String filePath = "/files";
+    private final String itemPath = "/items.json";
+    private final String resourcePath = "/resources.json";
+    private final String animalPath = "/animals.json";
+    private final String weaponPath = "/weapon.json";
+    private final String ammoPath = "/ammunition.json";
+    private final String tilePath = "/tiles.json";
+    private final String worldPath = "/worldgen.json";
+    private final String changeLogPath = "/changelog.json";
+    private final String imgPath = "/img/misc";
+    private final String soundPath = "/sounds";
+    private final String atlasPath = "/atlas";
+    private final String modPath = "/mods";
+    private final String scriptPath = "/scripts";
+    private final String modInfoFilePath = "/info.json";
+    private final String modFilePath = "/mods.json";
 
     private EasyAssetManager assetManager;
 
@@ -44,7 +46,7 @@ public class DataBuilder implements IDestroyable{
     public static JsonChangeLog changelog;
     public static JsonWorld worldData;
 
-    private static ModList modList;
+    private static HashMap<String, Mod> modTable = new HashMap<>();
 
     public DataBuilder(EasyAssetManager assetManager){
         this.assetManager = assetManager;
@@ -60,22 +62,25 @@ public class DataBuilder implements IDestroyable{
     public void loadFiles(){
 
         //Load all the base game stuff and the mod list.
-        loadFilesForMod(Gdx.files.internal(""));
+        loadFilesForMod(Gdx.files.internal("./"));
         //Load the changelog separately as mods don't have changelogs that display in game.
         changelog = buildJson(Gdx.files.internal("./"+filePath+changeLogPath), JsonChangeLog.class, null);
 
         //Get the base mod dir.
-        FileHandle modBaseDir = Gdx.files.internal("mods");
-        ModList modList = buildJson(Gdx.files.internal("./mods.json"), ModList.class, null);
-        if(modList == null) return; //End if there is no mods.json file.
+        FileHandle modBaseDir = Gdx.files.internal("./"+modPath);
+        Mod[] modValue = buildJson(Gdx.files.internal("./" + modFilePath), Mod[].class, null);
+        Array<Mod> modList;
+        if(modValue != null) modList = new Array<>(modValue);
+        else modList = new Array<>();
 
         //Loop over each mod directory and load it if it's enabled.
         for(FileHandle modDir : modBaseDir.list()){
-            ModInfo modInfo = buildJson(Gdx.files.internal(modDir.path()+"/info.json"), ModInfo.class, null);
+            ModInfo modInfo = buildJson(Gdx.files.internal(modDir.path()+ modInfoFilePath), ModInfo.class, null);
             if(modInfo == null) continue;
-            for(Mod mod : modList.modList)
+            for(Mod mod : modList)
                 if(mod.modName.equals(modInfo.name)){
                     if(mod.enabled) loadFilesForMod(modDir);
+                    mod.modInfo = modInfo;
                     break;
                 }
         }
@@ -87,9 +92,7 @@ public class DataBuilder implements IDestroyable{
      */
     private void loadFilesForMod(FileHandle fileHandle){
         buildAssets(fileHandle);
-
         String path = fileHandle.path();
-        if(!path.isEmpty()) path += "/";
 
         //Build items
         buildJson(Gdx.files.internal(path + filePath + itemPath), JsonItem[].class, value -> {
@@ -131,8 +134,6 @@ public class DataBuilder implements IDestroyable{
 
         String path = fileHandle.path();
         if(!path.isEmpty()) path += "/";
-
-        System.out.println("Loading: " + path);
 
         buildFilesInDir(Gdx.files.internal(path + this.imgPath), Texture.class, param, new String[]{"png"});
         buildFilesInDir(Gdx.files.internal(path + this.soundPath), Sound.class, null, new String[]{"ogg"});
@@ -302,8 +303,6 @@ public class DataBuilder implements IDestroyable{
     }
 
     private <T> T buildJson(FileHandle fileHandle, Class<T> cls, Consumer<T> doWithResult){
-        System.out.println("In dir: "+fileHandle);
-
         if(!fileHandle.exists()) return null;
 
         Json json = new Json();
@@ -519,10 +518,9 @@ public class DataBuilder implements IDestroyable{
 
     public static class JsonAnimal{
         public String name, img, displayName, resourceName;
-        public String[] itemNames;
         public boolean aggressive, pack;
-        public int[] packAmount;
-        public int[][] itemAmounts;
+        public String[] typeInPack;
+        public int[] packAmount, tpyeInPackChance;
     }
 
     public static class JsonWeapon{
@@ -551,13 +549,10 @@ public class DataBuilder implements IDestroyable{
         public String name, version, description;
     }
 
-    private static class ModList{
-        private Array<Mod> modList = new Array<>();
-    }
-
     private static class Mod{
         public String modName;
         public boolean enabled = false;
+        public ModInfo modInfo;
     }
 
     @Override

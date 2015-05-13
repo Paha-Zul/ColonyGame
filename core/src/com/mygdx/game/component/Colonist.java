@@ -171,7 +171,7 @@ public class Colonist extends Component implements IInteractable{
         Stats.Stat health = this.stats.getStat("health");
         if (health == null) return;
 
-        health.addToCurrent(amount);
+        health.addToCurrent(-50);
         if(this.manager != null) {
             this.manager.getBlackBoard().target = entity;
             this.manager.changeTaskImmediate("attackTarget");
@@ -180,6 +180,7 @@ public class Colonist extends Component implements IInteractable{
 
     //The callback for when our health is 0.
     private Functional.Callback onZero = () -> {
+        this.owner.removeTag(Constants.ENTITY_ALIVE);
         this.owner.transform.setRotation(90f);
         this.stats.clearTimers();
         this.owner.destroyComponent(BehaviourManagerComp.class);
@@ -187,7 +188,6 @@ public class Colonist extends Component implements IInteractable{
         GridComponent gridComp = this.getComponent(GridComponent.class);
         gridComp.setActive(false);
         ColonyGame.worldGrid.removeViewer(gridComp);
-        this.owner.removeTag(Constants.ENTITY_ALIVE);
     };
 
 

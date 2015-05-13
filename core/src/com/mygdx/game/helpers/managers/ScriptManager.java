@@ -19,6 +19,7 @@ public class ScriptManager {
     public static Array<IScript> scripts = new Array<>();
 
     public static void load(String path, String original){
+        System.out.println("Loading script in: "+path+" orig: "+original);
 
         // Create a File object on the root of the directory containing the class file
         FileHandle handle = Gdx.files.internal(path);
@@ -35,6 +36,7 @@ public class ScriptManager {
                 //We then need to strip away the first and second AND THIRD '/' characters, which will make it look like 'wahteverdir/ClassNameHere'
                 //Then we turn each '/' into a '.' because that's how packages work, which looks like 'waheteverdir.ClassNameHere'
                 String fileName = file.path().substring(0, index);
+                fileName = fileName.substring(fileName.indexOf('/')+1, fileName.length());
                 fileName = fileName.substring(fileName.indexOf('/')+1, fileName.length());
                 fileName = fileName.substring(fileName.indexOf('/')+1, fileName.length());
                 fileName = fileName.substring(fileName.indexOf('/')+1, fileName.length());

@@ -1,38 +1,41 @@
 [
-    {
-      "name": "squirrel",
-      "displayName": "Squirrel",
-      "aggressive": false,
-      "img": "squirrel",
-      "itemNames": ["food", "hide"],
-      "itemAmounts":[[1,2], [0,1]],
-      "resourceName": "squirrelCarcass"
-    },
-    {
-      "name": "wolf",
-      "displayName": "Wolf",
-      "aggressive": true,
-      "pack": true,
-      "packAmount": [2, 10],
-      "img": "Wolf",
-      "itemNames": ["food"],
-      "itemAmounts":[[0,2]],
-      "resourceName": "squirrelCarcass"
-    },
-    {
-      "name": "deer",
-      "displayName": "Deer",
-      "aggressive": false,
-      "img": "Deer",
-      "itemNames": ["food"],
-      "itemAmounts":[[0,2]]
-    },
-    {
-      "name": "bear",
-      "displayName": "Bear",
-      "aggressive": true,
-      "img": "Bear",
-      "itemNames": ["food"],
-      "itemAmounts":[[0,2]]
-    }
+  {
+    "name": "squirrel",
+    "displayName": "Squirrel",
+    "aggressive": false,
+    "img": "squirrel",
+    "resourceName": "squirrelCarcass"
+  },
+  {
+    "name": "wolf",
+    "displayName": "Wolf",
+    "aggressive": true,
+    "pack": true,
+    "packAmount": [2, 10],
+    "img": "wolf",
+    "resourceName": "squirrelCarcass"
+  },
+  {
+    "name": "bosswolf",
+    "displayName": "Big Bad Wolf",
+    "aggressive": true,
+    "pack": true,
+    "packAmount": [10, 30],
+    "typeInPack": ["wolf"],
+    "typeInPackChance": [1],
+    "img": "wolf",
+    "resourceName": "squirrelCarcass"
+  },
+  {
+    "name": "deer",
+    "displayName": "Deer",
+    "aggressive": false,
+    "img": "Deer"
+  },
+  {
+    "name": "bear",
+    "displayName": "Bear",
+    "aggressive": true,
+    "img": "Bear"
+  }
 ]

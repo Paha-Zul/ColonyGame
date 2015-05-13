@@ -327,7 +327,6 @@ public class PrebuiltTasks {
          *      move to target
          *      attack target
          */
-
         Parallel parallel = new Parallel("Attacking", blackBoard);
         RepeatUntilCondition mainRepeat = new RepeatUntilCondition("attackTarget", blackBoard, parallel);
 
