@@ -66,8 +66,8 @@ public class Colony extends Component implements IInteractable {
     }
 
     @Override
-    public void destroy() {
-        super.destroy();
+    public void destroy(Entity destroyer) {
+        super.destroy(destroyer);
     }
 
     /**

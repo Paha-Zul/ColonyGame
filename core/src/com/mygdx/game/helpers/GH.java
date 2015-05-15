@@ -63,6 +63,17 @@ public class GH {
         region.setRegion((x + .5f) * invTexWidth, (y+.5f) * invTexHeight, (x + width - .5f) * invTexWidth, (y + height - .5f) * invTexHeight);
     }
 
+    public static String generateEventDescription(DataBuilder.JsonPlayerEvent event){
+        StringBuilder builder = new StringBuilder();
+        for(String desc : event.eventDescription) builder.append(desc);
+
+        String original = builder.toString();
+        original = original.replace("%et", event.eventTarget.name);
+        original = original.replace("%t", event.eventTargetOther.name);
+
+        return original;
+    }
+
     public static float toMeters(float value){
         return value/Constants.SCALE;
     }

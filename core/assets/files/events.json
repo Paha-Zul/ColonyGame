@@ -3,12 +3,17 @@
     "eventName": "bigbosswolfencounter",
     "eventDisplayName": "Big Boss Wolf Encounter!",
     "eventDescription": [
-      "%s has encountered a large wolf with a large pack! What do you wish to do?"
+      "%et has encountered a large wolf with a large pack! What do you wish to do?"
     ],
     "choices": [
       "Stand Your Ground!",
       "Flee to the Base to Try and Get Help!",
       "Try to Lose Them in the Surroundings!"
+    ],
+    "behaviours": [
+      "attackTarget",
+      "fleeTarget",
+      "returnToBase"
     ],
     "focusOnEvent": true,
     "pauseGame": true

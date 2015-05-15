@@ -1,7 +1,7 @@
-package com.mygdx.game.objects;
+package com.mygdx.game.component;
 
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
-import com.mygdx.game.component.Component;
 import com.mygdx.game.entity.Entity;
 
 /**
@@ -57,5 +57,29 @@ public class Group extends Component{
 
     public boolean isAttackLeaderTarget() {
         return attackLeaderTarget;
+    }
+
+    @Override
+    public void destroy(Entity destroyer) {
+        //If it is the leader, we need to find a new one!
+        if(destroyer == this.leader){
+            int rand = MathUtils.random(groupList.size);
+            Entity newLeader = groupList.get(rand);
+            groupList.removeIndex(rand);
+            this.setLeader(newLeader);
+
+        }else removeEntityFromGroup(destroyer);
+
+        super.destroy(destroyer);
+    }
+
+    /**
+     * Do not use this function for this Component. Since this Component attaches to many different Entities, the owner could be any Entity in the group.
+     * @return The wrong Entity or most of the time, null.
+     */
+    @Deprecated
+    @Override
+    public Entity getEntityOwner() {
+        return super.getEntityOwner();
     }
 }

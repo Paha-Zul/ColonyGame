@@ -49,9 +49,11 @@ public class MainMenuInterface extends UI{
     private Array<CheckBox> scriptCheckBoxList = new Array<>();
 
     private Stage stage;
+    private ColonyGame game;
 
     public MainMenuInterface(SpriteBatch batch, ColonyGame game) {
-        super(batch, game);
+        super(batch);
+        this.game = game;
 
         titleTexture = ColonyGame.assetManager.get("Auroris", Texture.class);
         music = Gdx.audio.newMusic(Gdx.files.internal("music/Karkarakacrrot.ogg"));
@@ -236,17 +238,12 @@ public class MainMenuInterface extends UI{
         this.titleRect.set(width / 2 - titleTexture.getWidth() / 2, height - titleTexture.getHeight() - height * 0.02f, titleTexture.getWidth(), titleTexture.getHeight());
 
         this.outsideScrollContainer.setBounds(width * 0.66f, height * 0.1f, width * 0.3f, height * 0.8f);
-        //this.outsideScrollContainer.getActor().setWidth(width * 0.33f);
-        //this.outsideScrollContainer.getActor().setHeight(height * 0.8f);
-        //this.outsideScrollContainer.getActor().invalidate();
         this.outsideScrollContainer.invalidate();
-        //outsideScrollContainer.setClip(false);
 
         stage.getViewport().update(width, height);
 
         for(int i=0;i<buttonRects.length;i++){
             Rectangle rect = buttonRects[i];
-
             rect.set(width/2 - 115, height - height*0.2f - 75*(i+1), 250, 60);
         }
     }

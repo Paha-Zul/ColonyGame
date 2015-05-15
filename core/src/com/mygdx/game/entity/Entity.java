@@ -206,7 +206,7 @@ public class Entity implements IDelayedDestroyable{
 		else
 			this.inactiveComponentList.removeValue(component, false);
 
-		component.destroy();
+		component.destroy(this);
 	}
 
 	/**
@@ -306,11 +306,11 @@ public class Entity implements IDelayedDestroyable{
 	}
 
 	@Override
-	public void destroy(){
+	public void destroy(Entity destroyer){
 		EventSystem.unregisterEntity(this);
 
 		//Destroy all children
-        this.transform.getChildren().forEach(com.mygdx.game.entity.Entity::destroy);
+        this.transform.getChildren().forEach(ent -> ent.destroy(ent));
 
 		//Remove myself from any parent.
 		if(this.transform.parent != null){
@@ -319,10 +319,10 @@ public class Entity implements IDelayedDestroyable{
 		}
 
 		//Destroy active components.
-		this.activeComponentList.forEach(com.mygdx.game.component.Component::destroy);
+		this.activeComponentList.forEach(comp -> comp.destroy(this));
 
 		//Destroy inactive components
-		this.inactiveComponentList.forEach(com.mygdx.game.component.Component::destroy);
+		this.inactiveComponentList.forEach(comp -> comp.destroy(this));
 
 		//Clear both lists.
 		this.activeComponentList.clear();
@@ -330,12 +330,12 @@ public class Entity implements IDelayedDestroyable{
 
 		//Destroy and clear identity.
 		if(this.identity != null) {
-			this.identity.destroy();
+			this.identity.destroy(this);
 			this.identity = null;
 		}
 
 		//Destroy and clear transform.
-		this.transform.destroy();
+		this.transform.destroy(this);
 		this.transform = null;
 
 		//Set destroyed to true.

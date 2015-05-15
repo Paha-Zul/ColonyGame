@@ -131,7 +131,7 @@ public abstract class Component implements IDelayedDestroyable {
 	}
 
 	@Override
-	public void destroy() {
+	public void destroy(Entity destroyer) {
 		this.owner = null;
 		this.destroyed = true;
 		this.active = false;

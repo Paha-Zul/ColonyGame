@@ -85,8 +85,8 @@ public class Collider extends Component implements IScalable{
     }
 
     @Override
-    public void destroy() {
-        super.destroy();
+    public void destroy(Entity destroyer) {
+        super.destroy(destroyer);
 
         this.body.destroyFixture(this.fixture);
         this.world.destroyBody(this.body);

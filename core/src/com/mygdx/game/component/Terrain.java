@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.mygdx.game.ColonyGame;
+import com.mygdx.game.entity.Entity;
 
 /**
  * Created by Bbent_000 on 12/18/2014.
@@ -34,7 +35,7 @@ public class Terrain extends Component{
     }
 
     @Override
-    public void destroy() {
-        super.destroy();
+    public void destroy(Entity destroyer) {
+        super.destroy(destroyer);
     }
 }

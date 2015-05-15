@@ -7,6 +7,7 @@ import com.mygdx.game.ColonyGame;
 import com.mygdx.game.helpers.ListHolder;
 import com.mygdx.game.helpers.worldgeneration.WorldGen;
 import com.mygdx.game.ui.LoadingInterface;
+import com.mygdx.game.ui.PlayerInterface;
 import com.mygdx.game.ui.UI;
 
 /**
@@ -24,7 +25,7 @@ public class LoadingScreen implements Screen {
     @Override
     public void show() {
         WorldGen.getInstance().init(game);
-        loadingInterface = new LoadingInterface(ColonyGame.batch, this.game);
+        loadingInterface = new LoadingInterface(ColonyGame.batch);
     }
 
     @Override
@@ -33,6 +34,8 @@ public class LoadingScreen implements Screen {
             loadingInterface.setDone();
             WorldGen.getInstance().clean();
             this.dispose();
+            PlayerInterface.active = true;
+            PlayerInterface.getInstance();
             game.setScreen(new GameScreen(this.game));
         }
     }

@@ -60,9 +60,8 @@ public class GameScreen implements Screen{
 
         //Resizes all the GUI elements of the game (hopefully!)
         Array<UI> list = ListHolder.getGUIList();
-        for(int i=0;i< list.size;i++){
+        for(int i=0;i< list.size;i++)
             list.get(i).resize(width, height);
-        }
     }
 
     @Override

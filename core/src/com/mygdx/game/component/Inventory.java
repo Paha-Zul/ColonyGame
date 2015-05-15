@@ -2,6 +2,7 @@ package com.mygdx.game.component;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
+import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.DataBuilder;
 import com.mygdx.game.helpers.gui.GUI;
 import com.mygdx.game.helpers.managers.DataManager;
@@ -167,8 +168,8 @@ public class Inventory extends Component implements IDisplayable{
     }
 
     @Override
-    public void destroy() {
-        super.destroy();
+    public void destroy(Entity destroyer) {
+        super.destroy(destroyer);
 
         this.inventory.clear();
         this.allowedTypes = null;

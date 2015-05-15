@@ -11,7 +11,6 @@ import com.mygdx.game.helpers.EventSystem;
 import com.mygdx.game.helpers.managers.DataManager;
 import com.mygdx.game.interfaces.Functional;
 import com.mygdx.game.interfaces.IInteractable;
-import com.mygdx.game.objects.Group;
 
 import java.util.LinkedList;
 import java.util.function.Consumer;
@@ -37,6 +36,9 @@ public class Animal extends Component implements IInteractable{
     @Override
     public void start() {
         super.start();
+
+        if(animalRef.boss) this.getEntityOwner().addTag(Constants.ENTITY_BOSS);
+        this.getEntityOwner().name = animalRef.displayName;
 
         this.stats = this.getComponent(Stats.class);
         this.behComp = this.getComponent(BehaviourManagerComp.class);
@@ -80,7 +82,11 @@ public class Animal extends Component implements IInteractable{
 
         boolean validTarget = behComp.getBlackBoard().target != null && behComp.getBlackBoard().target.isValid() && behComp.getBlackBoard().target.hasTag(Constants.ENTITY_ALIVE);
         if(attackList.size() > 0 && !validTarget) {
-            behComp.getBlackBoard().target = attackList.poll();
+            Entity target = attackList.poll(); //Get the next target off of the list.
+            //If the target is not valid (not alive), let's not use it!
+            if(target.hasTag(Constants.ENTITY_ALIVE)) behComp.getBlackBoard().target = target;
+            else behComp.getBlackBoard().target = null;
+            //Attack single or group attack.
             if(this.group != null) groupAttack(behComp.getBlackBoard().target);
             else this.behComp.changeTaskImmediate("attackTarget");
         }
@@ -107,6 +113,7 @@ public class Animal extends Component implements IInteractable{
                 this.owner.destroyComponent(BehaviourManagerComp.class); //Destroy the BehaviourManagerComp
                 this.owner.destroyComponent(Stats.class); //Destroy the Stats component.
                 this.owner.destroyComponent(Animal.class); //Destroy this (Animal) Component.
+                this.owner.destroyComponent(Group.class); //Destroy this (Animal) Component.
             }
         };
     }
@@ -130,8 +137,9 @@ public class Animal extends Component implements IInteractable{
             otherInfo.owner.setToDestroy();
 
             //If I am a detector and the other is a colonist, we must attack it!
-        }else if (myInfo.tags.hasTag(Constants.COLLIDER_DETECTOR) && otherInfo.owner.hasTag(Constants.ENTITY_COLONIST) && animalRef.aggressive)
-            attackList.add(otherInfo.owner);
+        }else if (myInfo.tags.hasTag(Constants.COLLIDER_DETECTOR) && otherInfo.owner.hasTag(Constants.ENTITY_COLONIST) && animalRef.aggressive) {
+            if(otherInfo.owner.hasTag(Constants.ENTITY_ALIVE)) attackList.add(otherInfo.owner);
+        }
     };
 
     //The Consumer function to call when I stop colliding with something.
@@ -161,9 +169,9 @@ public class Animal extends Component implements IInteractable{
         BehaviourManagerComp leaderComp = group.getLeader().getComponent(BehaviourManagerComp.class);
         leaderComp.getBlackBoard().target = target;
         leaderComp.changeTaskImmediate("attackTarget");
-        EventSystem.notifyEntityEvent(target, "attacking", this.getEntityOwner());
+        EventSystem.notifyEntityEvent(target, "attacking_group", this.group);
 
-        group.getGroupList().forEach(ent ->{
+        this.group.getGroupList().forEach(ent ->{
             BehaviourManagerComp entComp = ent.getComponent(BehaviourManagerComp.class);
             entComp.getBlackBoard().target = target;
             entComp.changeTaskImmediate("attackTarget");
@@ -173,6 +181,11 @@ public class Animal extends Component implements IInteractable{
     public void setGroup(Group group){
         this.group = group;
     }
+
+    public DataBuilder.JsonAnimal getAnimalRef() {
+        return animalRef;
+    }
+
 
     @Override
     public Inventory getInventory() {
@@ -199,18 +212,14 @@ public class Animal extends Component implements IInteractable{
         return this.getEntityOwner().name;
     }
 
-    public DataBuilder.JsonAnimal getAnimalRef() {
-        return animalRef;
-    }
-
     @Override
     public BehaviourManagerComp getBehManager() {
         return this.behComp;
     }
 
     @Override
-    public void destroy() {
-        super.destroy();
+    public void destroy(Entity destroyer) {
+        super.destroy(destroyer);
         if(attackSensor != null) this.collider.body.destroyFixture(attackSensor);
     }
 }

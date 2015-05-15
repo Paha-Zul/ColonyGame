@@ -1,5 +1,6 @@
 package com.mygdx.game.component;
 
+import com.mygdx.game.entity.Entity;
 import com.mygdx.game.interfaces.IDelayedDestroyable;
 import com.mygdx.game.interfaces.IInteractable;
 
@@ -52,8 +53,8 @@ public class Interactable extends Component{
     }
 
     @Override
-    public void destroy() {
-        super.destroy();
+    public void destroy(Entity destroyer) {
+        super.destroy(destroyer);
         this.interType = null;
     }
 }

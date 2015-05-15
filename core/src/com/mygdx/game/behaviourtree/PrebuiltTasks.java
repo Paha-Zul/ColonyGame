@@ -479,4 +479,17 @@ public class PrebuiltTasks {
         return repeatFiveTimes;
 
     }
+
+    public static Task returnToBase(BlackBoard blackBoard, BehaviourManagerComp behComp){
+        Sequence seq = new Sequence("returnToBase", blackBoard);
+        FindClosestEntity fc = new FindClosestEntity("findingBase", blackBoard);
+
+        //Make sure it's a building we find.
+        fc.control.callbacks.successCriteria = ent -> ((Entity)ent).hasTag(Constants.ENTITY_BUILDING);
+
+        seq.control.addTask(fc);
+        seq.control.addTask(moveTo(blackBoard));
+
+        return seq;
+    }
 }

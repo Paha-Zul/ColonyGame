@@ -10,6 +10,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.component.Animal;
 import com.mygdx.game.component.Colony;
+import com.mygdx.game.component.Group;
 import com.mygdx.game.entity.AnimalEnt;
 import com.mygdx.game.entity.ColonyEntity;
 import com.mygdx.game.entity.Entity;
@@ -19,8 +20,6 @@ import com.mygdx.game.helpers.GH;
 import com.mygdx.game.helpers.Grid;
 import com.mygdx.game.helpers.managers.DataManager;
 import com.mygdx.game.helpers.worldgeneration.WorldGen;
-import com.mygdx.game.objects.Group;
-import com.mygdx.game.ui.PlayerInterface;
 
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -51,8 +50,6 @@ public class ServerPlayer {
 		this.batch = batch;
 		this.shapeRenderer = renderer;
 		this.game = game;
-
-		initPlayer();
     }
 
 	public void render(float delta){
@@ -65,14 +62,6 @@ public class ServerPlayer {
             }
         }
 	}
-
-    public boolean getPaused(){
-        return this.paused;
-    }
-
-    public void setPaused(boolean paused){
-        this.paused = paused;
-    }
 
 	private void generateStart(Vector2 start){
         //Find a suitable place to spawn our Colony
@@ -138,6 +127,7 @@ public class ServerPlayer {
 		int radius = 8;
         Predicate<Grid.Node> notWaterNode = node -> !node.getTerrainTile().category.equals("water");
 
+        //A consumer function to use. If the entity is a tree, destroy it!
         Consumer<Entity> treeConsumer = ent -> {
             if(ent.hasTag(Constants.ENTITY_RESOURCE)) ent.setToDestroy();
         };
@@ -180,6 +170,7 @@ public class ServerPlayer {
         AnimalEnt bossWolf = new AnimalEnt(bossWolfRef, pos, 0, atlas.findRegion(bossWolfRef.img), 11);
         group.setLeader(bossWolf);
         bossWolf.transform.setScale(2f);
+        bossWolf.addComponent(group);
 
         int amount = (int)(bossWolfRef.packAmount[0] + Math.random()*(bossWolfRef.packAmount[1] - bossWolfRef.packAmount[0]));
         for(int j=0;j<amount; j++){
@@ -191,8 +182,4 @@ public class ServerPlayer {
             group.addEntityToGroup(wolf);
         }
     }
-
-	private void initPlayer(){
-		new PlayerInterface(ColonyGame.batch, this.game, this, ColonyGame.world);
-	}
 }

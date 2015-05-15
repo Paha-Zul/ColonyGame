@@ -2,20 +2,31 @@ package com.mygdx.game.ui;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.QueryCallback;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
+import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.Align;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.behaviourtree.PrebuiltTasks;
 import com.mygdx.game.component.*;
@@ -30,7 +41,6 @@ import com.mygdx.game.helpers.worldgeneration.WorldGen;
 import com.mygdx.game.interfaces.Functional;
 import com.mygdx.game.interfaces.IGUI;
 import com.mygdx.game.interfaces.IInteractable;
-import com.mygdx.game.server.ServerPlayer;
 
 import java.util.ArrayList;
 
@@ -38,10 +48,12 @@ import java.util.ArrayList;
  * Created by Bbent_000 on 12/25/2014.
  */
 public class PlayerInterface extends UI implements IGUI, InputProcessor {
-    private SpriteBatch batch;
+    public boolean paused = false;
+    public static boolean active = false;
+    public float gameSpeed = 1;
+
     private Texture background, UIBackgroundBase, UIBackgroundTop;
     private World world;
-    private ServerPlayer gameScreen;
 
     private StateSystem buttonStateSystem = new StateSystem();
 
@@ -98,10 +110,10 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     private static Interactable interactable = null;
 
     private Color gray = new Color(Color.BLACK);
-
-    private Texture blueSquare = ColonyGame.assetManager.get("blueSquare", Texture.class);
-
+    private Texture blueSquare;
     private Tree.TreeNode currStateNode = null;
+    private Stage stage;
+    private static PlayerInterface playerInterface;
 
     private void loadHuntButtonStyle(){
         huntStyle.normal = ColonyGame.assetManager.get("huntbutton_normal", Texture.class);
@@ -142,11 +154,12 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
      * @param batch The SpriteBatch for drawing to the screen.
      * @param world The Box2D world. We need to know about this for clicking on objects.
      */
-    public PlayerInterface(SpriteBatch batch, ColonyGame game, ServerPlayer gameScreen, World world) {
-        super(batch, game);
-        this.batch = batch;
+    public PlayerInterface(SpriteBatch batch, World world) {
+        super(batch);
         this.world = world;
-        this.gameScreen = gameScreen;
+
+        this.stage = new Stage(new ScreenViewport(ColonyGame.UICamera));
+        this.blueSquare = ColonyGame.assetManager.get("blueSquare", Texture.class);
 
         this.background = ColonyGame.assetManager.get("background", Texture.class);
         this.UIBackgroundBase = ColonyGame.assetManager.get("UIBackground_base", Texture.class);
@@ -194,12 +207,15 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         exploreStyle.font.setColor(new Color(126f / 255f, 75f / 255f, 27f / 255f, 1));
         huntStyle.font.setColor(126f / 255f, 75f / 255f, 27f / 255f, 1);
 
-        Gdx.input.setInputProcessor(this);
-
         buttonStateSystem.addState("main", true);
         buttonStateSystem.addState("gather");
         buttonStateSystem.addState("hunt");
         buttonStateSystem.setCurrState("main");
+
+        InputMultiplexer multiplexer = new InputMultiplexer();
+        multiplexer.addProcessor(stage);
+        multiplexer.addProcessor(this);
+        Gdx.input.setInputProcessor(multiplexer);
     }
 
     private void generateFonts(){
@@ -219,6 +235,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     @Override
     public void render(float delta, SpriteBatch batch) {
         super.render(delta, batch);
+        batch.setProjectionMatrix(ColonyGame.UICamera.combined);
         GUI.font.setColor(Color.WHITE);
 
         int height = Gdx.graphics.getHeight();
@@ -246,6 +263,12 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
             this.drawSelected();
         }
 
+        batch.end();
+        batch.begin();
+        stage.act(delta);
+        stage.draw();
+        batch.end();
+        batch.begin();
     }
 
     /**
@@ -324,7 +347,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         if(node == null) return;
         Grid.TerrainTile tile = grid.getNode(index).getTerrainTile();
         if(tile == null) return;
-        GUI.Label(tile.category, this.batch, rect.x, rect.getY(), rect.getWidth()*0.5f, rect.getHeight()*0.5f);
+        GUI.Label(tile.category, this.batch, rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight());
     }
 
     /**
@@ -361,59 +384,38 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
             IInteractable innerInter = interactable.getInteractable(); //Get the interactable!
 
             //If it has a name, draw the name...
-            if(innerInter.getName() != null)
+            if(innerInter.getName() != null) {
                 GUI.Label(innerInter.getName(), this.batch, this.infoTopRect, this.UIStyle);
+            }
 
-//            //If it has stats, draw the stats...
-//            if(innerInter.getStats() != null){
-//                //GUI.Texture(statusRect, ColonyGame.assetManager.get("menuButton_normal", Texture.class), this.batch);
-//                Stats stats = innerInter.getStats();
-//
-//                GUI.Label("Stats", this.batch, this.statusTopRect, this.UIStyle);
-//                ArrayList<Stats.Stat> list = stats.getStatList();
-//                float space = ((statusRect.height - list.size()*20)/list.size()+1)/2;
-//                float x = statusRect.x + 10;
-//                float y = statusRect.y + statusRect.height - 20;
-//
-//                for(int i=0;i<list.size();i++){
-//                    Stats.Stat stat = list.get(i);
-//                    drawBar(stat.name, x, y-(i+1)*space - 20*i, 100, 20, stat.getCurrVal(), stat.getMaxVal());
-//                }
-//
-//            //If no stats, maybe it has stat text?
-//            }else if(innerInter.getStatsText() != null){
-//                GUI.Label("Resources", this.batch, this.statusTopRect, this.UIStyle);
-//                this.UIStyle.multiline = true;
-//                this.UIStyle.alignment = Align.topLeft;
-//                this.UIStyle.paddingLeft = 10;
-//                this.UIStyle.paddingTop = 5;
-//                GUI.Label(innerInter.getStatsText(), this.batch, this.statusRect, this.UIStyle);
-//                this.UIStyle.paddingLeft = 0;
-//                this.UIStyle.paddingTop = 0;
-//                this.UIStyle.alignment = Align.center;
-//                this.UIStyle.multiline = false;
-//            }
+            //If it has stats, draw the stats...
+            if(innerInter.getStats() != null){
+                //GUI.Texture(statusRect, ColonyGame.assetManager.get("menuButton_normal", Texture.class), this.batch);
+                Stats stats = innerInter.getStats();
 
-            if(innerInter.getSkills() != null){
-                Skills skills = innerInter.getSkills();
-
-                GUI.Label("Skills", this.batch, this.statusTopRect, this.UIStyle);
-                Array<Skills.Skill> list = skills.getSkillList();
-                float space = ((statusRect.height - list.size*20)/list.size+1)/2;
+                GUI.Label("Stats", this.batch, this.statusTopRect, this.UIStyle);
+                ArrayList<Stats.Stat> list = stats.getStatList();
+                float space = ((statusRect.height - list.size()*20)/list.size()+1)/2;
                 float x = statusRect.x + 10;
                 float y = statusRect.y + statusRect.height - 20;
 
-                StringBuilder str = new StringBuilder();
-                for(int i=0;i<list.size;i++){
-                    Skills.Skill skill = list.get(i);
-                    str.append(skill.getSkillName()).append(": ").append(skill.getCurrLevel()).append("/").append(skill.getMaxLevel()).append("   ").append(skill.getCurrXP()).append("/").append(skill.getCurrLvlMaxXp()).append("\n");
-                    //drawBar(stat.name, x, y-(i+1)*space - 20*i, 100, 20, stat.getCurrVal(), stat.getMaxVal());
+                for(int i=0;i<list.size();i++){
+                    Stats.Stat stat = list.get(i);
+                    drawBar(stat.name, x, y-(i+1)*space - 20*i, 100, 20, stat.getCurrVal(), stat.getMaxVal());
                 }
 
-                skillsStyle.alignment = Align.topLeft;
-                skillsStyle.multiline = true;
-                skillsStyle.paddingLeft = 5;
-                GUI.Label(str.toString(), batch, statusRect, skillsStyle);
+            //If no stats, maybe it has stat text?
+            }else if(innerInter.getStatsText() != null){
+                GUI.Label("Resources", this.batch, this.statusTopRect, this.UIStyle);
+                this.UIStyle.multiline = true;
+                this.UIStyle.alignment = Align.topLeft;
+                this.UIStyle.paddingLeft = 10;
+                this.UIStyle.paddingTop = 5;
+                GUI.Label(innerInter.getStatsText(), this.batch, this.statusRect, this.UIStyle);
+                this.UIStyle.paddingLeft = 0;
+                this.UIStyle.paddingTop = 0;
+                this.UIStyle.alignment = Align.center;
+                this.UIStyle.multiline = false;
             }
 
             //If it has an inventory, draw the inventory...
@@ -630,6 +632,71 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         this.batch.begin();
     }
 
+    public void newPlayerEvent(DataBuilder.JsonPlayerEvent playerEvent){
+        this.paused = true;
+        float width = Gdx.graphics.getWidth(), height = Gdx.graphics.getHeight();
+        float x = width/2, y = height/2;
+        int buttonSpacing = 20, buttonWidth = 100, buttonHeight = 50, windowWidth = 600, windowHeight = 400;
+        float spacing = (600-playerEvent.choices.length*(buttonWidth+buttonSpacing))/2;
+
+        //Add a new window.
+        Window.WindowStyle windowStyle = new Window.WindowStyle();
+        windowStyle.titleFont = GUI.font;
+        windowStyle.background = new TextureRegionDrawable(new TextureRegion(WorldGen.whiteTex));
+        Window window = new Window(GH.generateEventDescription(playerEvent), windowStyle);
+        window.setBounds(x - windowWidth/2, y - windowHeight/2, windowWidth, windowHeight);
+        this.stage.addActor(window);
+
+        for(int i=0; i<playerEvent.choices.length;i++) {
+            String choice = playerEvent.choices[i];
+
+            //Button style and bounds and such.
+            ImageButton.ImageButtonStyle buttonStyle = new ImageButton.ImageButtonStyle();
+            buttonStyle.up = new TextureRegionDrawable(new TextureRegion(ColonyGame.assetManager.get("blankbutton_normal", Texture.class), buttonWidth, buttonHeight));
+            buttonStyle.over = new TextureRegionDrawable(new TextureRegion(ColonyGame.assetManager.get("blankbutton_moused", Texture.class), buttonWidth, buttonHeight));
+            buttonStyle.down = new TextureRegionDrawable(new TextureRegion(ColonyGame.assetManager.get("blankbutton_clicked", Texture.class), buttonWidth, buttonHeight));
+            ImageButton button = new ImageButton(buttonStyle);
+            button.setBounds(spacing*(i+1), 0, buttonWidth, buttonHeight);
+
+            //Add the listener for the button.
+            final String behName = playerEvent.behaviours[i];
+            button.addListener(new ClickListener(){
+                @Override
+                public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                    BehaviourManagerComp behComp = playerEvent.eventTarget.getComponent(BehaviourManagerComp.class);
+                    if(button == Input.Buttons.LEFT && behComp != null){
+                        behComp.getBlackBoard().target = playerEvent.eventTargetOther;
+                        behComp.changeTaskImmediate(behName);
+                        window.remove();
+                        paused = false;
+                    }
+                    return false;
+                }
+            });
+
+            //The label to go over the button. We have to do this because scene2d ui's buttons don't have
+            //wrapping text from what I can find.
+            Label.LabelStyle labelStyle = new Label.LabelStyle();
+            labelStyle.font = GUI.font;
+            Label label = new Label(choice, labelStyle);
+            label.setBounds(button.getX(), button.getY(), button.getWidth(), button.getHeight());
+            label.setAlignment(Align.center);
+            label.setWrap(true);
+            label.setTouchable(Touchable.disabled);
+
+            //Add the button and label.
+            window.addActor(button);
+            window.addActor(label);
+            //this.stage.addActor(button);
+            //this.stage.addActor(label);
+        }
+    }
+
+    public static PlayerInterface getInstance(){
+        if(playerInterface == null) playerInterface = new PlayerInterface(ColonyGame.batch, ColonyGame.world);
+        return playerInterface;
+    }
+
     @Override
     public void destroy() {
         super.destroy();
@@ -657,7 +724,8 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         this.tabsTopRect.set(statusTopRect.x + statusTopRect.width, uiBackgroundTopRect.y, width * tabsWidth, uiBackgroundTopRect.height); //The top tabs area
         this.ordersTopRect.set(tabsTopRect.x + tabsTopRect.width, uiBackgroundTopRect.y, width - (tabsRect.x + tabsRect.width), uiBackgroundTopRect.height); //The top orders ares
 
-        this.bottomLeftRect.set(width - 100, 0, 100, height*0.05f);
+        this.bottomLeftRect.set(width - 100, 0, 100, height * 0.05f);
+        this.stage.getViewport().update(width, height);
     }
 
     @Override
@@ -667,16 +735,20 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
     @Override
     public boolean keyDown(int keycode) {
-        if(keycode == Input.Keys.F1)
+        if(keycode == Input.Keys.F1) //F1 - draw info
             this.drawingInfo = !this.drawingInfo;
-        else if(keycode == Input.Keys.F2)
+        else if(keycode == Input.Keys.F2) //F2 - draw profiler
             Profiler.enabled = this.drawingProfiler = !this.drawingProfiler;
-        else if(keycode == Input.Keys.F3) {
+        else if(keycode == Input.Keys.F3) { //F3 - draw grid
             this.drawGrid = !this.drawGrid;
-        }else if(keycode == Input.Keys.SPACE)
-            this.gameScreen.setPaused(!this.gameScreen.getPaused());
-        else if(keycode == Input.Keys.F4)
+        }else if(keycode == Input.Keys.SPACE) //SPACE - toggle paused
+            this.paused = !this.paused;
+        else if(keycode == Input.Keys.F4) //F4 - reveal map
             this.revealMap();
+        else if(keycode == Input.Keys.PLUS)
+            gameSpeed*=2;
+        else if(keycode == Input.Keys.MINUS)
+            gameSpeed*=0.5f;
         else
             return false;
 

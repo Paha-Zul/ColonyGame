@@ -48,9 +48,9 @@ public class GridComponent extends Component{
     }
 
     @Override
-    public void destroy() {
+    public void destroy(Entity destroyer) {
         this.currNode.removeEntity(this.owner);
 
-        super.destroy();
+        super.destroy(destroyer);
     }
 }

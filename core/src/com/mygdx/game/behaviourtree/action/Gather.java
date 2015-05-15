@@ -26,7 +26,6 @@ public class Gather extends LeafTask{
     private Resource resource;
     private Timer gatherTimer;
     private Timer soundTimer;
-    private Skills skills;
 
     private static Sound[] chopTreeSounds = new Sound[]{ColonyGame.assetManager.get("axechop1", Sound.class), ColonyGame.assetManager.get("axechop2", Sound.class), ColonyGame.assetManager.get("axechop3", Sound.class),
             ColonyGame.assetManager.get("axechop4", Sound.class)  , ColonyGame.assetManager.get("axechop5", Sound.class), ColonyGame.assetManager.get("axechop6", Sound.class)};
@@ -43,7 +42,6 @@ public class Gather extends LeafTask{
     @Override
     public void start() {
         super.start();
-        this.skills = this.blackBoard.getEntityOwner().getComponent(Skills.class);
 
         //If the 'myInventory' field is null of the blackboard, get it from the blackboard's owner.
         if(this.blackBoard.myInventory == null)
@@ -62,13 +60,8 @@ public class Gather extends LeafTask{
                     new Vector2(ColonyGame.camera.position.x, ColonyGame.camera.position.y), 200, 1000);
         });
 
-        float gatherReduction = 1f;
-        Skills.Skill skill = skills.getSkill(this.resource.getResRef().skill);
-        if(skill != null) gatherReduction = skill.getMultiplierEffect()*skill.getCurrLevel();
-        float time = this.resource.getGatherTick() - this.resource.getGatherTick()*gatherReduction;
-
         //Gather after the amount of time needed.
-        this.gatherTimer = new RepeatingTimer(time, ()->{
+        this.gatherTimer = new RepeatingTimer(resource.getGatherTick(), ()->{
             if(this.resource.isDestroyed()){
                 this.control.finishWithFailure();
                 return;
@@ -95,8 +88,6 @@ public class Gather extends LeafTask{
             //Peek into the resource. If the next tick is empty, end this job with success.
             if(!resource.peek())
                 endWithSuccess();
-
-            if(skill != null) skill.addXP(50f);
         });
     }
 

@@ -1,13 +1,13 @@
 package com.mygdx.game.component;
 
-import java.util.ArrayList;
-
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.entity.Entity;
-import com.mygdx.game.interfaces.IDestroyable;
+import com.mygdx.game.interfaces.IDelayedDestroyable;
 
-public class Transform extends Component implements IDestroyable {
+import java.util.ArrayList;
+
+public class Transform extends Component implements IDelayedDestroyable {
 	public Transform parent;
 	private Vector2 worldPosition, localPosition;
 	private float worldRotation, localRotation, rotationOffset=0, distFromParent=0;
@@ -297,7 +297,7 @@ public class Transform extends Component implements IDestroyable {
 	}
 
 	@Override
-	public void destroy() {
+	public void destroy(Entity destroyer) {
 		this.parent = null;
 		this.worldPosition = null;
 		this.localPosition = null;

@@ -45,6 +45,8 @@ public class BehaviourManagerComp extends Component{
         BehaviourManagerComp.addTaskToMap("consume", PrebuiltTasks::consumeTask);
         BehaviourManagerComp.addTaskToMap("attackTarget", PrebuiltTasks::attackTarget);
         BehaviourManagerComp.addTaskToMap("idle", PrebuiltTasks::idleTask);
+        BehaviourManagerComp.addTaskToMap("fleeTarget", PrebuiltTasks::fleeTarget);
+        BehaviourManagerComp.addTaskToMap("returnToBase", PrebuiltTasks::fleeTarget);
     }
 
     @Override
@@ -220,11 +222,11 @@ public class BehaviourManagerComp extends Component{
     }
 
     @Override
-    public void destroy() {
+    public void destroy(Entity destroyer) {
         this.currentBehaviour.getControl().finishWithFailure();
         this.currentBehaviour.getControl().safeEnd();
         this.currentBehaviour = null;
-        super.destroy();
+        super.destroy(destroyer);
     }
 
     public class Line{

@@ -21,8 +21,8 @@ public class LoadingInterface extends UI{
     private Rectangle loadingBar = new Rectangle(), square = new Rectangle();
     private Texture outline, bar;
 
-    public LoadingInterface(SpriteBatch batch, ColonyGame game){
-        super(batch, game);
+    public LoadingInterface(SpriteBatch batch){
+        super(batch);
         this.batch = batch;
 
         this.outline = ColonyGame.assetManager.get("LoadingBarOutline", Texture.class);

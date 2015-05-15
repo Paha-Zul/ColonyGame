@@ -20,7 +20,7 @@ public class AnimalEnt extends Entity{
         super(position, rotation, graphic, drawLevel);
         this.addTag(Constants.ENTITY_ANIMAL);
         this.addTag(Constants.ENTITY_ALIVE);
-        this.name = "Squirrel";
+        this.name = "AnimalDefault";
 
         this.addComponent(new Animal(animalRef));
         this.addComponent(new Stats());

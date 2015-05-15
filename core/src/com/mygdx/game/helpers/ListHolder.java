@@ -56,7 +56,7 @@ public class ListHolder {
 				Entity e = anEntityList.get(j);
 				//If it is set to be destroyed, destroy it, remove it, decrement, continue.
 				if (e.isSetToBeDestroyed()) {
-					anEntityList.get(j).destroy();
+					anEntityList.get(j).destroy(e);
 					anEntityList.remove(j);
 					j--;
 					continue;

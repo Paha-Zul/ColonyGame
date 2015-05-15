@@ -13,6 +13,7 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.mygdx.game.helpers.*;
 import com.mygdx.game.helpers.gui.GUI;
 import com.mygdx.game.screens.PreLoadingScreen;
+import com.mygdx.game.ui.PlayerInterface;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -53,7 +54,6 @@ public class ColonyGame extends Game {
 
 	@Override
 	public void render () {
-
 		try {
 			super.render();
 			Gdx.gl.glClearColor(screenColor.r, screenColor.g, screenColor.b, screenColor.a);
@@ -63,7 +63,10 @@ public class ColonyGame extends Game {
 			float delta = Gdx.graphics.getDeltaTime();
 			updateVarious(delta);
 
-			delta = 0;
+			if(PlayerInterface.active){
+				delta*=PlayerInterface.getInstance().gameSpeed;
+				if(PlayerInterface.getInstance().paused) delta = 0;
+			}
 
 			ColonyGame.batch.begin();
 			updateEntities(delta);

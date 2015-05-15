@@ -1,6 +1,7 @@
 package com.mygdx.game.component;
 
 import com.badlogic.gdx.graphics.Color;
+import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.timer.RepeatingTimer;
 import com.mygdx.game.helpers.timer.Timer;
 import com.mygdx.game.interfaces.Functional;
@@ -116,8 +117,8 @@ public class Stats extends Component{
     }
 
     @Override
-    public void destroy() {
-        super.destroy();
+    public void destroy(Entity destroyer) {
+        super.destroy(destroyer);
         statMap.clear();
         statList.clear();
         timerList.clear();

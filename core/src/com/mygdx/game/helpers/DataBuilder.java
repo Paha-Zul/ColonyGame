@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter;
+import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.managers.DataManager;
 import com.mygdx.game.helpers.managers.ScriptManager;
 import com.mygdx.game.helpers.worldgeneration.WorldGen;
@@ -524,7 +525,7 @@ public class DataBuilder implements IDestroyable{
 
     public static class JsonAnimal{
         public String name, img, displayName, resourceName;
-        public boolean aggressive, pack;
+        public boolean aggressive, pack, boss;
         public String[] typeInPack;
         public int[] packAmount, tpyeInPackChance;
     }
@@ -563,8 +564,11 @@ public class DataBuilder implements IDestroyable{
 
     public static class JsonPlayerEvent{
         public String eventName, eventDisplayName;
-        public String[] eventDescription, choices;
+        public String[] eventDescription, choices, behaviours;
         public boolean focusOnEvent, pauseGame;
+
+        //Not anything read in, but used for passing data.
+        public Entity eventTarget, eventTargetOther;
     }
 
     @Override

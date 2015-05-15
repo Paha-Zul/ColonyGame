@@ -5,16 +5,14 @@ import com.mygdx.game.ColonyGame;
 import com.mygdx.game.behaviourtree.PrebuiltTasks;
 import com.mygdx.game.behaviourtree.Task;
 import com.mygdx.game.entity.Entity;
-import com.mygdx.game.helpers.Constants;
-import com.mygdx.game.helpers.EventSystem;
-import com.mygdx.game.helpers.StringTable;
-import com.mygdx.game.helpers.Tree;
+import com.mygdx.game.helpers.*;
 import com.mygdx.game.helpers.gui.GUI;
 import com.mygdx.game.helpers.managers.DataManager;
 import com.mygdx.game.helpers.timer.RepeatingTimer;
 import com.mygdx.game.helpers.timer.Timer;
 import com.mygdx.game.interfaces.Functional;
 import com.mygdx.game.interfaces.IInteractable;
+import com.mygdx.game.ui.PlayerInterface;
 
 import java.util.function.Consumer;
 
@@ -52,6 +50,7 @@ public class Colonist extends Component implements IInteractable{
         this.manager.getBlackBoard().moveSpeed = 200f;
 
         EventSystem.onEntityEvent(this.owner, "damage", onDamage);
+        EventSystem.onEntityEvent(this.owner, "attacking_group", onAttackingEvent);
 
         this.createStats();
         this.createBehaviourButtons();
@@ -171,7 +170,7 @@ public class Colonist extends Component implements IInteractable{
         Stats.Stat health = this.stats.getStat("health");
         if (health == null) return;
 
-        health.addToCurrent(-50);
+        health.addToCurrent(amount);
         if(this.manager != null) {
             this.manager.getBlackBoard().target = entity;
             this.manager.changeTaskImmediate("attackTarget");
@@ -190,6 +189,15 @@ public class Colonist extends Component implements IInteractable{
         ColonyGame.worldGrid.removeViewer(gridComp);
     };
 
+    private Consumer<Object[]> onAttackingEvent = args -> {
+        Group attackingGroup = (Group)args[0];
+        if(attackingGroup.getLeader().hasTag(Constants.ENTITY_BOSS)) {
+            DataBuilder.JsonPlayerEvent event = DataManager.getData("bigbosswolfencounter", DataBuilder.JsonPlayerEvent.class);
+            event.eventTarget = this.getEntityOwner();
+            event.eventTargetOther = attackingGroup.getLeader();
+            PlayerInterface.getInstance().newPlayerEvent(event);
+        }
+    };
 
     public Colony getColony() {
         return colony;
@@ -235,8 +243,8 @@ public class Colonist extends Component implements IInteractable{
     }
 
     @Override
-    public void destroy() {
-        super.destroy();
+    public void destroy(Entity destroyer) {
+        super.destroy(destroyer);
 
 
     }
