@@ -182,7 +182,7 @@ public class Colonist extends Component implements IInteractable{
         this.owner.removeTag(Constants.ENTITY_ALIVE);
         this.owner.transform.setRotation(90f);
         this.stats.clearTimers();
-        this.owner.destroyComponent(BehaviourManagerComp.class);
+        this.owner.internalDestroyComponent(BehaviourManagerComp.class);
         this.manager = null;
         GridComponent gridComp = this.getComponent(GridComponent.class);
         gridComp.setActive(false);
@@ -192,7 +192,7 @@ public class Colonist extends Component implements IInteractable{
     private Consumer<Object[]> onAttackingEvent = args -> {
         Group attackingGroup = (Group)args[0];
         if(attackingGroup.getLeader().hasTag(Constants.ENTITY_BOSS)) {
-            DataBuilder.JsonPlayerEvent event = DataManager.getData("bigbosswolfencounter", DataBuilder.JsonPlayerEvent.class);
+            DataBuilder.JsonPlayerEvent event = DataManager.getData("bossencounter", DataBuilder.JsonPlayerEvent.class);
             event.eventTarget = this.getEntityOwner();
             event.eventTargetOther = attackingGroup.getLeader();
             PlayerInterface.getInstance().newPlayerEvent(event);
@@ -210,6 +210,7 @@ public class Colonist extends Component implements IInteractable{
     public void setName(String firstName, String lastName) {
         this.firstName = firstName;
         this.lastName = lastName;
+        this.getEntityOwner().name = firstName;
     }
 
     @Override

@@ -83,13 +83,17 @@ public class Animal extends Component implements IInteractable{
         boolean validTarget = behComp.getBlackBoard().target != null && behComp.getBlackBoard().target.isValid() && behComp.getBlackBoard().target.hasTag(Constants.ENTITY_ALIVE);
         if(attackList.size() > 0 && !validTarget) {
             Entity target = attackList.poll(); //Get the next target off of the list.
-            //If the target is not valid (not alive), let's not use it!
-            if(target.hasTag(Constants.ENTITY_ALIVE)) behComp.getBlackBoard().target = target;
-            else behComp.getBlackBoard().target = null;
-            //Attack single or group attack.
-            if(this.group != null) groupAttack(behComp.getBlackBoard().target);
-            else this.behComp.changeTaskImmediate("attackTarget");
+            attackTarget(target);
         }
+    }
+
+    private void attackTarget(Entity target){
+        //If the target is not valid (not alive), let's not use it!
+        if(target.hasTag(Constants.ENTITY_ALIVE)) behComp.getBlackBoard().target = target;
+        else behComp.getBlackBoard().target = null;
+        //Attack single or group attack.
+        if(this.group != null) groupAttack(behComp.getBlackBoard().target);
+        else this.behComp.changeTaskImmediate("attackTarget");
     }
 
     //The callback to be called when I die!
@@ -110,10 +114,10 @@ public class Animal extends Component implements IInteractable{
                 this.owner.addTag(Constants.ENTITY_RESOURCE); //Add the resource tag
                 this.owner.addComponent(new Resource(DataManager.getData(animalRef.resourceName, DataBuilder.JsonResource.class))); //Add a Resource Component.
                 if (interactable != null) interactable.changeType("resource");
-                this.owner.destroyComponent(BehaviourManagerComp.class); //Destroy the BehaviourManagerComp
-                this.owner.destroyComponent(Stats.class); //Destroy the Stats component.
-                this.owner.destroyComponent(Animal.class); //Destroy this (Animal) Component.
-                this.owner.destroyComponent(Group.class); //Destroy this (Animal) Component.
+                this.owner.internalDestroyComponent(BehaviourManagerComp.class); //Destroy the BehaviourManagerComp
+                this.owner.internalDestroyComponent(Stats.class); //Destroy the Stats component.
+                this.owner.internalDestroyComponent(Animal.class); //Destroy this (Animal) Component.
+                this.owner.internalDestroyComponent(Group.class); //Destroy this (Animal) Component.
             }
         };
     }
@@ -133,7 +137,7 @@ public class Animal extends Component implements IInteractable{
             //If not aggressive, flee!
             if(!animalRef.aggressive) behComp.changeTaskImmediate(PrebuiltTasks.fleeTarget(behComp.getBlackBoard(), behComp));
             //If aggressive, attack!
-            else behComp.changeTaskImmediate(PrebuiltTasks.attackTarget(behComp.getBlackBoard(), behComp));
+            else attackTarget(behComp.getBlackBoard().target);
             otherInfo.owner.setToDestroy();
 
             //If I am a detector and the other is a colonist, we must attack it!

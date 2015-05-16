@@ -69,7 +69,7 @@ public class GH {
 
         String original = builder.toString();
         original = original.replace("%et", event.eventTarget.name);
-        original = original.replace("%t", event.eventTargetOther.name);
+        original = original.replace("%eot", event.eventTargetOther.name);
 
         return original;
     }

@@ -19,9 +19,7 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
-import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Window;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.Align;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
@@ -33,6 +31,7 @@ import com.mygdx.game.component.*;
 import com.mygdx.game.component.collider.Collider;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.*;
+import com.mygdx.game.helpers.Tree;
 import com.mygdx.game.helpers.gui.GUI;
 import com.mygdx.game.helpers.managers.DataManager;
 import com.mygdx.game.helpers.timer.RepeatingTimer;
@@ -105,9 +104,10 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     private GUI.GUIStyle UIStyle;
     private Timer FPSTimer;
 
-    private Vector2 testPoint = new Vector2();
-    private static Entity selected = null, newlySelected;
-    private static Interactable interactable = null;
+    private Vector2 testPoint = new Vector2(); //A reusable vector
+    private static boolean newlySelected = false; //If we have selected a new entity, this will stop the left click from getting rid of it.
+    private static UnitProfile selectedProfile = null; //The currently selected UnitProfile.
+    private ArrayList<UnitProfile> selectedProfileList = new ArrayList<>(); //The list of selected UnitProfiles.
 
     private Color gray = new Color(Color.BLACK);
     private Texture blueSquare;
@@ -125,25 +125,24 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     private QueryCallback callback = fixture -> {
         Collider.ColliderInfo info = (Collider.ColliderInfo)fixture.getUserData();
         if(info.tags.hasTag(Constants.COLLIDER_CLICKABLE) && fixture.testPoint(testPoint.x, testPoint.y)){
-            setSelected(info.owner);
+            setSelectedEntity(info.owner);
             return false;
         }
 
         return true;
     };
 
-    //For selecting multiple units.
-    private ArrayList<UnitProfile> selectedList = new ArrayList<>();
+
     private QueryCallback selectionCallback = fixture -> {
         Collider.ColliderInfo selectedInfo = (Collider.ColliderInfo)fixture.getUserData();
 
         //If not null, the entity is a colonist, and the collider is clickable.
         if(selectedInfo != null && selectedInfo.owner.hasTag(Constants.ENTITY_COLONIST) && selectedInfo.tags.hasTag(Constants.COLLIDER_CLICKABLE)) {
             UnitProfile profile = new UnitProfile(); //Make a unit profile.
-            setSelected(selectedInfo.owner); //Set our selected
+            setSelectedEntity(selectedInfo.owner); //Set our selectedEntity
             profile.entity = selectedInfo.owner; //Get the Entity that we clicked.
-            profile.interactable = selectedInfo.owner.getComponent(Interactable.class); //Get teh interactable Component.
-            selectedList.add(profile); //Add it to the list.
+            profile.interactable = selectedInfo.owner.getComponent(Interactable.class); //Get teh selectedProfile Component.
+            selectedProfileList.add(profile); //Add it to the list.
             return true;
         }
         return true;
@@ -230,6 +229,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         UIStyle.font = topFont;
         gatherStyle.font = topFont;
         exploreStyle.font = topFont;
+        DataManager.addData("UIFont", topFont, BitmapFont.class);
     }
 
     @Override
@@ -255,8 +255,8 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
             drawBox2DDebug();
         }
 
-        //Draw stuff about the selected entity.
-        if((selected != null && interactable != null) || this.selectedList.size() > 0){
+        //Draw stuff about the selectedEntity entity.
+        if(selectedProfile != null || this.selectedProfileList.size() > 0){
             GUI.Texture(this.UIBackgroundBase, this.uiBackgroundBaseRect, this.batch);
             GUI.Texture(this.UIBackgroundTop, this.uiBackgroundTopRect, this.batch);
             this.drawMultipleProfiles(this.ordersRect);
@@ -351,20 +351,19 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     }
 
     /**
-     * Draws the multiple selected profiles.
+     * Draws the multiple selectedEntity profiles.
      * @param rect The rectangle to draw the information inside of.
      */
     private void drawMultipleProfiles(Rectangle rect){
-        //If there is more than one unit selected.. display in a group format.
-        if(selectedList.size() > 1){
+        //If there is more than one unit selectedEntity.. display in a group format.
+        if(selectedProfileList.size() > 1){
             profileButtonRect.set(rect.getX() + rect.getWidth() - 115, rect.getY() + rect.getHeight() - 20, 50, 20);
 
             //For each profile, draw a button to access each individual entity.
-            for(UnitProfile profile : selectedList) {
-                if(GUI.Button(profileButtonRect, profile.interactable.getInteractable().getName(), this.batch)){ //Draw the button.
-                    selected = profile.entity;
-                    interactable = profile.interactable;
-                }
+            for(UnitProfile profile : selectedProfileList) {
+                //Draw the button for the individual profile. If clicked, make it our selected profile.
+                if(GUI.Button(profileButtonRect, profile.interactable.getInteractable().getName(), this.batch))
+                    selectedProfile = profile;
 
                 //If we go too far down the screen, move over.
                 profileButtonRect.setY(profileButtonRect.getY() - 22);
@@ -376,12 +375,12 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     }
 
     /**
-     * Displays the selected Entity.
+     * Displays the selectedEntity Entity.
      */
     private void drawSelected(){
-        //Make sure the interactable we have selected isn't null!
-        if(interactable.getInteractable() != null){
-            IInteractable innerInter = interactable.getInteractable(); //Get the interactable!
+        //Make sure the selectedProfile we have selectedEntity isn't null!
+        if(selectedProfile != null){
+            IInteractable innerInter = selectedProfile.interactable.getInteractable(); //Get the selectedProfile!
 
             //If it has a name, draw the name...
             if(innerInter.getName() != null) {
@@ -442,7 +441,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
                 GUI.Label(innerInter.getBehManager().getCurrentTaskName(), this.batch, this.ordersRect.x, this.ordersRect.y + 70, this.ordersRect.width, this.ordersRect.height - 50, this.UIStyle);
 
                 //If it's a humanoid that we can control, draw some order buttons and its current path.
-                if(interactable.interType.equals("humanoid")){
+                if(selectedProfile.interactable.interType.equals("humanoid")){
                     GUI.Label("Orders", this.batch, this.ordersTopRect, this.UIStyle);
 
                     //GUI.Texture(ordersRect, ColonyGame.assetManager.get("menuButton_normal", Texture.class), this.batch);
@@ -464,9 +463,9 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         }
     }
 
-    //Draws the buttons for each selected colonist that we have control of.
+    //Draws the buttons for each selectedEntity colonist that we have control of.
     private void drawButtons(IInteractable interactable){
-        //If this interactable was recently selected, this will be null. Set it to the root of the currently selected interactable.
+        //If this selectedProfile was recently selectedEntity, this will be null. Set it to the root of the currently selectedEntity selectedProfile.
         if(currStateNode == null)
             currStateNode = interactable.getBehManager().getTaskTree().getNode(node -> node.nodeName.equals("root"));
 
@@ -496,16 +495,16 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
             if (GUI.Button(orderButtonRect, currTaskNode.nodeName, this.batch, style)) {
                 taskInfo.doCallback();
 
-                //For each profile selected, tell them to gather.
-                for (UnitProfile profile : selectedList) {
-                    if(profile.entity == selected) continue;
+                //For each profile selectedEntity, tell them to gather.
+                for (UnitProfile profile : selectedProfileList) {
+                    if(profile.entity == selectedProfile.entity) continue;
 
                     //Get the BehaviourComponent and TreeNode.
                     BehaviourManagerComp comp = profile.interactable.getInteractable().getBehManager();
                     Tree.TreeNode treeNode = comp.getTaskTree().getNode(node -> node.nodeName.equals(currTaskNode.nodeName));
                     BehaviourManagerComp.TaskInfo profTaskInfo = (BehaviourManagerComp.TaskInfo)treeNode.userData;
 
-                    //Do the callback and sync the active booleans. Assign this profile's active state to the main selected profile.
+                    //Do the callback and sync the active booleans. Assign this profile's active state to the main selectedEntity profile.
                     profTaskInfo.doCallback();
                     ((BehaviourManagerComp.TaskInfo) treeNode.userData).active = taskInfo.active; //Toggle the treeNode.
 
@@ -599,17 +598,17 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
      * @return True if moused over, false otherwise.
      */
     public boolean isOnUI(){
-        boolean windowActive = ((selected != null && interactable != null) || this.selectedList.size() > 0);
+        boolean windowActive = ((selectedProfile != null && selectedProfile != null) || this.selectedProfileList.size() > 0);
         return this.checkMousedOver() && windowActive;
     }
 
     /**
-     * Sets the selected entity for viewing.
-     * @param entity The Entity to set as the selected Entity.
+     * Sets the selectedEntity entity for viewing.
+     * @param entity The Entity to set as the selectedEntity Entity.
      */
-    public static void setSelected(Entity entity){
-        newlySelected = entity;
-        interactable = newlySelected.getComponent(Interactable.class);
+    public static void setSelectedEntity(Entity entity){
+        newlySelected = true;
+        selectedProfile = new UnitProfile(entity);
     }
 
     //Reveals the entire map by adding a viewer to every tile.
@@ -636,16 +635,44 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         this.paused = true;
         float width = Gdx.graphics.getWidth(), height = Gdx.graphics.getHeight();
         float x = width/2, y = height/2;
-        int buttonSpacing = 20, buttonWidth = 100, buttonHeight = 50, windowWidth = 600, windowHeight = 400;
-        float spacing = (600-playerEvent.choices.length*(buttonWidth+buttonSpacing))/2;
+        int buttonSpacing = 20, buttonWidth = 150, buttonHeight = 75, windowWidth = 600, windowHeight = 400;
+        float descWidth = windowWidth*0.9f, descHeight = windowHeight*0.5f;
+        float spacing = (600-playerEvent.choices.length*buttonWidth)/(playerEvent.choices.length+1);
+        BitmapFont font = DataManager.getData("UIFont", BitmapFont.class);
 
         //Add a new window.
-        Window.WindowStyle windowStyle = new Window.WindowStyle();
-        windowStyle.titleFont = GUI.font;
-        windowStyle.background = new TextureRegionDrawable(new TextureRegion(WorldGen.whiteTex));
-        Window window = new Window(GH.generateEventDescription(playerEvent), windowStyle);
-        window.setBounds(x - windowWidth/2, y - windowHeight/2, windowWidth, windowHeight);
+        Window.WindowStyle windowStyle = new Window.WindowStyle(font, font.getColor(), new TextureRegionDrawable(new TextureRegion(ColonyGame.assetManager.get("eventWindowBackground", Texture.class))));
+        Window window = new Window("", windowStyle);
+        window.setBounds(x - windowWidth / 2, y - windowHeight / 2, windowWidth, windowHeight);
         this.stage.addActor(window);
+
+        Table table = new Table();
+        window.addActor(table);
+        //table.top();
+        table.setWidth(window.getWidth());
+        table.setHeight(window.getHeight());
+        table.top().left();
+
+        //label for title.
+        Label.LabelStyle titleStyle = new Label.LabelStyle(font, font.getColor());
+        titleStyle.background = new TextureRegionDrawable(new TextureRegion(ColonyGame.assetManager.get("eventWindowTitleBackground", Texture.class)));
+        Label titleLabel = new Label(playerEvent.eventDisplayName, titleStyle);
+        titleLabel.setAlignment(Align.left);
+        Cell cell = table.add(titleLabel).width(windowWidth * 0.5f).height(windowHeight * 0.1f);
+        cell.left();
+        cell.padLeft(windowWidth*0.01f).padTop(windowHeight * 0.05f);
+
+        table.row();
+
+        //Label for description.
+        Label.LabelStyle descStyle = new Label.LabelStyle(font, font.getColor());
+        TextureRegion descStyleBackground = new TextureRegion(ColonyGame.assetManager.get("eventWindowDescriptionBackground", Texture.class));
+        descStyle.background = new TextureRegionDrawable(descStyleBackground);
+        Label descLabel = new Label(GH.generateEventDescription(playerEvent), descStyle);
+        descLabel.setAlignment(Align.topLeft);
+        descLabel.setWrap(true);
+        cell = table.add(descLabel).width(descWidth).height(descHeight);
+        cell.padLeft(windowWidth*0.01f);
 
         for(int i=0; i<playerEvent.choices.length;i++) {
             String choice = playerEvent.choices[i];
@@ -656,7 +683,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
             buttonStyle.over = new TextureRegionDrawable(new TextureRegion(ColonyGame.assetManager.get("blankbutton_moused", Texture.class), buttonWidth, buttonHeight));
             buttonStyle.down = new TextureRegionDrawable(new TextureRegion(ColonyGame.assetManager.get("blankbutton_clicked", Texture.class), buttonWidth, buttonHeight));
             ImageButton button = new ImageButton(buttonStyle);
-            button.setBounds(spacing*(i+1), 0, buttonWidth, buttonHeight);
+            button.setBounds(spacing*(i+1) + buttonWidth*i, windowHeight*0.01f, buttonWidth, buttonHeight);
 
             //Add the listener for the button.
             final String behName = playerEvent.behaviours[i];
@@ -676,8 +703,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
             //The label to go over the button. We have to do this because scene2d ui's buttons don't have
             //wrapping text from what I can find.
-            Label.LabelStyle labelStyle = new Label.LabelStyle();
-            labelStyle.font = GUI.font;
+            Label.LabelStyle labelStyle = new Label.LabelStyle(font, font.getColor());
             Label label = new Label(choice, labelStyle);
             label.setBounds(button.getX(), button.getY(), button.getWidth(), button.getHeight());
             label.setAlignment(Align.center);
@@ -687,9 +713,11 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
             //Add the button and label.
             window.addActor(button);
             window.addActor(label);
-            //this.stage.addActor(button);
-            //this.stage.addActor(label);
         }
+
+        window.setDebug(true);
+        table.setDebug(true);
+        if(playerEvent.focusOnEvent) ColonyGame.camera.position.set(playerEvent.eventTarget.transform.getPosition().x, playerEvent.eventTarget.transform.getPosition().y, 0);
     }
 
     public static PlayerInterface getInstance(){
@@ -702,7 +730,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         super.destroy();
         this.background.dispose();
         this.batch = null;
-        interactable = null;
+        selectedProfile = null;
         this.world = null;
         this.buttonRect = null;
         this.infoRect = null;
@@ -786,33 +814,31 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         Vector3 worldCoords = ColonyGame.camera.unproject(new Vector3(screenX, screenY, 0));
 
         if(button == Input.Buttons.LEFT){
-            this.selectedList.clear();
+            this.selectedProfileList.clear();
             this.buttonStateSystem.setToDefaultState();
             this.currStateNode = null;
             this.finishDragging(worldCoords.x, worldCoords.y);
 
-            if(newlySelected != null)
-                selected = newlySelected;
-            else {
-                newlySelected = null;
-                selected = null;
-                interactable = null;
+            //Otherwise, null out our existing selection and try to get a new one where we clicked.
+            if(!newlySelected) {
+                newlySelected = false;
+                selectedProfile = null;
 
                 //Try to get a selection of Entities. If not, maybe we clicked just one?
-                if (this.selectedList.size() < 1) {
+                if (this.selectedProfileList.size() < 1) {
                     this.testPoint.set(worldCoords.x, worldCoords.y);
                     this.world.QueryAABB(this.callback, worldCoords.x - 0.01f, worldCoords.y - 0.011f, worldCoords.x + 0.01f, worldCoords.y + 0.01f);
                 }
-
-                selected = newlySelected;
             }
 
-            newlySelected = null;
+            newlySelected = false;
             return true;
+
+        //On right click, let's tell everyone we have selected to move!
         }if(button == Input.Buttons.RIGHT){
-            if(selected != null && interactable != null){
-                BehaviourManagerComp comp = interactable.getInteractable().getBehManager();
-                if(comp != null) {
+            for(UnitProfile profile : selectedProfileList) {
+                BehaviourManagerComp comp = profile.interactable.getInteractable().getBehManager();
+                if (comp != null) {
                     comp.getBlackBoard().target = null;
                     comp.getBlackBoard().targetNode = comp.getBlackBoard().colonyGrid.getNode(new Vector2(worldCoords.x, worldCoords.y));
                     comp.changeTaskImmediate(PrebuiltTasks.moveTo(comp.getBlackBoard()));
@@ -845,10 +871,20 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         return false;
     }
 
-    private class UnitProfile{
+    private static class UnitProfile{
         public Entity entity;
         public Interactable interactable;
         public GridComponent gridComp;
+
+        public UnitProfile(){
+
+        }
+
+        public UnitProfile(Entity entity){
+            this.entity = entity;
+            this.interactable = entity.getComponent(Interactable.class);
+            this.gridComp = entity.getComponent(GridComponent.class);
+        }
     }
 
 

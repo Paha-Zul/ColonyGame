@@ -104,7 +104,7 @@ public class Entity implements IDelayedDestroyable{
 		//Only update if active.
 		if(this.active && !this.destroyed) {
 			if(destroyComponentList.size > 0) {
-				for (Component comp : destroyComponentList) destroyComponent(comp); //Destory the component
+				for (Component comp : destroyComponentList) internalDestroyComponent(comp); //Destory the component
 				destroyComponentList.clear(); //Clear the list.
 			}
 
@@ -180,7 +180,7 @@ public class Entity implements IDelayedDestroyable{
 	 * Removes a Component from this Entity.
 	 * @param cls The class interType of the Component to remove.
 	 */
-	public <T extends Component> void destroyComponent(Class<T> cls){
+	public <T extends Component> void internalDestroyComponent(Class<T> cls){
 		//Search the inactive list.
 		for (Component comp : this.inactiveComponentList)
 			if (comp.getClass() == cls) {
@@ -197,10 +197,18 @@ public class Entity implements IDelayedDestroyable{
 	}
 
 	/**
+	 * Destroys the passed in component and removes it from this Entity.
+	 * @param component The Component to destroy and remove.
+	 */
+	public void destroyComponent(Component component){
+		destroyComponentList.add(component);
+	}
+
+	/**
 	 *	Destroys and removes a Component from this Entity.
 	 * @param component The Component to destroy and remove.
 	 */
-	protected void destroyComponent(Component component){
+	private void internalDestroyComponent(Component component){
 		if(component.isActive())
 			this.activeComponentList.removeValue(component, false);
 		else

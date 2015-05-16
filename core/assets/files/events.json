@@ -1,19 +1,20 @@
 [
   {
-    "eventName": "bigbosswolfencounter",
-    "eventDisplayName": "Big Boss Wolf Encounter!",
+    "eventName": "bossencounter",
+    "eventDisplayName": "Boss Encounter!",
     "eventDescription": [
-      "%et has encountered a large wolf with a large pack! What do you wish to do?"
+      "%et has encountered the legendary %eot and he's not alone! The creature has a large pack and it is beginning to surround %et.",
+      "%et considers his options quickly but carefully, and has come up with three options. Choose carefully as %et's life may be lost if chosen wrongly."
     ],
     "choices": [
-      "Stand Your Ground!",
-      "Flee to the Base to Try and Get Help!",
-      "Try to Lose Them in the Surroundings!"
+      "I will stand my ground!",
+      "I need to run to the base and get help!",
+      "Maybe I can lose them in the surroundings!"
     ],
     "behaviours": [
       "attackTarget",
-      "fleeTarget",
-      "returnToBase"
+      "returnToBase",
+      "fleeTarget"
     ],
     "focusOnEvent": true,
     "pauseGame": true
