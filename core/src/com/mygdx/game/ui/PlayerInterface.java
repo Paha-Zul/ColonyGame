@@ -136,7 +136,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         Collider.ColliderInfo selectedInfo = (Collider.ColliderInfo)fixture.getUserData();
 
         //If not null, the entity is a colonist, and the collider is clickable.
-        if(selectedInfo != null && selectedInfo.owner.hasTag(Constants.ENTITY_COLONIST) && selectedInfo.tags.hasTag(Constants.COLLIDER_CLICKABLE)) {
+        if(selectedInfo != null && selectedInfo.owner.getTags().hasTag("colonist") && selectedInfo.tags.hasTag(Constants.COLLIDER_CLICKABLE)) {
             UnitProfile profile = new UnitProfile(); //Make a unit profile.
             setSelectedEntity(selectedInfo.owner); //Set our selectedEntity
             profile.entity = selectedInfo.owner; //Get the Entity that we clicked.
@@ -557,8 +557,8 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
                     ((BehaviourManagerComp.TaskInfo) treeNode.userData).active = taskInfo.active; //Toggle the treeNode.
 
                     //If it's toggled, add the tag, otherwise, remove the tag.
-                    if(((BehaviourManagerComp.TaskInfo) treeNode.userData).active) comp.getBlackBoard().resourceTypeTags.addTag(StringTable.getString("resource_type", treeNode.nodeName));
-                    else comp.getBlackBoard().resourceTypeTags.removeTag(StringTable.getString("resource_type", treeNode.nodeName));
+                    if(((BehaviourManagerComp.TaskInfo) treeNode.userData).active) comp.getBlackBoard().resourceTypeTags.addTag(StringTable.StringToInt("resource_type", treeNode.nodeName));
+                    else comp.getBlackBoard().resourceTypeTags.removeTag(StringTable.StringToInt("resource_type", treeNode.nodeName));
                 }
 
                 //Get the node from the gather TreeNode. If it has children, set the currStateNode

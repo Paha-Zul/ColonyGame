@@ -156,7 +156,7 @@ public class PrebuiltTasks {
         };
 
         //Make sure we are getting a building...
-        findStorage.control.callbacks.successCriteria = ent -> ((Entity)ent).hasTag(Constants.ENTITY_BUILDING);
+        findStorage.control.callbacks.successCriteria = ent -> ((Entity)ent).getTags().hasTag("building");
 
         //When finding a path to the resource, make sure it's actually a resource and we are the ones that have claimed it!
         findPath.getControl().callbacks.checkCriteria = task -> {
@@ -300,7 +300,7 @@ public class PrebuiltTasks {
 
         fc.control.callbacks.successCriteria = ent -> {
             Entity entity = (Entity)ent;
-            return entity.hasTag(Constants.ENTITY_ANIMAL) && entity.hasTag(Constants.ENTITY_ALIVE);
+            return entity.getTags().hasTag("animal") && entity.getTags().hasTag("alive");
         };
 
         //Creates a floating text object when trying to find an animal fails.
@@ -344,7 +344,7 @@ public class PrebuiltTasks {
         //To succeed this repeat job, the target must be null, not valid, or not alive.
         mainRepeat.getControl().callbacks.successCriteria = task -> {
             Entity target = ((Task)task).getBlackboard().target;
-            return target == null || !target.isValid() || !target.hasTag(Constants.ENTITY_ALIVE);
+            return target == null || !target.isValid() || !target.getTags().hasTag("alive");
         };
 
         //If the target has moved away from it's last square AND the move job is still active (why repath if not moving?), fail the parallel job.
@@ -485,7 +485,7 @@ public class PrebuiltTasks {
         FindClosestEntity fc = new FindClosestEntity("findingBase", blackBoard);
 
         //Make sure it's a building we find.
-        fc.control.callbacks.successCriteria = ent -> ((Entity)ent).hasTag(Constants.ENTITY_BUILDING);
+        fc.control.callbacks.successCriteria = ent -> ((Entity)ent).getTags().hasTag("alive");
 
         seq.control.addTask(fc);
         seq.control.addTask(moveTo(blackBoard));

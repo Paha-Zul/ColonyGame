@@ -21,7 +21,7 @@ public class ColonyEntity extends Entity{
     public ColonyEntity(Vector2 position, float rotation, TextureRegion graphic, int drawLevel) {
         super(position, rotation, graphic, drawLevel);
         this.name = "Colony";
-        this.addTag(Constants.ENTITY_BUILDING);
+        this.tags.addTag("building");
 
         this.addComponent(new GridComponent(Constants.GRIDSTATIC, ColonyGame.worldGrid, 8));
         this.addComponent(new Colony());

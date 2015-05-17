@@ -10,7 +10,6 @@ import com.mygdx.game.component.Projectile;
 import com.mygdx.game.component.Transform;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.entity.ProjectileEnt;
-import com.mygdx.game.helpers.Constants;
 import com.mygdx.game.helpers.EventSystem;
 import com.mygdx.game.helpers.GH;
 import com.mygdx.game.helpers.timer.RepeatingTimer;
@@ -64,7 +63,7 @@ public class Attack extends LeafTask{
     public void update(float delta) {
         super.update(delta);
         //If the target is null or dead, return with success (it died... I or someone else killed it!)
-        if(this.blackBoard.target == null || this.blackBoard.target.isDestroyed() || this.blackBoard.target.isSetToBeDestroyed() || !this.blackBoard.target.hasTag(Constants.ENTITY_ALIVE)) {
+        if(this.blackBoard.target == null || this.blackBoard.target.isDestroyed() || this.blackBoard.target.isSetToBeDestroyed() || !this.blackBoard.target.getTags().hasTag("alive")) {
             this.control.finishWithSuccess();
             this.blackBoard.target = null;
             return;

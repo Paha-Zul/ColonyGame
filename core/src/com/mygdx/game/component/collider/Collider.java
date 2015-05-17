@@ -99,7 +99,7 @@ public class Collider extends Component implements IScalable{
 
     public static class ColliderInfo{
         public String name;
-        public Tags tags = new Tags();
+        public Tags tags = new Tags("collider");
         public Entity owner;
 
         public ColliderInfo(Entity owner){

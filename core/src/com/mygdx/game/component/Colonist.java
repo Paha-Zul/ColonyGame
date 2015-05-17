@@ -5,7 +5,10 @@ import com.mygdx.game.ColonyGame;
 import com.mygdx.game.behaviourtree.PrebuiltTasks;
 import com.mygdx.game.behaviourtree.Task;
 import com.mygdx.game.entity.Entity;
-import com.mygdx.game.helpers.*;
+import com.mygdx.game.helpers.DataBuilder;
+import com.mygdx.game.helpers.EventSystem;
+import com.mygdx.game.helpers.StringTable;
+import com.mygdx.game.helpers.Tree;
 import com.mygdx.game.helpers.gui.GUI;
 import com.mygdx.game.helpers.managers.DataManager;
 import com.mygdx.game.helpers.timer.RepeatingTimer;
@@ -137,7 +140,7 @@ public class Colonist extends Component implements IInteractable{
             BehaviourManagerComp.TaskInfo taskInfo = new BehaviourManagerComp.TaskInfo(node.nodeName);
             taskInfo.callback = () -> {
                 taskInfo.active = !taskInfo.active;
-                getBehManager().getBlackBoard().resourceTypeTags.toggleTag(StringTable.getString("resource_type", node.nodeName));
+                getBehManager().getBlackBoard().resourceTypeTags.toggleTag(StringTable.StringToInt("resource_type", node.nodeName));
             };
             taskInfo.userData = DataManager.getData("blankStyle", GUI.GUIStyle.class);
 
@@ -179,7 +182,7 @@ public class Colonist extends Component implements IInteractable{
 
     //The callback for when our health is 0.
     private Functional.Callback onZero = () -> {
-        this.owner.removeTag(Constants.ENTITY_ALIVE);
+        this.owner.getTags().removeTag("alive");
         this.owner.transform.setRotation(90f);
         this.stats.clearTimers();
         this.owner.internalDestroyComponent(BehaviourManagerComp.class);
@@ -191,7 +194,7 @@ public class Colonist extends Component implements IInteractable{
 
     private Consumer<Object[]> onAttackingEvent = args -> {
         Group attackingGroup = (Group)args[0];
-        if(attackingGroup.getLeader().hasTag(Constants.ENTITY_BOSS)) {
+        if(attackingGroup.getLeader().getTags().hasTag("boss")) {
             DataBuilder.JsonPlayerEvent event = DataManager.getData("bossencounter", DataBuilder.JsonPlayerEvent.class);
             event.eventTarget = this.getEntityOwner();
             event.eventTargetOther = attackingGroup.getLeader();

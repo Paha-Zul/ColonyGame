@@ -20,7 +20,7 @@ public class ResourceEnt extends Entity{
 
     public ResourceEnt(Vector2 position, float rotation, TextureRegion graphic, int drawLevel) {
         super(position, rotation, graphic, drawLevel);
-        this.addTag(Constants.ENTITY_RESOURCE);
+        this.getTags().addTag("resource");
         this.name = "Resource";
 
         this.addComponent(new Interactable("resource"));

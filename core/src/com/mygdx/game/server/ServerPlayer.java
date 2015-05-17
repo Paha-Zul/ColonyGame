@@ -129,7 +129,7 @@ public class ServerPlayer {
 
         //A consumer function to use. If the entity is a tree, destroy it!
         Consumer<Entity> treeConsumer = ent -> {
-            if(ent.hasTag(Constants.ENTITY_RESOURCE)) ent.setToDestroy();
+            if(ent.getTags().hasTag("resource")) ent.setToDestroy();
         };
 
         //Perform the things.

@@ -7,7 +7,6 @@ import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.component.Projectile;
 import com.mygdx.game.component.collider.Collider;
-import com.mygdx.game.helpers.Constants;
 
 /**
  * Created by Paha on 4/2/2015.
@@ -15,7 +14,7 @@ import com.mygdx.game.helpers.Constants;
 public class ProjectileEnt extends Entity{
     public ProjectileEnt(Vector2 position, float rotation, TextureRegion graphic, int drawLevel) {
         super(position, rotation, graphic, drawLevel);
-        this.addTag(Constants.ENTITY_PROJECTILE);
+        this.tags.addTag("projectile");
 
         this.addComponent(new Projectile());
         makeCollider();

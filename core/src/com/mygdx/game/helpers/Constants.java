@@ -33,16 +33,6 @@ public class Constants {
     public final static int VISIBILITY_EXPLORED = 1;
     public final static int VISIBILITY_VISIBLE = 2;
 
-    //Entity types
-    public final static int ENTITY_HUMANOID = 1;
-    public final static int ENTITY_BUILDING = 2;
-    public final static int ENTITY_ANIMAL = 3;
-    public final static int ENTITY_RESOURCE = 4;
-    public final static int ENTITY_COLONIST = 5;
-    public final static int ENTITY_PROJECTILE = 6;
-    public final static int ENTITY_ALIVE = 7;
-    public final static int ENTITY_BOSS = 8;
-
     //Collider tags
     public final static int COLLIDER_CLICKABLE = 1;
     public final static int COLLIDER_DETECTOR = 2;

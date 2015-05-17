@@ -3,7 +3,6 @@ package com.mygdx.game.component;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.entity.Entity;
-import com.mygdx.game.helpers.Constants;
 
 /**
  * Created by Paha on 5/8/2015.
@@ -55,7 +54,7 @@ public class Group extends Component{
      * @return The Entity leader of this group. Null if the group is empty and no valid leader can be set.
      */
     public Entity getLeader(){
-        if(!leader.hasTag(Constants.ENTITY_ALIVE)) getNewLeader();
+        if(!leader.getTags().hasTag("alive")) getNewLeader();
         return this.leader;
     }
 

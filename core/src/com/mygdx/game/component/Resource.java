@@ -28,8 +28,8 @@ public class Resource extends Component implements IInteractable{
     private StringBuilder contents = new StringBuilder();
     private DataBuilder.JsonResource resRef;
 
-    public Tags effectTags = new Tags();
-    public Tags resourceTypeTags = new Tags();
+    public Tags effectTags = new Tags("effect");
+    public Tags resourceTypeTags = new Tags("resource");
 
     public Resource(String resourceName) {
         super();
@@ -93,12 +93,12 @@ public class Resource extends Component implements IInteractable{
                 amounts.add(amount); //Adds the item amount to this resource.
                 names.add(itemNames[i]); //Adds the item name to this resource.
                 DataBuilder.JsonItem itemRef = DataManager.getData(itemNames[i], DataBuilder.JsonItem.class); //Get the itemRef
-                resourceTypeTags.addTag(StringTable.getString("resource_type", itemRef.getItemType())); //Adds the type to the resource type tags.
+                resourceTypeTags.addTag(StringTable.StringToInt("resource_type", itemRef.getItemType())); //Adds the type to the resource type tags.
 
                 //For every item effect, add the effect to the effectTags.
                 if(itemRef.getEffects() != null)
                     for(String effect : itemRef.getEffects())
-                        effectTags.addTag(StringTable.getString("item_effect", effect));
+                        effectTags.addTag(StringTable.StringToInt("item_effect", effect));
 
                 if(amount > highest) highest = amount;
                 total += amount;
@@ -125,12 +125,12 @@ public class Resource extends Component implements IInteractable{
                 amounts.add(itemAmounts[i]); //Adds the item amount to this resource.
                 names.add(itemNames[i]); //Adds the item name to this resource.
                 DataBuilder.JsonItem itemRef = DataManager.getData(itemNames[i], DataBuilder.JsonItem.class); //Get the itemRef
-                resourceTypeTags.addTag(StringTable.getString("resource_type", itemRef.getItemType())); //Adds the type to the resource type tags.
+                resourceTypeTags.addTag(StringTable.StringToInt("resource_type", itemRef.getItemType())); //Adds the type to the resource type tags.
 
                 //For every item effect, add the effect to the effectTags.
                 if(itemRef.getEffects() != null)
                     for(String effect : itemRef.getEffects())
-                        effectTags.addTag(StringTable.getString("item_effect", effect));
+                        effectTags.addTag(StringTable.StringToInt("item_effect", effect));
 
                 if(itemAmounts[i] > highest) highest = itemAmounts[i];
                 total += itemAmounts[i];

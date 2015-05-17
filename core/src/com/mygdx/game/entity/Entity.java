@@ -25,7 +25,7 @@ public class Entity implements IDelayedDestroyable{
 	public GraphicIdentity identity;
 	public boolean active = true;
 
-    public Tags tags = new Tags();
+    protected Tags tags = new Tags("entity");
 
 	protected Array<Component> newComponentList;
 	protected Array<Component> activeComponentList;
@@ -262,47 +262,6 @@ public class Entity implements IDelayedDestroyable{
 		return this.ID;
 	}
 
-	/**
-	 * Adds a tag to this Entity.
-	 * @param tag The tag to add.
-	 */
-    public void addTag(int tag){
-        this.tags.addTag(tag);
-	}
-
-	/**
-	 * Removes a tag from this Entity.
-	 * @param tag The tag to remove.
-	 */
-	public void removeTag(int tag){
-		this.tags.removeTag(tag);
-	}
-
-	/**
-	 * Removes all tags for this Entity.
-	 */
-	public void clearTags(){
-		this.tags.clearTags();
-	}
-
-	/**
-	 * Checks if this Entity has the tag passed in.
-	 * @param tag The tag to check for.
-	 * @return True if this Entity has the tag, false otherwise.
-	 */
-    public boolean hasTag(int tag){
-		return this.tags.hasTag(tag);
-    }
-
-	/**
-	 * Checks if the Entity has multiple tags.
-	 * @param tagsToCheck The tags to check for.
-	 * @return True if this Entity has all the tags, false otherwise.
-	 */
-    public boolean hasTags(int[] tagsToCheck){
-        return this.tags.hasTags(tagsToCheck);
-    }
-
 	@Override
 	public boolean isSetToBeDestroyed() {
 		return this.setToDestroy;
@@ -357,5 +316,9 @@ public class Entity implements IDelayedDestroyable{
 	public final void scaleComponents(float scale){
 		for(IScalable scalable : this.scalableComponents)
 			scalable.scale(scale);
+	}
+
+	public Tags getTags(){
+		return this.tags;
 	}
 }

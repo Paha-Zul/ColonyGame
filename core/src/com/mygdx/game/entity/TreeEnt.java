@@ -21,8 +21,7 @@ import com.mygdx.game.helpers.managers.DataManager;
 public class TreeEnt extends Entity{
     public TreeEnt(Vector2 position, float rotation, TextureRegion graphic, int drawLevel) {
         super(position, rotation, graphic, drawLevel);
-
-        this.addTag(Constants.ENTITY_RESOURCE);
+        this.getTags().addTag("resource");
 
         float rand = MathUtils.random();
 

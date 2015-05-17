@@ -37,7 +37,7 @@ public class Animal extends Component implements IInteractable{
     public void start() {
         super.start();
 
-        if(animalRef.boss) this.getEntityOwner().addTag(Constants.ENTITY_BOSS);
+        if(animalRef.boss) this.getEntityOwner().getTags().addTag("boss");
         this.getEntityOwner().name = animalRef.displayName;
 
         this.stats = this.getComponent(Stats.class);
@@ -80,7 +80,7 @@ public class Animal extends Component implements IInteractable{
     public void update(float delta) {
         super.update(delta);
 
-        boolean validTarget = behComp.getBlackBoard().target != null && behComp.getBlackBoard().target.isValid() && behComp.getBlackBoard().target.hasTag(Constants.ENTITY_ALIVE);
+        boolean validTarget = behComp.getBlackBoard().target != null && behComp.getBlackBoard().target.isValid() && behComp.getBlackBoard().target.getTags().hasTag("alive");
         if(attackList.size() > 0 && !validTarget) {
             Entity target = attackList.poll(); //Get the next target off of the list.
             attackTarget(target);
@@ -89,7 +89,7 @@ public class Animal extends Component implements IInteractable{
 
     private void attackTarget(Entity target){
         //If the target is not valid (not alive), let's not use it!
-        if(target.hasTag(Constants.ENTITY_ALIVE)) behComp.getBlackBoard().target = target;
+        if(target.getTags().hasTag("alive")) behComp.getBlackBoard().target = target;
         else behComp.getBlackBoard().target = null;
         //Attack single or group attack.
         if(this.group != null) groupAttack(behComp.getBlackBoard().target);
@@ -110,8 +110,8 @@ public class Animal extends Component implements IInteractable{
                 EventSystem.unregisterEntity(this.owner); //Unregister for events.
                 this.owner.transform.setRotation(180);
                 this.collider.body.setLinearVelocity(0, 0);
-                this.owner.clearTags(); //Clear all tags
-                this.owner.addTag(Constants.ENTITY_RESOURCE); //Add the resource tag
+                this.owner.getTags().clearTags(); //Clear all tags
+                this.owner.getTags().addTag("resource"); //Add the resource tag
                 this.owner.addComponent(new Resource(DataManager.getData(animalRef.resourceName, DataBuilder.JsonResource.class))); //Add a Resource Component.
                 if (interactable != null) interactable.changeType("resource");
                 this.owner.internalDestroyComponent(BehaviourManagerComp.class); //Destroy the BehaviourManagerComp
@@ -131,7 +131,7 @@ public class Animal extends Component implements IInteractable{
         Collider.ColliderInfo myInfo = (Collider.ColliderInfo) me.getUserData();
 
         //If it is not a detector, the other is a bullet, and I am an animal, hurt me! and kill the bullet!
-        if (!myInfo.tags.hasTag(Constants.COLLIDER_DETECTOR) && otherInfo.owner.hasTag(Constants.ENTITY_PROJECTILE) && this.owner.hasTag(Constants.ENTITY_ANIMAL)) {
+        if (!myInfo.tags.hasTag(Constants.COLLIDER_DETECTOR) && otherInfo.owner.getTags().hasTag("projectile") && this.owner.getTags().hasTag("animal")) {
             this.getComponent(Stats.class).getStat("health").addToCurrent(-20);
             behComp.getBlackBoard().target = otherInfo.owner.getComponent(Projectile.class).projOwner;
             //If not aggressive, flee!
@@ -141,8 +141,8 @@ public class Animal extends Component implements IInteractable{
             otherInfo.owner.setToDestroy();
 
             //If I am a detector and the other is a colonist, we must attack it!
-        }else if (myInfo.tags.hasTag(Constants.COLLIDER_DETECTOR) && otherInfo.owner.hasTag(Constants.ENTITY_COLONIST) && animalRef.aggressive) {
-            if(otherInfo.owner.hasTag(Constants.ENTITY_ALIVE)) attackList.add(otherInfo.owner);
+        }else if (myInfo.tags.hasTag(Constants.COLLIDER_DETECTOR) && otherInfo.owner.getTags().hasTag("colonist") && animalRef.aggressive) {
+            if(otherInfo.owner.getTags().hasTag("alive")) attackList.add(otherInfo.owner);
         }
     };
 
@@ -154,7 +154,7 @@ public class Animal extends Component implements IInteractable{
         Collider.ColliderInfo otherInfo = (Collider.ColliderInfo) other.getUserData();
         Collider.ColliderInfo myInfo = (Collider.ColliderInfo) me.getUserData();
 
-        if (myInfo.tags.hasTag(Constants.COLLIDER_DETECTOR) && otherInfo.owner.hasTag(Constants.ENTITY_COLONIST)) {
+        if (myInfo.tags.hasTag(Constants.COLLIDER_DETECTOR) && otherInfo.owner.getTags().hasTag("colonist")) {
             attackList.remove(otherInfo.owner);
         }
     };

@@ -19,7 +19,7 @@ public class BlackBoard extends Component{
     public Resource targetResource;
 
     //Related to gathering resources
-    public Tags resourceTypeTags = new Tags();
+    public Tags resourceTypeTags = new Tags("resource");
 
     //Transferring variables
     public boolean transferAll = false;
