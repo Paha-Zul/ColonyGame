@@ -7,16 +7,16 @@
           "category": "Grass",
           "dir": "img/terrain/0",
           "height": [0.8, 1],
-          "resources":["bunchberry", "blackspruce", "whitespruce", "americanlarch"],
-          "resourcesChance": [[0, 0.01], [0.01, 0.02], [0.02, 0.03], [0.03, 0.04]]
+          "resources":["bunchberry", "blackspruce", "whitespruce", "americanlarch", "rock"],
+          "resourcesChance": [[0, 0.01], [0.01, 0.02], [0.02, 0.03], [0.03, 0.04], [0.04, 1]]
         },
         {
           "tileNames": ["1"],
           "category": "Grass",
           "dir": "img/terrain/1",
           "height": [0.6, 0.8],
-		  "resources":["blackspruce", "whitespruce", "americanlarch"],
-          "resourcesChance": [[0, 0.01], [0.01, 0.02], [0.02, 0.03]]
+		  "resources":["blackspruce", "whitespruce", "americanlarch", "ironore"],
+          "resourcesChance": [[0, 0.01], [0.01, 0.02], [0.02, 0.03], [0.03, 0.1]]
         },
         {
           "tileNames": ["2"],

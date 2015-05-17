@@ -72,7 +72,7 @@ public class Resource extends Component implements IInteractable{
         this.itemNames = jRes.itemNames;
         this.gatherTime = jRes.gatherTime;
 
-        generateItemInfo(jRes.itemNames, jRes.itemAmounts);
+        generateItemInfo(jRes.itemNames, jRes.itemAmounts, jRes.itemChances);
     }
 
     /**
@@ -80,12 +80,14 @@ public class Resource extends Component implements IInteractable{
      * @param itemNames The String array of item names.
      * @param itemAmounts The 2D int array of itemAmounts for each item name.
      */
-    private void generateItemInfo(String[] itemNames, int[][] itemAmounts){
+    private void generateItemInfo(String[] itemNames, int[][] itemAmounts, int[] itemChances){
         TIntArrayList amounts = new TIntArrayList(10);
         ArrayList<String> names = new ArrayList<>(10);
         int total = 0, highest = 0;
 
         for(int i=0;i<itemAmounts.length; i++) {
+            if(MathUtils.random() > itemChances[i]) continue;
+
             int amount = MathUtils.random(itemAmounts[i][1] - itemAmounts[i][0]) + itemAmounts[i][0]; //Add diff to base.
             if(amount != 0){
                 amounts.add(amount); //Adds the item amount to this resource.

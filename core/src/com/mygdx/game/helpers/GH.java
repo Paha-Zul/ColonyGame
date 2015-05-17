@@ -33,10 +33,26 @@ public class GH {
         if(writeStackTrace){
             StackTraceElement[] trace = Thread.currentThread().getStackTrace();
             for(StackTraceElement elem : trace)
-                errorLog.writeString(elem.toString(), true);
+                errorLog.writeString(elem.toString()+"\n", true);
         }
 
         throw new RuntimeException("An error was written to an error file. Check the base directory. (For quick reference, err: "+err+")");
+    }
+
+    /**
+     * Writes the Exception to a file.
+     * @param e The exception to write.
+     */
+    public static void writeErrorMessage(Exception e){
+        DateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy HH-mm-ss");
+        Date date = new Date();
+
+        FileHandle handle = Gdx.files.internal(""); //Get a path to where the game is.
+        File file = new File(handle.file().getAbsolutePath()+"/"+"err_"+dateFormat.format(date)+".txt"); //Create a new file with the pathname.
+        FileHandle errorLog = new FileHandle(file); //Get a file handle to the error log that we create.
+        StackTraceElement[] trace = e.getStackTrace();
+        for(StackTraceElement elem : trace)
+            errorLog.writeString(elem.toString()+"\n", true);
     }
 
     public static int[] fixRanges(int startX, int endX, int startY, int endY, int width, int height){
@@ -74,6 +90,7 @@ public class GH {
         return original;
     }
 
+
     public static float toMeters(float value){
         return value/Constants.SCALE;
     }
@@ -81,5 +98,7 @@ public class GH {
     public static float toReal(float value){
         return value*Constants.SCALE;
     }
+
+
 
 }

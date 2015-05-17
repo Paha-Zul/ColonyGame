@@ -3,7 +3,7 @@
     "eventName": "bossencounter",
     "eventDisplayName": "Boss Encounter!",
     "eventDescription": [
-      "%et has encountered the legendary %eot and he's not alone! The creature has a large pack and it is beginning to surround %et.",
+      "%et has encountered the legendary %eot and he's not alone! The creature has a large pack and it is beginning to surround %et. ",
       "%et considers his options quickly but carefully, and has come up with three options. Choose carefully as %et's life may be lost if chosen wrongly."
     ],
     "choices": [

@@ -46,7 +46,7 @@ public class BehaviourManagerComp extends Component{
         BehaviourManagerComp.addTaskToMap("attackTarget", PrebuiltTasks::attackTarget);
         BehaviourManagerComp.addTaskToMap("idle", PrebuiltTasks::idleTask);
         BehaviourManagerComp.addTaskToMap("fleeTarget", PrebuiltTasks::fleeTarget);
-        BehaviourManagerComp.addTaskToMap("returnToBase", PrebuiltTasks::fleeTarget);
+        BehaviourManagerComp.addTaskToMap("returnToBase", PrebuiltTasks::returnToBase);
     }
 
     @Override

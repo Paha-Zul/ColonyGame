@@ -1,58 +1,76 @@
 [
-    {
-      "itemName": "fish",
-      "displayName": "Fish",
-      "itemType": "food",
-      "description": "A slippery fish.",
-      "effects": ["feed"],
-      "strengths":[10]
-    },
-    {
-      "itemName": "woodlog",
-      "displayName": "Wood Log",
-      "itemType": "wood",
-      "description": "A wood log."
-    },
-    {
-      "itemName": "stone",
-      "displayName": "Stone",
-      "itemType": "stone",
-      "description": "A stone rock."
-    },
-    {
-      "itemName": "twig",
-      "displayName": "Twig",
-      "itemType": "wood",
-      "description": "A Twig."
-    },
-    {
-      "itemName": "herbs",
-      "displayName": "Herbs",
-      "itemType": "herbs",
-      "description": "Medicinal Herbs.",
-      "effects": ["heal"],
-      "strengths":[5]
-    },
-    {
-      "itemName": "food",
-      "displayName": "Food",
-      "itemType": "food",
-      "description": "Yummy food.",
-      "effects": ["feed"],
-      "strengths":[10]
-    },
-    {
-      "itemName": "water",
-      "displayName": "Water",
-      "itemType": "water",
-      "description": "Yummy water.",
-      "effects": ["thirst"],
-      "strengths":[10]
-    },
-    {
-      "itemName": "hide",
-      "displayName": "Animal Hide",
-      "itemType": "hide",
-      "description": "Awesome animal hide."
-    }
+  {
+    "itemName": "stone",
+    "displayName": "Stones",
+    "itemType": "stone",
+    "description": "Hard stuff."
+  },
+  {
+    "itemName": "metalfragments",
+    "displayName": "Metal Fragments",
+    "itemType": "metal",
+    "description": "Shiny fragments."
+  },
+  {
+    "itemName": "nitrate",
+    "displayName": "Nitrates",
+    "itemType": "metal",
+    "description": "It's like nitrogen?"
+  },
+  {
+    "itemName": "fish",
+    "displayName": "Fish",
+    "itemType": "food",
+    "description": "A slippery fish.",
+    "effects": ["feed"],
+    "strengths":[10]
+  },
+  {
+    "itemName": "woodlog",
+    "displayName": "Wood Log",
+    "itemType": "wood",
+    "description": "A wood log."
+  },
+  {
+    "itemName": "stone",
+    "displayName": "Stone",
+    "itemType": "stone",
+    "description": "A stone rock."
+  },
+  {
+    "itemName": "twig",
+    "displayName": "Twig",
+    "itemType": "wood",
+    "description": "A Twig."
+  },
+  {
+    "itemName": "herbs",
+    "displayName": "Herbs",
+    "itemType": "herbs",
+    "description": "Medicinal Herbs.",
+    "effects": ["heal"],
+    "strengths":[5]
+  },
+  {
+    "itemName": "food",
+    "displayName": "Food",
+    "itemType": "food",
+    "description": "Yummy food.",
+    "effects": ["feed"],
+    "strengths":[10]
+  },
+  {
+    "itemName": "water",
+    "displayName": "Water",
+    "itemType": "water",
+    "description": "Yummy water.",
+    "effects": ["thirst"],
+    "strengths":[10]
+  },
+  {
+    "itemName": "hide",
+    "displayName": "Animal Hide",
+    "itemType": "hide",
+    "description": "Awesome animal hide."
+  }
 ]

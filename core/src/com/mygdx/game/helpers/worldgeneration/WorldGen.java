@@ -31,12 +31,8 @@ public class WorldGen {
     public float treeScale = 0.8f;
     public float freq = 5;
     public float percentageDone = 0;
-
     public static Texture whiteTex;
-
     private TextureAtlas terrainAtlas;
-
-
     private int currX = 0, currY = 0;
     private int numTrees = 0;
 
@@ -162,7 +158,7 @@ public class WorldGen {
                 this.currDone++;
             }
 
-            percentageDone = this.currDone / maxAmount; //Calcs the percentage done so that the player's UI can use this.
+            percentageDone = (float)this.currDone / maxAmount; //Calcs the percentage done so that the player's UI can use this.
 
             //If we are done with the current noise level but we have more levels to go, reset the currX and currY, increment currIndex and continue.
             if (done && this.currIndex < DataBuilder.worldData.noiseMapHashMap.size()) {
@@ -276,6 +272,8 @@ public class WorldGen {
             String textureName = jRes.img[MathUtils.random(jRes.img.length - 1)]; //Get the texture name.
             reg = interactableAtlas.findRegion(textureName);
         }
+
+        if(reg == null && !jRes.noimg) GH.writeErrorMessage("A resource image is null when 'noimg' is set to false, meaning there should be a picture. Check the resources.json and make sure the image name is correct.", true);
 
         //Create the resource and stuff.
         ResourceEnt resEnt = new ResourceEnt(centerPos, 0, reg, 11);

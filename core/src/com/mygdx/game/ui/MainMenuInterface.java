@@ -39,7 +39,7 @@ public class MainMenuInterface extends UI{
 
     Rectangle[] buttonRects = new Rectangle[5];
 
-    private Texture titleTexture;
+    private TextureRegion titleTexture;
     private BitmapFont titleFont;
     private GUI.GUIStyle changeLogStyle = new GUI.GUIStyle();
     private Rectangle startRect = new Rectangle(), quitRect = new Rectangle(), blank1Rect = new Rectangle();
@@ -55,7 +55,7 @@ public class MainMenuInterface extends UI{
         super(batch);
         this.game = game;
 
-        titleTexture = ColonyGame.assetManager.get("Auroris", Texture.class);
+        titleTexture = new TextureRegion(ColonyGame.assetManager.get("Auroris", Texture.class));
         music = Gdx.audio.newMusic(Gdx.files.internal("music/Karkarakacrrot.ogg"));
         titleFont = new BitmapFont(Gdx.files.internal("fonts/titlefont.fnt"));
         mainMenuTexture = ColonyGame.assetManager.get("Space2", Texture.class);
@@ -189,7 +189,7 @@ public class MainMenuInterface extends UI{
         GUI.ResetFont();
 
         //Start button.
-        if(GUI.Button(startRect, "", this.batch, startButtonStyle)){
+        if(GUI.Button(this.batch, "", startRect, startButtonStyle)){
             for(int i=0;i<scriptCheckBoxList.size;i++){
                 if(scriptCheckBoxList.get(i).isChecked())
                     ScriptManager.scripts.get(i).start();
@@ -200,12 +200,12 @@ public class MainMenuInterface extends UI{
             return;
         }
 
-        GUI.Button(blank1Rect, "", this.batch, blank1Style);
-        GUI.Button(blank2Rect, "", this.batch, blank2Style);
-        GUI.Button(blank3Rect, "", this.batch, blank3Style);
+        GUI.Button(this.batch, "", blank1Rect, blank1Style);
+        GUI.Button(this.batch, "", blank2Rect, blank2Style);
+        GUI.Button(this.batch, "", blank3Rect, blank3Style);
 
         //Quit button.
-        if(GUI.Button(quitRect, "", this.batch, quitButtonStyle)){
+        if(GUI.Button(this.batch, "", quitRect, quitButtonStyle)){
             Gdx.app.exit();
         }
 
@@ -235,7 +235,7 @@ public class MainMenuInterface extends UI{
     @Override
     public void resize(int width, int height) {
         this.changelogRect.set(width - width * 0.3f, 0, width * 0.3f, height - height * 0.1f);
-        this.titleRect.set(width / 2 - titleTexture.getWidth() / 2, height - titleTexture.getHeight() - height * 0.02f, titleTexture.getWidth(), titleTexture.getHeight());
+        this.titleRect.set(width / 2 - titleTexture.getRegionWidth() / 2, height - titleTexture.getRegionHeight() - height * 0.02f, titleTexture.getRegionWidth(), titleTexture.getRegionHeight());
 
         this.outsideScrollContainer.setBounds(width * 0.66f, height * 0.1f, width * 0.3f, height * 0.8f);
         this.outsideScrollContainer.invalidate();

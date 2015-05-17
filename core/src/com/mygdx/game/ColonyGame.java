@@ -79,6 +79,7 @@ public class ColonyGame extends Game {
 		}catch(Exception e){
 			e.printStackTrace();
 			threadPool.shutdownNow();
+			GH.writeErrorMessage(e);
 			Gdx.app.exit();
 		}
 

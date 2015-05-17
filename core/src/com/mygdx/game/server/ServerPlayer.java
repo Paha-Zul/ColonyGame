@@ -149,7 +149,7 @@ public class ServerPlayer {
         //Spawn some angry wolf packs.
         for(int i=0;i<5;i++){
             Group group = new Group();
-            Vector2 pos = new Vector2(10 + MathUtils.random(grid.getWidth()-10)*grid.getSquareSize(), 10 + MathUtils.random(grid.getHeight()-10)*grid.getSquareSize());
+            Vector2 pos = new Vector2(20 + MathUtils.random(grid.getWidth()-40)*grid.getSquareSize(), 20 + MathUtils.random(grid.getHeight()-40)*grid.getSquareSize());
             AnimalEnt wolfLeader = new AnimalEnt("wolf", pos, 0, atlas.findRegion("wolf"), 11);
             group.setLeader(wolfLeader);
 
@@ -165,7 +165,7 @@ public class ServerPlayer {
 
         //spawn big boss wolf
         Group group = new Group();
-        Vector2 pos = new Vector2(10 + MathUtils.random(grid.getWidth()-10)*grid.getSquareSize(), 20 + MathUtils.random(grid.getHeight()-20)*grid.getSquareSize());
+        Vector2 pos = new Vector2(20 + MathUtils.random(grid.getWidth()-40)*grid.getSquareSize(), 20 + MathUtils.random(grid.getHeight()-40)*grid.getSquareSize());
         DataBuilder.JsonAnimal bossWolfRef = DataManager.getData("bosswolf", DataBuilder.JsonAnimal.class);
         AnimalEnt bossWolf = new AnimalEnt(bossWolfRef, pos, 0, atlas.findRegion(bossWolfRef.img), 11);
         group.setLeader(bossWolf);

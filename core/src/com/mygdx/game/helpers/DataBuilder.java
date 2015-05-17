@@ -478,6 +478,7 @@ public class DataBuilder implements IDestroyable{
         public String resourceName, displayName, resourceType, description, dir, skill;
         public String[] img, allimgwith, itemNames;
         public int[][] itemAmounts;
+        public int[] itemChances;
         public int gatherTime;
         public float skillIncrease = 0;
         public boolean noimg, infinite, skillRequired = false;

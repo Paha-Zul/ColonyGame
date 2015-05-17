@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.utils.Align;
 import com.mygdx.game.helpers.worldgeneration.WorldGen;
@@ -29,15 +30,19 @@ public class GUI {
     private static boolean up = false;
     private static Rectangle rect1 = new Rectangle();
 
+    private static TextureRegion whiteTexture;
+    private static float boundsWidth = 0;
+
     static{
         font = defaultFont;
+        whiteTexture = new TextureRegion(WorldGen.whiteTex);
     }
 
-    public static void Texture(Texture texture, Rectangle rect, SpriteBatch batch){
+    public static void Texture(TextureRegion texture, Rectangle rect, SpriteBatch batch){
         batch.draw(texture, rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight());
     }
 
-    public static void Texture(Texture texture, float x, float y, float width, float height, SpriteBatch batch){
+    public static void Texture(TextureRegion texture, float x, float y, float width, float height, SpriteBatch batch){
         batch.draw(texture, x, y, width, height);
     }
 
@@ -88,32 +93,32 @@ public class GUI {
         Color batchColor = batch.getColor();
         //Draw the out rectangle
         batch.setColor(Color.BLACK);
-        GUI.Texture(WorldGen.whiteTex, outerX, y, width, height, batch);
+        GUI.Texture(new TextureRegion(WorldGen.whiteTex), outerX, y, width, height, batch);
 
         //Draw the inner rectangle (shrink it by 2 inches on all sides, 'padding')
         batch.setColor(color);
         float newWidth = (currVal/maxVal)*(width-4);
-        GUI.Texture(WorldGen.whiteTex, innerX, y + 2, newWidth, height - 4, batch);
+        GUI.Texture(whiteTexture, innerX, y + 2, newWidth, height - 4, batch);
 
         if(displayText) GUI.Label((int)currVal+"/"+(int)maxVal, batch, outerX, y, width, height);
 
         batch.setColor(batchColor);
     }
 
-    public static boolean Button(Rectangle rect, SpriteBatch batch){
-        return GUI.Button(rect, "", batch, null);
+    public static boolean Button(SpriteBatch batch, Rectangle rect){
+        return GUI.Button(batch, "", rect, null);
     }
 
-    public static boolean Button(Rectangle rect, String text, SpriteBatch batch){
-        return GUI.Button(rect, text, batch, null);
+    public static boolean Button(SpriteBatch batch, Rectangle rect, String text){
+        return GUI.Button(batch, text, rect, null);
     }
 
-    public static boolean Button(float x, float y, float width, float height, String text, SpriteBatch batch, GUIStyle style){
+    public static boolean Button(SpriteBatch batch, String text, float x, float y, float width, float height, GUIStyle style){
         rect1.set(x, y, width, height);
-        return GUI.Button(rect1, text, batch, style);
+        return GUI.Button(batch, text, rect1, style);
     }
 
-    public static boolean Button(Rectangle rect, String text, SpriteBatch batch, GUIStyle style){
+    public static boolean Button(SpriteBatch batch, String text, Rectangle rect, GUIStyle style){
         boolean clicked = false;
 
         if(style == null)
@@ -136,7 +141,7 @@ public class GUI {
 
         batch.draw(currTexture, rect.x, rect.y, rect.getWidth(), rect.getHeight());
         BitmapFont.TextBounds bounds = font.getBounds(text);                                //Get the bounds of the text
-        style.font.draw(batch, text, rect.getX() + rect.getWidth() / 2 - bounds.width / 2, rect.getY() + rect.getHeight() / 2 + bounds.height / 2); //Draw the text
+        if(!text.isEmpty()) GUI.Label(text, batch, rect.x, rect.y, rect.getWidth(), rect.getHeight(), style);
 
         return clicked;
     }
@@ -155,26 +160,46 @@ public class GUI {
 
     public static void Label(@NotNull String text, @NotNull SpriteBatch batch, float x, float y, float width, float height, GUIStyle style){
         if(style == null) style = defaultGUIStyle;
+        BitmapFont.HAlignment alignment;
+
+        if(style.background != null)
+            GUI.Texture(style.background, x, y, width, height, batch);
+
         //y += style.font.getLineHeight();
         BitmapFont.TextBounds bounds = font.getBounds(text);
+        boundsWidth = bounds.width;
 
-        x += style.paddingLeft;
-        width -= style.paddingRight;
+        float adjX = x, adjY = y;
+
+        adjX += style.paddingLeft; //Push to the right for left padding.
+        width -= style.paddingLeft; //Since we pushed the X to the left, we must shrink the width by an equal amount.
         y -= style.paddingTop;
         height -= style.paddingBottom;
 
-        if(style.alignment == Align.center){
-            x += width/2 - bounds.width/2;
-            y += height/2 + bounds.height/2;
-        }else if(style.alignment == Align.left)
-            y += height/2 + bounds.height/2;
-        else if(style.alignment == Align.topLeft)
-            y += height;
 
-        if(!style.multiline)
-            style.font.draw(batch, text, x, y);
-        else
-            style.font.drawMultiLine(batch, text, x, y);
+        if(style.alignment == Align.center){
+            adjX += width/2 - boundsWidth/2;
+            adjY += height/2 + bounds.height/2;
+            alignment = BitmapFont.HAlignment.CENTER;
+        }else if(style.alignment == Align.left) {
+            adjY += height / 2 + bounds.height / 2;
+            alignment = BitmapFont.HAlignment.LEFT;
+        }else if(style.alignment == Align.topLeft) {
+            adjY += height;
+            alignment = BitmapFont.HAlignment.LEFT;
+        }else
+            alignment = BitmapFont.HAlignment.LEFT;
+
+        if(adjX >= x) x = adjX;
+        if(adjY >= y) y = adjY;
+
+        //Shrink these after...
+        width -= style.paddingRight; //Shrink the width by the right padding.
+        height -= style.paddingTop; //Shrink the height by the top padding.
+
+        if(!style.multiline && !style.wrap) style.font.draw(batch, text, x, y);
+        else if(!style.wrap) style.font.drawMultiLine(batch, text, x, y);
+        else style.font.drawWrapped(batch, text, x, y, width, alignment);
     }
 
     public static String TextBox(String text, SpriteBatch batch, float x, float y){
@@ -185,22 +210,6 @@ public class GUI {
         GUI.font = defaultFont;
         GUI.font.setColor(Color.WHITE);
         GUI.font.setScale(1f);
-    }
-
-    public static class GUIStyle {
-        public Texture normal = GUI.defaultNormalButton;
-        public Texture moused = GUI.defaultMousedButton;
-        public Texture clicked = GUI.defaultClickedButton;
-        public Texture active = GUI.defaultClickedButton;
-
-        public BitmapFont font = defaultFont;
-        public boolean multiline = false, toggled = false, activated = false;
-        public int alignment = Align.center;
-        public int paddingLeft, paddingRight, paddingTop, paddingBottom;
-
-        public GUIStyle(){
-
-        }
     }
 
     public static void checkState(){
@@ -215,6 +224,27 @@ public class GUI {
         }else if(GUI.up){
             GUI.up = false;
             GUI.clicked = false;
+        }
+    }
+
+    public static class GUIStyle {
+        public Texture normal = GUI.defaultNormalButton;
+        public Texture moused = GUI.defaultMousedButton;
+        public Texture clicked = GUI.defaultClickedButton;
+        public Texture active = GUI.defaultClickedButton;
+
+        public BitmapFont font = defaultFont;
+        public boolean multiline = false, toggled = false, activated = false, wrap = false;
+        public int alignment = Align.center;
+        public int paddingLeft, paddingRight, paddingTop, paddingBottom;
+        public TextureRegion background;
+
+        public GUIStyle(){
+
+        }
+
+        public void padding(int amt){
+            paddingLeft = paddingBottom = paddingRight = paddingTop = amt;
         }
     }
 }

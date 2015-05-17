@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.helpers.ListHolder;
@@ -19,14 +20,16 @@ public class LoadingInterface extends UI{
     private boolean done;
 
     private Rectangle loadingBar = new Rectangle(), square = new Rectangle();
-    private Texture outline, bar;
+    private TextureRegion outline, bar;
+    private TextureRegion whiteTexture;
 
     public LoadingInterface(SpriteBatch batch){
         super(batch);
         this.batch = batch;
 
-        this.outline = ColonyGame.assetManager.get("LoadingBarOutline", Texture.class);
-        this.bar = ColonyGame.assetManager.get("LoadingBar", Texture.class);
+        this.whiteTexture = new TextureRegion(WorldGen.whiteTex);
+        this.outline = new TextureRegion(ColonyGame.assetManager.get("LoadingBarOutline", Texture.class));
+        this.bar = new TextureRegion(ColonyGame.assetManager.get("LoadingBar", Texture.class));
 
         this.loadingBar.set(Gdx.graphics.getWidth()/2 - width/2, Gdx.graphics.getHeight()/2 + height/2, width, height);
         this.square.set(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -41,7 +44,7 @@ public class LoadingInterface extends UI{
         if(!done) {
             Color color = this.batch.getColor();
             this.batch.setColor(Color.BLACK);
-            GUI.Texture(WorldGen.getInstance().whiteTex, this.square, this.batch);
+            GUI.Texture(this.whiteTexture, this.square, this.batch);
             this.batch.setColor(color);
 
             GUI.Texture(this.outline, this.loadingBar, this.batch);
@@ -72,9 +75,7 @@ public class LoadingInterface extends UI{
         batch = null;
         loadingBar = null;
         square = null;
-        outline.dispose();
         outline = null;
-        bar.dispose();
         bar = null;
     }
 
