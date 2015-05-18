@@ -50,21 +50,6 @@ public class ColonyGame extends Game {
         threadPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
 		this.setScreen(new PreLoadingScreen(this));
-
-		Tags tag1 = new Tags("resource");
-		Tags tag2 = new Tags("resource");
-
-		tag1.addTag(2);
-		tag2.addTag(1);
-		tag2.addTag(3);
-
-		System.out.println("tag1 has 2: " + tag1.hasTag(2));
-		System.out.println("tag1 has 1: " + tag1.hasTag(1));
-		System.out.println("tag1 has 1: " + tag1.hasTag(3));
-
-		System.out.println("tag2 has 2: "+tag1.hasTag(2));
-
-
 	}
 
 	@Override

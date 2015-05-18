@@ -93,7 +93,7 @@ public class Resource extends Component implements IInteractable{
                 amounts.add(amount); //Adds the item amount to this resource.
                 names.add(itemNames[i]); //Adds the item name to this resource.
                 DataBuilder.JsonItem itemRef = DataManager.getData(itemNames[i], DataBuilder.JsonItem.class); //Get the itemRef
-                resourceTypeTags.addTag(StringTable.StringToInt("resource_type", itemRef.getItemType())); //Adds the type to the resource type tags.
+                resourceTypeTags.addTag(itemRef.getItemType()); //Adds the type to the resource type tags.
 
                 //For every item effect, add the effect to the effectTags.
                 if(itemRef.getEffects() != null)

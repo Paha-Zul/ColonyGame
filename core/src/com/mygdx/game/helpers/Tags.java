@@ -101,7 +101,7 @@ public class Tags {
      * @param tagsToCheck The String tags to check.
      * @return True if this Tags object has all the tags in the tagsToCheck array, false otherwise.
      */
-    public boolean hasTags(String[] tagsToCheck){
+    public boolean hasTags(String... tagsToCheck){
         int tags = 0b0; //0 in binary
         for (String tagToCheck : tagsToCheck) tags |= (1 << StringTable.StringToInt(type, tagToCheck));
         return (tags & tagMask) == tags;
@@ -122,7 +122,7 @@ public class Tags {
         return false;
     }
 
-    public boolean hasAnyTag(String[] tagsToCheck){
+    public boolean hasAnyTag(String... tagsToCheck){
         for (String tag : tagsToCheck) {
             int shift = 1 << StringTable.StringToInt(type, tag);
             if((shift & tagMask) == shift)

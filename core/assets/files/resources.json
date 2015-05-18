@@ -10,10 +10,10 @@
     "gatherTime": 3
   },
   {
-    "resourceName": "ironore",
+    "resourceName": "iron_ore",
     "displayName": "Iron Ore",
     "resourceType": "ore",
-    "itemNames": ["metalfragments", "nitrate"],
+    "itemNames": ["metal_fragments", "nitrate"],
     "itemAmounts": [[5,10], [1,1]],
     "itemChances": [1, 0.1],
     "img": ["Ore1"],

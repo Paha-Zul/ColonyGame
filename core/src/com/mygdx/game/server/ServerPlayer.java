@@ -156,7 +156,7 @@ public class ServerPlayer {
             DataBuilder.JsonAnimal animal = wolfLeader.getComponent(Animal.class).getAnimalRef();
             int amount = (int)(animal.packAmount[0] + Math.random()*(animal.packAmount[1] - animal.packAmount[0]));
             for(int j=0;j<amount; j++){
-                Vector2 pos2 = new Vector2(pos.x + MathUtils.random()*5 - 10, pos.y + MathUtils.random()*5 - 10);
+                Vector2 pos2 = new Vector2(pos.x + MathUtils.random()*1 - 2, pos.y + MathUtils.random()*1 - 2);
                 AnimalEnt wolf = new AnimalEnt("wolf", pos2, 0, atlas.findRegion("wolf"), 11);
                 wolf.addComponent(group);
                 group.addEntityToGroup(wolf);
@@ -176,7 +176,7 @@ public class ServerPlayer {
         for(int j=0;j<amount; j++){
             DataBuilder.JsonAnimal childWolf = DataManager.getData(bossWolfRef.typeInPack[0], DataBuilder.JsonAnimal.class);
 
-            Vector2 pos2 = new Vector2(pos.x + MathUtils.random()*5 - 10, pos.y + MathUtils.random()*5 - 10);
+            Vector2 pos2 = new Vector2(pos.x + MathUtils.random()*1 - 2, pos.y + MathUtils.random()*1 - 2);
             AnimalEnt wolf = new AnimalEnt(childWolf, pos2, 0, atlas.findRegion(childWolf.img), 11);
             wolf.addComponent(group);
             group.addEntityToGroup(wolf);

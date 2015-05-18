@@ -102,7 +102,7 @@ public class Gather extends LeafTask{
     }
 
     private void createGatherMessage(String[] itemNames, int[] amounts){
-        StringBuilder text = new StringBuilder("Gathered ");
+        StringBuilder text = new StringBuilder("+");
         for(int i=0;i<itemNames.length;i++){
             DataBuilder.JsonItem ref = DataManager.getData(itemNames[i], DataBuilder.JsonItem.class);
             text.append(amounts[i]).append(" ").append(ref.getDisplayName());

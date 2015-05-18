@@ -131,7 +131,6 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         return true;
     };
 
-
     private QueryCallback selectionCallback = fixture -> {
         Collider.ColliderInfo selectedInfo = (Collider.ColliderInfo)fixture.getUserData();
 
@@ -557,8 +556,8 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
                     ((BehaviourManagerComp.TaskInfo) treeNode.userData).active = taskInfo.active; //Toggle the treeNode.
 
                     //If it's toggled, add the tag, otherwise, remove the tag.
-                    if(((BehaviourManagerComp.TaskInfo) treeNode.userData).active) comp.getBlackBoard().resourceTypeTags.addTag(StringTable.StringToInt("resource_type", treeNode.nodeName));
-                    else comp.getBlackBoard().resourceTypeTags.removeTag(StringTable.StringToInt("resource_type", treeNode.nodeName));
+                    if(((BehaviourManagerComp.TaskInfo) treeNode.userData).active) comp.getBlackBoard().resourceTypeTags.addTag(treeNode.nodeName);
+                    else comp.getBlackBoard().resourceTypeTags.removeTag(treeNode.nodeName);
                 }
 
                 //Get the node from the gather TreeNode. If it has children, set the currStateNode

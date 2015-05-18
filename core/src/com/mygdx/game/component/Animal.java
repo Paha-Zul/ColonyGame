@@ -140,7 +140,7 @@ public class Animal extends Component implements IInteractable{
             else attackTarget(behComp.getBlackBoard().target);
             otherInfo.owner.setToDestroy();
 
-            //If I am a detector and the other is a colonist, we must attack it!
+        //If I am a detector and the other is a colonist, we must attack it!
         }else if (myInfo.tags.hasTag(Constants.COLLIDER_DETECTOR) && otherInfo.owner.getTags().hasTag("colonist") && animalRef.aggressive) {
             if(otherInfo.owner.getTags().hasTag("alive")) attackList.add(otherInfo.owner);
         }

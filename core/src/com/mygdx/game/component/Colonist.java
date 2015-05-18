@@ -7,7 +7,6 @@ import com.mygdx.game.behaviourtree.Task;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.DataBuilder;
 import com.mygdx.game.helpers.EventSystem;
-import com.mygdx.game.helpers.StringTable;
 import com.mygdx.game.helpers.Tree;
 import com.mygdx.game.helpers.gui.GUI;
 import com.mygdx.game.helpers.managers.DataManager;
@@ -134,13 +133,13 @@ public class Colonist extends Component implements IInteractable{
             node.userData = taskInfo;
         }
 
-        nodeList = taskTree.addNode("gather", "food", "water", "herbs", "wood");
+        nodeList = taskTree.addNode("gather", "food", "water", "herbs", "wood", "stone", "metal");
 
         for(Tree.TreeNode node : nodeList) {
             BehaviourManagerComp.TaskInfo taskInfo = new BehaviourManagerComp.TaskInfo(node.nodeName);
             taskInfo.callback = () -> {
                 taskInfo.active = !taskInfo.active;
-                getBehManager().getBlackBoard().resourceTypeTags.toggleTag(StringTable.StringToInt("resource_type", node.nodeName));
+                getBehManager().getBlackBoard().resourceTypeTags.toggleTag(node.nodeName);
             };
             taskInfo.userData = DataManager.getData("blankStyle", GUI.GUIStyle.class);
 
