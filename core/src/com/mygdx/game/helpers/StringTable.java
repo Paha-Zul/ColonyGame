@@ -1,5 +1,6 @@
 package com.mygdx.game.helpers;
 
+import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 
 import java.util.HashMap;
@@ -17,6 +18,7 @@ public class StringTable {
      */
     private static TObjectIntHashMap counterMap = new TObjectIntHashMap(32);
     private static HashMap<String, HashMap<String, StringIntPair>> stringToIntTable = new HashMap<>();
+    private static HashMap<String, TIntObjectHashMap<StringIntPair>> intToStringTable = new HashMap<>();
 
     /**
      * Gets a string from the string stringToIntTable.
@@ -27,21 +29,24 @@ public class StringTable {
     @SuppressWarnings("unchecked")
     public static int StringToInt(String category, String string){
         stringToIntTable.putIfAbsent(category, new HashMap<>()); //Puts in the object -> int hashmap.
+        intToStringTable.putIfAbsent(category, new TIntObjectHashMap<>()); //Puts in the int -> object hashmap.
+
         StringIntPair value = stringToIntTable.get(category).get(string); //Gets the string -> StringIntPair object.
         //If it's null, we need to initialize it
         if(value == null){
             int val = counterMap.adjustOrPutValue(category, 1, 1);
-            stringToIntTable.get(category).put(string, value = new StringIntPair(string, val));
+            stringToIntTable.get(category).put(string, value = new StringIntPair(string, val)); //This adds the string -> object pair.
+            intToStringTable.get(category).put(value.integer, value);   //This adds the int -> object pair using the int from value which is assigned in the line above.
         }
 
         return value.integer;
     }
 
-//    public static String IntToString(String category, int num){
-//        HashMap<String, StringIntPair> tmpTable = stringToIntTable.get(category);
-//        if(tmpTable == null) GH.writeErrorMessage("A category has not been entered and set up in StringTable.java for "+category+". you are doing something wrong...", true);
-//        return tmpTable.get()
-//    }
+    public static String IntToString(String category, int num){
+        TIntObjectHashMap<StringIntPair> tmpTable = intToStringTable.get(category);
+        if(tmpTable == null) GH.writeErrorMessage("A category has not been entered and set up in StringTable.java for "+category+". you are doing something wrong...", true);
+        return tmpTable.get(num).string;
+    }
 
     private static class StringIntPair{
         public String string;

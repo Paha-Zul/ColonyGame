@@ -15,12 +15,15 @@ import java.util.HashMap;
  * Created by Paha on 1/18/2015.
  */
 public class Inventory extends Component implements IDisplayable{
+    public String lasAddedItem = "";
+
     private String allowedTypes = "all";
     private int totalTypesAllowed = -1;
     private int totalItemsAllowed = -1;
     private int totalWeightAllowed = -1;
-
     private int currTotalItems = 0;
+
+    private final int maxAmount = 10;
 
     private HashMap<String, InventoryItem> inventory = new HashMap<>(20);
 
@@ -56,21 +59,23 @@ public class Inventory extends Component implements IDisplayable{
     }
 
     /**
-     * Adds one of the item designated by the itemName passed in.
+     * Checks if this Inventory can add a certain amount of item.
      * @param itemName The name of the item to add.
+     * @param amount The amount to add.
+     * @return True if it can be added, false otherwise.
      */
-    public void addItem(String itemName){
+    public boolean canAddItem(String itemName, int amount) {
         InventoryItem invItem = this.inventory.get(itemName);
-        //If the invItem doesn't exist, create a new one and add it to the hash map.
-        if(invItem == null) {
-            invItem = new InventoryItem(itemName, 1);
-            this.inventory.put(itemName, invItem); //Make a new inventory itemRef in the hashmap.
-            //Otherwise, simply add the amount from the itemRef.
-        }else
-            invItem.addAmount(1);
+        return (invItem == null && amount <= maxAmount) || (invItem != null && invItem.canAddAmount(amount));
+    }
 
-        //Keeps track of total itemNames in this inventory.
-        this.currTotalItems+=1;
+    /**
+     * Checks if this Inventory can add 1 of an item.
+     * @param itemName The name of the Item to add
+     * @return True if it can be added, false otherwise.
+     */
+    public boolean canAddItem(String itemName){
+        return this.canAddItem(itemName, 1);
     }
 
     /**
@@ -79,12 +84,13 @@ public class Inventory extends Component implements IDisplayable{
      * @param amount The amount of the item to add.
      */
     public void addItem(String itemName, int amount){
+        this.lasAddedItem = null;
         if(amount == 0) return;
 
         InventoryItem invItem = this.inventory.get(itemName);
         //If the invItem doesn't exist, create a new one and add it to the hash map.
         if(invItem == null) {
-            invItem = new InventoryItem(itemName, amount);
+            invItem = new InventoryItem(itemName, amount, maxAmount);
             this.inventory.put(itemName, invItem); //Make a new inventory itemRef in the hashmap.
             //Otherwise, simply add the amount from the itemRef.
         }else
@@ -92,7 +98,18 @@ public class Inventory extends Component implements IDisplayable{
 
         //Keeps track of total itemNames in this inventory.
         this.currTotalItems+=amount;
+        this.lasAddedItem = itemName;
     }
+
+    /**
+     * Adds one of the item designated by the itemName passed in.
+     * @param itemName The name of the item to add.
+     */
+    public void addItem(String itemName){
+        this.addItem(itemName, 1);
+    }
+
+
 
     /**
      * Removes all of an itemRef (by name) and returns that itemRef with the amount removed.
@@ -185,13 +202,13 @@ public class Inventory extends Component implements IDisplayable{
         GUI.Text("Inventory Items", batch, x, y);
         y-=20;
         for(Inventory.InventoryItem item : this.getItemList()){
-            GUI.Text(item.itemRef.getDisplayName()+": "+item.amount, batch, x, y);
+            GUI.Text(item.itemRef.getDisplayName()+": "+item.amount+"/"+item.maxAmount, batch, x, y);
             y-=20;
         }
     }
 
     public class InventoryItem{
-        private int amount;
+        private int amount, maxAmount;
         public DataBuilder.JsonItem itemRef;
 
         /**
@@ -199,13 +216,18 @@ public class Inventory extends Component implements IDisplayable{
          * @param itemRef The Item to clone.
          * @param amount The amount of the itemRef to initially store.
          */
-        public InventoryItem(DataBuilder.JsonItem itemRef, int amount){
+        public InventoryItem(DataBuilder.JsonItem itemRef, int amount, int maxAmount){
             this.itemRef = itemRef;
             this.amount = amount;
+            this.maxAmount = maxAmount;
         }
 
-        public InventoryItem(String itemName, int amount){
-            this(DataManager.getData(itemName, DataBuilder.JsonItem.class), amount);
+        public InventoryItem(String itemName, int amount, int maxAmount){
+            this(DataManager.getData(itemName, DataBuilder.JsonItem.class), amount, maxAmount);
+        }
+
+        public boolean canAddAmount(int amount){
+            return this.amount + amount <= maxAmount;
         }
 
         public void addAmount(int amount){
@@ -214,6 +236,10 @@ public class Inventory extends Component implements IDisplayable{
 
         public int getAmount(){
             return this.amount;
+        }
+
+        public int getMaxAmount(){
+            return this.maxAmount;
         }
     }
 }

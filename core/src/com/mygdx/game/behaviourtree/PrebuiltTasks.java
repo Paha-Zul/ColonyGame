@@ -58,10 +58,31 @@ public class PrebuiltTasks {
         };
 
         Sequence sequence = new Sequence("Gathering Resource", blackBoard);
-        FindClosestEntity fr = new FindClosestEntity("Finding Closest Resource", blackBoard);
 
-        ((ParentTaskController)sequence.getControl()).addTask(fr);
-        ((ParentTaskController)sequence.getControl()).addTask(gatherTarget(blackBoard, behComp));
+        //All this should be under a repeat.
+        Sequence innerGatherSeq = new Sequence("Gathering", blackBoard);
+        RepeatUntilCondition repeatGather = new RepeatUntilCondition("Repeat", blackBoard, innerGatherSeq);
+        FindClosestEntity fr = new FindClosestEntity("Finding Closest Resource", blackBoard);
+        FindPath fpResource = new FindPath("Finding Path to Resource", blackBoard);
+        MoveTo mtResource = new MoveTo("Moving to Resource", blackBoard);
+        Gather gather = new Gather("Gathering Resource", blackBoard);
+
+        FindClosestEntity findStorage = new FindClosestEntity("Finding storage.", blackBoard);
+        FindPath findPathToStorage = new FindPath("Finding Path to Storage", blackBoard);
+        MoveTo moveToStorage = new MoveTo("Moving to Storage", blackBoard);
+        TransferResource transferItems = new TransferResource("Transferring Resources", blackBoard);
+
+        ((ParentTaskController)sequence.getControl()).addTask(repeatGather);
+        ((ParentTaskController)innerGatherSeq.getControl()).addTask(fr);
+        ((ParentTaskController)innerGatherSeq.getControl()).addTask(fpResource);
+        ((ParentTaskController)innerGatherSeq.getControl()).addTask(mtResource);
+        ((ParentTaskController)innerGatherSeq.getControl()).addTask(gather);
+
+        ((ParentTaskController)sequence.getControl()).addTask(findStorage);
+        ((ParentTaskController)sequence.getControl()).addTask(findPathToStorage);
+        ((ParentTaskController)sequence.getControl()).addTask(moveToStorage);
+        ((ParentTaskController)sequence.getControl()).addTask(transferItems);
+
 
         //Reset some values.
         sequence.control.callbacks.startCallback = task -> {
@@ -76,6 +97,24 @@ public class PrebuiltTasks {
             task.blackBoard.targetNode = null;
         };
 
+        //When we finish, set the target back to not taken IF it is still a valid target (if we ended early).
+        sequence.getControl().callbacks.finishCallback = task -> {
+            if (blackBoard.targetResource != null && blackBoard.targetResource.isValid() && sequence.getBlackboard().targetResource.getTaken() == sequence.getBlackboard().getEntityOwner()) {
+                sequence.getBlackboard().targetResource.setTaken(null);
+            }
+        };
+
+        //Check if we can still add more items that we are looking for. Return true if we can't (to end the repeat)
+        //and false to keep repeating.
+        repeatGather.getControl().callbacks.successCriteria = tsk -> {
+            Task task = (Task)tsk;
+            Inventory inv = task.blackBoard.myInventory;
+            //Get a list of the items we are searching for. If we can hold more, keep searching for what we need.
+            String[] itemNames = task.blackBoard.resourceTypeTags.getTagsAsString();
+            for(String itemName : itemNames) if(inv.canAddItem(itemName)) return false;
+            return true;
+        };
+
         //If we fail, call the fail callback.
         fr.getControl().callbacks.failureCallback = fail;
 
@@ -88,11 +127,12 @@ public class PrebuiltTasks {
             Resource resource = ent.getComponent(Resource.class);
             if(resource == null || blackBoard.resourceTypeTags.isEmpty()) return false;
 
-            int[] blackTags = blackBoard.resourceTypeTags.getTags();
+            String[] blackTags = blackBoard.resourceTypeTags.getTagsAsString();
             boolean notTaken = !resource.isTaken();
             boolean hasTag = resource.resourceTypeTags.hasAnyTag(blackTags);
+            boolean hasAvailableItem = resource.peekAvailableOnlyWanted(blackBoard.myInventory, blackTags);
 
-            return notTaken && hasTag;
+            return notTaken && hasTag && hasAvailableItem;
         };
 
         //On success, set the resource as taken if not already taken.
@@ -101,6 +141,30 @@ public class PrebuiltTasks {
             if(!task.blackBoard.targetResource.isTaken() || task.blackBoard.targetResource.getTaken() == task.blackBoard.getEntityOwner()) {
                 task.blackBoard.targetResource.setTaken(task.blackBoard.getEntityOwner());
             }
+        };
+
+        //If we don't have a target resource, try to get one from our target. Then check if it's valid and owned by us.
+        //If not, cancel the job.
+        fpResource.control.callbacks.checkCriteria = task -> {
+            if(task.blackBoard.targetResource == null) task.blackBoard.targetResource = task.blackBoard.target.getComponent(Resource.class);
+            return task.blackBoard.targetResource != null && (task.blackBoard.targetResource.getTaken() == null || task.blackBoard.targetResource.getTaken() == task.blackBoard.getEntityOwner());
+        };
+
+        //Make sure we are getting a building...
+        findStorage.control.callbacks.successCriteria = ent -> ((Entity)ent).getTags().hasTag("building");
+
+        //When finding a path to the resource, make sure it's actually a resource and we are the ones that have claimed it!
+        findPathToStorage.getControl().callbacks.checkCriteria = task -> {
+            Resource res = task.blackBoard.targetResource; //Get the target resource from the blackboard.
+            if(res == null) task.blackBoard.targetResource = res = task.blackBoard.target.getComponent(Resource.class); //If null, try to get it from the target.
+            return res != null && task.getBlackboard().targetResource.getTaken() == task.getBlackboard().getEntityOwner(); //Return true if not null and we are the ones that took it. False otherwise.
+        };
+
+        //When we finish gathering from a source, try to untake it in case it's infinite (like a water source)
+        gather.getControl().callbacks.finishCallback = task -> {
+            if(blackBoard.targetResource != null && blackBoard.targetResource.isValid())
+                if(blackBoard.targetResource.getTaken() == blackBoard.getEntityOwner())
+                    blackBoard.targetResource.setTaken(null);
         };
 
         return sequence;

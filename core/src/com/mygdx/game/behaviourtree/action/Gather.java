@@ -14,8 +14,6 @@ import com.mygdx.game.helpers.managers.SoundManager;
 import com.mygdx.game.helpers.timer.RepeatingTimer;
 import com.mygdx.game.helpers.timer.Timer;
 
-import java.util.Arrays;
-
 /**
  * <p>A task that gathers a resource when the right criteria is met.</p>
  *
@@ -68,31 +66,16 @@ public class Gather extends LeafTask{
             }
 
             //get the item names to gather. If the size is 0, we are done gathering this resource.
-            String[] itemNames = this.resource.gatherFrom();
-            if(itemNames.length == 0){
+            if(!this.resource.gatherFrom(this.blackBoard.myInventory))
                 endWithSuccess();
-                return;
-            }
-
-            //Fill an array with 1s
-            int[] amounts = new int[itemNames.length];
-            Arrays.fill(amounts, 1);
-
-            //For each item name, add it to the inventory.
-            for (String itemName : itemNames)
-                this.blackBoard.myInventory.addItem(itemName);
 
             //Create the gather message
-            createGatherMessage(itemNames, amounts);
-
-            //Peek into the resource. If the next tick is empty, end this job with success.
-            if(!resource.peek())
-                endWithSuccess();
+            createGatherMessage(this.blackBoard.myInventory.lasAddedItem, 1);
         });
     }
 
     private void endWithSuccess(){
-        //This sets up the information for moving and transfering to the colony.
+        //This sets up the information for moving and transferring to the colony.
         Colony targetColony = this.blackBoard.getEntityOwner().getComponent(Colonist.class).getColony(); //Get the colony.
         this.blackBoard.targetNode = null; //Set the target node to null to make sure we use the target (not the node)
         this.blackBoard.target = targetColony.getEntityOwner(); //Set the target to the entity owner of the colony.
@@ -119,6 +102,21 @@ public class Gather extends LeafTask{
         end.y += GH.toMeters(90);
 
         new FloatingText(text.toString(), start, end, 2f, 0.8f);
+    }
+
+    private void createGatherMessage(String itemName, int amount){
+        if(itemName == null || itemName.isEmpty())
+            itemName = "nothing...";
+        else
+            itemName = "+"+amount+" "+itemName;
+
+        Vector2 start = new Vector2(this.blackBoard.getEntityOwner().transform.getPosition());
+        start.y += GH.toMeters(40);
+
+        Vector2 end = new Vector2(this.blackBoard.getEntityOwner().transform.getPosition());
+        end.y += GH.toMeters(90);
+
+        new FloatingText(itemName, start, end, 2f, 0.8f);
     }
 
     @Override

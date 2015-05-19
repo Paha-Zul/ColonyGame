@@ -1,5 +1,6 @@
 package com.mygdx.game.helpers;
 
+import com.badlogic.gdx.utils.Array;
 import gnu.trove.list.array.TIntArrayList;
 
 /**
@@ -141,6 +142,20 @@ public class Tags {
         for(int i=0;i<33;i++){
             if(((tagMask >> i) & 1) == 1)
                 tagList.add(i);
+        }
+
+        return tagList.toArray();
+    }
+
+    /**
+     * Gets the tags as an integer array from this Tags object.
+     * @return An integer array containing the integer tags.
+     */
+    public String[] getTagsAsString(){
+        Array<String> tagList = new Array<>(String.class);
+        for(int i=0;i<33;i++){
+            if(((tagMask >> i) & 1) == 1)
+                tagList.add(StringTable.IntToString(type, i));
         }
 
         return tagList.toArray();

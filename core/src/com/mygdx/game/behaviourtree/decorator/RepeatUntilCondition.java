@@ -6,7 +6,7 @@ import com.mygdx.game.component.BlackBoard;
 /**
  * Created by Paha on 4/6/2015.
  *
- * <p>Repeats a task until a condition is met. The condition is tested by using {@link com.mygdx.game.helpers.Callbacks#successCriteria successCritera} to test
+ * <p>Repeats a task until a condition is met. The condition is tested by using {@link com.mygdx.game.helpers.Callbacks#successCriteria successCritera} which takes a {@link Task task} to test
  * the task for completion.</p>
  */
 public class RepeatUntilCondition extends TaskDecorator{

@@ -8,22 +8,18 @@ import com.mygdx.game.helpers.StringTable;
 import com.mygdx.game.helpers.Tags;
 import com.mygdx.game.helpers.managers.DataManager;
 import com.mygdx.game.interfaces.IInteractable;
-import gnu.trove.list.array.TIntArrayList;
-
-import java.util.ArrayList;
 
 /**
  * Created by Paha on 1/10/2015.
  */
 public class Resource extends Component implements IInteractable{
     private String resourceName = "default", displayName = "default", resourceType = "default";
-    private String[] itemNames;
+    private Array<String> itemNames;
+    private Array<Integer> itemAmounts;
     private int itemIndex = 0;
-    private int[] itemAmounts;
     private float gatherTime = 1f;
     private float gatherTick = 1f;
     private volatile Entity taken = null;
-    private Array<String> gatherList = new Array<>(false, 10, String.class);
 
     private StringBuilder contents = new StringBuilder();
     private DataBuilder.JsonResource resRef;
@@ -69,7 +65,7 @@ public class Resource extends Component implements IInteractable{
     private void initItem(DataBuilder.JsonResource jRes){
         this.displayName = jRes.displayName;
         this.resourceType = jRes.resourceType;
-        this.itemNames = jRes.itemNames;
+        this.itemNames = new Array<>(jRes.itemNames);
         this.gatherTime = jRes.gatherTime;
 
         generateItemInfo(jRes.itemNames, jRes.itemAmounts, jRes.itemChances);
@@ -81,8 +77,8 @@ public class Resource extends Component implements IInteractable{
      * @param itemAmounts The 2D int array of itemAmounts for each item name.
      */
     private void generateItemInfo(String[] itemNames, int[][] itemAmounts, int[] itemChances){
-        TIntArrayList amounts = new TIntArrayList(10);
-        ArrayList<String> names = new ArrayList<>(10);
+        Array<Integer> amounts = new Array<>(10);
+        Array<String> names = new Array<>(10);
         int total = 0, highest = 0;
 
         for(int i=0;i<itemAmounts.length; i++) {
@@ -105,40 +101,8 @@ public class Resource extends Component implements IInteractable{
             }
         }
 
-        this.itemAmounts = amounts.toArray();
-        this.itemNames = names.toArray(new String[names.size()]);
-        this.gatherTick = gatherTime/total;
-    }
-
-    /**
-     * Generates the item information about the resource being created, such as the names and item itemAmounts.
-     * @param itemNames The String array of item names.
-     * @param itemAmounts The 2D int array of itemAmounts for each item name.
-     */
-    private void generateItemInfo(String[] itemNames, int[] itemAmounts){
-        TIntArrayList amounts = new TIntArrayList(10);
-        ArrayList<String> names = new ArrayList<>(10);
-        int total = 0, highest = 0;
-
-        for(int i=0;i<itemAmounts.length; i++) {
-            if(itemAmounts[i] != 0){
-                amounts.add(itemAmounts[i]); //Adds the item amount to this resource.
-                names.add(itemNames[i]); //Adds the item name to this resource.
-                DataBuilder.JsonItem itemRef = DataManager.getData(itemNames[i], DataBuilder.JsonItem.class); //Get the itemRef
-                resourceTypeTags.addTag(StringTable.StringToInt("resource_type", itemRef.getItemType())); //Adds the type to the resource type tags.
-
-                //For every item effect, add the effect to the effectTags.
-                if(itemRef.getEffects() != null)
-                    for(String effect : itemRef.getEffects())
-                        effectTags.addTag(StringTable.StringToInt("item_effect", effect));
-
-                if(itemAmounts[i] > highest) highest = itemAmounts[i];
-                total += itemAmounts[i];
-            }
-        }
-
-        this.itemAmounts = amounts.toArray();
-        this.itemNames = names.toArray(new String[names.size()]);
+        this.itemAmounts = amounts;
+        this.itemNames = names;
         this.gatherTick = gatherTime/total;
     }
 
@@ -146,10 +110,6 @@ public class Resource extends Component implements IInteractable{
     public void init(Entity owner) {
         super.init(owner);
         owner.name = this.displayName;
-
-        //Build the item name string for displaying in the UI.
-        for(int i=0;i<itemNames.length;i++)
-            contents.append(itemAmounts[i]).append(" ").append(itemNames[i]).append(System.lineSeparator());
 
         if(resRef.resourceType.equals("water"))
             owner.active = false;
@@ -181,66 +141,119 @@ public class Resource extends Component implements IInteractable{
         return displayName;
     }
 
+    public String[] getCurrItems(){
+        return itemNames.toArray();
+    }
+
     /**
      * @return True if the resource has resources left, false otherwise. If false, also either destroys the resource or re-initializes it.
      */
-    public boolean peek(){
-        int val = 0;
-        for(int amt : itemAmounts) val += amt;
+    private boolean peek(){
+        int size = itemAmounts.size;
 
         //If it's empty, either destroy it or re-initialize it.
-        if(val == 0 && !DataManager.getData(this.resourceName, DataBuilder.JsonResource.class).infinite)
+        if(size == 0 && !DataManager.getData(this.resourceName, DataBuilder.JsonResource.class).infinite)
             this.owner.setToDestroy();
-        else if(val == 0)
+        else if(size == 0)
             this.initItem(this.resRef);
 
-        return val != 0;
+        return size > 0;
     }
 
     /**
-     * @return An array of item names gathered from this resource. Empty array if nothing was gathered.
+     * Peeks at the available items left in this resource. Loops over the items until it finds one that the inventory can accept or until it fully loops around,
+     * in which case, will return false. The itemIndex will either remain unchanged (loop around to where it was) or remain where the next available item that can be taken is.
+     * It is recommended to call this function first to position the itemIndex at the right location and then call gatherFrom, which won't need to check again.
+     * @param inventory The Inventory to use for checking against.
+     * @return True if the inventory can take an item from here, false otherwise.
      */
-    public String[] gatherFrom(){
-        gatherItemRotating(gatherList); //Get the items to give to the one gathering the item.
+    public boolean peekAvailable(Inventory inventory){
+        if(!peek()) return false; //If this resource has nothing left, return false.
 
-        //If the gather list is 0, it means it's empty. If not infinite, destroy. Otherwise, re-initialize it.
-        if(gatherList.size == 0 && !DataManager.getData(this.resourceName, DataBuilder.JsonResource.class).infinite)
-            this.owner.setToDestroy();
-        else if(gatherList.size == 0)
-            this.initItem(this.resRef);
+        //Try to find an item we can take.
+        int flag = itemIndex;
+        do{
+            if(inventory.canAddItem(itemNames.get(itemIndex))) return true; //If we can take this, return true.
+            itemIndex = (itemIndex + 1)% itemNames.size;
+        }while(itemIndex != flag);
 
-        //generateItemInfo(itemNames, itemAmounts);
+        //If we could find nothing we could take, return false.
+        return false;
+    }
 
-        return gatherList.toArray();
+    /**
+     * Only peeks for available resources that we want, which is supplied by the 'wanted' parameter.
+     * @param inventory The Inventory to check against.
+     * @param wanted The String array of wanted types. Every item checked to be added will first be checked if it is wanted.
+     * @return True if an item is wanted, false otherwise.
+     */
+    public boolean peekAvailableOnlyWanted(Inventory inventory, String[] wanted){
+        if(!peek()) return false; //If this resource has nothing left, return false.
+
+        //Try to find an item we can take.
+        int flag = itemIndex;
+        do{
+            //First, check that the current item from the resource is one that we want and can be added to the inventory. Return true if so.
+            for(String want : wanted)
+                if(want.equals(itemNames.get(itemIndex)) && inventory.canAddItem(itemNames.get(itemIndex)))
+                    return true; //If we can take this, return true.
+
+            itemIndex = (itemIndex + 1)% itemNames.size;
+        }while(itemIndex != flag);
+
+        //If we could find nothing we could take, return false.
+        return false;
+    }
+
+    /**
+     * Attempts to gather an item from this Resource and place it into the Inventory passed in.
+     * @param inventory The Inventory to add an item to.
+     * @return True if an item was able to be added from the resource, false otherwise.
+     */
+    public boolean gatherFrom(Inventory inventory){
+        return gatherItemRotating(inventory) && peekAvailable(inventory);
     }
 
     //Add exactly one item to the list, rotating each time.
-    private void gatherItemRotating(Array<String> list) {
+    private boolean gatherItemRotating(Inventory inventory) {
         int flag = itemIndex;
-        list.clear();
 
         do {
-            //If the amount is more than 0, take it and decrement the amount in this resource.
-            if (itemAmounts[itemIndex] > 0) {
-                list.add(itemNames[itemIndex]);
-                itemAmounts[itemIndex]--;
+            //If we can't add this to our inventory, simply continue.
+            if(!inventory.canAddItem(itemNames.get(itemIndex))) continue;
+
+            inventory.addItem(itemNames.get(itemIndex)); //Add the item.
+
+            //Decrement the value and remove if 0.
+            int amt = itemAmounts.get(itemIndex); //Get the amount
+            itemAmounts.set(itemIndex, --amt); //Set the amount to one less in the list.
+            if(amt <= 0) { //If it's below 0, remove it...
+                itemNames.removeIndex(itemIndex); //Remove the name.
+                itemAmounts.removeIndex(itemIndex); //Remove the amount.
             }
 
-            itemIndex = (itemIndex + 1) % itemNames.length;
-            //If we do a full circle and meet the initial value, return.
-            if (itemIndex == flag) return;
+            //If the itemNames is not empty, increment the itemIndex
+            if(itemNames.size != 0)
+                itemIndex = (itemIndex + 1) % itemNames.size; //Increment the index and wrap around to the start if needed (mod)
+
+            //Return true if we made it here!
+            return true;
             //Loop this until we have at least one item in the list.
-        } while (list.size < 1);
+        } while (itemIndex != flag);
+
+        //Return false if we made it here. THis means we couldn't add anythimg.
+        return false;
     }
 
     //Add each item to the list if available (amount more than 0).
     private void gatherItemEach(Array<String> list){
         list.clear();
 
-        for(int i=0;i<itemNames.length;i++){
-            if(itemAmounts[i] <= 0) continue;
-            list.add(itemNames[i]);
-            itemAmounts[i]--;
+        for(int i=0;i<itemNames.size;i++){
+            int amt = itemAmounts.get(i);
+            if(amt <= 0) continue;
+            list.add(itemNames.get(itemIndex));
+            itemAmounts.set(itemIndex, amt-1);
         }
     }
 
@@ -325,6 +338,8 @@ public class Resource extends Component implements IInteractable{
     @Override
     public String getStatsText() {
         String takenBy = this.taken == null ? "null" : this.taken.getComponent(Colonist.class).getName();
+        contents.setLength(0);
+        for(int i=0;i<itemNames.size;i++) contents.append(itemAmounts.get(i)).append(" ").append(itemNames.get(i)).append(System.lineSeparator());
         return contents.toString() + "\ntaken: "+this.isTaken()+" by: "+takenBy+"\ntags: "+this.resourceTypeTags.toString();
     }
 

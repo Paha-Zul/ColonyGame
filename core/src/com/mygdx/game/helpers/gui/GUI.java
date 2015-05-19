@@ -243,6 +243,24 @@ public class GUI {
 
         }
 
+        public GUIStyle(GUIStyle style) {
+            this.normal = style.normal;
+            this.moused = style.moused;
+            this.clicked = style.clicked;
+            this.active = style.active;
+            this.font = new BitmapFont(style.font.getData().fontFile);
+            this.multiline = style.multiline;
+            this.toggled = style.toggled;
+            this.activated = style.activated;
+            this.wrap = style.wrap;
+            this.alignment = style.alignment;
+            this.paddingLeft = style.paddingLeft;
+            this.paddingRight = style.paddingRight;
+            this.paddingTop = style.paddingTop;
+            this.paddingBottom = style.paddingBottom;
+            this.background = style.background;
+        }
+
         public void padding(int amt){
             paddingLeft = paddingBottom = paddingRight = paddingTop = amt;
         }

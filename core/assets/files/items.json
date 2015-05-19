@@ -26,7 +26,7 @@
     "strengths":[10]
   },
   {
-    "itemName": "woodlog",
+    "itemName": "wood",
     "displayName": "Wood Log",
     "itemType": "wood",
     "description": "A wood log."

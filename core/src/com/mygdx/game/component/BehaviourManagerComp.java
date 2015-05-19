@@ -62,6 +62,7 @@ public class BehaviourManagerComp extends Component{
         super.start();
         this.stats = this.owner.getComponent(Stats.class);
         this.blackBoard = this.getComponent(BlackBoard.class);
+        this.blackBoard.myInventory = this.getComponent(Inventory.class);
 
         getBehaviourStates().addState("idle", true, PrebuiltTasks::idleTask);
     }

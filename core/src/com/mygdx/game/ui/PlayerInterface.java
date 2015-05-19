@@ -95,6 +95,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     private GUI.GUIStyle huntStyle = new GUI.GUIStyle();
     private GUI.GUIStyle blankStyle = new GUI.GUIStyle();
     private GUI.GUIStyle skillsStyle = new GUI.GUIStyle();
+    private GUI.GUIStyle gameSpeedStyle = new GUI.GUIStyle();
     private GUI.GUIStyle UIStyle;
     private Timer FPSTimer;
 
@@ -207,6 +208,8 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
         DataManager.addData("blankStyle", blankStyle, GUI.GUIStyle.class);
 
+        gameSpeedStyle.background = new TextureRegion(ColonyGame.assetManager.get("eventWindowBackground", Texture.class));
+
         gatherStyle.font.setColor(new Color(126f / 255f, 75f / 255f, 27f / 255f, 1));
         exploreStyle.font.setColor(new Color(126f / 255f, 75f / 255f, 27f / 255f, 1));
         huntStyle.font.setColor(126f / 255f, 75f / 255f, 27f / 255f, 1);
@@ -240,6 +243,8 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     @Override
     public void render(float delta, SpriteBatch batch) {
         super.render(delta, batch);
+        int screenW = Gdx.graphics.getWidth(), screenH = Gdx.graphics.getHeight();
+
         batch.setProjectionMatrix(ColonyGame.UICamera.combined);
         GUI.font.setColor(Color.WHITE);
 
@@ -250,22 +255,15 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         this.drawSelectionBox(); //Draws the selection box.
         this.drawDebugInfo(height); //Draws some debug information.
         this.drawTerrainInfo(this.bottomLeftRect); //Draws information about the moused over terrain piece.
+        this.drawGameSpeed(screenW, screenH, this.batch, this.gameSpeedStyle);
+        this.drawSelectedEntity();
 
-        if(this.drawingProfiler)
-            Profiler.drawDebug(batch, 200, height - 20);
+        if(this.drawingProfiler) Profiler.drawDebug(batch, 200, height - 20);
 
         //Draw the grid squares if enabled.
         if(drawGrid) {
             ColonyGame.worldGrid.debugDraw();
             drawBox2DDebug();
-        }
-
-        //Draw stuff about the selectedEntity entity.
-        if(selectedProfile != null || this.selectedProfileList.size() > 0){
-            GUI.Texture(this.UIBackgroundBase, this.uiBackgroundBaseRect, this.batch);
-            GUI.Texture(this.UIBackgroundTop, this.uiBackgroundTopRect, this.batch);
-            this.drawMultipleProfiles(this.ordersRect);
-            this.drawSelected();
         }
 
         drawCurrentEvent(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -276,6 +274,16 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         stage.draw();
         batch.end();
         batch.begin();
+    }
+
+    private void drawSelectedEntity(){
+        //Draw stuff about the selectedEntity entity.
+        if(selectedProfile != null || this.selectedProfileList.size() > 0){
+            GUI.Texture(this.UIBackgroundBase, this.uiBackgroundBaseRect, this.batch);
+            GUI.Texture(this.UIBackgroundTop, this.uiBackgroundTopRect, this.batch);
+            this.drawMultipleProfiles(this.ordersRect);
+            this.drawSelected();
+        }
     }
 
     private void drawCurrentEvent(int width, int height){
@@ -428,6 +436,10 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         //Make sure the selectedProfile we have selectedEntity isn't null!
         if(selectedProfile != null){
             IInteractable innerInter = selectedProfile.interactable.getInteractable(); //Get the selectedProfile!
+            if(innerInter == null) {
+                selectedProfile = null;
+                return;
+            }
 
             //If it has a name, draw the name...
             if(innerInter.getName() != null) {
@@ -476,7 +488,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
                 for(int i=0;i<itemList.size();i++){
                     Inventory.InventoryItem item = itemList.get(i);
                     GUI.Label(item.itemRef.getDisplayName(), this.batch, this.tabsRect.x, this.tabsRect.y, this.tabsRect.width, this.tabsRect.height - 20 - i*10, this.UIStyle);
-                    GUI.Label(""+item.getAmount(), this.batch, this.tabsRect.x + 100, this.tabsRect.y, 100, this.tabsRect.height - 20 - i*10, this.UIStyle);
+                    GUI.Label(""+item.getAmount()+"/"+item.getMaxAmount(), this.batch, this.tabsRect.x + 100, this.tabsRect.y, 100, this.tabsRect.height - 20 - i*10, this.UIStyle);
                 }
                 this.batch.setColor(Color.WHITE);
                 this.UIStyle.alignment = Align.center;
@@ -568,6 +580,18 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
                 }
             }
         }
+    }
+
+    /**
+     * Draws the game speed window.
+     * @param screenW The screen width.
+     * @param screenH The screen height.
+     * @param batch The SpriteBatch to draw with.
+     * @param style The GUIStyle to use.
+     */
+    private void drawGameSpeed(int screenW, int screenH, SpriteBatch batch, GUI.GUIStyle style){
+        style.alignment = Align.center;
+        GUI.Label("x"+gameSpeed+" speed", batch, screenW - 100, screenH - 50, 100, 50, style);
     }
 
     /**
