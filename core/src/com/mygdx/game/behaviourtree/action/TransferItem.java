@@ -6,16 +6,13 @@ import com.mygdx.game.component.Inventory;
 
 /**
  * Created by Paha on 1/30/2015.
+ * <p>Transfers items from the {@link BlackBoard#fromInventory blackBoard.fromInventory} to the {@link BlackBoard#toInventory blackBoard.toInventory}. If
+ * {@link BlackBoard#transferAll blackBoard.transferAll} is set to true, the entire inventory in the blackBoard.fromInventory will be transferred. Otherwise,
+ * only the item denoted by {@link BlackBoard#itemNameToTake blackBoard.itemNameToTake} will be transferred.</p>
  */
-public class TransferResource extends LeafTask{
-    public TransferResource(String name, BlackBoard blackBoard) {
+public class TransferItem extends LeafTask{
+    public TransferItem(String name, BlackBoard blackBoard) {
         super(name, blackBoard);
-    }
-
-    public TransferResource(String name, BlackBoard blackBoard, Inventory fromInv, Inventory toInv) {
-        super(name, blackBoard);
-        this.blackBoard.fromInventory = fromInv;
-        this.blackBoard.toInventory = toInv;
     }
 
     @Override

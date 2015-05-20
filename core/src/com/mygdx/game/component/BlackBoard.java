@@ -50,6 +50,7 @@ public class BlackBoard extends Component{
     //My stuff
     public Inventory myInventory;
     public float moveSpeed = 100f;
+    public BehaviourManagerComp myManager;
 
     //Random
     public int counter;

@@ -4,6 +4,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.DataBuilder;
+import com.mygdx.game.helpers.GH;
 import com.mygdx.game.helpers.StringTable;
 import com.mygdx.game.helpers.Tags;
 import com.mygdx.game.helpers.managers.DataManager;
@@ -89,6 +90,7 @@ public class Resource extends Component implements IInteractable{
                 amounts.add(amount); //Adds the item amount to this resource.
                 names.add(itemNames[i]); //Adds the item name to this resource.
                 DataBuilder.JsonItem itemRef = DataManager.getData(itemNames[i], DataBuilder.JsonItem.class); //Get the itemRef
+                if(itemRef == null) GH.writeErrorMessage("There is no item named "+itemNames[i]+" for resource "+this.displayName+". Check the resource.json and items.json files and make sure resource/item pairs match.", true);
                 resourceTypeTags.addTag(itemRef.getItemType()); //Adds the type to the resource type tags.
 
                 //For every item effect, add the effect to the effectTags.
@@ -217,6 +219,7 @@ public class Resource extends Component implements IInteractable{
     //Add exactly one item to the list, rotating each time.
     private boolean gatherItemRotating(Inventory inventory) {
         int flag = itemIndex;
+        if(!peek()) return false;
 
         do {
             //If we can't add this to our inventory, simply continue.

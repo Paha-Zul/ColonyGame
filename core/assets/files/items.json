@@ -6,7 +6,7 @@
     "description": "Hard stuff."
   },
   {
-    "itemName": "metal_fragments",
+    "itemName": "metal",
     "displayName": "Metal Fragments",
     "itemType": "metal",
     "description": "Shiny fragments."

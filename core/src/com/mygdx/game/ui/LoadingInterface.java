@@ -44,11 +44,11 @@ public class LoadingInterface extends UI{
         if(!done) {
             Color color = this.batch.getColor();
             this.batch.setColor(Color.BLACK);
-            GUI.Texture(this.whiteTexture, this.square, this.batch);
+            GUI.Texture(this.whiteTexture, this.batch, this.square);
             this.batch.setColor(color);
 
-            GUI.Texture(this.outline, this.loadingBar, this.batch);
-            GUI.Texture(this.bar, this.loadingBar.x, this.loadingBar.y, this.loadingBar.width*WorldGen.getInstance().percentageDone, this.loadingBar.height, this.batch);
+            GUI.Texture(this.outline, this.batch, this.loadingBar);
+            GUI.Texture(this.bar, this.batch, this.loadingBar.x, this.loadingBar.y, this.loadingBar.width*WorldGen.getInstance().percentageDone, this.loadingBar.height);
             GUI.Label("Loading Terrain", this.batch, this.loadingBar.getX(), this.loadingBar.getY(), loadingBar.getWidth(), loadingBar.getHeight());
         }else
             this.destroy();

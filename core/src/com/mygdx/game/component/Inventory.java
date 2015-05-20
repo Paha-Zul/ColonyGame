@@ -1,12 +1,9 @@
 package com.mygdx.game.component;
 
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.Rectangle;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.DataBuilder;
-import com.mygdx.game.helpers.gui.GUI;
 import com.mygdx.game.helpers.managers.DataManager;
-import com.mygdx.game.interfaces.IDisplayable;
+import com.mygdx.game.interfaces.IOwnable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,9 +11,10 @@ import java.util.HashMap;
 /**
  * Created by Paha on 1/18/2015.
  */
-public class Inventory extends Component implements IDisplayable{
+public class Inventory extends Component implements IOwnable{
     public String lasAddedItem = "";
 
+    private Colony colony;
     private String allowedTypes = "all";
     private int totalTypesAllowed = -1;
     private int totalItemsAllowed = -1;
@@ -56,6 +54,8 @@ public class Inventory extends Component implements IDisplayable{
     @Override
     public void start() {
         super.start();
+        Building building = this.getComponent(Building.class);
+        if(building != null) this.colony = building.getOwningColony();
     }
 
     /**
@@ -99,6 +99,7 @@ public class Inventory extends Component implements IDisplayable{
         //Keeps track of total itemNames in this inventory.
         this.currTotalItems+=amount;
         this.lasAddedItem = itemName;
+        if(colony != null) colony.addItemToGlobal(invItem.itemRef, amount);
     }
 
     /**
@@ -118,15 +119,7 @@ public class Inventory extends Component implements IDisplayable{
      */
     public int removeItemAll(String itemName){
         InventoryItem invItem = this.inventory.get(name);
-
-        //If it didn't exist or it was empty, return 0.
-        if(invItem == null || invItem.amount <= 0)
-            return 0;
-
-        this.currTotalItems-=invItem.amount; //Subtract the current itemRef counter by the amount being removed.
-        this.inventory.remove(name); //Remove it from the inventory.
-
-        return invItem.amount; //Return the amount of the item we removed.
+        return this.removeItemAmount(itemName, invItem.amount);
     }
 
     /**
@@ -152,6 +145,7 @@ public class Inventory extends Component implements IDisplayable{
         if(invItem.amount <= 0)
             this.inventory.remove(itemName);
 
+        if(colony != null) colony.addItemToGlobal(invItem.itemRef, -amt);
         return amt;
     }
 
@@ -192,22 +186,18 @@ public class Inventory extends Component implements IDisplayable{
         this.allowedTypes = null;
     }
 
-    @Override
-    public void display(Rectangle rect, SpriteBatch batch, String name, GUI.GUIStyle style) {
 
+    @Override
+    public void addedToColony(Colony colony) {
+        this.colony = colony;
     }
 
     @Override
-    public void display(float x, float y, float width, float height, SpriteBatch batch, String name, GUI.GUIStyle style) {
-        GUI.Text("Inventory Items", batch, x, y);
-        y-=20;
-        for(Inventory.InventoryItem item : this.getItemList()){
-            GUI.Text(item.itemRef.getDisplayName()+": "+item.amount+"/"+item.maxAmount, batch, x, y);
-            y-=20;
-        }
+    public Colony getOwningColony() {
+        return this.colony;
     }
 
-    public class InventoryItem{
+    public static class InventoryItem{
         private int amount, maxAmount;
         public DataBuilder.JsonItem itemRef;
 

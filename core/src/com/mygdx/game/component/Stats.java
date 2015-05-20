@@ -137,8 +137,6 @@ public class Stats extends Component{
             this.current = current;
             this.max = max;
             this.stats = stats;
-
-            onZero = stats.owner::setToDestroy;
         }
 
         /**

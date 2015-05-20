@@ -28,6 +28,9 @@ import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.*;
 import com.mygdx.game.helpers.gui.GUI;
 import com.mygdx.game.helpers.managers.DataManager;
+import com.mygdx.game.helpers.managers.NotificationManager;
+import com.mygdx.game.helpers.managers.PlayerManager;
+import com.mygdx.game.helpers.timer.OneShotTimer;
 import com.mygdx.game.helpers.timer.RepeatingTimer;
 import com.mygdx.game.helpers.timer.Timer;
 import com.mygdx.game.helpers.worldgeneration.WorldGen;
@@ -36,6 +39,7 @@ import com.mygdx.game.interfaces.IGUI;
 import com.mygdx.game.interfaces.IInteractable;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created by Bbent_000 on 12/25/2014.
@@ -96,6 +100,8 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     private GUI.GUIStyle blankStyle = new GUI.GUIStyle();
     private GUI.GUIStyle skillsStyle = new GUI.GUIStyle();
     private GUI.GUIStyle gameSpeedStyle = new GUI.GUIStyle();
+    private GUI.GUIStyle notificationStyle = new GUI.GUIStyle();
+    private GUI.GUIStyle mousedOverNotiStyle = new GUI.GUIStyle();
     private GUI.GUIStyle UIStyle;
     private Timer FPSTimer;
 
@@ -114,6 +120,10 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     private GUI.GUIStyle eventDescStyle, eventTitleStyle;
 
     private TextureRegion whiteTexture;
+    private NotificationManager.Notification mousedOverNotification = null;
+
+    private boolean extendedTooltip;
+    private Timer extendedTooltipTimer = new OneShotTimer(2f, () -> extendedTooltip = true);
 
     private void loadHuntButtonStyle(){
         huntStyle.normal = ColonyGame.assetManager.get("huntbutton_normal", Texture.class);
@@ -209,6 +219,8 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         DataManager.addData("blankStyle", blankStyle, GUI.GUIStyle.class);
 
         gameSpeedStyle.background = new TextureRegion(ColonyGame.assetManager.get("eventWindowBackground", Texture.class));
+        notificationStyle.background = new TextureRegion(ColonyGame.assetManager.get("notificationIcon", Texture.class));
+        notificationStyle.font = DataManager.getData("changelogFont", BitmapFont.class);
 
         gatherStyle.font.setColor(new Color(126f / 255f, 75f / 255f, 27f / 255f, 1));
         exploreStyle.font.setColor(new Color(126f / 255f, 75f / 255f, 27f / 255f, 1));
@@ -257,6 +269,8 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         this.drawTerrainInfo(this.bottomLeftRect); //Draws information about the moused over terrain piece.
         this.drawGameSpeed(screenW, screenH, this.batch, this.gameSpeedStyle);
         this.drawSelectedEntity();
+        this.drawInvAmounts(screenW, screenH);
+        this.drawCurrentNotifications(screenW, screenH, delta);
 
         if(this.drawingProfiler) Profiler.drawDebug(batch, 200, height - 20);
 
@@ -276,11 +290,61 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         batch.begin();
     }
 
+    private void drawInvAmounts(int width, int height){
+        PlayerManager.Player player = PlayerManager.getPlayer("Player");
+        if(player != null) {
+            HashMap<String, Inventory.InventoryItem> inv = PlayerManager.getPlayer("Player").colony.getGlobalInv();
+            StringBuilder builder = new StringBuilder();
+            builder.append("Overall Items:\n");
+            int counter = 0;
+            for (Inventory.InventoryItem item : inv.values()) {
+                if (item.getAmount() != 0) {
+                    builder.append(item.getAmount()).append(" ").append(item.itemRef.getDisplayName()).append("\n");
+                    counter++;
+                }
+            }
+
+            gameSpeedStyle.multiline = true;
+            gameSpeedStyle.alignment = Align.top;
+            GUI.Label(builder.toString(), this.batch, 0, height * 0.4f, width * 0.07f, height * 0.48f, gameSpeedStyle);
+        }
+    }
+
+    private void drawCurrentNotifications(int width, int height, float delta){
+        Array<NotificationManager.Notification> list = NotificationManager.getActiveNotifications();
+        float x = width - 80f, y = height*0.4f;
+        float labelW = 50f, labelH = 50f;
+        NotificationManager.Notification newlyMousedOver = null; //This is like a flag.
+
+        notificationStyle.wrap = true;
+        for(int i=0;i<list.size;i++){
+            NotificationManager.Notification notification = list.get(i);
+
+            //GUI.Texture(whiteTexture, batch, x, y, labelW, labelH);
+            if(GUI.Label(notification.name, this.batch, x, y, labelW, labelH, notificationStyle)){
+                newlyMousedOver = notification; //Set the flag(ish) variable.
+
+                mousedOverNotiStyle.wrap = true;
+                String toolTip = extendedTooltip ? notification.extendedTooltip : notification.quickTooltip;
+                GUI.Label(toolTip, batch, Gdx.input.getX() - 250, height - Gdx.input.getY() - 50, 200, 100, mousedOverNotiStyle);
+            }
+            y += labelH + 10f;
+        }
+
+        //If we are still moused over the same notification, increase the timer.
+        if(this.mousedOverNotification != null && this.mousedOverNotification == newlyMousedOver) extendedTooltipTimer.update(delta);
+        else {
+            this.extendedTooltip = false;
+            extendedTooltipTimer.restart();
+        }
+        this.mousedOverNotification = newlyMousedOver;
+    }
+
     private void drawSelectedEntity(){
         //Draw stuff about the selectedEntity entity.
         if(selectedProfile != null || this.selectedProfileList.size() > 0){
-            GUI.Texture(this.UIBackgroundBase, this.uiBackgroundBaseRect, this.batch);
-            GUI.Texture(this.UIBackgroundTop, this.uiBackgroundTopRect, this.batch);
+            GUI.Texture(this.UIBackgroundBase, this.batch, this.uiBackgroundBaseRect);
+            GUI.Texture(this.UIBackgroundTop, this.batch, this.uiBackgroundTopRect);
             this.drawMultipleProfiles(this.ordersRect);
             this.drawSelected();
         }
@@ -297,7 +361,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
             float descWidth = windowWidth*0.9f, descHeight = windowHeight*0.6f;
             float descX = windowX + windowWidth*0.05f, descY = windowY + windowHeight*0.25f;
 
-            GUI.Texture(new TextureRegion(ColonyGame.assetManager.get("eventWindowBackground", Texture.class)), windowX, windowY, windowWidth, windowHeight, this.batch);
+            GUI.Texture(new TextureRegion(ColonyGame.assetManager.get("eventWindowBackground", Texture.class)), this.batch, windowX, windowY, windowWidth, windowHeight);
 
             eventDescStyle.padding(10);
             eventDescStyle.multiline = true;
@@ -396,7 +460,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         Vector3 mouseCoords = camera.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
         Grid.GridInstance grid = ColonyGame.worldGrid;
 
-        GUI.Texture(this.background, rect, this.batch);
+        GUI.Texture(this.background, this.batch, rect);
         int index[] = grid.getIndex(mouseCoords.x, mouseCoords.y);
         Grid.Node node = grid.getNode(index);
         if(node == null) return;
@@ -614,12 +678,12 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
         //Draw the out rectangle
         batch.setColor(Color.BLACK);
-        GUI.Texture(this.whiteTexture, outerX, y, width, height, batch);
+        GUI.Texture(this.whiteTexture, batch, outerX, y, width, height);
 
         //Draw the inner rectangle (shrink it by 2 inches on all sides, 'padding')
         batch.setColor(Color.GREEN);
         float newWidth = (currVal/maxVal)*(width-4);
-        GUI.Texture(this.whiteTexture, innerX, y + 2, newWidth, height - 4, batch);
+        GUI.Texture(this.whiteTexture, batch, innerX, y + 2, newWidth, height - 4);
 
         GUI.Label((int)currVal+"/"+(int)maxVal, batch, outerX, y, width, height);
     }

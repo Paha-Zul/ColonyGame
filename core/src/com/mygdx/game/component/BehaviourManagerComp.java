@@ -55,6 +55,7 @@ public class BehaviourManagerComp extends Component{
 
         this.blackBoard = this.owner.addComponent(new BlackBoard());
         this.blackBoard.colonyGrid = ColonyGame.worldGrid;
+        this.blackBoard.myManager = this;
     }
 
     @Override

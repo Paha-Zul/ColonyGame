@@ -95,10 +95,9 @@ public abstract class Component implements IDelayedDestroyable {
 		if (val == this.active)
 			return;
 
-        this.active = val; //Sets it's active value.
-
 		if(this.initiated) {
 			this.owner.removeComponent(this);   //Remove it from the current active/inactive list.
+			this.active = val; 					//Sets it's active value.
 			this.owner.addComponent(this);		//Add it to the correct list.
 		}
 

@@ -14,6 +14,7 @@ import com.mygdx.game.helpers.timer.RepeatingTimer;
 import com.mygdx.game.helpers.timer.Timer;
 import com.mygdx.game.interfaces.Functional;
 import com.mygdx.game.interfaces.IInteractable;
+import com.mygdx.game.interfaces.IOwnable;
 import com.mygdx.game.ui.PlayerInterface;
 
 import java.util.function.Consumer;
@@ -21,7 +22,7 @@ import java.util.function.Consumer;
 /**
  * Created by Paha on 1/17/2015.
  */
-public class Colonist extends Component implements IInteractable{
+public class Colonist extends Component implements IInteractable, IOwnable{
     private Colony colony;
     private Inventory inventory;
     private Stats stats;
@@ -246,9 +247,17 @@ public class Colonist extends Component implements IInteractable{
     }
 
     @Override
+    public void addedToColony(Colony colony) {
+        this.colony = colony;
+    }
+
+    @Override
+    public Colony getOwningColony() {
+        return this.colony;
+    }
+
+    @Override
     public void destroy(Entity destroyer) {
         super.destroy(destroyer);
-
-
     }
 }

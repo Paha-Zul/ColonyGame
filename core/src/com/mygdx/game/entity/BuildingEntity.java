@@ -6,7 +6,7 @@ import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.mygdx.game.ColonyGame;
-import com.mygdx.game.component.Colony;
+import com.mygdx.game.component.Building;
 import com.mygdx.game.component.GridComponent;
 import com.mygdx.game.component.Interactable;
 import com.mygdx.game.component.Inventory;
@@ -17,15 +17,15 @@ import com.mygdx.game.helpers.GH;
 /**
  * Created by Paha on 1/18/2015.
  */
-public class ColonyEntity extends Entity{
-    public ColonyEntity(Vector2 position, float rotation, TextureRegion graphic, int drawLevel) {
+public class BuildingEntity extends Entity{
+    public BuildingEntity(Vector2 position, float rotation, TextureRegion graphic, int drawLevel) {
         super(position, rotation, graphic, drawLevel);
-        this.name = "Colony";
+        this.name = "Main Base";
         this.tags.addTag("building");
 
         this.addComponent(new GridComponent(Constants.GRIDSTATIC, ColonyGame.worldGrid, 8));
-        this.addComponent(new Colony());
-        this.addComponent(new Interactable("colony"));
+        this.addComponent(new Building());
+        this.addComponent(new Interactable("building"));
         this.addComponent(new Inventory("all", 100, 100, 100));
         this.makeCollider(position);
     }

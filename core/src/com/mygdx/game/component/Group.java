@@ -76,7 +76,7 @@ public class Group extends Component{
      */
     private void getNewLeader(){
         if(groupList.size > 0) {
-            int rand = MathUtils.random(groupList.size);
+            int rand = MathUtils.random(groupList.size-1);
             Entity newLeader = groupList.get(rand);
             groupList.removeIndex(rand);
             this.setLeader(newLeader);

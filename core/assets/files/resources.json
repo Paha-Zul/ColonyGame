@@ -13,7 +13,7 @@
     "resourceName": "iron_ore",
     "displayName": "Iron Ore",
     "resourceType": "ore",
-    "itemNames": ["metal_fragments", "nitrate"],
+    "itemNames": ["metal", "nitrate"],
     "itemAmounts": [[5,10], [1,1]],
     "itemChances": [1, 0.1],
     "img": ["Ore1"],

@@ -38,6 +38,8 @@ public class Interactable extends Component{
             this.interactable = this.owner.getComponent(Colony.class);
         else if(newType.equals("animal"))
             this.interactable = this.owner.getComponent(Animal.class);
+        else if(newType.equals("building"))
+            this.interactable = this.owner.getComponent(Building.class);
     }
 
     @Override

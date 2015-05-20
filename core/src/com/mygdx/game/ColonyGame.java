@@ -92,14 +92,14 @@ public class ColonyGame extends Game {
 
 	private void updateEntities(float delta){
 		batch.setProjectionMatrix(ColonyGame.camera.combined);
-		Profiler.begin("ServerPlayer: Rendering Terrain"); //Start the profiler.
+		Profiler.begin("GameScreen: Rendering Terrain"); //Start the profiler.
 
 		this.renderMap(); //Render the map.
 
 		batch.setColor(Color.WHITE); //Set the color back to white.
 		Profiler.end(); //End the profiler.
 
-		Profiler.begin("ServerPlayer: Updating Entities");
+		Profiler.begin("GameScreen: Updating Entities");
 		ListHolder.update(delta);
 		ListHolder.updateFloatingTexts(delta, batch);
 

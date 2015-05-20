@@ -19,6 +19,7 @@ import com.mygdx.game.ColonyGame;
 import com.mygdx.game.helpers.DataBuilder;
 import com.mygdx.game.helpers.ListHolder;
 import com.mygdx.game.helpers.gui.GUI;
+import com.mygdx.game.helpers.managers.DataManager;
 import com.mygdx.game.helpers.managers.ScriptManager;
 import com.mygdx.game.helpers.worldgeneration.WorldGen;
 import com.mygdx.game.interfaces.IScript;
@@ -91,6 +92,7 @@ public class MainMenuInterface extends UI{
         parameter.size = 16;
         parameter.borderWidth = 1f;
         changeLogStyle.font = generator.generateFont(parameter);
+        DataManager.addData("changelogFont", changeLogStyle.font, BitmapFont.class);
         generator.dispose();
 
         //Create a new stage and configure it!
@@ -185,7 +187,7 @@ public class MainMenuInterface extends UI{
 
         //Set a new font, draw "Colony Game" to the screen, and reset the font.
         GUI.font = titleFont;
-        GUI.Texture(titleTexture, titleRect, this.batch);
+        GUI.Texture(titleTexture, this.batch, titleRect);
         GUI.ResetFont();
 
         //Start button.

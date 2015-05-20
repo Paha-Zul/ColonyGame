@@ -38,11 +38,11 @@ public class GUI {
         whiteTexture = new TextureRegion(WorldGen.whiteTex);
     }
 
-    public static void Texture(TextureRegion texture, Rectangle rect, SpriteBatch batch){
+    public static void Texture(@NotNull TextureRegion texture, @NotNull SpriteBatch batch, Rectangle rect){
         batch.draw(texture, rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight());
     }
 
-    public static void Texture(TextureRegion texture, float x, float y, float width, float height, SpriteBatch batch){
+    public static void Texture(@NotNull TextureRegion texture, @NotNull SpriteBatch batch, float x, float y, float width, float height){
         batch.draw(texture, x, y, width, height);
     }
 
@@ -93,12 +93,12 @@ public class GUI {
         Color batchColor = batch.getColor();
         //Draw the out rectangle
         batch.setColor(Color.BLACK);
-        GUI.Texture(new TextureRegion(WorldGen.whiteTex), outerX, y, width, height, batch);
+        GUI.Texture(new TextureRegion(WorldGen.whiteTex), batch, outerX, y, width, height);
 
         //Draw the inner rectangle (shrink it by 2 inches on all sides, 'padding')
         batch.setColor(color);
         float newWidth = (currVal/maxVal)*(width-4);
-        GUI.Texture(whiteTexture, innerX, y + 2, newWidth, height - 4, batch);
+        GUI.Texture(whiteTexture, batch, innerX, y + 2, newWidth, height - 4);
 
         if(displayText) GUI.Label((int)currVal+"/"+(int)maxVal, batch, outerX, y, width, height);
 
@@ -146,24 +146,28 @@ public class GUI {
         return clicked;
     }
 
-    public static void Label(@NotNull String text, @NotNull SpriteBatch batch, @NotNull Rectangle rect){
-        GUI.Label(text, batch, rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight(), null);
+    public static boolean Label(@NotNull String text, @NotNull SpriteBatch batch, @NotNull Rectangle rect){
+        return GUI.Label(text, batch, rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight(), null);
     }
 
-    public static void Label(@NotNull String text, @NotNull SpriteBatch batch, @NotNull Rectangle rect, GUIStyle style){
-        GUI.Label(text, batch, rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight(), style);
+    public static boolean Label(@NotNull String text, @NotNull SpriteBatch batch, @NotNull Rectangle rect, GUIStyle style){
+        return GUI.Label(text, batch, rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight(), style);
     }
 
-    public static void Label(@NotNull String text, @NotNull SpriteBatch batch, float x, float y, float width, float height){
-        GUI.Label(text, batch, x, y, width, height, null);
+    public static boolean Label(@NotNull String text, @NotNull SpriteBatch batch, float x, float y, float width, float height){
+        return GUI.Label(text, batch, x, y, width, height, null);
     }
 
-    public static void Label(@NotNull String text, @NotNull SpriteBatch batch, float x, float y, float width, float height, GUIStyle style){
+    public static boolean Label(@NotNull String text, @NotNull SpriteBatch batch, float x, float y, float width, float height, GUIStyle style){
         if(style == null) style = defaultGUIStyle;
         BitmapFont.HAlignment alignment;
+        boolean mouseInside = false;
+        Rectangle.tmp.set(x, y, width, height);
+        if(Rectangle.tmp.contains(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY()))
+            mouseInside = true;
 
         if(style.background != null)
-            GUI.Texture(style.background, x, y, width, height, batch);
+            GUI.Texture(style.background, batch, x, y, width, height);
 
         //y += style.font.getLineHeight();
         BitmapFont.TextBounds bounds = font.getBounds(text);
@@ -181,12 +185,20 @@ public class GUI {
             adjX += width/2 - boundsWidth/2;
             adjY += height/2 + bounds.height/2;
             alignment = BitmapFont.HAlignment.CENTER;
+
         }else if(style.alignment == Align.left) {
             adjY += height / 2 + bounds.height / 2;
             alignment = BitmapFont.HAlignment.LEFT;
+
         }else if(style.alignment == Align.topLeft) {
             adjY += height;
             alignment = BitmapFont.HAlignment.LEFT;
+
+        }else if(style.alignment == Align.top){
+            adjY += height;
+            adjX += width/2 - boundsWidth/2;
+            alignment = BitmapFont.HAlignment.CENTER;
+
         }else
             alignment = BitmapFont.HAlignment.LEFT;
 
@@ -200,6 +212,8 @@ public class GUI {
         if(!style.multiline && !style.wrap) style.font.draw(batch, text, x, y);
         else if(!style.wrap) style.font.drawMultiLine(batch, text, x, y);
         else style.font.drawWrapped(batch, text, x, y, width, alignment);
+
+        return mouseInside;
     }
 
     public static String TextBox(String text, SpriteBatch batch, float x, float y){

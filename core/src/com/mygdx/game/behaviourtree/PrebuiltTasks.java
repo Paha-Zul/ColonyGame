@@ -53,7 +53,7 @@ public class PrebuiltTasks {
 
             //When we finish moving to the newly explored area, try to gather a resource again.
             Task task = exploreUnexplored(blackBoard, behComp);
-            task.getControl().getCallbacks().finishCallback = tsk2 -> behComp.changeTaskImmediate("gather"); //When we finish, try to gather.
+            task.getControl().getCallbacks().successCallback = tsk2 -> behComp.changeTaskImmediate("gather"); //When we finish, try to gather.
             behComp.changeTaskImmediate(task);
         };
 
@@ -70,7 +70,7 @@ public class PrebuiltTasks {
         FindClosestEntity findStorage = new FindClosestEntity("Finding storage.", blackBoard);
         FindPath findPathToStorage = new FindPath("Finding Path to Storage", blackBoard);
         MoveTo moveToStorage = new MoveTo("Moving to Storage", blackBoard);
-        TransferResource transferItems = new TransferResource("Transferring Resources", blackBoard);
+        TransferItem transferItems = new TransferItem("Transferring Resources", blackBoard);
 
         ((ParentTaskController)sequence.getControl()).addTask(repeatGather);
         ((ParentTaskController)innerGatherSeq.getControl()).addTask(fr);
@@ -88,7 +88,6 @@ public class PrebuiltTasks {
         sequence.control.callbacks.startCallback = task -> {
             //Reset blackboard values...
             task.blackBoard.fromInventory = task.blackBoard.getEntityOwner().getComponent(Colonist.class).getInventory();
-            task.blackBoard.toInventory = task.blackBoard.getEntityOwner().getComponent(Colonist.class).getColony().getInventory();
             task.blackBoard.transferAll = true;
             task.blackBoard.takeAmount = 0;
             task.blackBoard.itemNameToTake = null;
@@ -153,6 +152,9 @@ public class PrebuiltTasks {
         //Make sure we are getting a building...
         findStorage.control.callbacks.successCriteria = ent -> ((Entity)ent).getTags().hasTag("building");
 
+        //If we find a valid building, get the inventory from it and assign it to the 'toInventory' field.
+        findStorage.control.callbacks.successCallback = task -> task.blackBoard.toInventory = task.blackBoard.target.getComponent(Inventory.class);
+
         //When finding a path to the resource, make sure it's actually a resource and we are the ones that have claimed it!
         findPathToStorage.getControl().callbacks.checkCriteria = task -> {
             Resource res = task.blackBoard.targetResource; //Get the target resource from the blackboard.
@@ -190,7 +192,7 @@ public class PrebuiltTasks {
         FindClosestEntity findStorage = new FindClosestEntity("Finding storage.", blackBoard);
         FindPath findPathToStorage = new FindPath("Finding Path to Storage", blackBoard);
         MoveTo moveToStorage = new MoveTo("Moving to Storage", blackBoard);
-        TransferResource transferItems = new TransferResource("Transferring Resources", blackBoard);
+        TransferItem transferItems = new TransferItem("Transferring Resources", blackBoard);
 
         ((ParentTaskController)sequence.getControl()).addTask(findPath);
         ((ParentTaskController)sequence.getControl()).addTask(move);
@@ -257,6 +259,8 @@ public class PrebuiltTasks {
         FindPath findPathToUnexplored = new FindPath("Finding Path to Unexplored", blackBoard);
         MoveTo moveToLocation = new MoveTo("Moving to Explore", blackBoard);
 
+        findClosestUnexplored.control.callbacks.startCallback = task -> task.blackBoard.target = task.blackBoard.getEntityOwner().getComponent(Colonist.class).getColony().getOwnedFromColony(Building.class).getEntityOwner();
+
         ((ParentTaskController) sequence.getControl()).addTask(findClosestUnexplored);
         ((ParentTaskController) sequence.getControl()).addTask(findPathToUnexplored);
         ((ParentTaskController) sequence.getControl()).addTask(moveToLocation);
@@ -303,7 +307,7 @@ public class PrebuiltTasks {
         CheckInventoryHas check = new CheckInventoryHas("Checking Inventory", blackBoard);
         FindPath fp = new FindPath("Finding Path to consume item", blackBoard);
         MoveTo moveTo = new MoveTo("Moving to consume item", blackBoard);
-        TransferResource tr = new TransferResource("Transferring Consumable", blackBoard);
+        TransferItem tr = new TransferItem("Transferring Consumable", blackBoard);
         Consume consume = new Consume("Consuming Item", blackBoard);
 
         ((ParentTaskController) sequence.getControl()).addTask(check);
@@ -320,7 +324,7 @@ public class PrebuiltTasks {
             blackBoard.itemNameToTake = null;
 
             blackBoard.target = blackBoard.getEntityOwner().getComponent(Colonist.class).getColony().getEntityOwner();
-            blackBoard.fromInventory = blackBoard.getEntityOwner().getComponent(Colonist.class).getColony().getInventory();
+            blackBoard.fromInventory = blackBoard.getEntityOwner().getComponent(Colonist.class).getColony().getOwnedFromColony(Building.class).getComponent(Inventory.class);
             blackBoard.toInventory = blackBoard.getEntityOwner().getComponent(Inventory.class);
         };
 
@@ -456,7 +460,7 @@ public class PrebuiltTasks {
         FindClosestEntity fc = new FindClosestEntity("Finding base", blackBoard);
         FindPath fpBase = new FindPath("Finding path to base", blackBoard);
         MoveTo mtBase = new MoveTo("Moving to base", blackBoard);
-        TransferResource tr = new TransferResource("Transferring resources", blackBoard);
+        TransferItem tr = new TransferItem("Transferring resources", blackBoard);
 
         //We need to tell this fct what can pass as a valid tile.
         fct.getControl().callbacks.successCriteria = nd -> {

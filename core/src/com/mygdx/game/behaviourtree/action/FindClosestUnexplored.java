@@ -35,6 +35,7 @@ public class FindClosestUnexplored extends LeafTask{
             int radius = 0;
             float closestDst = 999999999999999f;
             Grid.Node closestNode = null;
+            boolean wholeMap = false;
 
             Grid.Node targetNode = this.blackBoard.colonyGrid.getNode(this.blackBoard.target);
             Grid.Node myNode = this.blackBoard.colonyGrid.getNode(this.getBlackboard().getEntityOwner());
@@ -49,6 +50,7 @@ public class FindClosestUnexplored extends LeafTask{
                 //So we don't keep checking the whole map or more than we need to.
                 if(startX == -1 && endX == -1 && startY == -1 && endY == -1){
                     this.blackBoard.targetNode = null;
+                    wholeMap = true;
                     break;
                 }
 
@@ -57,16 +59,15 @@ public class FindClosestUnexplored extends LeafTask{
                     for(int y = startY; y <= endY; y++){
                         //Check if we are still on the gridMap.
                         Grid.Node tmpNode = grid.getNode(x, y);
-                        Grid.VisibilityTile visTile = grid.getVisibilityMap()[x][y];
-                        if(tmpNode == null)
-                            continue;
+                        if(tmpNode == null) continue;
 
-                        if(visTile == null)
-                            continue;
+                        Grid.VisibilityTile visTile = grid.getVisibilityMap()[x][y];
+                        Grid.TerrainTile terrainTile = tmpNode.getTerrainTile();
+                        if(terrainTile == null || visTile == null) continue;
 
                         //Check terrain and visibility.
-                        boolean avoid = grid.getNode(x, y).getTerrainTile().avoid;
-                        int visibility = grid.getVisibilityMap()[x][y].getVisibility();
+                        boolean avoid = terrainTile.avoid;
+                        int visibility = visTile.getVisibility();
                         if(visibility != Constants.VISIBILITY_UNEXPLORED || avoid)
                             continue;
 
@@ -77,6 +78,7 @@ public class FindClosestUnexplored extends LeafTask{
                             closestNode = tmpNode;
                             closestDst = dst + dstToMe;
                         }
+
                     }
                 }
 
@@ -85,10 +87,12 @@ public class FindClosestUnexplored extends LeafTask{
 
             this.blackBoard.targetNode = closestNode;
             this.blackBoard.target = null;
-            if(this.blackBoard.targetNode == null)
-                this.control.finishWithFailure();
+
+            //If the 'wholeMap' flag is true, nothing could be found on the current available map and/or radius that we explored. Idle...
+            if(wholeMap) this.blackBoard.myManager.changeTaskImmediate("idle");
             else
-                this.control.finishWithSuccess();
+                if(this.blackBoard.targetNode == null) this.control.finishWithFailure();
+                else this.control.finishWithSuccess();
 
         };
 
