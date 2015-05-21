@@ -1,7 +1,5 @@
 package com.mygdx.game.interfaces;
 
-import com.mygdx.game.entity.Entity;
-
 /**
  * Created by Paha on 3/27/2015.
  */
@@ -15,9 +13,9 @@ public interface IDelayedDestroyable {
     /**
      * Used for clearing objects to prevent memory leaks. Can also be used for any
      * flags.
-     * @param destroyer
+     * @param ownerID The ownerID of the entity that destroyed it.
      */
-    void destroy(Entity destroyer);
+    void destroy(double ownerID);
 
     /**
      * @return True if destroyed, false otherwise.

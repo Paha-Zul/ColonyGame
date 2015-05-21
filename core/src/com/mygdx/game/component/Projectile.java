@@ -26,10 +26,10 @@ public class Projectile extends Component{
 	public void start() {
 		super.start();
 
-		this.owner.transform.setScale(0.25f);
+		this.ownerID.transform.setScale(0.25f);
 
 		this.coll = this.getComponent(Collider.class);
-		this.lifetimeTimer = new OneShotTimer(this.lifetime, this.owner::setToDestroy);
+		this.lifetimeTimer = new OneShotTimer(this.lifetime, this.ownerID::setToDestroy);
 	}
 
 	@Override
@@ -38,8 +38,8 @@ public class Projectile extends Component{
 
 		this.lifetimeTimer.update(delta);
 
-		if(this.owner != null) {
-			float rot = this.owner.transform.getRotation();
+		if(this.ownerID != null) {
+			float rot = this.ownerID.transform.getRotation();
 			float x = MathUtils.cosDeg(rot) * speed * delta;
 			float y = MathUtils.sinDeg(rot) * speed * delta;
 			coll.body.setLinearVelocity(x, y);

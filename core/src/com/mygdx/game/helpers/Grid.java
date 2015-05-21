@@ -7,8 +7,10 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.component.GridComponent;
+import com.mygdx.game.component.Transform;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.gui.GUI;
+import com.mygdx.game.helpers.managers.ComponentManager;
 import com.mygdx.game.interfaces.Functional;
 import com.mygdx.game.interfaces.IRecyclable;
 import com.sun.istack.internal.NotNull;
@@ -233,7 +235,7 @@ public class Grid {
          * @return The Node that the Entity is in. This could be the same as the currNode passed in, or a new Node.
          */
         public Node checkNode(Node currNode, Entity entity, boolean changeVisibility, int radius) {
-            Vector2 pos = entity.transform.getPosition();
+            Vector2 pos = ComponentManager.getComponents(entity.getID()).transform.getPosition();
 
             //Get the index of the node we need.
             int[] index = this.getIndex(pos);
@@ -318,10 +320,11 @@ public class Grid {
          * @return A Node at the Entity's location.
          */
         public Node getNode(@NotNull Entity entity) {
-            if(entity.transform == null)
+            Transform transform = ComponentManager.getComponents(entity.getID()).transform;
+            if(transform == null)
                 return null;
 
-            return this.getNode((int) (entity.transform.getPosition().x / this.getSquareSize()), (int) (entity.transform.getPosition().y / this.getSquareSize()));
+            return this.getNode((int) (transform.getPosition().x / this.getSquareSize()), (int) (transform.getPosition().y / this.getSquareSize()));
         }
 
         /**
@@ -364,8 +367,9 @@ public class Grid {
          * @param entity The Entity to add.
          */
         public void addEntity(Entity entity) {
-            int xIndex = (int) (entity.transform.getPosition().x / this.getSquareSize());
-            int yIndex = (int) (entity.transform.getPosition().y / this.getSquareSize());
+            Transform transform = ComponentManager.getComponents(entity.getID()).transform;
+            int xIndex = (int) (transform.getPosition().x / this.getSquareSize());
+            int yIndex = (int) (transform.getPosition().y / this.getSquareSize());
             Node node = this.grid[xIndex][yIndex];
 
             node.addEntity(entity);
@@ -377,8 +381,9 @@ public class Grid {
          * @param entity The Entity to remove.
          */
         public void removeEntity(Entity entity) {
-            int xIndex = (int) (entity.transform.getPosition().x / this.getSquareSize());
-            int yIndex = (int) (entity.transform.getPosition().y / this.getSquareSize());
+            Transform transform = ComponentManager.getComponents(entity.getID()).transform;
+            int xIndex = (int) (transform.getPosition().x / this.getSquareSize());
+            int yIndex = (int) (transform.getPosition().y / this.getSquareSize());
             Node node = this.grid[xIndex][yIndex];
 
             node.removeEntity(entity);
@@ -434,7 +439,7 @@ public class Grid {
          * @return An integer array containing the X and Y values of the index.
          */
         public int[] getIndex(Entity entity) {
-            return getIndex(entity.transform.getPosition());
+            return getIndex(ComponentManager.getComponents(entity.getID()).transform.getPosition());
         }
 
         /**

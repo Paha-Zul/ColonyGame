@@ -42,20 +42,20 @@ public class GraphicIdentity extends Component{
         super.render(delta, batch);
         Grid.GridInstance grid = ColonyGame.worldGrid;
 
-        Vector2 pos = this.owner.transform.getPosition(); //Cache the owner's position.
+        Vector2 pos = this.ownerID.transform.getPosition(); //Cache the ownerID's position.
 
         if(!ColonyGame.camera.frustum.boundsInFrustum(pos.x, pos.y, 0, sprite.getWidth(), sprite.getHeight(), 0))
             return;
 
-        Grid.Node node = grid.getNode(this.owner);
+        Grid.Node node = grid.getNode(this.ownerID);
         int visibility = grid.getVisibilityMap()[node.getX()][node.getY()].getVisibility();
         if(visibility == Constants.VISIBILITY_UNEXPLORED)
             return;
 
         this.changeVisibility(visibility);
 
-        this.sprite.setRotation(this.owner.transform.getRotation());
-        this.sprite.setScale(this.owner.transform.getScale());
+        this.sprite.setRotation(this.ownerID.transform.getRotation());
+        this.sprite.setScale(this.ownerID.transform.getScale());
 
         if(alignment == 0)
             this.sprite.setPosition(pos.x - (sprite.getWidth()/2), pos.y - (sprite.getHeight()/2));

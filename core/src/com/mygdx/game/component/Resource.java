@@ -109,8 +109,8 @@ public class Resource extends Component implements IInteractable{
     }
 
     @Override
-    public void init(Entity owner) {
-        super.init(owner);
+    public void init(double id) {
+        super.init(id);
         owner.name = this.displayName;
 
         if(resRef.resourceType.equals("water"))
@@ -155,7 +155,7 @@ public class Resource extends Component implements IInteractable{
 
         //If it's empty, either destroy it or re-initialize it.
         if(size == 0 && !DataManager.getData(this.resourceName, DataBuilder.JsonResource.class).infinite)
-            this.owner.setToDestroy();
+            this.ownerID.setToDestroy();
         else if(size == 0)
             this.initItem(this.resRef);
 

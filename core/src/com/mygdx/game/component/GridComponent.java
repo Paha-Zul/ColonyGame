@@ -1,8 +1,8 @@
 package com.mygdx.game.component;
 
-import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.Constants;
 import com.mygdx.game.helpers.Grid;
+import com.mygdx.game.helpers.ListHolder;
 
 /**
  * Created by Paha on 1/17/2015.
@@ -24,11 +24,11 @@ public class GridComponent extends Component{
     }
 
     @Override
-    public void init(Entity owner) {
-        super.init(owner);
+    public void init(double id) {
+        super.init(id);
 
         //Gets a node to start.
-        this.currNode = this.grid.addToGrid(this.owner);
+        this.currNode = this.grid.addToGrid(ListHolder.getIdToEntityMap().get(id));
         this.grid.addViewer(this.currNode, this.exploreRadius);
     }
 
@@ -40,7 +40,7 @@ public class GridComponent extends Component{
     @Override
     public void update(float delta) {
         super.update(delta);
-        this.currNode = this.grid.checkNode(this.currNode, this.owner, true, exploreRadius);
+        this.currNode = this.grid.checkNode(this.currNode, ListHolder.getIdToEntityMap().get(this.ownerID), true, exploreRadius);
     }
 
     public Grid.Node getCurrNode(){
@@ -48,9 +48,9 @@ public class GridComponent extends Component{
     }
 
     @Override
-    public void destroy(Entity destroyer) {
-        this.currNode.removeEntity(this.owner);
+    public void destroy(double id) {
+        this.currNode.removeEntity(ListHolder.getIdToEntityMap().get(this.ownerID));
 
-        super.destroy(destroyer);
+        super.destroy(id);
     }
 }

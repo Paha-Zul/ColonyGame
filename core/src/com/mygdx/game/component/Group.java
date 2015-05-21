@@ -100,7 +100,7 @@ public class Group extends Component{
     }
 
     /**
-     * Do not use this function for this Component. Since this Component attaches to many different Entities, the owner could be any Entity in the group.
+     * Do not use this function for this Component. Since this Component attaches to many different Entities, the ownerID could be any Entity in the group.
      * @return The wrong Entity or most of the time, null.
      */
     @Deprecated

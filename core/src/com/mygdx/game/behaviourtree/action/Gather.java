@@ -17,7 +17,7 @@ import com.mygdx.game.helpers.timer.Timer;
 /**
  * <p>A task that gathers a resource when the right criteria is met.</p>
  *
- * <p>If the 'blackBoard.myInventory' field is null, the inventory from the Entity owner of the blackboard will be used. The 'blackBoard.targetResource' field will
+ * <p>If the 'blackBoard.myInventory' field is null, the inventory from the Entity ownerID of the blackboard will be used. The 'blackBoard.targetResource' field will
  * be used to gather from. If this field is null, the task will end with failure.</p>
  */
 public class Gather extends LeafTask{
@@ -41,7 +41,7 @@ public class Gather extends LeafTask{
     public void start() {
         super.start();
 
-        //If the 'myInventory' field is null of the blackboard, get it from the blackboard's owner.
+        //If the 'myInventory' field is null of the blackboard, get it from the blackboard's ownerID.
         if(this.blackBoard.myInventory == null)
             this.blackBoard.myInventory = this.blackBoard.getEntityOwner().getComponent(Inventory.class);
 
@@ -78,7 +78,7 @@ public class Gather extends LeafTask{
         //This sets up the information for moving and transferring to the colony.
         Colony targetColony = this.blackBoard.getEntityOwner().getComponent(Colonist.class).getColony(); //Get the colony.
         this.blackBoard.targetNode = null; //Set the target node to null to make sure we use the target (not the node)
-        this.blackBoard.target = targetColony.getEntityOwner(); //Set the target to the entity owner of the colony.
+        this.blackBoard.target = targetColony.getEntityOwner(); //Set the target to the entity ownerID of the colony.
         this.blackBoard.toInventory = targetColony.getInventory(); //Set the inventory to the colony's inventory.
 
         this.control.finishWithSuccess();

@@ -33,7 +33,7 @@ public class FindRandomNearbyLocation extends LeafTask{
     public void start() {
         super.start();
 
-        //Cache the owner transform.
+        //Cache the ownerID transform.
         Transform transform = this.blackBoard.getEntityOwner().transform;
 
         //This function will get valid nodes around the entity.

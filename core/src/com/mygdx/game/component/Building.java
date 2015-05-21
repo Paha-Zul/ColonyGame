@@ -1,5 +1,6 @@
 package com.mygdx.game.component;
 
+import com.mygdx.game.helpers.ListHolder;
 import com.mygdx.game.interfaces.IInteractable;
 import com.mygdx.game.interfaces.IOwnable;
 
@@ -50,7 +51,7 @@ public class Building extends Component implements IOwnable, IInteractable{
 
     @Override
     public String getName() {
-        return this.owner.name;
+        return ListHolder.getIdToEntityMap().get(ownerID).name;
     }
 
     @Override

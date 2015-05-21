@@ -52,17 +52,17 @@ public class Colony extends Component implements IInteractable {
     @Override
     public void start() {
         super.start();
-        this.owner.name = "emptyColonyObject";
+        this.ownerID.name = "emptyColonyObject";
 
         placeStart();
 
-        this.inventory = this.owner.getComponent(Inventory.class);
+        this.inventory = this.ownerID.getComponent(Inventory.class);
         TextureRegion colonistTexture = new TextureRegion(ColonyGame.assetManager.get("colonist", Texture.class));
         Building building = this.getOwnedFromColony(Building.class);
 
         //Make some colonists!
         for(int i=0;i<5;i++) {
-            Entity c = this.makeColonist(building.owner.transform.getPosition(), GH.toMeters(200), colonistTexture);
+            Entity c = this.makeColonist(building.ownerID.transform.getPosition(), GH.toMeters(200), colonistTexture);
             c.getComponent(Colonist.class).setName(GameScreen.firstNames[MathUtils.random(GameScreen.firstNames.length - 1)], GameScreen.lastNames[MathUtils.random(GameScreen.lastNames.length - 1)]);
             this.addColonist(c.getComponent(Colonist.class));
         }

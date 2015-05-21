@@ -31,15 +31,15 @@ public class Interactable extends Component{
 
     public void changeType(String newType){
         if(newType.equals("resource"))
-            this.interactable = this.owner.getComponent(Resource.class);
+            this.interactable = this.ownerID.getComponent(Resource.class);
         else if(newType.equals("humanoid"))
-            this.interactable = this.owner.getComponent(Colonist.class);
+            this.interactable = this.ownerID.getComponent(Colonist.class);
         else if(newType.equals("colony"))
-            this.interactable = this.owner.getComponent(Colony.class);
+            this.interactable = this.ownerID.getComponent(Colony.class);
         else if(newType.equals("animal"))
-            this.interactable = this.owner.getComponent(Animal.class);
+            this.interactable = this.ownerID.getComponent(Animal.class);
         else if(newType.equals("building"))
-            this.interactable = this.owner.getComponent(Building.class);
+            this.interactable = this.ownerID.getComponent(Building.class);
     }
 
     @Override

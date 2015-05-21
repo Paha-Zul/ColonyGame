@@ -1,7 +1,6 @@
 package com.mygdx.game.component;
 
 import com.badlogic.gdx.utils.Array;
-import com.mygdx.game.entity.Entity;
 
 import java.util.HashMap;
 
@@ -62,8 +61,8 @@ public class Skills extends Component{
 
 
     @Override
-    public void destroy(Entity destroyer) {
-        super.destroy(destroyer);
+    public void destroy(double id) {
+        super.destroy(id);
     }
 
     /**

@@ -21,7 +21,7 @@ public class SetDestination extends Component{
 	public void start() {
 		super.start();
 
-		Vector2 pos = this.owner.transform.getPosition();
+		Vector2 pos = this.ownerID.transform.getPosition();
 
 		Functional.Callback callback = () ->{
 			float x = pos.x + (MathUtils.random()*moveDis - moveDis/2f);

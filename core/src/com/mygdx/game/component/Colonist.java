@@ -58,10 +58,10 @@ public class Colonist extends Component implements IInteractable, IOwnable{
         this.manager.getBlackBoard().moveSpeed = 200f;
         this.collider = this.getComponent(Collider.class);
 
-        EventSystem.onEntityEvent(this.owner, "damage", onDamage);
-        EventSystem.onEntityEvent(this.owner, "attacking_group", onAttackingEvent);
-        EventSystem.onEntityEvent(this.owner, "collide_start", onCollideStart);
-        EventSystem.onEntityEvent(this.owner, "collide_end", onCollideEnd);
+        EventSystem.onEntityEvent(this.ownerID, "damage", onDamage);
+        EventSystem.onEntityEvent(this.ownerID, "attacking_group", onAttackingEvent);
+        EventSystem.onEntityEvent(this.ownerID, "collide_start", onCollideStart);
+        EventSystem.onEntityEvent(this.ownerID, "collide_end", onCollideEnd);
 
         this.createStats();
         this.createBehaviourButtons();
@@ -78,7 +78,7 @@ public class Colonist extends Component implements IInteractable, IOwnable{
         fixtureDef.isSensor = true;
         fixtureDef.shape = shape;
         this.fixture = this.collider.body.createFixture(fixtureDef);
-        Collider.ColliderInfo info = new Collider.ColliderInfo(this.owner);
+        Collider.ColliderInfo info = new Collider.ColliderInfo(this.ownerID);
         info.tags.addTag("attack_sensor");
         this.fixture.setUserData(info);
         shape.dispose();
@@ -213,7 +213,7 @@ public class Colonist extends Component implements IInteractable, IOwnable{
         getBehManager().getBehaviourStates().addState("attackTarget", false, PrebuiltTasks::attackTarget).repeat = false;
         getBehManager().getBehaviourStates().addState("hunt", false, PrebuiltTasks::searchAndHunt).repeat = true;
 
-        EventSystem.onEntityEvent(this.owner, "task_started", args -> {
+        EventSystem.onEntityEvent(this.ownerID, "task_started", args -> {
             Task task = (Task)args[0];
             if(task.getName().equals("exploreUnexplored")) task.getBlackboard().target = this.getColony().getEntityOwner();
         });
@@ -246,9 +246,9 @@ public class Colonist extends Component implements IInteractable, IOwnable{
 
     //The callback for when our health is 0.
     private Functional.Callback onZero = () -> {
-        this.owner.getTags().removeTag("alive");
-        this.owner.transform.setRotation(90f);
-        this.owner.internalDestroyComponent(BehaviourManagerComp.class);
+        this.ownerID.getTags().removeTag("alive");
+        this.ownerID.transform.setRotation(90f);
+        this.ownerID.internalDestroyComponent(BehaviourManagerComp.class);
         this.collider.body.destroyFixture(this.fixture); //TODO THIS PROBABLY WILL BREAK IT!
         this.stats.clearTimers();
         this.manager = null;

@@ -7,6 +7,7 @@ import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.timer.Timer;
 import com.mygdx.game.interfaces.Functional;
 import com.mygdx.game.ui.UI;
+import gnu.trove.map.hash.TDoubleObjectHashMap;
 
 import java.util.LinkedList;
 import java.util.ListIterator;
@@ -21,6 +22,7 @@ public class ListHolder {
 	private static Array<Timer> timerList = new Array<>();
 
     private static LinkedList<FloatingText> floatingTexts = new LinkedList<>();
+	private static TDoubleObjectHashMap<Entity> idToEntityMap = new TDoubleObjectHashMap<>(1000);
 
 	public static void addEntity(int drawLevel, Entity e){
 		//If our list doesn't have enough layers to put something at 'drawLevel', add the layers!
@@ -33,6 +35,7 @@ public class ListHolder {
 
 		//Add the Entity
 		newList.add(e);
+		idToEntityMap.put(e.getID(), e);
 	}
 
 	public static void addTimer(Timer timer){
@@ -55,12 +58,14 @@ public class ListHolder {
 				Entity e = anEntityList.get(j);
 				//If it is set to be destroyed, destroy it, remove it, decrement, continue.
 				if (e.isSetToBeDestroyed()) {
-					anEntityList.get(j).destroy(e);
+					idToEntityMap.remove(e.getID());
+					anEntityList.get(j).destroy(e.getID());
 					anEntityList.removeIndex(j);
 					j--;
 					continue;
 					//If it is already destroyed (an immediate destroy call from somewhere else), remove it, decrement, continue.
 				} else if (e.isDestroyed()) {
+					idToEntityMap.remove(e.getID());
 					anEntityList.removeIndex(j);
 					j--;
 					continue;
@@ -162,6 +167,10 @@ public class ListHolder {
 
 	public static Array<Array<Entity>> getEntityList(){
 		return entityList;
+	}
+
+	public static TDoubleObjectHashMap<Entity> getIdToEntityMap(){
+		return idToEntityMap;
 	}
 
 	/**

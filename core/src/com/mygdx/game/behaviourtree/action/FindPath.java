@@ -13,7 +13,7 @@ import java.util.LinkedList;
 import java.util.PriorityQueue;
 
 /**
- * A Task that finds a path from where the Entity owner of this task is standing to a target Entity or target node.
+ * A Task that finds a path from where the Entity ownerID of this task is standing to a target Entity or target node.
  */
 public class FindPath extends LeafTask {
 
@@ -23,6 +23,7 @@ public class FindPath extends LeafTask {
 
     @Override
     public boolean check() {
+
         return super.check();
     }
 

@@ -59,7 +59,7 @@ public class Collider extends Component implements IScalable{
         super.init(owner);
 
         Vector2 ownerPos = owner.transform.getPosition();
-        this.body.setTransform(ownerPos.x, ownerPos.y, this.owner.transform.getRotation());
+        this.body.setTransform(ownerPos.x, ownerPos.y, this.ownerID.transform.getRotation());
 
         ColliderInfo bodyInfo = new ColliderInfo(owner);
         ColliderInfo fixtureInfo = new ColliderInfo(owner);
@@ -68,7 +68,7 @@ public class Collider extends Component implements IScalable{
         this.body.setUserData(bodyInfo);
         this.fixture.setUserData(fixtureInfo);
 
-        this.owner.registerScalable(this);
+        this.ownerID.registerScalable(this);
         this.body.setActive(true);
     }
 
@@ -81,7 +81,7 @@ public class Collider extends Component implements IScalable{
     public void update(float delta) {
         super.update(delta);
 
-        this.owner.transform.setPosition(this.body.getPosition().x, this.body.getPosition().y);
+        this.ownerID.transform.setPosition(this.body.getPosition().x, this.body.getPosition().y);
     }
 
     @Override

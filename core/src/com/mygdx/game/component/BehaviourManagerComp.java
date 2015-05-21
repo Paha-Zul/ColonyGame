@@ -53,7 +53,7 @@ public class BehaviourManagerComp extends Component{
     public void init(Entity owner) {
         super.init(owner);
 
-        this.blackBoard = this.owner.addComponent(new BlackBoard());
+        this.blackBoard = this.ownerID.addComponent(new BlackBoard());
         this.blackBoard.colonyGrid = ColonyGame.worldGrid;
         this.blackBoard.myManager = this;
     }
@@ -61,7 +61,7 @@ public class BehaviourManagerComp extends Component{
     @Override
     public void start() {
         super.start();
-        this.stats = this.owner.getComponent(Stats.class);
+        this.stats = this.ownerID.getComponent(Stats.class);
         this.blackBoard = this.getComponent(BlackBoard.class);
         this.blackBoard.myInventory = this.getComponent(Inventory.class);
 

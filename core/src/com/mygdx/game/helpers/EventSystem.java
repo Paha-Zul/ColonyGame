@@ -33,7 +33,7 @@ public class EventSystem {
     }
 
     private static void registerEvent(double id, String eventName, java.util.function.Consumer<Object[]> function){
-        //If the map for the Entity id is null, add a new map.
+        //If the map for the Entity ownerID is null, add a new map.
         if(entityMap.get(id) == null)
             entityMap.put(id, new HashMap<>());
 

@@ -53,9 +53,9 @@ public class Animal extends Component implements IInteractable{
         //Remove its animal properties and make it a resource.
         stats.getStat("health").onZero = onDeath();
 
-        EventSystem.onEntityEvent(this.owner, "collide_start", onCollideStart);
-        EventSystem.onEntityEvent(this.owner, "collide_end", onCollideEnd);
-        EventSystem.onEntityEvent(this.owner, "damage", onDamage);
+        EventSystem.onEntityEvent(this.ownerID, "collide_start", onCollideStart);
+        EventSystem.onEntityEvent(this.ownerID, "collide_end", onCollideEnd);
+        EventSystem.onEntityEvent(this.ownerID, "damage", onDamage);
 
         this.behComp.getBlackBoard().moveSpeed = 250f;
         //this.setActive(false);
@@ -70,7 +70,7 @@ public class Animal extends Component implements IInteractable{
         circle.setRadius(10f);
         attackSensor = collider.body.createFixture(circle, 1f);
         attackSensor.setSensor(true);
-        Collider.ColliderInfo fixtureInfo = new Collider.ColliderInfo(this.owner);
+        Collider.ColliderInfo fixtureInfo = new Collider.ColliderInfo(this.ownerID);
         fixtureInfo.tags.addTag(Constants.COLLIDER_DETECTOR);
         attackSensor.setUserData(fixtureInfo);
         circle.dispose();
@@ -99,25 +99,25 @@ public class Animal extends Component implements IInteractable{
     //The callback to be called when I die!
     private Functional.Callback onDeath(){
         return () -> {
-            Interactable interactable = this.owner.getComponent(Interactable.class);
+            Interactable interactable = this.ownerID.getComponent(Interactable.class);
 
             //If we don't have a resource to turn into, simply die.
             if(animalRef.resourceName == null)
-                this.owner.setToDestroy();
+                this.ownerID.setToDestroy();
 
             //Otherwise, prepare to be a resource!
             else {
-                EventSystem.unregisterEntity(this.owner); //Unregister for events.
-                this.owner.transform.setRotation(180);
+                EventSystem.unregisterEntity(this.ownerID); //Unregister for events.
+                this.ownerID.transform.setRotation(180);
                 this.collider.body.setLinearVelocity(0, 0);
-                this.owner.getTags().clearTags(); //Clear all tags
-                this.owner.getTags().addTag("resource"); //Add the resource tag
-                this.owner.addComponent(new Resource(DataManager.getData(animalRef.resourceName, DataBuilder.JsonResource.class))); //Add a Resource Component.
+                this.ownerID.getTags().clearTags(); //Clear all tags
+                this.ownerID.getTags().addTag("resource"); //Add the resource tag
+                this.ownerID.addComponent(new Resource(DataManager.getData(animalRef.resourceName, DataBuilder.JsonResource.class))); //Add a Resource Component.
                 if (interactable != null) interactable.changeType("resource");
-                this.owner.internalDestroyComponent(BehaviourManagerComp.class); //Destroy the BehaviourManagerComp
-                this.owner.internalDestroyComponent(Stats.class); //Destroy the Stats component.
-                this.owner.internalDestroyComponent(Animal.class); //Destroy this (Animal) Component.
-                this.owner.internalDestroyComponent(Group.class); //Destroy this (Animal) Component.
+                this.ownerID.internalDestroyComponent(BehaviourManagerComp.class); //Destroy the BehaviourManagerComp
+                this.ownerID.internalDestroyComponent(Stats.class); //Destroy the Stats component.
+                this.ownerID.internalDestroyComponent(Animal.class); //Destroy this (Animal) Component.
+                this.ownerID.internalDestroyComponent(Group.class); //Destroy this (Animal) Component.
             }
         };
     }
