@@ -7,7 +7,7 @@ import java.util.HashMap;
  */
 public class StateSystem<T>{
     private HashMap<String, State<T>> stateMap = new HashMap<>();
-    private State<T> currState = new State<>("default", null);
+    private State<T> currState = new State<>("default", true, null);
     private State<T> defaultState = currState;
 
     public StateSystem(){
@@ -46,10 +46,11 @@ public class StateSystem<T>{
      * @param defaultState True if it the state should be the default state, false otherwise.
      * @param userData The user data for this state.
      */
-    public void addState(String stateName, boolean defaultState, T userData){
-        State<T> newState = new State<>(stateName, userData);
+    public State<T> addState(String stateName, boolean defaultState, T userData){
+        State<T> newState = new State<>(stateName, false, userData);
         this.stateMap.putIfAbsent(stateName, newState);
         if(defaultState) this.defaultState = newState;
+        return newState;
     }
 
     /**
@@ -99,11 +100,13 @@ public class StateSystem<T>{
 
     public static class State<T>{
         public String stateName;
+        public boolean repeat;
         private T userData;
 
-        public State(String stateName, T userData){
+        public State(String stateName, boolean repeat, T userData){
             this.stateName = stateName;
             this.userData = userData;
+            this.repeat = repeat;
         }
 
         public T getUserData(){

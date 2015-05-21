@@ -54,7 +54,7 @@ public class Group extends Component{
      * @return The Entity leader of this group. Null if the group is empty and no valid leader can be set.
      */
     public Entity getLeader(){
-        if(!leader.getTags().hasTag("alive")) getNewLeader();
+        if(!leader.getTags().hasTag("alive") || this.leader == null) getNewLeader();
         return this.leader;
     }
 

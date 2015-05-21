@@ -1,9 +1,13 @@
 package com.mygdx.game.component;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.physics.box2d.CircleShape;
+import com.badlogic.gdx.physics.box2d.Fixture;
+import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.behaviourtree.PrebuiltTasks;
 import com.mygdx.game.behaviourtree.Task;
+import com.mygdx.game.component.collider.Collider;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.helpers.DataBuilder;
 import com.mygdx.game.helpers.EventSystem;
@@ -17,6 +21,7 @@ import com.mygdx.game.interfaces.IInteractable;
 import com.mygdx.game.interfaces.IOwnable;
 import com.mygdx.game.ui.PlayerInterface;
 
+import java.util.LinkedList;
 import java.util.function.Consumer;
 
 /**
@@ -28,16 +33,16 @@ public class Colonist extends Component implements IInteractable, IOwnable{
     private Stats stats;
     private Skills skills;
     private BehaviourManagerComp manager;
+    private Collider collider;
     private String firstName, lastName;
+    private boolean alert = false;
+
+    private LinkedList<Entity> attackList = new LinkedList<>();
+
+    private Fixture fixture;
 
     public Colonist() {
         super();
-        this.setActive(false);
-    }
-
-    @Override
-    public void update(float delta) {
-        super.update(delta);
     }
 
     @Override
@@ -51,13 +56,68 @@ public class Colonist extends Component implements IInteractable, IOwnable{
         this.skills = this.getComponent(Skills.class);
         this.manager = this.getComponent(BehaviourManagerComp.class);
         this.manager.getBlackBoard().moveSpeed = 200f;
+        this.collider = this.getComponent(Collider.class);
 
         EventSystem.onEntityEvent(this.owner, "damage", onDamage);
         EventSystem.onEntityEvent(this.owner, "attacking_group", onAttackingEvent);
+        EventSystem.onEntityEvent(this.owner, "collide_start", onCollideStart);
+        EventSystem.onEntityEvent(this.owner, "collide_end", onCollideEnd);
 
         this.createStats();
         this.createBehaviourButtons();
         this.createSkills();
+        this.createRangeSensor();
+    }
+
+    //Creates a range sensor for when we get a ranged weapon.
+    private void createRangeSensor(){
+
+        CircleShape shape = new CircleShape();
+        shape.setRadius(0f);
+        FixtureDef fixtureDef = new FixtureDef();
+        fixtureDef.isSensor = true;
+        fixtureDef.shape = shape;
+        this.fixture = this.collider.body.createFixture(fixtureDef);
+        Collider.ColliderInfo info = new Collider.ColliderInfo(this.owner);
+        info.tags.addTag("attack_sensor");
+        this.fixture.setUserData(info);
+        shape.dispose();
+    }
+
+    @Override
+    public void update(float delta) {
+        super.update(delta);
+
+        if(alert && this.attackList.size() > 0){
+            Entity ent = this.attackList.peek();
+            if(!ent.getTags().hasTag("alive"))
+                this.attackList.removeFirst();
+            else{
+                this.getBehManager().getBlackBoard().target = ent;
+                if(!this.getBehManager().getBehaviourStates().getCurrState().stateName.equals("attackTarget"))
+                    this.getBehManager().changeTaskImmediate("attackTarget");
+            }
+        }
+    }
+
+    public boolean setAlert(boolean alert){
+        //If alert is active and we are setting it to not active.
+        if(this.alert && !alert) {
+            this.attackList = new LinkedList<>();
+            this.fixture.getShape().setRadius(0);
+        //If alert is not active and we are setting it to active.
+        }else if(!this.alert && alert)
+            this.fixture.getShape().setRadius(20f);
+
+        return this.alert = alert;
+    }
+
+    /**
+     * Toggles the attack range sensor on this colonist.
+     * @return True if alert was set to true, false if alert was set to false.
+     */
+    public boolean toggleRangeSensor(){
+        return this.setAlert(!this.alert);
     }
 
     //Creates the stats for this colonist.
@@ -147,9 +207,11 @@ public class Colonist extends Component implements IInteractable, IOwnable{
             node.userData = taskInfo;
         }
 
-        getBehManager().getBehaviourStates().addState("gather", false, PrebuiltTasks::gatherResource);
-        getBehManager().getBehaviourStates().addState("explore", false, PrebuiltTasks::exploreUnexplored);
-        getBehManager().getBehaviourStates().addState("consume", false, PrebuiltTasks::consumeTask);
+        getBehManager().getBehaviourStates().addState("gather", false, PrebuiltTasks::gatherResource).repeat = true;
+        getBehManager().getBehaviourStates().addState("explore", false, PrebuiltTasks::exploreUnexplored).repeat = true;
+        getBehManager().getBehaviourStates().addState("consume", false, PrebuiltTasks::consumeTask).repeat = false;
+        getBehManager().getBehaviourStates().addState("attackTarget", false, PrebuiltTasks::attackTarget).repeat = false;
+        getBehManager().getBehaviourStates().addState("hunt", false, PrebuiltTasks::searchAndHunt).repeat = true;
 
         EventSystem.onEntityEvent(this.owner, "task_started", args -> {
             Task task = (Task)args[0];
@@ -157,6 +219,7 @@ public class Colonist extends Component implements IInteractable, IOwnable{
         });
     }
 
+    //Creates the skills, which aren't used anymore :(
     private void createSkills(){
         this.skills.addSkill("foraging", 10, 100, 2.25f, 0.1f);
         this.skills.addSkill("lumberjack", 10, 100, 2.25f, 0.1f);
@@ -166,6 +229,7 @@ public class Colonist extends Component implements IInteractable, IOwnable{
         this.skills.addSkill("mining", 10, 100, 2.25f, 0.1f);
     }
 
+    //The onDamage event when this colonist takes damage.
     private Consumer<Object[]> onDamage = args -> {
         Entity entity = (Entity) args[0];
         float amount = (float) args[1];
@@ -184,14 +248,16 @@ public class Colonist extends Component implements IInteractable, IOwnable{
     private Functional.Callback onZero = () -> {
         this.owner.getTags().removeTag("alive");
         this.owner.transform.setRotation(90f);
-        this.stats.clearTimers();
         this.owner.internalDestroyComponent(BehaviourManagerComp.class);
+        this.collider.body.destroyFixture(this.fixture); //TODO THIS PROBABLY WILL BREAK IT!
+        this.stats.clearTimers();
         this.manager = null;
         GridComponent gridComp = this.getComponent(GridComponent.class);
         gridComp.setActive(false);
         ColonyGame.worldGrid.removeViewer(gridComp);
     };
 
+    //The function for when a "attack" signal is sent to this colonist.
     private Consumer<Object[]> onAttackingEvent = args -> {
         Group attackingGroup = (Group)args[0];
         if(attackingGroup.getLeader().getTags().hasTag("boss")) {
@@ -199,6 +265,40 @@ public class Colonist extends Component implements IInteractable, IOwnable{
             event.eventTarget = this.getEntityOwner();
             event.eventTargetOther = attackingGroup.getLeader();
             PlayerInterface.getInstance().newPlayerEvent(event);
+        }
+    };
+
+    //When one of our fixtures collides with something.
+    private Consumer<Object[]> onCollideStart = args -> {
+        Fixture myFixture = (Fixture)args[0];
+        Fixture otherFixture = (Fixture)args[1];
+
+        Collider.ColliderInfo myInfo = (Collider.ColliderInfo)myFixture.getUserData();
+        Collider.ColliderInfo otherInfo = (Collider.ColliderInfo)otherFixture.getUserData();
+
+        //If a body (not a sensor) is hitting our 'attack_sensor' fixture and it's an animal
+        if(myInfo.tags.hasTag("attack_sensor") && otherInfo.tags.hasTag("entity") && otherInfo.owner.getTags().hasTag("animal")){
+            Animal animal = otherInfo.owner.getComponent(Animal.class);
+            if(animal == null) return;
+            if(animal.getAnimalRef().aggressive)
+                attackList.add(otherInfo.owner);
+        }
+    };
+
+    //When one of our fixtures collides with something.
+    private Consumer<Object[]> onCollideEnd = args -> {
+        Fixture myFixture = (Fixture)args[0];
+        Fixture otherFixture = (Fixture)args[1];
+
+        Collider.ColliderInfo myInfo = (Collider.ColliderInfo)myFixture.getUserData();
+        Collider.ColliderInfo otherInfo = (Collider.ColliderInfo)otherFixture.getUserData();
+
+        //If a (entity) fixture is hitting our 'attack_sensor' fixture and it's an animal
+        if(myInfo.tags.hasTag("attack_sensor") && otherInfo.owner.getTags().hasTag("animal") && otherInfo.tags.hasTag("entity")){
+            Animal animal = otherInfo.owner.getComponent(Animal.class);
+            if(animal == null) return;
+            if(animal.getAnimalRef().aggressive)
+                attackList.remove(otherInfo.owner);
         }
     };
 
@@ -254,6 +354,11 @@ public class Colonist extends Component implements IInteractable, IOwnable{
     @Override
     public Colony getOwningColony() {
         return this.colony;
+    }
+
+    @Override
+    public Component getComponent() {
+        return this;
     }
 
     @Override

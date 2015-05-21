@@ -22,8 +22,10 @@ public class Parallel extends ParentTask{
     public void start() {
         //When this parallel job starts, reset each task and start each task.
         this.control.getSubTasks().forEach(task -> {
-            task.getControl().reset();
-            task.getControl().safeStart();
+            if(task.check()) {
+                task.getControl().reset();
+                task.getControl().safeStart();
+            }
         });
     }
 

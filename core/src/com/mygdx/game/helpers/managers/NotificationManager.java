@@ -95,7 +95,7 @@ public class NotificationManager {
         return noti;
     }
 
-    public final static Array<Notification> getActiveNotifications(){
+    public static Array<Notification> getActiveNotifications(){
         return activeNotifications;
     }
 

@@ -360,4 +360,9 @@ public class Resource extends Component implements IInteractable{
     public BehaviourManagerComp getBehManager() {
         return null;
     }
+
+    @Override
+    public Component getComponent() {
+        return this;
+    }
 }

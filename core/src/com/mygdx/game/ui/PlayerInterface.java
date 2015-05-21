@@ -142,11 +142,12 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         return true;
     };
 
+    //For selecting many units
     private QueryCallback selectionCallback = fixture -> {
         Collider.ColliderInfo selectedInfo = (Collider.ColliderInfo)fixture.getUserData();
 
         //If not null, the entity is a colonist, and the collider is clickable.
-        if(selectedInfo != null && selectedInfo.owner.getTags().hasTag("colonist") && selectedInfo.tags.hasTag(Constants.COLLIDER_CLICKABLE)) {
+        if(selectedInfo != null && selectedInfo.owner.getTags().hasTags("colonist", "alive") && selectedInfo.tags.hasTag(Constants.COLLIDER_CLICKABLE)) {
             UnitProfile profile = new UnitProfile(); //Make a unit profile.
             setSelectedEntity(selectedInfo.owner); //Set our selectedEntity
             profile.entity = selectedInfo.owner; //Get the Entity that we clicked.
@@ -235,6 +236,8 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         multiplexer.addProcessor(stage);
         multiplexer.addProcessor(this);
         Gdx.input.setInputProcessor(multiplexer);
+
+        ColonyGame.camera.zoom = 1.5f;
     }
 
     private void generateFonts(){
@@ -306,7 +309,9 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
             gameSpeedStyle.multiline = true;
             gameSpeedStyle.alignment = Align.top;
-            GUI.Label(builder.toString(), this.batch, 0, height * 0.4f, width * 0.07f, height * 0.48f, gameSpeedStyle);
+            gameSpeedStyle.paddingTop = 5;
+            GUI.Label(builder.toString(), this.batch, 0, height * 0.2f, width * 0.07f, height * 0.48f, gameSpeedStyle);
+            gameSpeedStyle.paddingTop = 0;
         }
     }
 
@@ -824,11 +829,21 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
             this.paused = !this.paused;
         else if(keycode == Input.Keys.F4) //F4 - reveal map
             this.revealMap();
-        else if(keycode == Input.Keys.PLUS)
+        else if(keycode == Input.Keys.PLUS) //+ - increase game speed
             gameSpeed*=2;
-        else if(keycode == Input.Keys.MINUS)
+        else if(keycode == Input.Keys.MINUS)//- - decrease game speed
             gameSpeed*=0.5f;
-        else
+        else if(keycode == Input.Keys.T) { //T - toggle the colonists (if we have a colonist selected) 'alert' mode.
+            boolean alert = false;
+            if (selectedProfile != null)
+                if (selectedProfile.interactable.getInteractable().getComponent().getEntityOwner().getTags().hasTag("colonist"))
+                    alert = ((Colonist) selectedProfile.interactable.getInteractable().getComponent()).toggleRangeSensor();
+
+            for(UnitProfile profile : this.selectedProfileList){
+                ((Colonist)profile.interactable.getInteractable().getComponent()).setAlert(alert);
+            }
+
+        }else
             return false;
 
         return true;

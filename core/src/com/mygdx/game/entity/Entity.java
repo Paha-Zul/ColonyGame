@@ -124,8 +124,6 @@ public class Entity implements IDelayedDestroyable{
 				comp.update(delta);
 				comp.lateUpdate(delta);
 			}
-
-
 		}
 	}
 

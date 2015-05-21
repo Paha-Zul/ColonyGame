@@ -22,11 +22,12 @@ public class ProjectileEnt extends Entity{
 
     private void makeCollider(){
         CircleShape shape = new CircleShape();
-        shape.setRadius(0.1f);
+        shape.setRadius(0.3f);
         Collider collider = this.addComponent(new Collider(ColonyGame.world, shape));
 
         collider.body.setType(BodyDef.BodyType.DynamicBody);
         collider.fixture.setSensor(true);
+        collider.body.setBullet(true);
 
         collider.fixture.setFriction(0.5f);
         collider.fixture.setDensity(1f);

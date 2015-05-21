@@ -23,7 +23,7 @@ public class FindPath extends LeafTask {
 
     @Override
     public boolean check() {
-        return super.check() || (this.blackBoard.target != null && this.blackBoard.targetNode != null);
+        return super.check();
     }
 
     @Override

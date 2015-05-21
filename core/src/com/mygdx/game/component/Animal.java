@@ -130,8 +130,8 @@ public class Animal extends Component implements IInteractable{
         Collider.ColliderInfo otherInfo = (Collider.ColliderInfo) other.getUserData();
         Collider.ColliderInfo myInfo = (Collider.ColliderInfo) me.getUserData();
 
-        //If it is not a detector, the other is a bullet, and I am an animal, hurt me! and kill the bullet!
-        if (!myInfo.tags.hasTag(Constants.COLLIDER_DETECTOR) && otherInfo.owner.getTags().hasTag("projectile") && this.owner.getTags().hasTag("animal")) {
+        //If it is not a detector, the other is a bullet, hurt me! and kill the bullet!
+        if (!myInfo.tags.hasTag(Constants.COLLIDER_DETECTOR) && otherInfo.owner.getTags().hasTag("projectile")) {
             this.getComponent(Stats.class).getStat("health").addToCurrent(-20);
             behComp.getBlackBoard().target = otherInfo.owner.getComponent(Projectile.class).projOwner;
             //If not aggressive, flee!
@@ -141,7 +141,7 @@ public class Animal extends Component implements IInteractable{
             otherInfo.owner.setToDestroy();
 
         //If I am a detector and the other is a colonist, we must attack it!
-        }else if (myInfo.tags.hasTag(Constants.COLLIDER_DETECTOR) && otherInfo.owner.getTags().hasTag("colonist") && animalRef.aggressive) {
+        }else if (myInfo.tags.hasTag(Constants.COLLIDER_DETECTOR) && otherInfo.tags.hasTag("entity") && otherInfo.owner.getTags().hasTag("colonist") && animalRef.aggressive) {
             if(otherInfo.owner.getTags().hasTag("alive")) attackList.add(otherInfo.owner);
         }
     };
@@ -170,6 +170,8 @@ public class Animal extends Component implements IInteractable{
     };
 
     private void groupAttack(Entity target){
+        if(group.getLeader() == null) return;
+
         BehaviourManagerComp leaderComp = group.getLeader().getComponent(BehaviourManagerComp.class);
         leaderComp.getBlackBoard().target = target;
         leaderComp.changeTaskImmediate("attackTarget");
@@ -219,6 +221,11 @@ public class Animal extends Component implements IInteractable{
     @Override
     public BehaviourManagerComp getBehManager() {
         return this.behComp;
+    }
+
+    @Override
+    public Component getComponent() {
+        return this;
     }
 
     @Override

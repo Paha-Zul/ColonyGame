@@ -64,11 +64,11 @@ public class Collider extends Component implements IScalable{
         ColliderInfo bodyInfo = new ColliderInfo(owner);
         ColliderInfo fixtureInfo = new ColliderInfo(owner);
         fixtureInfo.tags.addTag(Constants.COLLIDER_CLICKABLE);
+        fixtureInfo.tags.addTag("entity");
         this.body.setUserData(bodyInfo);
         this.fixture.setUserData(fixtureInfo);
 
         this.owner.registerScalable(this);
-
         this.body.setActive(true);
     }
 

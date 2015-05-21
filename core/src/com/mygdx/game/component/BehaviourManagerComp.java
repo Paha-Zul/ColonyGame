@@ -66,6 +66,7 @@ public class BehaviourManagerComp extends Component{
         this.blackBoard.myInventory = this.getComponent(Inventory.class);
 
         getBehaviourStates().addState("idle", true, PrebuiltTasks::idleTask);
+        getBehaviourStates().setCurrState(getBehaviourStates().getDefaultState().stateName);
     }
 
     /**
@@ -124,9 +125,13 @@ public class BehaviourManagerComp extends Component{
 
                 //If the next behaviour is empty, do something based on the state.
                 }else {
-                    BiFunction<BlackBoard, BehaviourManagerComp, Task> data = behaviourStates.getCurrState().getUserData();
-                    if(data != null) this.changeTaskImmediate(data.apply(blackBoard, this));
-                    else this.changeTaskImmediate(behaviourStates.getDefaultState().getUserData().apply(blackBoard, this));
+                    StateSystem.State state = behaviourStates.getDefaultState();
+                    BiFunction<BlackBoard, BehaviourManagerComp, Task> data;
+                    if(behaviourStates.getCurrState().repeat) state = behaviourStates.getCurrState();
+
+                    data = behaviourStates.getCurrState().getUserData();
+                    this.changeTaskImmediate(data.apply(blackBoard, this));
+                    behaviourStates.setCurrState(state.stateName);
                 }
 
             //Update the job.

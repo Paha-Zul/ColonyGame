@@ -57,4 +57,9 @@ public class Building extends Component implements IOwnable, IInteractable{
     public BehaviourManagerComp getBehManager() {
         return null;
     }
+
+    @Override
+    public Component getComponent() {
+        return this;
+    }
 }

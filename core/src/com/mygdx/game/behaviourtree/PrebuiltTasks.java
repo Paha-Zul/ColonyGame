@@ -402,12 +402,8 @@ public class PrebuiltTasks {
         Follow mt = new Follow("Following", blackBoard);
         Attack attack = new Attack("Attacking Target", blackBoard);
 
-        ((ParentTaskController)parallel.getControl()).addTask(fp);
-        ((ParentTaskController)parallel.getControl()).addTask(mt);
-        ((ParentTaskController)parallel.getControl()).addTask(attack);
-
         //Make sure the target is not null.
-        mainRepeat.getControl().callbacks.checkCriteria = task -> task.getBlackboard().target != null;
+        mainRepeat.getControl().callbacks.checkCriteria = task -> task.getBlackboard().target != null && task.blackBoard.target.getTags().hasTag("alive");
 
         //To succeed this repeat job, the target must be null, not valid, or not alive.
         mainRepeat.getControl().callbacks.successCriteria = task -> {
@@ -431,6 +427,14 @@ public class PrebuiltTasks {
             float dis = task.getBlackboard().target.transform.getPosition().dst(task.getBlackboard().getEntityOwner().transform.getPosition());
             return dis <= GH.toMeters(task.getBlackboard().attackRange);
         };
+
+        fp.control.callbacks.checkCriteria = task -> {
+            return task.blackBoard.target != null && task.blackBoard.target.getTags().hasTag("alive");
+        };
+
+        ((ParentTaskController)parallel.getControl()).addTask(fp);
+        ((ParentTaskController)parallel.getControl()).addTask(mt);
+        ((ParentTaskController)parallel.getControl()).addTask(attack);
 
         return mainRepeat;
     }
