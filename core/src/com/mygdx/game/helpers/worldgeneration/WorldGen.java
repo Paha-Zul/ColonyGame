@@ -81,7 +81,7 @@ public class WorldGen {
     }
 
     /**
-     * Called every frame to generate the world. This will return true when the world is fully generated.
+     * Called every frame to generate the saveContainer. This will return true when the saveContainer is fully generated.
      * @return True when finished, false otherwise.
      */
     public boolean generateWorld(){

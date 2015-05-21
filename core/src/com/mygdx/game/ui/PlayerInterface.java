@@ -161,7 +161,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     /**
      * A player interface Component that will display information on the screen.
      * @param batch The SpriteBatch for drawing to the screen.
-     * @param world The Box2D world. We need to know about this for clicking on objects.
+     * @param world The Box2D saveContainer. We need to know about this for clicking on objects.
      */
     public PlayerInterface(SpriteBatch batch, World world) {
         super(batch);
@@ -576,7 +576,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
                     if(innerInter.getBehManager() != null) {
                         drawButtons(innerInter);
 
-                        //Set to world camera and draw the path lines.
+                        //Set to saveContainer camera and draw the path lines.
                         batch.setProjectionMatrix(ColonyGame.camera.combined);
                         BehaviourManagerComp.Line[] lines = innerInter.getBehManager().getLines();
                         for(BehaviourManagerComp.Line line : lines)
@@ -728,7 +728,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         float halfHeight = Math.abs(selectionBox.getHeight()/2);
         selectionBox.set(center.x - halfWidth, center.y - halfHeight, center.x + halfWidth, center.y + halfHeight);
 
-        //Query the world and set dragging to false.
+        //Query the saveContainer and set dragging to false.
         this.world.QueryAABB(this.selectionCallback, selectionBox.x, selectionBox.y, selectionBox.getWidth(), selectionBox.getHeight());
         this.dragging = false;
     }
@@ -829,7 +829,10 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
             this.paused = !this.paused;
         else if(keycode == Input.Keys.F4) //F4 - reveal map
             this.revealMap();
-        else if(keycode == Input.Keys.PLUS) //+ - increase game speed
+        else if(keycode == Input.Keys.F5){
+            SaveGameHelper.saveContainer.entityList = ListHolder.getEntityList();
+            SaveGameHelper.saveWorld();
+        }else if(keycode == Input.Keys.PLUS) //+ - increase game speed
             gameSpeed*=2;
         else if(keycode == Input.Keys.MINUS)//- - decrease game speed
             gameSpeed*=0.5f;

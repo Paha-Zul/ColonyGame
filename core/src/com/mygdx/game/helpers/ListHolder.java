@@ -8,7 +8,6 @@ import com.mygdx.game.helpers.timer.Timer;
 import com.mygdx.game.interfaces.Functional;
 import com.mygdx.game.ui.UI;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.ListIterator;
 
@@ -17,7 +16,7 @@ import java.util.ListIterator;
  */
 public class ListHolder {
 	private static Array<Entity> newList = new Array<>();
-	private static Array<ArrayList<Entity>> entityList = new Array<>();
+	private static Array<Array<Entity>> entityList = new Array<>();
 	private static Array<UI> GUIList = new Array<>();
 	private static Array<Timer> timerList = new Array<>();
 
@@ -28,7 +27,7 @@ public class ListHolder {
 		if(entityList.size <= drawLevel){
 			int diff =  drawLevel - entityList.size;
 			for(int i=0;i<=diff;i++){
-				entityList.add(new ArrayList<>());
+				entityList.add(new Array<>());
 			}
 		}
 
@@ -50,19 +49,19 @@ public class ListHolder {
      */
 	public static void update(float delta){
 		//Loop over each layer.
-		for (ArrayList<Entity> anEntityList : entityList) {
+		for (Array<Entity> anEntityList : entityList) {
 			//For each entity in this layer
-			for (int j = 0; j < anEntityList.size(); j++) {
+			for (int j = 0; j < anEntityList.size; j++) {
 				Entity e = anEntityList.get(j);
 				//If it is set to be destroyed, destroy it, remove it, decrement, continue.
 				if (e.isSetToBeDestroyed()) {
 					anEntityList.get(j).destroy(e);
-					anEntityList.remove(j);
+					anEntityList.removeIndex(j);
 					j--;
 					continue;
 					//If it is already destroyed (an immediate destroy call from somewhere else), remove it, decrement, continue.
 				} else if (e.isDestroyed()) {
-					anEntityList.remove(j);
+					anEntityList.removeIndex(j);
 					j--;
 					continue;
 				}
@@ -161,6 +160,10 @@ public class ListHolder {
 		return GUIList;
 	}
 
+	public static Array<Array<Entity>> getEntityList(){
+		return entityList;
+	}
+
 	/**
 	 * Finds an Entity by name from the game. Don't do this every frame for performance reasons.
 	 * @param name The name that the Entity should have.
@@ -168,7 +171,7 @@ public class ListHolder {
 	 */
 	public static Entity findEntityByName(String name){
 		for(int i=0; i<entityList.size; i++){
-			for(int j=0; j<entityList.get(i).size(); j++){
+			for(int j=0; j<entityList.get(i).size; j++){
 				Entity ent = entityList.get(i).get(j);
 				if(ent.name == name)
 					return ent;

@@ -111,7 +111,7 @@ public class MainMenuInterface extends UI{
         //Create the table for this inside text.
         Table insideScrollTextTable = new Table();
 
-        //The scrollpane that holds the container.
+        //The scrollpane that holds the saveContainer.
         ScrollPane.ScrollPaneStyle scrollStyle = new ScrollPane.ScrollPaneStyle();
         scrollStyle.vScrollKnob = new TextureRegionDrawable(new TextureRegion(WorldGen.whiteTex));
         ScrollPane versionHistoryScroll = new ScrollPane(insideScrollTextTable, scrollStyle);

@@ -20,7 +20,7 @@ public class Collider extends Component implements IScalable{
 
     /**
      * Uses default values to create the body and fixture. Can be changed through calls to the body and fixture.
-     * @param world The Box2D world.
+     * @param world The Box2D saveContainer.
      * @param shape The Shape that the body should be.
      */
     public Collider(World world, Shape shape) {
@@ -42,7 +42,7 @@ public class Collider extends Component implements IScalable{
 
     /**
      * A more advanced setup which
-     * @param world The Box2D world.
+     * @param world The Box2D saveContainer.
      * @param bodyDef The definition of the body.
      * @param fixtureDef The definition of the fixture.
      */

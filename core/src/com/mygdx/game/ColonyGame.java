@@ -43,7 +43,7 @@ public class ColonyGame extends Game {
 		ColonyGame.UICamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		world = new World(new Vector2(0,0), true);
         ColonyGame.assetManager = new EasyAssetManager();
-		ColonyGame.debugRenderer = new Box2DDebugRenderer(); //Create the Box2D world.
+		ColonyGame.debugRenderer = new Box2DDebugRenderer(); //Create the Box2D saveContainer.
 
 		world.setContactListener(new Collision());
 

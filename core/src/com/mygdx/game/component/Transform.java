@@ -17,8 +17,8 @@ public class Transform extends Component implements IDelayedDestroyable {
 
 	/**
 	 * Creates a new transform.
-	 * @param position The world position of the owner Entity.
-	 * @param rotation The world rotation of the owner Entity.
+	 * @param position The saveContainer position of the owner Entity.
+	 * @param rotation The saveContainer rotation of the owner Entity.
 	 */
 	public Transform(Vector2 position, float rotation, Entity owner){
 		super();
@@ -143,8 +143,8 @@ public class Transform extends Component implements IDelayedDestroyable {
 	}
 
 	/**
-	 * Gets the world rotation of this Transform.
-	 * @return A float which is the world rotation of this Transform.
+	 * Gets the saveContainer rotation of this Transform.
+	 * @return A float which is the saveContainer rotation of this Transform.
 	 */
 	public float getRotation(){
 		return this.worldRotation;
@@ -179,15 +179,15 @@ public class Transform extends Component implements IDelayedDestroyable {
 	 * @param scale The scale for this Transform to be.
 	 */
 	public void setScale(float scale){
-		//If no parent, set the world scale AND localscale
+		//If no parent, set the saveContainer scale AND localscale
 		if(this.parent == null){
 			this.worldScale = this.localScale = scale;
-		//If we do have a parent, only set the world scale.
+		//If we do have a parent, only set the saveContainer scale.
 		}else {
-			this.worldScale = this.localScale * scale; //Set world scale. We multiply our local scale with the new world scale (ie: 2 * 0.5 = 1 world scale).
+			this.worldScale = this.localScale * scale; //Set saveContainer scale. We multiply our local scale with the new saveContainer scale (ie: 2 * 0.5 = 1 saveContainer scale).
 
 			Vector2 localCopy = new Vector2(localPosition.x, localPosition.y); //Get a copy of our local position to work on (so we don't edit ours!).
-			//Set the distance. We first scale our local position by our world position, add it to our current position
+			//Set the distance. We first scale our local position by our saveContainer position, add it to our current position
 			//Calc the distance to the parent. Scale the local position by the parents scale, then add to the parent's position, then get the dst.
 			this.distFromParent = (localCopy.scl(this.parent.getScale()).add(this.parent.getPosition()).dst(this.parent.getPosition()));
 
@@ -200,16 +200,16 @@ public class Transform extends Component implements IDelayedDestroyable {
 	}
 
 	/**
-	 * Sets the local scale of this Transform. If this Transform has no parent, it also sets the world scale.
+	 * Sets the local scale of this Transform. If this Transform has no parent, it also sets the saveContainer scale.
 	 * @param scale The value to use as the local scale of this Transform.
 	 */
 	public void setLocalScale(float scale){
 		this.localScale = scale;
 		if(this.parent == null) this.worldScale = scale;
 		else{
-			this.worldScale = this.localScale * scale; //Set world scale. We multiply our local scale with the new world scale (ie: 2 * 0.5 = 1 world scale).
+			this.worldScale = this.localScale * scale; //Set saveContainer scale. We multiply our local scale with the new saveContainer scale (ie: 2 * 0.5 = 1 saveContainer scale).
 			Vector2 localCopy = new Vector2(localPosition.x, localPosition.y); //Get a copy of our local position to work on (so we don't edit ours!).
-			//Set the distance. We first scale our local position by our world position, add it to our current position
+			//Set the distance. We first scale our local position by our saveContainer position, add it to our current position
 			this.distFromParent = (localCopy.scl(this.parent.getScale()).add(this.parent.getPosition()).dst(this.parent.getPosition()));
 
 		}
@@ -222,8 +222,8 @@ public class Transform extends Component implements IDelayedDestroyable {
 	}
 
 	/**
-	 * Sets the world position of the transform. This will update the local position of the transform.
-	 * @param pos A Vector2 holding the new world position.
+	 * Sets the saveContainer position of the transform. This will update the local position of the transform.
+	 * @param pos A Vector2 holding the new saveContainer position.
 	 */
 	public void setPosition(Vector2 pos){
 		setPosition(pos.x, pos.y);
@@ -249,8 +249,8 @@ public class Transform extends Component implements IDelayedDestroyable {
 	}
 
 	/**
-	 * Sets the world rotation of this transform. This will update the local rotation of the transform.
-	 * @param rot A float which is the new world rotation.
+	 * Sets the saveContainer rotation of this transform. This will update the local rotation of the transform.
+	 * @param rot A float which is the new saveContainer rotation.
 	 */
 	public void setRotation(float rot){
 		this.worldRotation = this.normalizeAngle(rot);
@@ -272,7 +272,7 @@ public class Transform extends Component implements IDelayedDestroyable {
 	}
 
 	/**
-	 * Adds the X and Y value passed in to the world position, effectively moving the Entity.
+	 * Adds the X and Y value passed in to the saveContainer position, effectively moving the Entity.
 	 * @param x The X value to move.
 	 * @param y The Y value to move.
 	 */
