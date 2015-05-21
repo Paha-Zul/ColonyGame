@@ -11,8 +11,8 @@ import com.mygdx.game.component.GridComponent;
 import com.mygdx.game.component.Interactable;
 import com.mygdx.game.component.Inventory;
 import com.mygdx.game.component.collider.Collider;
-import com.mygdx.game.helpers.Constants;
-import com.mygdx.game.helpers.GH;
+import com.mygdx.game.util.Constants;
+import com.mygdx.game.util.GH;
 
 /**
  * Created by Paha on 1/18/2015.
@@ -36,7 +36,7 @@ public class BuildingEntity extends Entity{
         bodyDef.position.set(position);
 
         PolygonShape shape = new PolygonShape();
-        shape.setAsBox(GH.toMeters(identity.sprite.getWidth()/2), GH.toMeters(identity.sprite.getHeight()/2));
+        shape.setAsBox(GH.toMeters(getGraphicIdentity().sprite.getWidth()/2), GH.toMeters(getGraphicIdentity().sprite.getHeight()/2));
 
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.restitution = 0;

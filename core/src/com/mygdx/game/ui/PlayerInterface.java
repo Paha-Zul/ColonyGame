@@ -25,18 +25,18 @@ import com.mygdx.game.behaviourtree.PrebuiltTasks;
 import com.mygdx.game.component.*;
 import com.mygdx.game.component.collider.Collider;
 import com.mygdx.game.entity.Entity;
-import com.mygdx.game.helpers.*;
-import com.mygdx.game.helpers.gui.GUI;
-import com.mygdx.game.helpers.managers.DataManager;
-import com.mygdx.game.helpers.managers.NotificationManager;
-import com.mygdx.game.helpers.managers.PlayerManager;
-import com.mygdx.game.helpers.timer.OneShotTimer;
-import com.mygdx.game.helpers.timer.RepeatingTimer;
-import com.mygdx.game.helpers.timer.Timer;
-import com.mygdx.game.helpers.worldgeneration.WorldGen;
 import com.mygdx.game.interfaces.Functional;
 import com.mygdx.game.interfaces.IGUI;
 import com.mygdx.game.interfaces.IInteractable;
+import com.mygdx.game.util.*;
+import com.mygdx.game.util.gui.GUI;
+import com.mygdx.game.util.managers.DataManager;
+import com.mygdx.game.util.managers.NotificationManager;
+import com.mygdx.game.util.managers.PlayerManager;
+import com.mygdx.game.util.timer.OneShotTimer;
+import com.mygdx.game.util.timer.RepeatingTimer;
+import com.mygdx.game.util.timer.Timer;
+import com.mygdx.game.util.worldgeneration.WorldGen;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -774,7 +774,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     public void newPlayerEvent(DataBuilder.JsonPlayerEvent playerEvent){
         this.paused = playerEvent.pauseGame;
         this.currentEvent = playerEvent;
-        if(playerEvent.focusOnEvent) ColonyGame.camera.position.set(playerEvent.eventTarget.transform.getPosition().x, playerEvent.eventTarget.transform.getPosition().y, 0);
+        if(playerEvent.focusOnEvent) ColonyGame.camera.position.set(playerEvent.eventTarget.getTransform().getPosition().x, playerEvent.eventTarget.getTransform().getPosition().y, 0);
     }
 
     public static PlayerInterface getInstance(){

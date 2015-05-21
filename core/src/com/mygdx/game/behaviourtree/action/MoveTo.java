@@ -2,20 +2,20 @@ package com.mygdx.game.behaviourtree.action;
 
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.behaviourtree.LeafTask;
-import com.mygdx.game.component.BlackBoard;
 import com.mygdx.game.component.Transform;
 import com.mygdx.game.component.collider.Collider;
-import com.mygdx.game.helpers.GH;
+import com.mygdx.game.util.BlackBoard;
+import com.mygdx.game.util.GH;
 
 import java.util.LinkedList;
 
 /**
  * Created by Paha on 1/28/2015.
  *
- * <p>This task will move the {@link com.mygdx.game.entity.Entity Entity} that owns this Task towards a target {@link com.mygdx.game.helpers.Grid.Node Node }
+ * <p>This task will move the {@link com.mygdx.game.entity.Entity Entity} that owns this Task towards a target {@link com.mygdx.game.util.Grid.Node Node }
  * following the blackBoard.path that was generated beforehand.</p>
  *
- * <p>During the update, {@link com.mygdx.game.helpers.Callbacks#successCriteria control.callbacks.successCriteria } and {@link com.mygdx.game.helpers.Callbacks#failCriteria control.callbacks.failCriteria }
+ * <p>During the update, {@link com.mygdx.game.util.Callbacks#successCriteria control.callbacks.successCriteria } and {@link com.mygdx.game.util.Callbacks#failCriteria control.callbacks.failCriteria }
  * are tested to succeed or fail the task, respectively. To move the Entity of this Task,
  * the Entity must have a {@link Collider collider} to apply velocity to. The collider will be applied velocity that is dependant upon the {@link BlackBoard#moveSpeed moveSpeed} blackBoard.moveSpeed field.
  * When the path is completed, the Entity's collider velocity will be set to 0 and the task will succeed.</p>
@@ -40,7 +40,7 @@ public class MoveTo extends LeafTask{
     public void start() {
         super.start();
 
-        this.transform = this.blackBoard.getEntityOwner().transform;
+        this.transform = this.blackBoard.myManager.getEntityOwner().getTransform();
         this.name = this.transform.getEntityOwner().name;
         this.path = this.blackBoard.path;
         this.collider = this.transform.getComponent(Collider.class);

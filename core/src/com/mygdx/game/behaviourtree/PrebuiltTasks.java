@@ -9,10 +9,7 @@ import com.mygdx.game.behaviourtree.control.ParentTaskController;
 import com.mygdx.game.behaviourtree.decorator.RepeatUntilCondition;
 import com.mygdx.game.component.*;
 import com.mygdx.game.entity.Entity;
-import com.mygdx.game.helpers.Constants;
-import com.mygdx.game.helpers.FloatingText;
-import com.mygdx.game.helpers.GH;
-import com.mygdx.game.helpers.Grid;
+import com.mygdx.game.util.*;
 
 import java.util.function.Consumer;
 
@@ -48,7 +45,7 @@ public class PrebuiltTasks {
 
         //If we fail to find a resource, we need to explore until we find one...
         Consumer<Task> fail = tsk -> {
-            Vector2 pos = tsk.blackBoard.getEntityOwner().transform.getPosition();
+            Vector2 pos = tsk.blackBoard.myManager.getEntityOwner().getTransform().getPosition();
             new FloatingText("Couldn't find a nearby resource!", new Vector2(pos.x, pos.y + 1), new Vector2(pos.x, pos.y + 10), 1.5f, 0.8f);
 
             //When we finish moving to the newly explored area, try to gather a resource again.
@@ -87,7 +84,7 @@ public class PrebuiltTasks {
         //Reset some values.
         sequence.control.callbacks.startCallback = task -> {
             //Reset blackboard values...
-            task.blackBoard.fromInventory = task.blackBoard.getEntityOwner().getComponent(Colonist.class).getInventory();
+            task.blackBoard.fromInventory = task.blackBoard.myManager.getEntityOwner().getComponent(Colonist.class).getInventory();
             task.blackBoard.transferAll = true;
             task.blackBoard.takeAmount = 0;
             task.blackBoard.itemNameToTake = null;
@@ -98,7 +95,7 @@ public class PrebuiltTasks {
 
         //When we finish, set the target back to not taken IF it is still a valid target (if we ended early).
         sequence.getControl().callbacks.finishCallback = task -> {
-            if (blackBoard.targetResource != null && blackBoard.targetResource.isValid() && sequence.getBlackboard().targetResource.getTaken() == sequence.getBlackboard().getEntityOwner()) {
+            if (blackBoard.targetResource != null && blackBoard.targetResource.isValid() && sequence.getBlackboard().targetResource.getTaken() == sequence.getBlackboard().myManager.getEntityOwner()) {
                 sequence.getBlackboard().targetResource.setTaken(null);
             }
         };
@@ -137,8 +134,8 @@ public class PrebuiltTasks {
         //On success, set the resource as taken if not already taken.
         fr.getControl().callbacks.successCallback = task ->  {
             task.blackBoard.targetResource = task.blackBoard.target.getComponent(Resource.class);
-            if(!task.blackBoard.targetResource.isTaken() || task.blackBoard.targetResource.getTaken() == task.blackBoard.getEntityOwner()) {
-                task.blackBoard.targetResource.setTaken(task.blackBoard.getEntityOwner());
+            if(!task.blackBoard.targetResource.isTaken() || task.blackBoard.targetResource.getTaken() == task.blackBoard.myManager.getEntityOwner()) {
+                task.blackBoard.targetResource.setTaken(task.blackBoard.myManager.getEntityOwner());
             }
         };
 
@@ -146,7 +143,7 @@ public class PrebuiltTasks {
         //If not, cancel the job.
         fpResource.control.callbacks.checkCriteria = task -> {
             if(task.blackBoard.targetResource == null) task.blackBoard.targetResource = task.blackBoard.target.getComponent(Resource.class);
-            return task.blackBoard.targetResource != null && (task.blackBoard.targetResource.getTaken() == null || task.blackBoard.targetResource.getTaken() == task.blackBoard.getEntityOwner());
+            return task.blackBoard.targetResource != null && (task.blackBoard.targetResource.getTaken() == null || task.blackBoard.targetResource.getTaken() == task.blackBoard.myManager.getEntityOwner());
         };
 
         //Make sure we are getting a building...
@@ -159,13 +156,13 @@ public class PrebuiltTasks {
         findPathToStorage.getControl().callbacks.checkCriteria = task -> {
             Resource res = task.blackBoard.targetResource; //Get the target resource from the blackboard.
             if(res == null) task.blackBoard.targetResource = res = task.blackBoard.target.getComponent(Resource.class); //If null, try to get it from the target.
-            return res != null && task.getBlackboard().targetResource.getTaken() == task.getBlackboard().getEntityOwner(); //Return true if not null and we are the ones that took it. False otherwise.
+            return res != null && task.getBlackboard().targetResource.getTaken() == task.getBlackboard().myManager.getEntityOwner(); //Return true if not null and we are the ones that took it. False otherwise.
         };
 
         //When we finish gathering from a source, try to untake it in case it's infinite (like a water source)
         gather.getControl().callbacks.finishCallback = task -> {
             if(blackBoard.targetResource != null && blackBoard.targetResource.isValid())
-                if(blackBoard.targetResource.getTaken() == blackBoard.getEntityOwner())
+                if(blackBoard.targetResource.getTaken() == blackBoard.myManager.getEntityOwner())
                     blackBoard.targetResource.setTaken(null);
         };
 
@@ -204,7 +201,7 @@ public class PrebuiltTasks {
 
         //When we finish, set the target back to not taken IF it is still a valid target (if we ended early).
         sequence.getControl().callbacks.finishCallback = task -> {
-            if (blackBoard.targetResource != null && blackBoard.targetResource.isValid() && sequence.getBlackboard().targetResource.getTaken() == sequence.getBlackboard().getEntityOwner()) {
+            if (blackBoard.targetResource != null && blackBoard.targetResource.isValid() && sequence.getBlackboard().targetResource.getTaken() == sequence.getBlackboard().myManager.getEntityOwner()) {
                 sequence.getBlackboard().targetResource.setTaken(null);
             }
         };
@@ -212,13 +209,13 @@ public class PrebuiltTasks {
         //Make sure we have a target resource and
         sequence.control.callbacks.checkCriteria = task -> {
             if(task.blackBoard.targetResource == null) task.blackBoard.targetResource = task.blackBoard.target.getComponent(Resource.class);
-            return task.blackBoard.targetResource != null && (task.blackBoard.targetResource.getTaken() == null || task.blackBoard.targetResource.getTaken() == task.blackBoard.getEntityOwner());
+            return task.blackBoard.targetResource != null && (task.blackBoard.targetResource.getTaken() == null || task.blackBoard.targetResource.getTaken() == task.blackBoard.myManager.getEntityOwner());
         };
 
         //Set the 'fromInventory' field and set the resource as taken by us!
         sequence.getControl().callbacks.startCallback = task -> {
-            task.blackBoard.fromInventory = task.blackBoard.getEntityOwner().getComponent(Inventory.class);
-            task.blackBoard.targetResource.setTaken(blackBoard.getEntityOwner());
+            task.blackBoard.fromInventory = task.blackBoard.myManager.getEntityOwner().getComponent(Inventory.class);
+            task.blackBoard.targetResource.setTaken(blackBoard.myManager.getEntityOwner());
         };
 
         //Make sure we are getting a building...
@@ -228,13 +225,13 @@ public class PrebuiltTasks {
         findPath.getControl().callbacks.checkCriteria = task -> {
             Resource res = task.blackBoard.targetResource; //Get the target resource from the blackboard.
             if(res == null) task.blackBoard.targetResource = res = task.blackBoard.target.getComponent(Resource.class); //If null, try to get it from the target.
-            return res != null && task.getBlackboard().targetResource.getTaken() == task.getBlackboard().getEntityOwner(); //Return true if not null and we are the ones that took it. False otherwise.
+            return res != null && task.getBlackboard().targetResource.getTaken() == task.getBlackboard().myManager.getEntityOwner(); //Return true if not null and we are the ones that took it. False otherwise.
         };
 
         //When we finish gathering from a source, try to untake it in case it's infinite (like a water source)
         gather.getControl().callbacks.finishCallback = task -> {
             if(blackBoard.targetResource != null && blackBoard.targetResource.isValid())
-                if(blackBoard.targetResource.getTaken() == blackBoard.getEntityOwner())
+                if(blackBoard.targetResource.getTaken() == blackBoard.myManager.getEntityOwner())
                     blackBoard.targetResource.setTaken(null);
         };
 
@@ -259,7 +256,7 @@ public class PrebuiltTasks {
         FindPath findPathToUnexplored = new FindPath("Finding Path to Unexplored", blackBoard);
         MoveTo moveToLocation = new MoveTo("Moving to Explore", blackBoard);
 
-        findClosestUnexplored.control.callbacks.startCallback = task -> task.blackBoard.target = task.blackBoard.getEntityOwner().getComponent(Colonist.class).getColony().getOwnedFromColony(Building.class).getEntityOwner();
+        findClosestUnexplored.control.callbacks.startCallback = task -> task.blackBoard.target = task.blackBoard.myManager.getEntityOwner().getComponent(Colonist.class).getColony().getOwnedFromColony(Building.class).getEntityOwner();
 
         ((ParentTaskController) sequence.getControl()).addTask(findClosestUnexplored);
         ((ParentTaskController) sequence.getControl()).addTask(findPathToUnexplored);
@@ -323,9 +320,9 @@ public class PrebuiltTasks {
             blackBoard.takeAmount = 1;
             blackBoard.itemNameToTake = null;
 
-            blackBoard.target = blackBoard.getEntityOwner().getComponent(Colonist.class).getColony().getEntityOwner();
-            blackBoard.fromInventory = blackBoard.getEntityOwner().getComponent(Colonist.class).getColony().getOwnedFromColony(Building.class).getComponent(Inventory.class);
-            blackBoard.toInventory = blackBoard.getEntityOwner().getComponent(Inventory.class);
+            blackBoard.target = blackBoard.myManager.getEntityOwner().getComponent(Colonist.class).getColony().getEntityOwner();
+            blackBoard.fromInventory = blackBoard.myManager.getEntityOwner().getComponent(Colonist.class).getColony().getOwnedFromColony(Building.class).getComponent(Inventory.class);
+            blackBoard.toInventory = blackBoard.myManager.getEntityOwner().getComponent(Inventory.class);
         };
 
         return sequence;
@@ -373,7 +370,7 @@ public class PrebuiltTasks {
 
         //Creates a floating text object when trying to find an animal fails.
         fc.getControl().callbacks.failureCallback = task -> {
-            Vector2 pos = blackBoard.getEntityOwner().transform.getPosition();
+            Vector2 pos = blackBoard.myManager.getEntityOwner().getTransform().getPosition();
             new FloatingText("Couldn't find a nearby animal to hunt!", new Vector2(pos.x, pos.y + 1), new Vector2(pos.x, pos.y + 10), 1.5f, 0.8f);
             behComp.changeTaskImmediate(behComp.getBehaviourStates().getDefaultState().getUserData().apply(behComp.getBlackBoard(), behComp));
         };
@@ -424,13 +421,11 @@ public class PrebuiltTasks {
         //If we are within range of the target, succeed the MoveTo task.
         mt.getControl().callbacks.successCriteria = tsk -> {
             Task task = (Task)tsk;
-            float dis = task.getBlackboard().target.transform.getPosition().dst(task.getBlackboard().getEntityOwner().transform.getPosition());
+            float dis = task.getBlackboard().target.getTransform().getPosition().dst(task.getBlackboard().myManager.getEntityOwner().getTransform().getPosition());
             return dis <= GH.toMeters(task.getBlackboard().attackRange);
         };
 
-        fp.control.callbacks.checkCriteria = task -> {
-            return task.blackBoard.target != null && task.blackBoard.target.getTags().hasTag("alive");
-        };
+        fp.control.callbacks.checkCriteria = task -> task.blackBoard.target != null && task.blackBoard.target.getTags().hasTag("alive");
 
         ((ParentTaskController)parallel.getControl()).addTask(fp);
         ((ParentTaskController)parallel.getControl()).addTask(mt);
@@ -453,7 +448,7 @@ public class PrebuiltTasks {
 
         blackBoard.transferAll = true;
         blackBoard.itemNameToTake = null;
-        blackBoard.fromInventory = blackBoard.getEntityOwner().getComponent(Inventory.class);
+        blackBoard.fromInventory = blackBoard.myManager.getEntityOwner().getComponent(Inventory.class);
 
         Sequence seq = new Sequence("fish", blackBoard);
 
@@ -523,8 +518,8 @@ public class PrebuiltTasks {
 
         //Calculate my distance.
         sequence.getControl().callbacks.startCallback = task -> {
-            task.blackBoard.myDisToTarget = (int)(Math.abs(blackBoard.getEntityOwner().transform.getPosition().x - blackBoard.target.transform.getPosition().x)
-                + Math.abs(blackBoard.getEntityOwner().transform.getPosition().y - blackBoard.target.transform.getPosition().y));
+            task.blackBoard.myDisToTarget = (int)(Math.abs(blackBoard.myManager.getEntityOwner().getTransform().getPosition().x - blackBoard.target.getTransform().getPosition().x)
+                + Math.abs(blackBoard.myManager.getEntityOwner().getTransform().getPosition().y - blackBoard.target.getTransform().getPosition().y));
         };
 
         //Try to find a tile away from our target to flee to.
@@ -532,8 +527,8 @@ public class PrebuiltTasks {
             Grid.Node node = (Grid.Node)n;
 
             //The distance to the target (node distance).
-            float nodeDisToTarget = Math.abs(node.getXCenter() - blackBoard.target.transform.getPosition().x)
-                    + Math.abs(node.getYCenter() - blackBoard.target.transform.getPosition().y);
+            float nodeDisToTarget = Math.abs(node.getXCenter() - blackBoard.target.getTransform().getPosition().x)
+                    + Math.abs(node.getYCenter() - blackBoard.target.getTransform().getPosition().y);
 
             //If the node distance is greater than my distance to the target, we'll take it!
             if(nodeDisToTarget > blackBoard.myDisToTarget){

@@ -10,8 +10,8 @@ import com.mygdx.game.component.GraphicIdentity;
 import com.mygdx.game.component.GridComponent;
 import com.mygdx.game.component.Interactable;
 import com.mygdx.game.component.collider.Collider;
-import com.mygdx.game.helpers.Constants;
-import com.mygdx.game.helpers.GH;
+import com.mygdx.game.util.Constants;
+import com.mygdx.game.util.GH;
 
 /**
  * Created by Paha on 2/28/2015.

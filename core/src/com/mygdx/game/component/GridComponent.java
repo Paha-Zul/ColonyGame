@@ -1,8 +1,8 @@
 package com.mygdx.game.component;
 
 import com.mygdx.game.entity.Entity;
-import com.mygdx.game.helpers.Constants;
-import com.mygdx.game.helpers.Grid;
+import com.mygdx.game.util.Constants;
+import com.mygdx.game.util.Grid;
 
 /**
  * Created by Paha on 1/17/2015.

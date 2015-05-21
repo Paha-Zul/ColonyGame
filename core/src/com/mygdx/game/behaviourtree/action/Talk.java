@@ -1,9 +1,7 @@
 package com.mygdx.game.behaviourtree.action;
 
 import com.mygdx.game.behaviourtree.LeafTask;
-import com.mygdx.game.component.BlackBoard;
-import com.mygdx.game.helpers.timer.OneShotTimer;
-import com.mygdx.game.helpers.timer.Timer;
+import com.mygdx.game.util.BlackBoard;
 
 /**
  * Created by Bbent_000 on 12/31/2014.

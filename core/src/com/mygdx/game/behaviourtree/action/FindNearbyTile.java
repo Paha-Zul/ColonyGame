@@ -1,8 +1,8 @@
 package com.mygdx.game.behaviourtree.action;
 
 import com.mygdx.game.behaviourtree.LeafTask;
-import com.mygdx.game.component.BlackBoard;
-import com.mygdx.game.helpers.Grid;
+import com.mygdx.game.util.BlackBoard;
+import com.mygdx.game.util.Grid;
 
 /**
  * Created by Paha on 4/30/2015.
@@ -22,7 +22,7 @@ public class FindNearbyTile extends LeafTask{
         super.start();
 
         Grid.GridInstance grid = this.blackBoard.colonyGrid;
-        boolean result = grid.performOnNodeInRadius(control.callbacks.successCriteria, 1, grid.getIndex(blackBoard.getEntityOwner()));
+        boolean result = grid.performOnNodeInRadius(control.callbacks.successCriteria, 1, grid.getIndex(blackBoard.myManager.getEntityOwner()));
 
         if(result) this.control.finishWithSuccess();
         else this.control.finishWithFailure();

@@ -16,14 +16,14 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.mygdx.game.ColonyGame;
-import com.mygdx.game.helpers.DataBuilder;
-import com.mygdx.game.helpers.ListHolder;
-import com.mygdx.game.helpers.gui.GUI;
-import com.mygdx.game.helpers.managers.DataManager;
-import com.mygdx.game.helpers.managers.ScriptManager;
-import com.mygdx.game.helpers.worldgeneration.WorldGen;
 import com.mygdx.game.interfaces.IScript;
 import com.mygdx.game.screens.LoadingScreen;
+import com.mygdx.game.util.DataBuilder;
+import com.mygdx.game.util.ListHolder;
+import com.mygdx.game.util.gui.GUI;
+import com.mygdx.game.util.managers.DataManager;
+import com.mygdx.game.util.managers.ScriptManager;
+import com.mygdx.game.util.worldgeneration.WorldGen;
 
 /**
  * A UI that controls the main menu. This is responsible for all buttons, images, music, and sounds of the main menu.

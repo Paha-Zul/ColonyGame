@@ -1,7 +1,7 @@
 package com.mygdx.game.behaviourtree.action;
 
 import com.mygdx.game.behaviourtree.LeafTask;
-import com.mygdx.game.component.BlackBoard;
+import com.mygdx.game.util.BlackBoard;
 
 /**
  * Created by Paha on 4/7/2015.

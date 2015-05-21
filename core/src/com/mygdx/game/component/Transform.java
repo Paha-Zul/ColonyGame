@@ -13,7 +13,7 @@ public class Transform extends Component implements IDelayedDestroyable {
 	private float worldRotation, localRotation, rotationOffset=0, distFromParent=0;
 	private float worldScale = 1, localScale = 1;
 
-	private ArrayList<Entity> children;
+	private ArrayList<Transform> children;
 
 	/**
 	 * Creates a new transform.
@@ -46,9 +46,9 @@ public class Transform extends Component implements IDelayedDestroyable {
 		}
 	}
 
-	public void setParent(Entity futureParent){
-		futureParent.transform.addChild(this.owner);
-		this.parent = futureParent.transform;
+	public void setParent(Transform futureParent){
+		futureParent.addChild(this);
+		this.parent = futureParent;
 		this.setPosition(this.getPosition());
 		this.setRotation(this.getRotation());
 	}
@@ -58,21 +58,21 @@ public class Transform extends Component implements IDelayedDestroyable {
 	 * child Entity being added.
 	 * @param child The Entity being added as a child to this transform.
 	 */
-	public void addChild(Entity child){
+	public void addChild(Transform child){
 		Vector2 thisPos = new Vector2(this.worldPosition.x, this.worldPosition.y);
-		Vector2 childPos = new Vector2(child.transform.getPosition().x, child.transform.getPosition().y);
+		Vector2 childPos = new Vector2(child.getPosition().x, child.getPosition().y);
 
 		float rot = MathUtils.atan2(childPos.y - thisPos.y, childPos.x - thisPos.x)*MathUtils.radDeg;
 		rot = Transform.normalizeAngle(rot);
 
-		child.transform.rotationOffset = rot - this.worldRotation;
-		child.transform.distFromParent = thisPos.dst(childPos);
+		child.rotationOffset = rot - this.worldRotation;
+		child.distFromParent = thisPos.dst(childPos);
 
 		this.children.add(child); //Add the child to this transform
-		child.transform.parent = this; //Make the child's parent this transform.
+		child.parent = this; //Make the child's parent this transform.
 
-		child.transform.setLocalPosition(thisPos.x - childPos.x, thisPos.y - childPos.y);
-		child.transform.localScale = child.transform.worldScale/this.getScale();
+		child.setLocalPosition(thisPos.x - childPos.x, thisPos.y - childPos.y);
+		child.localScale = child.worldScale/this.getScale();
 	}
 
 	/**
@@ -80,22 +80,22 @@ public class Transform extends Component implements IDelayedDestroyable {
 	 * @param child The child Entity to add as a child.
 	 * @param relative The relative position to the parent that the child should be put at.
 	 */
-	public void addChild(Entity child, Vector2 relative){
+	public void addChild(Transform child, Vector2 relative){
 		Vector2 thisPos = new Vector2(this.worldPosition.x, this.worldPosition.y); //Get the current entity's position.
-		child.transform.setPosition(thisPos.x + relative.x, thisPos.y + relative.y); //Set the child's position.
-		Vector2 childPos = new Vector2(child.transform.getPosition().x, child.transform.getPosition().y); //Cache the child's position.
+		child.setPosition(thisPos.x + relative.x, thisPos.y + relative.y); //Set the child's position.
+		Vector2 childPos = new Vector2(child.getPosition().x, child.getPosition().y); //Cache the child's position.
 
 		float rot = MathUtils.atan2(childPos.y - thisPos.y, childPos.x - thisPos.x)*MathUtils.radDeg;
 		rot = Transform.normalizeAngle(rot);
 
-		child.transform.rotationOffset = rot - this.worldRotation;
-		child.transform.distFromParent = thisPos.dst(childPos);
+		child.rotationOffset = rot - this.worldRotation;
+		child.distFromParent = thisPos.dst(childPos);
 
 		this.children.add(child); //Add the child to this transform
-		child.transform.parent = this; //Make the child's parent this entity.
+		child.parent = this; //Make the child's parent this entity.
 
-		child.transform.setLocalPosition(thisPos.x - childPos.x, thisPos.y - childPos.y);
-		child.transform.localScale = child.transform.worldScale/this.getScale();
+		child.setLocalPosition(thisPos.x - childPos.x, thisPos.y - childPos.y);
+		child.localScale = child.worldScale/this.getScale();
 
 	}
 
@@ -104,11 +104,11 @@ public class Transform extends Component implements IDelayedDestroyable {
 	 * @param child The Entity child being removed from this transform.
 	 * @throws Exception If the child doesn't exist.
 	 */
-	public void removeChild(Entity child){
+	public void removeChild(Transform child){
 		for(int i=this.children.size()-1;i>=0;i--)
 			if(child == this.children.get(i)){
-				Entity tempChild = this.children.remove(i); //Removes it from the child list.
-				tempChild.transform.parent = null; //Sets the parent to null.
+				Transform tempChild = this.children.remove(i); //Removes it from the child list.
+				tempChild.parent = null; //Sets the parent to null.
 //				tempChild.transform.setPosition(tempChild.transform.getPosition()); //Reset position.
 //				tempChild.transform.setRotation(tempChild.transform.getRotation()); //Reset rotation.
 
@@ -122,7 +122,7 @@ public class Transform extends Component implements IDelayedDestroyable {
 		}
 	}
 
-	public ArrayList<Entity> getChildren(){
+	public ArrayList<Transform> getChildren(){
 		return this.children;
 	}
 
@@ -193,10 +193,10 @@ public class Transform extends Component implements IDelayedDestroyable {
 
 		}
 
-		this.owner.scaleComponents(this.worldScale);
+		this.owner.getComponents().scaleComponents(this.worldScale);
 		//For each child, set a new position and scale.
-		for(Entity child : this.children)
-			child.transform.setScale(scale);
+		for(Transform child : this.children)
+			child.setScale(scale);
 	}
 
 	/**
@@ -214,11 +214,11 @@ public class Transform extends Component implements IDelayedDestroyable {
 
 		}
 
-		this.owner.scaleComponents(this.worldScale);
+		this.owner.getComponents().scaleComponents(this.worldScale);
 
 		//For each child, set a new position and scale.
-		for(Entity child : this.children)
-			child.transform.setScale(scale);
+		for(Transform child : this.children)
+			child.setScale(scale);
 	}
 
 	/**
@@ -268,7 +268,7 @@ public class Transform extends Component implements IDelayedDestroyable {
 	}
 
 	public void clearParent(){
-		this.parent.removeChild(this.owner);
+		this.parent.removeChild(this);
 	}
 
 	/**

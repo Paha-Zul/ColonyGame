@@ -11,9 +11,9 @@ import com.mygdx.game.component.GridComponent;
 import com.mygdx.game.component.Interactable;
 import com.mygdx.game.component.Resource;
 import com.mygdx.game.component.collider.Collider;
-import com.mygdx.game.helpers.Constants;
-import com.mygdx.game.helpers.DataBuilder;
-import com.mygdx.game.helpers.managers.DataManager;
+import com.mygdx.game.util.Constants;
+import com.mygdx.game.util.DataBuilder;
+import com.mygdx.game.util.managers.DataManager;
 
 /**
  * Created by Paha on 1/29/2015.

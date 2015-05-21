@@ -6,12 +6,13 @@ import com.mygdx.game.ColonyGame;
 import com.mygdx.game.behaviourtree.PrebuiltTasks;
 import com.mygdx.game.behaviourtree.Task;
 import com.mygdx.game.entity.Entity;
-import com.mygdx.game.helpers.EventSystem;
-import com.mygdx.game.helpers.StateSystem;
-import com.mygdx.game.helpers.Tree;
-import com.mygdx.game.helpers.timer.OneShotTimer;
-import com.mygdx.game.helpers.timer.Timer;
 import com.mygdx.game.interfaces.Functional;
+import com.mygdx.game.util.BlackBoard;
+import com.mygdx.game.util.EventSystem;
+import com.mygdx.game.util.StateSystem;
+import com.mygdx.game.util.Tree;
+import com.mygdx.game.util.timer.OneShotTimer;
+import com.mygdx.game.util.timer.Timer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -53,7 +54,7 @@ public class BehaviourManagerComp extends Component{
     public void init(Entity owner) {
         super.init(owner);
 
-        this.blackBoard = this.owner.addComponent(new BlackBoard());
+        this.blackBoard = new BlackBoard();
         this.blackBoard.colonyGrid = ColonyGame.worldGrid;
         this.blackBoard.myManager = this;
     }
@@ -62,7 +63,6 @@ public class BehaviourManagerComp extends Component{
     public void start() {
         super.start();
         this.stats = this.owner.getComponent(Stats.class);
-        this.blackBoard = this.getComponent(BlackBoard.class);
         this.blackBoard.myInventory = this.getComponent(Inventory.class);
 
         getBehaviourStates().addState("idle", true, PrebuiltTasks::idleTask);
@@ -169,8 +169,8 @@ public class BehaviourManagerComp extends Component{
 
                     //Otherwise, draw to the Entity.
                     }else{
-                        nextX = this.getEntityOwner().transform.getPosition().x;
-                        nextY = this.getEntityOwner().transform.getPosition().y;
+                        nextX = this.getEntityOwner().getTransform().getPosition().x;
+                        nextY = this.getEntityOwner().getTransform().getPosition().y;
                     }
 
                     //Get the rotation from our entity to the next location.

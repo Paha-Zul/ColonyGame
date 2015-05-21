@@ -9,12 +9,12 @@ import com.mygdx.game.ColonyGame;
 import com.mygdx.game.entity.BuildingEntity;
 import com.mygdx.game.entity.ColonistEnt;
 import com.mygdx.game.entity.Entity;
-import com.mygdx.game.helpers.DataBuilder;
-import com.mygdx.game.helpers.GH;
-import com.mygdx.game.helpers.Grid;
 import com.mygdx.game.interfaces.IInteractable;
 import com.mygdx.game.interfaces.IOwnable;
 import com.mygdx.game.screens.GameScreen;
+import com.mygdx.game.util.DataBuilder;
+import com.mygdx.game.util.GH;
+import com.mygdx.game.util.Grid;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -62,7 +62,7 @@ public class Colony extends Component implements IInteractable {
 
         //Make some colonists!
         for(int i=0;i<5;i++) {
-            Entity c = this.makeColonist(building.owner.transform.getPosition(), GH.toMeters(200), colonistTexture);
+            Entity c = this.makeColonist(building.owner.getTransform().getPosition(), GH.toMeters(200), colonistTexture);
             c.getComponent(Colonist.class).setName(GameScreen.firstNames[MathUtils.random(GameScreen.firstNames.length - 1)], GameScreen.lastNames[MathUtils.random(GameScreen.lastNames.length - 1)]);
             this.addColonist(c.getComponent(Colonist.class));
         }
@@ -127,7 +127,7 @@ public class Colony extends Component implements IInteractable {
 
         //Spawns the Colony Entity and centers the camera on it.
         BuildingEntity colonyEnt = new BuildingEntity(start, 0, new TextureRegion(ColonyGame.assetManager.get("Colony", Texture.class)), 10);
-        ColonyGame.camera.position.set(colonyEnt.transform.getPosition().x, colonyEnt.transform.getPosition().y, 0);
+        ColonyGame.camera.position.set(colonyEnt.getTransform().getPosition().x, colonyEnt.getTransform().getPosition().y, 0);
         this.addOwnedToColony(colonyEnt.getComponent(Building.class));
 
         //Destroys resources in an area around the Colony Entity.
@@ -141,7 +141,7 @@ public class Colony extends Component implements IInteractable {
 
         //Perform the things.
         //this.grid.perform(destroyNearbyResources);
-        grid.performOnEntityInRadius(treeConsumer, notWaterNode, radius, grid.getIndex(colonyEnt.transform.getPosition()));
+        grid.performOnEntityInRadius(treeConsumer, notWaterNode, radius, grid.getIndex(colonyEnt.getTransform().getPosition()));
     }
 
     @Override

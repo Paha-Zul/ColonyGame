@@ -2,7 +2,7 @@ package com.mygdx.game.interfaces;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
-import com.mygdx.game.helpers.gui.GUI;
+import com.mygdx.game.util.gui.GUI;
 
 /**
  * Created by Paha on 1/18/2015.

@@ -2,11 +2,11 @@ package com.mygdx.game.behaviourtree.action;
 
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.behaviourtree.LeafTask;
-import com.mygdx.game.component.BlackBoard;
 import com.mygdx.game.entity.Entity;
-import com.mygdx.game.helpers.Grid;
-import com.mygdx.game.helpers.runnables.CallbackRunnable;
 import com.mygdx.game.interfaces.Functional;
+import com.mygdx.game.util.BlackBoard;
+import com.mygdx.game.util.Grid;
+import com.mygdx.game.util.runnables.CallbackRunnable;
 
 /**
  * Created by Paha on 4/6/2015.
@@ -27,14 +27,14 @@ public class FindClosestTile extends LeafTask{
         this.blackBoard.target = null;
         this.blackBoard.targetNode = null;
 
-        Entity target = this.blackBoard.getEntityOwner();
+        Entity target = this.blackBoard.myManager.getEntityOwner();
         Grid.Node[][] grid = ColonyGame.worldGrid.getGrid();
 
         Functional.Callback findClosestUnexplored = () -> {
             int radius = 0; //Start off with 0 radius.
             float closestDst = 999999999999999f; //Start with a really high distance...
             Grid.Node closestNode = null; //Closest
-            Grid.Node myNode = this.blackBoard.colonyGrid.getNode(this.blackBoard.getEntityOwner());
+            Grid.Node myNode = this.blackBoard.colonyGrid.getNode(this.blackBoard.myManager.getEntityOwner());
 
             while(closestNode == null) {
                 //Get the bounds for the search...

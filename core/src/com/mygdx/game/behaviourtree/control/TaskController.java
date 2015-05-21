@@ -1,7 +1,7 @@
 package com.mygdx.game.behaviourtree.control;
 
 import com.mygdx.game.behaviourtree.Task;
-import com.mygdx.game.helpers.Callbacks;
+import com.mygdx.game.util.Callbacks;
 
 /**
  * Created by Bbent_000 on 12/31/2014.

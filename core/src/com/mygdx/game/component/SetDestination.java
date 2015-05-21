@@ -2,8 +2,8 @@ package com.mygdx.game.component;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
-import com.mygdx.game.helpers.timer.RepeatingTimer;
 import com.mygdx.game.interfaces.Functional;
+import com.mygdx.game.util.timer.RepeatingTimer;
 
 /**
  * Created by Bbent_000 on 11/24/2014.
@@ -21,7 +21,7 @@ public class SetDestination extends Component{
 	public void start() {
 		super.start();
 
-		Vector2 pos = this.owner.transform.getPosition();
+		Vector2 pos = this.owner.getTransform().getPosition();
 
 		Functional.Callback callback = () ->{
 			float x = pos.x + (MathUtils.random()*moveDis - moveDis/2f);

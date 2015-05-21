@@ -1,11 +1,11 @@
 package com.mygdx.game.behaviourtree.action;
 
 import com.mygdx.game.behaviourtree.LeafTask;
-import com.mygdx.game.component.BlackBoard;
 import com.mygdx.game.component.Inventory;
 import com.mygdx.game.component.Stats;
-import com.mygdx.game.helpers.DataBuilder;
-import com.mygdx.game.helpers.managers.DataManager;
+import com.mygdx.game.util.BlackBoard;
+import com.mygdx.game.util.DataBuilder;
+import com.mygdx.game.util.managers.DataManager;
 
 /**
  * Created by Paha on 3/14/2015.
@@ -18,13 +18,13 @@ public class Consume extends LeafTask{
 
     @Override
     public boolean check() {
-        return this.blackBoard.getEntityOwner().getComponent(Inventory.class).getItemList().size() > 0;
+        return this.blackBoard.myManager.getEntityOwner().getComponent(Inventory.class).getItemList().size() > 0;
     }
 
     @Override
     public void start() {
         super.start();
-        Inventory inv = this.blackBoard.getEntityOwner().getComponent(Inventory.class);
+        Inventory inv = this.blackBoard.myManager.getEntityOwner().getComponent(Inventory.class);
         //Search for an itemRef that has the effect we want. If we find one, consume one!
         for(Inventory.InventoryItem item : inv.getItemList()){
             DataBuilder.JsonItem ref = DataManager.getData(item.itemRef.getItemName(), DataBuilder.JsonItem.class);
@@ -43,7 +43,7 @@ public class Consume extends LeafTask{
     }
 
     public void addEffect(DataBuilder.JsonItem item, int amount){
-        Stats stats = this.getBlackboard().getEntityOwner().getComponent(Stats.class);
+        Stats stats = this.getBlackboard().myManager.getEntityOwner().getComponent(Stats.class);
         if(stats == null) return;
 
         //For each effect in the itemRef we are consuming...

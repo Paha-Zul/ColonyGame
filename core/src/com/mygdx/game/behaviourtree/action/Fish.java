@@ -1,10 +1,10 @@
 package com.mygdx.game.behaviourtree.action;
 
 import com.mygdx.game.behaviourtree.LeafTask;
-import com.mygdx.game.component.BlackBoard;
 import com.mygdx.game.component.Inventory;
-import com.mygdx.game.helpers.timer.RepeatingTimer;
-import com.mygdx.game.helpers.timer.Timer;
+import com.mygdx.game.util.BlackBoard;
+import com.mygdx.game.util.timer.RepeatingTimer;
+import com.mygdx.game.util.timer.Timer;
 
 /**
  * Created by Paha on 4/7/2015.
@@ -26,7 +26,7 @@ public class Fish extends LeafTask{
     @Override
     public void start() {
         super.start();
-        this.inv = this.blackBoard.getEntityOwner().getComponent(Inventory.class);
+        this.inv = this.blackBoard.myManager.getEntityOwner().getComponent(Inventory.class);
         this.numFishCaught = 0;
 
         fishTimer = new RepeatingTimer(5f, () -> {

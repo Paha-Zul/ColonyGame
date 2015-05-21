@@ -5,12 +5,12 @@ import com.badlogic.gdx.physics.box2d.Fixture;
 import com.mygdx.game.behaviourtree.PrebuiltTasks;
 import com.mygdx.game.component.collider.Collider;
 import com.mygdx.game.entity.Entity;
-import com.mygdx.game.helpers.Constants;
-import com.mygdx.game.helpers.DataBuilder;
-import com.mygdx.game.helpers.EventSystem;
-import com.mygdx.game.helpers.managers.DataManager;
 import com.mygdx.game.interfaces.Functional;
 import com.mygdx.game.interfaces.IInteractable;
+import com.mygdx.game.util.Constants;
+import com.mygdx.game.util.DataBuilder;
+import com.mygdx.game.util.EventSystem;
+import com.mygdx.game.util.managers.DataManager;
 
 import java.util.LinkedList;
 import java.util.function.Consumer;
@@ -62,6 +62,8 @@ public class Animal extends Component implements IInteractable{
 
         if(animalRef.aggressive) addCircleSensor();
         this.group = this.getComponent(Group.class);
+
+        this.makeBehaviourStuff();
     }
 
     //Adds a circle sensor to this animal.
@@ -74,6 +76,10 @@ public class Animal extends Component implements IInteractable{
         fixtureInfo.tags.addTag(Constants.COLLIDER_DETECTOR);
         attackSensor.setUserData(fixtureInfo);
         circle.dispose();
+    }
+
+    private void makeBehaviourStuff(){
+        this.behComp.getBehaviourStates().addState("attackTarget").repeat = false;
     }
 
     @Override
@@ -91,6 +97,10 @@ public class Animal extends Component implements IInteractable{
         //If the target is not valid (not alive), let's not use it!
         if(target.getTags().hasTag("alive")) behComp.getBlackBoard().target = target;
         else behComp.getBlackBoard().target = null;
+
+        //If we are already attacking something, give up.
+        if(this.behComp.getBehaviourStates().getCurrState().stateName.equals("attackTarget")) return;
+
         //Attack single or group attack.
         if(this.group != null) groupAttack(behComp.getBlackBoard().target);
         else this.behComp.changeTaskImmediate("attackTarget");
@@ -108,16 +118,16 @@ public class Animal extends Component implements IInteractable{
             //Otherwise, prepare to be a resource!
             else {
                 EventSystem.unregisterEntity(this.owner); //Unregister for events.
-                this.owner.transform.setRotation(180);
+                this.owner.getTransform().setRotation(180);
                 this.collider.body.setLinearVelocity(0, 0);
                 this.owner.getTags().clearTags(); //Clear all tags
                 this.owner.getTags().addTag("resource"); //Add the resource tag
                 this.owner.addComponent(new Resource(DataManager.getData(animalRef.resourceName, DataBuilder.JsonResource.class))); //Add a Resource Component.
                 if (interactable != null) interactable.changeType("resource");
-                this.owner.internalDestroyComponent(BehaviourManagerComp.class); //Destroy the BehaviourManagerComp
-                this.owner.internalDestroyComponent(Stats.class); //Destroy the Stats component.
-                this.owner.internalDestroyComponent(Animal.class); //Destroy this (Animal) Component.
-                this.owner.internalDestroyComponent(Group.class); //Destroy this (Animal) Component.
+                this.owner.destroyComponent(BehaviourManagerComp.class); //Destroy the BehaviourManagerComp
+                this.owner.destroyComponent(Stats.class); //Destroy the Stats component.
+                this.owner.destroyComponent(Animal.class); //Destroy this (Animal) Component.
+                this.owner.destroyComponent(Group.class); //Destroy this (Animal) Component.
             }
         };
     }
@@ -134,9 +144,8 @@ public class Animal extends Component implements IInteractable{
         if (!myInfo.tags.hasTag(Constants.COLLIDER_DETECTOR) && otherInfo.owner.getTags().hasTag("projectile")) {
             this.getComponent(Stats.class).getStat("health").addToCurrent(-20);
             behComp.getBlackBoard().target = otherInfo.owner.getComponent(Projectile.class).projOwner;
-            //If not aggressive, flee!
+            //If not aggressive, flee. Otherwise, attack!
             if(!animalRef.aggressive) behComp.changeTaskImmediate(PrebuiltTasks.fleeTarget(behComp.getBlackBoard(), behComp));
-            //If aggressive, attack!
             else attackTarget(behComp.getBlackBoard().target);
             otherInfo.owner.setToDestroy();
 

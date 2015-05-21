@@ -2,12 +2,12 @@ package com.mygdx.game.behaviourtree.action;
 
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.behaviourtree.LeafTask;
-import com.mygdx.game.component.BlackBoard;
 import com.mygdx.game.entity.Entity;
-import com.mygdx.game.helpers.Constants;
-import com.mygdx.game.helpers.Grid;
-import com.mygdx.game.helpers.runnables.CallbackRunnable;
 import com.mygdx.game.interfaces.Functional;
+import com.mygdx.game.util.BlackBoard;
+import com.mygdx.game.util.Constants;
+import com.mygdx.game.util.Grid;
+import com.mygdx.game.util.runnables.CallbackRunnable;
 
 /**
  * <p> A Task that will find the closest Entity on the map and assign it to the 'target' field of the blackboard. The 'successCriteria' field of control.callbacks
@@ -42,7 +42,7 @@ public class FindClosestEntity extends LeafTask{
         Grid.GridInstance grid = ColonyGame.worldGrid;
         Grid.Node[][] gridMap = grid.getGrid();
         Functional.Callback getClosestResource = () -> {
-            Grid.Node currNode = this.blackBoard.colonyGrid.getNode(this.blackBoard.getEntityOwner()); //Get the nod we are standing on.
+            Grid.Node currNode = this.blackBoard.colonyGrid.getNode(this.blackBoard.myManager.getEntityOwner()); //Get the nod we are standing on.
             boolean finished = false; //Flag
             int radius = 0; //The radius to start at and keep track of.
 

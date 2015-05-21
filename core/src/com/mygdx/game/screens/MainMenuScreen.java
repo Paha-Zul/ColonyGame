@@ -4,10 +4,10 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.ColonyGame;
-import com.mygdx.game.helpers.GH;
-import com.mygdx.game.helpers.ListHolder;
 import com.mygdx.game.ui.MainMenuInterface;
 import com.mygdx.game.ui.UI;
+import com.mygdx.game.util.GH;
+import com.mygdx.game.util.ListHolder;
 
 /**
  * Created by Paha on 1/10/2015.

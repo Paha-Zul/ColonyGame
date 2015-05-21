@@ -2,9 +2,9 @@ package com.mygdx.game.component;
 
 import com.badlogic.gdx.graphics.Color;
 import com.mygdx.game.entity.Entity;
-import com.mygdx.game.helpers.timer.RepeatingTimer;
-import com.mygdx.game.helpers.timer.Timer;
 import com.mygdx.game.interfaces.Functional;
+import com.mygdx.game.util.timer.RepeatingTimer;
+import com.mygdx.game.util.timer.Timer;
 import com.sun.istack.internal.NotNull;
 
 import java.util.ArrayList;

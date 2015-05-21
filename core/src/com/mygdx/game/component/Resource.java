@@ -3,12 +3,12 @@ package com.mygdx.game.component;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.entity.Entity;
-import com.mygdx.game.helpers.DataBuilder;
-import com.mygdx.game.helpers.GH;
-import com.mygdx.game.helpers.StringTable;
-import com.mygdx.game.helpers.Tags;
-import com.mygdx.game.helpers.managers.DataManager;
 import com.mygdx.game.interfaces.IInteractable;
+import com.mygdx.game.util.DataBuilder;
+import com.mygdx.game.util.GH;
+import com.mygdx.game.util.StringTable;
+import com.mygdx.game.util.Tags;
+import com.mygdx.game.util.managers.DataManager;
 
 /**
  * Created by Paha on 1/10/2015.

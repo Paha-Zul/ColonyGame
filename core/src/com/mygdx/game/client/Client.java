@@ -3,10 +3,12 @@ package com.mygdx.game.client;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Net;
 import com.badlogic.gdx.net.Socket;
-import com.mygdx.game.helpers.BytesUtil;
-import com.mygdx.game.helpers.GH;
+import com.mygdx.game.util.BytesUtil;
+import com.mygdx.game.util.GH;
 
-import java.io.*;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 
 /**
  * Created by Bbent_000 on 11/23/2014.

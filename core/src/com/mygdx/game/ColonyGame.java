@@ -10,10 +10,10 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
-import com.mygdx.game.helpers.*;
-import com.mygdx.game.helpers.gui.GUI;
 import com.mygdx.game.screens.PreLoadingScreen;
 import com.mygdx.game.ui.PlayerInterface;
+import com.mygdx.game.util.*;
+import com.mygdx.game.util.gui.GUI;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;

@@ -6,9 +6,9 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.ColonyGame;
-import com.mygdx.game.helpers.Constants;
-import com.mygdx.game.helpers.GH;
-import com.mygdx.game.helpers.Grid;
+import com.mygdx.game.util.Constants;
+import com.mygdx.game.util.GH;
+import com.mygdx.game.util.Grid;
 
 public class GraphicIdentity extends Component{
 	public Sprite sprite;
@@ -42,7 +42,7 @@ public class GraphicIdentity extends Component{
         super.render(delta, batch);
         Grid.GridInstance grid = ColonyGame.worldGrid;
 
-        Vector2 pos = this.owner.transform.getPosition(); //Cache the owner's position.
+        Vector2 pos = this.owner.getTransform().getPosition(); //Cache the owner's position.
 
         if(!ColonyGame.camera.frustum.boundsInFrustum(pos.x, pos.y, 0, sprite.getWidth(), sprite.getHeight(), 0))
             return;
@@ -54,8 +54,8 @@ public class GraphicIdentity extends Component{
 
         this.changeVisibility(visibility);
 
-        this.sprite.setRotation(this.owner.transform.getRotation());
-        this.sprite.setScale(this.owner.transform.getScale());
+        this.sprite.setRotation(this.owner.getTransform().getRotation());
+        this.sprite.setScale(this.owner.getTransform().getScale());
 
         if(alignment == 0)
             this.sprite.setPosition(pos.x - (sprite.getWidth()/2), pos.y - (sprite.getHeight()/2));

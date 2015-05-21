@@ -24,7 +24,7 @@ public class Terrain extends Component{
 
         this.batch = ColonyGame.batch;
         sprite = new Sprite(image);
-        sprite.setPosition(this.owner.transform.getPosition().x, this.owner.transform.getPosition().y);
+        sprite.setPosition(this.owner.getTransform().getPosition().x, this.owner.getTransform().getPosition().y);
     }
 
     @Override

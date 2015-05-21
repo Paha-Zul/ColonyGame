@@ -2,10 +2,10 @@ package com.mygdx.game.behaviourtree.action;
 
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.behaviourtree.LeafTask;
-import com.mygdx.game.component.BlackBoard;
 import com.mygdx.game.component.Transform;
 import com.mygdx.game.component.collider.Collider;
-import com.mygdx.game.helpers.GH;
+import com.mygdx.game.util.BlackBoard;
+import com.mygdx.game.util.GH;
 
 import java.util.LinkedList;
 
@@ -32,7 +32,7 @@ public class Follow extends LeafTask{
     public void start() {
         super.start();
 
-        if(transform == null) this.transform = this.blackBoard.getEntityOwner().transform;
+        if(transform == null) this.transform = this.blackBoard.myManager.getEntityOwner().getTransform();
         if(collider == null) this.collider = this.transform.getComponent(Collider.class);
         this.name = this.transform.getEntityOwner().name;
         this.path = this.blackBoard.path;
@@ -65,12 +65,12 @@ public class Follow extends LeafTask{
         double rot;
 
         //If we are still outside our range to move towards the target, move!
-        if(blackBoard.target.transform.getPosition().dst(blackBoard.getEntityOwner().transform.getPosition()) >= GH.toMeters(blackBoard.followDis)){
+        if(blackBoard.target.getTransform().getPosition().dst(blackBoard.myManager.getEntityOwner().getTransform().getPosition()) >= GH.toMeters(blackBoard.followDis)){
 
             //If the node of our target that we are following matches ours (we're on the same tile!), direct move to it!
-            if(blackBoard.colonyGrid.getNode(blackBoard.target) == blackBoard.colonyGrid.getNode(blackBoard.getEntityOwner())){
-                nodeX = blackBoard.target.transform.getPosition().x;
-                nodeY = blackBoard.target.transform.getPosition().y;
+            if(blackBoard.colonyGrid.getNode(blackBoard.target) == blackBoard.colonyGrid.getNode(blackBoard.myManager.getEntityOwner())){
+                nodeX = blackBoard.target.getTransform().getPosition().x;
+                nodeY = blackBoard.target.getTransform().getPosition().y;
 
             //Otherwise, let's move towards our next path destination.
             }else{

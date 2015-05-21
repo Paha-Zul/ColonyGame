@@ -5,14 +5,18 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.behaviourtree.LeafTask;
-import com.mygdx.game.component.*;
-import com.mygdx.game.helpers.DataBuilder;
-import com.mygdx.game.helpers.FloatingText;
-import com.mygdx.game.helpers.GH;
-import com.mygdx.game.helpers.managers.DataManager;
-import com.mygdx.game.helpers.managers.SoundManager;
-import com.mygdx.game.helpers.timer.RepeatingTimer;
-import com.mygdx.game.helpers.timer.Timer;
+import com.mygdx.game.component.Colonist;
+import com.mygdx.game.component.Colony;
+import com.mygdx.game.component.Inventory;
+import com.mygdx.game.component.Resource;
+import com.mygdx.game.util.BlackBoard;
+import com.mygdx.game.util.DataBuilder;
+import com.mygdx.game.util.FloatingText;
+import com.mygdx.game.util.GH;
+import com.mygdx.game.util.managers.DataManager;
+import com.mygdx.game.util.managers.SoundManager;
+import com.mygdx.game.util.timer.RepeatingTimer;
+import com.mygdx.game.util.timer.Timer;
 
 /**
  * <p>A task that gathers a resource when the right criteria is met.</p>
@@ -43,7 +47,7 @@ public class Gather extends LeafTask{
 
         //If the 'myInventory' field is null of the blackboard, get it from the blackboard's owner.
         if(this.blackBoard.myInventory == null)
-            this.blackBoard.myInventory = this.blackBoard.getEntityOwner().getComponent(Inventory.class);
+            this.blackBoard.myInventory = this.blackBoard.myManager.getEntityOwner().getComponent(Inventory.class);
 
         //If we can't get a resource component from the target, end this with failure.
         this.resource = this.blackBoard.targetResource;
@@ -54,7 +58,7 @@ public class Gather extends LeafTask{
 
         //Not used currently...
         this.soundTimer = new RepeatingTimer(0.5f, ()->{
-            SoundManager.play(chopTreeSounds[MathUtils.random(chopTreeSounds.length - 1)], this.blackBoard.getEntityOwner().transform.getPosition(),
+            SoundManager.play(chopTreeSounds[MathUtils.random(chopTreeSounds.length - 1)], this.blackBoard.myManager.getEntityOwner().getTransform().getPosition(),
                     new Vector2(ColonyGame.camera.position.x, ColonyGame.camera.position.y), 200, 1000);
         });
 
@@ -76,7 +80,7 @@ public class Gather extends LeafTask{
 
     private void endWithSuccess(){
         //This sets up the information for moving and transferring to the colony.
-        Colony targetColony = this.blackBoard.getEntityOwner().getComponent(Colonist.class).getColony(); //Get the colony.
+        Colony targetColony = this.blackBoard.myManager.getEntityOwner().getComponent(Colonist.class).getColony(); //Get the colony.
         this.blackBoard.targetNode = null; //Set the target node to null to make sure we use the target (not the node)
         this.blackBoard.target = targetColony.getEntityOwner(); //Set the target to the entity owner of the colony.
         this.blackBoard.toInventory = targetColony.getInventory(); //Set the inventory to the colony's inventory.
@@ -95,27 +99,29 @@ public class Gather extends LeafTask{
         if(itemNames.length == 0)
             text.append("nothing...");
 
-        Vector2 start = new Vector2(this.blackBoard.getEntityOwner().transform.getPosition());
+        Vector2 start = new Vector2(this.blackBoard.myManager.getEntityOwner().getTransform().getPosition());
         start.y += GH.toMeters(40);
 
-        Vector2 end = new Vector2(this.blackBoard.getEntityOwner().transform.getPosition());
+        Vector2 end = new Vector2(this.blackBoard.myManager.getEntityOwner().getTransform().getPosition());
         end.y += GH.toMeters(90);
 
         new FloatingText(text.toString(), start, end, 2f, 0.8f);
     }
 
     private void createGatherMessage(String itemName, int amount){
-        if(itemName == null || itemName.isEmpty())
-            itemName = "nothing...";
-        else
-            itemName = "+"+amount+" "+itemName;
+        //Get the message we want to display.
+        if(itemName == null || itemName.isEmpty()) itemName = "nothing...";
+        else itemName = "+"+amount+" "+itemName;
 
-        Vector2 start = new Vector2(this.blackBoard.getEntityOwner().transform.getPosition());
+        //Starting vector
+        Vector2 start = new Vector2(this.blackBoard.myManager.getEntityOwner().getTransform().getPosition());
         start.y += GH.toMeters(40);
 
-        Vector2 end = new Vector2(this.blackBoard.getEntityOwner().transform.getPosition());
+        //Ending vector.
+        Vector2 end = new Vector2(this.blackBoard.myManager.getEntityOwner().getTransform().getPosition());
         end.y += GH.toMeters(90);
 
+        //Make the floating text!
         new FloatingText(itemName, start, end, 2f, 0.8f);
     }
 

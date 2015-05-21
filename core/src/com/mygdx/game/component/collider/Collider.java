@@ -4,9 +4,9 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.mygdx.game.component.Component;
 import com.mygdx.game.entity.Entity;
-import com.mygdx.game.helpers.Constants;
-import com.mygdx.game.helpers.Tags;
 import com.mygdx.game.interfaces.IScalable;
+import com.mygdx.game.util.Constants;
+import com.mygdx.game.util.Tags;
 
 /**
  * Created by Paha on 1/9/2015.
@@ -58,8 +58,8 @@ public class Collider extends Component implements IScalable{
     public void init(Entity owner) {
         super.init(owner);
 
-        Vector2 ownerPos = owner.transform.getPosition();
-        this.body.setTransform(ownerPos.x, ownerPos.y, this.owner.transform.getRotation());
+        Vector2 ownerPos = owner.getTransform().getPosition();
+        this.body.setTransform(ownerPos.x, ownerPos.y, this.owner.getTransform().getRotation());
 
         ColliderInfo bodyInfo = new ColliderInfo(owner);
         ColliderInfo fixtureInfo = new ColliderInfo(owner);
@@ -68,7 +68,7 @@ public class Collider extends Component implements IScalable{
         this.body.setUserData(bodyInfo);
         this.fixture.setUserData(fixtureInfo);
 
-        this.owner.registerScalable(this);
+        this.owner.getComponents().registerScalable(this);
         this.body.setActive(true);
     }
 
@@ -81,7 +81,7 @@ public class Collider extends Component implements IScalable{
     public void update(float delta) {
         super.update(delta);
 
-        this.owner.transform.setPosition(this.body.getPosition().x, this.body.getPosition().y);
+        this.owner.getTransform().setPosition(this.body.getPosition().x, this.body.getPosition().y);
     }
 
     @Override

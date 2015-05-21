@@ -7,9 +7,9 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.mygdx.game.ColonyGame;
-import com.mygdx.game.helpers.ListHolder;
-import com.mygdx.game.helpers.gui.GUI;
-import com.mygdx.game.helpers.worldgeneration.WorldGen;
+import com.mygdx.game.util.ListHolder;
+import com.mygdx.game.util.gui.GUI;
+import com.mygdx.game.util.worldgeneration.WorldGen;
 
 /**
  * Created by Bbent_000 on 12/29/2014.

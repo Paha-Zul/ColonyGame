@@ -4,9 +4,9 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.behaviourtree.LeafTask;
-import com.mygdx.game.component.BlackBoard;
-import com.mygdx.game.helpers.GH;
-import com.mygdx.game.helpers.Grid;
+import com.mygdx.game.util.BlackBoard;
+import com.mygdx.game.util.GH;
+import com.mygdx.game.util.Grid;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -69,7 +69,7 @@ public class FindPath extends LeafTask {
 
         //If our targetNode is still null somehow, fail and return.
         if(targetNode == null) {
-            Gdx.app.log("[FindPath]:",this.blackBoard.getEntityOwner().name + "'s target is null");
+            Gdx.app.log("[FindPath]:",this.blackBoard.myManager.getEntityOwner().name + "'s target is null");
             this.control.finishWithFailure();
             return null;
         }
@@ -81,9 +81,9 @@ public class FindPath extends LeafTask {
         PriorityQueue<Grid.PathNode> openList = new PriorityQueue<>((n1, n2) -> (int)((n1.getF() - n2.getF())*100));
 
         //Set the starting currNode and its G and H value.
-        Grid.Node node = this.blackBoard.colonyGrid.getNode(this.blackBoard.getEntityOwner());
-        int[] index = this.blackBoard.colonyGrid.getIndex(this.blackBoard.getEntityOwner().transform.getPosition());
-        if(node == null) GH.writeErrorMessage("Node was null for entity: "+this.blackBoard.getEntityOwner().name+" at "+this.blackBoard.getEntityOwner().transform.getPosition()
+        Grid.Node node = this.blackBoard.colonyGrid.getNode(this.blackBoard.myManager.getEntityOwner());
+        int[] index = this.blackBoard.colonyGrid.getIndex(this.blackBoard.myManager.getEntityOwner().getTransform().getPosition());
+        if(node == null) GH.writeErrorMessage("Node was null for entity: "+this.blackBoard.myManager.getEntityOwner().name+" at "+ this.blackBoard.myManager.getEntityOwner().getTransform().getPosition()
                 +" which is index "+index[0]+" "+index[1]+" when grid is size "+this.blackBoard.colonyGrid.getWidth()+" "+this.blackBoard.colonyGrid.getHeight());
 
         Grid.PathNode currNode = new Grid.PathNode(node);

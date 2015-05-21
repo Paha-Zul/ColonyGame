@@ -2,9 +2,9 @@ package com.mygdx.game.screens;
 
 import com.badlogic.gdx.Screen;
 import com.mygdx.game.ColonyGame;
-import com.mygdx.game.helpers.Constants;
-import com.mygdx.game.helpers.DataBuilder;
-import com.mygdx.game.helpers.Grid;
+import com.mygdx.game.util.Constants;
+import com.mygdx.game.util.DataBuilder;
+import com.mygdx.game.util.Grid;
 
 /**
  * Created by Paha on 2/19/2015.

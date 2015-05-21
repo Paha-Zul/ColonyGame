@@ -2,10 +2,10 @@ package com.mygdx.game.behaviourtree.action;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.mygdx.game.behaviourtree.LeafTask;
-import com.mygdx.game.component.BlackBoard;
 import com.mygdx.game.component.Transform;
-import com.mygdx.game.helpers.Grid;
 import com.mygdx.game.interfaces.Functional;
+import com.mygdx.game.util.BlackBoard;
+import com.mygdx.game.util.Grid;
 
 import java.util.ArrayList;
 
@@ -34,7 +34,7 @@ public class FindRandomNearbyLocation extends LeafTask{
         super.start();
 
         //Cache the owner transform.
-        Transform transform = this.blackBoard.getEntityOwner().transform;
+        Transform transform = this.blackBoard.myManager.getEntityOwner().getTransform();
 
         //This function will get valid nodes around the entity.
         Functional.PerformAndGet<ArrayList<Grid.Node>, Grid.Node[][]> getValidNodes = (graph) -> {

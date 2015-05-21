@@ -2,11 +2,11 @@ package com.mygdx.game.behaviourtree.action;
 
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.behaviourtree.LeafTask;
-import com.mygdx.game.component.BlackBoard;
-import com.mygdx.game.helpers.Constants;
-import com.mygdx.game.helpers.Grid;
-import com.mygdx.game.helpers.runnables.CallbackRunnable;
 import com.mygdx.game.interfaces.Functional;
+import com.mygdx.game.util.BlackBoard;
+import com.mygdx.game.util.Constants;
+import com.mygdx.game.util.Grid;
+import com.mygdx.game.util.runnables.CallbackRunnable;
 
 /**
  * Created by Paha on 2/17/2015.
@@ -27,7 +27,7 @@ public class FindClosestUnexplored extends LeafTask{
         super.start();
 
         if(this.blackBoard.target == null)
-            this.blackBoard.target = this.blackBoard.getEntityOwner();
+            this.blackBoard.target = this.blackBoard.myManager.getEntityOwner();
 
         Grid.GridInstance grid = ColonyGame.worldGrid;
         Grid.Node[][] gridMap = grid.getGrid();
@@ -38,7 +38,7 @@ public class FindClosestUnexplored extends LeafTask{
             boolean wholeMap = false;
 
             Grid.Node targetNode = this.blackBoard.colonyGrid.getNode(this.blackBoard.target);
-            Grid.Node myNode = this.blackBoard.colonyGrid.getNode(this.getBlackboard().getEntityOwner());
+            Grid.Node myNode = this.blackBoard.colonyGrid.getNode(this.getBlackboard().myManager.getEntityOwner());
 
             while(closestNode == null) {
                 //Some bounds stuff.

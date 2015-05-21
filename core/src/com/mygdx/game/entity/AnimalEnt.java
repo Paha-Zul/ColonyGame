@@ -7,9 +7,10 @@ import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.component.*;
 import com.mygdx.game.component.collider.Collider;
-import com.mygdx.game.helpers.Constants;
-import com.mygdx.game.helpers.DataBuilder;
-import com.mygdx.game.helpers.managers.DataManager;
+import com.mygdx.game.util.BlackBoard;
+import com.mygdx.game.util.Constants;
+import com.mygdx.game.util.DataBuilder;
+import com.mygdx.game.util.managers.DataManager;
 
 /**
  * Created by Paha on 2/26/2015.
@@ -25,12 +26,12 @@ public class AnimalEnt extends Entity{
         this.addComponent(new Animal(animalRef));
         this.addComponent(new Stats());
         this.addComponent(new Interactable("animal"));
-        this.addComponent(new BehaviourManagerComp("animal"));
+        BehaviourManagerComp behManager = this.addComponent(new BehaviourManagerComp("animal"));
         this.addComponent(new GridComponent(Constants.GRIDACTIVE, ColonyGame.worldGrid, -1));
 
         this.makeCollider();
 
-        tuneBehaviour();
+        tuneBehaviour(behManager);
     }
 
     public AnimalEnt(String animalName, Vector2 position, float rotation, TextureRegion graphic, int drawLevel) {
@@ -50,8 +51,8 @@ public class AnimalEnt extends Entity{
         collider.fixture.setDensity(1f);
     }
 
-    private void tuneBehaviour(){
-        BlackBoard bb = this.getComponent(BlackBoard.class);
+    private void tuneBehaviour(BehaviourManagerComp behManager){
+        BlackBoard bb = behManager.getBlackBoard();
         bb.idleDistance = 3;
         bb.baseIdleTime = 0.3f;
         bb.randomIdleTime = 1f;

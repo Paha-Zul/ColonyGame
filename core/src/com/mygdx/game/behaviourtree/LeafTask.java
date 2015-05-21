@@ -1,7 +1,7 @@
 package com.mygdx.game.behaviourtree;
 
 import com.mygdx.game.behaviourtree.control.TaskController;
-import com.mygdx.game.component.BlackBoard;
+import com.mygdx.game.util.BlackBoard;
 
 /**
  * A LeafTask which extends the Task class. This task is designed for tasks that do not operate on any children

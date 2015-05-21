@@ -9,17 +9,17 @@ import com.mygdx.game.behaviourtree.PrebuiltTasks;
 import com.mygdx.game.behaviourtree.Task;
 import com.mygdx.game.component.collider.Collider;
 import com.mygdx.game.entity.Entity;
-import com.mygdx.game.helpers.DataBuilder;
-import com.mygdx.game.helpers.EventSystem;
-import com.mygdx.game.helpers.Tree;
-import com.mygdx.game.helpers.gui.GUI;
-import com.mygdx.game.helpers.managers.DataManager;
-import com.mygdx.game.helpers.timer.RepeatingTimer;
-import com.mygdx.game.helpers.timer.Timer;
 import com.mygdx.game.interfaces.Functional;
 import com.mygdx.game.interfaces.IInteractable;
 import com.mygdx.game.interfaces.IOwnable;
 import com.mygdx.game.ui.PlayerInterface;
+import com.mygdx.game.util.DataBuilder;
+import com.mygdx.game.util.EventSystem;
+import com.mygdx.game.util.Tree;
+import com.mygdx.game.util.gui.GUI;
+import com.mygdx.game.util.managers.DataManager;
+import com.mygdx.game.util.timer.RepeatingTimer;
+import com.mygdx.game.util.timer.Timer;
 
 import java.util.LinkedList;
 import java.util.function.Consumer;
@@ -247,8 +247,8 @@ public class Colonist extends Component implements IInteractable, IOwnable{
     //The callback for when our health is 0.
     private Functional.Callback onZero = () -> {
         this.owner.getTags().removeTag("alive");
-        this.owner.transform.setRotation(90f);
-        this.owner.internalDestroyComponent(BehaviourManagerComp.class);
+        this.owner.getTransform().setRotation(90f);
+        this.owner.destroyComponent(BehaviourManagerComp.class);
         this.collider.body.destroyFixture(this.fixture); //TODO THIS PROBABLY WILL BREAK IT!
         this.stats.clearTimers();
         this.manager = null;

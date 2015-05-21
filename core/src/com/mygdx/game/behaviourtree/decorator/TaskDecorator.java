@@ -2,7 +2,7 @@ package com.mygdx.game.behaviourtree.decorator;
 
 import com.mygdx.game.behaviourtree.Task;
 import com.mygdx.game.behaviourtree.control.TaskController;
-import com.mygdx.game.component.BlackBoard;
+import com.mygdx.game.util.BlackBoard;
 
 /**
  * Base class for the specific decorators.

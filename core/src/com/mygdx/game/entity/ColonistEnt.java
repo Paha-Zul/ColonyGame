@@ -7,7 +7,7 @@ import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.component.*;
 import com.mygdx.game.component.collider.Collider;
-import com.mygdx.game.helpers.Constants;
+import com.mygdx.game.util.Constants;
 
 /**
  * Created by Paha on 1/18/2015.

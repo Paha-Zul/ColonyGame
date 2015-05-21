@@ -1,9 +1,9 @@
 package com.mygdx.game.component;
 
 import com.mygdx.game.entity.Entity;
-import com.mygdx.game.helpers.DataBuilder;
-import com.mygdx.game.helpers.managers.DataManager;
 import com.mygdx.game.interfaces.IOwnable;
+import com.mygdx.game.util.DataBuilder;
+import com.mygdx.game.util.managers.DataManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;

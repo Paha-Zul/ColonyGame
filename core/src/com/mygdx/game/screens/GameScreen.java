@@ -15,12 +15,12 @@ import com.mygdx.game.component.Colony;
 import com.mygdx.game.component.Group;
 import com.mygdx.game.entity.AnimalEnt;
 import com.mygdx.game.entity.Entity;
-import com.mygdx.game.helpers.*;
-import com.mygdx.game.helpers.managers.DataManager;
-import com.mygdx.game.helpers.managers.NotificationManager;
-import com.mygdx.game.helpers.managers.PlayerManager;
-import com.mygdx.game.helpers.worldgeneration.WorldGen;
 import com.mygdx.game.ui.UI;
+import com.mygdx.game.util.*;
+import com.mygdx.game.util.managers.DataManager;
+import com.mygdx.game.util.managers.NotificationManager;
+import com.mygdx.game.util.managers.PlayerManager;
+import com.mygdx.game.util.worldgeneration.WorldGen;
 
 /**
  * Created by Bbent_000 on 12/25/2014.
@@ -111,7 +111,7 @@ public class GameScreen implements Screen{
         DataBuilder.JsonAnimal bossWolfRef = DataManager.getData("bosswolf", DataBuilder.JsonAnimal.class);
         AnimalEnt bossWolf = new AnimalEnt(bossWolfRef, pos, 0, atlas.findRegion(bossWolfRef.img), 11);
         group.setLeader(bossWolf);
-        bossWolf.transform.setScale(2f);
+        bossWolf.getTransform().setScale(2f);
         bossWolf.addComponent(group);
 
         int amount = (int)(bossWolfRef.packAmount[0] + Math.random()*(bossWolfRef.packAmount[1] - bossWolfRef.packAmount[0]));
