@@ -180,7 +180,7 @@ public class DataBuilder implements IDestroyable{
         int i = entry.name().lastIndexOf('.');
         if (i > 0) {
             extension = entry.name().substring(i + 1); //Get the extension.
-            commonName = entry.name().substring(0, i); //Get the common name (no path or extension).
+            commonName = entry.name().substring(0, i); //Get the common compName (no path or extension).
         }
 
         //If it matches one of the extensions, load it!
@@ -203,7 +203,7 @@ public class DataBuilder implements IDestroyable{
             if(entry.isDirectory()) //For every directory, call this function again to load the images.
                 getFileNamesFromDir(new FileHandle(entry.path()+"/"), list); //A bit of recursion.
 
-            //Get the name. If it's empty, don't add it.
+            //Get the compName. If it's empty, don't add it.
             String name = getFileName(entry);
             if(!name.equals(""))
                 list.add(name);
@@ -228,9 +228,9 @@ public class DataBuilder implements IDestroyable{
     }
 
     /**
-     * Gets the file name from the Handle passed in.
+     * Gets the file compName from the Handle passed in.
      * @param entry The File Handle of the file.
-     * @return The File name if it succeeded, empty if it didn't.
+     * @return The File compName if it succeeded, empty if it didn't.
      */
     private String getFileName(FileHandle entry){
         String extension = "";
@@ -249,10 +249,10 @@ public class DataBuilder implements IDestroyable{
     }
 
     /**
-     * Gets the file name from the Handle passed in.
+     * Gets the file compName from the Handle passed in.
      * @param entry The File Handle of the file.
-     * @param base The base the file name must match/
-     * @return The name of the file if succeeded, empty otherwise.
+     * @param base The base the file compName must match/
+     * @return The compName of the file if succeeded, empty otherwise.
      */
     private String getFileName(FileHandle entry, String base){
         String extension = "";
@@ -262,7 +262,7 @@ public class DataBuilder implements IDestroyable{
         int i = entry.name().lastIndexOf('.');
         if (i > 0) {
             extension = entry.name().substring(i + 1); //Get the extension.
-            commonName = entry.name().substring(0, i); //Get the common name.
+            commonName = entry.name().substring(0, i); //Get the common compName.
         }
 
         //Get the index of the base
@@ -297,7 +297,7 @@ public class DataBuilder implements IDestroyable{
                 int index = entry.nameWithoutExtension().lastIndexOf('_'); //Get the index of the last _.
                 if(index == -1) GH.writeErrorMessage("Using 'autoLayered' in tiles.json and "+entry.nameWithoutExtension() + " has no rank attached to it! (ex: 'file_1, file_2'"); //Throw an error if it doesn't exist.
                 int rank = Integer.parseInt(entry.nameWithoutExtension().substring(index+1)); //Record the rank of the folder.
-                String fullName = entry.nameWithoutExtension(); //Record the full name.
+                String fullName = entry.nameWithoutExtension(); //Record the full compName.
                 this.getFileNamesFromDir(entry, fileList); //Get all file names inside the folder.
                 String[] img = fileList.toArray(new String[fileList.size()]); //Convert it into a String array.
 

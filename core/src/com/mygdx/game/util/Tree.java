@@ -19,8 +19,8 @@ public class Tree {
 
     /**
      * Adds a node to the Tree.
-     * @param parent The parent name of the node to add the node to.
-     * @param newNodeName The new node's name.
+     * @param parent The parent compName of the node to add the node to.
+     * @param newNodeName The new node's compName.
      * @return The TreeNode that was created to add to the tree, or null if the parent was not found.
      */
     public TreeNode addNode(String parent, String newNodeName){
@@ -31,7 +31,7 @@ public class Tree {
 
     /**
      * Adds multiple new nodes to the tree.
-     * @param parent The name of the parent node to add the new nodes to.
+     * @param parent The compName of the parent node to add the new nodes to.
      * @param nodeNames The names of the new nodes to add.
      * @return This Tree object.
      */

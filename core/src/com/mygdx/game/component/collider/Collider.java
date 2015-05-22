@@ -7,15 +7,20 @@ import com.mygdx.game.entity.Entity;
 import com.mygdx.game.interfaces.IScalable;
 import com.mygdx.game.util.Constants;
 import com.mygdx.game.util.Tags;
+import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
  * Created by Paha on 1/9/2015.
  */
 public class Collider extends Component implements IScalable{
+    @JsonIgnore
     public Body body;
+    @JsonIgnore
     public Fixture fixture;
-
+    @JsonIgnore
     private World world;
+    @JsonProperty
     private float originalRadius;
 
     /**
@@ -75,6 +80,16 @@ public class Collider extends Component implements IScalable{
     @Override
     public void start() {
         super.start();
+    }
+
+    @Override
+    public void save() {
+
+    }
+
+    @Override
+    public void load() {
+
     }
 
     @Override

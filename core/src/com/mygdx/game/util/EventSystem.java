@@ -16,7 +16,7 @@ public class EventSystem {
     /**
      * Adds a function to the EventSystem.
      * @param entity The Entity to use for its ID. This will direct the call to the correct Entity.
-     * @param eventName The event name, ie: "collidestart" to indicate which event to call.
+     * @param eventName The event compName, ie: "collidestart" to indicate which event to call.
      * @param function The Consumer function to be called on an event.
      */
     public static void onEntityEvent(Entity entity, String eventName, java.util.function.Consumer<Object[]> function){
@@ -25,7 +25,7 @@ public class EventSystem {
 
     /**
      * Adds a function to the EventSystem for a game event.
-     * @param eventName The name of the event.
+     * @param eventName The compName of the event.
      * @param function THe Consumer function to be called on an event.
      */
     public static void onGameEvent(String eventName, java.util.function.Consumer<Object[]> function){
@@ -55,7 +55,7 @@ public class EventSystem {
     /**
      * Removes an Event from the system.
      * @param entity The Entity to call the event on.
-     * @param handlerName The name of the Event/Handler.
+     * @param handlerName The compName of the Event/Handler.
      * @param function The function/Event to remove from the system.
      */
     public static void unregisterEvent(Entity entity, String handlerName, java.util.function.Consumer<Object[]> function){
@@ -66,7 +66,7 @@ public class EventSystem {
     /**
      * Unreigsters all events with 'handlerName' passed in.
      * @param entity The Entity to remove from.
-     * @param handlerName The name of the handler to remove.
+     * @param handlerName The compName of the handler to remove.
      */
     public static void unregisterHandler(Entity entity, String handlerName){
         if(entityMap.get(entity.getID()) != null && entityMap.get(entity.getID()).get(handlerName) != null)
@@ -85,7 +85,7 @@ public class EventSystem {
     /**
      * Calls all Events with the "handleName" on a specific Entity.
      * @param entity The Entity to call the event on.
-     * @param handlerName The name of the Event.
+     * @param handlerName The compName of the Event.
      * @param args The arguments to pass into the list.
      */
     public static void notifyEntityEvent(@NotNull Entity entity, String handlerName, Object... args){
@@ -102,7 +102,7 @@ public class EventSystem {
 
     /**
      * Calls all Events with the "handleName" on a specific Entity.
-     * @param handlerName The name of the Event.
+     * @param handlerName The compName of the Event.
      * @param args The arguments to pass into the list.
      */
     public static void notifyGameEvent(String handlerName, Object... args){

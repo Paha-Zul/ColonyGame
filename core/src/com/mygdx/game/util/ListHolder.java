@@ -165,9 +165,9 @@ public class ListHolder {
 	}
 
 	/**
-	 * Finds an Entity by name from the game. Don't do this every frame for performance reasons.
-	 * @param name The name that the Entity should have.
-	 * @return The first Entity found with 'name', null otherwise.
+	 * Finds an Entity by compName from the game. Don't do this every frame for performance reasons.
+	 * @param name The compName that the Entity should have.
+	 * @return The first Entity found with 'compName', null otherwise.
 	 */
 	public static Entity findEntityByName(String name){
 		for(int i=0; i<entityList.size; i++){

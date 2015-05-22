@@ -36,7 +36,7 @@ public class Grid {
 
     public static class GridInstance {
         private int numCols, numRows, squareSize;
-        public int padding = 1;
+        public int padding = 3;
         private Node[][] grid;
         private VisibilityTile[][] visibilityMap;
 
@@ -121,21 +121,10 @@ public class Grid {
             int counter = 0;
             Node[] neighbors = new Node[4];
 
-            int startX = node.getX() - 1;
-            int endX = node.getX() + 1;
-            int startY = node.getY() - 1;
-            int endY = node.getY() + 1;
-
-            for (int col = startX; col <= endX; col++) {
-                for (int row = startY; row <= endY; row++) {
-                    //If we are on the corners, continue without doing anything;
-                    if ((col == startX && row == startY) || (col == startX && row == endY) || (col == endX && row == startY) || (col == endX && row == endY))
-                        continue;
-
-                    neighbors[counter] = getNode(col, row);
-                    counter++;
-                }
-            }
+            neighbors[0] = this.getNode(node.getX() - 1, node.getY()); // Left
+            neighbors[1] = this.getNode(node.getX() + 1, node.getY()); // Right
+            neighbors[2] = this.getNode(node.getX(), node.getY() + 1); // Up
+            neighbors[3] = this.getNode(node.getX(), node.getY() - 1); // Down
 
             return neighbors;
         }
@@ -144,7 +133,7 @@ public class Grid {
          * Gets the Node's neighbor in 8 directions around the Node.
          *
          * @param node The Node to get the neighbors of.
-         * @return A Node array of 8 neighbors. Values could be null to indicate an invalid neighbor.
+         * @return A Node array of 8 neighbors. Values can/will be null to indicate an invalid neighbor.
          */
         public Node[] getNeighbors8(Node node) {
             int counter = 0;
@@ -517,10 +506,18 @@ public class Grid {
             return getEntFunc.getEnt(entList);
         }
 
+        /**
+         * Gets the X index of this Node. Not the real location.
+         * @return An integer which is the X's index on the map.
+         */
         public int getX(){
             return this.x;
         }
 
+        /**
+         * Gets the Y index of this Node. Not the real location.
+         * @return An integer which is the Y's index on the map.
+         */
         public int getY(){
             return this.y;
         }

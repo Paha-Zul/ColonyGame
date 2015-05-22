@@ -6,6 +6,8 @@ import com.mygdx.game.interfaces.Functional;
 import com.mygdx.game.util.timer.RepeatingTimer;
 import com.mygdx.game.util.timer.Timer;
 import com.sun.istack.internal.NotNull;
+import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.annotate.JsonProperty;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,8 +17,11 @@ import java.util.HashMap;
  * increment/decrement stats like lowering health due to hunger/thirst.
  */
 public class Stats extends Component{
+    @JsonIgnore
     private HashMap<String, Stat> statMap = new HashMap<>();
+    @JsonIgnore
     private ArrayList<Stat> statList = new ArrayList<>();
+    @JsonIgnore
     private ArrayList<RepeatingTimer> timerList = new ArrayList<>();
 
     public Stats() {
@@ -26,6 +31,16 @@ public class Stats extends Component{
     @Override
     public void start() {
         super.start();
+    }
+
+    @Override
+    public void save() {
+
+    }
+
+    @Override
+    public void load() {
+
     }
 
     @Override
@@ -54,13 +69,13 @@ public class Stats extends Component{
 
     /**
      * Adds a new Stat object to the Stats Component.
-     * @param name The name of the Stat.
+     * @param name The compName of the Stat.
      * @param initCurrValue The initial current value to start.
      * @param initMaxValue THe initial maximum value to start.
      * @return The Stat that was created.
      */
     public Stat addStat(String name, float initCurrValue, float initMaxValue){
-        Stat stat = new Stat(name, this, initCurrValue, initMaxValue);
+        Stat stat = new Stat(name, initCurrValue, initMaxValue);
         this.statMap.put(name, stat);
         this.statList.add(stat);
         return stat;
@@ -69,14 +84,14 @@ public class Stats extends Component{
     /**
      *
      * Adds a new Stat object to the Stats Component.
-     * @param name The name of the Stat.
+     * @param name The compName of the Stat.
      * @param effect The effect to put on this Stat.
      * @param initCurrValue The initial current value to start.
      * @param initMaxValue THe initial maximum value to start.
      * @return The Stat that was created.
      */
     public Stat addStat(String name, String effect, float initCurrValue, float initMaxValue){
-        Stat stat = new Stat(name, this, initCurrValue, initMaxValue);
+        Stat stat = new Stat(name, initCurrValue, initMaxValue);
         stat.effect = effect;
         this.statMap.put(name, stat);
         this.statList.add(stat);
@@ -85,9 +100,10 @@ public class Stats extends Component{
 
     /**
      * Gets a Stat from the statMap.
-     * @param name The name of the stat.
-     * @return The Stat object referenced by 'name'. Null if it doesn't exist.
+     * @param name The compName of the stat.
+     * @return The Stat object referenced by 'compName'. Null if it doesn't exist.
      */
+    @JsonIgnore
     public Stat getStat(String name){
         if(this.statMap.containsKey(name))
             return this.statMap.get(name);
@@ -97,9 +113,10 @@ public class Stats extends Component{
 
     /**
      * Attempts to get the stat with the effect desired.
-     * @param effect The name of the effect.
+     * @param effect The compName of the effect.
      * @return The stat the contains the effect if found, otherwise null.
      */
+    @JsonIgnore
     public Stat getStatWithEffect(String effect){
         for(Stat stat : statList)
             if(stat.effect != null && stat.effect.equals(effect))
@@ -108,6 +125,7 @@ public class Stats extends Component{
         return null;
     }
 
+    @JsonIgnore
     public final ArrayList<Stat> getStatList(){
         return this.statList;
     }
@@ -125,18 +143,19 @@ public class Stats extends Component{
     }
 
     public static class Stat{
+        @JsonProperty
         public Functional.Callback onZero, onFull;
+        @JsonProperty
         public Color color = Color.GREEN;
-
+        @JsonProperty
         public String name, effect;
-        private Stats stats;
+        @JsonProperty
         private float current, max;
 
-        public Stat(String name, Stats stats, float current, float max) {
+        public Stat(String name, float current, float max) {
             this.name = name;
             this.current = current;
             this.max = max;
-            this.stats = stats;
         }
 
         /**

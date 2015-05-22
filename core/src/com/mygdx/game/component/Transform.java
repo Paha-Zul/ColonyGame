@@ -4,34 +4,55 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.interfaces.IDelayedDestroyable;
+import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.annotate.JsonProperty;
 
 import java.util.ArrayList;
 
 public class Transform extends Component implements IDelayedDestroyable {
+    @JsonIgnore
 	public Transform parent;
+    @JsonProperty
 	private Vector2 worldPosition, localPosition;
+    @JsonProperty
 	private float worldRotation, localRotation, rotationOffset=0, distFromParent=0;
+    @JsonProperty
 	private float worldScale = 1, localScale = 1;
-
-	private ArrayList<Transform> children;
+    @JsonIgnore
+	private ArrayList<Transform> children = new ArrayList<>();
 
 	/**
 	 * Creates a new transform.
 	 * @param position The saveContainer position of the owner Entity.
 	 * @param rotation The saveContainer rotation of the owner Entity.
 	 */
-	public Transform(Vector2 position, float rotation, Entity owner){
+	public Transform(Vector2 position, float rotation){
 		super();
-		this.owner = owner;
-		this.worldPosition = new Vector2(position.x, position.y);
-		this.localPosition = new Vector2(0, 0);
-		this.setRotation(rotation);
-		this.children = new ArrayList<>();
+
+        this.worldPosition = new Vector2(position.x, position.y);
+        this.localPosition = new Vector2(0, 0);
+        this.setRotation(rotation);
 	}
 
-	@Override
+    @Override
+    public void start() {
+        super.start();
+
+    }
+
+    @Override
+    public void save() {
+
+    }
+
+    @Override
+    public void load() {
+
+    }
+
+    @Override
 	public void update(float delta){
-		//System.out.println(this.owner.name+" local in update: "+this.localPosition);
+		//System.out.println(this.owner.compName+" local in update: "+this.localPosition);
 
 		if(this.parent!=null){
 			float parentRot = this.parent.getRotation();
@@ -122,6 +143,7 @@ public class Transform extends Component implements IDelayedDestroyable {
 		}
 	}
 
+    @JsonIgnore
 	public ArrayList<Transform> getChildren(){
 		return this.children;
 	}
@@ -130,6 +152,7 @@ public class Transform extends Component implements IDelayedDestroyable {
 	 * Gets the local position of the transform.
 	 * @return A Vector2 holding the local X and Y coordinate of the transform.
 	 */
+    @JsonIgnore
 	public Vector2 getPosition(){
 		return this.worldPosition;
 	}
@@ -138,6 +161,7 @@ public class Transform extends Component implements IDelayedDestroyable {
 	 * Gets the local position relative to this Transform's parent
 	 * @return A Vector2 which is the local X and Y of this Transform relative to its parent.
 	 */
+    @JsonIgnore
 	public Vector2 getLocalPosition(){
 		return this.localPosition;
 	}
@@ -146,6 +170,7 @@ public class Transform extends Component implements IDelayedDestroyable {
 	 * Gets the saveContainer rotation of this Transform.
 	 * @return A float which is the saveContainer rotation of this Transform.
 	 */
+    @JsonIgnore
 	public float getRotation(){
 		return this.worldRotation;
 	}
@@ -154,6 +179,7 @@ public class Transform extends Component implements IDelayedDestroyable {
 	 * Gets the local rotation of this Transform.
 	 * @return A float which is the relative rotation of this Transform in relation to its parent.
 	 */
+    @JsonIgnore
 	public float getLocalRotation(){
 		return this.localRotation;
 	}
@@ -162,6 +188,7 @@ public class Transform extends Component implements IDelayedDestroyable {
 	 * Gets the scale of this Transform.
 	 * @return A float which is the scale of this Transform
 	 */
+    @JsonIgnore
 	public float getScale(){
 		return this.worldScale;
 	}
@@ -170,6 +197,7 @@ public class Transform extends Component implements IDelayedDestroyable {
 	 * Gets the local scale of this Transform.
 	 * @return A float which is the local scale of this Transform
 	 */
+    @JsonIgnore
 	public float getLocalScale(){
 		return this.localScale;
 	}

@@ -3,22 +3,20 @@ package com.mygdx.game.component;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.interfaces.IDelayedDestroyable;
 import com.mygdx.game.interfaces.IInteractable;
+import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
  * Created by Paha on 1/10/2015.
  */
 public class Interactable extends Component{
+    @JsonProperty
     public String interType;
-
+    @JsonIgnore
     private IInteractable interactable;
 
-    public Interactable(String type) {
+    public Interactable() {
         super();
-        this.interType = type;
-    }
-
-    public Interactable(){
-        this("NothingType");
         this.setActive(false);
     }
 
@@ -27,6 +25,17 @@ public class Interactable extends Component{
         super.start();
 
         this.changeType(interType);
+    }
+
+
+    @Override
+    public void save() {
+
+    }
+
+    @Override
+    public void load() {
+
     }
 
     public void changeType(String newType){
@@ -47,6 +56,11 @@ public class Interactable extends Component{
         super.update(delta);
     }
 
+    public void setInterType(String interType) {
+        this.interType = interType;
+    }
+
+    @JsonIgnore
     public IInteractable getInteractable(){
         if(interactable != null && (((IDelayedDestroyable)interactable).isDestroyed() || ((IDelayedDestroyable)interactable).isSetToBeDestroyed()))
             interactable = null;

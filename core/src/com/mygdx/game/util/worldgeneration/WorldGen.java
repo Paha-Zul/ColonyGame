@@ -18,7 +18,6 @@ import com.mygdx.game.util.GH;
 import com.mygdx.game.util.Grid;
 import com.mygdx.game.util.managers.DataManager;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 
@@ -44,9 +43,8 @@ public class WorldGen {
     private int lastIndex = -1;
 
     //Variables for performing breadth first resource spawning;
-    private LinkedList<Grid.TerrainTile> neighbors = new LinkedList<>();
-    private HashMap<Integer, Grid.TerrainTile> visitedMap = new HashMap<>(1000);
-    private ArrayList<Grid.TerrainTile> tmpNeighbors = new ArrayList<>(4);
+    private LinkedList<Grid.Node> openList = new LinkedList<>();
+    private HashMap<Integer, Grid.Node> visitedMap = new HashMap<>(1000);
     private int[] startIndex;
     private Vector2 center = new Vector2();
     private boolean started = false;
@@ -94,7 +92,7 @@ public class WorldGen {
         //This will loop until everything is done.
         while(this.currDone < maxAmount && stepsLeft > 0) {
             freq = DataBuilder.worldData.noiseMapHashMap.get(this.currIndex).freq; //Get the frequency of the current noise map.
-            String noiseMapName = DataBuilder.worldData.noiseMapHashMap.get(this.currIndex).name; //Get the name of the current noise map.
+            String noiseMapName = DataBuilder.worldData.noiseMapHashMap.get(this.currIndex).name; //Get the compName of the current noise map.
 
             //If the index has changed, we need to increment and get the next noise level.
             if(this.lastIndex != this.currIndex){
@@ -134,8 +132,8 @@ public class WorldGen {
                         tile.set(terrainSprite, noiseValue, rotation, type, position); //Create a new terrain tile.
                         tile.avoid = jtile.avoid;
                         if (jtile.tileNames.length <= randTileIndex)
-                            GH.writeErrorMessage("Tile with image " + jtile.img[randTileIndex] + " and category " + jtile.category + " does not have a name assigned to it");
-                        tile.tileName = jtile.tileNames[randTileIndex]; //Assign the name
+                            GH.writeErrorMessage("Tile with image " + jtile.img[randTileIndex] + " and category " + jtile.category + " does not have a compName assigned to it");
+                        tile.tileName = jtile.tileNames[randTileIndex]; //Assign the compName
                         tile.category = jtile.category; //Assign the category.
                         grid.getGrid()[currX][currY].setTerrainTile(tile); //Assign the tile to the map.
                     }
@@ -180,12 +178,22 @@ public class WorldGen {
         return done;
     }
 
+    /**
+     * This function will generate resources for the world. The world will be scanned over for each
+     * noise map the exists. So if we have 3 noise maps (normal, water, mountains), the world will be scanned 3 times.
+     * Each scan will get each node, get the terrain tile (if not null), check the tile list from a structure made from 'tiles.json' file,
+     * searches for a valid resource to spawn, and will spawn it if the random number is within the bounds of that the resource requires.
+     * @param startPos The starting position of the scan.
+     * @param blockRadius The block radius of where not to spawn stuff?
+     * @param step The number of steps to perform before halting.
+     * @return True if the task is completely finished, false otherwise.
+     */
     public boolean generateResources(Vector2 startPos, int blockRadius, int step){
         boolean done = false;
         Grid.GridInstance grid = ColonyGame.worldGrid;
 
         if(!started){
-            this.neighbors.add(grid.getNode(startPos).getTerrainTile());
+            this.openList.add(grid.getNode(startPos));
             this.startIndex = grid.getIndex(startPos);
             this.started = true;
             noiseMapName = DataBuilder.worldData.noiseMapHashMap.get(this.currIndex).name;
@@ -193,56 +201,39 @@ public class WorldGen {
 
         //Partially executes a breadth first search.
         for (int i = 0; i < step; i++) {
-            Grid.TerrainTile currTile = neighbors.pop(); //Pop the first neighbor
-            int[] index = {(int) (currTile.terrainSprite.getX() / grid.getSquareSize()), (int) (currTile.terrainSprite.getY() / grid.getSquareSize())}; //Get the index.
+            Grid.Node currNode = openList.pop(); //Pop the first neighbor
+            Grid.Node[] neighbors = grid.getNeighbors8(currNode);
 
-            //Get left/right/up/down
-            Grid.Node left = grid.getNode(index[0] - 1, index[1]);
-            Grid.Node right = grid.getNode(index[0] + 1, index[1]);
-            Grid.Node up = grid.getNode(index[0], index[1] + 1);
-            Grid.Node down = grid.getNode(index[0] - 1, index[1] - 1);
-
-            //If a neighbor is not null and it hasn't been visited already...
-            if (left != null && left.getTerrainTile() != null && !visitedMap.containsKey(left.hashCode())) {
-                neighbors.add(left.getTerrainTile());
-                visitedMap.put(left.hashCode(), left.getTerrainTile());
-            }
-            if (right != null && right.getTerrainTile() != null && !visitedMap.containsKey(right.hashCode())) {
-                neighbors.add(right.getTerrainTile());
-                visitedMap.put(right.hashCode(), right.getTerrainTile());
-            }
-            if (up != null && up.getTerrainTile() != null && !visitedMap.containsKey(up.hashCode())) {
-                neighbors.add(up.getTerrainTile());
-                visitedMap.put(up.hashCode(), up.getTerrainTile());
-            }
-            if (down != null && down.getTerrainTile() != null && !visitedMap.containsKey(down.hashCode())) {
-                neighbors.add(down.getTerrainTile());
-                visitedMap.put(down.hashCode(), down.getTerrainTile());
-            }
+            for(Grid.Node node : neighbors)
+                if(node != null && !visitedMap.containsKey(node.hashCode())) {
+                    openList.add(node);
+                    visitedMap.put(node.hashCode(), node);
+                }
 
             //Add the current tile to the visitedMap.
-            visitedMap.put(currTile.hashCode(), currTile);
+            visitedMap.put(currNode.hashCode(), currNode);
+            if(currNode.getTerrainTile() != null) {
+                int[] currIndex = {currNode.getX(), currNode.getY()};
+                //If the resource is within the blockRadius, simply continue.
+                if (Math.abs(currIndex[0] - startIndex[0]) <= blockRadius && Math.abs(currIndex[1] - startIndex[1]) <= blockRadius)
+                    continue;
 
-            int[] currIndex = grid.getIndex(currTile.terrainSprite.getX(), currTile.terrainSprite.getY()); //Get the current index.
-            //If the resource is within the blockRadius, simply continue.
-            if (Math.abs(currIndex[0] - startIndex[0]) <= blockRadius && Math.abs(currIndex[1] - startIndex[1]) <= blockRadius)
-                continue;
+                //Set the center Vector2 and spawn the tree using the center position.
+                center.set(currNode.getX()*grid.getSquareSize() +  grid.getSquareSize() * 0.5f, currNode.getY()*grid.getSquareSize() +  grid.getSquareSize() * 0.5f);
+                spawnResource(getTileAtHeight(DataBuilder.tileGroupsMap.get(noiseMapName).tiles, (float) currNode.getTerrainTile().noiseValue), center, currNode.getTerrainTile());
+            }
 
-            //Set the center Vector2 and spawn the tree using the center position.
-            center.set(currTile.terrainSprite.getX() + grid.getSquareSize() * 0.5f, currTile.terrainSprite.getY() + grid.getSquareSize() * 0.5f);
-            spawnTree(getTileAtHeight(DataBuilder.tileGroupsMap.get(noiseMapName).tiles, (float) currTile.noiseValue), center, currTile);
-
-            //If there are no more neighbors, we are done.
-            if (neighbors.size() == 0 && this.currIndex < DataBuilder.worldData.noiseMapHashMap.size() - 1) {
+            //If there are no more nodes in openList, we are done.
+            if (openList.size() == 0 && this.currIndex < DataBuilder.worldData.noiseMapHashMap.size() - 1) {
                 done = false;
-                this.neighbors.clear();
-                this.visitedMap.clear();
+                this.openList = new LinkedList<>();
+                this.visitedMap = new HashMap<>();
                 this.started = false;
                 this.currIndex++;
                 break;
-            }else if(neighbors.size() == 0){
+            }else if(openList.size() == 0){
                 done = true;
-                this.neighbors.clear();
+                this.openList = null;
                 this.visitedMap.clear();
                 this.started = false;
                 break;
@@ -253,7 +244,7 @@ public class WorldGen {
     }
 
     //Spawns a tree.
-    private void spawnTree(DataBuilder.JsonTile jtile, Vector2 centerPos, Grid.TerrainTile currTile){
+    private void spawnResource(DataBuilder.JsonTile jtile, Vector2 centerPos, Grid.TerrainTile currTile){
         if(jtile == null || currTile == null || !currTile.category.equals(jtile.category))
             return;
 
@@ -263,17 +254,18 @@ public class WorldGen {
             return;
 
         //Create a new resource from the JsonResource.
-        Resource res = new Resource(jRes);
+        Resource res = new Resource();
+        res.copyResource(jRes);
 
         //Get the atlas so we can get the image from it.
         TextureAtlas interactableAtlas = ColonyGame.assetManager.get("interactables", TextureAtlas.class); //Get the atlas
         TextureRegion reg = null;
         if(jRes.img != null && jRes.img.length > 0) {
-            String textureName = jRes.img[MathUtils.random(jRes.img.length - 1)]; //Get the texture name.
+            String textureName = jRes.img[MathUtils.random(jRes.img.length - 1)]; //Get the texture compName.
             reg = interactableAtlas.findRegion(textureName);
         }
 
-        if(reg == null && !jRes.noimg) GH.writeErrorMessage("A resource image is null when 'noimg' is set to false, meaning there should be a picture. Check the resources.json and make sure the image name is correct.", true);
+        if(reg == null && !jRes.noimg) GH.writeErrorMessage("A resource image is null when 'noimg' is set to false, meaning there should be a picture. Check the resources.json and make sure the image compName is correct.", true);
 
         //Create the resource and stuff.
         ResourceEnt resEnt = new ResourceEnt(centerPos, 0, reg, 11);

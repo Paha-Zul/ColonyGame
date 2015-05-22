@@ -18,10 +18,13 @@ public class ColonistEnt extends Entity{
         this.name = "Colonist";
 
         this.addComponent(new Colonist());
-        this.addComponent(new GridComponent(Constants.GRIDACTIVE, ColonyGame.worldGrid, 3));
-        this.addComponent(new Interactable("humanoid"));
+        GridComponent gridComp = this.addComponent(new GridComponent());
+        gridComp.setGridType(Constants.GRIDACTIVE);
+        gridComp.setGrid(ColonyGame.worldGrid);
+        gridComp.setExploreRadius(3);
+        Interactable inter = this.addComponent(new Interactable());
+        inter.setInterType("humanoid");
         this.addComponent(new Stats());
-        this.addComponent(new Skills());
         this.addComponent(new Inventory());
         this.addComponent(new BehaviourManagerComp("colonist"));
         this.makeCollider();

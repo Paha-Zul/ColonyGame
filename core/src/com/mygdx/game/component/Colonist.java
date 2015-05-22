@@ -20,6 +20,8 @@ import com.mygdx.game.util.gui.GUI;
 import com.mygdx.game.util.managers.DataManager;
 import com.mygdx.game.util.timer.RepeatingTimer;
 import com.mygdx.game.util.timer.Timer;
+import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.annotate.JsonProperty;
 
 import java.util.LinkedList;
 import java.util.function.Consumer;
@@ -28,17 +30,23 @@ import java.util.function.Consumer;
  * Created by Paha on 1/17/2015.
  */
 public class Colonist extends Component implements IInteractable, IOwnable{
+    @JsonIgnore
     private Colony colony;
+    @JsonIgnore
     private Inventory inventory;
+    @JsonIgnore
     private Stats stats;
-    private Skills skills;
+    @JsonIgnore
     private BehaviourManagerComp manager;
+    @JsonIgnore
     private Collider collider;
+    @JsonProperty
     private String firstName, lastName;
+    @JsonProperty
     private boolean alert = false;
-
+    @JsonIgnore
     private LinkedList<Entity> attackList = new LinkedList<>();
-
+    @JsonIgnore
     private Fixture fixture;
 
     public Colonist() {
@@ -48,25 +56,8 @@ public class Colonist extends Component implements IInteractable, IOwnable{
     @Override
     public void start() {
         super.start();
-
-//        getBehManager().getBehaviourStates().addState("idle", (BlackBoard blackBoard, BehaviourManagerComp behComp) -> PrebuiltTasks::idleTask);
-
-        this.inventory = this.getComponent(Inventory.class);
-        this.stats = this.getComponent(Stats.class);
-        this.skills = this.getComponent(Skills.class);
-        this.manager = this.getComponent(BehaviourManagerComp.class);
-        this.manager.getBlackBoard().moveSpeed = 200f;
-        this.collider = this.getComponent(Collider.class);
-
-        EventSystem.onEntityEvent(this.owner, "damage", onDamage);
-        EventSystem.onEntityEvent(this.owner, "attacking_group", onAttackingEvent);
-        EventSystem.onEntityEvent(this.owner, "collide_start", onCollideStart);
-        EventSystem.onEntityEvent(this.owner, "collide_end", onCollideEnd);
-
+        load();
         this.createStats();
-        this.createBehaviourButtons();
-        this.createSkills();
-        this.createRangeSensor();
     }
 
     //Creates a range sensor for when we get a ranged weapon.
@@ -82,6 +73,28 @@ public class Colonist extends Component implements IInteractable, IOwnable{
         info.tags.addTag("attack_sensor");
         this.fixture.setUserData(info);
         shape.dispose();
+    }
+
+    @Override
+    public void save() {
+
+    }
+
+    @Override
+    public void load() {
+        this.inventory = this.getComponent(Inventory.class);
+        this.stats = this.getComponent(Stats.class);
+        this.manager = this.getComponent(BehaviourManagerComp.class);
+        this.manager.getBlackBoard().moveSpeed = 200f;
+        this.collider = this.getComponent(Collider.class);
+
+        EventSystem.onEntityEvent(this.owner, "damage", onDamage);
+        EventSystem.onEntityEvent(this.owner, "attacking_group", onAttackingEvent);
+        EventSystem.onEntityEvent(this.owner, "collide_start", onCollideStart);
+        EventSystem.onEntityEvent(this.owner, "collide_end", onCollideEnd);
+
+        this.createBehaviourButtons();
+        this.createRangeSensor();
     }
 
     @Override
@@ -219,17 +232,8 @@ public class Colonist extends Component implements IInteractable, IOwnable{
         });
     }
 
-    //Creates the skills, which aren't used anymore :(
-    private void createSkills(){
-        this.skills.addSkill("foraging", 10, 100, 2.25f, 0.1f);
-        this.skills.addSkill("lumberjack", 10, 100, 2.25f, 0.1f);
-        this.skills.addSkill("hunting", 10, 100, 2.25f, 0.1f);
-        this.skills.addSkill("exploration", 10, 100, 2.25f, 1.5f);
-        this.skills.addSkill("butchering", 10, 100, 2.25f, 0.1f);
-        this.skills.addSkill("mining", 10, 100, 2.25f, 0.1f);
-    }
-
     //The onDamage event when this colonist takes damage.
+    @JsonIgnore
     private Consumer<Object[]> onDamage = args -> {
         Entity entity = (Entity) args[0];
         float amount = (float) args[1];
@@ -245,6 +249,7 @@ public class Colonist extends Component implements IInteractable, IOwnable{
     };
 
     //The callback for when our health is 0.
+    @JsonIgnore
     private Functional.Callback onZero = () -> {
         this.owner.getTags().removeTag("alive");
         this.owner.getTransform().setRotation(90f);
@@ -258,6 +263,7 @@ public class Colonist extends Component implements IInteractable, IOwnable{
     };
 
     //The function for when a "attack" signal is sent to this colonist.
+    @JsonIgnore
     private Consumer<Object[]> onAttackingEvent = args -> {
         Group attackingGroup = (Group)args[0];
         if(attackingGroup.getLeader().getTags().hasTag("boss")) {
@@ -269,6 +275,7 @@ public class Colonist extends Component implements IInteractable, IOwnable{
     };
 
     //When one of our fixtures collides with something.
+    @JsonIgnore
     private Consumer<Object[]> onCollideStart = args -> {
         Fixture myFixture = (Fixture)args[0];
         Fixture otherFixture = (Fixture)args[1];
@@ -286,6 +293,7 @@ public class Colonist extends Component implements IInteractable, IOwnable{
     };
 
     //When one of our fixtures collides with something.
+    @JsonIgnore
     private Consumer<Object[]> onCollideEnd = args -> {
         Fixture myFixture = (Fixture)args[0];
         Fixture otherFixture = (Fixture)args[1];
@@ -302,10 +310,6 @@ public class Colonist extends Component implements IInteractable, IOwnable{
         }
     };
 
-    public Colony getColony() {
-        return colony;
-    }
-
     public void setColony(Colony colony) {
         this.colony = colony;
     }
@@ -316,32 +320,49 @@ public class Colonist extends Component implements IInteractable, IOwnable{
         this.getEntityOwner().name = firstName;
     }
 
-    @Override
-    public Skills getSkills() {
-        return this.skills;
+    @JsonIgnore
+    public Colony getColony() {
+        return colony;
     }
 
     @Override
+    @JsonIgnore
     public String getName() {
         return this.firstName;
     }
+    @JsonProperty
+    public String getFirstName() {
+        return firstName;
+    }
+    @JsonProperty
+    public String getLastName() {
+        return lastName;
+    }
+    @JsonProperty
+    public boolean isAlert() {
+        return alert;
+    }
 
     @Override
+    @JsonIgnore
     public Inventory getInventory(){
         return this.inventory;
     }
 
     @Override
+    @JsonIgnore
     public Stats getStats(){
         return this.stats;
     }
 
     @Override
+    @JsonIgnore
     public String getStatsText() {
         return null;
     }
 
     @Override
+    @JsonIgnore
     public BehaviourManagerComp getBehManager() {
         return this.manager;
     }
@@ -352,11 +373,13 @@ public class Colonist extends Component implements IInteractable, IOwnable{
     }
 
     @Override
+    @JsonIgnore
     public Colony getOwningColony() {
         return this.colony;
     }
 
     @Override
+    @JsonIgnore
     public Component getComponent() {
         return this;
     }

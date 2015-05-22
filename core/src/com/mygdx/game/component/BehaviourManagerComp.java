@@ -13,6 +13,7 @@ import com.mygdx.game.util.StateSystem;
 import com.mygdx.game.util.Tree;
 import com.mygdx.game.util.timer.OneShotTimer;
 import com.mygdx.game.util.timer.Timer;
+import org.codehaus.jackson.annotate.JsonIgnore;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,17 +23,23 @@ import java.util.function.BiFunction;
  * A Component that manages the behaviour of Entities.
  */
 public class BehaviourManagerComp extends Component{
+    @JsonIgnore
     private BlackBoard blackBoard;
+    @JsonIgnore
     private Task currentBehaviour, nextBehaviour;
+    @JsonIgnore
     private String behaviourType = "";
-
+    @JsonIgnore
     private Stats stats;
-
+    @JsonIgnore
     private ArrayList<Line> lineList = new ArrayList<>();
+    @JsonIgnore
     private Timer feedTimer = new OneShotTimer(5f, null);
-
+    @JsonIgnore
     private Tree taskTree = new Tree("taskTree", "root");
+    @JsonIgnore
     private StateSystem<BiFunction<BlackBoard, BehaviourManagerComp, Task>> behaviourStates = new StateSystem<>();
+    @JsonIgnore
     private static HashMap<String, BiFunction<BlackBoard, BehaviourManagerComp, Task>> taskMap = new HashMap<>();
 
     public BehaviourManagerComp(String behaviourType) {
@@ -53,10 +60,19 @@ public class BehaviourManagerComp extends Component{
     @Override
     public void init(Entity owner) {
         super.init(owner);
+        load();
+    }
 
+    @Override
+    public void load() {
         this.blackBoard = new BlackBoard();
         this.blackBoard.colonyGrid = ColonyGame.worldGrid;
         this.blackBoard.myManager = this;
+    }
+
+    @Override
+    public void save() {
+
     }
 
     @Override
@@ -143,6 +159,7 @@ public class BehaviourManagerComp extends Component{
             this.changeTaskImmediate(behaviourStates.getDefaultState().getUserData().apply(blackBoard, this));
     }
 
+    @JsonIgnore
     public Line[] getLines() {
         lineList.clear(); //Clear the list.
 
@@ -197,8 +214,9 @@ public class BehaviourManagerComp extends Component{
     }
 
     /**
-     * @return The current task name.
+     * @return The current task compName.
      */
+    @JsonIgnore
     public String getCurrentTaskName(){
         if(this.currentBehaviour != null)
             return this.currentBehaviour.getName();
@@ -209,6 +227,7 @@ public class BehaviourManagerComp extends Component{
     /**
      * @return The blackboard of this Component.
      */
+    @JsonIgnore
     public BlackBoard getBlackBoard(){
         return this.blackBoard;
     }
@@ -216,10 +235,12 @@ public class BehaviourManagerComp extends Component{
     /**
      * @return The task Tree of this Behaviour Component.
      */
+    @JsonIgnore
     public Tree getTaskTree(){
         return this.taskTree;
     }
 
+    @JsonIgnore
     public StateSystem<BiFunction<BlackBoard, BehaviourManagerComp, Task>> getBehaviourStates(){
         return behaviourStates;
     }
@@ -230,9 +251,11 @@ public class BehaviourManagerComp extends Component{
 
     @Override
     public void destroy(Entity destroyer) {
-        this.currentBehaviour.getControl().finishWithFailure();
-        this.currentBehaviour.getControl().safeEnd();
-        this.currentBehaviour = null;
+        if(this.currentBehaviour != null) {
+            this.currentBehaviour.getControl().finishWithFailure();
+            this.currentBehaviour.getControl().safeEnd();
+            this.currentBehaviour = null;
+        }
         super.destroy(destroyer);
     }
 

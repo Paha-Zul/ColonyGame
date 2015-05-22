@@ -23,10 +23,14 @@ public class BuildingEntity extends Entity{
         this.name = "Main Base";
         this.tags.addTag("building");
 
-        this.addComponent(new GridComponent(Constants.GRIDSTATIC, ColonyGame.worldGrid, 8));
+        GridComponent gridComp = this.addComponent(new GridComponent());
+        gridComp.setGridType(Constants.GRIDSTATIC);
+        gridComp.setGrid(ColonyGame.worldGrid);
+        gridComp.setExploreRadius(8);
         this.addComponent(new Building());
-        this.addComponent(new Interactable("building"));
-        this.addComponent(new Inventory("all", 100, 100, 100));
+        Interactable inter = this.addComponent(new Interactable());
+        inter.setInterType("building");
+        this.addComponent(new Inventory());
         this.makeCollider(position);
     }
 

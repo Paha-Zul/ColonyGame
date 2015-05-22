@@ -4,6 +4,8 @@ import com.mygdx.game.entity.Entity;
 import com.mygdx.game.interfaces.IOwnable;
 import com.mygdx.game.util.DataBuilder;
 import com.mygdx.game.util.managers.DataManager;
+import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.annotate.JsonProperty;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,55 +14,52 @@ import java.util.HashMap;
  * Created by Paha on 1/18/2015.
  */
 public class Inventory extends Component implements IOwnable{
+    @JsonProperty
     public String lasAddedItem = "";
-
+    @JsonIgnore
     private Colony colony;
+    @JsonProperty
     private String allowedTypes = "all";
+    @JsonProperty
     private int totalTypesAllowed = -1;
+    @JsonProperty
     private int totalItemsAllowed = -1;
+    @JsonProperty
     private int totalWeightAllowed = -1;
+    @JsonProperty
     private int currTotalItems = 0;
-
+    @JsonProperty
     private final int maxAmount = 10;
-
+    @JsonIgnore
     private HashMap<String, InventoryItem> inventory = new HashMap<>(20);
-
-    /**
-     * Creates an Inventory Component to hold Items.
-     * @param allowedTypes The allowed types for this inventory. This should be in the form of "resource,furniture,weapons,...etc". Using "all" will
-     *                     indicate that all types can be stored here. (NOT IMPLEMENTED)
-     * @param totalTypesAllowed The total number of different types allowed. For instance, if "all" is used but 'totalTypesAllowed' is 2, then if furniture and weapon types are stored first,
-     *                          no other types can be put in until another interType is cleared. -1 indicates infinite. (NOT IMPLEMENTED)
-     * @param totalItemsAllowed The total number of itemNames allowed in this inventory. For instance, maybe a person can only hold 10 itemNames? -1 indicates infinite. (NOT IMPLEMENTED)
-     * @param totalWeightAllowed The total weight allowed for this inventory. For instance, maybe a person can hold a total weight of 50? -1 indicates infinite. (NOT IMPLEMENTED)
-     */
-    public Inventory(String allowedTypes, int totalTypesAllowed, int totalItemsAllowed, int totalWeightAllowed) {
-        super();
-        this.allowedTypes = allowedTypes;
-        this.totalTypesAllowed = totalTypesAllowed;
-        this.totalItemsAllowed = totalItemsAllowed;
-        this.totalWeightAllowed = totalWeightAllowed;
-
-        this.setActive(false);
-    }
 
     /**
      * Creates a default Inventory Component with the default values. This means this inventory can hold unlimited of everything.
      */
     public Inventory(){
-        this("all", -1, -1, -1);
+
     }
 
     @Override
     public void start() {
         super.start();
+        load();
+    }
+
+    @Override
+    public void save() {
+
+    }
+
+    @Override
+    public void load() {
         Building building = this.getComponent(Building.class);
         if(building != null) this.colony = building.getOwningColony();
     }
 
     /**
      * Checks if this Inventory can add a certain amount of item.
-     * @param itemName The name of the item to add.
+     * @param itemName The compName of the item to add.
      * @param amount The amount to add.
      * @return True if it can be added, false otherwise.
      */
@@ -71,7 +70,7 @@ public class Inventory extends Component implements IOwnable{
 
     /**
      * Checks if this Inventory can add 1 of an item.
-     * @param itemName The name of the Item to add
+     * @param itemName The compName of the Item to add
      * @return True if it can be added, false otherwise.
      */
     public boolean canAddItem(String itemName){
@@ -79,8 +78,8 @@ public class Inventory extends Component implements IOwnable{
     }
 
     /**
-     * Adds an amount of the item designated by the name passed in.
-     * @param itemName The name of the item to add.
+     * Adds an amount of the item designated by the compName passed in.
+     * @param itemName The compName of the item to add.
      * @param amount The amount of the item to add.
      */
     public void addItem(String itemName, int amount){
@@ -104,7 +103,7 @@ public class Inventory extends Component implements IOwnable{
 
     /**
      * Adds one of the item designated by the itemName passed in.
-     * @param itemName The name of the item to add.
+     * @param itemName The compName of the item to add.
      */
     public void addItem(String itemName){
         this.addItem(itemName, 1);
@@ -113,12 +112,12 @@ public class Inventory extends Component implements IOwnable{
 
 
     /**
-     * Removes all of an itemRef (by name) and returns that itemRef with the amount removed.
-     * @param itemName The name of the Item.
+     * Removes all of an itemRef (by compName) and returns that itemRef with the amount removed.
+     * @param itemName The compName of the Item.
      * @return The Item that was completely removed from the inventory with the quantity that was removed.
      */
     public int removeItemAll(String itemName){
-        InventoryItem invItem = this.inventory.get(name);
+        InventoryItem invItem = this.inventory.get(compName);
         return this.removeItemAmount(itemName, invItem.amount);
     }
 
@@ -126,7 +125,7 @@ public class Inventory extends Component implements IOwnable{
      * Attempts to remove an amount of an item from this inventory. It will either remove the requested amount
      * or will remove all of the item if the amount requested was higher than the stock of the item. Returns the amount
      * removed from this inventory.
-     * @param itemName The name of the Item.
+     * @param itemName The compName of the Item.
      * @param amount The amount of the item to remove.
      * @return The amount removed from the inventory.
      */
@@ -160,14 +159,17 @@ public class Inventory extends Component implements IOwnable{
      * Gets a list of the inventory.
      * @return An ArrayList containing the itemNames of the inventory.
      */
+    @JsonIgnore
     public final ArrayList<InventoryItem> getItemList(){
         return new ArrayList<>(inventory.values());
     }
 
+    @JsonIgnore
     public int getCurrTotalItems(){
         return this.currTotalItems;
     }
 
+    @JsonIgnore
     public final InventoryItem getItemReference(String name){
         return this.inventory.get(name);
     }

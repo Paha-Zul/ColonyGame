@@ -16,7 +16,7 @@ public class StateSystem<T>{
 
     /**
      * Adds a new state to this system.
-     * @param stateName The name for the state.
+     * @param stateName The compName for the state.
      */
     public State addState(String stateName){
         return this.addState(stateName, false, null);
@@ -24,7 +24,7 @@ public class StateSystem<T>{
 
     /**
      * Adds a new state to this system with user data (whatever object you want!)
-     * @param stateName The name for the state.
+     * @param stateName The compName for the state.
      * @param userData The data for the state to hold.
      */
     public State addState(String stateName, T userData){
@@ -33,7 +33,7 @@ public class StateSystem<T>{
 
     /**
      * Adds a new state to this system with the option to make it the default state.
-     * @param stateName The name of the state.
+     * @param stateName The compName of the state.
      * @param defaultState True if the state should be the default state of this system, false otherwise.
      */
     public State addState(String stateName, boolean defaultState){
@@ -42,7 +42,7 @@ public class StateSystem<T>{
 
     /**
      * Adds a new state to this system with the option to make it the default state and to add user data.
-     * @param stateName The name of the state.
+     * @param stateName The compName of the state.
      * @param defaultState True if it the state should be the default state, false otherwise.
      * @param userData The user data for this state.
      */
@@ -68,15 +68,15 @@ public class StateSystem<T>{
     }
 
     /**
-     * @param stateName The name of the state to check.
-     * @return True if the State name passed in is the name of the current State of this system, false otherwise.
+     * @param stateName The compName of the state to check.
+     * @return True if the State compName passed in is the compName of the current State of this system, false otherwise.
      */
     public boolean isCurrState(String stateName){
         return this.currState.stateName.equals(stateName);
     }
 
     /**
-     * Sets the current State of this system. If the State name does not exist, the default State becomes the current State.
+     * Sets the current State of this system. If the State compName does not exist, the default State becomes the current State.
      * @param stateName
      */
     public void setCurrState(String stateName){
@@ -91,7 +91,7 @@ public class StateSystem<T>{
     }
 
     /**
-     * @param stateName The name of the State to check for.
+     * @param stateName The compName of the State to check for.
      * @return True if this State system contains the state, false otherwise.
      */
     public boolean stateExists(String stateName){

@@ -53,6 +53,7 @@ project(":core") {
         compile "com.badlogicgames.gdx:gdx-bullet:$gdxVersion"
         compile "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
         compile "com.badlogicgames.box2dlights:box2dlights:$box2DLightsVersion"
+        compile "com.fasterxml:jackson-module-json-org:0.9.1"
         compile "net.sf.trove4j:trove4j:$troveVersion"
     }
 }

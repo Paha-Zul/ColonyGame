@@ -11,6 +11,7 @@ import com.mygdx.game.util.Constants;
 import com.mygdx.game.util.DataBuilder;
 import com.mygdx.game.util.EventSystem;
 import com.mygdx.game.util.managers.DataManager;
+import org.codehaus.jackson.annotate.JsonIgnore;
 
 import java.util.LinkedList;
 import java.util.function.Consumer;
@@ -19,13 +20,19 @@ import java.util.function.Consumer;
  * Created by Paha on 2/26/2015.
  */
 public class Animal extends Component implements IInteractable{
+    @JsonIgnore
     private BehaviourManagerComp behComp;
+    @JsonIgnore
     private Stats stats;
+    @JsonIgnore
     private DataBuilder.JsonAnimal animalRef;
+    @JsonIgnore
     private Collider collider;
+    @JsonIgnore
     private Group group;
-
+    @JsonIgnore
     private LinkedList<Entity> attackList = new LinkedList<>();
+    @JsonIgnore
     private Fixture attackSensor;
 
     public Animal(DataBuilder.JsonAnimal animalRef) {
@@ -37,6 +44,15 @@ public class Animal extends Component implements IInteractable{
     public void start() {
         super.start();
 
+        load();
+
+        EventSystem.onEntityEvent(this.owner, "collide_start", onCollideStart);
+        EventSystem.onEntityEvent(this.owner, "collide_end", onCollideEnd);
+        EventSystem.onEntityEvent(this.owner, "damage", onDamage);
+    }
+
+    @Override
+    public void load() {
         if(animalRef.boss) this.getEntityOwner().getTags().addTag("boss");
         this.getEntityOwner().name = animalRef.displayName;
 
@@ -44,26 +60,29 @@ public class Animal extends Component implements IInteractable{
         this.behComp = this.getComponent(BehaviourManagerComp.class);
         this.collider = this.getComponent(Collider.class);
 
-        behComp.getBlackBoard().attackRange = 15f;
-
-        stats.addStat("health", 100, 100);
-        stats.addStat("food", 100, 100);
-        stats.addStat("water", 100, 100);
+        if(stats.getStat("health") == null) stats.addStat("health", 100, 100);
+        if(stats.getStat("food") == null) stats.addStat("food", 100, 100);
+        if(stats.getStat("water") == null) stats.addStat("water", 100, 100);
 
         //Remove its animal properties and make it a resource.
         stats.getStat("health").onZero = onDeath();
+
+        behComp.getBlackBoard().attackRange = 15f;
+        this.behComp.getBlackBoard().moveSpeed = 250f;
 
         EventSystem.onEntityEvent(this.owner, "collide_start", onCollideStart);
         EventSystem.onEntityEvent(this.owner, "collide_end", onCollideEnd);
         EventSystem.onEntityEvent(this.owner, "damage", onDamage);
 
-        this.behComp.getBlackBoard().moveSpeed = 250f;
-        //this.setActive(false);
-
         if(animalRef.aggressive) addCircleSensor();
         this.group = this.getComponent(Group.class);
 
         this.makeBehaviourStuff();
+    }
+
+    @Override
+    public void save() {
+
     }
 
     //Adds a circle sensor to this animal.
@@ -107,6 +126,7 @@ public class Animal extends Component implements IInteractable{
     }
 
     //The callback to be called when I die!
+    @JsonIgnore
     private Functional.Callback onDeath(){
         return () -> {
             Interactable interactable = this.owner.getComponent(Interactable.class);
@@ -122,7 +142,8 @@ public class Animal extends Component implements IInteractable{
                 this.collider.body.setLinearVelocity(0, 0);
                 this.owner.getTags().clearTags(); //Clear all tags
                 this.owner.getTags().addTag("resource"); //Add the resource tag
-                this.owner.addComponent(new Resource(DataManager.getData(animalRef.resourceName, DataBuilder.JsonResource.class))); //Add a Resource Component.
+                Resource res = this.owner.addComponent(new Resource()); //Add a Resource Component.
+                res.copyResource(DataManager.getData(animalRef.resourceName, DataBuilder.JsonResource.class));
                 if (interactable != null) interactable.changeType("resource");
                 this.owner.destroyComponent(BehaviourManagerComp.class); //Destroy the BehaviourManagerComp
                 this.owner.destroyComponent(Stats.class); //Destroy the Stats component.
@@ -133,6 +154,7 @@ public class Animal extends Component implements IInteractable{
     }
 
     //The Consumer function to call when I collide with something.
+    @JsonIgnore
     private Consumer<Object[]> onCollideStart = args -> {
         Fixture me = (Fixture)args[0];
         Fixture other = (Fixture)args[1];
@@ -156,6 +178,7 @@ public class Animal extends Component implements IInteractable{
     };
 
     //The Consumer function to call when I stop colliding with something.
+    @JsonIgnore
     private Consumer<Object[]> onCollideEnd = args -> {
         Fixture me = (Fixture) args[0];
         Fixture other = (Fixture) args[1]; //Get the other entity.
@@ -169,6 +192,7 @@ public class Animal extends Component implements IInteractable{
     };
 
     //The Consume function to call when I take damage.
+    @JsonIgnore
     private Consumer<Object[]> onDamage = args -> {
         Entity other = (Entity) args[0];
         float damage = (float) args[1];
@@ -197,42 +221,43 @@ public class Animal extends Component implements IInteractable{
         this.group = group;
     }
 
+    @JsonIgnore
     public DataBuilder.JsonAnimal getAnimalRef() {
         return animalRef;
     }
 
-
     @Override
+    @JsonIgnore
     public Inventory getInventory() {
         return null;
     }
 
     @Override
+    @JsonIgnore
     public Stats getStats() {
         return this.stats;
     }
 
     @Override
+    @JsonIgnore
     public String getStatsText() {
         return null;
     }
 
     @Override
-    public Skills getSkills() {
-        return null;
-    }
-
-    @Override
+    @JsonIgnore
     public String getName() {
         return this.getEntityOwner().name;
     }
 
     @Override
+    @JsonIgnore
     public BehaviourManagerComp getBehManager() {
         return this.behComp;
     }
 
     @Override
+    @JsonIgnore
     public Component getComponent() {
         return this;
     }

@@ -55,7 +55,7 @@ public class Profiler {
 
     /**
      * Begins a profile section to record time for.
-     * @param name The name of the profile.
+     * @param name The compName of the profile.
      */
     public static void begin(String name){
         if(!enabled)
@@ -93,8 +93,8 @@ public class Profiler {
     }
 
     /**
-     * Begins a profile section. The function name, where this code was called, will be used for the name. This may be
-     * slightly less efficient than providing a name.
+     * Begins a profile section. The function compName, where this code was called, will be used for the compName. This may be
+     * slightly less efficient than providing a compName.
      */
     public static void begin(){
         if(!enabled)

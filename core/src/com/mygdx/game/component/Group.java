@@ -3,6 +3,8 @@ package com.mygdx.game.component;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.entity.Entity;
+import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
  * Created by Paha on 5/8/2015.
@@ -10,16 +12,26 @@ import com.mygdx.game.entity.Entity;
  * <p>A group of Entities with a leader.</p>
  */
 public class Group extends Component{
+    @JsonIgnore
     private Entity leader;
+    @JsonIgnore
     private Array<Entity> groupList = new Array<>();
-
+    @JsonProperty
     private boolean stayNearLeader = true, attackLeaderTarget = true;
-
-    public boolean busy = false;
 
     @Override
     public void start() {
         super.start();
+    }
+
+    @Override
+    public void save() {
+
+    }
+
+    @Override
+    public void load() {
+
     }
 
     public Entity addEntityToGroup(Entity entity){
@@ -53,19 +65,23 @@ public class Group extends Component{
      * and assigned as the new leader. If there are no Entities left in the group, returns null as the leader.
      * @return The Entity leader of this group. Null if the group is empty and no valid leader can be set.
      */
+    @JsonIgnore
     public Entity getLeader(){
         if(!leader.getTags().hasTag("alive") || this.leader == null) getNewLeader();
         return this.leader;
     }
 
+    @JsonIgnore
     public Array<Entity> getGroupList() {
         return groupList;
     }
 
+    @JsonIgnore
     public boolean isStayNearLeader() {
         return stayNearLeader;
     }
 
+    @JsonIgnore
     public boolean isAttackLeaderTarget() {
         return attackLeaderTarget;
     }
@@ -74,6 +90,7 @@ public class Group extends Component{
      * Replaces the leader with a random one from the group. If there are no Entities left in the group,
      * assigns it to null.
      */
+    @JsonIgnore
     private void getNewLeader(){
         if(groupList.size > 0) {
             int rand = MathUtils.random(groupList.size-1);
@@ -84,7 +101,18 @@ public class Group extends Component{
             this.leader = null;
     }
 
+    /**
+     * Do not use this function for this Component. Since this Component attaches to many different Entities, the owner could be any Entity in the group.
+     * @return The wrong Entity or most of the time, null.
+     */
+    @Deprecated
     @Override
+    public Entity getEntityOwner() {
+        return super.getEntityOwner();
+    }
+
+    @Override
+    @JsonIgnore
     public void setToDestroy() {
         super.setToDestroy();
     }
@@ -99,13 +127,5 @@ public class Group extends Component{
             super.destroy(destroyer);
     }
 
-    /**
-     * Do not use this function for this Component. Since this Component attaches to many different Entities, the owner could be any Entity in the group.
-     * @return The wrong Entity or most of the time, null.
-     */
-    @Deprecated
-    @Override
-    public Entity getEntityOwner() {
-        return super.getEntityOwner();
-    }
+
 }

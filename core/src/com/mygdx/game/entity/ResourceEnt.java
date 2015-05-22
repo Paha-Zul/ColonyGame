@@ -23,8 +23,12 @@ public class ResourceEnt extends Entity{
         this.getTags().addTag("resource");
         this.name = "Resource";
 
-        this.addComponent(new Interactable("resource"));
-        this.addComponent(new GridComponent(Constants.GRIDSTATIC, ColonyGame.worldGrid, -1));
+        Interactable inter = this.addComponent(new Interactable());
+        inter.setInterType("resource");
+        GridComponent gridComp = this.addComponent(new GridComponent());
+        gridComp.setGridType(Constants.GRIDACTIVE);
+        gridComp.setGrid(ColonyGame.worldGrid);
+        gridComp.setExploreRadius(-1);
         GraphicIdentity identity = this.getComponent(GraphicIdentity.class);
         if(identity != null) identity.alignment = 1;
 

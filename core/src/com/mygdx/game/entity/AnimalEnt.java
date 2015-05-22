@@ -25,9 +25,13 @@ public class AnimalEnt extends Entity{
 
         this.addComponent(new Animal(animalRef));
         this.addComponent(new Stats());
-        this.addComponent(new Interactable("animal"));
+        Interactable inter = this.addComponent(new Interactable());
+        inter.setInterType("animal");
         BehaviourManagerComp behManager = this.addComponent(new BehaviourManagerComp("animal"));
-        this.addComponent(new GridComponent(Constants.GRIDACTIVE, ColonyGame.worldGrid, -1));
+        GridComponent gridComp = this.addComponent(new GridComponent());
+        gridComp.setGridType(Constants.GRIDACTIVE);
+        gridComp.setGrid(ColonyGame.worldGrid);
+        gridComp.exploreRadius = -1;
 
         this.makeCollider();
 

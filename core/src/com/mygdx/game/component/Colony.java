@@ -15,6 +15,8 @@ import com.mygdx.game.screens.GameScreen;
 import com.mygdx.game.util.DataBuilder;
 import com.mygdx.game.util.GH;
 import com.mygdx.game.util.Grid;
+import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.annotate.JsonProperty;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,47 +27,46 @@ import java.util.function.Predicate;
  * Created by Paha on 1/17/2015.
  */
 public class Colony extends Component implements IInteractable {
+    @JsonProperty
     private String colonyName = "Colony";
-
+    @JsonIgnore
     private ArrayList<Colonist> colonistList = new ArrayList<>(20);
-    private HashMap<String, ArrayList<Resource>> nearbyResources = new HashMap<>();
-    private HashMap<String, ArrayList<Resource>> stockedResource = new HashMap<>();
+    @JsonIgnore
     private HashMap<Class<? extends Component>, Array<Component>> ownedMap = new HashMap<>();
+    @JsonIgnore
     private HashMap<String, Inventory.InventoryItem> quickInv = new HashMap<>();
-
-    private int totalNearbyResources = 0;
-
+    @JsonIgnore
     private Inventory inventory;
-    private int lastInvCount = 0;
-
-    public Colony(String colonyName) {
-        super();
-
-        this.colonyName = colonyName;
-        this.setActive(false);
-    }
 
     public Colony() {
-        this("Colony");
+        super();
     }
-
     @Override
     public void start() {
         super.start();
         this.owner.name = "emptyColonyObject";
 
+        load();
         placeStart();
-
-        this.inventory = this.owner.getComponent(Inventory.class);
-        TextureRegion colonistTexture = new TextureRegion(ColonyGame.assetManager.get("colonist", Texture.class));
         Building building = this.getOwnedFromColony(Building.class);
 
+        TextureRegion colonistTexture = new TextureRegion(ColonyGame.assetManager.get("colonist", Texture.class));
         //Make some colonists!
         for(int i=0;i<5;i++) {
             Entity c = this.makeColonist(building.owner.getTransform().getPosition(), GH.toMeters(200), colonistTexture);
             c.getComponent(Colonist.class).setName(GameScreen.firstNames[MathUtils.random(GameScreen.firstNames.length - 1)], GameScreen.lastNames[MathUtils.random(GameScreen.lastNames.length - 1)]);
             this.addColonist(c.getComponent(Colonist.class));
         }
+    }
+
+    @Override
+    public void save() {
+
+    }
+
+    @Override
+    public void load() {
+        this.inventory = this.owner.getComponent(Inventory.class);
     }
 
     private Entity makeColonist(Vector2 start, float offset, TextureRegion texture){
@@ -163,10 +164,11 @@ public class Colony extends Component implements IInteractable {
     }
 
     @SuppressWarnings("unchecked")
+    @JsonIgnore
     public <T extends Component> T getOwnedFromColony(Class<T> cls){
         return (T)ownedMap.get(cls).get(0);
     }
-
+    @JsonIgnore
     public <T extends Component> Array<Component> getOwnedListFromColony(Class<T> cls){
         return ownedMap.get(cls);
     }
@@ -200,70 +202,16 @@ public class Colony extends Component implements IInteractable {
             invItem.addAmount(amount);
     }
 
+    @JsonIgnore
     public final HashMap<String, Inventory.InventoryItem> getGlobalInv(){
         return quickInv;
-    }
-
-    /**
-     * Adds an available nearby Resource to this colony.
-     * @param resource The nearby Resource Component to add.
-     */
-    public void addNearbyResource(Resource resource){
-        if(this.nearbyResources.get(resource.getResourceName()) == null)
-            this.nearbyResources.put(resource.getResourceName(), new ArrayList<>(20));
-
-        this.nearbyResources.get(resource.getResourceName()).add(resource);
-        this.totalNearbyResources++;
-    }
-
-    /**
-     * Removes a nearby Resource from this colony.
-     * @param resource The Resource to remove.
-     */
-    public void removeNearbyResource(Resource resource){
-        if(this.nearbyResources.get(resource.getResourceName()) == null)
-            return;
-
-        this.nearbyResources.get(type).remove(resource);
-        this.totalNearbyResources--;
-    }
-
-    /**
-     * Returns the list of nearby Resources by interType.
-     * @param type The interType of resource.
-     * @return An empty ArrayList if there is no list for the given interType, otherwise the ArrayList of nearby resources for the given interType.
-     */
-    public ArrayList<Resource> getNearbyResourceListByType(String type){
-        if(this.nearbyResources.get(type) == null)
-            return new ArrayList<>();
-
-        return this.nearbyResources.get(type);
-    }
-
-    /**
-     * Returns the list of stocked Resources by interType.
-     * @param type The interType of resource.
-     * @return An empty ArrayList if there is no list for the given interType, otherwise the ArrayList of stocked resources for the given interType.
-     */
-    public ArrayList<Resource> getStockedResourceListByType(String type){
-        if(this.stockedResource.get(type) == null)
-            return new ArrayList<>();
-
-        return this.stockedResource.get(type);
-    }
-
-    /**
-     * Gets the total number of nearby resources that the Colony detects.
-     * @return An integer which is the total number of nearby resources.
-     */
-    public int getTotalNearbyResources(){
-        return this.totalNearbyResources;
     }
 
     /**
      * Gets the total number of stocked resources for this Colony.
      * @return An integer which is the total number of stocked resources.
      */
+    @JsonIgnore
     public int getTotalStockedResources(){
         return this.inventory.getCurrTotalItems();
     }
@@ -272,41 +220,43 @@ public class Colony extends Component implements IInteractable {
      * Gets the number of colonists this Colony has.
      * @return An integer which is the number of colonists.
      */
+    @JsonIgnore
     public int getNumColonists(){
         return this.colonistList.size();
     }
 
     @Override
+    @JsonIgnore
     public Inventory getInventory(){
         return this.inventory;
     }
 
     @Override
+    @JsonIgnore
     public Stats getStats() {
         return null;
     }
 
     @Override
+    @JsonIgnore
     public String getStatsText() {
         return null;
     }
 
     @Override
-    public Skills getSkills() {
-        return null;
-    }
-
-    @Override
+    @JsonIgnore
     public String getName() {
         return null;
     }
 
     @Override
+    @JsonIgnore
     public BehaviourManagerComp getBehManager() {
         return null;
     }
 
     @Override
+    @JsonIgnore
     public Component getComponent() {
         return this;
     }

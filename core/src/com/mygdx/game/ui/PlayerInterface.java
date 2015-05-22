@@ -510,7 +510,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
                 return;
             }
 
-            //If it has a name, draw the name...
+            //If it has a compName, draw the compName...
             if(innerInter.getName() != null) {
                 GUI.Label(innerInter.getName(), this.batch, this.infoTopRect, this.UIStyle);
             }
@@ -829,10 +829,12 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
             this.paused = !this.paused;
         else if(keycode == Input.Keys.F4) //F4 - reveal map
             this.revealMap();
-        else if(keycode == Input.Keys.F5){
-            SaveGameHelper.saveContainer.entityList = ListHolder.getEntityList();
+        else if(keycode == Input.Keys.F5) {
             SaveGameHelper.saveWorld();
+        }else if(keycode == Input.Keys.F6){
+            SaveGameHelper.loadWorld();
         }else if(keycode == Input.Keys.PLUS) //+ - increase game speed
+
             gameSpeed*=2;
         else if(keycode == Input.Keys.MINUS)//- - decrease game speed
             gameSpeed*=0.5f;

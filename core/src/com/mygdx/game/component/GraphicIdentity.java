@@ -3,30 +3,26 @@ package com.mygdx.game.component;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.util.Constants;
 import com.mygdx.game.util.GH;
 import com.mygdx.game.util.Grid;
+import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.annotate.JsonProperty;
 
 public class GraphicIdentity extends Component{
+    @JsonIgnore
 	public Sprite sprite;
+    @JsonProperty
     public int alignment = 0; //center
-
+    @JsonProperty
     private int currVisibility=0;
 
-	public GraphicIdentity(TextureRegion image){
-		super();
+    public GraphicIdentity(){
 
-		this.sprite = new Sprite(image);
-	}
-
-    public GraphicIdentity(Sprite sprite){
-        super();
-
-        this.sprite = new Sprite(sprite);
     }
+
 
 	@Override
 	public void start() {
@@ -35,6 +31,16 @@ public class GraphicIdentity extends Component{
         //is not centered.
         this.sprite.setSize(GH.toMeters(sprite.getRegionWidth()), GH.toMeters(sprite.getRegionHeight()));
         this.sprite.setOrigin(this.sprite.getWidth() / 2, this.sprite.getHeight() / 2);
+    }
+
+    @Override
+    public void save() {
+
+    }
+
+    @Override
+    public void load() {
+
     }
 
     @Override
@@ -63,6 +69,11 @@ public class GraphicIdentity extends Component{
             this.sprite.setPosition(pos.x - (sprite.getWidth() / 2), pos.y);
 
         this.sprite.draw(batch);
+    }
+
+    public void setSprite(Sprite sprite){
+        if(this.sprite == null) this.sprite = new Sprite(sprite);
+        else this.sprite.set(sprite);
     }
 
     public void setTexture(Texture texture){

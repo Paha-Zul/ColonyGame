@@ -1,5 +1,6 @@
 package com.mygdx.game.entity;
 
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
@@ -13,21 +14,32 @@ import com.mygdx.game.interfaces.IScalable;
 import com.mygdx.game.util.EventSystem;
 import com.mygdx.game.util.ListHolder;
 import com.mygdx.game.util.Tags;
+import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
  * @author Bbent_000
  *
  */
 public class Entity implements IDelayedDestroyable{
+    @JsonProperty
 	public String name = "Entity";
+    @JsonProperty
 	public int drawLevel = 0;
+    @JsonProperty
 	public boolean active = true;
+    @JsonProperty
     protected Tags tags = new Tags("entity");
+    @JsonIgnore
 	protected Components components;
-
-
+    @JsonProperty
     protected boolean destroyed=false, setToDestroy=false;
-	protected double ID;
+    @JsonProperty
+	protected long ID;
+
+    public Entity(){
+
+    }
 
 	/**
 	 * Creates an Entity that will start with a GraphicIdentity component.
@@ -37,11 +49,13 @@ public class Entity implements IDelayedDestroyable{
 	 */
 	public Entity(Vector2 position, float rotation, TextureRegion graphic, int drawLevel){
 		this.components = new Components(this);
-		this.components.transform = this.components.addComponent(new Transform(position, rotation, this));
-		if(graphic != null)
-			this.components.identity = this.components.addComponent(new GraphicIdentity(new TextureRegion(graphic)));
+		this.components.transform = this.components.addComponent(new Transform(position, rotation));
+		if(graphic != null) {
+            this.components.identity = this.components.addComponent(new GraphicIdentity());
+            this.components.identity.setSprite(new Sprite(new TextureRegion(graphic)));
+        }
 
-		this.ID = MathUtils.random()*Double.MAX_VALUE;
+		this.ID = (long)(MathUtils.random()*Long.MAX_VALUE - Long.MAX_VALUE*0.5);
 		this.drawLevel = drawLevel;
 
 		ListHolder.addEntity(drawLevel, this);
@@ -66,12 +80,12 @@ public class Entity implements IDelayedDestroyable{
 	public Entity(Vector2 position, float rotation, int drawLevel, Component... comps){
 		this.components = new Components(this);
 
-		this.components.transform = this.components.addComponent(new Transform(position, rotation, this));
+		this.components.transform = this.components.addComponent(new Transform(position, rotation));
 		for(Component comp : comps)
 			this.components.addComponent(comp);
 
 		ListHolder.addEntity(drawLevel, this);
-		this.ID = MathUtils.random()*Double.MAX_VALUE;
+        this.ID = (long)(MathUtils.random()*Long.MAX_VALUE - Long.MAX_VALUE*0.5);
 		this.drawLevel = drawLevel;
 	}
 
@@ -100,8 +114,37 @@ public class Entity implements IDelayedDestroyable{
         return components.addComponent(comp);
     }
 
+    @JsonIgnore
     public final <T extends Component> T getComponent(Class<T> c){
         return components.getComponent(c);
+    }
+
+    @JsonIgnore
+    public Components getComponents(){
+        return this.components;
+    }
+
+    @JsonIgnore
+    public GraphicIdentity getGraphicIdentity(){
+        return components.identity;
+    }
+
+    @JsonIgnore
+    public Tags getTags(){
+        return this.tags;
+    }
+
+    /**
+     * @return The double ID of this Entity.
+     */
+    @JsonIgnore
+    public long getID(){
+        return this.ID;
+    }
+
+    @JsonIgnore
+    public Transform getTransform(){
+        return components.transform;
     }
 
     public void destroyComponent(Component component){
@@ -116,22 +159,11 @@ public class Entity implements IDelayedDestroyable{
         return components.removeComponent(comp);
     }
 
-    public Transform getTransform(){
-        return components.transform;
-    }
-
-    public GraphicIdentity getGraphicIdentity(){
-        return components.identity;
-    }
-
-    public Components getComponents(){
-        return this.components;
-    }
-
 	/**
 	 * @return True if this Entity has been destroyed, false otherwise.
 	 */
 	@Override
+    @JsonIgnore
 	public boolean isDestroyed(){
 		return this.destroyed;
 	}
@@ -139,18 +171,13 @@ public class Entity implements IDelayedDestroyable{
 	/**
 	 * @return True if this Entity is valid (not destroyed or set to be destroyed), false otherwise.
 	 */
+    @JsonIgnore
 	public boolean isValid(){
 		return !this.destroyed && !this.isSetToBeDestroyed();
 	}
 
-    /**
-     * @return The double ID of this Entity.
-     */
-	public double getID(){
-		return this.ID;
-	}
-
 	@Override
+    @JsonIgnore
 	public boolean isSetToBeDestroyed() {
 		return this.setToDestroy;
 	}
@@ -171,10 +198,6 @@ public class Entity implements IDelayedDestroyable{
 	}
 
 
-	public Tags getTags(){
-		return this.tags;
-	}
-
 
     public static class Components implements IDelayedDestroyable{
 		public Transform transform;
@@ -182,7 +205,7 @@ public class Entity implements IDelayedDestroyable{
 		protected Array<Component> newComponentList = new Array<>();
 		protected Array<Component> activeComponentList = new Array<>();
 		protected Array<Component> inactiveComponentList = new Array<>();
-		protected Array<IScalable> scalableComponents = new Array<>();
+		protected Array<Component> scalableComponents = new Array<>();
 		protected Array<Component> destroyComponentList = new Array<>();
 		protected Entity owner;
 		protected boolean setToDestroy, destroyed;
@@ -242,6 +265,7 @@ public class Entity implements IDelayedDestroyable{
 		 * @return The Component if it was found, otherwise null.
 		 */
 		@SuppressWarnings("unchecked")
+        @JsonIgnore
 		public final <T extends Component> T getComponent(Class<T> c){
 			for(Component comp : this.inactiveComponentList){
 				if(comp.getClass() == c)
@@ -306,15 +330,34 @@ public class Entity implements IDelayedDestroyable{
 			if(comp.isActive()) return this.inactiveComponentList.removeValue(comp, false);
 			return this.activeComponentList.removeValue(comp, false);
 		}
+        @JsonIgnore
+        public Array<Component> getNewComponentList() {
+            return newComponentList;
+        }
+        @JsonIgnore
+        public Array<Component> getActiveComponentList() {
+            return activeComponentList;
+        }
+        @JsonIgnore
+        public Array<Component> getInactiveComponentList() {
+            return inactiveComponentList;
+        }
+        @JsonIgnore
+        public Array<Component> getScalableComponents() {
+            return scalableComponents;
+        }
+        @JsonIgnore
+        public Array<Component> getDestroyComponentList() {
+            return destroyComponentList;
+        }
 
-
-		public final void registerScalable(IScalable scalable){
+        public final <T extends Component & IScalable> void registerScalable(T scalable){
 			this.scalableComponents.add(scalable);
 		}
 
 		public final void scaleComponents(float scale){
-			for(IScalable scalable : this.scalableComponents)
-				scalable.scale(scale);
+			for(Component scalable : this.scalableComponents)
+                ((IScalable)scalable).scale(scale);
 		}
 
 		@Override
@@ -357,11 +400,13 @@ public class Entity implements IDelayedDestroyable{
 		}
 
 		@Override
+        @JsonIgnore
 		public boolean isDestroyed() {
 			return this.destroyed;
 		}
 
 		@Override
+        @JsonIgnore
 		public boolean isSetToBeDestroyed() {
 			return this.setToDestroy;
 		}

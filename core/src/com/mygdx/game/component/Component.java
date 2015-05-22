@@ -1,19 +1,28 @@
 package com.mygdx.game.component;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.MathUtils;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.interfaces.IDelayedDestroyable;
+import com.mygdx.game.interfaces.ISaveable;
+import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.annotate.JsonProperty;
 
 
-public abstract class Component implements IDelayedDestroyable {
-	protected String name;
-	protected int type;
-	private boolean active = true, destroyed = false, setToDestroy = false;
+public abstract class Component implements IDelayedDestroyable, ISaveable {
+    @JsonProperty
+	protected String compName;
+    @JsonProperty
+    private boolean active = true, destroyed = false, setToDestroy = false;
+    @JsonIgnore
 	protected Entity owner;
+    @JsonProperty
 	protected boolean initiated = false;
+    @JsonProperty
+	protected long compID;
 
 	public Component() {
-
+		this.compID = (long)(MathUtils.random()*Long.MAX_VALUE - Long.MAX_VALUE*0.5);
 	}
 
 	/**
@@ -82,7 +91,8 @@ public abstract class Component implements IDelayedDestroyable {
 	 * @param <T> The class.
 	 * @return The Component that was retrieved, or null if it could not be found.
 	 */
-	public final <T extends Component> T getComponent(Class<T> c){
+    @JsonIgnore
+    public final <T extends Component> T getComponent(Class<T> c){
 		return this.owner.getComponent(c);
 	}
 
@@ -107,19 +117,37 @@ public abstract class Component implements IDelayedDestroyable {
 	 * If this Component is active or not.
 	 * @return True if the Component is active, false if not.
 	 */
+    @JsonIgnore
 	public boolean isActive() {
 		return this.active;
 	}
 
-	/**
+    @JsonIgnore
+    public String getCompName(){
+        return this.compName;
+    }
+
+    @JsonIgnore
+    public boolean isInitiated() {
+        return initiated;
+    }
+
+    @JsonIgnore
+    public boolean isSetToDestroy() {
+        return setToDestroy;
+    }
+
+    /**
 	 * Gets the Entity owner of this Component.
 	 * @return The Entity owner of this Component.
 	 */
+    @JsonIgnore
 	public Entity getEntityOwner() {
 		return this.owner;
 	}
 
 	@Override
+    @JsonIgnore
 	public boolean isSetToBeDestroyed() {
 		return this.setToDestroy;
 	}
@@ -129,19 +157,26 @@ public abstract class Component implements IDelayedDestroyable {
 		this.setToDestroy = true;
 	}
 
+    @JsonIgnore
+    public long getCompID(){
+        return this.compID;
+    }
+
 	@Override
 	public void destroy(Entity destroyer) {
 		this.owner = null;
 		this.destroyed = true;
 		this.active = false;
-		this.name = null;
+		this.compName = null;
 	}
 
-	@Override
+    @Override
+    @JsonIgnore
 	public boolean isDestroyed(){
 		return this.destroyed;
 	}
 
+    @JsonIgnore
 	public boolean isValid(){
 		return !isDestroyed() && !isSetToBeDestroyed();
 	}

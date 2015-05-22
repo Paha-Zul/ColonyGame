@@ -11,7 +11,7 @@ public class DataManager {
 
     /**
      * Adds a piece of data to this manager.
-     * @param dataName The name of the data to add.
+     * @param dataName The compName of the data to add.
      * @param data The actual Object of data.
      * @param c The class of the data.
      * @param <T> The class interType of the Data.
@@ -28,14 +28,14 @@ public class DataManager {
 
     /**
      * Retrieves data from this manager.
-     * @param dataName The name of the data we are retrieving.
+     * @param dataName The compName of the data we are retrieving.
      * @param c The Class of the data we are retrieving.
      * @param <T> The Class interType of data.
      * @return The T data retrieved from this manager. Throws an exception if no data is found.
      */
     public static <T> T getData(String dataName, Class<T> c){
         HashMap<String, Object> map = dataMap.get(c);
-        //if(map == null || !map.containsKey(dataName)) GH.writeErrorMessage("Data of class "+c.getName()+" with name "+dataName+" does not exist!");
+        //if(map == null || !map.containsKey(dataName)) GH.writeErrorMessage("Data of class "+c.getName()+" with compName "+dataName+" does not exist!");
 
         return (T)map.get(dataName);
     }
