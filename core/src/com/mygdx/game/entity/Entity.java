@@ -23,6 +23,8 @@ import org.codehaus.jackson.annotate.JsonProperty;
  */
 public class Entity implements IDelayedDestroyable{
     @JsonProperty
+    protected long ID;
+    @JsonProperty
 	public String name = "Entity";
     @JsonProperty
 	public int drawLevel = 0;
@@ -34,8 +36,7 @@ public class Entity implements IDelayedDestroyable{
 	protected Components components;
     @JsonProperty
     protected boolean destroyed=false, setToDestroy=false;
-    @JsonProperty
-	protected long ID;
+
 
     public Entity(){
 

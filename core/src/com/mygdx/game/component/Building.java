@@ -13,11 +13,14 @@ public class Building extends Component implements IOwnable, IInteractable{
     @JsonIgnore
     private Inventory inventory;
 
+    public Building(){
+
+    }
+
     @Override
     public void start() {
         super.start();
         this.setActive(false);
-
     }
 
     @Override

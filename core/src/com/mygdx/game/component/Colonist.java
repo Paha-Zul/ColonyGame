@@ -113,6 +113,7 @@ public class Colonist extends Component implements IInteractable, IOwnable{
         }
     }
 
+    @JsonIgnore
     public boolean setAlert(boolean alert){
         //If alert is active and we are setting it to not active.
         if(this.alert && !alert) {
@@ -310,6 +311,7 @@ public class Colonist extends Component implements IInteractable, IOwnable{
         }
     };
 
+    @JsonIgnore
     public void setColony(Colony colony) {
         this.colony = colony;
     }

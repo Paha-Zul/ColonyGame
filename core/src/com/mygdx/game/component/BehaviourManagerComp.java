@@ -28,8 +28,6 @@ public class BehaviourManagerComp extends Component{
     @JsonIgnore
     private Task currentBehaviour, nextBehaviour;
     @JsonIgnore
-    private String behaviourType = "";
-    @JsonIgnore
     private Stats stats;
     @JsonIgnore
     private ArrayList<Line> lineList = new ArrayList<>();
@@ -42,8 +40,8 @@ public class BehaviourManagerComp extends Component{
     @JsonIgnore
     private static HashMap<String, BiFunction<BlackBoard, BehaviourManagerComp, Task>> taskMap = new HashMap<>();
 
-    public BehaviourManagerComp(String behaviourType) {
-        this.behaviourType = behaviourType;
+    public BehaviourManagerComp() {
+
     }
 
     static{

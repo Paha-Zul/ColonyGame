@@ -51,14 +51,17 @@ public class GridComponent extends Component{
         this.currNode = this.grid.checkNode(this.currNode, this.owner, true, exploreRadius);
     }
 
+    @JsonIgnore
     public void setGridType(int gridType) {
         this.gridType = gridType;
     }
 
+    @JsonIgnore
     public void setGrid(Grid.GridInstance grid) {
         this.grid = grid;
     }
 
+    @JsonIgnore
     public void setExploreRadius(int exploreRadius) {
         this.exploreRadius = exploreRadius;
     }

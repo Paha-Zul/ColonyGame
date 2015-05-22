@@ -7,8 +7,9 @@ import com.mygdx.game.interfaces.IDelayedDestroyable;
 import com.mygdx.game.interfaces.ISaveable;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.annotate.JsonTypeInfo;
 
-
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.WRAPPER_OBJECT, property = "@class")
 public abstract class Component implements IDelayedDestroyable, ISaveable {
     @JsonProperty
 	protected String compName;

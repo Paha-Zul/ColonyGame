@@ -41,6 +41,7 @@ public class Colony extends Component implements IInteractable {
     public Colony() {
         super();
     }
+
     @Override
     public void start() {
         super.start();

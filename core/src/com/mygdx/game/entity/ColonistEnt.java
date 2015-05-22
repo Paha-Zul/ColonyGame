@@ -26,7 +26,7 @@ public class ColonistEnt extends Entity{
         inter.setInterType("humanoid");
         this.addComponent(new Stats());
         this.addComponent(new Inventory());
-        this.addComponent(new BehaviourManagerComp("colonist"));
+        this.addComponent(new BehaviourManagerComp());
         this.makeCollider();
 
         this.tags.addTag("humanoid");

@@ -23,11 +23,12 @@ public class AnimalEnt extends Entity{
         this.getTags().addTag("alive");
         this.name = "AnimalDefault";
 
-        this.addComponent(new Animal(animalRef));
+        Animal animal = this.addComponent(new Animal());
+        animal.setAnimalRef(animalRef);
         this.addComponent(new Stats());
         Interactable inter = this.addComponent(new Interactable());
         inter.setInterType("animal");
-        BehaviourManagerComp behManager = this.addComponent(new BehaviourManagerComp("animal"));
+        BehaviourManagerComp behManager = this.addComponent(new BehaviourManagerComp());
         GridComponent gridComp = this.addComponent(new GridComponent());
         gridComp.setGridType(Constants.GRIDACTIVE);
         gridComp.setGrid(ColonyGame.worldGrid);

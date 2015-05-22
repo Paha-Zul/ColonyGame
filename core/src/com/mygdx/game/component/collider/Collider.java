@@ -23,6 +23,10 @@ public class Collider extends Component implements IScalable{
     @JsonProperty
     private float originalRadius;
 
+    public Collider(){
+
+    }
+
     /**
      * Uses default values to create the body and fixture. Can be changed through calls to the body and fixture.
      * @param world The Box2D saveContainer.

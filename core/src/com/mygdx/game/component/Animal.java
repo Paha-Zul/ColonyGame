@@ -35,9 +35,8 @@ public class Animal extends Component implements IInteractable{
     @JsonIgnore
     private Fixture attackSensor;
 
-    public Animal(DataBuilder.JsonAnimal animalRef) {
+    public Animal() {
         super();
-        this.animalRef = animalRef;
     }
 
     @Override
@@ -217,8 +216,19 @@ public class Animal extends Component implements IInteractable{
         });
     }
 
+    @JsonIgnore
     public void setGroup(Group group){
         this.group = group;
+    }
+
+    @JsonIgnore
+    public void setAnimalRef(String refName){
+        this.animalRef = DataManager.getData(refName, DataBuilder.JsonAnimal.class);
+    }
+
+    @JsonIgnore
+    public void setAnimalRef(DataBuilder.JsonAnimal animalRef){
+        this.animalRef = animalRef;
     }
 
     @JsonIgnore

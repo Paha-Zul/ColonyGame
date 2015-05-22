@@ -71,11 +71,13 @@ public class GraphicIdentity extends Component{
         this.sprite.draw(batch);
     }
 
+    @JsonIgnore
     public void setSprite(Sprite sprite){
         if(this.sprite == null) this.sprite = new Sprite(sprite);
         else this.sprite.set(sprite);
     }
 
+    @JsonIgnore
     public void setTexture(Texture texture){
         this.sprite.setTexture(texture);
     }

@@ -19,6 +19,10 @@ public class Group extends Component{
     @JsonProperty
     private boolean stayNearLeader = true, attackLeaderTarget = true;
 
+    public Group(){
+
+    }
+
     @Override
     public void start() {
         super.start();
@@ -48,14 +52,17 @@ public class Group extends Component{
      * @param leader The Entity leader of this group.
      * @return The Entity that was assigned as the leader of this group.
      */
+    @JsonIgnore
     public Entity setLeader(Entity leader){
         return this.leader = leader;
     }
 
+    @JsonIgnore
     public void setStayNearLeader(boolean stayNearLeader) {
         this.stayNearLeader = stayNearLeader;
     }
 
+    @JsonIgnore
     public void setAttackLeaderTarget(boolean attackLeaderTarget) {
         this.attackLeaderTarget = attackLeaderTarget;
     }

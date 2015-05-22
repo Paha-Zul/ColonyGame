@@ -316,6 +316,7 @@ public class Resource extends Component implements IInteractable{
      * Sets this Resource as taken or not taken.
      * @param entity The Entity to take this resource. Null if setting the resource as not taken.
      */
+    @JsonIgnore
     public void setTaken(Entity entity){
         this.taken = entity;
     }
@@ -324,6 +325,7 @@ public class Resource extends Component implements IInteractable{
      * Sets the gather time for this Resource.
      * @param gatherTime The amount of time to gather.
      */
+    @JsonIgnore
     public void setGatherTime(float gatherTime){
         this.gatherTime = gatherTime;
     }
@@ -332,6 +334,7 @@ public class Resource extends Component implements IInteractable{
      * Sets the interType for this Resource.
      * @param resourceType A String denoting the interType.
      */
+    @JsonIgnore
     public void setResourceType(String resourceType) {
         this.resourceType = resourceType;
     }

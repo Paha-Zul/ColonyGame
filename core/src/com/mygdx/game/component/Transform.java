@@ -21,6 +21,10 @@ public class Transform extends Component implements IDelayedDestroyable {
     @JsonIgnore
 	private ArrayList<Transform> children = new ArrayList<>();
 
+	public Transform(){
+
+	}
+
 	/**
 	 * Creates a new transform.
 	 * @param position The saveContainer position of the owner Entity.
@@ -67,6 +71,7 @@ public class Transform extends Component implements IDelayedDestroyable {
 		}
 	}
 
+    @JsonIgnore
 	public void setParent(Transform futureParent){
 		futureParent.addChild(this);
 		this.parent = futureParent;
@@ -206,6 +211,7 @@ public class Transform extends Component implements IDelayedDestroyable {
 	 * Sets the scale of this Transform.
 	 * @param scale The scale for this Transform to be.
 	 */
+    @JsonIgnore
 	public void setScale(float scale){
 		//If no parent, set the saveContainer scale AND localscale
 		if(this.parent == null){
@@ -231,6 +237,7 @@ public class Transform extends Component implements IDelayedDestroyable {
 	 * Sets the local scale of this Transform. If this Transform has no parent, it also sets the saveContainer scale.
 	 * @param scale The value to use as the local scale of this Transform.
 	 */
+    @JsonIgnore
 	public void setLocalScale(float scale){
 		this.localScale = scale;
 		if(this.parent == null) this.worldScale = scale;
@@ -253,6 +260,7 @@ public class Transform extends Component implements IDelayedDestroyable {
 	 * Sets the saveContainer position of the transform. This will update the local position of the transform.
 	 * @param pos A Vector2 holding the new saveContainer position.
 	 */
+    @JsonIgnore
 	public void setPosition(Vector2 pos){
 		setPosition(pos.x, pos.y);
 	}
@@ -262,6 +270,7 @@ public class Transform extends Component implements IDelayedDestroyable {
 	 * @param x A float which is the X coordinate.
 	 * @param y A float which is the Y coordinate.
 	 */
+    @JsonIgnore
 	public void setPosition(float x, float y){
 		this.worldPosition.x = x;
 		this.worldPosition.y = y;
@@ -272,6 +281,7 @@ public class Transform extends Component implements IDelayedDestroyable {
 	 * @param x A float which is the X Coordinate.
 	 * @param y A float which is the Y Coordinate.
 	 */
+    @JsonIgnore
 	public void setLocalPosition(float x, float y){
 		this.localPosition.set(x,y);
 	}
@@ -280,6 +290,7 @@ public class Transform extends Component implements IDelayedDestroyable {
 	 * Sets the saveContainer rotation of this transform. This will update the local rotation of the transform.
 	 * @param rot A float which is the new saveContainer rotation.
 	 */
+    @JsonIgnore
 	public void setRotation(float rot){
 		this.worldRotation = this.normalizeAngle(rot);
 
