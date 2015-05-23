@@ -1,9 +1,6 @@
 package com.mygdx.game.behaviourtree.action;
 
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
-import com.mygdx.game.ColonyGame;
 import com.mygdx.game.behaviourtree.LeafTask;
 import com.mygdx.game.component.Projectile;
 import com.mygdx.game.component.Transform;
@@ -36,12 +33,11 @@ public class Attack extends LeafTask{
             blackBoard.attackTimer = new RepeatingTimer(1f, true, () -> {
                 float dis = this.blackBoard.target.getTransform().getPosition().dst(this.blackBoard.myManager.getEntityOwner().getTransform().getPosition());
                 if (dis >= GH.toMeters(20)) {
-                    TextureRegion tex = new TextureRegion(ColonyGame.assetManager.get("ball", Texture.class)); //Get a texture for the bullet.
                     Transform trans = this.blackBoard.myManager.getEntityOwner().getTransform();               //Cache the transform.
                     Entity target = this.blackBoard.target;                                     //Cache the target
                     float rot = (float) Math.atan2(target.getTransform().getPosition().y - trans.getPosition().y, target.getTransform().getPosition().x - trans.getPosition().x) * MathUtils.radDeg; //Get the rotation to the target
                     rot += MathUtils.random(20) - 10;                                           //Randomize rotation a little bit
-                    Entity ent = new ProjectileEnt(trans.getPosition(), rot, tex, 11);          //Spawn the projectile.
+                    Entity ent = new ProjectileEnt(trans.getPosition(), rot, new String[]{"ball", ""}, 11);          //Spawn the projectile.
                     Projectile projectile = ent.getComponent(Projectile.class);                 //Get the projectile component.
 
                     if (projectile == null)

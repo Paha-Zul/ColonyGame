@@ -1,5 +1,6 @@
 package com.mygdx.game.component;
 
+import com.mygdx.game.ColonyGame;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.util.Grid;
 import org.codehaus.jackson.annotate.JsonIgnore;
@@ -42,7 +43,7 @@ public class GridComponent extends Component{
 
     @Override
     public void load() {
-
+        this.grid = ColonyGame.worldGrid;
     }
 
     @Override

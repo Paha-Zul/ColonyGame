@@ -66,8 +66,32 @@ public class Collider extends Component implements IScalable{
     @Override
     public void init(Entity owner) {
         super.init(owner);
+    }
+
+    @Override
+    public void start() {
+        super.start();
+        load();
+    }
+
+    @Override
+    public void save() {
+
+    }
+
+    @Override
+    public void initLoad() {
+        super.initLoad();
+
+    }
+
+    @Override
+    public void load() {
+        //TODO Under Construction! Apparently changing active state locks everything up.
 
         Vector2 ownerPos = owner.getTransform().getPosition();
+        if(this.body == null) return;
+
         this.body.setTransform(ownerPos.x, ownerPos.y, this.owner.getTransform().getRotation());
 
         ColliderInfo bodyInfo = new ColliderInfo(owner);
@@ -77,30 +101,45 @@ public class Collider extends Component implements IScalable{
         this.body.setUserData(bodyInfo);
         this.fixture.setUserData(fixtureInfo);
 
-        this.owner.getComponents().registerScalable(this);
-        this.body.setActive(true);
-    }
+        //this.body.setActive(true);
 
-    @Override
-    public void start() {
-        super.start();
-    }
-
-    @Override
-    public void save() {
-
-    }
-
-    @Override
-    public void load() {
-
+        //this.owner.getComponents().registerScalable(this);
+        //this.body.setActive(false);
     }
 
     @Override
     public void update(float delta) {
         super.update(delta);
-
+        if(this.owner == null)
+            System.out.println("Owner is null");
+        if(this.body == null)
+            System.out.println("Body is null");
         this.owner.getTransform().setPosition(this.body.getPosition().x, this.body.getPosition().y);
+    }
+
+    @JsonIgnore
+    public void setWorld(World world){
+        this.world = world;
+    }
+
+    @JsonIgnore
+    public void setBody(BodyDef bodyDef){
+        if(this.body != null) world.destroyBody(this.body);
+
+        this.body = world.createBody(bodyDef);
+        ColliderInfo bodyInfo = new ColliderInfo(owner);
+        this.body.setUserData(bodyInfo);
+        this.body.setTransform(this.owner.getTransform().getPosition(), 0);
+    }
+
+    @JsonIgnore
+    public void setFixture(FixtureDef def){
+        if(this.fixture != null) this.body.destroyFixture(this.fixture);
+        this.fixture = this.body.createFixture(def);
+        ColliderInfo fixtureInfo = new ColliderInfo(owner);
+        fixtureInfo.tags.addTag(Constants.COLLIDER_CLICKABLE);
+        fixtureInfo.tags.addTag("entity");
+        this.fixture.setUserData(fixtureInfo);
     }
 
     @Override

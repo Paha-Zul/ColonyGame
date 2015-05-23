@@ -3,7 +3,6 @@ package com.mygdx.game.screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
@@ -81,25 +80,28 @@ public class GameScreen implements Screen{
 
     private void spawnAnimals(){
 
-        TextureAtlas atlas = ColonyGame.assetManager.get("interactables", TextureAtlas.class);
+        String atlasName = "interactables";
+
         //Spawns some squirrels
         for(int i=0;i<100;i++) {
             Vector2 pos = new Vector2(MathUtils.random(grid.getWidth())*grid.getSquareSize(), MathUtils.random(grid.getHeight())*grid.getSquareSize());
-            new AnimalEnt("squirrel", pos, 0, atlas.findRegion("squirrel"), 11);
+            Entity animal = new AnimalEnt("squirrel", pos, 0, new String[]{"squirrel", atlasName}, 11);
         }
 
         //Spawn some angry wolf packs.
         for(int i=0;i<5;i++){
             Group group = new Group();
             Vector2 pos = new Vector2(20 + MathUtils.random(grid.getWidth()-40)*grid.getSquareSize(), 20 + MathUtils.random(grid.getHeight()-40)*grid.getSquareSize());
-            AnimalEnt wolfLeader = new AnimalEnt("wolf", pos, 0, atlas.findRegion("wolf"), 11);
+            AnimalEnt wolfLeader = new AnimalEnt("wolf", pos, 0, new String[]{"wolf", atlasName}, 11);
+            wolfLeader.getGraphicIdentity().setSprite("wolf", "interactables");
             group.setLeader(wolfLeader);
 
             DataBuilder.JsonAnimal animal = wolfLeader.getComponent(Animal.class).getAnimalRef();
             int amount = (int)(animal.packAmount[0] + Math.random()*(animal.packAmount[1] - animal.packAmount[0]));
             for(int j=0;j<amount; j++){
                 Vector2 pos2 = new Vector2(pos.x + MathUtils.random()*1 - 2, pos.y + MathUtils.random()*1 - 2);
-                AnimalEnt wolf = new AnimalEnt("wolf", pos2, 0, atlas.findRegion("wolf"), 11);
+                AnimalEnt wolf = new AnimalEnt("wolf", pos2, 0, new String[]{"wolf", atlasName}, 11);
+                wolf.getGraphicIdentity().setSprite("wolf", "interactables");
                 wolf.addComponent(group);
                 group.addEntityToGroup(wolf);
             }
@@ -109,7 +111,8 @@ public class GameScreen implements Screen{
         Group group = new Group();
         Vector2 pos = new Vector2(20 + MathUtils.random(grid.getWidth()-40)*grid.getSquareSize(), 20 + MathUtils.random(grid.getHeight()-40)*grid.getSquareSize());
         DataBuilder.JsonAnimal bossWolfRef = DataManager.getData("bosswolf", DataBuilder.JsonAnimal.class);
-        AnimalEnt bossWolf = new AnimalEnt(bossWolfRef, pos, 0, atlas.findRegion(bossWolfRef.img), 11);
+        AnimalEnt bossWolf = new AnimalEnt(bossWolfRef, pos, 0, new String[]{bossWolfRef.img, atlasName} , 11);
+        bossWolf.getGraphicIdentity().setSprite(bossWolfRef.img, "interactables");
         group.setLeader(bossWolf);
         bossWolf.getTransform().setScale(2f);
         bossWolf.addComponent(group);
@@ -119,7 +122,8 @@ public class GameScreen implements Screen{
             DataBuilder.JsonAnimal childWolf = DataManager.getData(bossWolfRef.typeInPack[0], DataBuilder.JsonAnimal.class);
 
             Vector2 pos2 = new Vector2(pos.x + MathUtils.random()*1 - 2, pos.y + MathUtils.random()*1 - 2);
-            AnimalEnt wolf = new AnimalEnt(childWolf, pos2, 0, atlas.findRegion(childWolf.img), 11);
+            AnimalEnt wolf = new AnimalEnt(childWolf, pos2, 0, new String[]{childWolf.img, atlasName}, 11);
+            wolf.getGraphicIdentity().setSprite(childWolf.img, "interactables");
             wolf.addComponent(group);
             group.addEntityToGroup(wolf);
         }

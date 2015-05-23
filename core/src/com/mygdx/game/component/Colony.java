@@ -1,7 +1,5 @@
 package com.mygdx.game.component;
 
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
@@ -51,10 +49,9 @@ public class Colony extends Component implements IInteractable {
         placeStart();
         Building building = this.getOwnedFromColony(Building.class);
 
-        TextureRegion colonistTexture = new TextureRegion(ColonyGame.assetManager.get("colonist", Texture.class));
         //Make some colonists!
         for(int i=0;i<5;i++) {
-            Entity c = this.makeColonist(building.owner.getTransform().getPosition(), GH.toMeters(200), colonistTexture);
+            Entity c = this.makeColonist(building.owner.getTransform().getPosition(), GH.toMeters(200), "colonist");
             c.getComponent(Colonist.class).setName(GameScreen.firstNames[MathUtils.random(GameScreen.firstNames.length - 1)], GameScreen.lastNames[MathUtils.random(GameScreen.lastNames.length - 1)]);
             this.addColonist(c.getComponent(Colonist.class));
         }
@@ -70,9 +67,9 @@ public class Colony extends Component implements IInteractable {
         this.inventory = this.owner.getComponent(Inventory.class);
     }
 
-    private Entity makeColonist(Vector2 start, float offset, TextureRegion texture){
+    private Entity makeColonist(Vector2 start, float offset, String textureName){
         Vector2 newPos = new Vector2(start.x + MathUtils.random()*offset*2 - offset, start.y + MathUtils.random()*offset*2 - offset);
-        return new ColonistEnt(newPos, 0, texture, 10);
+        return new ColonistEnt(newPos, 0, new String[]{textureName,""}, 10);
     }
 
     private void placeStart(){
@@ -128,7 +125,7 @@ public class Colony extends Component implements IInteractable {
         }
 
         //Spawns the Colony Entity and centers the camera on it.
-        BuildingEntity colonyEnt = new BuildingEntity(start, 0, new TextureRegion(ColonyGame.assetManager.get("Colony", Texture.class)), 10);
+        BuildingEntity colonyEnt = new BuildingEntity(start, 0, new String[]{"Colony",""}, 10);
         ColonyGame.camera.position.set(colonyEnt.getTransform().getPosition().x, colonyEnt.getTransform().getPosition().y, 0);
         this.addOwnedToColony(colonyEnt.getComponent(Building.class));
 

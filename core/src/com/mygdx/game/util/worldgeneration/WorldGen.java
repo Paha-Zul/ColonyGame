@@ -6,7 +6,6 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.ColonyGame;
@@ -259,16 +258,14 @@ public class WorldGen {
 
         //Get the atlas so we can get the image from it.
         TextureAtlas interactableAtlas = ColonyGame.assetManager.get("interactables", TextureAtlas.class); //Get the atlas
-        TextureRegion reg = null;
+        String textureName = null;
+        String atlasName = "interactables";
         if(jRes.img != null && jRes.img.length > 0) {
-            String textureName = jRes.img[MathUtils.random(jRes.img.length - 1)]; //Get the texture compName.
-            reg = interactableAtlas.findRegion(textureName);
+            textureName = jRes.img[MathUtils.random(jRes.img.length - 1)]; //Get the texture compName.
         }
 
-        if(reg == null && !jRes.noimg) GH.writeErrorMessage("A resource image is null when 'noimg' is set to false, meaning there should be a picture. Check the resources.json and make sure the image compName is correct.", true);
-
         //Create the resource and stuff.
-        ResourceEnt resEnt = new ResourceEnt(centerPos, 0, reg, 11);
+        ResourceEnt resEnt = new ResourceEnt(centerPos, 0, new String[]{textureName, atlasName}, 11);
         resEnt.addComponent(res);
         resEnt.getTransform().setScale(treeScale);
         resEnt.name = res.getDisplayName();

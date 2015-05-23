@@ -1,6 +1,5 @@
 package com.mygdx.game.entity;
 
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
@@ -18,8 +17,12 @@ import com.mygdx.game.util.GH;
  */
 public class ResourceEnt extends Entity{
 
-    public ResourceEnt(Vector2 position, float rotation, TextureRegion graphic, int drawLevel) {
-        super(position, rotation, graphic, drawLevel);
+    public ResourceEnt(){
+
+    }
+
+    public ResourceEnt(Vector2 position, float rotation, String[] graphicName, int drawLevel) {
+        super(position, rotation, graphicName, drawLevel);
         this.getTags().addTag("resource");
         this.name = "Resource";
 
@@ -35,14 +38,25 @@ public class ResourceEnt extends Entity{
         this.makeCollider();
     }
 
-    private void makeCollider(){
-        BodyDef bodyDef = new BodyDef();
-        bodyDef.type = BodyDef.BodyType.StaticBody;
-        bodyDef.active = false;
+    @Override
+    public void initLoad() {
+        super.initLoad();
+    }
 
+    @Override
+    public void load() {
+        super.load();
+        makeCollider();
+    }
+
+    private void makeCollider(){
         //Get the graphic for the collider size
         GraphicIdentity graphic = this.getComponent(GraphicIdentity.class);
-        if(graphic == null) return;
+        if(graphic == null || graphic.sprite == null) return;
+
+        BodyDef bodyDef = new BodyDef();
+        bodyDef.type = BodyDef.BodyType.StaticBody;
+        //bodyDef.active = false;
 
         //Set the polygon shape as a box using the sprite's width and height
         PolygonShape box = new PolygonShape();
@@ -50,15 +64,20 @@ public class ResourceEnt extends Entity{
         Vector2 center = new Vector2(graphic.sprite.getX(), graphic.sprite.getY() + height/2);
         box.setAsBox(width/4, height/2, center, 0);
 
-        //Do the fixture.
-        FixtureDef fixtureDef = new FixtureDef();
-        fixtureDef.shape = box;
-        fixtureDef.density = 0;
-        fixtureDef.friction = 0;
-        fixtureDef.restitution = 0;
+        box.setRadius(0.5f);
+        FixtureDef fixDef = new FixtureDef();
+        fixDef.isSensor = true;
+        fixDef.shape = box;
 
-        //Add the Collider Component and an Interactable Component.
-        Collider coll = this.addComponent(new Collider(ColonyGame.world, bodyDef, fixtureDef));
+        Collider collider = getComponent(Collider.class);
+        if(collider == null){
+            collider = new Collider();
+            collider.setActive(false);
+            collider = this.addComponent(collider);
+        }
+        collider.setWorld(ColonyGame.world);
+        collider.setBody(bodyDef);
+        collider.setFixture(fixDef);
 
         box.dispose();
     }

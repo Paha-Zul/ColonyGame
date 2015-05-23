@@ -60,6 +60,7 @@ public class Resource extends Component implements IInteractable{
         this.resourceType = resource.resourceType;
         this.itemNames = new Array<>(resource.itemNames);
         this.gatherTime = resource.gatherTime;
+        this.resourceName = resource.resourceName;
 
         generateItemInfo(resource.resRef.itemNames, resource.resRef.itemAmounts, resource.resRef.itemChances);
     }
@@ -70,6 +71,7 @@ public class Resource extends Component implements IInteractable{
         this.resourceType = jRes.resourceType;
         this.itemNames = new Array<>(jRes.itemNames);
         this.gatherTime = jRes.gatherTime;
+        this.resourceName = jRes.resourceName;
 
         generateItemInfo(jRes.itemNames, jRes.itemAmounts, jRes.itemChances);
     }

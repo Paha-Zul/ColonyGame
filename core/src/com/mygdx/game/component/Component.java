@@ -1,7 +1,6 @@
 package com.mygdx.game.component;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.MathUtils;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.interfaces.IDelayedDestroyable;
 import com.mygdx.game.interfaces.ISaveable;
@@ -18,12 +17,14 @@ public abstract class Component implements IDelayedDestroyable, ISaveable {
     @JsonIgnore
 	protected Entity owner;
     @JsonProperty
-	protected boolean initiated = false;
+	protected boolean initiated = false, started = false;
     @JsonProperty
 	protected long compID;
+    public static long currID = (long)(-Long.MAX_VALUE*0.5);
 
 	public Component() {
-		this.compID = (long)(MathUtils.random()*Long.MAX_VALUE - Long.MAX_VALUE*0.5);
+		this.compID = currID++;
+        if(this.compID == 0) this.compID = currID++;
 	}
 
 	/**
@@ -42,6 +43,21 @@ public abstract class Component implements IDelayedDestroyable, ISaveable {
 	 * The start of this Component. This is where other Components of the owner can be accessed and stored as a reference.
 	 */
 	public void start(){
+		this.started = true;
+	}
+
+	@Override
+	public void save() {
+
+	}
+
+	@Override
+	public void initLoad() {
+
+	}
+
+	@Override
+	public void load() {
 
 	}
 
@@ -101,6 +117,7 @@ public abstract class Component implements IDelayedDestroyable, ISaveable {
 	 * Sets this component to active or inactive.
 	 * @param val A boolean indicating active or inactive.
 	 */
+	@JsonIgnore
 	public void setActive(boolean val) {
 		//If the value isn't different, simply return
 		if (val == this.active)
@@ -111,8 +128,8 @@ public abstract class Component implements IDelayedDestroyable, ISaveable {
 			this.active = val; 					//Sets it's active value.
 			this.owner.addComponent(this);		//Add it to the correct list.
 		}
-
-	}
+        this.active = val;
+    }
 
 	/**
 	 * If this Component is active or not.
@@ -137,6 +154,10 @@ public abstract class Component implements IDelayedDestroyable, ISaveable {
     public boolean isSetToDestroy() {
         return setToDestroy;
     }
+
+	public boolean isStarted(){
+		return started;
+	}
 
     /**
 	 * Gets the Entity owner of this Component.

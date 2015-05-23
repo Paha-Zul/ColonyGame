@@ -84,6 +84,14 @@ public class ListHolder {
 		}
 	}
 
+	public static void clearEntityList(){
+		for(Array<Entity> list : entityList)
+			for(Entity ent : list)
+				ent.setToDestroy();
+
+		entityList = new Array<>();
+	}
+
     /**
      * Updates the GUI elements
      * @param delta The time between frames.

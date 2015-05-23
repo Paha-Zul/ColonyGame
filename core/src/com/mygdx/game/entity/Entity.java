@@ -1,29 +1,33 @@
 package com.mygdx.game.entity;
 
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.component.Component;
 import com.mygdx.game.component.GraphicIdentity;
 import com.mygdx.game.component.Transform;
 import com.mygdx.game.interfaces.IDelayedDestroyable;
+import com.mygdx.game.interfaces.ISaveable;
 import com.mygdx.game.interfaces.IScalable;
 import com.mygdx.game.util.EventSystem;
 import com.mygdx.game.util.ListHolder;
 import com.mygdx.game.util.Tags;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.annotate.JsonTypeInfo;
+
+import java.util.function.Consumer;
 
 /**
  * @author Bbent_000
  *
  */
-public class Entity implements IDelayedDestroyable{
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.WRAPPER_OBJECT, property = "@class")
+public class Entity implements IDelayedDestroyable, ISaveable{
     @JsonProperty
     protected long ID;
+    @JsonIgnore
+    protected static long counterID = (long)(-Long.MAX_VALUE*0.5);
     @JsonProperty
 	public String name = "Entity";
     @JsonProperty
@@ -33,9 +37,12 @@ public class Entity implements IDelayedDestroyable{
     @JsonProperty
     protected Tags tags = new Tags("entity");
     @JsonIgnore
-	protected Components components;
+	protected Components components = new Components(this);
     @JsonProperty
     protected boolean destroyed=false, setToDestroy=false;
+
+    @JsonProperty
+    private long transformID, identityID;
 
 
     public Entity(){
@@ -46,17 +53,16 @@ public class Entity implements IDelayedDestroyable{
 	 * Creates an Entity that will start with a GraphicIdentity component.
 	 * @param position The initial position of the Entity
 	 * @param rotation The initial rotation of the Entity.
-	 * @param graphic The Texture of the Entity
+	 * @param graphicName The Texture name for the Entity. The asset manager will be used to get the graphic.
 	 */
-	public Entity(Vector2 position, float rotation, TextureRegion graphic, int drawLevel){
-		this.components = new Components(this);
+	public Entity(Vector2 position, float rotation, String[] graphicName, int drawLevel){
 		this.components.transform = this.components.addComponent(new Transform(position, rotation));
-		if(graphic != null) {
+		if(graphicName != null) {
             this.components.identity = this.components.addComponent(new GraphicIdentity());
-            this.components.identity.setSprite(new Sprite(new TextureRegion(graphic)));
+            this.components.identity.setSprite(graphicName[0], graphicName[1]);
         }
 
-		this.ID = (long)(MathUtils.random()*Long.MAX_VALUE - Long.MAX_VALUE*0.5);
+		this.ID = counterID++;
 		this.drawLevel = drawLevel;
 
 		ListHolder.addEntity(drawLevel, this);
@@ -79,20 +85,33 @@ public class Entity implements IDelayedDestroyable{
 	 * @param comps A variable amount of Components to construct this Entity with.
 	 */
 	public Entity(Vector2 position, float rotation, int drawLevel, Component... comps){
-		this.components = new Components(this);
-
 		this.components.transform = this.components.addComponent(new Transform(position, rotation));
 		for(Component comp : comps)
 			this.components.addComponent(comp);
 
 		ListHolder.addEntity(drawLevel, this);
-        this.ID = (long)(MathUtils.random()*Long.MAX_VALUE - Long.MAX_VALUE*0.5);
+        this.ID = counterID++;
 		this.drawLevel = drawLevel;
 	}
 
 	public void start(){
 		EventSystem.notifyGameEvent("entity_created", this);
 	}
+
+    @Override
+    public void save() {
+
+    }
+
+    @Override
+    public void initLoad() {
+
+    }
+
+    @Override
+    public void load() {
+
+    }
 
     /**
      * Updates the Entity and all active components.
@@ -127,7 +146,24 @@ public class Entity implements IDelayedDestroyable{
 
     @JsonIgnore
     public GraphicIdentity getGraphicIdentity(){
-        return components.identity;
+        return this.components.identity;
+    }
+
+    @JsonIgnore
+    public Transform getTransform(){
+        return this.components.transform;
+    }
+
+    @JsonProperty("identityID")
+    public long getGraphicIdentityID(){
+        if(components.identity == null) return identityID;
+        return components.identity.getCompID();
+    }
+
+    @JsonProperty("transformID")
+    public long getTrasnformID(){
+        if(components.identity == null) return transformID;
+        return components.transform.getCompID();
     }
 
     @JsonIgnore
@@ -141,11 +177,6 @@ public class Entity implements IDelayedDestroyable{
     @JsonIgnore
     public long getID(){
         return this.ID;
-    }
-
-    @JsonIgnore
-    public Transform getTransform(){
-        return components.transform;
     }
 
     public void destroyComponent(Component component){
@@ -252,10 +283,11 @@ public class Entity implements IDelayedDestroyable{
 		@SuppressWarnings("unchecked")
 		public final <T extends Component> T addComponent(Component comp){
 			comp.init(owner); //Initialize the component with this Entity as the owner.
-			this.newComponentList.add(comp); //Add it to the new list for the start() method.
+            if(!comp.isStarted())
+                this.newComponentList.add(comp); //Add it to the new list for the start() method.
 			//Add it to the active or inactive list.
-			if(comp.isActive()) this.activeComponentList.add(comp);
-			else this.inactiveComponentList.add(comp);
+            if (comp.isActive()) this.activeComponentList.add(comp);
+            else this.inactiveComponentList.add(comp);
 
 			return (T) comp;
 		}
@@ -354,11 +386,24 @@ public class Entity implements IDelayedDestroyable{
 
         public final <T extends Component & IScalable> void registerScalable(T scalable){
 			this.scalableComponents.add(scalable);
-		}
+        }
 
-		public final void scaleComponents(float scale){
+        public final void scaleComponents(float scale){
 			for(Component scalable : this.scalableComponents)
                 ((IScalable)scalable).scale(scale);
+		}
+
+		public void iterateOverComponents(Consumer<Component> consumer){
+			for(int i=0;i<activeComponentList.size;i++)
+                consumer.accept(activeComponentList.get(i));
+            for(int i=0;i<inactiveComponentList.size;i++)
+                consumer.accept(inactiveComponentList.get(i));
+            for(int i=0;i<newComponentList.size;i++
+                    ) consumer.accept(newComponentList.get(i));
+            for(int i=0;i<destroyComponentList.size;i++)
+                consumer.accept(destroyComponentList.get(i));
+            for(int i=0;i<scalableComponents.size;i++)
+                consumer.accept(scalableComponents.get(i));
 		}
 
 		@Override

@@ -7,6 +7,8 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Json;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.component.Component;
+import com.mygdx.game.component.GraphicIdentity;
+import com.mygdx.game.component.Transform;
 import com.mygdx.game.entity.Entity;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import org.codehaus.jackson.annotate.JsonAutoDetect;
@@ -181,16 +183,58 @@ public class SaveGameHelper {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        //Make the three giant hash maps.
         System.out.println("Done!");
         for(Component comp : world.allComps) giantCompMap.put(comp.getCompID(), comp);
         for(JsonComponents comps : world.entComps) giantCompContainerMap.put(comps.entityID, comps);
         for(Entity ent : world.entities) giantEntityMap.put(ent.getID(), ent);
+        //Clear everything from the world.
         System.out.println("Done2!");
+        ListHolder.clearEntityList();
+        System.out.println("Done3!");
+
+        //Load it all back in (sync as we go!).
+        for(Entity ent : world.entities){
+            ent.getComponents().transform = (Transform)giantCompMap.get(ent.getTrasnformID());
+
+            if(ent.getGraphicIdentityID() != 0)
+                ent.getComponents().identity = (GraphicIdentity)giantCompMap.get(ent.getGraphicIdentityID());
+            JsonComponents comps = giantCompContainerMap.get(ent.getID());
+
+            ent.initLoad();
+
+            for(int i=0;i<comps.activeComponentList.size();i++) {
+                Component comp = giantCompMap.get(comps.activeComponentList.get(i));
+                ent.addComponent(comp);
+                comp.initLoad();
+            }for(int i=0;i<comps.inactiveComponentList.size();i++) {
+                Component comp = giantCompMap.get(comps.inactiveComponentList.get(i));
+                ent.addComponent(comp);
+                comp.initLoad();
+            }for(int i=0;i<comps.newComponentList.size();i++) {
+                Component comp = giantCompMap.get(comps.newComponentList.get(i));
+                ent.addComponent(comp);
+                comp.initLoad();
+            }for(int i=0;i<comps.destroyComponentList.size();i++) {
+                Component comp = giantCompMap.get(comps.destroyComponentList.get(i));
+                ent.addComponent(comp);
+                comp.initLoad();
+            }for(int i=0;i<comps.scalableComponents.size();i++) {
+               //TODO Figure something out here.
+            }
+
+            ent.load(); //Load the entity.
+            ent.getComponents().iterateOverComponents(Component::load); //Load all the components on the Entity.
+            ListHolder.addEntity(ent.drawLevel, ent);
+        }
+
+        System.out.println("Done4!");
     }
 
     public static void writeFile(FileHandle file, String s) {
         //file.writeString(com.badlogic.gdx.utils.Base64Coder.encodeString(s), false);
         file.writeString(s, true);
+        //file.writeBytes(s.getBytes(Charset.forName("UTF-8")), true);
     }
 
     public static String readFile(FileHandle file) {

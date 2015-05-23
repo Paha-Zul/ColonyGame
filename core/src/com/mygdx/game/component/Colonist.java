@@ -62,7 +62,7 @@ public class Colonist extends Component implements IInteractable, IOwnable{
 
     //Creates a range sensor for when we get a ranged weapon.
     private void createRangeSensor(){
-
+        if(this.collider == null || this.collider.body == null || this.collider.fixture == null) return;
         CircleShape shape = new CircleShape();
         shape.setRadius(0f);
         FixtureDef fixtureDef = new FixtureDef();
@@ -85,6 +85,10 @@ public class Colonist extends Component implements IInteractable, IOwnable{
         this.inventory = this.getComponent(Inventory.class);
         this.stats = this.getComponent(Stats.class);
         this.manager = this.getComponent(BehaviourManagerComp.class);
+        if(this.manager == null)
+            System.out.println("Manager null");
+        if(this.manager.getBlackBoard() == null)
+            System.out.println("Blackboard null");
         this.manager.getBlackBoard().moveSpeed = 200f;
         this.collider = this.getComponent(Collider.class);
 

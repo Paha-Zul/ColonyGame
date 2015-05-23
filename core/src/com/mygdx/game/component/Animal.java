@@ -12,6 +12,7 @@ import com.mygdx.game.util.DataBuilder;
 import com.mygdx.game.util.EventSystem;
 import com.mygdx.game.util.managers.DataManager;
 import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.annotate.JsonProperty;
 
 import java.util.LinkedList;
 import java.util.function.Consumer;
@@ -26,6 +27,8 @@ public class Animal extends Component implements IInteractable{
     private Stats stats;
     @JsonIgnore
     private DataBuilder.JsonAnimal animalRef;
+    @JsonProperty
+    private String animalRefName = "";
     @JsonIgnore
     private Collider collider;
     @JsonIgnore
@@ -52,6 +55,9 @@ public class Animal extends Component implements IInteractable{
 
     @Override
     public void load() {
+        if(this.animalRef == null) this.animalRef = DataManager.getData(this.animalRefName, DataBuilder.JsonAnimal.class);
+
+        if(animalRef == null) System.out.println("LOading animal with anme: "+this.animalRefName);
         if(animalRef.boss) this.getEntityOwner().getTags().addTag("boss");
         this.getEntityOwner().name = animalRef.displayName;
 
@@ -224,11 +230,13 @@ public class Animal extends Component implements IInteractable{
     @JsonIgnore
     public void setAnimalRef(String refName){
         this.animalRef = DataManager.getData(refName, DataBuilder.JsonAnimal.class);
+        this.animalRefName = refName;
     }
 
     @JsonIgnore
     public void setAnimalRef(DataBuilder.JsonAnimal animalRef){
         this.animalRef = animalRef;
+        this.animalRefName = animalRef.name;
     }
 
     @JsonIgnore

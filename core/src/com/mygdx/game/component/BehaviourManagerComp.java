@@ -58,14 +58,25 @@ public class BehaviourManagerComp extends Component{
     @Override
     public void init(Entity owner) {
         super.init(owner);
-        load();
+        initLoad();
+    }
+
+    @Override
+    public void initLoad() {
+        super.initLoad();
+
+        this.blackBoard = new BlackBoard();
+        this.blackBoard.colonyGrid = ColonyGame.worldGrid;
+        this.blackBoard.myManager = this;
     }
 
     @Override
     public void load() {
-        this.blackBoard = new BlackBoard();
-        this.blackBoard.colonyGrid = ColonyGame.worldGrid;
-        this.blackBoard.myManager = this;
+        this.stats = this.owner.getComponent(Stats.class);
+        this.blackBoard.myInventory = this.getComponent(Inventory.class);
+
+        getBehaviourStates().addState("idle", true, PrebuiltTasks::idleTask);
+        getBehaviourStates().setCurrState(getBehaviourStates().getDefaultState().stateName);
     }
 
     @Override
@@ -76,11 +87,7 @@ public class BehaviourManagerComp extends Component{
     @Override
     public void start() {
         super.start();
-        this.stats = this.owner.getComponent(Stats.class);
-        this.blackBoard.myInventory = this.getComponent(Inventory.class);
-
-        getBehaviourStates().addState("idle", true, PrebuiltTasks::idleTask);
-        getBehaviourStates().setCurrState(getBehaviourStates().getDefaultState().stateName);
+        load();
     }
 
     /**

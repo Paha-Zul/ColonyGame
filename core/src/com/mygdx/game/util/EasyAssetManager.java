@@ -17,7 +17,8 @@ public class EasyAssetManager extends AssetManager{
             if(this.isLoaded(commonName))
                 return super.get(commonName, type);
 
-            GH.writeErrorMessage("Can't find file "+commonName+". Check to make sure it exists.");
+            //GH.writeErrorMessage("Can't find file "+commonName+". Check to make sure it exists.");
+            return null;
         }
         return super.get(dataMap.get(commonName).path, type);
     }
