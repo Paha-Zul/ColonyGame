@@ -7,67 +7,53 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Json;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.component.Component;
-import com.mygdx.game.component.GraphicIdentity;
-import com.mygdx.game.component.Transform;
 import com.mygdx.game.entity.Entity;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import org.codehaus.jackson.annotate.JsonAutoDetect;
 import org.codehaus.jackson.annotate.JsonIgnore;
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.introspect.VisibilityChecker;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class SaveGameHelper {
 
-    //Information about components linked to an entity.
-    @JsonIgnoreProperties({"size", "ordered", "iterable", "predicateIterable"})
-    public static class JsonComponents{
-        @JsonProperty
-        long entityID;
-        @JsonProperty
-        ArrayList<Long> newComponentList = new ArrayList<>();
-        @JsonProperty
-        ArrayList<Long> activeComponentList = new ArrayList<>();
-        @JsonProperty
-        ArrayList<Long> inactiveComponentList = new ArrayList<>();
-        @JsonProperty
-        ArrayList<Long> scalableComponents = new ArrayList<>();
-        @JsonProperty
-        ArrayList<Long> destroyComponentList = new ArrayList<>();
+    private static class JsonEntity{
+        public Entity entity;
+        public Long[] compIDs;
 
-        public JsonComponents() {
+        public JsonEntity(){
 
+        }
+
+        public JsonEntity(Entity entity, Long[] compIDs){
+            this.entity = entity;
+            this.compIDs = compIDs;
         }
     }
 
     private static class JsonWorld{
         @JsonProperty
-        public ArrayList<Entity> entities;
+        public ArrayList<JsonEntity> entities = new ArrayList<>();
         @JsonProperty
-        public ArrayList<JsonComponents> entComps;
-        @JsonProperty
-        public ArrayList<Component> allComps;
+        public ArrayList<Component> allComps = new ArrayList<>();
 
         public JsonWorld(){
 
         }
 
         public void clear(){
-            entities = null;
-            entComps = null;
-            allComps = null;
+            entities = new ArrayList<>();
+            allComps = new ArrayList<>();
         }
     }
 
     private static class LoadedJsonWorld{
         @JsonProperty
-        public ArrayList<Entity> entities;
-        @JsonProperty
-        public ArrayList<JsonComponents> entComps;
+        public ArrayList<JsonEntity> entities;
         @JsonProperty
         public ArrayList<Component> allComps;
 
@@ -76,9 +62,8 @@ public class SaveGameHelper {
         }
 
         public void clear(){
-            entities = null;
-            entComps = null;
-            allComps = null;
+            entities = new ArrayList<>();
+            allComps = new ArrayList<>();
         }
     }
 
@@ -88,7 +73,6 @@ public class SaveGameHelper {
 
     private static TLongObjectHashMap<Entity> giantEntityMap = new TLongObjectHashMap<>(10000, 0.75f);
     private static TLongObjectHashMap<Component> giantCompMap = new TLongObjectHashMap<>(100000, 0.75f);
-    private static TLongObjectHashMap<JsonComponents> giantCompContainerMap = new TLongObjectHashMap<>(10000, 0.75f);
 
     public static void saveWorld() {
         Json json = new Json();
@@ -97,7 +81,7 @@ public class SaveGameHelper {
         mapper.getSerializationConfig().addMixInAnnotations(Array.class, MixIn.class);
         mapper.getSerializationConfig().addMixInAnnotations(Vector2.class, MixIn.class);
 
-        jsonEntities();
+        getJsonEntities();
 
         FileHandle file = Gdx.files.local("game.sav");
         file.writeString("", false); //Clear the file.
@@ -116,59 +100,13 @@ public class SaveGameHelper {
         //writeFile(file, json.toJson(allComps, Component[].class));
     }
 
-    private static void jsonEntities(){
-        ArrayList<Entity> entList = new ArrayList<>(100); //The entity list.
-        ArrayList<JsonComponents> entCompList = new ArrayList<>(100); //The component lists for each entity.
-        ArrayList<Component> compList = new ArrayList<>(100); //All of the existing components in the game.
-
+    private static void getJsonEntities(){
+        world.clear();
         for(Array<Entity> list : ListHolder.getEntityList())
             for(Entity ent : list) {
-                entList.add(ent);
-
-                Entity.Components comps = ent.getComponents(); //Get the components object from the entity.
-                JsonComponents entComps = new JsonComponents(); //Holds minimal information about the components object.
-                entComps.entityID = ent.getID();
-
-                /*
-                * For each list of components, lets store them... This stores them by ID for relinking later.
-                */
-
-                for(Component comp : comps.getNewComponentList()) {
-                    entComps.newComponentList.add(comp.getCompID()); //Store each by ID.
-                    compList.add(comp); //Add the comp to this list.
-                }
-                entComps.newComponentList.trimToSize();
-
-                for(Component comp : comps.getActiveComponentList()) {
-                    entComps.activeComponentList.add(comp.getCompID()); //Store each by ID.
-                    compList.add(comp); //Add the comp to this list.
-                }
-                entComps.activeComponentList.trimToSize();
-
-                for(Component comp : comps.getInactiveComponentList()) {
-                    entComps.inactiveComponentList.add(comp.getCompID()); //Store each by ID.
-                    compList.add(comp); //Add the comp to this list.
-                }
-                entComps.inactiveComponentList.trimToSize();
-
-                for(Component comp : comps.getDestroyComponentList()) {
-                    entComps.destroyComponentList.add(comp.getCompID()); //Store each by ID.
-                    compList.add(comp); //Add the comp to this list.
-                }
-                entComps.destroyComponentList.trimToSize();
-
-                for(Component comp : comps.getScalableComponents()) {
-                    entComps.scalableComponents.add(comp.getCompID()); //Store each by ID.
-                    compList.add(comp); //Add the comp to this list.
-                }
-                entComps.scalableComponents.trimToSize();
-
-                entCompList.add(entComps);
+                world.entities.add(new JsonEntity(ent, ent.getComponents().getComponentIDs()));
+                Collections.addAll(world.allComps, ent.getComponents().getAllComponents());
             }
-
-        world.entComps = entCompList;
-        world.allComps = compList;
-        world.entities = entList;
     }
 
     public static void loadWorld(){
@@ -186,46 +124,26 @@ public class SaveGameHelper {
         //Make the three giant hash maps.
         System.out.println("Done!");
         for(Component comp : world.allComps) giantCompMap.put(comp.getCompID(), comp);
-        for(JsonComponents comps : world.entComps) giantCompContainerMap.put(comps.entityID, comps);
-        for(Entity ent : world.entities) giantEntityMap.put(ent.getID(), ent);
+        for(JsonEntity ent : world.entities) giantEntityMap.put(ent.entity.getID(), ent.entity);
+
         //Clear everything from the world.
         System.out.println("Done2!");
         ListHolder.clearEntityList();
         System.out.println("Done3!");
 
         //Load it all back in (sync as we go!).
-        for(Entity ent : world.entities){
-            ent.getComponents().transform = (Transform)giantCompMap.get(ent.getTrasnformID());
-
-            if(ent.getGraphicIdentityID() != 0)
-                ent.getComponents().identity = (GraphicIdentity)giantCompMap.get(ent.getGraphicIdentityID());
-            JsonComponents comps = giantCompContainerMap.get(ent.getID());
-
-            ent.initLoad();
-
-            for(int i=0;i<comps.activeComponentList.size();i++) {
-                Component comp = giantCompMap.get(comps.activeComponentList.get(i));
-                ent.addComponent(comp);
+        for(JsonEntity ent : world.entities){
+            //ent.getComponents().transform = (Transform)giantCompMap.get(ent.getTrasnformID());
+            //if(ent.getGraphicIdentityID() != 0) ent.getComponents().identity = (GraphicIdentity)giantCompMap.get(ent.getGraphicIdentityID());
+            for(long id : ent.compIDs){
+                Component comp = giantCompMap.get(id);
+                ent.entity.addComponent(comp);
                 comp.initLoad();
-            }for(int i=0;i<comps.inactiveComponentList.size();i++) {
-                Component comp = giantCompMap.get(comps.inactiveComponentList.get(i));
-                ent.addComponent(comp);
-                comp.initLoad();
-            }for(int i=0;i<comps.newComponentList.size();i++) {
-                Component comp = giantCompMap.get(comps.newComponentList.get(i));
-                ent.addComponent(comp);
-                comp.initLoad();
-            }for(int i=0;i<comps.destroyComponentList.size();i++) {
-                Component comp = giantCompMap.get(comps.destroyComponentList.get(i));
-                ent.addComponent(comp);
-                comp.initLoad();
-            }for(int i=0;i<comps.scalableComponents.size();i++) {
-               //TODO Figure something out here.
             }
 
-            ent.load(); //Load the entity.
-            ent.getComponents().iterateOverComponents(Component::load); //Load all the components on the Entity.
-            ListHolder.addEntity(ent.drawLevel, ent);
+            ent.entity.load(); //Load the entity.
+            ent.entity.getComponents().iterateOverComponents(Component::load); //Load all the components on the Entity.
+            ListHolder.addEntity(ent.entity.drawLevel, ent.entity);
         }
 
         System.out.println("Done4!");

@@ -50,7 +50,7 @@ public class BuildingEntity extends Entity{
     private void makeCollider(){
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.StaticBody;
-        bodyDef.position.set(this.components.transform.getPosition());
+        bodyDef.position.set(this.getTransform().getPosition());
         //bodyDef.active = false;
 
         PolygonShape shape = new PolygonShape();

@@ -146,24 +146,12 @@ public class Entity implements IDelayedDestroyable, ISaveable{
 
     @JsonIgnore
     public GraphicIdentity getGraphicIdentity(){
-        return this.components.identity;
+        return this.getComponents().getIdentity();
     }
 
     @JsonIgnore
     public Transform getTransform(){
-        return this.components.transform;
-    }
-
-    @JsonProperty("identityID")
-    public long getGraphicIdentityID(){
-        if(components.identity == null) return identityID;
-        return components.identity.getCompID();
-    }
-
-    @JsonProperty("transformID")
-    public long getTrasnformID(){
-        if(components.identity == null) return transformID;
-        return components.transform.getCompID();
+        return this.getComponents().getTransform();
     }
 
     @JsonIgnore
@@ -232,8 +220,8 @@ public class Entity implements IDelayedDestroyable, ISaveable{
 
 
     public static class Components implements IDelayedDestroyable{
-		public Transform transform;
-		public GraphicIdentity identity;
+		private Transform transform;
+        private GraphicIdentity identity;
 		protected Array<Component> newComponentList = new Array<>();
 		protected Array<Component> activeComponentList = new Array<>();
 		protected Array<Component> inactiveComponentList = new Array<>();
@@ -382,6 +370,40 @@ public class Entity implements IDelayedDestroyable, ISaveable{
         @JsonIgnore
         public Array<Component> getDestroyComponentList() {
             return destroyComponentList;
+        }
+
+        @JsonIgnore
+        public Long[] getComponentIDs(){
+            Array<Long> longs = new Array<>();
+            for(Component comp : activeComponentList) longs.add(comp.getCompID());
+            for(Component comp : inactiveComponentList) longs.add(comp.getCompID());
+            for(Component comp : newComponentList) longs.add(comp.getCompID());
+            for(Component comp : destroyComponentList) longs.add(comp.getCompID());
+
+            return longs.toArray(Long.class);
+        }
+
+        @JsonIgnore
+        public Component[] getAllComponents(){
+            Array<Component> comps = new Array<>();
+            for(Component comp : activeComponentList) comps.add(comp);
+            for(Component comp : inactiveComponentList) comps.add(comp);
+            for(Component comp : newComponentList) comps.add(comp);
+            for(Component comp : destroyComponentList) comps.add(comp);
+
+            return comps.toArray(Component.class);
+        }
+
+        @JsonIgnore
+        public Transform getTransform() {
+            if(this.transform == null) this.transform = getComponent(Transform.class);
+            return transform;
+        }
+
+        @JsonIgnore
+        public GraphicIdentity getIdentity() {
+            if(this.identity == null) this.identity = getComponent(GraphicIdentity.class);
+            return identity;
         }
 
         public final <T extends Component & IScalable> void registerScalable(T scalable){
