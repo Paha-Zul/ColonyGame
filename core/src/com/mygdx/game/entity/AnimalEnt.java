@@ -7,6 +7,7 @@ import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.component.*;
 import com.mygdx.game.component.collider.Collider;
+import com.mygdx.game.component.graphic.GraphicIdentity;
 import com.mygdx.game.util.BlackBoard;
 import com.mygdx.game.util.Constants;
 import com.mygdx.game.util.DataBuilder;
@@ -22,21 +23,18 @@ public class AnimalEnt extends Entity{
     }
 
     public AnimalEnt(DataBuilder.JsonAnimal animalRef, Vector2 position, float rotation, String[] graphicName, int drawLevel) {
-        super(position, rotation, graphicName, drawLevel);
+        super(position, rotation, drawLevel);
         this.getTags().addTag("animal");
         this.getTags().addTag("alive");
         this.name = "AnimalDefault";
 
-        Animal animal = this.addComponent(new Animal());
-        animal.setAnimalRef(animalRef);
-        this.addComponent(new Stats());
-        Interactable inter = this.addComponent(new Interactable());
-        inter.setInterType("animal");
+        //Add the graphic.
+        ((GraphicIdentity)this.components.addComponent(new GraphicIdentity())).setSprite(graphicName[0], graphicName[1]);
+        ((Animal)this.addComponent(new Animal())).setAnimalRef(animalRef);         //Add the animal
+        this.addComponent(new Stats());  //Add the stats.
+        ((Interactable)this.addComponent(new Interactable())).setInterType("animal");
+        ((GridComponent)this.addComponent(new GridComponent())).setGridType(Constants.GRIDACTIVE).setGrid(ColonyGame.worldGrid).setExploreRadius(-1);
         BehaviourManagerComp behManager = this.addComponent(new BehaviourManagerComp());
-        GridComponent gridComp = this.addComponent(new GridComponent());
-        gridComp.setGridType(Constants.GRIDACTIVE);
-        gridComp.setGrid(ColonyGame.worldGrid);
-        gridComp.exploreRadius = -1;
 
         this.makeCollider();
 

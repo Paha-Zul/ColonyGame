@@ -10,6 +10,7 @@ import com.mygdx.game.component.GridComponent;
 import com.mygdx.game.component.Interactable;
 import com.mygdx.game.component.Inventory;
 import com.mygdx.game.component.collider.Collider;
+import com.mygdx.game.component.graphic.GraphicIdentity;
 import com.mygdx.game.util.Constants;
 
 /**
@@ -21,17 +22,14 @@ public class BuildingEntity extends Entity{
     }
 
     public BuildingEntity(Vector2 position, float rotation, String[] graphicName, int drawLevel) {
-        super(position, rotation, graphicName, drawLevel);
+        super(position, rotation, drawLevel);
         this.name = "Main Base";
         this.tags.addTag("building");
 
-        GridComponent gridComp = this.addComponent(new GridComponent());
-        gridComp.setGridType(Constants.GRIDSTATIC);
-        gridComp.setGrid(ColonyGame.worldGrid);
-        gridComp.setExploreRadius(8);
+        ((GraphicIdentity)this.components.addComponent(new GraphicIdentity())).setSprite(graphicName[0], graphicName[1]);
+        ((GridComponent)this.addComponent(new GridComponent())).setGridType(Constants.GRIDSTATIC).setGrid(ColonyGame.worldGrid).setExploreRadius(8);
         this.addComponent(new Building());
-        Interactable inter = this.addComponent(new Interactable());
-        inter.setInterType("building");
+        ((Interactable)this.addComponent(new Interactable())).setInterType("building");
         this.addComponent(new Inventory());
         this.makeCollider();
     }

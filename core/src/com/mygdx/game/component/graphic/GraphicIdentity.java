@@ -27,7 +27,7 @@ public class GraphicIdentity extends Component {
     public String atlasName = "";
 
     public GraphicIdentity(){
-
+        this.setActive(true);
     }
 
 	@Override
@@ -70,7 +70,6 @@ public class GraphicIdentity extends Component {
         preRender(delta, batch);
 
         if(getSprite() != null) {
-
             Grid.GridInstance grid = ColonyGame.worldGrid;
 
             Vector2 pos = this.owner.getTransform().getPosition(); //Cache the owner's position.

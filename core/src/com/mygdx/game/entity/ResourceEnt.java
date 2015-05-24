@@ -22,10 +22,11 @@ public class ResourceEnt extends Entity{
     }
 
     public ResourceEnt(Vector2 position, float rotation, String[] graphicName, int drawLevel) {
-        super(position, rotation, graphicName, drawLevel);
+        super(position, rotation, drawLevel);
         this.getTags().addTag("resource");
         this.name = "Resource";
 
+        ((GraphicIdentity)this.components.addComponent(new GraphicIdentity())).setSprite(graphicName[0], graphicName[1]);
         Interactable inter = this.addComponent(new Interactable());
         inter.setInterType("resource");
         GridComponent gridComp = this.addComponent(new GridComponent());

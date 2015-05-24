@@ -4,6 +4,36 @@
       "version": "0.25",
       "date": "4/28/2015",
       "log": [
+        "Warning: loud startling shooting sounds in the game. Also, you're gonna probably need to scroll this area to see all the changes (just click in this area and scroll).",
+        "- Removed: Really ugly checkboxes (lower left of this screen) for scripts. It's now done via the ModManager.jar. More on that at a later time....",
+        "- Added: Game speed! Using the '+' key will make the game speed double and the '-' will halve it. At 8x speed it gets a bit weird and 16x+ will probably crash the game.",
+        "- Added: Aggressive animals! Currently there are only wolves which are aggressive.",
+        "- Added: Groups! Currently only animals, animals that are wolves, are grouped. When one wolf from the group wants to attack or is attacked by something, the whole group will attack.",
+        "- Added: Game events! There is a Big Bad Wolf out there (which is not any stronger but is visually larger) and running into him will cause an event. The choices do nothing useful currently and is just an example.",
+        "- Added: Alerts! When the game is started, some alerts will pop up on the right. They will display a one or two word alert, a one sentence description when moused over, and an in depth explanation/tutorial ",
+        "when moused over for more than 2 seconds. The current alerts are: low food (<20), low water (<20), starvation (one or more colonists have 0 food), thirstation... (one or more colonists have 0 water). These all function ",
+        "properly according to what the colony/colonists have.",
+        "- Added: Players/Teams! Hard to explain, but basically a 'player' owns a colony, a colony owns everything under it (colonists, buildings, etc..). This allows me to track certain things like what a colony has ",
+        "for resources (which lets me do things like alerts).",
+        "- Added: Colonists have a toggleable 'alert' stage. When alert, they will attack anything aggressive within their sensor range (F3 will show it and it will only appear when they are alert). Alert colonists ",
+        "have a red exclamation above their head. While in this state and fighting, they will ignore any requests until taken out of alert mode or there are no more nearby threats",
+        "- Added: Colonists will call out for help (not visually) from nearby colonists when attacked. This only works on the initial attack of a group. It's mainly an example and feedback is needed on how to continue.",
+        "- Added: Selection circles! This currently only works for colonists but I will try to make it for almost everything.",
+        "- Added: A first early pass of saving/loading. It will 100% crash your game if used, but if you want to crash it, F5 is for saving, F6 is for loading.",
+        "- Added: A temporary quickview of the colony's items (left hand side). This should be perfect, but who knows, code, ya know?",
+        "- Changed(BIG!): Colonists now have a (temporary) carrying capacity of 10 for each item. When toggled to gather multiple things, they will continue gathering until all toggled items are fullfilled. For instance, ",
+        "if a colonist is toggled to get 'food' and 'wood', food and wood must reach 10 but other items, like herbs collected from plants, can be partial.",
+        "- Changed: Colonists that are killed won't simply disappear. They will turn sideways and lay on the ground as a dead(ish) body (that still has sight apparently)",
+        "- Changed: While a group of colonists is selected, any colonist that dies will be removed from the selection. This hopefully fixes the problem where a dead colonist is selected and issuing an order crashes the game.",
+        "- Changed: Squirrels will (try to?) flee away from the direction of where they were attacked from. They currently run about 5 steps and stop.",
+        "- Changed: Colonists (for now at least) can be told to move to a location by selecting and right clicking.",
+        "- Bugs: I tried REAL hard to get all of the game crashing bugs out for a nice preview. There are probably some weird behaviour things. Feedback mucho appreciato."
+      ]
+    },
+    {
+      "version": "0.25",
+      "date": "4/28/2015",
+      "log": [
         "- Added: Really ugly checkboxes (lower left of this screen) for scripts. If they have an ugly grey box, they are not active. Otherwise, green ugly checkboxes means they are active. When start is clicked, it will start the scripts selected.",
         "- Added: The script that's being tested adds quick view boxes at the top of the screen for all colonists. Just a silly test and it allowed me to move things here and there to tidy up a bit."
         "- Bug: Colonists sometimes will either get stuck trying to find a place to explore, or will outright refuse to do it.",

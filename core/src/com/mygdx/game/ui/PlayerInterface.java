@@ -21,7 +21,6 @@ import com.badlogic.gdx.scenes.scene2d.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.mygdx.game.ColonyGame;
-import com.mygdx.game.behaviourtree.PrebuiltTasks;
 import com.mygdx.game.component.*;
 import com.mygdx.game.component.collider.Collider;
 import com.mygdx.game.entity.Entity;
@@ -151,6 +150,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
             UnitProfile profile = new UnitProfile(); //Make a unit profile.
             setSelectedEntity(selectedInfo.owner); //Set our selectedEntity
             profile.entity = selectedInfo.owner; //Get the Entity that we clicked.
+            profile.entity.getTags().addTag("selected");
             profile.interactable = selectedInfo.owner.getComponent(Interactable.class); //Get teh selectedProfile Component.
             selectedProfileList.add(profile); //Add it to the list.
             return true;
@@ -270,9 +270,9 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         this.drawSelectionBox(); //Draws the selection box.
         this.drawDebugInfo(height); //Draws some debug information.
         this.drawTerrainInfo(this.bottomLeftRect); //Draws information about the moused over terrain piece.
-        this.drawGameSpeed(screenW, screenH, this.batch, this.gameSpeedStyle);
+        this.drawGameSpeed(screenW, screenH, batch, this.gameSpeedStyle);
         this.drawSelectedEntity();
-        this.drawInvAmounts(screenW, screenH);
+        this.drawInvAmounts(screenW, screenH, batch);
         this.drawCurrentNotifications(screenW, screenH, delta);
 
         if(this.drawingProfiler) Profiler.drawDebug(batch, 200, height - 20);
@@ -293,9 +293,10 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         batch.begin();
     }
 
-    private void drawInvAmounts(int width, int height){
+    private void drawInvAmounts(int width, int height, SpriteBatch batch){
         PlayerManager.Player player = PlayerManager.getPlayer("Player");
         if(player != null) {
+            batch.setColor(Color.WHITE);
             HashMap<String, Inventory.InventoryItem> inv = PlayerManager.getPlayer("Player").colony.getGlobalInv();
             StringBuilder builder = new StringBuilder();
             builder.append("Overall Items:\n");
@@ -310,7 +311,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
             gameSpeedStyle.multiline = true;
             gameSpeedStyle.alignment = Align.top;
             gameSpeedStyle.paddingTop = 5;
-            GUI.Label(builder.toString(), this.batch, 0, height * 0.2f, width * 0.07f, height * 0.48f, gameSpeedStyle);
+            GUI.Label(builder.toString(), batch, 0, height * 0.2f, width * 0.07f, height * 0.2f, gameSpeedStyle);
             gameSpeedStyle.paddingTop = 0;
         }
     }
@@ -484,7 +485,15 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
             profileButtonRect.set(rect.getX() + rect.getWidth() - 115, rect.getY() + rect.getHeight() - 20, 50, 20);
 
             //For each profile, draw a button to access each individual entity.
-            for(UnitProfile profile : selectedProfileList) {
+            for(int i=0;i<selectedProfileList.size();i++) {
+                UnitProfile profile = selectedProfileList.get(i);
+                if(!profile.entity.getTags().hasTag("alive")){
+                    profile.entity.getTags().removeTag("selected");
+                    selectedProfileList.remove(i);
+                    i--;
+                    continue;
+                }
+
                 //Draw the button for the individual profile. If clicked, make it our selected profile.
                 if(GUI.Button(this.batch, profileButtonRect, profile.interactable.getInteractable().getName()))
                     selectedProfile = profile;
@@ -504,6 +513,10 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     private void drawSelected(){
         //Make sure the selectedProfile we have selectedEntity isn't null!
         if(selectedProfile != null){
+            if(selectedProfileList.size() > 1 && !selectedProfile.entity.getTags().hasTag("alive")){
+                selectedProfileList.forEach(profile -> {if(profile.entity != selectedProfile.entity) selectedProfile = profile;});
+            }
+
             IInteractable innerInter = selectedProfile.interactable.getInteractable(); //Get the selectedProfile!
             if(innerInter == null) {
                 selectedProfile = null;
@@ -752,6 +765,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     public static void setSelectedEntity(Entity entity){
         newlySelected = true;
         selectedProfile = new UnitProfile(entity);
+        selectedProfile.entity.getTags().addTag("selected");
     }
 
     //Reveals the entire map by adding a viewer to every tile.
@@ -889,14 +903,16 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         Vector3 worldCoords = ColonyGame.camera.unproject(new Vector3(screenX, screenY, 0));
 
         if(button == Input.Buttons.LEFT){
+            this.selectedProfileList.forEach(profile -> profile.entity.getTags().removeTag("selected"));
             this.selectedProfileList.clear();
             this.buttonStateSystem.setToDefaultState();
             this.currStateNode = null;
             this.finishDragging(worldCoords.x, worldCoords.y);
 
-            //Otherwise, null out our existing selection and try to get a new one where we clicked.
+            //If we don't have something that was selected before this point, follow through with our click test.
             if(!newlySelected) {
                 newlySelected = false;
+                if(selectedProfile != null) selectedProfile.entity.getTags().removeTag("selected");
                 selectedProfile = null;
 
                 //Try to get a selection of Entities. If not, maybe we clicked just one?
@@ -916,7 +932,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
                 if (comp != null) {
                     comp.getBlackBoard().target = null;
                     comp.getBlackBoard().targetNode = comp.getBlackBoard().colonyGrid.getNode(new Vector2(worldCoords.x, worldCoords.y));
-                    comp.changeTaskImmediate(PrebuiltTasks.moveTo(comp.getBlackBoard()));
+                    comp.changeTaskImmediate("moveTo");
                 }
             }
         }

@@ -26,14 +26,16 @@ public class GridComponent extends Component{
     @Override
     public void init(Entity owner) {
         super.init(owner);
+        //Gets a node to start.
+        this.grid = ColonyGame.worldGrid;
+        this.currNode = this.grid.addToGrid(this.owner);
     }
 
     @Override
     public void start() {
         super.start();
-        //Gets a node to start.
-        this.currNode = this.grid.addToGrid(this.owner);
         this.grid.addViewer(this.currNode, this.exploreRadius);
+        this.load();
     }
 
     @Override
@@ -53,18 +55,21 @@ public class GridComponent extends Component{
     }
 
     @JsonIgnore
-    public void setGridType(int gridType) {
+    public GridComponent setGridType(int gridType) {
         this.gridType = gridType;
+        return this;
     }
 
     @JsonIgnore
-    public void setGrid(Grid.GridInstance grid) {
+    public GridComponent setGrid(Grid.GridInstance grid) {
         this.grid = grid;
+        return this;
     }
 
     @JsonIgnore
-    public void setExploreRadius(int exploreRadius) {
+    public GridComponent setExploreRadius(int exploreRadius) {
         this.exploreRadius = exploreRadius;
+        return this;
     }
 
     @JsonIgnore

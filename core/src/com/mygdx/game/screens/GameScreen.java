@@ -87,6 +87,7 @@ public class GameScreen implements Screen{
         for(int i=0;i<100;i++) {
             Vector2 pos = new Vector2(MathUtils.random(grid.getWidth())*grid.getSquareSize(), MathUtils.random(grid.getHeight())*grid.getSquareSize());
             Entity animal = new AnimalEnt("squirrel", pos, 0, new String[]{"squirrel", atlasName}, 11);
+            ListHolder.addEntity(animal);
         }
 
         //Spawn some angry wolf packs.

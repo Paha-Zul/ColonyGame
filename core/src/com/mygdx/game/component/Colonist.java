@@ -13,11 +13,11 @@ import com.mygdx.game.interfaces.Functional;
 import com.mygdx.game.interfaces.IInteractable;
 import com.mygdx.game.interfaces.IOwnable;
 import com.mygdx.game.ui.PlayerInterface;
-import com.mygdx.game.util.DataBuilder;
 import com.mygdx.game.util.EventSystem;
 import com.mygdx.game.util.Tree;
 import com.mygdx.game.util.gui.GUI;
 import com.mygdx.game.util.managers.DataManager;
+import com.mygdx.game.util.managers.GameEventManager;
 import com.mygdx.game.util.timer.RepeatingTimer;
 import com.mygdx.game.util.timer.Timer;
 import org.codehaus.jackson.annotate.JsonIgnore;
@@ -120,9 +120,12 @@ public class Colonist extends Component implements IInteractable, IOwnable{
         if(this.alert && !alert) {
             this.attackList = new LinkedList<>();
             this.fixture.getShape().setRadius(0);
+            this.owner.getTags().removeTag("alert");
         //If alert is not active and we are setting it to active.
-        }else if(!this.alert && alert)
+        }else if(!this.alert && alert) {
             this.fixture.getShape().setRadius(20f);
+            this.owner.getTags().addTag("alert");
+        }
 
         return this.alert = alert;
     }
@@ -269,10 +272,13 @@ public class Colonist extends Component implements IInteractable, IOwnable{
     private Consumer<Object[]> onAttackingEvent = args -> {
         Group attackingGroup = (Group)args[0];
         if(attackingGroup.getLeader().getTags().hasTag("boss")) {
-            DataBuilder.JsonPlayerEvent event = DataManager.getData("bossencounter", DataBuilder.JsonPlayerEvent.class);
-            event.eventTarget = this.getEntityOwner();
-            event.eventTargetOther = attackingGroup.getLeader();
-            PlayerInterface.getInstance().newPlayerEvent(event);
+            GameEventManager.GameEvent event = GameEventManager.getGameEvent("bossencounter");
+            if(!event.triggered) {
+                event.playerEvent.eventTarget = this.getEntityOwner();
+                event.playerEvent.eventTargetOther = attackingGroup.getLeader();
+                PlayerInterface.getInstance().newPlayerEvent(event.playerEvent);
+                event.triggered = true;
+            }
         }
     };
 

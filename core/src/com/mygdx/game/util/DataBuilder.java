@@ -13,6 +13,7 @@ import com.badlogic.gdx.utils.JsonWriter;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.interfaces.IDestroyable;
 import com.mygdx.game.util.managers.DataManager;
+import com.mygdx.game.util.managers.GameEventManager;
 import com.mygdx.game.util.managers.ScriptManager;
 import com.mygdx.game.util.worldgeneration.WorldGen;
 
@@ -122,7 +123,9 @@ public class DataBuilder implements IDestroyable{
 
         //Build player events
         buildJson(Gdx.files.internal(path + filePath + eventsFilePath), JsonPlayerEvent[].class, value -> {
-            for (JsonPlayerEvent event : value) DataManager.addData(event.eventName, event, JsonPlayerEvent.class);
+            for (JsonPlayerEvent event : value){
+                GameEventManager.addGameEvent(event);
+            }
         });
 
         //Load scripts

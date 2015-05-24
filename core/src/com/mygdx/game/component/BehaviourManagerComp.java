@@ -45,6 +45,7 @@ public class BehaviourManagerComp extends Component{
     }
 
     static{
+        BehaviourManagerComp.addTaskToMap("moveTo", PrebuiltTasks::moveTo);
         BehaviourManagerComp.addTaskToMap("gather", PrebuiltTasks::gatherResource);
         BehaviourManagerComp.addTaskToMap("hunt", PrebuiltTasks::searchAndHunt);
         BehaviourManagerComp.addTaskToMap("explore", PrebuiltTasks::exploreUnexplored);
@@ -146,11 +147,11 @@ public class BehaviourManagerComp extends Component{
 
                 //If the next behaviour is empty, do something based on the state.
                 }else {
-                    StateSystem.State state = behaviourStates.getDefaultState();
+                    StateSystem.State<BiFunction<BlackBoard, BehaviourManagerComp, Task>> state = behaviourStates.getDefaultState();
                     BiFunction<BlackBoard, BehaviourManagerComp, Task> data;
                     if(behaviourStates.getCurrState().repeat) state = behaviourStates.getCurrState();
 
-                    data = behaviourStates.getCurrState().getUserData();
+                    data = state.getUserData();
                     this.changeTaskImmediate(data.apply(blackBoard, this));
                     behaviourStates.setCurrState(state.stateName);
                 }

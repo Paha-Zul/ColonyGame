@@ -52,27 +52,12 @@ public class Entity implements IDelayedDestroyable, ISaveable{
 	 * Creates an Entity that will start with a GraphicIdentity component.
 	 * @param position The initial position of the Entity
 	 * @param rotation The initial rotation of the Entity.
-	 * @param graphicName The Texture name for the Entity. The asset manager will be used to get the graphic.
 	 */
-	public Entity(Vector2 position, float rotation, String[] graphicName, int drawLevel){
+	public Entity(Vector2 position, float rotation, int drawLevel){
 		this.components.transform = this.components.addComponent(new Transform(position, rotation));
-		if(graphicName != null) {
-            this.components.identity = this.components.addComponent(new GraphicIdentity());
-            this.components.identity.setSprite(graphicName[0], graphicName[1]);
-        }
 
 		this.ID = counterID++;
 		this.drawLevel = drawLevel;
-	}
-
-	/**
-	 * Creates an Entity with a transform and identity component.
-	 * such as "Paha's Market". Use as desired.
-	 * @param position The starting X and Y position of this Entity.
-	 * @param rotation The starting rotation of this Entity.
-	 */
-	public Entity(Vector2 position, float rotation, int drawLevel){
-		this(position, rotation, null, drawLevel);
 	}
 
 	/**
@@ -123,7 +108,7 @@ public class Entity implements IDelayedDestroyable, ISaveable{
 	 * @param batch The SpriteBatch to draw with.
 	 */
 	public void render(float delta, SpriteBatch batch){
-		if(this.components.identity != null) this.components.identity.render(delta, batch);
+		if(this.components.getIdentity() != null) this.components.identity.render(delta, batch);
 	}
 
     public final <T extends Component> T addComponent(Component comp){
@@ -285,12 +270,12 @@ public class Entity implements IDelayedDestroyable, ISaveable{
         @JsonIgnore
 		public final <T extends Component> T getComponent(Class<T> c){
 			for(Component comp : this.inactiveComponentList){
-				if(comp.getClass() == c)
+				if(comp.getClass() == c || comp.getClass().getSuperclass() == c)
 					return (T)comp;
 			}
 
 			for(Component comp : this.activeComponentList){
-				if(comp.getClass() == c)
+				if(comp.getClass() == c || comp.getClass().getSuperclass() == c)
 					return (T)comp;
 			}
 

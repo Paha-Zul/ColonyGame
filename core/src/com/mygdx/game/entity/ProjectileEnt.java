@@ -7,6 +7,7 @@ import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.component.Projectile;
 import com.mygdx.game.component.collider.Collider;
+import com.mygdx.game.component.graphic.GraphicIdentity;
 
 /**
  * Created by Paha on 4/2/2015.
@@ -17,9 +18,10 @@ public class ProjectileEnt extends Entity{
     }
 
     public ProjectileEnt(Vector2 position, float rotation, String[] graphicName, int drawLevel) {
-        super(position, rotation, graphicName, drawLevel);
+        super(position, rotation, drawLevel);
         this.tags.addTag("projectile");
 
+        ((GraphicIdentity)this.components.addComponent(new GraphicIdentity())).setSprite(graphicName[0], graphicName[1]);
         this.addComponent(new Projectile());
         makeCollider();
     }

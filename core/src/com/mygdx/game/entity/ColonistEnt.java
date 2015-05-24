@@ -7,6 +7,7 @@ import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.component.*;
 import com.mygdx.game.component.collider.Collider;
+import com.mygdx.game.component.graphic.ColonistGraphic;
 import com.mygdx.game.util.Constants;
 
 /**
@@ -19,25 +20,21 @@ public class ColonistEnt extends Entity{
     }
 
     public ColonistEnt(Vector2 position, float rotation, String[] graphicName, int drawLevel) {
-        super(position, rotation, graphicName, drawLevel);
+        super(position, rotation, drawLevel);
         this.name = "Colonist";
-
-        this.addComponent(new Colonist());
-        GridComponent gridComp = this.addComponent(new GridComponent());
-        gridComp.setGridType(Constants.GRIDACTIVE);
-        gridComp.setGrid(ColonyGame.worldGrid);
-        gridComp.setExploreRadius(3);
-        Interactable inter = this.addComponent(new Interactable());
-        inter.setInterType("humanoid");
-        this.addComponent(new Stats());
-        this.addComponent(new Inventory());
-        this.addComponent(new BehaviourManagerComp());
-        this.makeCollider();
-
         this.tags.addTag("humanoid");
         this.tags.addTag("colonist");
         this.tags.addTag("alive");
 
+        ((ColonistGraphic)this.components.addComponent(new ColonistGraphic())).setSprite(graphicName[0], graphicName[1]);
+        this.addComponent(new Colonist());
+        ((GridComponent)this.addComponent(new GridComponent())).setGridType(Constants.GRIDACTIVE).setGrid(ColonyGame.worldGrid).setExploreRadius(3);
+        ((Interactable)this.addComponent(new Interactable())).setInterType("humanoid");
+        this.addComponent(new Stats());
+        this.addComponent(new Inventory());
+        this.addComponent(new BehaviourManagerComp());
+
+        this.makeCollider();
     }
 
     @Override

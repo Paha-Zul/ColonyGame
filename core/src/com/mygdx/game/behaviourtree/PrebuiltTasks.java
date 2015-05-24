@@ -17,7 +17,7 @@ import java.util.function.Consumer;
  * Created by Paha on 4/11/2015.
  */
 public class PrebuiltTasks {
-    public static Task moveTo(BlackBoard blackBoard){
+    public static Task moveTo(BlackBoard blackBoard, BehaviourManagerComp behComp){
         //Get the target node/Entity.
         //Find the path.
         //Move to the target.
@@ -555,7 +555,7 @@ public class PrebuiltTasks {
         fc.control.callbacks.successCriteria = ent -> ((Entity)ent).getTags().hasTag("alive");
 
         seq.control.addTask(fc);
-        seq.control.addTask(moveTo(blackBoard));
+        seq.control.addTask(moveTo(blackBoard, behComp));
 
         return seq;
     }
