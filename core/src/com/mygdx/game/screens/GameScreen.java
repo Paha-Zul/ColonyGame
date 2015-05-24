@@ -70,6 +70,7 @@ public class GameScreen implements Screen{
     private void generateStart(Vector2 start){
         //Add our colony to an empty entity.
         Entity empty = new Entity(new Vector2(0,0), 0, 0);
+        ListHolder.addEntity(empty);
         Colony colony = empty.addComponent(new Colony());
         PlayerManager.Player player = PlayerManager.addPlayer("Player", colony);
 
@@ -95,6 +96,7 @@ public class GameScreen implements Screen{
             AnimalEnt wolfLeader = new AnimalEnt("wolf", pos, 0, new String[]{"wolf", atlasName}, 11);
             wolfLeader.getGraphicIdentity().setSprite("wolf", "interactables");
             group.setLeader(wolfLeader);
+            ListHolder.addEntity(wolfLeader);
 
             DataBuilder.JsonAnimal animal = wolfLeader.getComponent(Animal.class).getAnimalRef();
             int amount = (int)(animal.packAmount[0] + Math.random()*(animal.packAmount[1] - animal.packAmount[0]));
@@ -104,6 +106,7 @@ public class GameScreen implements Screen{
                 wolf.getGraphicIdentity().setSprite("wolf", "interactables");
                 wolf.addComponent(group);
                 group.addEntityToGroup(wolf);
+                ListHolder.addEntity(wolf);
             }
         }
 
@@ -116,6 +119,7 @@ public class GameScreen implements Screen{
         group.setLeader(bossWolf);
         bossWolf.getTransform().setScale(2f);
         bossWolf.addComponent(group);
+        ListHolder.addEntity(bossWolf);
 
         int amount = (int)(bossWolfRef.packAmount[0] + Math.random()*(bossWolfRef.packAmount[1] - bossWolfRef.packAmount[0]));
         for(int j=0;j<amount; j++){
@@ -126,6 +130,7 @@ public class GameScreen implements Screen{
             wolf.getGraphicIdentity().setSprite(childWolf.img, "interactables");
             wolf.addComponent(group);
             group.addEntityToGroup(wolf);
+            ListHolder.addEntity(wolf);
         }
     }
 

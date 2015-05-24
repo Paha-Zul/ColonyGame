@@ -11,7 +11,7 @@ import java.util.HashMap;
  */
 public class EventSystem {
     //A map of maps of lists of consumer interfaces.
-    private static HashMap<Double, HashMap<String, ArrayList<java.util.function.Consumer<Object[]>>>> entityMap = new HashMap<>();
+    private static HashMap<Long, HashMap<String, ArrayList<java.util.function.Consumer<Object[]>>>> entityMap = new HashMap<>();
 
     /**
      * Adds a function to the EventSystem.
@@ -32,7 +32,7 @@ public class EventSystem {
         registerEvent(-1, eventName, function);
     }
 
-    private static void registerEvent(double id, String eventName, java.util.function.Consumer<Object[]> function){
+    private static void registerEvent(long id, String eventName, java.util.function.Consumer<Object[]> function){
         //If the map for the Entity id is null, add a new map.
         if(entityMap.get(id) == null)
             entityMap.put(id, new HashMap<>());
@@ -106,7 +106,7 @@ public class EventSystem {
      * @param args The arguments to pass into the list.
      */
     public static void notifyGameEvent(String handlerName, Object... args){
-        double id = -1;
+        long id = -1;
 
         if(entityMap.get(id) == null || entityMap.get(id).get(handlerName) == null)
             return; //If any of the maps or lists are null, return.

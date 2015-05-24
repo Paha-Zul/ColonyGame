@@ -9,6 +9,14 @@ import com.mygdx.game.util.GH;
  */
 public class SoundManager {
 
+    /**
+     *
+     * @param sound The sound to play.
+     * @param soundPos The location of the sound.
+     * @param lookPos Where the player is currently looking.
+     * @param falloffStart The distance at which to begin tapering the sound.
+     * @param falloffMax The distance at which no sound is heard.
+     */
     public static void play(Sound sound, Vector2 soundPos, Vector2 lookPos, float falloffStart, float falloffMax){
         float dis = soundPos.dst(lookPos);
         falloffStart = GH.toMeters(falloffStart);

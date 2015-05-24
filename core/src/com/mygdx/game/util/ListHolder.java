@@ -22,10 +22,10 @@ public class ListHolder {
 
     private static LinkedList<FloatingText> floatingTexts = new LinkedList<>();
 
-	public static void addEntity(int drawLevel, Entity e){
+	public static void addEntity(Entity e){
 		//If our list doesn't have enough layers to put something at 'drawLevel', add the layers!
-		if(entityList.size <= drawLevel){
-			int diff =  drawLevel - entityList.size;
+		if(entityList.size <= e.drawLevel){
+			int diff =  e.drawLevel - entityList.size;
 			for(int i=0;i<=diff;i++){
 				entityList.add(new Array<>());
 			}

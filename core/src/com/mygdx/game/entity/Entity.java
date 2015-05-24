@@ -4,13 +4,12 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.component.Component;
-import com.mygdx.game.component.GraphicIdentity;
 import com.mygdx.game.component.Transform;
+import com.mygdx.game.component.graphic.GraphicIdentity;
 import com.mygdx.game.interfaces.IDelayedDestroyable;
 import com.mygdx.game.interfaces.ISaveable;
 import com.mygdx.game.interfaces.IScalable;
 import com.mygdx.game.util.EventSystem;
-import com.mygdx.game.util.ListHolder;
 import com.mygdx.game.util.Tags;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
@@ -64,8 +63,6 @@ public class Entity implements IDelayedDestroyable, ISaveable{
 
 		this.ID = counterID++;
 		this.drawLevel = drawLevel;
-
-		ListHolder.addEntity(drawLevel, this);
 	}
 
 	/**
@@ -89,7 +86,6 @@ public class Entity implements IDelayedDestroyable, ISaveable{
 		for(Component comp : comps)
 			this.components.addComponent(comp);
 
-		ListHolder.addEntity(drawLevel, this);
         this.ID = counterID++;
 		this.drawLevel = drawLevel;
 	}

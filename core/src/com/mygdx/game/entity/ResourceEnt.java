@@ -5,10 +5,10 @@ import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.mygdx.game.ColonyGame;
-import com.mygdx.game.component.GraphicIdentity;
 import com.mygdx.game.component.GridComponent;
 import com.mygdx.game.component.Interactable;
 import com.mygdx.game.component.collider.Collider;
+import com.mygdx.game.component.graphic.GraphicIdentity;
 import com.mygdx.game.util.Constants;
 import com.mygdx.game.util.GH;
 
@@ -52,7 +52,7 @@ public class ResourceEnt extends Entity{
     private void makeCollider(){
         //Get the graphic for the collider size
         GraphicIdentity graphic = this.getComponent(GraphicIdentity.class);
-        if(graphic == null || graphic.sprite == null) return;
+        if(graphic == null || graphic.getSprite() == null) return;
 
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.StaticBody;
@@ -60,8 +60,8 @@ public class ResourceEnt extends Entity{
 
         //Set the polygon shape as a box using the sprite's width and height
         PolygonShape box = new PolygonShape();
-        float width = GH.toMeters(graphic.sprite.getWidth()), height = GH.toMeters(graphic.sprite.getHeight());
-        Vector2 center = new Vector2(graphic.sprite.getX(), graphic.sprite.getY() + height/2);
+        float width = GH.toMeters(graphic.getSprite().getWidth()), height = GH.toMeters(graphic.getSprite().getHeight());
+        Vector2 center = new Vector2(graphic.getSprite().getX(), graphic.getSprite().getY() + height/2);
         box.setAsBox(width/4, height/2, center, 0);
 
         box.setRadius(0.5f);

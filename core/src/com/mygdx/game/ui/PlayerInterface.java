@@ -508,7 +508,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
             if(innerInter == null) {
                 selectedProfile = null;
                 return;
-            }
+        }
 
             //If it has a compName, draw the compName...
             if(innerInter.getName() != null) {
@@ -660,7 +660,10 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
      */
     private void drawGameSpeed(int screenW, int screenH, SpriteBatch batch, GUI.GUIStyle style){
         style.alignment = Align.center;
-        GUI.Label("x"+gameSpeed+" speed", batch, screenW - 100, screenH - 50, 100, 50, style);
+        String text;
+        if(paused) text = "PAUSED";
+        else text = "x"+gameSpeed+" speed";
+        GUI.Label(text, batch, screenW - 100, screenH - 50, 100, 50, style);
     }
 
     /**
@@ -833,6 +836,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
             SaveGameHelper.saveWorld();
         }else if(keycode == Input.Keys.F6){
             SaveGameHelper.loadWorld();
+            this.paused = true;
         }else if(keycode == Input.Keys.PLUS) //+ - increase game speed
 
             gameSpeed*=2;

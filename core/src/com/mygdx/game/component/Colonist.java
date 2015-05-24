@@ -85,10 +85,6 @@ public class Colonist extends Component implements IInteractable, IOwnable{
         this.inventory = this.getComponent(Inventory.class);
         this.stats = this.getComponent(Stats.class);
         this.manager = this.getComponent(BehaviourManagerComp.class);
-        if(this.manager == null)
-            System.out.println("Manager null");
-        if(this.manager.getBlackBoard() == null)
-            System.out.println("Blackboard null");
         this.manager.getBlackBoard().moveSpeed = 200f;
         this.collider = this.getComponent(Collider.class);
 
@@ -96,6 +92,7 @@ public class Colonist extends Component implements IInteractable, IOwnable{
         EventSystem.onEntityEvent(this.owner, "attacking_group", onAttackingEvent);
         EventSystem.onEntityEvent(this.owner, "collide_start", onCollideStart);
         EventSystem.onEntityEvent(this.owner, "collide_end", onCollideEnd);
+        EventSystem.onEntityEvent(this.owner, "attacking", onBeingAttacked);
 
         this.createBehaviourButtons();
         this.createRangeSensor();
@@ -277,6 +274,24 @@ public class Colonist extends Component implements IInteractable, IOwnable{
             event.eventTargetOther = attackingGroup.getLeader();
             PlayerInterface.getInstance().newPlayerEvent(event);
         }
+    };
+
+    @JsonIgnore
+    private Consumer<Object[]> onBeingAttacked = args -> {
+        Entity other = (Entity)args[0];
+        attackList.add(other);
+        Consumer<Entity> callForHelp = ent -> {
+            if(ent.getTags().hasTags("colonist", "alive")){
+                Colonist col = ent.getComponent(Colonist.class);
+                if(col.getColony() == this.getColony()){
+                    col.getBehManager().getBlackBoard().target = other;
+                    if(!col.getBehManager().getBehaviourStates().getCurrState().stateName.equals("attackTarget"))
+                        col.getBehManager().changeTaskImmediate("attackTarget");
+                }
+            }
+        };
+
+        ColonyGame.worldGrid.performOnEntityInRadius(callForHelp , null, 20, ColonyGame.worldGrid.getIndex(this.owner));
     };
 
     //When one of our fixtures collides with something.

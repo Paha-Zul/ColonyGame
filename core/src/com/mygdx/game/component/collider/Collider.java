@@ -101,7 +101,7 @@ public class Collider extends Component implements IScalable{
         this.body.setUserData(bodyInfo);
         this.fixture.setUserData(fixtureInfo);
 
-        //this.body.setActive(true);
+        this.body.setActive(true);
 
         //this.owner.getComponents().registerScalable(this);
         //this.body.setActive(false);
@@ -110,10 +110,6 @@ public class Collider extends Component implements IScalable{
     @Override
     public void update(float delta) {
         super.update(delta);
-        if(this.owner == null)
-            System.out.println("Owner is null");
-        if(this.body == null)
-            System.out.println("Body is null");
         this.owner.getTransform().setPosition(this.body.getPosition().x, this.body.getPosition().y);
     }
 

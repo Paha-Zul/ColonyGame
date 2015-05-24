@@ -15,7 +15,7 @@ public class Projectile extends Component{
     @JsonIgnore
 	public Entity projOwner;
     @JsonProperty
-	public float speed = 1500;
+	public float speed = 2500;
     @JsonProperty
 	public float lifetime = 3;
     @JsonIgnore

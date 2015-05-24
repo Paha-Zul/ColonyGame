@@ -1,6 +1,9 @@
 package com.mygdx.game.behaviourtree.action;
 
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
+import com.mygdx.game.ColonyGame;
 import com.mygdx.game.behaviourtree.LeafTask;
 import com.mygdx.game.component.Projectile;
 import com.mygdx.game.component.Transform;
@@ -9,6 +12,8 @@ import com.mygdx.game.entity.ProjectileEnt;
 import com.mygdx.game.util.BlackBoard;
 import com.mygdx.game.util.EventSystem;
 import com.mygdx.game.util.GH;
+import com.mygdx.game.util.ListHolder;
+import com.mygdx.game.util.managers.SoundManager;
 import com.mygdx.game.util.timer.RepeatingTimer;
 
 /**
@@ -37,8 +42,10 @@ public class Attack extends LeafTask{
                     Entity target = this.blackBoard.target;                                     //Cache the target
                     float rot = (float) Math.atan2(target.getTransform().getPosition().y - trans.getPosition().y, target.getTransform().getPosition().x - trans.getPosition().x) * MathUtils.radDeg; //Get the rotation to the target
                     rot += MathUtils.random(20) - 10;                                           //Randomize rotation a little bit
-                    Entity ent = new ProjectileEnt(trans.getPosition(), rot, new String[]{"ball", ""}, 11);          //Spawn the projectile.
-                    Projectile projectile = ent.getComponent(Projectile.class);                 //Get the projectile component.
+                    Entity bullet = new ProjectileEnt(trans.getPosition(), rot, new String[]{"ball", ""}, 11);          //Spawn the projectile.
+                    ListHolder.addEntity(bullet);
+                    Projectile projectile = bullet.getComponent(Projectile.class);                 //Get the projectile component.
+                    SoundManager.play(ColonyGame.assetManager.get("Walther-P22", Sound.class), bullet.getTransform().getPosition(), new Vector2(ColonyGame.camera.position.x, ColonyGame.camera.position.y), 200, 2000);
 
                     if (projectile == null)
                         GH.writeErrorMessage("Somehow making a projectile didn't make a projectile...");

@@ -47,10 +47,6 @@ public class Animal extends Component implements IInteractable{
         super.start();
 
         load();
-
-        EventSystem.onEntityEvent(this.owner, "collide_start", onCollideStart);
-        EventSystem.onEntityEvent(this.owner, "collide_end", onCollideEnd);
-        EventSystem.onEntityEvent(this.owner, "damage", onDamage);
     }
 
     @Override
@@ -114,6 +110,7 @@ public class Animal extends Component implements IInteractable{
         if(attackList.size() > 0 && !validTarget) {
             Entity target = attackList.poll(); //Get the next target off of the list.
             attackTarget(target);
+            EventSystem.notifyEntityEvent(target, "attacking", this.owner);
         }
     }
 

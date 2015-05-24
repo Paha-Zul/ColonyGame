@@ -13,6 +13,7 @@ import com.mygdx.game.screens.GameScreen;
 import com.mygdx.game.util.DataBuilder;
 import com.mygdx.game.util.GH;
 import com.mygdx.game.util.Grid;
+import com.mygdx.game.util.ListHolder;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
 
@@ -54,6 +55,7 @@ public class Colony extends Component implements IInteractable {
             Entity c = this.makeColonist(building.owner.getTransform().getPosition(), GH.toMeters(200), "colonist");
             c.getComponent(Colonist.class).setName(GameScreen.firstNames[MathUtils.random(GameScreen.firstNames.length - 1)], GameScreen.lastNames[MathUtils.random(GameScreen.lastNames.length - 1)]);
             this.addColonist(c.getComponent(Colonist.class));
+            ListHolder.addEntity(c);
         }
     }
 
@@ -126,6 +128,7 @@ public class Colony extends Component implements IInteractable {
 
         //Spawns the Colony Entity and centers the camera on it.
         BuildingEntity colonyEnt = new BuildingEntity(start, 0, new String[]{"Colony",""}, 10);
+        ListHolder.addEntity(colonyEnt);
         ColonyGame.camera.position.set(colonyEnt.getTransform().getPosition().x, colonyEnt.getTransform().getPosition().y, 0);
         this.addOwnedToColony(colonyEnt.getComponent(Building.class));
 

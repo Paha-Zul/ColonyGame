@@ -11,10 +11,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.component.Resource;
 import com.mygdx.game.entity.ResourceEnt;
-import com.mygdx.game.util.Constants;
-import com.mygdx.game.util.DataBuilder;
-import com.mygdx.game.util.GH;
-import com.mygdx.game.util.Grid;
+import com.mygdx.game.util.*;
 import com.mygdx.game.util.managers.DataManager;
 
 import java.util.HashMap;
@@ -269,6 +266,8 @@ public class WorldGen {
         resEnt.addComponent(res);
         resEnt.getTransform().setScale(treeScale);
         resEnt.name = res.getDisplayName();
+        if(!jRes.resourceName.equals("waterSource"))
+            ListHolder.addEntity(resEnt);
     }
 
     /**

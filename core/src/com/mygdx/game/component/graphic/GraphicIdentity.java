@@ -1,4 +1,4 @@
-package com.mygdx.game.component;
+package com.mygdx.game.component.graphic;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -7,15 +7,16 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.ColonyGame;
+import com.mygdx.game.component.Component;
 import com.mygdx.game.util.Constants;
 import com.mygdx.game.util.GH;
 import com.mygdx.game.util.Grid;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
 
-public class GraphicIdentity extends Component{
+public class GraphicIdentity extends Component {
     @JsonIgnore
-	public Sprite sprite;
+    private Sprite sprite;
     @JsonProperty
     public int alignment = 0; //center
     @JsonProperty
@@ -34,9 +35,9 @@ public class GraphicIdentity extends Component{
         //This is initially needed for getting the sprite to be the right size. If we simply scaled it using this method, then
         //the image would draw the right size, but the offset from the width and height being unaffected causes real problems whenever the image
         //is not centered.
-        if(sprite == null) return;
-        this.sprite.setSize(GH.toMeters(sprite.getRegionWidth()), GH.toMeters(sprite.getRegionHeight()));
-        this.sprite.setOrigin(this.sprite.getWidth() / 2, this.sprite.getHeight() / 2);
+        if(getSprite() == null) return;
+        this.getSprite().setSize(GH.toMeters(getSprite().getRegionWidth()), GH.toMeters(getSprite().getRegionHeight()));
+        this.getSprite().setOrigin(this.getSprite().getWidth() / 2, this.getSprite().getHeight() / 2);
     }
 
     @Override
@@ -49,34 +50,62 @@ public class GraphicIdentity extends Component{
         setSprite(this.spriteTextureName, this.atlasName);
     }
 
+    protected void configureSprite(Sprite sprite){
+        sprite.setSize(GH.toMeters(sprite.getRegionWidth()), GH.toMeters(sprite.getRegionHeight()));
+        sprite.setOrigin(sprite.getWidth() / 2, sprite.getHeight() / 2);
+    }
+
+    /**
+     * Renders before the main graphic is rendered.
+     * @param delta The time between frames.
+     * @param batch The SpriteBatch to render with.
+     */
+    public void preRender(float delta, SpriteBatch batch){
+
+    }
+
     @Override
     public void render(float delta, SpriteBatch batch) {
         super.render(delta, batch);
-        if(sprite == null) return;
+        preRender(delta, batch);
 
-        Grid.GridInstance grid = ColonyGame.worldGrid;
+        if(getSprite() != null) {
 
-        Vector2 pos = this.owner.getTransform().getPosition(); //Cache the owner's position.
+            Grid.GridInstance grid = ColonyGame.worldGrid;
 
-        if(!ColonyGame.camera.frustum.boundsInFrustum(pos.x, pos.y, 0, sprite.getWidth(), sprite.getHeight(), 0))
-            return;
+            Vector2 pos = this.owner.getTransform().getPosition(); //Cache the owner's position.
 
-        Grid.Node node = grid.getNode(this.owner);
-        int visibility = grid.getVisibilityMap()[node.getX()][node.getY()].getVisibility();
-        if(visibility == Constants.VISIBILITY_UNEXPLORED)
-            return;
+            if (!ColonyGame.camera.frustum.boundsInFrustum(pos.x, pos.y, 0, getSprite().getWidth(), getSprite().getHeight(), 0))
+                return;
 
-        this.changeVisibility(visibility);
+            Grid.Node node = grid.getNode(this.owner);
+            int visibility = grid.getVisibilityMap()[node.getX()][node.getY()].getVisibility();
+            if (visibility == Constants.VISIBILITY_UNEXPLORED)
+                return;
 
-        this.sprite.setRotation(this.owner.getTransform().getRotation());
-        this.sprite.setScale(this.owner.getTransform().getScale());
+            this.changeVisibility(visibility);
 
-        if(alignment == 0)
-            this.sprite.setPosition(pos.x - (sprite.getWidth()/2), pos.y - (sprite.getHeight()/2));
-        if(alignment == 1)
-            this.sprite.setPosition(pos.x - (sprite.getWidth() / 2), pos.y);
+            this.getSprite().setRotation(this.owner.getTransform().getRotation());
+            this.getSprite().setScale(this.owner.getTransform().getScale());
 
-        this.sprite.draw(batch);
+            if (alignment == 0)
+                this.getSprite().setPosition(pos.x - (getSprite().getWidth() / 2), pos.y - (getSprite().getHeight() / 2));
+            if (alignment == 1)
+                this.getSprite().setPosition(pos.x - (getSprite().getWidth() / 2), pos.y);
+
+            this.getSprite().draw(batch);
+        }
+
+        postRender(delta, batch);
+    }
+
+    /**
+     * Renders after the main graphic.
+     * @param delta The time between frames.
+     * @param batch The SpriteBatch to render with.
+     */
+    public void postRender(float delta, SpriteBatch batch){
+
     }
 
     /**
@@ -92,15 +121,15 @@ public class GraphicIdentity extends Component{
         if(atlasName != null && !atlasName.isEmpty()) {
             this.atlasName = atlasName;
             TextureRegion region = ColonyGame.assetManager.get(atlasName, TextureAtlas.class).findRegion(textureName);
-            if(this.sprite == null) this.sprite = new Sprite(region);
-            else this.sprite.setTexture(region.getTexture());
+            if(this.getSprite() == null) this.setSprite(new Sprite(region));
+            else this.getSprite().setTexture(region.getTexture());
 
         //If no atlas is used, get it normally.
         }else {
             Texture texture = ColonyGame.assetManager.get(textureName, Texture.class);
             if(texture == null) return;
-            if (this.sprite == null) this.sprite = new Sprite(texture);
-            else this.sprite.setTexture(texture);
+            if (this.getSprite() == null) this.setSprite(new Sprite(texture));
+            else this.getSprite().setTexture(texture);
         }
     }
 
@@ -115,8 +144,16 @@ public class GraphicIdentity extends Component{
 
         this.currVisibility = visibility;
         if(this.currVisibility == Constants.VISIBILITY_EXPLORED)
-            this.sprite.setColor(Constants.COLOR_EXPLORED);
+            this.getSprite().setColor(Constants.COLOR_EXPLORED);
         else if(this.currVisibility == Constants.VISIBILITY_VISIBLE)
-            this.sprite.setColor(Constants.COLOR_VISIBILE);
+            this.getSprite().setColor(Constants.COLOR_VISIBILE);
+    }
+
+    public void setSprite(Sprite sprite) {
+        this.sprite = sprite;
+    }
+
+    public Sprite getSprite() {
+        return sprite;
     }
 }

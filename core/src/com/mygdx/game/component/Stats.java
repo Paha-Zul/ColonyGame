@@ -19,7 +19,7 @@ import java.util.HashMap;
 public class Stats extends Component{
     @JsonIgnore
     private HashMap<String, Stat> statMap = new HashMap<>();
-    @JsonIgnore
+    @JsonProperty
     private ArrayList<Stat> statList = new ArrayList<>();
     @JsonIgnore
     private ArrayList<RepeatingTimer> timerList = new ArrayList<>();
@@ -143,7 +143,7 @@ public class Stats extends Component{
     }
 
     public static class Stat{
-        @JsonProperty
+        @JsonIgnore
         public Functional.Callback onZero, onFull;
         @JsonProperty
         public Color color = Color.GREEN;
@@ -151,6 +151,10 @@ public class Stats extends Component{
         public String name, effect;
         @JsonProperty
         private float current, max;
+
+        public Stat(){
+
+        }
 
         public Stat(String name, float current, float max) {
             this.name = name;
@@ -186,6 +190,7 @@ public class Stats extends Component{
         /**
          * @return The current value of this Stat.
          */
+        @JsonIgnore
         public float getCurrVal(){
             return this.current;
         }
@@ -193,14 +198,17 @@ public class Stats extends Component{
         /**
          * @return The max value of this Stat.
          */
+        @JsonIgnore
         public float getMaxVal(){
             return this.max;
         }
 
+        @JsonIgnore
         public String getEffect(){
             return this.effect;
         }
 
+        @JsonIgnore
         public void setEffect(String effect){
             this.effect = effect;
         }

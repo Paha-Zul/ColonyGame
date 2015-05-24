@@ -51,22 +51,6 @@ public class SaveGameHelper {
         }
     }
 
-    private static class LoadedJsonWorld{
-        @JsonProperty
-        public ArrayList<JsonEntity> entities;
-        @JsonProperty
-        public ArrayList<Component> allComps;
-
-        public LoadedJsonWorld(){
-
-        }
-
-        public void clear(){
-            entities = new ArrayList<>();
-            allComps = new ArrayList<>();
-        }
-    }
-
     public static JsonWorld world = new JsonWorld();
 
     private static ObjectMapper mapper;
@@ -115,9 +99,9 @@ public class SaveGameHelper {
 
     private static void loadWorld(FileHandle file) {
         String save = readFile(file);
-        LoadedJsonWorld world = new LoadedJsonWorld();
+        JsonWorld world = new JsonWorld();
         try {
-            world = mapper.readValue(file.file(), LoadedJsonWorld.class);
+            world = mapper.readValue(file.file(), JsonWorld.class);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -143,7 +127,7 @@ public class SaveGameHelper {
 
             ent.entity.load(); //Load the entity.
             ent.entity.getComponents().iterateOverComponents(Component::load); //Load all the components on the Entity.
-            ListHolder.addEntity(ent.entity.drawLevel, ent.entity);
+            ListHolder.addEntity(ent.entity);
         }
 
         System.out.println("Done4!");
