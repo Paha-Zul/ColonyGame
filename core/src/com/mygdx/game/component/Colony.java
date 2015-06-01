@@ -113,7 +113,7 @@ public class Colony extends Component implements IInteractable {
                     for (int innerX = innerStartX; innerX <= innerEndX && placed; innerX++) {
                         for (int innerY = innerStartY; innerY <= innerEndY && placed; innerY++) {
                             Grid.TerrainTile tile = grid.getNode(innerX, innerY).getTerrainTile();
-                            if (tile.avoid)//If there is a single tile set to avoid, break!
+                            if (tile.tileRef.avoid)//If there is a single tile set to avoid, break!
                                 placed = false;
                         }
                     }
@@ -134,7 +134,7 @@ public class Colony extends Component implements IInteractable {
 
         //Destroys resources in an area around the Colony Entity.
         radius = 8;
-        Predicate<Grid.Node> notWaterNode = node -> !node.getTerrainTile().category.equals("water");
+        Predicate<Grid.Node> notWaterNode = node -> !node.getTerrainTile().tileRef.category.equals("water");
 
         //A consumer function to use. If the entity is a tree, destroy it!
         Consumer<Entity> treeConsumer = ent -> {
@@ -197,8 +197,7 @@ public class Colony extends Component implements IInteractable {
     public void addItemToGlobal(DataBuilder.JsonItem itemRef, int amount){
         Inventory.InventoryItem invItem = quickInv.get(itemRef.getItemName());
         if(invItem == null) {
-            quickInv.put(itemRef.getItemName(), new Inventory.InventoryItem(itemRef, amount, 1000000));
-            System.out.println("adding item to such.");
+            quickInv.put(itemRef.getItemName(), new Inventory.InventoryItem(itemRef, amount, -1));
         }else
             invItem.addAmount(amount);
     }

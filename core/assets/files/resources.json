@@ -7,7 +7,9 @@
     "itemAmounts": [[5,10]],
     "itemChances": [1],
     "img": ["Rock1"],
-    "gatherTime": 3
+    "gatherTime": 3,
+    "tool" : "shovel",
+    "toolRequired": true
   },
   {
     "resourceName": "iron_ore",
@@ -17,7 +19,9 @@
     "itemAmounts": [[5,10], [1,1]],
     "itemChances": [1, 0.1],
     "img": ["Ore1"],
-    "gatherTime": 3
+    "gatherTime": 3,
+    "tool" : "pick",
+    "toolRequired": true
   },
   {
     "resourceName": "americanlarch",

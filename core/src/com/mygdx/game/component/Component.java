@@ -131,6 +131,10 @@ public abstract class Component implements IDelayedDestroyable, ISaveable {
         this.active = val;
     }
 
+	public void setOwner(Entity owner){
+		this.owner = owner;
+	}
+
 	/**
 	 * If this Component is active or not.
 	 * @return True if the Component is active, false if not.

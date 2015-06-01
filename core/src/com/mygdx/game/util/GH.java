@@ -50,6 +50,10 @@ public class GH {
         FileHandle handle = Gdx.files.internal(""); //Get a path to where the game is.
         File file = new File(handle.file().getAbsolutePath()+"/"+"err_"+dateFormat.format(date)+".txt"); //Create a new file with the pathname.
         FileHandle errorLog = new FileHandle(file); //Get a file handle to the error log that we create.
+
+        String message = e.getMessage();
+        if(message == null) message = "";
+        errorLog.writeString(message, true);
         StackTraceElement[] trace = e.getStackTrace();
         for(StackTraceElement elem : trace)
             errorLog.writeString(elem.toString()+"\n", true);

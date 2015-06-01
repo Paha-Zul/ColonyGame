@@ -146,7 +146,7 @@ public class Animal extends Component implements IInteractable{
                 this.owner.getTags().addTag("resource"); //Add the resource tag
                 Resource res = this.owner.addComponent(new Resource()); //Add a Resource Component.
                 res.copyResource(DataManager.getData(animalRef.resourceName, DataBuilder.JsonResource.class));
-                if (interactable != null) interactable.changeType("resource");
+                if (interactable != null) interactable.setInterType("resource");
                 this.owner.destroyComponent(BehaviourManagerComp.class); //Destroy the BehaviourManagerComp
                 this.owner.destroyComponent(Stats.class); //Destroy the Stats component.
                 this.owner.destroyComponent(Animal.class); //Destroy this (Animal) Component.

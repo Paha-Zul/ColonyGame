@@ -31,6 +31,7 @@ public class BuildingEntity extends Entity{
         this.addComponent(new Building());
         ((Interactable)this.addComponent(new Interactable())).setInterType("building");
         this.addComponent(new Inventory());
+
         this.makeCollider();
     }
 
@@ -64,7 +65,6 @@ public class BuildingEntity extends Entity{
         collider.setWorld(ColonyGame.world);
         collider.setBody(bodyDef);
         collider.setFixture(fixtureDef);
-        collider.setActive(false);
 
         shape.dispose();
     }

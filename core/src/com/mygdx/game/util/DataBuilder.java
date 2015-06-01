@@ -27,6 +27,7 @@ import java.util.function.Consumer;
 public class DataBuilder implements IDestroyable{
     private final String filePath = "/files";
     private final String itemPath = "/items.json";
+    private final String toolPath = "/tools.json";
     private final String resourcePath = "/resources.json";
     private final String animalPath = "/animals.json";
     private final String weaponPath = "/weapon.json";
@@ -100,6 +101,11 @@ public class DataBuilder implements IDestroyable{
         //Build items
         buildJson(Gdx.files.internal(path + filePath + itemPath), JsonItem[].class, value -> {
             for (JsonItem jsonItem : value) DataManager.addData(jsonItem.itemName, jsonItem, JsonItem.class);
+        });
+
+        //Build items
+        buildJson(Gdx.files.internal(path + filePath + toolPath), JsonTool[].class, value -> {
+            for (JsonTool tool : value) DataManager.addData(tool.itemName, tool, JsonTool.class);
         });
 
         buildJson(Gdx.files.internal(path + filePath + resourcePath), JsonResource[].class, compileResources);
@@ -434,9 +440,9 @@ public class DataBuilder implements IDestroyable{
     };
 
     public static class JsonItem{
-        private String itemName, displayName, itemType, description, img;
-        private String[] effects;
-        private int[] strengths;
+        protected String itemName, displayName, itemType, description, img;
+        protected String[] effects;
+        protected int[] strengths;
 
         public String getItemName() {
             return itemName;
@@ -477,14 +483,21 @@ public class DataBuilder implements IDestroyable{
         }
     }
 
+    public static class JsonTool extends JsonItem{
+
+        public JsonTool(){
+            itemName = "tool";
+        }
+    }
+
     public static class JsonResource{
-        public String resourceName, displayName, resourceType, description, dir, skill;
+        public String resourceName, displayName, resourceType, description, dir, skill, tool;
         public String[] img, allimgwith, itemNames;
         public int[][] itemAmounts;
         public int[] itemChances;
         public int gatherTime;
         public float skillIncrease = 0;
-        public boolean noimg, infinite, skillRequired = false;
+        public boolean noimg, infinite, skillRequired, toolRequired;
     }
 
     public static class JsonTileGroup{
@@ -543,6 +556,8 @@ public class DataBuilder implements IDestroyable{
         public String name, displayName, ammoType;
         public float damage, travelSpeed, accuracy;
     }
+
+
 
     private static class FolderStructure{
         public int rank=0;

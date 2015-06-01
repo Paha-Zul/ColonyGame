@@ -216,6 +216,8 @@ public class MainMenuInterface extends UI{
         stage.act(delta);
         stage.draw();
 
+        batch.setColor(Color.WHITE);
+
         this.batch.begin();
     }
 

@@ -1,5 +1,5 @@
   {
-    "tileSize": 26,
+    "tileSize": 32,
     "worldWidth": 10000,
     "worldHeight": 10000,
     "worldGenSpeed": 5000,

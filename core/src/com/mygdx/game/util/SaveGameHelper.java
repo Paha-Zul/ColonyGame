@@ -100,6 +100,7 @@ public class SaveGameHelper {
     private static void loadWorld(FileHandle file) {
         String save = readFile(file);
         JsonWorld world = new JsonWorld();
+        ListHolder.clearEntityList();
         try {
             world = mapper.readValue(file.file(), JsonWorld.class);
         } catch (IOException e) {
@@ -112,7 +113,6 @@ public class SaveGameHelper {
 
         //Clear everything from the world.
         System.out.println("Done2!");
-        ListHolder.clearEntityList();
         System.out.println("Done3!");
 
         //Load it all back in (sync as we go!).
@@ -123,6 +123,7 @@ public class SaveGameHelper {
                 Component comp = giantCompMap.get(id);
                 ent.entity.addComponent(comp);
                 comp.initLoad();
+                comp.setOwner(ent.entity);
             }
 
             ent.entity.load(); //Load the entity.

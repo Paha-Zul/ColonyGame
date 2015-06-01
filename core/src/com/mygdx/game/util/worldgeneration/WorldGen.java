@@ -82,6 +82,7 @@ public class WorldGen {
         int maxAmount = ColonyGame.worldGrid.getWidth()*ColonyGame.worldGrid.getHeight() * DataBuilder.worldData.noiseMapHashMap.size();
         int stepsLeft = Constants.WORLDGEN_GENERATESPEED;
         boolean done = true; //Flag for completion.
+
         HashMap<String, DataBuilder.JsonTileGroup> tileGroupsMap = DataBuilder.tileGroupsMap;
         Grid.GridInstance grid = ColonyGame.worldGrid;
 
@@ -100,10 +101,10 @@ public class WorldGen {
             while (stepsLeft > 0 && currX < grid.getWidth()) {
                 if (!(currX < grid.padding || currX >= grid.getWidth() - grid.padding || currY < grid.padding || currY >= grid.getHeight() - grid.padding)) {
 
+                    //Get the info about the tile.
                     double noiseValue = SimplexNoise.noise((double) currX / freq, (double) currY / freq); //Generate the noise for this tile.
                     Vector2 position = new Vector2(currX * grid.getSquareSize(), currY * grid.getSquareSize()); //Set the position.
                     Sprite terrainSprite; //Prepare the sprite object.
-                    int type = 0; //The interType of tile.
                     float rotation = 0; //The rotation of the tile.
 
                     done = false; //Set done to false signifying that we are not finished yet.
@@ -125,12 +126,10 @@ public class WorldGen {
                         //Creates a new sprite and a new tile, assigns the Sprite to the tile and puts it into the map array.
                         terrainSprite = terrainAtlas.createSprite(jtile.img[randTileIndex]);
                         terrainSprite.setSize(grid.getSquareSize(), grid.getSquareSize());
-                        tile.set(terrainSprite, noiseValue, rotation, type, position); //Create a new terrain tile.
-                        tile.avoid = jtile.avoid;
+                        tile.set(terrainSprite, noiseValue, rotation, position, jtile, jtile.img[randTileIndex], "terrain"); //Create a new terrain tile.
+
                         if (jtile.tileNames.length <= randTileIndex)
                             GH.writeErrorMessage("Tile with image " + jtile.img[randTileIndex] + " and category " + jtile.category + " does not have a compName assigned to it");
-                        tile.tileName = jtile.tileNames[randTileIndex]; //Assign the compName
-                        tile.category = jtile.category; //Assign the category.
                         grid.getGrid()[currX][currY].setTerrainTile(tile); //Assign the tile to the map.
                     }
 
@@ -241,7 +240,7 @@ public class WorldGen {
 
     //Spawns a tree.
     private void spawnResource(DataBuilder.JsonTile jtile, Vector2 centerPos, Grid.TerrainTile currTile){
-        if(jtile == null || currTile == null || !currTile.category.equals(jtile.category))
+        if(jtile == null || currTile == null || !currTile.tileRef.category.equals(jtile.category))
             return;
 
         //Gets the resource that should be spawned on this tile

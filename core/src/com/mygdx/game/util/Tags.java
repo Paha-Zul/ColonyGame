@@ -79,6 +79,13 @@ public class Tags {
         this.tagMask &= ~(1 << intTag); //AND the inverted tag to zero it out.
     }
 
+    public void removeTags(String... tags){
+        for(String tag : tags){
+            int intTag = StringTable.StringToInt(type, tag);
+            this.tagMask &= ~(1 << intTag); //AND the inverted tag to zero it out.
+        }
+    }
+
     /**
      * Clears/removes all tags from this Tag.
      */

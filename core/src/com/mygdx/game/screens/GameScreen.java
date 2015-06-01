@@ -2,18 +2,28 @@ package com.mygdx.game.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.PixmapIO;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.ScreenUtils;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.component.Animal;
 import com.mygdx.game.component.Colony;
 import com.mygdx.game.component.Group;
 import com.mygdx.game.entity.AnimalEnt;
 import com.mygdx.game.entity.Entity;
+import com.mygdx.game.ui.PlayerInterface;
 import com.mygdx.game.ui.UI;
 import com.mygdx.game.util.*;
 import com.mygdx.game.util.managers.DataManager;
@@ -38,6 +48,7 @@ public class GameScreen implements Screen{
 
     private boolean generatedTrees = false;
     private Vector2 startLocation = new Vector2();
+    private TextureRegion[][] map;
 
     public GameScreen(final ColonyGame game){
         //Server.start(1337); //Start the server
@@ -51,11 +62,10 @@ public class GameScreen implements Screen{
 
     @Override
     public void show() {
-
+        //generateLarger();
     }
 
     public void render(float delta){
-
         if(!generatedTrees) {
             generatedTrees = WorldGen.getInstance().generateResources(new Vector2((ColonyGame.worldGrid.getWidth() - 1) * ColonyGame.worldGrid.getSquareSize(), (ColonyGame.worldGrid.getHeight() - 1) * ColonyGame.worldGrid.getSquareSize()), 0, Constants.WORLDGEN_RESOURCEGENERATESPEED);
             if(generatedTrees){
@@ -64,6 +74,9 @@ public class GameScreen implements Screen{
             }
         }
 
+        //drawMap();
+        renderMap();
+        updateEntities(delta);
         NotificationManager.update(delta);
     }
 
@@ -79,13 +92,30 @@ public class GameScreen implements Screen{
         NotificationManager.init(player, 1f);
     }
 
+    private void updateEntities(float delta){
+        batch.setProjectionMatrix(ColonyGame.camera.combined);
+        batch.setColor(Color.WHITE); //Set the color back to white.
+        batch.begin();
+
+        ListHolder.update(delta);
+        ListHolder.updateFloatingTexts(delta, batch);
+
+        //Update and render events
+        EventSystem.notifyGameEvent("update", delta);
+        EventSystem.notifyGameEvent("render", delta, batch);
+
+        //Step the Box2D simulation.
+        ColonyGame.world.step(1f / 60f, 8, 3);
+        batch.end();
+    }
+
     private void spawnAnimals(){
 
         String atlasName = "interactables";
 
         //Spawns some squirrels
         for(int i=0;i<100;i++) {
-            Vector2 pos = new Vector2(MathUtils.random(grid.getWidth())*grid.getSquareSize(), MathUtils.random(grid.getHeight())*grid.getSquareSize());
+            Vector2 pos = new Vector2(20 + MathUtils.random(grid.getWidth()-40)*grid.getSquareSize(), 20 + MathUtils.random(grid.getHeight()-40)*grid.getSquareSize());
             Entity animal = new AnimalEnt("squirrel", pos, 0, new String[]{"squirrel", atlasName}, 11);
             ListHolder.addEntity(animal);
         }
@@ -133,6 +163,119 @@ public class GameScreen implements Screen{
             group.addEntityToGroup(wolf);
             ListHolder.addEntity(wolf);
         }
+    }
+
+    private void generateLarger(){
+        int scale = 4;
+        //TODO Almost works, but is strangely stretched
+
+        TextureRegion region = new TextureRegion();
+        Grid.GridInstance grid = ColonyGame.worldGrid;
+        int squareSize = grid.getOriginalSquareSize()/scale;
+        int pixelSize = 2048/scale;
+        int regionSize = pixelSize/squareSize;
+        int currX = 0, currY = 0;
+        int totalX = grid.getWidth()/regionSize, totalY = grid.getHeight()/regionSize;
+        map = new TextureRegion[totalX+1][totalY+1];
+
+        TextureAtlas terrainAtlas = ColonyGame.assetManager.get("terrain", TextureAtlas.class);
+        SpriteBatch batch = new SpriteBatch();
+
+        //This loops over the entire map, generating large pixmaps to be made into textures.
+        while(currY <= totalY) {
+            FrameBuffer fb = new FrameBuffer(Pixmap.Format.RGBA8888, pixelSize, pixelSize, false);
+            fb.begin();
+            batch.begin();
+
+            int counterX=0, counterY=0;
+            //Loops over each terrain tile in this 'region'. The region size is how many pixels for each region there should be. Must pick a number divisible by the tiles.
+            for (int ySquare = currY*regionSize; ySquare < (currY+1)*regionSize; ySquare++) {
+                for (int xSquare = currX*(regionSize) ; xSquare < (currX+1)*regionSize; xSquare++) {
+                    Grid.Node node = grid.getNode(xSquare, ySquare);
+                    if(node != null) {
+                        Grid.TerrainTile tile = node.getTerrainTile();
+                        if (tile != null) {
+                            batch.draw(terrainAtlas.findRegion(tile.tileTextureName), counterX * grid.getOriginalSquareSize(), counterY * grid.getOriginalSquareSize(), grid.getOriginalSquareSize(), grid.getOriginalSquareSize());
+                            //System.out.println("Drawing " + (xSquare) + " " + (ySquare));
+                        }
+                    }
+                    counterX++;
+                }
+                counterX = 0;
+                counterY++;
+            }
+
+            //System.out.println("Out");
+
+            batch.end();
+            //Then retrieve the Pixmap from the buffer.
+            Pixmap pm = ScreenUtils.getFrameBufferPixmap(0, 0, pixelSize, pixelSize);
+            map[currX][currY] = new TextureRegion(new Texture(pm));
+            map[currX][currY].flip(false, true);
+
+            //tex.getTextureData().prepare();
+            FileHandle levelTexture = Gdx.files.local("levelTexture"+currX+"_"+currY+".png");
+            PixmapIO.writePNG(levelTexture, map[currX][currY].getTexture().getTextureData().consumePixmap());
+
+            fb.end();
+            pm.dispose();
+            fb.dispose();
+
+            currX++;
+            if(currX>totalX){
+                currX = 0;
+                currY++;
+            }
+        }
+    }
+
+    private void drawMap(){
+        if(PlayerInterface.getInstance().renderWorld) return;
+
+        batch.setProjectionMatrix(ColonyGame.camera.combined);
+        batch.begin();
+        double area = GH.toMeters(2048);
+        float size = (float)area;
+        for(int y=0;y<map.length;y++){
+            for(int x=0;x<map[y].length;x++){
+                batch.draw(map[x][y], x*size, y*size, size, size);
+            }
+        }
+        batch.end();
+    }
+
+    //Renders the map
+    private void renderMap(){
+
+        if(ColonyGame.worldGrid == null) return;
+        //if(!PlayerInterface.active || !PlayerInterface.getInstance().renderWorld) return;
+
+        batch.setProjectionMatrix(ColonyGame.camera.combined);
+        batch.begin();
+        int off = 5;
+
+        float squareSize = ColonyGame.worldGrid.getSquareSize();
+        int halfWidth = (int)((ColonyGame.camera.viewportWidth*ColonyGame.camera.zoom)/2f);
+        int halfHeight = (int)((ColonyGame.camera.viewportHeight*ColonyGame.camera.zoom)/2f);
+        int xc = (int)ColonyGame.camera.position.x;
+        int yc = (int)ColonyGame.camera.position.y;
+
+        int startX = ((xc - halfWidth)/squareSize) - off >= 0 ? (int)((xc - halfWidth)/squareSize) - off : 0;
+        int endX = ((xc + halfWidth)/squareSize) + off < ColonyGame.worldGrid.getWidth() ? (int)((xc + halfWidth)/squareSize) + off : ColonyGame.worldGrid.getWidth()-1;
+        int startY = ((yc - halfHeight)/squareSize) - off >= 0 ? (int)((yc - halfHeight)/squareSize) - off : 0;
+        int endY = ((yc + halfHeight)/squareSize) + off < ColonyGame.worldGrid.getHeight() ? (int)((yc + halfHeight)/squareSize) + off : ColonyGame.worldGrid.getHeight()-1;
+
+        //Loop over the array
+        for(int x=startX;x<=endX;x++) {
+            for (int y = startY; y <= endY; y++) {
+                Grid.TerrainTile tile = ColonyGame.worldGrid.getNode(x, y).getTerrainTile();
+                if(tile == null) continue;
+                tile.changeVisibility(ColonyGame.worldGrid.getVisibilityMap()[x][y].getVisibility());
+                tile.terrainSprite.draw(batch);
+            }
+        }
+
+        batch.end();
     }
 
     @Override

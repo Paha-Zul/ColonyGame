@@ -29,7 +29,7 @@ public class Inventory extends Component implements IOwnable{
     @JsonProperty
     private int currTotalItems = 0;
     @JsonProperty
-    private final int maxAmount = 10;
+    private int maxAmount = 10;
     @JsonIgnore
     private HashMap<String, InventoryItem> inventory = new HashMap<>(20);
 
@@ -65,7 +65,7 @@ public class Inventory extends Component implements IOwnable{
      */
     public boolean canAddItem(String itemName, int amount) {
         InventoryItem invItem = this.inventory.get(itemName);
-        return (invItem == null && amount <= maxAmount) || (invItem != null && invItem.canAddAmount(amount));
+        return (invItem == null && (this.maxAmount < 0 || amount <= this.maxAmount)) || (invItem != null && invItem.canAddAmount(amount));
     }
 
     /**
@@ -89,7 +89,7 @@ public class Inventory extends Component implements IOwnable{
         InventoryItem invItem = this.inventory.get(itemName);
         //If the invItem doesn't exist, create a new one and add it to the hash map.
         if(invItem == null) {
-            invItem = new InventoryItem(itemName, amount, maxAmount);
+            invItem = new InventoryItem(itemName, amount, this.maxAmount);
             this.inventory.put(itemName, invItem); //Make a new inventory itemRef in the hashmap.
             //Otherwise, simply add the amount from the itemRef.
         }else
@@ -174,6 +174,28 @@ public class Inventory extends Component implements IOwnable{
         return this.inventory.get(name);
     }
 
+    @Override
+    @JsonIgnore
+    public Colony getOwningColony() {
+        return this.colony;
+    }
+
+    /**
+     * Gets the max amount per item.
+     * @return The max amount per item
+     */
+    public int getMaxAmount() {
+        return maxAmount;
+    }
+
+    /**
+     * Sets the max amount per item.
+     * @param maxAmount The max amount per item.
+     */
+    public void setMaxAmount(int maxAmount) {
+        this.maxAmount = maxAmount;
+    }
+
     public void printInventory(){
         System.out.println("[Inventory]Inventory of "+this.getEntityOwner().name);
         for(InventoryItem item : this.inventory.values())
@@ -194,10 +216,6 @@ public class Inventory extends Component implements IOwnable{
         this.colony = colony;
     }
 
-    @Override
-    public Colony getOwningColony() {
-        return this.colony;
-    }
 
     public static class InventoryItem{
         private int amount, maxAmount;
@@ -219,7 +237,7 @@ public class Inventory extends Component implements IOwnable{
         }
 
         public boolean canAddAmount(int amount){
-            return this.amount + amount <= maxAmount;
+            return this.amount + amount <= maxAmount || this.maxAmount < 0;
         }
 
         public void addAmount(int amount){

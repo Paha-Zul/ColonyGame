@@ -86,8 +86,9 @@ public class ListHolder {
 
 	public static void clearEntityList(){
 		for(Array<Entity> list : entityList)
-			for(Entity ent : list)
-				ent.setToDestroy();
+			for(Entity ent : list) {
+				ent.destroy(ent);
+			}
 
 		entityList = new Array<>();
 	}

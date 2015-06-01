@@ -40,7 +40,9 @@ public class Stats extends Component{
 
     @Override
     public void load() {
+        super.load();
 
+        statList.forEach(stat -> statMap.put(stat.name, stat));
     }
 
     @Override
@@ -145,7 +147,7 @@ public class Stats extends Component{
     public static class Stat{
         @JsonIgnore
         public Functional.Callback onZero, onFull;
-        @JsonProperty
+        @JsonIgnore
         public Color color = Color.GREEN;
         @JsonProperty
         public String name, effect;

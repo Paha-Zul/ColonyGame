@@ -120,7 +120,7 @@ public class FindPath extends LeafTask {
 
                 //Get the TerrainTile and check if the tile is to be avoided.
                 Grid.TerrainTile tile = ColonyGame.worldGrid.getNode(neighborNode.x, neighborNode.y).getTerrainTile();
-                if (neighborNode.hasEnts() || (tile != null && tile.avoid))
+                if (neighborNode.hasEnts() || (tile != null && tile.tileRef.avoid))
                     neighborNode.B = 500;
 
                 //Set the H value, add it to the openList, and make its parent the current Node.

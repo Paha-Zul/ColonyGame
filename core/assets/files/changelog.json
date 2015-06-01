@@ -1,8 +1,8 @@
 {
   "changes": [
     {
-      "version": "0.25",
-      "date": "4/28/2015",
+      "version": "0.3",
+      "date": "5/24/2015",
       "log": [
         "Warning: loud startling shooting sounds in the game. Also, you're gonna probably need to scroll this area to see all the changes (just click in this area and scroll).",
         "- Removed: Really ugly checkboxes (lower left of this screen) for scripts. It's now done via the ModManager.jar. More on that at a later time....",

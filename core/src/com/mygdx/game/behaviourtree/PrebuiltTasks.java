@@ -467,7 +467,7 @@ public class PrebuiltTasks {
             Grid.TerrainTile tile = blackBoard.colonyGrid.getNode(node.getX(), node.getY()).getTerrainTile();
             int visibility = blackBoard.colonyGrid.getVisibilityMap()[node.getX()][node.getY()].getVisibility();
 
-            return tile.category.equals("LightWater") && visibility != Constants.VISIBILITY_UNEXPLORED;
+            return tile.tileRef.category.equals("LightWater") && visibility != Constants.VISIBILITY_UNEXPLORED;
         };
 
         //We want to remove the last step in our destination (first in the list) since it will be on the shore line.

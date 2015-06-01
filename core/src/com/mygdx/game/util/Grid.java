@@ -410,6 +410,10 @@ public class Grid {
             return this.numRows;
         }
 
+        public int getOriginalSquareSize(){
+            return this.squareSize;
+        }
+
         /**
          * @return The square size of this Grid.
          */
@@ -593,22 +597,21 @@ public class Grid {
      * A class that contains terrain information and graphics for the tile it is attached to.
      */
     public static class TerrainTile {
-        public String tileName, category;
+        public DataBuilder.JsonTile tileRef;
         public Sprite terrainSprite;
+        public String tileTextureName, tileAtlasName;
         public double noiseValue;
-        public int type;
-        public boolean avoid = false;
         private int visibility = Constants.VISIBILITY_UNEXPLORED;
 
         public TerrainTile(){
 
         }
 
-        public TerrainTile(Sprite sprite, double noiseValue, float rotation, int type, Vector2 position) {
+        public TerrainTile(Sprite sprite, double noiseValue, float rotation, Vector2 position, DataBuilder.JsonTile tileRef) {
             this.terrainSprite = new Sprite(sprite);
             this.terrainSprite.setColor(Constants.COLOR_UNEXPLORED);
             this.noiseValue = noiseValue;
-            this.type = type;
+            this.tileRef = tileRef;
             this.terrainSprite.setPosition(position.x, position.y);
             this.terrainSprite.setRotation(rotation);
         }
@@ -623,26 +626,23 @@ public class Grid {
             if(visibility == Constants.VISIBILITY_VISIBLE) this.terrainSprite.setColor(Constants.COLOR_VISIBILE);
         }
 
-        public void set(Sprite sprite, double noiseValue, float rotation, int type, Vector2 position){
+        public void set(Sprite sprite, double noiseValue, float rotation, Vector2 position, DataBuilder.JsonTile tileRef, String tileTextureName, String tileAtlasName){
             if(terrainSprite != null)
                 this.terrainSprite.set(sprite);
             else this.terrainSprite = sprite;
 
             this.noiseValue = noiseValue;
             this.terrainSprite.setRotation(rotation);
-            this.type = type;
+            this.tileRef = tileRef;
             this.terrainSprite.setPosition(position.x, position.y);
             this.terrainSprite.setColor(Constants.COLOR_UNEXPLORED);
+            this.tileTextureName = tileTextureName;
+            this.tileAtlasName = tileAtlasName;
         }
 
         @Override
         public int hashCode() {
-            int hash = (int)(terrainSprite.getX() + terrainSprite.getY() + terrainSprite.getWidth() + terrainSprite.getY());
-            hash += hash*type;
-            hash += noiseValue*10000d;
-            hash += terrainSprite.hashCode();
-
-            return hash;
+            return super.hashCode();
         }
     }
 

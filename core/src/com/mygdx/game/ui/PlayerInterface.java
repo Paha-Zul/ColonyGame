@@ -58,6 +58,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     private boolean mouseDown = false;
     private boolean dragging = false;
     private boolean drawGrid = false;
+    public boolean renderWorld = false;
 
     private Rectangle buttonRect = new Rectangle();
     private Rectangle uiBackgroundBaseRect = new Rectangle();
@@ -472,7 +473,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         if(node == null) return;
         Grid.TerrainTile tile = grid.getNode(index).getTerrainTile();
         if(tile == null) return;
-        GUI.Label(tile.category, this.batch, rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight());
+        GUI.Label(tile.tileRef.category, this.batch, rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight());
     }
 
     /**
@@ -570,7 +571,8 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
                 for(int i=0;i<itemList.size();i++){
                     Inventory.InventoryItem item = itemList.get(i);
                     GUI.Label(item.itemRef.getDisplayName(), this.batch, this.tabsRect.x, this.tabsRect.y, this.tabsRect.width, this.tabsRect.height - 20 - i*10, this.UIStyle);
-                    GUI.Label(""+item.getAmount()+"/"+item.getMaxAmount(), this.batch, this.tabsRect.x + 100, this.tabsRect.y, 100, this.tabsRect.height - 20 - i*10, this.UIStyle);
+                    String maxItemAmount = item.getMaxAmount() > 0 ? ""+item.getMaxAmount() : "?";
+                    GUI.Label(""+item.getAmount()+"/"+maxItemAmount, this.batch, this.tabsRect.x + 100, this.tabsRect.y, 100, this.tabsRect.height - 20 - i*10, this.UIStyle);
                 }
                 this.batch.setColor(Color.WHITE);
                 this.UIStyle.alignment = Align.center;
@@ -839,7 +841,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         if(keycode == Input.Keys.F1) //F1 - draw info
             this.drawingInfo = !this.drawingInfo;
         else if(keycode == Input.Keys.F2) //F2 - draw profiler
-            Profiler.enabled = this.drawingProfiler = !this.drawingProfiler;
+            this.renderWorld = !this.renderWorld;
         else if(keycode == Input.Keys.F3) { //F3 - draw grid
             this.drawGrid = !this.drawGrid;
         }else if(keycode == Input.Keys.SPACE) //SPACE - toggle paused

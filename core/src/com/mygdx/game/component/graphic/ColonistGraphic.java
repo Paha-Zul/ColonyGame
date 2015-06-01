@@ -7,26 +7,23 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.component.Colonist;
+import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  * Created by Paha on 5/24/2015.
  */
 public class ColonistGraphic extends GraphicIdentity{
+    @JsonIgnore
     private Sprite selectionSprite;
+    @JsonIgnore
     private Sprite alertSprite;
+    @JsonIgnore
     private Colonist colonist;
 
     @Override
     public void start() {
         super.start();
-
-        this.alertSprite = new Sprite(ColonyGame.assetManager.get("alertIcon", Texture.class));
-        this.selectionSprite = new Sprite(ColonyGame.assetManager.get("selectedCircle", Texture.class));
-        this.selectionSprite.setColor(Color.BLUE);
-
-        this.configureSprite(this.alertSprite);
-        this.configureSprite(this.selectionSprite);
-
+        load();
     }
 
     @Override
@@ -37,6 +34,13 @@ public class ColonistGraphic extends GraphicIdentity{
     @Override
     public void load() {
         super.load();
+
+        this.alertSprite = new Sprite(ColonyGame.assetManager.get("alertIcon", Texture.class));
+        this.selectionSprite = new Sprite(ColonyGame.assetManager.get("selectedCircle", Texture.class));
+        this.selectionSprite.setColor(Color.BLUE);
+
+        this.configureSprite(this.alertSprite);
+        this.configureSprite(this.selectionSprite);
     }
 
     @Override

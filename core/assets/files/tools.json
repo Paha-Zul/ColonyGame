@@ -1,0 +1,20 @@
+[
+  {
+  "itemName": "pick",
+  "displayName": "Pick",
+  "itemType": "tool",
+  "description": "Awesome pick."
+  },
+  {
+  "itemName": "shovel",
+  "displayName": "Shovel",
+  "itemType": "tool",
+  "description": "A shovel."
+  },
+  {
+  "itemName": "hatchet",
+  "displayName": "Hatchet",
+  "itemType": "tool",
+  "description": "Crazy hatchet."
+  }
+]

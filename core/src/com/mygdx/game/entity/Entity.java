@@ -329,8 +329,8 @@ public class Entity implements IDelayedDestroyable, ISaveable{
 		 * @return True if the Component was removed, false otherwise.
 		 */
 		public boolean removeComponent(Component comp){
-			if(comp.isActive()) return this.inactiveComponentList.removeValue(comp, false);
-			return this.activeComponentList.removeValue(comp, false);
+			if(comp.isActive()) return this.activeComponentList.removeValue(comp, true);
+			return this.inactiveComponentList.removeValue(comp, true);
 		}
         @JsonIgnore
         public Array<Component> getNewComponentList() {
@@ -417,7 +417,7 @@ public class Entity implements IDelayedDestroyable, ISaveable{
 		@Override
 		public void destroy(Entity destroyer) {
 			//Destroy all children
-			this.transform.getChildren().forEach(tranform -> tranform.destroy(tranform.getEntityOwner()));
+			this.getTransform().getChildren().forEach(transform -> transform.destroy(transform.getEntityOwner()));
 
 			//Remove myself from any parent.
 			if(this.transform.parent != null){

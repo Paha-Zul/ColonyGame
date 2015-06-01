@@ -66,7 +66,7 @@ public class FindClosestUnexplored extends LeafTask{
                         if(terrainTile == null || visTile == null) continue;
 
                         //Check terrain and visibility.
-                        boolean avoid = terrainTile.avoid;
+                        boolean avoid = terrainTile.tileRef.avoid;
                         int visibility = visTile.getVisibility();
                         if(visibility != Constants.VISIBILITY_UNEXPLORED || avoid)
                             continue;

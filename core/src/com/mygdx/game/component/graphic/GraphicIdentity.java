@@ -46,8 +46,14 @@ public class GraphicIdentity extends Component {
     }
 
     @Override
-    public void load() {
+    public void initLoad() {
+        super.initLoad();
         setSprite(this.spriteTextureName, this.atlasName);
+    }
+
+    @Override
+    public void load() {
+        super.load();
     }
 
     protected void configureSprite(Sprite sprite){
@@ -120,6 +126,9 @@ public class GraphicIdentity extends Component {
         if(atlasName != null && !atlasName.isEmpty()) {
             this.atlasName = atlasName;
             TextureRegion region = ColonyGame.assetManager.get(atlasName, TextureAtlas.class).findRegion(textureName);
+            if(region == null)
+                GH.writeErrorMessage("TextureRegion is null when creating sprite in GraphicIdentity. Texture: "+textureName+", atlasName: "+atlasName+". Does it exist?");
+
             if(this.getSprite() == null) this.setSprite(new Sprite(region));
             else this.getSprite().setTexture(region.getTexture());
 
@@ -148,6 +157,7 @@ public class GraphicIdentity extends Component {
             this.getSprite().setColor(Constants.COLOR_VISIBILE);
     }
 
+    @JsonIgnore
     public void setSprite(Sprite sprite) {
         this.sprite = sprite;
     }

@@ -24,7 +24,7 @@ public class Interactable extends Component{
     public void start() {
         super.start();
 
-        this.changeType(interType);
+        load();
     }
 
 
@@ -35,20 +35,7 @@ public class Interactable extends Component{
 
     @Override
     public void load() {
-
-    }
-
-    public void changeType(String newType){
-        if(newType.equals("resource"))
-            this.interactable = this.owner.getComponent(Resource.class);
-        else if(newType.equals("humanoid"))
-            this.interactable = this.owner.getComponent(Colonist.class);
-        else if(newType.equals("colony"))
-            this.interactable = this.owner.getComponent(Colony.class);
-        else if(newType.equals("animal"))
-            this.interactable = this.owner.getComponent(Animal.class);
-        else if(newType.equals("building"))
-            this.interactable = this.owner.getComponent(Building.class);
+        this.setInterType(interType);
     }
 
     @Override
@@ -58,6 +45,19 @@ public class Interactable extends Component{
 
     public void setInterType(String interType) {
         this.interType = interType;
+
+        if(this.started) {
+            if (interType.equals("resource"))
+                this.interactable = this.owner.getComponent(Resource.class);
+            else if (interType.equals("humanoid"))
+                this.interactable = this.owner.getComponent(Colonist.class);
+            else if (interType.equals("colony"))
+                this.interactable = this.owner.getComponent(Colony.class);
+            else if (interType.equals("animal"))
+                this.interactable = this.owner.getComponent(Animal.class);
+            else if (interType.equals("building"))
+                this.interactable = this.owner.getComponent(Building.class);
+        }
     }
 
     @JsonIgnore

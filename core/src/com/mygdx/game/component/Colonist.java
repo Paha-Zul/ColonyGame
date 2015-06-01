@@ -82,7 +82,9 @@ public class Colonist extends Component implements IInteractable, IOwnable{
 
     @Override
     public void load() {
+        super.load();
         this.inventory = this.getComponent(Inventory.class);
+        this.inventory.setMaxAmount(10);
         this.stats = this.getComponent(Stats.class);
         this.manager = this.getComponent(BehaviourManagerComp.class);
         this.manager.getBlackBoard().moveSpeed = 200f;
@@ -256,12 +258,12 @@ public class Colonist extends Component implements IInteractable, IOwnable{
     //The callback for when our health is 0.
     @JsonIgnore
     private Functional.Callback onZero = () -> {
-        this.owner.getTags().removeTag("alive");
+        this.owner.getTags().removeTags("alive", "alert", "selected");
         this.owner.getTransform().setRotation(90f);
         this.owner.destroyComponent(BehaviourManagerComp.class);
+        this.manager = null;
         this.collider.body.destroyFixture(this.fixture); //TODO THIS PROBABLY WILL BREAK IT!
         this.stats.clearTimers();
-        this.manager = null;
         GridComponent gridComp = this.getComponent(GridComponent.class);
         gridComp.setActive(false);
         ColonyGame.worldGrid.removeViewer(gridComp);
@@ -347,6 +349,16 @@ public class Colonist extends Component implements IInteractable, IOwnable{
         this.getEntityOwner().name = firstName;
     }
 
+    @JsonProperty("firstName")
+    public void setFirstName(String firstName){
+        this.firstName = firstName;
+    }
+
+    @JsonProperty("lastName")
+    public void setLastName(String lastName){
+        this.lastName = lastName;
+    }
+
     @JsonIgnore
     public Colony getColony() {
         return colony;
@@ -357,14 +369,17 @@ public class Colonist extends Component implements IInteractable, IOwnable{
     public String getName() {
         return this.firstName;
     }
-    @JsonProperty
+
+    @JsonProperty("firstName")
     public String getFirstName() {
         return firstName;
     }
-    @JsonProperty
+
+    @JsonProperty("lastName")
     public String getLastName() {
         return lastName;
     }
+
     @JsonProperty
     public boolean isAlert() {
         return alert;

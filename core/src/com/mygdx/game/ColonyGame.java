@@ -55,9 +55,9 @@ public class ColonyGame extends Game {
 	@Override
 	public void render () {
 		try {
+            Gdx.gl.glClearColor(screenColor.r, screenColor.g, screenColor.b, screenColor.a);
+            Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 			super.render();
-			Gdx.gl.glClearColor(screenColor.r, screenColor.g, screenColor.b, screenColor.a);
-			Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
 			//Update the profile and GUI.
 			float delta = Gdx.graphics.getDeltaTime();
@@ -69,7 +69,6 @@ public class ColonyGame extends Game {
 			}
 
 			ColonyGame.batch.begin();
-			updateEntities(delta);
 			updateGUI(delta);
 			ListHolder.updateTimers(delta);
 			ColonyGame.batch.end();
@@ -90,28 +89,7 @@ public class ColonyGame extends Game {
 		GUI.checkState();
 	}
 
-	private void updateEntities(float delta){
-		batch.setProjectionMatrix(ColonyGame.camera.combined);
-		Profiler.begin("GameScreen: Rendering Terrain"); //Start the profiler.
 
-		this.renderMap(); //Render the map.
-
-		batch.setColor(Color.WHITE); //Set the color back to white.
-		Profiler.end(); //End the profiler.
-
-		Profiler.begin("GameScreen: Updating Entities");
-		ListHolder.update(delta);
-		ListHolder.updateFloatingTexts(delta, batch);
-
-		//Update and render events
-		EventSystem.notifyGameEvent("update", delta);
-		EventSystem.notifyGameEvent("render", delta, batch);
-
-		Profiler.end();
-
-		//Step the Box2D simulation.
-		ColonyGame.world.step(1f / 60f, 8, 3);
-	}
 
 	private void updateGUI(float delta){
 		//Draw GUI stuff.
@@ -119,32 +97,4 @@ public class ColonyGame extends Game {
 		ListHolder.updateGUI(delta, batch);
         EventSystem.notifyGameEvent("render_GUI", delta, batch);
     }
-
-	//Renders the map
-	private void renderMap(){
-		if(worldGrid == null) return;
-
-		int off = 5;
-
-		float squareSize = ColonyGame.worldGrid.getSquareSize();
-		int halfWidth = (int)((ColonyGame.camera.viewportWidth*ColonyGame.camera.zoom)/2f);
-		int halfHeight = (int)((ColonyGame.camera.viewportHeight*ColonyGame.camera.zoom)/2f);
-		int xc = (int)ColonyGame.camera.position.x;
-		int yc = (int)ColonyGame.camera.position.y;
-
-		int startX = ((xc - halfWidth)/squareSize) - off >= 0 ? (int)((xc - halfWidth)/squareSize) - off : 0;
-		int endX = ((xc + halfWidth)/squareSize) + off < ColonyGame.worldGrid.getWidth() ? (int)((xc + halfWidth)/squareSize) + off : ColonyGame.worldGrid.getWidth()-1;
-		int startY = ((yc - halfHeight)/squareSize) - off >= 0 ? (int)((yc - halfHeight)/squareSize) - off : 0;
-		int endY = ((yc + halfHeight)/squareSize) + off < ColonyGame.worldGrid.getHeight() ? (int)((yc + halfHeight)/squareSize) + off : ColonyGame.worldGrid.getHeight()-1;
-
-		//Loop over the array
-		for(int x=startX;x<=endX;x++) {
-			for (int y = startY; y <= endY; y++) {
-				Grid.TerrainTile tile = worldGrid.getNode(x, y).getTerrainTile();
-				if(tile == null) continue;
-				tile.changeVisibility(worldGrid.getVisibilityMap()[x][y].getVisibility());
-				tile.terrainSprite.draw(batch);
-			}
-		}
-	}
 }

@@ -2,7 +2,9 @@ package com.mygdx.game.component;
 
 import com.mygdx.game.interfaces.IInteractable;
 import com.mygdx.game.interfaces.IOwnable;
+import com.mygdx.game.util.Tags;
 import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
  * Created by Paha on 5/19/2015.
@@ -12,6 +14,8 @@ public class Building extends Component implements IOwnable, IInteractable{
     private Colony colonyOwner;
     @JsonIgnore
     private Inventory inventory;
+    @JsonProperty
+    public final Tags buildingTags = new Tags("building");
 
     public Building(){
 
@@ -20,6 +24,8 @@ public class Building extends Component implements IOwnable, IInteractable{
     @Override
     public void start() {
         super.start();
+
+        load();
         this.setActive(false);
     }
 
@@ -31,6 +37,7 @@ public class Building extends Component implements IOwnable, IInteractable{
     @Override
     public void load() {
         this.inventory = this.getComponent(Inventory.class);
+        this.inventory.setMaxAmount(-1);
     }
 
     @Override

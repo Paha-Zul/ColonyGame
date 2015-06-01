@@ -103,6 +103,7 @@ public class Collider extends Component implements IScalable{
 
         this.body.setActive(true);
 
+
         //this.owner.getComponents().registerScalable(this);
         //this.body.setActive(false);
     }
