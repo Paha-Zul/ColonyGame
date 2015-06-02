@@ -256,7 +256,10 @@ public class PrebuiltTasks {
         FindPath findPathToUnexplored = new FindPath("Finding Path to Unexplored", blackBoard);
         MoveTo moveToLocation = new MoveTo("Moving to Explore", blackBoard);
 
-        findClosestUnexplored.control.callbacks.startCallback = task -> task.blackBoard.target = task.blackBoard.myManager.getEntityOwner().getComponent(Colonist.class).getColony().getOwnedFromColony(Building.class).getEntityOwner();
+        findClosestUnexplored.control.callbacks.startCallback = task -> {
+            Colonist col = task.blackBoard.myManager.getEntityOwner().getComponent(Colonist.class);
+            task.blackBoard.target = col.getColony().getOwnedFromColony(Building.class, building -> building.buildingTags.hasTag("main")).getEntityOwner();
+        };
 
         ((ParentTaskController) sequence.getControl()).addTask(findClosestUnexplored);
         ((ParentTaskController) sequence.getControl()).addTask(findPathToUnexplored);
@@ -321,7 +324,7 @@ public class PrebuiltTasks {
             blackBoard.itemNameToTake = null;
 
             blackBoard.target = blackBoard.myManager.getEntityOwner().getComponent(Colonist.class).getColony().getEntityOwner();
-            blackBoard.fromInventory = blackBoard.myManager.getEntityOwner().getComponent(Colonist.class).getColony().getOwnedFromColony(Building.class).getComponent(Inventory.class);
+            blackBoard.fromInventory = blackBoard.myManager.getEntityOwner().getComponent(Colonist.class).getColony().getOwnedFromColony(Building.class, building -> building.buildingTags.hasTag("main")).getComponent(Inventory.class);
             blackBoard.toInventory = blackBoard.myManager.getEntityOwner().getComponent(Inventory.class);
         };
 

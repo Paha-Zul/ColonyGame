@@ -42,11 +42,13 @@ public class LoadingInterface extends UI{
         super.render(delta, batch);
 
         if(!done) {
+            //Black screen coloring stuff.
             Color color = this.batch.getColor();
             this.batch.setColor(Color.BLACK);
             GUI.Texture(this.whiteTexture, this.batch, this.square);
             this.batch.setColor(color);
 
+            //Draw loading bar
             GUI.Texture(this.outline, this.batch, this.loadingBar);
             GUI.Texture(this.bar, this.batch, this.loadingBar.x, this.loadingBar.y, this.loadingBar.width*WorldGen.getInstance().percentageDone, this.loadingBar.height);
             GUI.Label("Loading Terrain", this.batch, this.loadingBar.getX(), this.loadingBar.getY(), loadingBar.getWidth(), loadingBar.getHeight());

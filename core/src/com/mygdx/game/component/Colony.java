@@ -48,11 +48,11 @@ public class Colony extends Component implements IInteractable {
 
         load();
         placeStart();
-        Building building = this.getOwnedFromColony(Building.class);
+        Building mainBuilding = this.getOwnedFromColony(Building.class, building -> building.buildingTags.hasTag("main"));
 
         //Make some colonists!
         for(int i=0;i<5;i++) {
-            Entity c = this.makeColonist(building.owner.getTransform().getPosition(), GH.toMeters(200), "colonist");
+            Entity c = this.makeColonist(mainBuilding.owner.getTransform().getPosition(), GH.toMeters(200), "colonist");
             c.getComponent(Colonist.class).setName(GameScreen.firstNames[MathUtils.random(GameScreen.firstNames.length - 1)], GameScreen.lastNames[MathUtils.random(GameScreen.lastNames.length - 1)]);
             this.addColonist(c.getComponent(Colonist.class));
             ListHolder.addEntity(c);
@@ -76,12 +76,16 @@ public class Colony extends Component implements IInteractable {
 
     private void placeStart(){
         //Find a suitable place to spawn our Colony
-        int radius = 0;
+        int radius = 0, areaToSearch = 5;
         boolean placed = false;
         Grid.GridInstance grid = ColonyGame.worldGrid;
         Vector2 start = new Vector2(grid.getWidth()/2, grid.getHeight()/2);
         int[] index = grid.getIndex(start);
 
+        /**
+         * For now, starts in the middle of the map. For each loop, search an area ('areaToSearch') that is suitable. This will check an area (ex: 5x5) to make sure
+         * there are no obstacles or terrain problems. If the area is suitable, the building is placed. Otherwise, we increase the radius and keep searching.
+         */
         while (!placed) {
             int startX = index[0] - radius;
             int endX = index[0] + radius;
@@ -91,6 +95,8 @@ public class Colony extends Component implements IInteractable {
             //Loop over each tile.
             for (int x = startX; x <= endX && !placed; x++) {
                 for (int y = startY; y <= endY && !placed; y++) {
+
+                    //If we're not on the edge, continue. We don't want to search the inner areas as we go.
                     if (x != startX && x != endX && y != startY && y != endY)
                         continue;
 
@@ -98,10 +104,10 @@ public class Colony extends Component implements IInteractable {
                         GH.writeErrorMessage("Couldn't find a place to spawn the base!");
 
                     //For each tile, we want to check if there is a 4x4 surrounding area.
-                    int innerStartX = x - 5;
-                    int innerEndX = x + 5;
-                    int innerStartY = y - 5;
-                    int innerEndY = y + 5;
+                    int innerStartX = x - areaToSearch;
+                    int innerEndX = x + areaToSearch;
+                    int innerStartY = y - areaToSearch;
+                    int innerEndY = y + areaToSearch;
 
                     //If the node is null (outside the bounds), continue.
                     if (grid.getNode(innerStartX, innerStartY) == null || grid.getNode(innerEndX, innerEndY) == null)
@@ -130,7 +136,21 @@ public class Colony extends Component implements IInteractable {
         BuildingEntity colonyEnt = new BuildingEntity(start, 0, new String[]{"Colony",""}, 10);
         ListHolder.addEntity(colonyEnt);
         ColonyGame.camera.position.set(colonyEnt.getTransform().getPosition().x, colonyEnt.getTransform().getPosition().y, 0);
-        this.addOwnedToColony(colonyEnt.getComponent(Building.class));
+        Building colonyBuilding = colonyEnt.getComponent(Building.class);
+        this.addOwnedToColony(colonyBuilding);
+        colonyBuilding.buildingTags.addTag("main");
+
+        //Spawns the Equipment building.
+        BuildingEntity equipEnt = new BuildingEntity(new Vector2(start.x - 5, start.y - 5), 0, new String[]{"Colony",""}, 10);
+        equipEnt.name = "Equipment Shed";
+        ListHolder.addEntity(equipEnt);
+        Building equipBuilding = equipEnt.getComponent(Building.class);
+        this.addOwnedToColony(equipBuilding);
+        equipBuilding.buildingTags.addTag("equipment");
+        Inventory equipInv = equipEnt.getComponent(Inventory.class);
+        equipInv.addItem("pick");
+        equipInv.addItem("shovel");
+        equipInv.addItem("hatchet");
 
         //Destroys resources in an area around the Colony Entity.
         radius = 8;
@@ -164,11 +184,23 @@ public class Colony extends Component implements IInteractable {
         comp.addedToColony(this);
     }
 
+    /**
+     * Gets a (T) Component from this colony.
+     * @param cls The Class type of the component to get (ie: Building.class).
+     * @param predicate The Predicate function to test the Component for. (ie: does Building have inventory?)
+     * @param <T> The Component type (ie: Building.class) which extends component.
+     * @return The Component that matches the predicate, if any. Otherwise, null if no match was found.
+     */
     @SuppressWarnings("unchecked")
     @JsonIgnore
-    public <T extends Component> T getOwnedFromColony(Class<T> cls){
-        return (T)ownedMap.get(cls).get(0);
+    public <T extends Component> T getOwnedFromColony(Class<T> cls, Predicate<T> predicate){
+        for(Component comp : ownedMap.get(cls)){
+            if(predicate.test((T)comp)) return (T)comp;
+        }
+
+        return null;
     }
+
     @JsonIgnore
     public <T extends Component> Array<Component> getOwnedListFromColony(Class<T> cls){
         return ownedMap.get(cls);

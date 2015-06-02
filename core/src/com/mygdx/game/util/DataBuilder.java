@@ -105,7 +105,7 @@ public class DataBuilder implements IDestroyable{
 
         //Build items
         buildJson(Gdx.files.internal(path + filePath + toolPath), JsonTool[].class, value -> {
-            for (JsonTool tool : value) DataManager.addData(tool.itemName, tool, JsonTool.class);
+            for (JsonTool tool : value) DataManager.addData(tool.itemName, tool, JsonItem.class);
         });
 
         buildJson(Gdx.files.internal(path + filePath + resourcePath), JsonResource[].class, compileResources);

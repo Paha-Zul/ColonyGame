@@ -18,6 +18,7 @@ public class LoadingScreen implements Screen {
     private ColonyGame game;
     private LoadingInterface loadingInterface;
 
+
     public LoadingScreen(final ColonyGame game){
         this.game = game;
     }
