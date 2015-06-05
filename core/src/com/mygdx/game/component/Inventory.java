@@ -3,6 +3,7 @@ package com.mygdx.game.component;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.interfaces.IOwnable;
 import com.mygdx.game.util.DataBuilder;
+import com.mygdx.game.util.EventSystem;
 import com.mygdx.game.util.managers.DataManager;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
@@ -58,6 +59,15 @@ public class Inventory extends Component implements IOwnable{
     }
 
     /**
+     * Checks if this Inventory can add 1 of an item.
+     * @param itemName The compName of the Item to add
+     * @return True if it can be added, false otherwise.
+     */
+    public boolean canAddItem(String itemName){
+        return this.canAddItem(itemName, 1);
+    }
+
+    /**
      * Checks if this Inventory can add a certain amount of item.
      * @param itemName The compName of the item to add.
      * @param amount The amount to add.
@@ -66,15 +76,6 @@ public class Inventory extends Component implements IOwnable{
     public boolean canAddItem(String itemName, int amount) {
         InventoryItem invItem = this.inventory.get(itemName);
         return (invItem == null && (this.maxAmount < 0 || amount <= this.maxAmount)) || (invItem != null && invItem.canAddAmount(amount));
-    }
-
-    /**
-     * Checks if this Inventory can add 1 of an item.
-     * @param itemName The compName of the Item to add
-     * @return True if it can be added, false otherwise.
-     */
-    public boolean canAddItem(String itemName){
-        return this.canAddItem(itemName, 1);
     }
 
     /**
@@ -99,6 +100,8 @@ public class Inventory extends Component implements IOwnable{
         this.currTotalItems+=amount;
         this.lasAddedItem = itemName;
         if(colony != null) colony.addItemToGlobal(invItem.itemRef, amount);
+
+        EventSystem.notifyEntityEvent(this.owner, "added_item", invItem.itemRef, amount);
     }
 
     /**
@@ -108,8 +111,6 @@ public class Inventory extends Component implements IOwnable{
     public void addItem(String itemName){
         this.addItem(itemName, 1);
     }
-
-
 
     /**
      * Removes all of an itemRef (by compName) and returns that itemRef with the amount removed.
@@ -145,6 +146,8 @@ public class Inventory extends Component implements IOwnable{
             this.inventory.remove(itemName);
 
         if(colony != null) colony.addItemToGlobal(invItem.itemRef, -amt);
+        
+        EventSystem.notifyEntityEvent(this.owner, "removed_item", invItem.itemRef, amt);
         return amt;
     }
 

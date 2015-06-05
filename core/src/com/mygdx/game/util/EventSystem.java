@@ -13,10 +13,12 @@ public class EventSystem {
     //A map of maps of lists of consumer interfaces.
     private static HashMap<Long, HashMap<String, ArrayList<java.util.function.Consumer<Object[]>>>> entityMap = new HashMap<>();
 
+    private static final int gameEventID = 0;
+
     /**
      * Adds a function to the EventSystem.
      * @param entity The Entity to use for its ID. This will direct the call to the correct Entity.
-     * @param eventName The event compName, ie: "collidestart" to indicate which event to call.
+     * @param eventName The event name, ie: "collidestart" to indicate which event to call.
      * @param function The Consumer function to be called on an event.
      */
     public static void onEntityEvent(Entity entity, String eventName, java.util.function.Consumer<Object[]> function){
@@ -25,13 +27,19 @@ public class EventSystem {
 
     /**
      * Adds a function to the EventSystem for a game event.
-     * @param eventName The compName of the event.
+     * @param eventName The name of the event.
      * @param function THe Consumer function to be called on an event.
      */
     public static void onGameEvent(String eventName, java.util.function.Consumer<Object[]> function){
-        registerEvent(-1, eventName, function);
+        registerEvent(gameEventID, eventName, function);
     }
 
+    /**
+     * Registers an event to the system.
+     * @param id The ID of the Entity if an Entity is receiving the event. Otherwise, an ID of 'gameEventID' (class variable) dictates a game event.
+     * @param eventName The name of the Event to call.
+     * @param function The function to register to this Event.
+     */
     private static void registerEvent(long id, String eventName, java.util.function.Consumer<Object[]> function){
         //If the map for the Entity id is null, add a new map.
         if(entityMap.get(id) == null)
@@ -66,11 +74,11 @@ public class EventSystem {
     /**
      * Unreigsters all events with 'handlerName' passed in.
      * @param entity The Entity to remove from.
-     * @param handlerName The compName of the handler to remove.
+     * @param eventName The compName of the event to remove.
      */
-    public static void unregisterHandler(Entity entity, String handlerName){
-        if(entityMap.get(entity.getID()) != null && entityMap.get(entity.getID()).get(handlerName) != null)
-            entityMap.get(entity.getID()).remove(handlerName);
+    public static void unregisterHandler(Entity entity, String eventName){
+        if(entityMap.get(entity.getID()) != null && entityMap.get(entity.getID()).get(eventName) != null)
+            entityMap.get(entity.getID()).remove(eventName);
     }
 
     /**
@@ -83,36 +91,36 @@ public class EventSystem {
     }
 
     /**
-     * Calls all Events with the "handleName" on a specific Entity.
+     * Calls all Events with the "eventName" on a specific Entity.
      * @param entity The Entity to call the event on.
-     * @param handlerName The compName of the Event.
+     * @param eventName The name of the Event.
      * @param args The arguments to pass into the list.
      */
-    public static void notifyEntityEvent(@NotNull Entity entity, String handlerName, Object... args){
+    public static void notifyEntityEvent(@NotNull Entity entity, String eventName, Object... args){
         if(entity == null) return; //If the Entity is null, return.
-        if(entityMap.get(entity.getID()) == null || entityMap.get(entity.getID()).get(handlerName) == null)
+        if(entityMap.get(entity.getID()) == null || entityMap.get(entity.getID()).get(eventName) == null)
            return; //If any of the maps or lists are null, return.
 
         //get the list.
-        ArrayList<java.util.function.Consumer<Object[]>> list = entityMap.get(entity.getID()).get(handlerName);
+        ArrayList<java.util.function.Consumer<Object[]>> list = entityMap.get(entity.getID()).get(eventName);
 
         if(list == null) return; //If the list is null, return.
         list.forEach(evt -> evt.accept(args)); //For each item in the list, call it!
     }
 
     /**
-     * Calls all Events with the "handleName" on a specific Entity.
-     * @param handlerName The compName of the Event.
+     * Calls all Events with the "eventName" on a specific Entity.
+     * @param eventName The compName of the Event.
      * @param args The arguments to pass into the list.
      */
-    public static void notifyGameEvent(String handlerName, Object... args){
-        long id = -1;
+    public static void notifyGameEvent(String eventName, Object... args){
+        long id = gameEventID;
 
-        if(entityMap.get(id) == null || entityMap.get(id).get(handlerName) == null)
+        if(entityMap.get(id) == null || entityMap.get(id).get(eventName) == null)
             return; //If any of the maps or lists are null, return.
 
         //get the list.
-        ArrayList<java.util.function.Consumer<Object[]>> list = entityMap.get(id).get(handlerName);
+        ArrayList<java.util.function.Consumer<Object[]>> list = entityMap.get(id).get(eventName);
 
         if(list == null) return; //If the list is null, return.
         list.forEach(evt -> evt.accept(args)); //For each item in the list, call it!

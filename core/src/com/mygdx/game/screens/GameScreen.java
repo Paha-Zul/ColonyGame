@@ -66,13 +66,19 @@ public class GameScreen implements Screen{
     }
 
     public void render(float delta){
+
+        //Generate the trees if it hasn't been done already.
         if(!generatedTrees) {
-            generatedTrees = WorldGen.getInstance().generateResources(new Vector2((ColonyGame.worldGrid.getWidth() - 1) * ColonyGame.worldGrid.getSquareSize(), (ColonyGame.worldGrid.getHeight() - 1) * ColonyGame.worldGrid.getSquareSize()), 0, Constants.WORLDGEN_RESOURCEGENERATESPEED);
+            generatedTrees = WorldGen.getInstance().generateResources(new Vector2((ColonyGame.worldGrid.getWidth() - 1) * ColonyGame.worldGrid.getSquareSize(),
+                    (ColonyGame.worldGrid.getHeight() - 1) * ColonyGame.worldGrid.getSquareSize()), 0, Constants.WORLDGEN_RESOURCEGENERATESPEED);
             if(generatedTrees){
                 startLocation.set((ColonyGame.worldGrid.getWidth()/2)*ColonyGame.worldGrid.getSquareSize(), (ColonyGame.worldGrid.getHeight()/2)*ColonyGame.worldGrid.getSquareSize());
                 generateStart(startLocation);
             }
         }
+
+        if(PlayerInterface.getInstance().paused) delta = 0;
+        else delta *= PlayerInterface.getInstance().gameSpeed;
 
         //drawMap();
         renderMap();

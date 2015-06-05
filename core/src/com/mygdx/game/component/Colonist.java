@@ -267,6 +267,7 @@ public class Colonist extends Component implements IInteractable, IOwnable{
         GridComponent gridComp = this.getComponent(GridComponent.class);
         gridComp.setActive(false);
         ColonyGame.worldGrid.removeViewer(gridComp);
+        this.setActive(false); //Disable the update tick. We won't be active for now...
     };
 
     //The function for when a "attack" signal is sent to this colonist.

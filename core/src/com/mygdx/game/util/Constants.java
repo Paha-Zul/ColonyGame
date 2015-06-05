@@ -23,7 +23,7 @@ public class Constants {
 
 	//WorldGen stuff
     public static int WORLDGEN_GENERATESPEED = 500;
-    public static int WORLDGEN_RESOURCEGENERATESPEED = 500;
+    public static int WORLDGEN_RESOURCEGENERATESPEED = 5000000;
 
     //Terrain stuff
 	public final static int TERRAIN_WATER = 0;

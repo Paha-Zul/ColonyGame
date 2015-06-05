@@ -43,7 +43,6 @@ public class Entity implements IDelayedDestroyable, ISaveable{
     @JsonProperty
     private long transformID, identityID;
 
-
     public Entity(){
 
     }
@@ -56,7 +55,7 @@ public class Entity implements IDelayedDestroyable, ISaveable{
 	public Entity(Vector2 position, float rotation, int drawLevel){
 		this.components.transform = this.components.addComponent(new Transform(position, rotation));
 
-		this.ID = counterID++;
+		this.getNewID();
 		this.drawLevel = drawLevel;
 	}
 
@@ -71,8 +70,13 @@ public class Entity implements IDelayedDestroyable, ISaveable{
 		for(Component comp : comps)
 			this.components.addComponent(comp);
 
-        this.ID = counterID++;
+		this.getNewID();
 		this.drawLevel = drawLevel;
+	}
+
+	private void getNewID(){
+		this.ID = counterID++;
+		if(this.ID == 0) this.ID = counterID++;
 	}
 
 	public void start(){

@@ -187,15 +187,15 @@ public class WorldGen {
         boolean done = false;
         Grid.GridInstance grid = ColonyGame.worldGrid;
 
-        if(!started){
-            this.openList.add(grid.getNode(startPos));
-            this.startIndex = grid.getIndex(startPos);
-            this.started = true;
-            noiseMapName = DataBuilder.worldData.noiseMapHashMap.get(this.currIndex).name;
-        }
-
         //Partially executes a breadth first search.
         for (int i = 0; i < step; i++) {
+            if(!started){
+                this.openList.add(grid.getNode(startPos));
+                this.startIndex = grid.getIndex(startPos);
+                this.started = true;
+                noiseMapName = DataBuilder.worldData.noiseMapHashMap.get(this.currIndex).name;
+            }
+
             Grid.Node currNode = openList.pop(); //Pop the first neighbor
             Grid.Node[] neighbors = grid.getNeighbors8(currNode);
 
@@ -218,14 +218,16 @@ public class WorldGen {
                 spawnResource(getTileAtHeight(DataBuilder.tileGroupsMap.get(noiseMapName).tiles, (float) currNode.getTerrainTile().noiseValue), center, currNode.getTerrainTile());
             }
 
-            //If there are no more nodes in openList, we are done.
+            //If there are no more nodes in openList, but we still have noise maps to go, continue again!
             if (openList.size() == 0 && this.currIndex < DataBuilder.worldData.noiseMapHashMap.size() - 1) {
                 done = false;
                 this.openList = new LinkedList<>();
                 this.visitedMap = new HashMap<>();
                 this.started = false;
                 this.currIndex++;
-                break;
+                continue;
+
+            //Otherwise, we are completely finished.
             }else if(openList.size() == 0){
                 done = true;
                 this.openList = null;

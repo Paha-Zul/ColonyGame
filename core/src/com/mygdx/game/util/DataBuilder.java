@@ -108,8 +108,13 @@ public class DataBuilder implements IDestroyable{
             for (JsonTool tool : value) DataManager.addData(tool.itemName, tool, JsonItem.class);
         });
 
-        buildJson(Gdx.files.internal(path + filePath + resourcePath), JsonResource[].class, compileResources);
+        //Build resources.
+        buildJson(Gdx.files.internal(path + filePath + resourcePath), JsonResource[].class, buildResources);
+
+        //Build tiles
         buildJson(Gdx.files.internal(path + filePath + tilePath), JsonTileGroup[].class, compileTiles);
+
+        //Build the world.
         buildJson(Gdx.files.internal(path + filePath + worldPath), JsonWorld.class, compileWorldGen);
 
         //Build animals
@@ -333,7 +338,7 @@ public class DataBuilder implements IDestroyable{
         return value;
     }
 
-    Consumer<JsonResource[]> compileResources = value -> {
+    Consumer<JsonResource[]> buildResources = value -> {
         for(JsonResource jRes : value){
             //If the dir field is not null, we have a directory to pull images from.
             if(jRes.dir != null){
@@ -355,6 +360,7 @@ public class DataBuilder implements IDestroyable{
                 list.clear();
             }
 
+            //If the amounts for the items is null, write an error.
             if(jRes.itemAmounts == null)
                 GH.writeErrorMessage("No item amounts for the resource: "+jRes.resourceName, true);
 
@@ -366,6 +372,16 @@ public class DataBuilder implements IDestroyable{
             }
 
             DataManager.addData(jRes.resourceName, jRes, JsonResource.class);
+
+            //Add a this resource as a link on all the items this resource has. Also, cache what tool they take.
+            for(String itemName : jRes.itemNames){
+                JsonItem item = DataManager.getData(itemName, JsonItem.class);
+                item.inResources.add(jRes);
+                String toolName = jRes.tool == null ? "" : jRes.tool; //If null, empty, otherwise, the name.
+
+                if(!item.possibleTools.contains(toolName, false))
+                    item.possibleTools.add(toolName);
+            }
         }
     };
 
@@ -440,6 +456,9 @@ public class DataBuilder implements IDestroyable{
     };
 
     public static class JsonItem{
+        public Array<JsonResource> inResources = new Array<>(); //A link to the resources this item is in.
+        public Array<String> possibleTools = new Array<>();
+
         protected String itemName, displayName, itemType, description, img;
         protected String[] effects;
         protected int[] strengths;
