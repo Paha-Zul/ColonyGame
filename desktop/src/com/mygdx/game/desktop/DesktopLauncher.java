@@ -34,9 +34,8 @@ public class DesktopLauncher {
         settings.edgePadding = true;
         settings.duplicatePadding = true;
         settings.flattenPaths = true;
-        TexturePacker.process(settings, "./img/terrain", "./atlas", "terrain");
-        TexturePacker.process(settings, "./img/trees", "./atlas", "trees");
-        TexturePacker.process(settings, "./img/ui/buttons", "./atlas", "buttons");
-        TexturePacker.process(settings, "./img/Interactable", "./atlas", "interactables");
+        TexturePacker.process(settings, "img/terrain", "./atlas", "terrain");
+        TexturePacker.process(settings, "img/ui/buttons", "./atlas", "buttons");
+        TexturePacker.process(settings, "img/Interactable", "./atlas", "interactables");
     }
 }
