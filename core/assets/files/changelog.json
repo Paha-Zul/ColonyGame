@@ -1,6 +1,19 @@
 {
   "changes": [
     {
+      "version": "0.31",
+      "date": "6/6/2015",
+      "log": [
+        "- Fixed: Some crashes where squirrels/wolves spawned outside the map. Should be fixed now.",
+        "- Added: An equipment shed which doesn't work yet.",
+        "- Added: A really bad loading circle thing because my skills to make a better one are lacking. It's just a colored circle that spins....",
+        "- Changed: Main menu music....",
+        "- Changed: Trees are a lot easier to click on. This makes anything behind them basically impossible to click on.",
+        "- Bugs: Weird lag when a ton of wolves attack?"
+        "- Bugs: The buildings are really hard to click on now. If you hit F3 you can see where to click them. It's near the top left of their picture."
+      ]
+    },
+    {
       "version": "0.3",
       "date": "5/24/2015",
       "log": [

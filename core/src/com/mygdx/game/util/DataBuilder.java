@@ -43,6 +43,7 @@ public class DataBuilder implements IDestroyable{
     private final String modInfoFilePath = "/info.json";
     private final String modFilePath = "/mods.json";
     private final String eventsFilePath = "/events.json";
+    private final String miscPath = "/misc.json";
 
     private EasyAssetManager assetManager;
 
@@ -97,6 +98,11 @@ public class DataBuilder implements IDestroyable{
     private void loadFilesForMod(FileHandle fileHandle){
         buildAssets(fileHandle);
         String path = fileHandle.path();
+
+        //Build misc
+        buildJson(Gdx.files.internal(path + filePath + miscPath), JsonMisc.class, value -> {
+            DataManager.addData("misc", value, JsonMisc.class);
+        });
 
         //Build items
         buildJson(Gdx.files.internal(path + filePath + itemPath), JsonItem[].class, value -> {
@@ -576,6 +582,9 @@ public class DataBuilder implements IDestroyable{
         public float damage, travelSpeed, accuracy;
     }
 
+    public static class JsonMisc{
+        public String mainMenuMusic;
+    }
 
 
     private static class FolderStructure{

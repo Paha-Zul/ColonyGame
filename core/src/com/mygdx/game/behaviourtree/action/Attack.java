@@ -23,6 +23,7 @@ public class Attack extends LeafTask{
     public Attack(String name, BlackBoard blackBoard) {
         super(name, blackBoard);
     }
+    static Sound gunSound = ColonyGame.assetManager.get("Walther-P22", Sound.class);
 
     @Override
     public boolean check() {
@@ -45,7 +46,7 @@ public class Attack extends LeafTask{
                     Entity bullet = new ProjectileEnt(trans.getPosition(), rot, new String[]{"ball", ""}, 11);          //Spawn the projectile.
                     ListHolder.addEntity(bullet);
                     Projectile projectile = bullet.getComponent(Projectile.class);                 //Get the projectile component.
-                    SoundManager.play(ColonyGame.assetManager.get("Walther-P22", Sound.class), bullet.getTransform().getPosition(), new Vector2(ColonyGame.camera.position.x, ColonyGame.camera.position.y), 200, 2000);
+                    SoundManager.play(gunSound, bullet.getTransform().getPosition(), new Vector2(ColonyGame.camera.position.x, ColonyGame.camera.position.y), 200, 2000);
 
                     if (projectile == null)
                         GH.writeErrorMessage("Somehow making a projectile didn't make a projectile...");

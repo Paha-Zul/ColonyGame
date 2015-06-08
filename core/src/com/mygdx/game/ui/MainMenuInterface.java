@@ -57,7 +57,7 @@ public class MainMenuInterface extends UI{
         this.game = game;
 
         titleTexture = new TextureRegion(ColonyGame.assetManager.get("Auroris", Texture.class));
-        music = Gdx.audio.newMusic(Gdx.files.internal("music/Karkarakacrrot.ogg"));
+        music = Gdx.audio.newMusic(Gdx.files.internal(DataManager.getData("misc", DataBuilder.JsonMisc.class).mainMenuMusic));
         titleFont = new BitmapFont(Gdx.files.internal("fonts/titlefont.fnt"));
         mainMenuTexture = ColonyGame.assetManager.get("Space2", Texture.class);
 

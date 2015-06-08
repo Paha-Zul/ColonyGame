@@ -79,6 +79,29 @@ public class Inventory extends Component implements IOwnable{
     }
 
     /**
+     * Reserves 1 of an item.
+     * @param itemName The name of the item.
+     * @return A positive number if the item was able to be reserved. This could be the amount requested or the a partial amount available. -1 indicates the item
+     * does not exist in the inventory, and 0 indicates that the item had none left available.
+     */
+    public int reserveItem(String itemName){
+        return this.reserveItem(itemName, 1);
+    }
+
+    /**
+     * Reserves an amount of an item.
+     * @param itemName The name of the item.
+     * @param amount The amount to reserve.
+     * @return A positive number if the item was able to be reserved. This could be the amount requested or the a partial amount available. -1 indicates the item
+     * does not exist in the inventory, and 0 indicates that the item had none left available.
+     */
+    public int reserveItem(String itemName, int amount){
+        InventoryItem invItem = this.inventory.get(itemName);
+        if(invItem == null) return -1;
+        return invItem.reserve(amount);
+    }
+
+    /**
      * Adds an amount of the item designated by the compName passed in.
      * @param itemName The compName of the item to add.
      * @param amount The amount of the item to add.
@@ -221,7 +244,7 @@ public class Inventory extends Component implements IOwnable{
 
 
     public static class InventoryItem{
-        private int amount, maxAmount;
+        private int amount, maxAmount, reserved;
         public DataBuilder.JsonItem itemRef;
 
         /**
@@ -239,6 +262,18 @@ public class Inventory extends Component implements IOwnable{
             this(DataManager.getData(itemName, DataBuilder.JsonItem.class), amount, maxAmount);
         }
 
+        /**
+         * Places a reserve on this item for some amount.
+         * @param amount The amount of this item to reserve.
+         * @return The amount reserved.
+         */
+        public int reserve(int amount){
+            int _available = this.getAvailable(); //Get the available amount.
+            int _reserved = amount <= _available ? amount : _available; //Take what we can!
+            this.reserved += _reserved; //Add this amount to the item's reserved amount.
+            return _reserved; //Return it!
+        }
+
         public boolean canAddAmount(int amount){
             return this.amount + amount <= maxAmount || this.maxAmount < 0;
         }
@@ -253,6 +288,14 @@ public class Inventory extends Component implements IOwnable{
 
         public int getMaxAmount(){
             return this.maxAmount;
+        }
+
+        public int getReserved() {
+            return this.reserved;
+        }
+
+        public int getAvailable(){
+            return this.amount - this.reserved;
         }
     }
 }
