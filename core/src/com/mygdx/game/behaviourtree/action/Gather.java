@@ -83,7 +83,7 @@ public class Gather extends LeafTask{
         Colony targetColony = this.blackBoard.myManager.getEntityOwner().getComponent(Colonist.class).getColony(); //Get the colony.
         this.blackBoard.targetNode = null; //Set the target node to null to make sure we use the target (not the node)
         this.blackBoard.target = targetColony.getEntityOwner(); //Set the target to the entity owner of the colony.
-        this.blackBoard.toInventory = targetColony.getInventory(); //Set the inventory to the colony's inventory.
+        this.blackBoard.itemTransfer.toInventory = targetColony.getInventory(); //Set the inventory to the colony's inventory.
 
         this.control.finishWithSuccess();
     }

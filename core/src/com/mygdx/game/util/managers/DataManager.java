@@ -1,5 +1,6 @@
 package com.mygdx.game.util.managers;
 
+import java.lang.reflect.Array;
 import java.util.HashMap;
 
 /**
@@ -40,4 +41,9 @@ public class DataManager {
         return (T)map.get(dataName);
     }
 
+    public static <T> String[] getKeysForType(Class <T> c){
+        HashMap<String, Object> map = dataMap.get(c);
+
+        return map.keySet().toArray(new String[map.size()]);
+    }
 }

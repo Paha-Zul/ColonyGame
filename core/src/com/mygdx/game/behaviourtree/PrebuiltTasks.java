@@ -35,12 +35,16 @@ public class PrebuiltTasks {
     public static Task gatherResource(BlackBoard blackBoard, BehaviourManagerComp behComp){
         /*
          * Sequence:
-         *  Find the closest valid resource and valid storage closest to the resource.
-         *  Find a path to the resource.
-         *  Move to the resource.
-         *  Gather the resource.
-         *  Find a path back to the storage.
-         *  Store the resource.
+         *      Repeat (until we are full on the items toggled):
+         *          find resource
+         *          find path to resource
+         *          move to resource
+         *          gather resource
+         *
+         *      find storage
+         *      find path to storage
+         *      move to storage
+         *      transfer items.
          */
 
         //If we fail to find a resource, we need to explore until we find one...
@@ -69,25 +73,29 @@ public class PrebuiltTasks {
         MoveTo moveToStorage = new MoveTo("Moving to Storage", blackBoard);
         TransferItem transferItems = new TransferItem("Transferring Resources", blackBoard);
 
+        //Add the repeat gather task to the main sequence, and then the rest to the inner sequence under repeat.
         ((ParentTaskController)sequence.getControl()).addTask(repeatGather);
         ((ParentTaskController)innerGatherSeq.getControl()).addTask(fr);
         ((ParentTaskController)innerGatherSeq.getControl()).addTask(fpResource);
         ((ParentTaskController)innerGatherSeq.getControl()).addTask(mtResource);
         ((ParentTaskController)innerGatherSeq.getControl()).addTask(gather);
 
+        //Add these to the main sequence.
         ((ParentTaskController)sequence.getControl()).addTask(findStorage);
         ((ParentTaskController)sequence.getControl()).addTask(findPathToStorage);
         ((ParentTaskController)sequence.getControl()).addTask(moveToStorage);
         ((ParentTaskController)sequence.getControl()).addTask(transferItems);
 
-
         //Reset some values.
         sequence.control.callbacks.startCallback = task -> {
             //Reset blackboard values...
-            task.blackBoard.fromInventory = task.blackBoard.myManager.getEntityOwner().getComponent(Colonist.class).getInventory();
-            task.blackBoard.transferAll = true;
-            task.blackBoard.takeAmount = 0;
-            task.blackBoard.itemNameToTake = null;
+            task.blackBoard.itemTransfer.fromInventory = task.blackBoard.myManager.getEntityOwner().getComponent(Colonist.class).getInventory();
+            task.blackBoard.itemTransfer.transferAmount = false;
+            task.blackBoard.itemTransfer.transferMany = false;
+            task.blackBoard.itemTransfer.transferAll = true;
+            task.blackBoard.itemTransfer.itemAmountToTake = 0;
+            task.blackBoard.itemTransfer.itemNameToTake = null;
+
             task.blackBoard.targetResource = null;
             task.blackBoard.target = null;
             task.blackBoard.targetNode = null;
@@ -117,7 +125,7 @@ public class PrebuiltTasks {
         //Check if our resourceTypeTags are empty. If so, no use trying to find an entity.
         fr.control.callbacks.checkCriteria = task -> !task.blackBoard.resourceTypeTags.isEmpty();
 
-        //Check to make sure the resource isn't taken.
+        //Check to make sure the resource isn't taken. Also make sure the resource has an item we want.
         fr.getControl().callbacks.successCriteria = (e) -> {
             Entity ent = (Entity)e;
             Resource resource = ent.getComponent(Resource.class);
@@ -140,7 +148,7 @@ public class PrebuiltTasks {
         };
 
         //If we don't have a target resource, try to get one from our target. Then check if it's valid and owned by us.
-        //If not, cancel the job.
+        //If not, cancel the job. This secondary check is done because the job can be threaded
         fpResource.control.callbacks.checkCriteria = task -> {
             if(task.blackBoard.targetResource == null) task.blackBoard.targetResource = task.blackBoard.target.getComponent(Resource.class);
             return task.blackBoard.targetResource != null && (task.blackBoard.targetResource.getTaken() == null || task.blackBoard.targetResource.getTaken() == task.blackBoard.myManager.getEntityOwner());
@@ -150,8 +158,9 @@ public class PrebuiltTasks {
         findStorage.control.callbacks.successCriteria = ent -> ((Entity)ent).getTags().hasTag("building");
 
         //If we find a valid building, get the inventory from it and assign it to the 'toInventory' field.
-        findStorage.control.callbacks.successCallback = task -> task.blackBoard.toInventory = task.blackBoard.target.getComponent(Inventory.class);
+        findStorage.control.callbacks.successCallback = task -> task.blackBoard.itemTransfer.toInventory = task.blackBoard.target.getComponent(Inventory.class);
 
+        //TODO Not sure what this does exactly...
         //When finding a path to the resource, make sure it's actually a resource and we are the ones that have claimed it!
         findPathToStorage.getControl().callbacks.checkCriteria = task -> {
             Resource res = task.blackBoard.targetResource; //Get the target resource from the blackboard.
@@ -214,7 +223,7 @@ public class PrebuiltTasks {
 
         //Set the 'fromInventory' field and set the resource as taken by us!
         sequence.getControl().callbacks.startCallback = task -> {
-            task.blackBoard.fromInventory = task.blackBoard.myManager.getEntityOwner().getComponent(Inventory.class);
+            task.blackBoard.itemTransfer.fromInventory = task.blackBoard.myManager.getEntityOwner().getComponent(Inventory.class);
             task.blackBoard.targetResource.setTaken(blackBoard.myManager.getEntityOwner());
         };
 
@@ -319,13 +328,13 @@ public class PrebuiltTasks {
         sequence.getControl().callbacks.startCallback = task->{
             //Reset blackboard values.
             blackBoard.targetNode = null;
-            blackBoard.transferAll = false;
-            blackBoard.takeAmount = 1;
-            blackBoard.itemNameToTake = null;
+            blackBoard.itemTransfer.transferAll = false;
+            blackBoard.itemTransfer.itemAmountToTake = 1;
+            blackBoard.itemTransfer.itemNameToTake = null;
 
             blackBoard.target = blackBoard.myManager.getEntityOwner().getComponent(Colonist.class).getColony().getEntityOwner();
-            blackBoard.fromInventory = blackBoard.myManager.getEntityOwner().getComponent(Colonist.class).getColony().getOwnedFromColony(Building.class, building -> building.buildingTags.hasTag("main")).getComponent(Inventory.class);
-            blackBoard.toInventory = blackBoard.myManager.getEntityOwner().getComponent(Inventory.class);
+            blackBoard.itemTransfer.fromInventory = blackBoard.myManager.getEntityOwner().getComponent(Colonist.class).getColony().getOwnedFromColony(Building.class, building -> building.buildingTags.hasTag("main")).getComponent(Inventory.class);
+            blackBoard.itemTransfer.toInventory = blackBoard.myManager.getEntityOwner().getComponent(Inventory.class);
         };
 
         return sequence;
@@ -356,7 +365,7 @@ public class PrebuiltTasks {
          *      transfer itemNames to storage
          */
 
-        blackBoard.transferAll = true;
+        blackBoard.itemTransfer.transferAll = true;
 
         Sequence mainSeq = new Sequence("hunt", blackBoard);
 
@@ -449,9 +458,9 @@ public class PrebuiltTasks {
          * Transfer all resources.
          */
 
-        blackBoard.transferAll = true;
-        blackBoard.itemNameToTake = null;
-        blackBoard.fromInventory = blackBoard.myManager.getEntityOwner().getComponent(Inventory.class);
+        blackBoard.itemTransfer.transferAll = true;
+        blackBoard.itemTransfer.itemNameToTake = null;
+        blackBoard.itemTransfer.fromInventory = blackBoard.myManager.getEntityOwner().getComponent(Inventory.class);
 
         Sequence seq = new Sequence("fish", blackBoard);
 
@@ -476,7 +485,7 @@ public class PrebuiltTasks {
         //We want to remove the last step in our destination (first in the list) since it will be on the shore line.
         fp.getControl().callbacks.successCallback = task -> blackBoard.path.removeFirst();
 
-        fc.getControl().callbacks.successCallback = task -> blackBoard.toInventory = blackBoard.target.getComponent(Inventory.class);
+        fc.getControl().callbacks.successCallback = task -> blackBoard.itemTransfer.toInventory = blackBoard.target.getComponent(Inventory.class);
 
         ((ParentTaskController)seq.getControl()).addTask(fct);
         ((ParentTaskController)seq.getControl()).addTask(fp);

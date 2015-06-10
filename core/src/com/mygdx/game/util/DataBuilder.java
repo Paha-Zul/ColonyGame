@@ -100,16 +100,14 @@ public class DataBuilder implements IDestroyable{
         String path = fileHandle.path();
 
         //Build misc
-        buildJson(Gdx.files.internal(path + filePath + miscPath), JsonMisc.class, value -> {
-            DataManager.addData("misc", value, JsonMisc.class);
-        });
+        buildJson(Gdx.files.internal(path + filePath + miscPath), JsonMisc.class, value -> DataManager.addData("misc", value, JsonMisc.class));
 
         //Build items
         buildJson(Gdx.files.internal(path + filePath + itemPath), JsonItem[].class, value -> {
             for (JsonItem jsonItem : value) DataManager.addData(jsonItem.itemName, jsonItem, JsonItem.class);
         });
 
-        //Build items
+        //Build tools
         buildJson(Gdx.files.internal(path + filePath + toolPath), JsonTool[].class, value -> {
             for (JsonTool tool : value) DataManager.addData(tool.itemName, tool, JsonItem.class);
         });
@@ -117,8 +115,17 @@ public class DataBuilder implements IDestroyable{
         //Build resources.
         buildJson(Gdx.files.internal(path + filePath + resourcePath), JsonResource[].class, buildResources);
 
+//        for(String itemName : DataManager.getKeysForType(JsonItem.class)){
+//            JsonItem item = DataManager.getData(itemName, JsonItem.class);
+//            System.out.print("Item: " + item.getItemName() + ", tools: ");
+//            for(String tool : item.possibleTools){
+//                System.out.print("'"+tool+"', ");
+//            }
+//            System.out.println();
+//        }
+
         //Build tiles
-        buildJson(Gdx.files.internal(path + filePath + tilePath), JsonTileGroup[].class, compileTiles);
+        buildJson(Gdx.files.internal(path + filePath + tilePath), JsonTileGroup[].class, buildTiles);
 
         //Build the world.
         buildJson(Gdx.files.internal(path + filePath + worldPath), JsonWorld.class, compileWorldGen);
@@ -346,6 +353,8 @@ public class DataBuilder implements IDestroyable{
 
     Consumer<JsonResource[]> buildResources = value -> {
         for(JsonResource jRes : value){
+
+            //TODO This might not be done right. What if jRes.dir is null and we aren't using a dir?
             //If the dir field is not null, we have a directory to pull images from.
             if(jRes.dir != null){
                 ArrayList<String> list = new ArrayList<>();
@@ -377,21 +386,24 @@ public class DataBuilder implements IDestroyable{
                 amounts[i][1] = jRes.itemAmounts[i][1];
             }
 
-            DataManager.addData(jRes.resourceName, jRes, JsonResource.class);
-
+            //TODO This only accepts one tool name per item. What if two?
             //Add a this resource as a link on all the items this resource has. Also, cache what tool they take.
             for(String itemName : jRes.itemNames){
                 JsonItem item = DataManager.getData(itemName, JsonItem.class);
                 item.inResources.add(jRes);
                 String toolName = jRes.tool == null ? "" : jRes.tool; //If null, empty, otherwise, the name.
 
+                System.out.println("Adding '"+toolName+"' to "+item.getItemName());
+
                 if(!item.possibleTools.contains(toolName, false))
                     item.possibleTools.add(toolName);
             }
+
+            DataManager.addData(jRes.resourceName, jRes, JsonResource.class);
         }
     };
 
-    Consumer<JsonTileGroup[]> compileTiles = value -> {
+    Consumer<JsonTileGroup[]> buildTiles = value -> {
         //For each group of tiles
         for (JsonTileGroup group : value) {
             //If the group of tiles is auto layered...

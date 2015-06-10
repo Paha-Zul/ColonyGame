@@ -42,6 +42,10 @@ public class Equipment extends Component{
         this.setActive(false);
     }
 
+    public boolean hasTool(String toolName){
+        return this.tools.containsKey(toolName);
+    }
+
     @JsonProperty("toolNames")
     public String[] getToolNames(){
         Array<String> toolNames = new Array<>();

@@ -1,6 +1,7 @@
 package com.mygdx.game.util;
 
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.component.BehaviourManagerComp;
 import com.mygdx.game.component.Inventory;
 import com.mygdx.game.component.Resource;
@@ -23,11 +24,7 @@ public class BlackBoard{
     public Tags resourceTypeTags = new Tags("resource");
 
     //Transferring variables
-    public boolean transferAll = false;
-    public int takeAmount = 0;
-    public Inventory toInventory;
-    public Inventory fromInventory;
-    public String itemNameToTake;
+    public final ItemTransfer itemTransfer = new ItemTransfer();
 
     //Consuming task stuff
     public String itemEffect;
@@ -48,6 +45,9 @@ public class BlackBoard{
     public float attackDamage = 10f;
     public Timer attackTimer = null;
 
+    //Equipment stuff
+    public Array<String> toolsWanted = new Array<>();
+
     //My stuff
     public Inventory myInventory;
     public float moveSpeed = 100f;
@@ -62,5 +62,21 @@ public class BlackBoard{
 
     public Entity getTarget(){
         return target;
+    }
+
+    public static class ItemTransfer{
+        public boolean transferAll;
+        public boolean transferAmount;
+        public boolean transferMany;
+
+        public boolean takingReserved;
+
+        public String itemNameToTake;
+        public int itemAmountToTake;
+        public Array<String> itemNamesToTake;
+        public Array<Integer> itemAmountsToTake;
+
+        public Inventory toInventory;
+        public Inventory fromInventory;
     }
 }
