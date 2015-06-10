@@ -29,7 +29,7 @@ public class Consume extends LeafTask{
         for(Inventory.InventoryItem item : inv.getItemList()){
             DataBuilder.JsonItem ref = DataManager.getData(item.itemRef.getItemName(), DataBuilder.JsonItem.class);
             if(ref.hasEffect(this.blackBoard.itemEffect)) { //If this itemRef has the effect we want, get some and consume it!
-                int itemAmount = inv.removeItemAmount(ref.getItemName(), 1);
+                int itemAmount = inv.removeItem(ref.getItemName(), 1);
                 this.addEffect(ref, itemAmount);
                 this.control.finishWithSuccess();
                 break;

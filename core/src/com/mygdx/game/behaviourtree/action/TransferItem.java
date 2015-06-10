@@ -3,8 +3,6 @@ package com.mygdx.game.behaviourtree.action;
 import com.mygdx.game.behaviourtree.LeafTask;
 import com.mygdx.game.component.Inventory;
 import com.mygdx.game.util.BlackBoard;
-import com.mygdx.game.util.DataBuilder;
-import com.mygdx.game.util.managers.DataManager;
 
 /**
  * Created by Paha on 1/30/2015.
@@ -38,6 +36,7 @@ public class TransferItem extends LeafTask{
             for(int i=0;i<this.blackBoard.itemTransfer.itemNamesToTake.size;i++){
                 String itemName = this.blackBoard.itemTransfer.itemNamesToTake.get(i);
                 int amount = this.blackBoard.itemTransfer.itemAmountsToTake.get(i);
+                this.blackBoard.itemTransfer.fromInventory.removeItem(itemName, amount, this.blackBoard.itemTransfer.takingReserved);
                 this.blackBoard.itemTransfer.toInventory.addItem(itemName, amount);
             }
 

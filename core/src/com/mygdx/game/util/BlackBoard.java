@@ -45,9 +45,6 @@ public class BlackBoard{
     public float attackDamage = 10f;
     public Timer attackTimer = null;
 
-    //Equipment stuff
-    public Array<String> toolsWanted = new Array<>();
-
     //My stuff
     public Inventory myInventory;
     public float moveSpeed = 100f;

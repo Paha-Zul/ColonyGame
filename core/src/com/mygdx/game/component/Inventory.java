@@ -104,11 +104,11 @@ public class Inventory extends Component implements IOwnable{
     /**
      * Adds an amount of the item designated by the compName passed in.
      * @param itemName The compName of the item to add.
-     * @param amount The amount of the item to add.
+     * @param amount The amount of the item to add. If the amount is <= 0, returns early.
      */
     public void addItem(String itemName, int amount){
         this.lasAddedItem = null;
-        if(amount == 0) return;
+        if(amount <= 0) return;
 
         InventoryItem invItem = this.inventory.get(itemName);
         //If the invItem doesn't exist, create a new one and add it to the hash map.
@@ -142,7 +142,26 @@ public class Inventory extends Component implements IOwnable{
      */
     public int removeItemAll(String itemName){
         InventoryItem invItem = this.inventory.get(compName);
-        return this.removeItemAmount(itemName, invItem.amount);
+        return this.removeItem(itemName, invItem.amount);
+    }
+
+    /**
+     * Removes 1 item from the inventory.
+     * @param itemName The name of the item to remove.
+     * @return The amount removed of the item from the Inventory.
+     */
+    public int removeItem(String itemName){
+        return this.removeItem(itemName, 1, false);
+    }
+
+    /**
+     * Removes an amount of an item from this Inventory.
+     * @param itemName The name of the item to remove.
+     * @param amount The amount to remove from the inventory.
+     * @return The amount of the item removed from the Inventory.
+     */
+    public int removeItem(String itemName, int amount){
+        return this.removeItem(itemName, amount, false);
     }
 
     /**
@@ -151,27 +170,29 @@ public class Inventory extends Component implements IOwnable{
      * removed from this inventory.
      * @param itemName The compName of the Item.
      * @param amount The amount of the item to remove.
+     * @param takingReserved True if the item being removed was reserved first, false otherwise.
      * @return The amount removed from the inventory.
      */
-    public int removeItemAmount(String itemName, int amount){
+    public int removeItem(String itemName, int amount, boolean takingReserved){
+        //If the amount to remove is <= 0, return 0.
+        if(amount <= 0) return 0;
         InventoryItem invItem = this.inventory.get(itemName); //Get the item.
-
         //If it didn't exist or it was empty, return 0.
-        if(invItem == null || invItem.amount <= 0)
-            return 0;
+        if(invItem == null) return 0;
 
-        int amt = (amount >= invItem.amount) ? invItem.amount : amount; //If amount is equal or more than the inv amount, take all of it, otherwise the amount.
-        invItem.amount -= amt; //Set the inventory Item's amount.
-        this.currTotalItems-=amt; //Subtract the amount being removed from the counter.
+        int removeAmount = (amount >= invItem.amount) ? invItem.amount : amount; //If amount is equal or more than the inv amount, take all of it, otherwise the amount.
+        invItem.amount -= removeAmount;                         //Set the inventory Item's amount.
+        if(takingReserved) invItem.reserved -= removeAmount;    //If we are taking a reserved item, reduce the reserved amount also.
+        this.currTotalItems-=removeAmount;                      //Subtract the amount being removed from the counter.
 
         //Remove the item from the inventory if all of it has been taken.
         if(invItem.amount <= 0)
             this.inventory.remove(itemName);
 
-        if(colony != null) colony.addItemToGlobal(invItem.itemRef, -amt);
+        if(colony != null) colony.addItemToGlobal(invItem.itemRef, -removeAmount);
         
-        EventSystem.notifyEntityEvent(this.owner, "removed_item", invItem.itemRef, amt);
-        return amt;
+        EventSystem.notifyEntityEvent(this.owner, "removed_item", invItem.itemRef, removeAmount);
+        return removeAmount;
     }
 
     /**

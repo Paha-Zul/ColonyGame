@@ -32,6 +32,7 @@ public class ColonistEnt extends Entity{
         ((Interactable)this.addComponent(new Interactable())).setInterType("humanoid");
         this.addComponent(new Stats());
         this.addComponent(new Inventory());
+        this.addComponent(new Equipment());
         this.addComponent(new BehaviourManagerComp());
 
         this.makeCollider();

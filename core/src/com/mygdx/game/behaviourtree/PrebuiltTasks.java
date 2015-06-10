@@ -35,6 +35,14 @@ public class PrebuiltTasks {
     public static Task gatherResource(BlackBoard blackBoard, BehaviourManagerComp behComp){
         /*
          * Sequence:
+         *      Sequence
+         *          figure out tools for gathering
+         *          find the tool shed
+         *          check the shed and reserve
+         *          find path to shed
+         *          move to shed
+         *          transfer tools
+         *
          *      Repeat (until we are full on the items toggled):
          *          find resource
          *          find path to resource
@@ -72,6 +80,8 @@ public class PrebuiltTasks {
         FindPath findPathToStorage = new FindPath("Finding Path to Storage", blackBoard);
         MoveTo moveToStorage = new MoveTo("Moving to Storage", blackBoard);
         TransferItem transferItems = new TransferItem("Transferring Resources", blackBoard);
+
+        sequence.control.addTask(getTools(blackBoard, behComp));
 
         //Add the repeat gather task to the main sequence, and then the rest to the inner sequence under repeat.
         ((ParentTaskController)sequence.getControl()).addTask(repeatGather);
@@ -245,6 +255,54 @@ public class PrebuiltTasks {
         };
 
         return sequence;
+    }
+
+    private static Task getTools(BlackBoard blackBoard, BehaviourManagerComp behComp){
+        /**
+         *  Sequence
+         *      figure out tools
+         *      find tool shed
+         *      check and reserve tools
+         *      get path to tool shed
+         *      move to tool shed
+         *      transfer tools
+         */
+
+        Sequence seq = new Sequence("Getting tools", blackBoard);
+        GetToolsForGathering get = new GetToolsForGathering("Figuring tools", blackBoard);
+        FindClosestEntity findShed = new FindClosestEntity("Finding tool shed", blackBoard);
+        CheckAndReserve checkShed = new CheckAndReserve("CheckingReserving", blackBoard);
+        FindPath fpToShed = new FindPath("PathToShed", blackBoard);
+        MoveTo mtShed = new MoveTo("Moving", blackBoard);
+        TransferItem transferTools = new TransferItem("Transferring", blackBoard);
+
+        seq.control.callbacks.startCallback = task -> {
+            task.blackBoard.itemTransfer.transferAll = false;
+            task.blackBoard.itemTransfer.transferMany = true;
+            task.blackBoard.itemTransfer.takingReserved = true;
+        };
+
+        findShed.control.callbacks.successCriteria = entity -> {
+            Entity ent = (Entity)entity;
+            if(ent.getTags().hasTag("building"))
+                if(ent.getComponent(Building.class).buildingTags.hasTag("equipment"))
+                    return true;
+            return false;
+        };
+
+        findShed.control.callbacks.successCallback = task -> {
+            task.blackBoard.itemTransfer.toInventory = task.blackBoard.myManager.getEntityOwner().getComponent(Inventory.class);
+            task.blackBoard.itemTransfer.fromInventory = task.blackBoard.target.getComponent(Inventory.class);
+        };
+
+        seq.control.addTask(get);
+        seq.control.addTask(findShed);
+        seq.control.addTask(checkShed);
+        seq.control.addTask(fpToShed);
+        seq.control.addTask(mtShed);
+        seq.control.addTask(transferTools);
+
+        return seq;
     }
 
     public static Task exploreUnexplored(BlackBoard blackBoard, BehaviourManagerComp behComp){

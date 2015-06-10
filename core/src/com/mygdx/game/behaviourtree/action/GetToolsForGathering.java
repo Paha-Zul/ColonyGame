@@ -33,18 +33,26 @@ public class GetToolsForGathering extends LeafTask{
     public void update(float delta) {
         super.update(delta);
 
-        this.blackBoard.toolsWanted = new Array<>();
+        this.blackBoard.itemTransfer.itemNamesToTake = new Array<>();
+        this.blackBoard.itemTransfer.itemAmountsToTake = new Array<>();
         String[] items = this.blackBoard.resourceTypeTags.getTagsAsString();
+
+        System.out.println("Getting tools");
 
         //For each item, if we don't already have the tool in our equipment, add it to the 'wanted' list.
         for(String item : items){
             DataBuilder.JsonItem jItem = DataManager.getData(item, DataBuilder.JsonItem.class);
+            System.out.println("For item "+item);
             for(String tool : jItem.possibleTools){
+                System.out.println("Trying to add tool '"+tool+"'.");
                 //If we it's empty or we already have the tool, continue.
                 if(tool.equals("") || this.equipment.hasTool(tool)) continue;
-                //If the toolsWanted array doesn't already contain the tool, add it.
-                if(!this.blackBoard.toolsWanted.contains(tool, false))
-                    this.blackBoard.toolsWanted.add(tool);
+                //If the itemNamesToTake array doesn't already contain the tool, add it.
+                if(!this.blackBoard.itemTransfer.itemNamesToTake.contains(tool, false)) {
+                    this.blackBoard.itemTransfer.itemNamesToTake.add(tool);
+                    this.blackBoard.itemTransfer.itemAmountsToTake.add(1);
+                    System.out.println("Added tool '"+tool+"'");
+                }
             }
         }
 

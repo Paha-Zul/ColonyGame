@@ -25,11 +25,19 @@ public class CheckAndReserve extends LeafTask{
     public void update(float delta) {
         super.update(delta);
 
-        for(int i=0;i<this.blackBoard.itemTransfer.itemNamesToTake.size;i++){
-            String itemName = this.blackBoard.itemTransfer.itemNamesToTake.get(i);
-            int amount = this.blackBoard.itemTransfer.itemAmountsToTake.get(i);
-            int reserve = this.blackBoard.itemTransfer.fromInventory.reserveItem(itemName, amount);
+        this.blackBoard.itemTransfer.takingReserved = true;
+
+        if(this.blackBoard.itemTransfer.transferMany) {
+            //For each item name in the array, try to reserve.
+            for (int i = 0; i < this.blackBoard.itemTransfer.itemNamesToTake.size; i++) {
+                String itemName = this.blackBoard.itemTransfer.itemNamesToTake.get(i); //Get the name
+                int amount = this.blackBoard.itemTransfer.itemAmountsToTake.get(i); //Get the amount
+                int reserve = this.blackBoard.itemTransfer.fromInventory.reserveItem(itemName, amount); //Attempt to reserve
+                this.blackBoard.itemTransfer.itemAmountsToTake.set(i, reserve); //Set the amount to the amount we were able to reserve.
+            }
         }
+
+        this.control.finishWithSuccess();
     }
 
     @Override
