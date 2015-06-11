@@ -33,7 +33,7 @@ public abstract class TaskDecorator extends Task
     {
         super(name, bb);
         this.task = task;
-        this.control = new TaskController(task);
+        this.control = new TaskController(this);
     }
 
     /**
@@ -51,7 +51,7 @@ public abstract class TaskDecorator extends Task
     @Override
     public void start()
     {
-        this.task.start();
+        this.task.getControl().safeStart();
     }
 
     /**
@@ -60,12 +60,16 @@ public abstract class TaskDecorator extends Task
     @Override
     public void end()
     {
-        this.task.end();
+        this.task.getControl().safeEnd();
     }
 
     @Override
     public void setBlackBoard(BlackBoard blackBoard) {
         this.blackBoard = blackBoard;
+    }
+
+    public void setTask(Task task){
+        this.task = task;
     }
 
     @Override

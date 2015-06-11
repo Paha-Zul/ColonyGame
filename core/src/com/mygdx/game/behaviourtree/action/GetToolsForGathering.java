@@ -56,7 +56,10 @@ public class GetToolsForGathering extends LeafTask{
             }
         }
 
-        this.control.finishWithSuccess();
+        if(this.blackBoard.itemTransfer.itemNamesToTake.size == 0)
+            this.control.finishWithFailure();
+        else
+            this.control.finishWithSuccess();
     }
 
     @Override

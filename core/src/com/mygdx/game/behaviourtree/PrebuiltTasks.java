@@ -6,6 +6,7 @@ import com.mygdx.game.behaviourtree.action.*;
 import com.mygdx.game.behaviourtree.composite.Parallel;
 import com.mygdx.game.behaviourtree.composite.Sequence;
 import com.mygdx.game.behaviourtree.control.ParentTaskController;
+import com.mygdx.game.behaviourtree.decorator.AlwaysTrue;
 import com.mygdx.game.behaviourtree.decorator.RepeatUntilCondition;
 import com.mygdx.game.component.*;
 import com.mygdx.game.entity.Entity;
@@ -268,6 +269,7 @@ public class PrebuiltTasks {
          *      transfer tools
          */
 
+        AlwaysTrue alwaysTrue = new AlwaysTrue("Always true", blackBoard);
         Sequence seq = new Sequence("Getting tools", blackBoard);
         GetToolsForGathering get = new GetToolsForGathering("Figuring tools", blackBoard);
         FindClosestEntity findShed = new FindClosestEntity("Finding tool shed", blackBoard);
@@ -280,6 +282,8 @@ public class PrebuiltTasks {
             task.blackBoard.itemTransfer.transferAll = false;
             task.blackBoard.itemTransfer.transferMany = true;
             task.blackBoard.itemTransfer.takingReserved = true;
+
+            System.out.println("tool seq is starting");
         };
 
         findShed.control.callbacks.successCriteria = entity -> {
@@ -302,7 +306,9 @@ public class PrebuiltTasks {
         seq.control.addTask(mtShed);
         seq.control.addTask(transferTools);
 
-        return seq;
+        alwaysTrue.setTask(seq);
+
+        return alwaysTrue;
     }
 
     public static Task exploreUnexplored(BlackBoard blackBoard, BehaviourManagerComp behComp){
