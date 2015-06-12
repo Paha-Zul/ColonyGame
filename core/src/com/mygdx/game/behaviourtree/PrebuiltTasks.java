@@ -105,8 +105,8 @@ public class PrebuiltTasks {
             task.blackBoard.itemTransfer.transferAmount = false;
             task.blackBoard.itemTransfer.transferMany = false;
             task.blackBoard.itemTransfer.transferAll = true;
-            task.blackBoard.itemTransfer.itemAmountToTake = 0;
-            task.blackBoard.itemTransfer.itemNameToTake = null;
+            task.blackBoard.itemTransfer.itemAmountToTransfer = 0;
+            task.blackBoard.itemTransfer.itemNameToTransfer = null;
 
             task.blackBoard.targetResource = null;
             task.blackBoard.target = null;
@@ -280,19 +280,17 @@ public class PrebuiltTasks {
         TransferItem transferTools = new TransferItem("Transferring", blackBoard);
 
         seq.control.callbacks.startCallback = task -> {
-            task.blackBoard.itemTransfer.transferAll = false;
-            task.blackBoard.itemTransfer.transferMany = true;
-            task.blackBoard.itemTransfer.takingReserved = true;
+            task.blackBoard.itemTransfer.reset();
 
             System.out.println("tool seq is starting");
         };
 
-        //When we finish, if we still have plans to take items (itemNamesToTake and itemAmountsToTake is not null), try to unreserve it.
+        //When we finish, if we still have plans to take items (itemNamesToTransfer and itemAmountsToTransfer is not null), try to unreserve it.
         seq.control.callbacks.finishCallback = task -> {
-            if(task.blackBoard.itemTransfer.itemNamesToTake != null && task.blackBoard.itemTransfer.itemAmountsToTake != null && task.blackBoard.itemTransfer.fromInventory != null){
-                for(int i=0;i<task.blackBoard.itemTransfer.itemNamesToTake.size;i++){
-                    String itemName = task.blackBoard.itemTransfer.itemNamesToTake.get(i);
-                    task.blackBoard.itemTransfer.fromInventory.unReserveItem(itemName, task.blackBoard.itemTransfer.itemAmountsToTake.get(i));
+            if(task.blackBoard.itemTransfer.itemNamesToTransfer != null && task.blackBoard.itemTransfer.itemAmountsToTransfer != null && task.blackBoard.itemTransfer.fromInventory != null){
+                for(int i=0;i<task.blackBoard.itemTransfer.itemNamesToTransfer.size;i++){
+                    String itemName = task.blackBoard.itemTransfer.itemNamesToTransfer.get(i);
+                    task.blackBoard.itemTransfer.fromInventory.unReserveItem(itemName, task.blackBoard.itemTransfer.itemAmountsToTransfer.get(i));
                 }
             }
         };
@@ -306,6 +304,7 @@ public class PrebuiltTasks {
             return false;
         };
 
+        //When we find the shed, assign the to and from inventory.
         findShed.control.callbacks.successCallback = task -> {
             task.blackBoard.itemTransfer.toInventory = task.blackBoard.myManager.getEntityOwner().getComponent(Inventory.class);
             task.blackBoard.itemTransfer.fromInventory = task.blackBoard.target.getComponent(Inventory.class);
@@ -347,15 +346,15 @@ public class PrebuiltTasks {
 
         //Set some flags and get a list of item names to be removed.
         seq.control.callbacks.startCallback = task -> {
-            task.blackBoard.itemTransfer.transferAll = false;
+            task.blackBoard.itemTransfer.reset();
+
             task.blackBoard.itemTransfer.transferMany = true;
-            task.blackBoard.itemTransfer.takingReserved = false;
 
             //TODO Something here... check!
-            task.blackBoard.itemTransfer.itemNamesToTake = new Array<>(task.blackBoard.myManager.getComponent(Equipment.class).getToolNames());
-            task.blackBoard.itemTransfer.itemAmountsToTake = new Array<>(task.blackBoard.itemTransfer.itemNamesToTake.size);
-            for(int i=0;i<task.blackBoard.itemTransfer.itemNamesToTake.size;i++)
-                task.blackBoard.itemTransfer.itemAmountsToTake.add(1);
+            task.blackBoard.itemTransfer.itemNamesToTransfer = new Array<>(task.blackBoard.myManager.getComponent(Equipment.class).getToolNames());
+            task.blackBoard.itemTransfer.itemAmountsToTransfer = new Array<>(task.blackBoard.itemTransfer.itemNamesToTransfer.size);
+            for(int i=0;i<task.blackBoard.itemTransfer.itemNamesToTransfer.size;i++)
+                task.blackBoard.itemTransfer.itemAmountsToTransfer.add(1);
         };
 
         //We need a building with the tag "equipment".
@@ -460,8 +459,8 @@ public class PrebuiltTasks {
             //Reset blackboard values.
             blackBoard.targetNode = null;
             blackBoard.itemTransfer.transferAll = false;
-            blackBoard.itemTransfer.itemAmountToTake = 1;
-            blackBoard.itemTransfer.itemNameToTake = null;
+            blackBoard.itemTransfer.itemAmountToTransfer = 1;
+            blackBoard.itemTransfer.itemNameToTransfer = null;
 
             blackBoard.target = blackBoard.myManager.getEntityOwner().getComponent(Colonist.class).getColony().getEntityOwner();
             blackBoard.itemTransfer.fromInventory = blackBoard.myManager.getEntityOwner().getComponent(Colonist.class).getColony().getOwnedFromColony(Building.class, building -> building.buildingTags.hasTag("main")).getComponent(Inventory.class);
@@ -590,7 +589,7 @@ public class PrebuiltTasks {
          */
 
         blackBoard.itemTransfer.transferAll = true;
-        blackBoard.itemTransfer.itemNameToTake = null;
+        blackBoard.itemTransfer.itemNameToTransfer = null;
         blackBoard.itemTransfer.fromInventory = blackBoard.myManager.getEntityOwner().getComponent(Inventory.class);
 
         Sequence seq = new Sequence("fish", blackBoard);

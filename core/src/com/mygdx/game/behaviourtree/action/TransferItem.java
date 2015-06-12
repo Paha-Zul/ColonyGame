@@ -9,7 +9,7 @@ import com.mygdx.game.util.BlackBoard;
  * <p>Transfers items from the {@link com.mygdx.game.util.BlackBoard.ItemTransfer#fromInventory blackBoard.fromInventory} to
  * the {@link com.mygdx.game.util.BlackBoard.ItemTransfer#toInventory blackBoard.toInventory}. If
  * {@link com.mygdx.game.util.BlackBoard.ItemTransfer#transferAll blackBoard.transferAll} is set to true, the entire inventory in the blackBoard.fromInventory will be transferred. Otherwise,
- * only the item denoted by {@link com.mygdx.game.util.BlackBoard.ItemTransfer#itemNameToTake blackBoard.itemNameToTake} will be transferred.</p>
+ * only the item denoted by {@link com.mygdx.game.util.BlackBoard.ItemTransfer#itemNameToTransfer blackBoard.itemNameToTransfer} will be transferred.</p>
  */
 public class TransferItem extends LeafTask{
     public TransferItem(String name, BlackBoard blackBoard) {
@@ -33,22 +33,22 @@ public class TransferItem extends LeafTask{
 
         //If we are taking many items but not all of them.
         }else if(this.blackBoard.itemTransfer.transferMany){
-            for(int i=0;i<this.blackBoard.itemTransfer.itemNamesToTake.size;i++){
-                String itemName = this.blackBoard.itemTransfer.itemNamesToTake.get(i);
-                int amount = this.blackBoard.itemTransfer.itemAmountsToTake.get(i);
+            for(int i=0;i<this.blackBoard.itemTransfer.itemNamesToTransfer.size;i++){
+                String itemName = this.blackBoard.itemTransfer.itemNamesToTransfer.get(i);
+                int amount = this.blackBoard.itemTransfer.itemAmountsToTransfer.get(i);
                 this.blackBoard.itemTransfer.fromInventory.removeItem(itemName, amount, this.blackBoard.itemTransfer.takingReserved);
                 this.blackBoard.itemTransfer.toInventory.addItem(itemName, amount);
             }
 
         //If we are only taking one item.
         }else{
-            this.blackBoard.itemTransfer.toInventory.addItem(this.blackBoard.itemTransfer.itemNameToTake, this.blackBoard.itemTransfer.itemAmountToTake);
+            this.blackBoard.itemTransfer.toInventory.addItem(this.blackBoard.itemTransfer.itemNameToTransfer, this.blackBoard.itemTransfer.itemAmountToTransfer);
         }
 
-        this.blackBoard.itemTransfer.itemNamesToTake = null;
-        this.blackBoard.itemTransfer.itemAmountsToTake = null;
-        this.blackBoard.itemTransfer.itemNameToTake = null;
-        this.blackBoard.itemTransfer.itemAmountToTake = 0;
+        this.blackBoard.itemTransfer.itemNamesToTransfer = null;
+        this.blackBoard.itemTransfer.itemAmountsToTransfer = null;
+        this.blackBoard.itemTransfer.itemNameToTransfer = null;
+        this.blackBoard.itemTransfer.itemAmountToTransfer = 0;
 
         this.control.finishWithSuccess();
     }

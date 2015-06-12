@@ -65,15 +65,26 @@ public class BlackBoard{
         public boolean transferAll;
         public boolean transferAmount;
         public boolean transferMany;
-
         public boolean takingReserved;
 
-        public String itemNameToTake;
-        public int itemAmountToTake;
-        public Array<String> itemNamesToTake;
-        public Array<Integer> itemAmountsToTake;
+        public int itemAmountToTransfer;
+
+        public String itemNameToTransfer;
+        public Array<String> itemNamesToTransfer;
+        public Array<Integer> itemAmountsToTransfer;
 
         public Inventory toInventory;
         public Inventory fromInventory;
+
+        public void reset(){
+            transferAll = transferAmount = transferMany = takingReserved = false;
+            itemAmountToTransfer = 0;
+
+            itemNamesToTransfer = null;
+            itemAmountsToTransfer = null;
+            itemNameToTransfer = null;
+
+            toInventory = fromInventory = null;
+        }
     }
 }

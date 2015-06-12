@@ -13,7 +13,7 @@ public class CheckAndReserve extends LeafTask{
 
     @Override
     public boolean check() {
-        return super.check() && this.blackBoard.itemTransfer.itemNamesToTake != null && this.blackBoard.itemTransfer.itemNamesToTake.size != 0;
+        return super.check() && this.blackBoard.itemTransfer.itemNamesToTransfer != null && this.blackBoard.itemTransfer.itemNamesToTransfer.size != 0;
     }
 
     @Override
@@ -30,11 +30,11 @@ public class CheckAndReserve extends LeafTask{
 
         if(this.blackBoard.itemTransfer.transferMany) {
             //For each item name in the array, try to reserve.
-            for (int i = 0; i < this.blackBoard.itemTransfer.itemNamesToTake.size; i++) {
-                String itemName = this.blackBoard.itemTransfer.itemNamesToTake.get(i); //Get the name
-                int amount = this.blackBoard.itemTransfer.itemAmountsToTake.get(i); //Get the amount
+            for (int i = 0; i < this.blackBoard.itemTransfer.itemNamesToTransfer.size; i++) {
+                String itemName = this.blackBoard.itemTransfer.itemNamesToTransfer.get(i); //Get the name
+                int amount = this.blackBoard.itemTransfer.itemAmountsToTransfer.get(i); //Get the amount
                 int reserve = this.blackBoard.itemTransfer.fromInventory.reserveItem(itemName, amount); //Attempt to reserve
-                this.blackBoard.itemTransfer.itemAmountsToTake.set(i, reserve); //Set the amount to the amount we were able to reserve.
+                this.blackBoard.itemTransfer.itemAmountsToTransfer.set(i, reserve); //Set the amount to the amount we were able to reserve.
                 if(reserve > 0) atLeastOne = true;
             }
         }

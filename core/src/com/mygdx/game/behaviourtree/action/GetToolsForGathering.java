@@ -33,8 +33,8 @@ public class GetToolsForGathering extends LeafTask{
     public void update(float delta) {
         super.update(delta);
 
-        this.blackBoard.itemTransfer.itemNamesToTake = new Array<>();
-        this.blackBoard.itemTransfer.itemAmountsToTake = new Array<>();
+        this.blackBoard.itemTransfer.itemNamesToTransfer = new Array<>();
+        this.blackBoard.itemTransfer.itemAmountsToTransfer = new Array<>();
         String[] items = this.blackBoard.resourceTypeTags.getTagsAsString();
 
         //For each item, if we don't already have the tool in our equipment, add it to the 'wanted' list.
@@ -44,15 +44,15 @@ public class GetToolsForGathering extends LeafTask{
                 System.out.println("Trying to add tool '"+tool+"'.");
                 //If we it's empty or we already have the tool, continue.
                 if(tool.equals("") || this.equipment.hasTool(tool)) continue;
-                //If the itemNamesToTake array doesn't already contain the tool, add it.
-                if(!this.blackBoard.itemTransfer.itemNamesToTake.contains(tool, false)) {
-                    this.blackBoard.itemTransfer.itemNamesToTake.add(tool);
-                    this.blackBoard.itemTransfer.itemAmountsToTake.add(1);
+                //If the itemNamesToTransfer array doesn't already contain the tool, add it.
+                if(!this.blackBoard.itemTransfer.itemNamesToTransfer.contains(tool, false)) {
+                    this.blackBoard.itemTransfer.itemNamesToTransfer.add(tool);
+                    this.blackBoard.itemTransfer.itemAmountsToTransfer.add(1);
                 }
             }
         }
 
-        if(this.blackBoard.itemTransfer.itemNamesToTake.size == 0)
+        if(this.blackBoard.itemTransfer.itemNamesToTransfer.size == 0)
             this.control.finishWithFailure();
         else {
             this.control.finishWithSuccess();

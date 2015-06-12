@@ -31,7 +31,7 @@ public class CheckInventoryHas extends LeafTask {
             if(itemRef.getEffects() != null && itemRef.getEffects().length > 0) {
                 if (itemRef.hasEffect(this.blackBoard.itemEffect) && item.getAmount() >= this.blackBoard.itemEffectAmount) {
                     this.control.finishWithSuccess();
-                    this.blackBoard.itemTransfer.itemNameToTake = itemRef.getItemName();
+                    this.blackBoard.itemTransfer.itemNameToTransfer = itemRef.getItemName();
                     return;
                 }
             }
