@@ -32,11 +32,25 @@ public class Equipment extends Component{
         EventSystem.onEntityEvent(this.owner, "added_item", (args) -> {
             DataBuilder.JsonItem item = (DataBuilder.JsonItem)args[0];
             int amt = (int)args[1];
+            System.out.println("Something was added to my inventory (Equipment)");
 
+            //Cast to a tool and add it.
             if(item.getItemType().equals("tool")){
                 DataBuilder.JsonTool tool = (DataBuilder.JsonTool)item;
                 tools.put(tool.getItemName(), tool);
+                System.out.println("Added tool to equipment");
             }
+        });
+
+        //When an item is added to the inventory of this Component's Entity owner, check if it's a tool.
+        //If so, add it to our tools.
+        EventSystem.onEntityEvent(this.owner, "removed_item", (args) -> {
+            DataBuilder.JsonItem item = (DataBuilder.JsonItem)args[0];
+            int amt = (int)args[1];
+
+            //Remove the tool.
+            if(item.getItemType().equals("tool"))
+                tools.remove(item.getItemName());
         });
 
         this.setActive(false);
@@ -44,6 +58,10 @@ public class Equipment extends Component{
 
     public boolean hasTool(String toolName){
         return this.tools.containsKey(toolName);
+    }
+
+    public boolean hasTools(){
+        return this.tools.size() > 0;
     }
 
     @JsonProperty("toolNames")

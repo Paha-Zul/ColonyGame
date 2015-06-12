@@ -101,6 +101,16 @@ public class Inventory extends Component implements IOwnable{
         return invItem.reserve(amount);
     }
 
+    public int unReserveItem(String itemName){
+        return this.unReserveItem(itemName, 1);
+    }
+
+    public int unReserveItem(String itemName, int amount){
+        InventoryItem invItem = this.inventory.get(itemName);
+        if(invItem == null) return -1;
+        return invItem.unReserve(amount);
+    }
+
     /**
      * Adds an amount of the item designated by the compName passed in.
      * @param itemName The compName of the item to add.
@@ -293,6 +303,17 @@ public class Inventory extends Component implements IOwnable{
             int _reserved = amount <= _available ? amount : _available; //Take what we can!
             this.reserved += _reserved; //Add this amount to the item's reserved amount.
             return _reserved; //Return it!
+        }
+
+        /**
+         * Unreserves an amount on this item.
+         * @param amount The amount to unreserve.
+         * @return The amount that was unreserved.
+         */
+        public int unReserve(int amount){
+            int _unReserved = amount <= this.getAmount() ? amount : this.getAmount();
+            this.reserved -= _unReserved; //Take away from the reserves.
+            return _unReserved; //Return it!
         }
 
         public boolean canAddAmount(int amount){

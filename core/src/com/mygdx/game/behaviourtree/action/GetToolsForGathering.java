@@ -37,12 +37,9 @@ public class GetToolsForGathering extends LeafTask{
         this.blackBoard.itemTransfer.itemAmountsToTake = new Array<>();
         String[] items = this.blackBoard.resourceTypeTags.getTagsAsString();
 
-        System.out.println("Getting tools");
-
         //For each item, if we don't already have the tool in our equipment, add it to the 'wanted' list.
         for(String item : items){
             DataBuilder.JsonItem jItem = DataManager.getData(item, DataBuilder.JsonItem.class);
-            System.out.println("For item "+item);
             for(String tool : jItem.possibleTools){
                 System.out.println("Trying to add tool '"+tool+"'.");
                 //If we it's empty or we already have the tool, continue.
@@ -51,15 +48,15 @@ public class GetToolsForGathering extends LeafTask{
                 if(!this.blackBoard.itemTransfer.itemNamesToTake.contains(tool, false)) {
                     this.blackBoard.itemTransfer.itemNamesToTake.add(tool);
                     this.blackBoard.itemTransfer.itemAmountsToTake.add(1);
-                    System.out.println("Added tool '"+tool+"'");
                 }
             }
         }
 
         if(this.blackBoard.itemTransfer.itemNamesToTake.size == 0)
             this.control.finishWithFailure();
-        else
+        else {
             this.control.finishWithSuccess();
+        }
     }
 
     @Override

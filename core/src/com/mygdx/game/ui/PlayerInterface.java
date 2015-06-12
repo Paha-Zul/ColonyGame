@@ -581,7 +581,9 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
             }
 
             if(innerInter.getBehManager() != null){
-                GUI.Label(innerInter.getBehManager().getCurrentTaskName(), this.batch, this.ordersRect.x, this.ordersRect.y + 70, this.ordersRect.width, this.ordersRect.height - 50, this.UIStyle);
+                GUI.Label("currTask: "+innerInter.getBehManager().getCurrentTaskName(), this.batch, this.ordersRect.x, this.ordersRect.y + 70, this.ordersRect.width, this.ordersRect.height - 50, this.UIStyle);
+                GUI.Label("nextTask: "+innerInter.getBehManager().getNextTaskName(), this.batch, this.ordersRect.x, this.ordersRect.y + 60, this.ordersRect.width, this.ordersRect.height - 50, this.UIStyle);
+                GUI.Label("currState: "+innerInter.getBehManager().getBehaviourStates().getCurrState().stateName, this.batch, this.ordersRect.x, this.ordersRect.y + 50, this.ordersRect.width, this.ordersRect.height - 50, this.UIStyle);
 
                 //If it's a humanoid that we can control, draw some order buttons and its current path.
                 if(selectedProfile.interactable.interType.equals("humanoid")){

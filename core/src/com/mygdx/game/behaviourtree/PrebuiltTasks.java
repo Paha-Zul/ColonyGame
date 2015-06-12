@@ -1,6 +1,7 @@
 package com.mygdx.game.behaviourtree;
 
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.behaviourtree.action.*;
 import com.mygdx.game.behaviourtree.composite.Parallel;
@@ -286,6 +287,17 @@ public class PrebuiltTasks {
             System.out.println("tool seq is starting");
         };
 
+        //When we finish, if we still have plans to take items (itemNamesToTake and itemAmountsToTake is not null), try to unreserve it.
+        seq.control.callbacks.finishCallback = task -> {
+            if(task.blackBoard.itemTransfer.itemNamesToTake != null && task.blackBoard.itemTransfer.itemAmountsToTake != null && task.blackBoard.itemTransfer.fromInventory != null){
+                for(int i=0;i<task.blackBoard.itemTransfer.itemNamesToTake.size;i++){
+                    String itemName = task.blackBoard.itemTransfer.itemNamesToTake.get(i);
+                    task.blackBoard.itemTransfer.fromInventory.unReserveItem(itemName, task.blackBoard.itemTransfer.itemAmountsToTake.get(i));
+                }
+            }
+        };
+
+        //We need to find a building with that tag 'equipment'.
         findShed.control.callbacks.successCriteria = entity -> {
             Entity ent = (Entity)entity;
             if(ent.getTags().hasTag("building"))
@@ -309,6 +321,61 @@ public class PrebuiltTasks {
         alwaysTrue.setTask(seq);
 
         return alwaysTrue;
+    }
+
+    public static Task returnTools(BlackBoard blackBoard, BehaviourManagerComp behComp){
+        /**
+         *  Sequence:
+         *      get list of tools that we have.
+         *      *not implemented and optional* check if inventory has space
+         *      find closest tool shed
+         *      find path to tool shed
+         *      move to tool shed
+         *      transfer tools
+         */
+
+        Sequence seq = new Sequence("Returning tools", blackBoard);
+        FindClosestEntity findShed = new FindClosestEntity("Finding tool shed", blackBoard);
+        FindPath fpToShed = new FindPath("PathToShed", blackBoard);
+        MoveTo mtShed = new MoveTo("Moving", blackBoard);
+        TransferItem transferTools = new TransferItem("Transferring", blackBoard);
+
+        seq.control.addTask(findShed);
+        seq.control.addTask(fpToShed);
+        seq.control.addTask(mtShed);
+        seq.control.addTask(transferTools);
+
+        //Set some flags and get a list of item names to be removed.
+        seq.control.callbacks.startCallback = task -> {
+            task.blackBoard.itemTransfer.transferAll = false;
+            task.blackBoard.itemTransfer.transferMany = true;
+            task.blackBoard.itemTransfer.takingReserved = false;
+
+            //TODO Something here... check!
+            task.blackBoard.itemTransfer.itemNamesToTake = new Array<>(task.blackBoard.myManager.getComponent(Equipment.class).getToolNames());
+            task.blackBoard.itemTransfer.itemAmountsToTake = new Array<>(task.blackBoard.itemTransfer.itemNamesToTake.size);
+            for(int i=0;i<task.blackBoard.itemTransfer.itemNamesToTake.size;i++)
+                task.blackBoard.itemTransfer.itemAmountsToTake.add(1);
+        };
+
+        //We need a building with the tag "equipment".
+        findShed.control.callbacks.successCriteria = entity -> {
+            Entity ent = (Entity)entity;
+            if(ent.getTags().hasTag("building"))
+                if(ent.getComponent(Building.class).buildingTags.hasTag("equipment"))
+                    return true;
+
+            return false;
+        };
+
+        //When we are successful in finding the shed, set the inventories.
+        findShed.control.callbacks.successCallback = task -> {
+            task.blackBoard.itemTransfer.toInventory = task.blackBoard.target.getComponent(Inventory.class);
+            task.blackBoard.itemTransfer.fromInventory = task.blackBoard.myManager.getEntityOwner().getComponent(Inventory.class);
+        };
+
+        return seq;
+
     }
 
     public static Task exploreUnexplored(BlackBoard blackBoard, BehaviourManagerComp behComp){

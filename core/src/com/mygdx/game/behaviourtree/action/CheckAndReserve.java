@@ -13,7 +13,7 @@ public class CheckAndReserve extends LeafTask{
 
     @Override
     public boolean check() {
-        return super.check();
+        return super.check() && this.blackBoard.itemTransfer.itemNamesToTake != null && this.blackBoard.itemTransfer.itemNamesToTake.size != 0;
     }
 
     @Override
@@ -25,6 +25,7 @@ public class CheckAndReserve extends LeafTask{
     public void update(float delta) {
         super.update(delta);
 
+        boolean atLeastOne = false;
         this.blackBoard.itemTransfer.takingReserved = true;
 
         if(this.blackBoard.itemTransfer.transferMany) {
@@ -34,10 +35,14 @@ public class CheckAndReserve extends LeafTask{
                 int amount = this.blackBoard.itemTransfer.itemAmountsToTake.get(i); //Get the amount
                 int reserve = this.blackBoard.itemTransfer.fromInventory.reserveItem(itemName, amount); //Attempt to reserve
                 this.blackBoard.itemTransfer.itemAmountsToTake.set(i, reserve); //Set the amount to the amount we were able to reserve.
+                if(reserve > 0) atLeastOne = true;
             }
         }
 
-        this.control.finishWithSuccess();
+        if(atLeastOne)
+            this.control.finishWithSuccess();
+        else
+            this.control.finishWithFailure();
     }
 
     @Override

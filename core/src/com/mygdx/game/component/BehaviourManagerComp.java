@@ -54,6 +54,7 @@ public class BehaviourManagerComp extends Component{
         BehaviourManagerComp.addTaskToMap("idle", PrebuiltTasks::idleTask);
         BehaviourManagerComp.addTaskToMap("fleeTarget", PrebuiltTasks::fleeTarget);
         BehaviourManagerComp.addTaskToMap("returnToBase", PrebuiltTasks::returnToBase);
+        BehaviourManagerComp.addTaskToMap("returnTools", PrebuiltTasks::returnTools);
     }
 
     @Override
@@ -98,7 +99,7 @@ public class BehaviourManagerComp extends Component{
     public void changeTaskImmediate(Task task){
         //End the current task.
         if(this.currentBehaviour != null && !this.currentBehaviour.getControl().hasFinished()) {
-            this.currentBehaviour.getControl().finishWithSuccess();
+            this.currentBehaviour.getControl().finishWithFailure();
             this.currentBehaviour.getControl().safeEnd();
         }
 
@@ -228,6 +229,14 @@ public class BehaviourManagerComp extends Component{
             return this.currentBehaviour.getName();
 
         return "Nothing";
+    }
+
+    @JsonIgnore
+    public String getNextTaskName(){
+        if(this.currentBehaviour != null)
+            return this.currentBehaviour.getName();
+
+        return "null";
     }
 
     /**

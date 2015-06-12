@@ -45,6 +45,11 @@ public class TransferItem extends LeafTask{
             this.blackBoard.itemTransfer.toInventory.addItem(this.blackBoard.itemTransfer.itemNameToTake, this.blackBoard.itemTransfer.itemAmountToTake);
         }
 
+        this.blackBoard.itemTransfer.itemNamesToTake = null;
+        this.blackBoard.itemTransfer.itemAmountsToTake = null;
+        this.blackBoard.itemTransfer.itemNameToTake = null;
+        this.blackBoard.itemTransfer.itemAmountToTake = 0;
+
         this.control.finishWithSuccess();
     }
 

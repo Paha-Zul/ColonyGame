@@ -39,6 +39,8 @@ public class Colonist extends Component implements IInteractable, IOwnable{
     @JsonIgnore
     private BehaviourManagerComp manager;
     @JsonIgnore
+    private Equipment equipment;
+    @JsonIgnore
     private Collider collider;
     @JsonProperty
     private String firstName, lastName;
@@ -89,6 +91,7 @@ public class Colonist extends Component implements IInteractable, IOwnable{
         this.manager = this.getComponent(BehaviourManagerComp.class);
         this.manager.getBlackBoard().moveSpeed = 200f;
         this.collider = this.getComponent(Collider.class);
+        this.equipment = this.getComponent(Equipment.class);
 
         EventSystem.onEntityEvent(this.owner, "damage", onDamage);
         EventSystem.onEntityEvent(this.owner, "attacking_group", onAttackingEvent);
@@ -113,6 +116,8 @@ public class Colonist extends Component implements IInteractable, IOwnable{
                 if(!this.getBehManager().getBehaviourStates().getCurrState().stateName.equals("attackTarget"))
                     this.getBehManager().changeTaskImmediate("attackTarget");
             }
+        }else if(this.getBehManager().getBehaviourStates().isCurrState("idle") && this.equipment.hasTools()){
+            this.getBehManager().changeTaskImmediate("returnTools");
         }
     }
 
@@ -232,6 +237,7 @@ public class Colonist extends Component implements IInteractable, IOwnable{
         getBehManager().getBehaviourStates().addState("consume", false, PrebuiltTasks::consumeTask).repeat = false;
         getBehManager().getBehaviourStates().addState("attackTarget", false, PrebuiltTasks::attackTarget).repeat = false;
         getBehManager().getBehaviourStates().addState("hunt", false, PrebuiltTasks::searchAndHunt).repeat = true;
+        getBehManager().getBehaviourStates().addState("returnTools", false, PrebuiltTasks::returnTools).repeat = false;
 
         EventSystem.onEntityEvent(this.owner, "task_started", args -> {
             Task task = (Task)args[0];
