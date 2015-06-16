@@ -393,8 +393,6 @@ public class DataBuilder implements IDestroyable{
                 item.inResources.add(jRes);
                 String toolName = jRes.tool == null ? "" : jRes.tool; //If null, empty, otherwise, the name.
 
-                System.out.println("Adding '"+toolName+"' to "+item.getItemName());
-
                 if(!item.possibleTools.contains(toolName, false))
                     item.possibleTools.add(toolName);
             }

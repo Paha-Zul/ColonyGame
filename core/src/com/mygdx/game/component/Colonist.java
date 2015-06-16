@@ -39,6 +39,8 @@ public class Colonist extends Component implements IInteractable, IOwnable{
     @JsonIgnore
     private BehaviourManagerComp manager;
     @JsonIgnore
+    private Effects effects;
+    @JsonIgnore
     private Equipment equipment;
     @JsonIgnore
     private Collider collider;
@@ -92,6 +94,7 @@ public class Colonist extends Component implements IInteractable, IOwnable{
         this.manager.getBlackBoard().moveSpeed = 200f;
         this.collider = this.getComponent(Collider.class);
         this.equipment = this.getComponent(Equipment.class);
+        this.effects = this.getComponent(Effects.class);
 
         EventSystem.onEntityEvent(this.owner, "damage", onDamage);
         EventSystem.onEntityEvent(this.owner, "attacking_group", onAttackingEvent);
@@ -101,56 +104,15 @@ public class Colonist extends Component implements IInteractable, IOwnable{
 
         this.createBehaviourButtons();
         this.createRangeSensor();
-    }
-
-    @Override
-    public void update(float delta) {
-        super.update(delta);
-
-        if(alert && this.attackList.size() > 0){
-            Entity ent = this.attackList.peek();
-            if(!ent.getTags().hasTag("alive"))
-                this.attackList.removeFirst();
-            else{
-                this.getBehManager().getBlackBoard().target = ent;
-                if(!this.getBehManager().getBehaviourStates().getCurrState().stateName.equals("attackTarget"))
-                    this.getBehManager().changeTaskImmediate("attackTarget");
-            }
-        }else if(this.getBehManager().getBehaviourStates().isCurrState("idle") && this.equipment.hasTools()){
-            this.getBehManager().changeTaskImmediate("returnTools");
-        }
-    }
-
-    @JsonIgnore
-    public boolean setAlert(boolean alert){
-        //If alert is active and we are setting it to not active.
-        if(this.alert && !alert) {
-            this.attackList = new LinkedList<>();
-            this.fixture.getShape().setRadius(0);
-            this.owner.getTags().removeTag("alert");
-        //If alert is not active and we are setting it to active.
-        }else if(!this.alert && alert) {
-            this.fixture.getShape().setRadius(20f);
-            this.owner.getTags().addTag("alert");
-        }
-
-        return this.alert = alert;
-    }
-
-    /**
-     * Toggles the attack range sensor on this colonist.
-     * @return True if alert was set to true, false if alert was set to false.
-     */
-    public boolean toggleRangeSensor(){
-        return this.setAlert(!this.alert);
+        this.createEffects();
     }
 
     //Creates the stats for this colonist.
     private void createStats(){
         //Create these 4 stats.
         Stats.Stat healthStat = stats.addStat("health", 100, 100);
-        Stats.Stat foodStat = stats.addStat("food", 100, 100);
-        Stats.Stat waterStat = stats.addStat("water", 20, 100);
+        Stats.Stat foodStat = stats.addStat("food", 5, 100);
+        Stats.Stat waterStat = stats.addStat("water", 1, 100);
         stats.addStat("energy", 100, 100).color = Color.YELLOW;
 
         healthStat.color = Color.GREEN;
@@ -243,6 +205,57 @@ public class Colonist extends Component implements IInteractable, IOwnable{
             Task task = (Task)args[0];
             if(task.getName().equals("exploreUnexplored")) task.getBlackboard().target = this.getColony().getEntityOwner();
         });
+    }
+
+    private void createEffects(){
+        this.effects.addNewEffect("starving", "Starving", "starvation_effect", (Stats stats) -> stats.getStat("food").getCurrVal() <= 0);
+        this.effects.addNewEffect("dehydrated", "Dehydrated", "dehydration_effect", (Stats stats) -> stats.getStat("water").getCurrVal() <= 0);
+        this.effects.addNewEffect("sleepy", "Sleepy", "sleepy_effect", (Stats stats) -> stats.getStat("energy").getCurrVal() <= 20);
+    }
+
+    @Override
+    public void update(float delta) {
+        super.update(delta);
+
+        if(alert && this.attackList.size() > 0){
+            Entity ent = this.attackList.peek();
+            if(!ent.getTags().hasTag("alive"))
+                this.attackList.removeFirst();
+            else{
+                this.getBehManager().getBlackBoard().target = ent;
+                if(!this.getBehManager().getBehaviourStates().getCurrState().stateName.equals("attackTarget"))
+                    this.getBehManager().changeTaskImmediate("attackTarget");
+            }
+        }else if(this.getBehManager().getBehaviourStates().isCurrState("idle") && this.equipment.hasTools()){
+            this.getBehManager().changeTaskImmediate("returnTools");
+        }
+
+        effects.testAndSetEffect("starving", this.stats);
+        effects.testAndSetEffect("dehydrated", this.stats);
+    }
+
+    @JsonIgnore
+    public boolean setAlert(boolean alert){
+        //If alert is active and we are setting it to not active.
+        if(this.alert && !alert) {
+            this.attackList = new LinkedList<>();
+            this.fixture.getShape().setRadius(0);
+            this.owner.getTags().removeTag("alert");
+        //If alert is not active and we are setting it to active.
+        }else if(!this.alert && alert) {
+            this.fixture.getShape().setRadius(20f);
+            this.owner.getTags().addTag("alert");
+        }
+
+        return this.alert = alert;
+    }
+
+    /**
+     * Toggles the attack range sensor on this colonist.
+     * @return True if alert was set to true, false if alert was set to false.
+     */
+    public boolean toggleRangeSensor(){
+        return this.setAlert(!this.alert);
     }
 
     //The onDamage event when this colonist takes damage.

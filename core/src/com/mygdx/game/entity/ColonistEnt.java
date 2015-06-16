@@ -34,6 +34,7 @@ public class ColonistEnt extends Entity{
         this.addComponent(new Inventory());
         this.addComponent(new Equipment());
         this.addComponent(new BehaviourManagerComp());
+        this.addComponent(new Effects());
 
         this.makeCollider();
     }

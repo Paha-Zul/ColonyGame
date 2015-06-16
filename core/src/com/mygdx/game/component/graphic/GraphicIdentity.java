@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.component.Component;
+import com.mygdx.game.component.Effects;
 import com.mygdx.game.util.Constants;
 import com.mygdx.game.util.GH;
 import com.mygdx.game.util.Grid;
@@ -17,6 +18,8 @@ import org.codehaus.jackson.annotate.JsonProperty;
 public class GraphicIdentity extends Component {
     @JsonIgnore
     private Sprite sprite;
+    @JsonIgnore
+    private Effects effects;
     @JsonProperty
     public int alignment = 0; //center
     @JsonProperty
@@ -38,6 +41,8 @@ public class GraphicIdentity extends Component {
         if(getSprite() == null) return;
         this.getSprite().setSize(GH.toMeters(getSprite().getRegionWidth()), GH.toMeters(getSprite().getRegionHeight()));
         this.getSprite().setOrigin(this.getSprite().getWidth() / 2, this.getSprite().getHeight() / 2);
+
+        this.load();
     }
 
     @Override
@@ -54,6 +59,7 @@ public class GraphicIdentity extends Component {
     @Override
     public void load() {
         super.load();
+        this.effects = this.getComponent(Effects.class);
     }
 
     protected void configureSprite(Sprite sprite){
@@ -77,11 +83,9 @@ public class GraphicIdentity extends Component {
 
         if(getSprite() != null) {
             Grid.GridInstance grid = ColonyGame.worldGrid;
-
             Vector2 pos = this.owner.getTransform().getPosition(); //Cache the owner's position.
 
-            if (!ColonyGame.camera.frustum.boundsInFrustum(pos.x, pos.y, 0, getSprite().getWidth(), getSprite().getHeight(), 0))
-                return;
+            if (!isWithinBounds()) return;
 
             Grid.Node node = grid.getNode(this.owner);
             int visibility = grid.getVisibilityMap()[node.getX()][node.getY()].getVisibility();
@@ -99,9 +103,25 @@ public class GraphicIdentity extends Component {
                 this.getSprite().setPosition(pos.x - (getSprite().getWidth() / 2), pos.y);
 
             this.getSprite().draw(batch);
+
+            if(effects != null){
+                float size = GH.toMeters(24);
+                int num = effects.getActiveEffects().size;
+                float startX = pos.x - num*(size/2);
+                float startY = pos.y + sprite.getHeight()/2;
+                for(Effects.Effect effect : effects.getActiveEffects()){
+                    batch.draw(effect.getIcon(), startX, startY, size, size);
+                    startX+=size;
+                }
+            }
         }
 
         postRender(delta, batch);
+    }
+
+    public boolean isWithinBounds(){
+        Vector2 pos = this.owner.getTransform().getPosition(); //Cache the owner's position.
+        return ColonyGame.camera.frustum.boundsInFrustum(pos.x, pos.y, 0, getSprite().getWidth(), getSprite().getHeight(), 0);
     }
 
     /**
