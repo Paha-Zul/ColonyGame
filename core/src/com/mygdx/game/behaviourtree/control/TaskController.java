@@ -49,18 +49,17 @@ public class TaskController {
      * Starts the task.
      */
     public void safeStart(){
-        this.started = true;
-        this.task.start();
-
         if(this.callbacks != null && this.callbacks.startCallback != null)
             this.callbacks.startCallback.accept(this.task);
+
+        this.started = true;
+        this.task.start();
     }
 
     /**
      * Ends the task. Also calls any callbacks if valid.
      */
     public void safeEnd(){
-
         if(callbacks != null) {
             if (this.hasFailed() && this.callbacks.failureCallback != null)
                 this.callbacks.failureCallback.accept(this.task); //Failure callback

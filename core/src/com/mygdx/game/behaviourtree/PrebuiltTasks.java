@@ -101,16 +101,7 @@ public class PrebuiltTasks {
         //Reset some values.
         sequence.control.callbacks.startCallback = task -> {
             //Reset blackboard values...
-            task.blackBoard.itemTransfer.fromInventory = task.blackBoard.myManager.getEntityOwner().getComponent(Colonist.class).getInventory();
-            task.blackBoard.itemTransfer.transferAmount = false;
-            task.blackBoard.itemTransfer.transferMany = false;
-            task.blackBoard.itemTransfer.transferAll = true;
-            task.blackBoard.itemTransfer.itemAmountToTransfer = 0;
-            task.blackBoard.itemTransfer.itemNameToTransfer = null;
-
-            task.blackBoard.targetResource = null;
-            task.blackBoard.target = null;
-            task.blackBoard.targetNode = null;
+            task.blackBoard.itemTransfer.reset();
         };
 
         //When we finish, set the target back to not taken IF it is still a valid target (if we ended early).
@@ -167,7 +158,10 @@ public class PrebuiltTasks {
         };
 
         //Make sure we are getting a building...
-        findStorage.control.callbacks.successCriteria = ent -> ((Entity)ent).getTags().hasTag("building");
+        findStorage.control.callbacks.successCriteria = ent -> {
+            Entity entity = (Entity)ent;
+            return entity.getTags().hasTag("building") && entity.getComponent(Building.class).buildingTags.hasTag("storage");
+        };
 
         //If we find a valid building, get the inventory from it and assign it to the 'toInventory' field.
         findStorage.control.callbacks.successCallback = task -> task.blackBoard.itemTransfer.toInventory = task.blackBoard.target.getComponent(Inventory.class);
@@ -185,6 +179,13 @@ public class PrebuiltTasks {
             if(blackBoard.targetResource != null && blackBoard.targetResource.isValid())
                 if(blackBoard.targetResource.getTaken() == blackBoard.myManager.getEntityOwner())
                     blackBoard.targetResource.setTaken(null);
+        };
+
+        transferItems.control.callbacks.startCallback = task -> {
+            task.blackBoard.itemTransfer.fromInventory = task.blackBoard.myManager.getEntityOwner().getComponent(Inventory.class);
+            task.blackBoard.itemTransfer.toInventory = task.blackBoard.target.getComponent(Inventory.class);
+            task.blackBoard.itemTransfer.transferAll = true;
+            System.out.println("Transfering start callback");
         };
 
         return sequence;
@@ -395,6 +396,12 @@ public class PrebuiltTasks {
         FindPath findPathToUnexplored = new FindPath("Finding Path to Unexplored", blackBoard);
         MoveTo moveToLocation = new MoveTo("Moving to Explore", blackBoard);
 
+        //Make sure we clear our targets and target node first to get a fresh unexplored area.
+        sequence.control.callbacks.startCallback = task -> {
+            task.blackBoard.target = null;
+            task.blackBoard.targetNode = null;
+        };
+
         findClosestUnexplored.control.callbacks.startCallback = task -> {
             Colonist col = task.blackBoard.myManager.getEntityOwner().getComponent(Colonist.class);
             task.blackBoard.target = col.getColony().getOwnedFromColony(Building.class, building -> building.buildingTags.hasTag("main")).getEntityOwner();
@@ -456,15 +463,15 @@ public class PrebuiltTasks {
         ((ParentTaskController) sequence.getControl()).addTask(consume);
 
         sequence.getControl().callbacks.startCallback = task->{
-            //Reset blackboard values.
-            blackBoard.targetNode = null;
-            blackBoard.itemTransfer.transferAll = false;
-            blackBoard.itemTransfer.itemAmountToTransfer = 1;
-            blackBoard.itemTransfer.itemNameToTransfer = null;
+            task.blackBoard.itemTransfer.reset(); //Reset item transfers
+            task.blackBoard.targetNode = null; //We don't want this set.
+            task.blackBoard.itemTransfer.itemAmountToTransfer = 1; //We only want to take 1
 
-            blackBoard.target = blackBoard.myManager.getEntityOwner().getComponent(Colonist.class).getColony().getEntityOwner();
-            blackBoard.itemTransfer.fromInventory = blackBoard.myManager.getEntityOwner().getComponent(Colonist.class).getColony().getOwnedFromColony(Building.class, building -> building.buildingTags.hasTag("main")).getComponent(Inventory.class);
-            blackBoard.itemTransfer.toInventory = blackBoard.myManager.getEntityOwner().getComponent(Inventory.class);
+            //Get a storage building from my colony, store the entity as the target, and set the from/to inventory.
+            Building storage = task.blackBoard.myManager.getEntityOwner().getComponent(Colonist.class).getColony().getOwnedFromColony(Building.class, b -> b.buildingTags.hasTag("storage"));
+            task.blackBoard.target = storage.getEntityOwner();
+            task.blackBoard.itemTransfer.fromInventory = storage.getComponent(Inventory.class);
+            task.blackBoard.itemTransfer.toInventory = blackBoard.myManager.getEntityOwner().getComponent(Inventory.class);
         };
 
         return sequence;

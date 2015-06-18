@@ -66,7 +66,7 @@ public class Stats extends Component{
      * Clears the timers from this Stats Component.
      */
     public void clearTimers(){
-        this.timerList.clear();
+        this.timerList = new ArrayList<>();
     }
 
     /**

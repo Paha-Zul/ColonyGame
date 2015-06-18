@@ -3,18 +3,21 @@
     "itemName": "pick",
     "displayName": "Pick",
     "itemType": "tool",
-    "description": "Awesome pick."
+    "description": "Awesome pick.",
+    "icon": "pick"
   },
   {
     "itemName": "shovel",
     "displayName": "Shovel",
     "itemType": "tool",
-    "description": "A shovel."
+    "description": "A shovel.",
+    "icon": "shovel"
   },
   {
     "itemName": "hatchet",
     "displayName": "Hatchet",
     "itemType": "tool",
-    "description": "Crazy hatchet."
+    "description": "Crazy hatchet.",
+    "icon": "hatchet"
   }
 ]

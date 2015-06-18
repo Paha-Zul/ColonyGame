@@ -139,6 +139,7 @@ public class Colony extends Component implements IInteractable {
         Building colonyBuilding = colonyEnt.getComponent(Building.class);
         this.addOwnedToColony(colonyBuilding);
         colonyBuilding.buildingTags.addTag("main");
+        colonyBuilding.buildingTags.addTag("storage");
 
         //Spawns the Equipment building.
         BuildingEntity equipEnt = new BuildingEntity(new Vector2(start.x - 5, start.y - 5), 0, new String[]{"Colony",""}, 10);
