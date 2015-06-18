@@ -41,7 +41,6 @@ public class GetToolsForGathering extends LeafTask{
         for(String item : items){
             DataBuilder.JsonItem jItem = DataManager.getData(item, DataBuilder.JsonItem.class);
             for(String tool : jItem.possibleTools){
-                System.out.println("Trying to add tool '"+tool+"'.");
                 //If we it's empty or we already have the tool, continue.
                 if(tool.equals("") || this.equipment.hasTool(tool)) continue;
                 //If the itemNamesToTransfer array doesn't already contain the tool, add it.
@@ -52,9 +51,9 @@ public class GetToolsForGathering extends LeafTask{
             }
         }
 
-        if(this.blackBoard.itemTransfer.itemNamesToTransfer.size == 0)
+        if(this.blackBoard.itemTransfer.itemNamesToTransfer.size == 0) {
             this.control.finishWithFailure();
-        else {
+        }else {
             this.control.finishWithSuccess();
         }
     }

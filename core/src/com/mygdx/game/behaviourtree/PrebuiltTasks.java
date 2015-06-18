@@ -281,8 +281,8 @@ public class PrebuiltTasks {
 
         seq.control.callbacks.startCallback = task -> {
             task.blackBoard.itemTransfer.reset();
-
-            System.out.println("tool seq is starting");
+            task.blackBoard.itemTransfer.transferMany = true;
+            task.blackBoard.itemTransfer.takingReserved = true;
         };
 
         //When we finish, if we still have plans to take items (itemNamesToTransfer and itemAmountsToTransfer is not null), try to unreserve it.

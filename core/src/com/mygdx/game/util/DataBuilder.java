@@ -7,6 +7,7 @@ import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter;
@@ -96,6 +97,9 @@ public class DataBuilder implements IDestroyable{
      * @param fileHandle The FileHandle for the folder that the assets reside in.
      */
     private void loadFilesForMod(FileHandle fileHandle){
+        TextureAtlas atlas = new TextureAtlas(Gdx.files.internal("atlas/icons.atlas"));
+
+        //TODO Separate the loading of image assets and file assets. Image assets should be first...
         buildAssets(fileHandle);
         String path = fileHandle.path();
 
@@ -104,12 +108,20 @@ public class DataBuilder implements IDestroyable{
 
         //Build items
         buildJson(Gdx.files.internal(path + filePath + itemPath), JsonItem[].class, value -> {
-            for (JsonItem jsonItem : value) DataManager.addData(jsonItem.itemName, jsonItem, JsonItem.class);
+            for (JsonItem jsonItem : value) {
+                jsonItem.iconTexture = atlas.findRegion(jsonItem.icon);
+                if(jsonItem.iconTexture == null) jsonItem.iconTexture = atlas.findRegion("missing");
+                DataManager.addData(jsonItem.itemName, jsonItem, JsonItem.class);
+            }
         });
 
         //Build tools
         buildJson(Gdx.files.internal(path + filePath + toolPath), JsonTool[].class, value -> {
-            for (JsonTool tool : value) DataManager.addData(tool.itemName, tool, JsonItem.class);
+            for (JsonTool tool : value) {
+                tool.iconTexture = atlas.findRegion(tool.icon);
+                if(tool.iconTexture == null) tool.iconTexture = atlas.findRegion("missing");
+                DataManager.addData(tool.itemName, tool, JsonItem.class);
+            }
         });
 
         //Build resources.
@@ -478,6 +490,9 @@ public class DataBuilder implements IDestroyable{
         protected String itemName, displayName, itemType, description, img;
         protected String[] effects;
         protected int[] strengths;
+        public String icon;
+        public TextureRegion iconTexture;
+
 
         public String getItemName() {
             return itemName;

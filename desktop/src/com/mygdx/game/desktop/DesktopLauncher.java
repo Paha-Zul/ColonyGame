@@ -2,7 +2,6 @@ package com.mygdx.game.desktop;
 
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.tools.texturepacker.TexturePacker;
 import com.mygdx.game.ColonyGame;
 
@@ -37,5 +36,6 @@ public class DesktopLauncher {
         TexturePacker.process(settings, "img/terrain", "./atlas", "terrain");
         TexturePacker.process(settings, "img/ui/buttons", "./atlas", "buttons");
         TexturePacker.process(settings, "img/Interactable", "./atlas", "interactables");
+        TexturePacker.process(settings, "img/icons", "./atlas", "icons");
     }
 }

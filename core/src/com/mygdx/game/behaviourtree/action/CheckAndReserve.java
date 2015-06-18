@@ -39,10 +39,13 @@ public class CheckAndReserve extends LeafTask{
             }
         }
 
-        if(atLeastOne)
+        if(atLeastOne) {
             this.control.finishWithSuccess();
-        else
+            System.out.println("I reserved one");
+        } else {
+            System.out.println("Couldn't reserve");
             this.control.finishWithFailure();
+        }
     }
 
     @Override

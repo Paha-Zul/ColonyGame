@@ -3,13 +3,15 @@
     "itemName": "stone",
     "displayName": "Stones",
     "itemType": "stone",
-    "description": "Hard stuff."
+    "description": "Hard stuff.",
+    "icon": "stone"
   },
   {
     "itemName": "metal",
     "displayName": "Metal Fragments",
     "itemType": "metal",
-    "description": "Shiny fragments."
+    "description": "Shiny fragments.",
+    "icon": "metal"
   },
   {
     "itemName": "nitrate",
@@ -29,13 +31,8 @@
     "itemName": "wood",
     "displayName": "Wood Log",
     "itemType": "wood",
-    "description": "A wood log."
-  },
-  {
-    "itemName": "stone",
-    "displayName": "Stone",
-    "itemType": "stone",
-    "description": "A stone rock."
+    "description": "A wood log.",
+    "icon": "wood"
   },
   {
     "itemName": "twig",
@@ -49,7 +46,8 @@
     "itemType": "herbs",
     "description": "Medicinal Herbs.",
     "effects": ["heal"],
-    "strengths":[5]
+    "strengths":[5],
+    "icon": "herbs"
   },
   {
     "itemName": "food",
@@ -57,7 +55,8 @@
     "itemType": "food",
     "description": "Yummy food.",
     "effects": ["feed"],
-    "strengths":[10]
+    "strengths":[10],
+    "icon": "food"
   },
   {
     "itemName": "water",
@@ -65,12 +64,14 @@
     "itemType": "water",
     "description": "Yummy water.",
     "effects": ["thirst"],
-    "strengths":[10]
+    "strengths":[10],
+    "icon": "water"
   },
   {
     "itemName": "hide",
     "displayName": "Animal Hide",
     "itemType": "hide",
-    "description": "Awesome animal hide."
+    "description": "Awesome animal hide.",
+    "icon": "hide"
   }
 ]

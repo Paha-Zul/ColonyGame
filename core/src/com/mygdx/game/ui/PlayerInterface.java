@@ -563,16 +563,32 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
             if(innerInter.getInventory() != null){
                 //GUI.Texture(tabsRect, ColonyGame.assetManager.get("menuButton_normal", Texture.class), this.batch);
 
+                batch.setColor(Color.WHITE);
                 GUI.Label("Inventory", this.batch, this.tabsTopRect, this.UIStyle);
                 ArrayList<Inventory.InventoryItem> itemList = innerInter.getInventory().getItemList();
-                this.UIStyle.alignment = Align.topLeft;
-                this.UIStyle.paddingLeft = 5;
+                this.UIStyle.alignment = Align.center;
                 this.UIStyle.paddingTop = 0;
+                int topOffset = this.UIStyle.paddingLeft = 10, iconSize =  32;
+                float leftOffset = iconSize/1.5f;
+                float labelHeight = iconSize;
+
+                float xPos = this.tabsRect.x;
+                float yPos = this.tabsRect.y+tabsRect.height-iconSize;
+
+                //TODO Make this shift to the right when no more space to go down...
                 for(int i=0;i<itemList.size();i++){
                     Inventory.InventoryItem item = itemList.get(i);
-                    GUI.Label(item.itemRef.getDisplayName(), this.batch, this.tabsRect.x, this.tabsRect.y, this.tabsRect.width, this.tabsRect.height - 20 - i*10, this.UIStyle);
-                    String maxItemAmount = item.getMaxAmount() > 0 ? ""+item.getMaxAmount() : "?";
-                    GUI.Label(""+item.getAmount()+"/"+maxItemAmount, this.batch, this.tabsRect.x + 100, this.tabsRect.y, 100, this.tabsRect.height - 20 - i*10, this.UIStyle);
+                    String maxItemAmount = item.getMaxAmount() >= 0 ? ""+item.getMaxAmount() : "?";
+                    //GUI.Label(item.itemRef.getDisplayName(), this.batch, this.tabsRect.x + leftOffset, this.tabsRect.y-i*10, this.tabsRect.width, this.tabsRect.height, this.UIStyle);
+                    GUI.Label(""+item.getAmount()+"/"+maxItemAmount, this.batch, xPos, yPos, 100, labelHeight, this.UIStyle);
+
+                    GUI.Texture(item.itemRef.iconTexture, batch, xPos, yPos, iconSize, iconSize);
+
+                    yPos-=iconSize;
+                    if(yPos < this.tabsRect.y){
+                        xPos+= 100;
+                        yPos = this.tabsRect.y+tabsRect.height-iconSize;
+                    }
                 }
                 this.batch.setColor(Color.WHITE);
                 this.UIStyle.alignment = Align.center;
