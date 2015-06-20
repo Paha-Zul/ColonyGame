@@ -114,9 +114,6 @@ public class Grid {
             int startY = area[2] < 0 ? 0 : area[2];
             int endY = area[3] >= this.getHeight() ? this.getHeight()-1 : area[3];
 
-            System.out.println("Area: "+area[0]+" "+area[1]+" "+area[2]+" "+area[3]);
-            System.out.println("start/end: "+startX+" "+endX+" "+startY+" "+endY);
-
             for(int x = startX; x <= endX; x++){
                 for(int y = startY; y <= endY; y++){
                     Node node = getNode(x, y);

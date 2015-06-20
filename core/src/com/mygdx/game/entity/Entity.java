@@ -115,7 +115,7 @@ public class Entity implements IDelayedDestroyable, ISaveable{
 		if(this.components.getIdentity() != null) this.components.identity.render(delta, batch);
 	}
 
-    public final <T extends Component> T addComponent(Component comp){
+    public final <T extends Component> T addComponent(T comp){
         return components.addComponent(comp);
     }
 
@@ -254,7 +254,7 @@ public class Entity implements IDelayedDestroyable, ISaveable{
 		 * @return The Component that was added.
 		 */
 		@SuppressWarnings("unchecked")
-		public final <T extends Component> T addComponent(Component comp){
+		public final <T extends Component> T addComponent(T comp){
 			comp.init(owner); //Initialize the component with this Entity as the owner.
             if(!comp.isStarted())
                 this.newComponentList.add(comp); //Add it to the new list for the start() method.
@@ -262,7 +262,7 @@ public class Entity implements IDelayedDestroyable, ISaveable{
             if (comp.isActive()) this.activeComponentList.add(comp);
             else this.inactiveComponentList.add(comp);
 
-			return (T) comp;
+			return comp;
 		}
 
 		/**

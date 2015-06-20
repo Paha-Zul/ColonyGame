@@ -81,7 +81,6 @@ public class GH {
 
     public static int[] fixRanges(float squareSize, float startX, float startY, float endX, float endY, int width, int height){
         int[] ranges = new int[4];
-        System.out.println("SquareSize: "+squareSize);
         ranges[0] = (int)(startX/squareSize);
         ranges[1] = (int)(endX/squareSize);
         ranges[2] = (int)(startY/squareSize);

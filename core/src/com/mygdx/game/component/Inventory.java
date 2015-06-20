@@ -226,6 +226,21 @@ public class Inventory extends Component implements IOwnable{
         return this.currTotalItems;
     }
 
+    /**
+     * Gets an amount of an item from the inventory if it exists.
+     * @param itemName The name of the item to get an amount of.
+     * @return The amount of the item in the inventory. 0 if the item does not exist or simply has 0.
+     */
+    @JsonIgnore
+    public int getItemAmount(String itemName){
+        InventoryItem item = this.inventory.get(itemName);
+        int amount = 0;
+        if(item != null)
+            amount = item.getAmount();
+
+        return amount;
+    }
+
     @JsonIgnore
     public final InventoryItem getItemReference(String name){
         return this.inventory.get(name);

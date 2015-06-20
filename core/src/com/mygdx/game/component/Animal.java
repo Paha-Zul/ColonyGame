@@ -278,6 +278,12 @@ public class Animal extends Component implements IInteractable{
     }
 
     @Override
+    @JsonIgnore
+    public Constructable getConstructable() {
+        return null;
+    }
+
+    @Override
     public void destroy(Entity destroyer) {
         super.destroy(destroyer);
         if(attackSensor != null) this.collider.body.destroyFixture(attackSensor);

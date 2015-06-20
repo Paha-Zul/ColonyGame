@@ -457,6 +457,12 @@ public class Colonist extends Component implements IInteractable, IOwnable{
     }
 
     @Override
+    @JsonIgnore
+    public Constructable getConstructable() {
+        return null;
+    }
+
+    @Override
     public void destroy(Entity destroyer) {
         super.destroy(destroyer);
     }

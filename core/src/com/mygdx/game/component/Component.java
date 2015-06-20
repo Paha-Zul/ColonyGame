@@ -97,7 +97,7 @@ public abstract class Component implements IDelayedDestroyable, ISaveable {
 	 * @param <T> The class.
 	 * @return The Component that was added.
 	 */
-	public final <T extends Component> T addComponent(Component comp){
+	public final <T extends Component> T addComponent(T comp){
 		return this.owner.addComponent(comp);
 	}
 

@@ -8,6 +8,7 @@ import com.badlogic.gdx.physics.box2d.Shape;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.component.collider.Collider;
 import com.mygdx.game.entity.Entity;
+import com.mygdx.game.util.Constants;
 import com.mygdx.game.util.Grid;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
@@ -34,7 +35,6 @@ public class GridComponent extends Component{
     @Override
     public void init(Entity owner) {
         super.init(owner);
-
     }
 
     @Override
@@ -84,6 +84,7 @@ public class GridComponent extends Component{
         }
         this.grid.addViewer(this.currNode, this.exploreRadius);
         this.load();
+
     }
 
     @Override
@@ -94,6 +95,8 @@ public class GridComponent extends Component{
     @Override
     public void load() {
         this.grid = ColonyGame.worldGrid;
+        if(this.gridType == Constants.GRIDSTATIC)
+            this.setActive(false);
     }
 
     @Override

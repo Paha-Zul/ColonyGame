@@ -66,19 +66,9 @@ public class GraphicIdentity extends Component {
         sprite.setOrigin(sprite.getWidth() / 2, sprite.getHeight() / 2);
     }
 
-    /**
-     * Renders before the main graphic is rendered.
-     * @param delta The time between frames.
-     * @param batch The SpriteBatch to render with.
-     */
-    public void preRender(float delta, SpriteBatch batch){
-
-    }
-
     @Override
     public void render(float delta, SpriteBatch batch) {
         super.render(delta, batch);
-        preRender(delta, batch);
 
         if(getSprite() != null) {
             Grid.GridInstance grid = ColonyGame.worldGrid;
@@ -101,6 +91,10 @@ public class GraphicIdentity extends Component {
             if (alignment == 1)
                 this.getSprite().setPosition(pos.x - (getSprite().getWidth() / 2), pos.y);
 
+            if(this.owner.getTags().hasTag("building")) {
+                System.out.println("color: " + this.sprite.getColor().r + " " + this.sprite.getColor().g + " " + this.sprite.getColor().b + " " + this.sprite.getColor().a);
+                //getSprite().setAlpha(0.1f);
+            }
             this.getSprite().draw(batch);
 
             if(effects != null){
@@ -114,22 +108,11 @@ public class GraphicIdentity extends Component {
                 }
             }
         }
-
-        postRender(delta, batch);
     }
 
     public boolean isWithinBounds(){
         Vector2 pos = this.owner.getTransform().getPosition(); //Cache the owner's position.
         return ColonyGame.camera.frustum.boundsInFrustum(pos.x, pos.y, 0, getSprite().getWidth(), getSprite().getHeight(), 0);
-    }
-
-    /**
-     * Renders after the main graphic.
-     * @param delta The time between frames.
-     * @param batch The SpriteBatch to render with.
-     */
-    public void postRender(float delta, SpriteBatch batch){
-
     }
 
     /**
@@ -184,6 +167,6 @@ public class GraphicIdentity extends Component {
     }
 
     public Sprite getSprite() {
-        return sprite;
+        return this.sprite;
     }
 }

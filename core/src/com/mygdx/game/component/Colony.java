@@ -293,4 +293,10 @@ public class Colony extends Component implements IInteractable {
     public Component getComponent() {
         return this;
     }
+
+    @Override
+    @JsonIgnore
+    public Constructable getConstructable() {
+        return null;
+    }
 }

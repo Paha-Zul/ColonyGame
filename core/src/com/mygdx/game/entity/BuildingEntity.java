@@ -5,10 +5,7 @@ import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.mygdx.game.ColonyGame;
-import com.mygdx.game.component.Building;
-import com.mygdx.game.component.GridComponent;
-import com.mygdx.game.component.Interactable;
-import com.mygdx.game.component.Inventory;
+import com.mygdx.game.component.*;
 import com.mygdx.game.component.collider.Collider;
 import com.mygdx.game.component.graphic.GraphicIdentity;
 import com.mygdx.game.util.Constants;
@@ -24,16 +21,14 @@ public class BuildingEntity extends Entity{
     public BuildingEntity(Vector2 position, float rotation, String[] graphicName, int drawLevel) {
         super(position, rotation, drawLevel);
         this.name = "Main Base";
-        this.tags.addTag("building");
+        this.tags.addTags("building", "constructing");
 
-        ((GraphicIdentity)this.components.addComponent(new GraphicIdentity())).setSprite(graphicName[0], graphicName[1]);
-
-        GridComponent gridComp = this.addComponent(new GridComponent());
-        gridComp.setGridType(Constants.GRIDSTATIC).setGrid(ColonyGame.worldGrid).setExploreRadius(8).setAddMulti(true);
-
+        this.addComponent(new GraphicIdentity()).setSprite(graphicName[0], graphicName[1]);
+        this.addComponent(new GridComponent()).setGridType(Constants.GRIDSTATIC).setGrid(ColonyGame.worldGrid).setExploreRadius(8).setAddMulti(true);
         this.addComponent(new Building());
-        ((Interactable)this.addComponent(new Interactable())).setInterType("building");
+        this.addComponent(new Interactable()).setInterType("building");
         this.addComponent(new Inventory());
+        this.addComponent(new Constructable()).addItem("wood", 20);
 
         this.makeCollider();
     }
