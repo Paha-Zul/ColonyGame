@@ -55,8 +55,17 @@ public class BuildingEntity extends Entity{
         bodyDef.position.set(this.getTransform().getPosition());
         //bodyDef.active = false;
 
+        float hWidth = 1;
+        float hHeight = 1;
+
+        GraphicIdentity graphic = this.getGraphicIdentity();
+        if(graphic != null){
+            hWidth = graphic.getSprite().getWidth()/2;
+            hHeight = graphic.getSprite().getHeight()/2;
+        }
+
         PolygonShape shape = new PolygonShape();
-        shape.setAsBox(1, 1);
+        shape.setAsBox(hWidth, hHeight);
 
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.restitution = 0;

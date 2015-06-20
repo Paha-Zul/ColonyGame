@@ -200,24 +200,15 @@ public class Grid {
         public Node addToGrid(Entity entity, boolean multi, Rectangle bounds){
             if(multi){
                 System.out.println();
-                System.out.println("Adding " + entity.name + " to multiple. bounds: " + bounds);
-                int[] ranges = GH.fixRanges(this.getSquareSize(), bounds.x-bounds.width/2, bounds.y-bounds.height/2, bounds.x+bounds.width/2, bounds.y+bounds.height/2, this.getWidth(), this.getHeight());
-                System.out.print("Ranges: "+ranges[0]+" "+ranges[1]+" "+ranges[2]+" "+ranges[3]);
-                System.out.println();
-
+                int[] ranges = GH.fixRanges(this.getSquareSize(), bounds.x, bounds.y, bounds.x+bounds.width, bounds.y+bounds.height, this.getWidth(), this.getHeight());
                 performOnNodeInArea(ranges, node -> {
-                    System.out.println("Trying to add to "+node);
                     if (node.getX() == (int) (entity.getTransform().getPosition().x / this.getSquareSize()) && node.getY() == (int) (entity.getTransform().getPosition().y / this.getSquareSize()))
                         return false;
-
                     node.addEntity(entity);
-                    System.out.println("Added to " + node);
-
                     return false;
                 });
             }
             Node node = this.addToGrid(entity);
-            System.out.println("Enitity added to "+node);
             return node;
         }
 
