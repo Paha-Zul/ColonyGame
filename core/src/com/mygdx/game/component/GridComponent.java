@@ -1,6 +1,8 @@
 package com.mygdx.game.component;
 
+import com.badlogic.gdx.math.Rectangle;
 import com.mygdx.game.ColonyGame;
+import com.mygdx.game.component.collider.Collider;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.util.Grid;
 import org.codehaus.jackson.annotate.JsonIgnore;
@@ -18,6 +20,8 @@ public class GridComponent extends Component{
     private Grid.GridInstance grid;
     @JsonProperty
     public int exploreRadius = 3;
+    @JsonProperty
+    private boolean addMulti = false;
 
     public GridComponent() {
         super();
@@ -26,14 +30,24 @@ public class GridComponent extends Component{
     @Override
     public void init(Entity owner) {
         super.init(owner);
-        //Gets a node to start.
-        this.grid = ColonyGame.worldGrid;
-        this.currNode = this.grid.addToGrid(this.owner);
+
     }
 
     @Override
     public void start() {
         super.start();
+        //Gets a node to start.
+        this.grid = ColonyGame.worldGrid;
+        if(!addMulti) this.currNode = this.grid.addToGrid(this.owner);
+        else{
+            Rectangle bounds = new Rectangle();
+            Collider collider = this.getComponent(Collider.class);
+            bounds.setX(this.owner.getTransform().getPosition().x - collider.fixture.getShape().getRadius()/2);
+            bounds.setY(this.owner.getTransform().getPosition().y - collider.fixture.getShape().getRadius()/2);
+            bounds.setWidth(collider.fixture.getShape().getRadius());
+            bounds.setHeight(collider.fixture.getShape().getRadius());
+            this.currNode = this.grid.addToGrid(this.owner, true, bounds);
+        }
         this.grid.addViewer(this.currNode, this.exploreRadius);
         this.load();
     }
@@ -69,6 +83,12 @@ public class GridComponent extends Component{
     @JsonIgnore
     public GridComponent setExploreRadius(int exploreRadius) {
         this.exploreRadius = exploreRadius;
+        return this;
+    }
+
+    @JsonIgnore
+    public GridComponent setAddMulti(boolean multi){
+        this.addMulti = multi;
         return this;
     }
 

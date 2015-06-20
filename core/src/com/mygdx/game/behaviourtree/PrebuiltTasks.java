@@ -185,7 +185,6 @@ public class PrebuiltTasks {
             task.blackBoard.itemTransfer.fromInventory = task.blackBoard.myManager.getEntityOwner().getComponent(Inventory.class);
             task.blackBoard.itemTransfer.toInventory = task.blackBoard.target.getComponent(Inventory.class);
             task.blackBoard.itemTransfer.transferAll = true;
-            System.out.println("Transfering start callback");
         };
 
         return sequence;

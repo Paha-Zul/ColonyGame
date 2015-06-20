@@ -63,6 +63,7 @@ public class GameScreen implements Screen{
     @Override
     public void show() {
         //generateLarger();
+
     }
 
     public void render(float delta){

@@ -41,6 +41,12 @@ public class Tags {
         this.tagMask |= (1 << intTag); //OR the tag to the mask.
     }
 
+    public void addTags(String... tags){
+        for(String tag : tags){
+            this.addTag(tag);
+        }
+    }
+
     /**
      * Toggles the tag bit in this Tags object.
      * @param tag The tag to toggle.

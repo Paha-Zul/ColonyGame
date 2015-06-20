@@ -44,6 +44,7 @@ public class DataBuilder implements IDestroyable{
     private final String modInfoFilePath = "/info.json";
     private final String modFilePath = "/mods.json";
     private final String eventsFilePath = "/events.json";
+    private final String prefabFilePath = "/prefabs.json";
     private final String miscPath = "/misc.json";
 
     private EasyAssetManager assetManager;
@@ -642,6 +643,38 @@ public class DataBuilder implements IDestroyable{
         //Not anything read in, but used for passing data.
         public Entity eventTarget, eventTargetOther;
     }
+
+    /*
+    public static class JsonPrefab{
+        public String name, entityName; //The name to store it by, and the entity name.
+        public FieldInit[] fields;
+        public MethodCall[] methodCalls;
+        public ComponentObject[] components;
+
+        public static class ComponentObject{
+            public String className;
+            public MethodCall[] methodCalls;
+            public FieldInit[] fields;
+        }
+
+        public static class ComponentTags{
+            public String component;
+            public String[] tags;
+        }
+
+        public static class FieldInit{
+            public String fieldName, type, value;
+            public MethodCall[] methodCalls;
+        }
+
+        public static class MethodCall{
+            public String method;           //The method name
+            public String[] parameters;     //The actual parameters
+            public String[] methodParamType;
+            public String[] parameterTypes; //If many parameters
+        }
+    }
+    */
 
     @Override
     public void destroy() {

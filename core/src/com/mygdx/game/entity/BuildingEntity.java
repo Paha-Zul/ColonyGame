@@ -27,7 +27,10 @@ public class BuildingEntity extends Entity{
         this.tags.addTag("building");
 
         ((GraphicIdentity)this.components.addComponent(new GraphicIdentity())).setSprite(graphicName[0], graphicName[1]);
-        ((GridComponent)this.addComponent(new GridComponent())).setGridType(Constants.GRIDSTATIC).setGrid(ColonyGame.worldGrid).setExploreRadius(8);
+
+        GridComponent gridComp = this.addComponent(new GridComponent());
+        gridComp.setGridType(Constants.GRIDSTATIC).setGrid(ColonyGame.worldGrid).setExploreRadius(8).setAddMulti(true);
+
         this.addComponent(new Building());
         ((Interactable)this.addComponent(new Interactable())).setInterType("building");
         this.addComponent(new Inventory());

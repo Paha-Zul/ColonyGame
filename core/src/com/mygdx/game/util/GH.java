@@ -59,6 +59,16 @@ public class GH {
             errorLog.writeString(elem.toString()+"\n", true);
     }
 
+    /**
+     * Calculates the correct ranges for X and Y.
+     * @param startX The start X index.
+     * @param endX The ending X index.
+     * @param startY The starting Y index.
+     * @param endY The ending Y index.
+     * @param width The width of the allowed ranged (0 to width, ie: 0 to 200)
+     * @param height The height of the allowed range (0 to height, ie: 0 to 200)
+     * @return An array that contains the 4 ranges, start and end. [0]-startX, [1]-endX, [2]-startY, [3]-endY.
+     */
     public static int[] fixRanges(int startX, int endX, int startY, int endY, int width, int height){
         int[] nums = new int[4];
         nums[0] = startX < 0 ? 0 : startX;
@@ -67,6 +77,22 @@ public class GH {
         nums[3] = endY >= height ? height - 1 : endY;
 
         return nums;
+    }
+
+    public static int[] fixRanges(float squareSize, float startX, float startY, float endX, float endY, int width, int height){
+        int[] ranges = new int[4];
+        System.out.println("SquareSize: "+squareSize);
+        ranges[0] = (int)(startX/squareSize);
+        ranges[1] = (int)(endX/squareSize);
+        ranges[2] = (int)(startY/squareSize);
+        ranges[3] = (int)(endY/squareSize);
+
+        ranges[0] = ranges[0] < 0 ? 0 : ranges[0];
+        ranges[1] = ranges[1] >= width ? width-1 : ranges[1];
+        ranges[2] = ranges[2] < 0 ? 0 : ranges[2];
+        ranges[3] = ranges[3] >= height ? height-1 : ranges[3];
+
+        return ranges;
     }
 
 	public static class Message implements Serializable {

@@ -1,0 +1,14 @@
+[
+  {
+    "name": "colonyBase",
+    "entityName": "ColonyBase",
+    "components": ["Transform", "graphic.GraphicIdentity", "GridComponent", "Colony", "Building", "collider.Collider"],
+    "entityTags": ["building"],
+    "buildingTags": ["main", "storage"],
+    "graphicImageAndAtlas": ["colony", ""],
+    "gridSightRadius": 8,
+    "colliderType"
+    "colliderShape": "circle",
+    "colliderRadius": 1
+  }
+]

@@ -13,7 +13,7 @@ public class Transform extends Component implements IDelayedDestroyable {
     @JsonIgnore
 	public Transform parent;
     @JsonProperty
-	private Vector2 worldPosition, localPosition;
+	private Vector2 worldPosition = new Vector2(), localPosition = new Vector2();
     @JsonProperty
 	private float worldRotation, localRotation, rotationOffset=0, distFromParent=0;
     @JsonProperty
@@ -261,8 +261,9 @@ public class Transform extends Component implements IDelayedDestroyable {
 	 * @param pos A Vector2 holding the new saveContainer position.
 	 */
     @JsonIgnore
-	public void setPosition(Vector2 pos){
+	public Transform setPosition(Vector2 pos){
 		setPosition(pos.x, pos.y);
+		return this;
 	}
 
 	/**
@@ -291,7 +292,7 @@ public class Transform extends Component implements IDelayedDestroyable {
 	 * @param rot A float which is the new saveContainer rotation.
 	 */
     @JsonIgnore
-	public void setRotation(float rot){
+	public Transform setRotation(float rot){
 		this.worldRotation = this.normalizeAngle(rot);
 
 		if(this.parent == null)
@@ -299,7 +300,7 @@ public class Transform extends Component implements IDelayedDestroyable {
 		else {
 			this.localRotation = Transform.normalizeAngle(this.worldRotation - this.parent.worldRotation);
 		}
-
+		return this;
 	}
 
 	public void rotate(float rot){

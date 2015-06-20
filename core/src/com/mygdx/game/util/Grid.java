@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.component.GridComponent;
@@ -88,15 +89,36 @@ public class Grid {
 
         /**
          * Performs a Predicate function on Nodes within the radius from the start index. If any Predicate test returns true, the function returns.
-         * @param nodePredicate The Predicate function to test and perform on the Node. If this return true, the function returns and does not process any further.
          * @param radius The radius of the search.
          * @param startIndex The start index.
+         * @param nodePredicate The Predicate function to test and perform on the Node. If this return true, the function returns and does not process any further.
          */
-        public boolean performOnNodeInRadius(Predicate<Node> nodePredicate, int radius, int[] startIndex){
+        public boolean performOnNodeInRadius(int radius, int[] startIndex, Predicate<Node> nodePredicate){
             int[] ranges = GH.fixRanges(startIndex[0] - radius, startIndex[0] + radius, startIndex[1] - radius, startIndex[1] + radius, getWidth(), getHeight());
 
             for(int x = ranges[0]; x <= ranges[1]; x++){
                 for(int y = ranges[2]; y <= ranges[3]; y++){
+                    Node node = getNode(x, y);
+                    if(node == null) continue; //If null, continue
+                    if(nodePredicate.test(node))
+                        return true;
+                }
+            }
+
+            return false;
+        }
+
+        public boolean performOnNodeInArea(int[] area, Predicate<Node> nodePredicate){
+            int startX = area[0] < 0 ? 0 : area[0];
+            int endX = area[1] >= this.getWidth() ? this.getWidth()-1 : area[1];
+            int startY = area[2] < 0 ? 0 : area[2];
+            int endY = area[3] >= this.getHeight() ? this.getHeight()-1 : area[3];
+
+            System.out.println("Area: "+area[0]+" "+area[1]+" "+area[2]+" "+area[3]);
+            System.out.println("start/end: "+startX+" "+endX+" "+startY+" "+endY);
+
+            for(int x = startX; x <= endX; x++){
+                for(int y = startY; y <= endY; y++){
                     Node node = getNode(x, y);
                     if(node == null) continue; //If null, continue
                     if(nodePredicate.test(node))
@@ -157,13 +179,45 @@ public class Grid {
         }
 
         /**
-         * Adds an Entity to the grid, using it's postion to find the Node.
+         * Adds an Entity to the grid, using it's position to find the Node.
          * @param entity The Entity to add.
          * @return The Node that the Entity was added to.
          */
         public Node addToGrid(Entity entity){
             Node node = this.getNode(entity);
             node.addEntity(entity);
+            return node;
+        }
+
+        /**
+         * Adds an Entity to the grid. Uses the position of the Entity for the node to return, but may add this Entity to multiple nodes
+         * using the bounds parameter.
+         * @param entity The Entity to add/
+         * @param multi True if this should be added to multiple nodes. False otherwise.
+         * @param bounds The bounds to use for adding to multiple nodes.
+         * @return The node that the Entity's position is on.
+         */
+        public Node addToGrid(Entity entity, boolean multi, Rectangle bounds){
+            if(multi){
+                System.out.println();
+                System.out.println("Adding " + entity.name + " to multiple. bounds: " + bounds);
+                int[] ranges = GH.fixRanges(this.getSquareSize(), bounds.x-bounds.width/2, bounds.y-bounds.height/2, bounds.x+bounds.width/2, bounds.y+bounds.height/2, this.getWidth(), this.getHeight());
+                System.out.print("Ranges: "+ranges[0]+" "+ranges[1]+" "+ranges[2]+" "+ranges[3]);
+                System.out.println();
+
+                performOnNodeInArea(ranges, node -> {
+                    System.out.println("Trying to add to "+node);
+                    if (node.getX() == (int) (entity.getTransform().getPosition().x / this.getSquareSize()) && node.getY() == (int) (entity.getTransform().getPosition().y / this.getSquareSize()))
+                        return false;
+
+                    node.addEntity(entity);
+                    System.out.println("Added to " + node);
+
+                    return false;
+                });
+            }
+            Node node = this.addToGrid(entity);
+            System.out.println("Enitity added to "+node);
             return node;
         }
 

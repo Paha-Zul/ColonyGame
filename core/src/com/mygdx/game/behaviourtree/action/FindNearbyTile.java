@@ -22,7 +22,7 @@ public class FindNearbyTile extends LeafTask{
         super.start();
 
         Grid.GridInstance grid = this.blackBoard.colonyGrid;
-        boolean result = grid.performOnNodeInRadius(control.callbacks.successCriteria, 1, grid.getIndex(blackBoard.myManager.getEntityOwner()));
+        boolean result = grid.performOnNodeInRadius(1, grid.getIndex(blackBoard.myManager.getEntityOwner()), control.callbacks.successCriteria);
 
         if(result) this.control.finishWithSuccess();
         else this.control.finishWithFailure();

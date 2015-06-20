@@ -52,6 +52,8 @@ public class Colonist extends Component implements IInteractable, IOwnable{
     private LinkedList<Entity> attackList = new LinkedList<>();
     @JsonIgnore
     private Fixture fixture;
+    @JsonIgnore
+    private Functional.Callback deathCallback = null;
 
     public Colonist() {
         super();
@@ -232,6 +234,12 @@ public class Colonist extends Component implements IInteractable, IOwnable{
 
         effects.testAndSetEffect("starving", this.stats);
         effects.testAndSetEffect("dehydrated", this.stats);
+
+        //If the callback for death is ready, call it and reset it.
+        if(this.deathCallback != null) {
+            this.deathCallback.callback();
+            this.deathCallback = null;
+        }
     }
 
     @JsonIgnore
@@ -277,16 +285,18 @@ public class Colonist extends Component implements IInteractable, IOwnable{
     //The callback for when our health is 0.
     @JsonIgnore
     private Functional.Callback onZero = () -> {
-        this.owner.getTags().removeTags("alive", "alert", "selected");
-        this.owner.getTransform().setRotation(90f);
-        this.owner.destroyComponent(BehaviourManagerComp.class);
-        this.manager = null;
-        this.collider.body.destroyFixture(this.fixture); //TODO THIS PROBABLY WILL BREAK IT!
-        this.stats.clearTimers();
-        GridComponent gridComp = this.getComponent(GridComponent.class);
-        gridComp.setActive(false);
-        ColonyGame.worldGrid.removeViewer(gridComp);
-        this.setActive(false); //Disable the update tick. We won't be active for now...
+        this.deathCallback = () -> {
+            this.owner.getTags().removeTags("alive", "alert", "selected");
+            this.owner.getTransform().setRotation(90f);
+            this.owner.destroyComponent(BehaviourManagerComp.class);
+            this.manager = null;
+            this.collider.body.destroyFixture(this.fixture); //TODO THIS PROBABLY WILL BREAK IT!
+            this.stats.clearTimers();
+            GridComponent gridComp = this.getComponent(GridComponent.class);
+            gridComp.setActive(false);
+            ColonyGame.worldGrid.removeViewer(gridComp);
+            this.setActive(false); //Disable the update tick. We won't be active for now...
+        };
     };
 
     //The function for when a "attack" signal is sent to this colonist.

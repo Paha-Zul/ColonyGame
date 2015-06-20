@@ -1,6 +1,5 @@
 package com.mygdx.game.util.managers;
 
-import java.lang.reflect.Array;
 import java.util.HashMap;
 
 /**
@@ -46,4 +45,58 @@ public class DataManager {
 
         return map.keySet().toArray(new String[map.size()]);
     }
+
+//    private static <T> void assignFields(DataBuilder.JsonPrefab.FieldInit[] fields, Class<T> clazz, Object objectInstance){
+//        try {
+//            //For each field
+//            for(DataBuilder.JsonPrefab.FieldInit field : fields) {
+//                Field tmp = objectInstance.getClass().getDeclaredField(field.fieldName);
+//                Object object  = null;
+//                try {
+//                    object = tmp.getType().newInstance();
+//                } catch (InstantiationException e) {
+//                    e.printStackTrace();
+//                }
+//                tmp.setAccessible(true);
+//                Object value = tmp.get(object);
+//                //If there is a value, assign it.
+//                if (field.value != null) tmp.set(objectInstance, tmp.getType().cast(field.value));
+//                //Otherwise, do any method calls.
+//                else {
+//                    //For each method call...
+//                    for (DataBuilder.JsonPrefab.MethodCall call : field.methodCalls) {
+//                        Object[] parameters = new Object[call.parameters.length]; //List for all the parameters
+//                        Class<?>[] methodParamTypes = null;
+//                        if(call.methodParamType != null) methodParamTypes = new Class<?>[1];
+//                        else methodParamTypes = new Class<?>[call.parameterTypes.length];
+//                        //For each parameter, cast it to the type that is dictated in the JSON.
+//                        for(int i=0;i<call.parameters.length;i++) {
+//                            parameters[i] = Class.forName(call.parameterTypes[i]).cast(call.parameters[i]); //Get the class by name and cast the object.
+//                            if(methodParamTypes.length == 1) methodParamTypes[0] = Class.forName(call.methodParamType[0]);
+//                            else methodParamTypes[i] = Class.forName(call.parameterTypes[i]);
+//                        }
+//
+//                        Method meth = tmp.getType().getMethod(call.method, methodParamTypes);     //Get the method.
+//
+//                        System.out.println(objectInstance.getClass().getName());
+//
+//                        //Invoke with the new parameters.
+//                        meth.invoke(objectInstance, parameters);
+//                    }
+//                }
+//            }
+//        }catch (NoSuchFieldException | IllegalAccessException | NoSuchMethodException | InvocationTargetException | ClassNotFoundException e) {
+//            e.printStackTrace();
+//        }
+//    }
+//
+//    private static <T> void assignComponents(Entity entity, DataBuilder.JsonPrefab prefab){
+//        try {
+//            for(DataBuilder.JsonPrefab.ComponentObject compObject : prefab.components){
+//                Component component = (Component)Class.forName(compObject.className).newInstance();
+//            }
+//        }catch (IllegalAccessException | ClassNotFoundException | InstantiationException e) {
+//            e.printStackTrace();
+//        }
+//    }
 }

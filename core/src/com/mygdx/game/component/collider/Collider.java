@@ -160,6 +160,5 @@ public class Collider extends Component implements IScalable{
         public ColliderInfo(Entity owner){
             this.owner = owner;
         }
-
     }
 }
