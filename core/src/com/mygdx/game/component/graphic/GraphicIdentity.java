@@ -91,10 +91,6 @@ public class GraphicIdentity extends Component {
             if (alignment == 1)
                 this.getSprite().setPosition(pos.x - (getSprite().getWidth() / 2), pos.y);
 
-            if(this.owner.getTags().hasTag("building")) {
-                System.out.println("color: " + this.sprite.getColor().r + " " + this.sprite.getColor().g + " " + this.sprite.getColor().b + " " + this.sprite.getColor().a);
-                //getSprite().setAlpha(0.1f);
-            }
             this.getSprite().draw(batch);
 
             if(effects != null){

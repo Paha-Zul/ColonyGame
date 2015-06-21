@@ -12,6 +12,7 @@ public class Constructable extends Component{
     private Inventory inventory;
     private HashMap<String, ConstructableItemAmounts> itemMap = new HashMap<>();
     private int totalItemsNeeded, totalItemsSupplied;
+    private boolean complete=false;
 
     public Constructable(){
         this.setActive(false);
@@ -25,6 +26,8 @@ public class Constructable extends Component{
     @Override
     public void start() {
         super.start();
+
+        this.load();
     }
 
     @Override
@@ -60,12 +63,19 @@ public class Constructable extends Component{
         for(ConstructableItemAmounts item : itemMap.values()){
             int amount = this.inventory.getItemAmount(item.itemName);
             if(amount > 0){
-                this.inventory.removeItem(item.itemName, 1);
-                this.totalItemsSupplied+=1;
-            item.amountFulfilled+=1;
-                return this;
+                int useAmount = 1; //How much to consume.
+                this.inventory.removeItem(item.itemName, useAmount); //Remove the amount from the inventory
+                this.totalItemsSupplied+=useAmount; //Add the amount to the total items supplied
+                item.amountFulfilled+=useAmount;    //Add the amount to the item's amount fulfilled
+                if(item.amountFulfilled >= item.amountNeeded)  //If we have fulfilled it all, remove it from the needed materials.
+                    this.itemMap.remove(item.itemName);
+                break;
             }
         }
+
+        if(itemMap.size() == 0)
+            this.setComplete();
+
         return this;
     }
 
@@ -98,6 +108,15 @@ public class Constructable extends Component{
         return this.totalItemsSupplied/this.totalItemsNeeded;
     }
 
+    public boolean isComplete(){
+        return this.complete;
+    }
+
+    public void setComplete(){
+        this.owner.getGraphicIdentity().getSprite().setAlpha(1f);
+        this.complete = true;
+    }
+
     public class ItemsNeeded{
         public String itemName;
         public int amountNeeded;
@@ -116,6 +135,11 @@ public class Constructable extends Component{
         public ConstructableItemAmounts(String itemName, int amountNeeded){
             this.itemName = itemName;
             this.amountNeeded = amountNeeded;
+        }
+
+        @Override
+        public String toString() {
+            return "item: "+itemName+", needed: "+amountNeeded+", fulfilled: "+amountFulfilled;
         }
     }
 }

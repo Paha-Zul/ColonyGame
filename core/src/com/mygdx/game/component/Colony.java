@@ -140,6 +140,7 @@ public class Colony extends Component implements IInteractable {
         this.addOwnedToColony(colonyBuilding);
         colonyBuilding.buildingTags.addTag("main");
         colonyBuilding.buildingTags.addTag("storage");
+        colonyEnt.getComponent(Constructable.class).setComplete();
 
         //Spawns the Equipment building.
         BuildingEntity equipEnt = new BuildingEntity(new Vector2(start.x - 5, start.y - 5), 0, new String[]{"Colony",""}, 10);
@@ -152,6 +153,8 @@ public class Colony extends Component implements IInteractable {
         equipInv.addItem("pick");
         equipInv.addItem("shovel");
         equipInv.addItem("hatchet");
+        equipInv.addItem("wood", 30);
+        equipInv.addItem("stone", 40);
 
         //Destroys resources in an area around the Colony Entity.
         radius = 8;

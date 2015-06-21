@@ -13,7 +13,7 @@ public class RepeatingTimer extends Timer{
 
 	/**
 	 * Creates a repeating timer that will continue to repeat and call the callback at each completion.
-	 * @param length The length of the timer to run in milliseconds.
+	 * @param length The length of the timer to run in seconds.
 	 * @param callback The Callback function to run when completed.
 	 */
 	public RepeatingTimer(double length, Functional.Callback callback) {

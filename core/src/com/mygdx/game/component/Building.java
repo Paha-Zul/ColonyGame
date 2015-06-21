@@ -1,6 +1,5 @@
 package com.mygdx.game.component;
 
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.mygdx.game.interfaces.IInteractable;
 import com.mygdx.game.interfaces.IOwnable;
 import com.mygdx.game.util.Tags;
@@ -46,11 +45,7 @@ public class Building extends Component implements IOwnable, IInteractable{
         this.inventory.setMaxAmount(-1);
         this.constructable = this.getComponent(Constructable.class);
         if(this.owner.getTags().hasTag("constructing")){
-            this.timer = new RepeatingTimer(1000, this.constructable::build);
-            Sprite sprite = this.owner.getGraphicIdentity().getSprite();
-            this.owner.getGraphicIdentity().getSprite().setColor(1, 1, 1, 0.1f);
-            sprite.setAlpha(0.1f);
-            System.out.println("Such: "+sprite.getColor().a);
+            this.timer = new RepeatingTimer(0.1, this.constructable::build);
         }else{
             this.setActive(false);
         }
@@ -60,8 +55,18 @@ public class Building extends Component implements IOwnable, IInteractable{
     public void update(float delta) {
         super.update(delta);
 
-        if(this.timer != null)
+        //System.out.println("Updating building");
+        if(this.timer != null) {
+            //System.out.println("Updating timer");
+            this.owner.getGraphicIdentity().getSprite().setAlpha(0.5f);
             this.timer.update(delta);
+        }
+
+        if(this.constructable.isComplete()){
+            this.owner.destroyComponent(Constructable.class);
+            this.timer = null;
+            this.setActive(false);
+        }
     }
 
     @Override
