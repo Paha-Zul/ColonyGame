@@ -46,7 +46,7 @@ public class NotificationManager {
         //Some test notifications
         NotificationManager.addNotification("Low Food", "The current level of food is low.", currPlayer -> {
             Inventory.InventoryItem invItem = player.colony.getGlobalInv().get("food");
-            return invItem == null || invItem.getAmount() <= 20;
+            return invItem == null || invItem.getAmount(false) <= 20;
         }).extendedTooltip = foodTooltip;
 
         String waterTooltip = "The current level of water is low. To get more water, select a colonist and direct him to gather water by clicking the 'gather' button at the bottom of the screen and " +

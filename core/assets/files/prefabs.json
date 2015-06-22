@@ -7,7 +7,6 @@
     "buildingTags": ["main", "storage"],
     "graphicImageAndAtlas": ["colony", ""],
     "gridSightRadius": 8,
-    "colliderType",
     "colliderShape": "circle",
     "colliderRadius": 1
   }

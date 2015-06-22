@@ -3,6 +3,7 @@ package com.mygdx.game.util;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.component.BehaviourManagerComp;
+import com.mygdx.game.component.Constructable;
 import com.mygdx.game.component.Inventory;
 import com.mygdx.game.component.Resource;
 import com.mygdx.game.entity.Entity;
@@ -45,6 +46,9 @@ public class BlackBoard{
     public float attackDamage = 10f;
     public Timer attackTimer = null;
 
+    //Construction stuff
+    public Constructable constructable;
+
     //My stuff
     public Inventory myInventory;
     public float moveSpeed = 100f;
@@ -62,27 +66,25 @@ public class BlackBoard{
     }
 
     public static class ItemTransfer{
-        public boolean transferAll;
-        public boolean transferAmount;
-        public boolean transferMany;
-        public boolean takingReserved;
+        public boolean transferAll;     //If we are to transfer all items or just amounts specified.
+        public boolean transferMany;    //If we are transferring many items.
+        public boolean takingReserved;  //If we are taking from a reserve
+        public boolean reserveToTake;   //If we should be reserving the item to take.
 
         public int itemAmountToTransfer;
 
         public String itemNameToTransfer;
-        public Array<String> itemNamesToTransfer;
-        public Array<Integer> itemAmountsToTransfer;
+        public Array<ItemNeeded> itemsToTransfer;
 
         public Inventory toInventory;
         public Inventory fromInventory;
 
         public void reset(){
-            transferAll = transferAmount = transferMany = takingReserved = false;
+            transferAll = transferMany = takingReserved = false;
             itemAmountToTransfer = 0;
 
-            itemNamesToTransfer = null;
-            itemAmountsToTransfer = null;
-            itemNameToTransfer = null;
+            itemsToTransfer = new Array<>();
+            itemNameToTransfer = "";
 
             toInventory = fromInventory = null;
         }

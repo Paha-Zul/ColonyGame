@@ -2,6 +2,7 @@ package com.mygdx.game.component;
 
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.entity.Entity;
+import com.mygdx.game.util.ItemNeeded;
 
 import java.util.HashMap;
 
@@ -83,12 +84,12 @@ public class Constructable extends Component{
      * Gets the remaining items needed and the amounts to finish this construction.
      * @return An object that holds an item name and an amount needed.
      */
-    public Array<ItemsNeeded> getItemsNeeded(){
-        Array<ItemsNeeded> items = new Array<>();
+    public Array<ItemNeeded> getItemsNeeded(){
+        Array<ItemNeeded> items = new Array<>();
         for(String item : itemMap.keySet()){
             int amountNeeded = itemAmountNeeded(item);
             if(amountNeeded > 0) //Only add if we actually need some.
-                items.add(new ItemsNeeded(item, amountNeeded));
+                items.add(new ItemNeeded(item, amountNeeded));
         }
 
         return items;
@@ -101,30 +102,36 @@ public class Constructable extends Component{
      */
     public int itemAmountNeeded(String itemName){
         ConstructableItemAmounts amounts = itemMap.get(itemName);
-        return amounts.amountNeeded - amounts.amountFulfilled - this.inventory.getItemAmount(itemName);
+        return amounts.amountNeeded - amounts.amountFulfilled - this.inventory.getItemAmount(itemName, true);
     }
 
+    /**
+     * @return A value between 0 and 1.
+     */
     public float getPercentageDone(){
         return this.totalItemsSupplied/this.totalItemsNeeded;
     }
 
+    /**
+     * @return True if complete, false otherwise.
+     */
     public boolean isComplete(){
         return this.complete;
     }
 
+    /**
+     * Sets this Constructable to complete.
+     */
     public void setComplete(){
         this.owner.getGraphicIdentity().getSprite().setAlpha(1f);
         this.complete = true;
     }
 
-    public class ItemsNeeded{
-        public String itemName;
-        public int amountNeeded;
-
-        public ItemsNeeded(String itemName, int amountNeeded) {
-            this.itemName = itemName;
-            this.amountNeeded = amountNeeded;
-        }
+    /**
+     * @return The Inventory of this Constructable.
+     */
+    public Inventory getInventory(){
+        return this.inventory;
     }
 
     private class ConstructableItemAmounts{
@@ -142,4 +149,5 @@ public class Constructable extends Component{
             return "item: "+itemName+", needed: "+amountNeeded+", fulfilled: "+amountFulfilled;
         }
     }
+
 }

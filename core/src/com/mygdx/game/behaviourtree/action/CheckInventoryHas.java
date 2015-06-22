@@ -29,7 +29,7 @@ public class CheckInventoryHas extends LeafTask {
         for(Inventory.InventoryItem item : this.blackBoard.itemTransfer.fromInventory.getItemList()){
             DataBuilder.JsonItem itemRef = DataManager.getData(item.itemRef.getItemName(), DataBuilder.JsonItem.class);
             if(itemRef.getEffects() != null && itemRef.getEffects().length > 0) {
-                if (itemRef.hasEffect(this.blackBoard.itemEffect) && item.getAmount() >= this.blackBoard.itemEffectAmount) {
+                if (itemRef.hasEffect(this.blackBoard.itemEffect) && item.getAmount(false) >= this.blackBoard.itemEffectAmount) {
                     this.control.finishWithSuccess();
                     this.blackBoard.itemTransfer.itemNameToTransfer = itemRef.getItemName();
                     return;

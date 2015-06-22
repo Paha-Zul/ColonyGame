@@ -1,10 +1,10 @@
 package com.mygdx.game.behaviourtree;
 
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.behaviourtree.action.*;
 import com.mygdx.game.behaviourtree.composite.Parallel;
+import com.mygdx.game.behaviourtree.composite.Selector;
 import com.mygdx.game.behaviourtree.composite.Sequence;
 import com.mygdx.game.behaviourtree.control.ParentTaskController;
 import com.mygdx.game.behaviourtree.decorator.AlwaysTrue;
@@ -287,10 +287,11 @@ public class PrebuiltTasks {
 
         //When we finish, if we still have plans to take items (itemNamesToTransfer and itemAmountsToTransfer is not null), try to unreserve it.
         seq.control.callbacks.finishCallback = task -> {
-            if(task.blackBoard.itemTransfer.itemNamesToTransfer != null && task.blackBoard.itemTransfer.itemAmountsToTransfer != null && task.blackBoard.itemTransfer.fromInventory != null){
-                for(int i=0;i<task.blackBoard.itemTransfer.itemNamesToTransfer.size;i++){
-                    String itemName = task.blackBoard.itemTransfer.itemNamesToTransfer.get(i);
-                    task.blackBoard.itemTransfer.fromInventory.unReserveItem(itemName, task.blackBoard.itemTransfer.itemAmountsToTransfer.get(i));
+            if(task.blackBoard.itemTransfer.itemsToTransfer != null && task.blackBoard.itemTransfer.fromInventory != null){
+                for(int i=0;i<task.blackBoard.itemTransfer.itemsToTransfer.size;i++){
+                    ItemNeeded item = task.blackBoard.itemTransfer.itemsToTransfer.get(i);
+                    String itemName = item.itemName;
+                    task.blackBoard.itemTransfer.fromInventory.unReserveItem(itemName, item.amountNeeded);
                 }
             }
         };
@@ -350,11 +351,9 @@ public class PrebuiltTasks {
 
             task.blackBoard.itemTransfer.transferMany = true;
 
-            //TODO Something here... check!
-            task.blackBoard.itemTransfer.itemNamesToTransfer = new Array<>(task.blackBoard.myManager.getComponent(Equipment.class).getToolNames());
-            task.blackBoard.itemTransfer.itemAmountsToTransfer = new Array<>(task.blackBoard.itemTransfer.itemNamesToTransfer.size);
-            for(int i=0;i<task.blackBoard.itemTransfer.itemNamesToTransfer.size;i++)
-                task.blackBoard.itemTransfer.itemAmountsToTransfer.add(1);
+            String[] toolNames = task.blackBoard.myManager.getComponent(Equipment.class).getToolNames();
+            for (String toolName : toolNames)
+                task.blackBoard.itemTransfer.itemsToTransfer.add(new ItemNeeded(toolName, 1));
         };
 
         //We need a building with the tag "equipment".
@@ -375,6 +374,83 @@ public class PrebuiltTasks {
 
         return seq;
 
+    }
+
+    public static Task build(BlackBoard blackboard, BehaviourManagerComp behComp){
+        /**
+         *  Selector
+         *      Sequence{
+         *          find a building under construction
+         *          Sequence - Always true decorator
+         *              get list of items needed to build
+         *              find storage
+         *              reserve items
+         *              find path to storage
+         *              move to storage
+         *              transfer items.
+         *         Sequence
+         *              get path to building
+         *              move to building
+         *              transfer any materials
+         *              build
+         *      }
+         *
+         *      idle
+         */
+
+        Selector mainSelector = new Selector("Build", blackboard);
+        Sequence constructionSeq = new Sequence("BuildSeq", blackboard);
+        GetBuildingUnderConstruction getConstruction = new GetBuildingUnderConstruction("GettingConstruction", blackboard);
+        Sequence getItemsSeq = new Sequence("GetItemSeq", blackboard);
+        AlwaysTrue alwaysTrue = new AlwaysTrue("AlwaysTrue", blackboard, getItemsSeq);
+        CheckAndReserve reserve = new CheckAndReserve("CheckAndReserve", blackboard);
+        FindPath fpToStorage = new FindPath("PathToStorage", blackboard);
+        MoveTo mtStorage = new MoveTo("MoveToStorage", blackboard);
+        TransferItem transferItems = new TransferItem("Transfering", blackboard);
+
+        Sequence buildSeq = new Sequence("Build", blackboard);
+        FindPath fpToBuilding = new FindPath("FindPathBuilding", blackboard);
+        MoveTo mtBuilding = new MoveTo("MoveToBuilding", blackboard);
+        TransferItem transferToBuilding = new TransferItem("TransferToBuilding", blackboard);
+        //Construct construct = new Construct("Constructing", blackboard);
+
+        //The main selector between constructing and idling
+        mainSelector.control.addTask(constructionSeq);
+        mainSelector.control.addTask(idleTask(blackboard, behComp));
+
+        //The main sequence of construction.
+        constructionSeq.control.addTask(getConstruction);
+        constructionSeq.control.addTask(alwaysTrue); //Use the always true as getting items ins't necessary
+        constructionSeq.control.addTask(buildSeq);
+
+        //Get items sequence
+        getItemsSeq.control.addTask(reserve);
+        getItemsSeq.control.addTask(fpToStorage);
+        getItemsSeq.control.addTask(mtStorage);
+        getItemsSeq.control.addTask(transferItems);
+
+        //Build sequence
+        buildSeq.control.addTask(fpToBuilding);
+        buildSeq.control.addTask(mtBuilding);
+        buildSeq.control.addTask(transferToBuilding);
+
+        //Time for the crap
+
+        //First, we need to get a building under construction. Then, we need to get a list of items. Then we need to find a storage
+        //building with any of the items we need.
+        getConstruction.control.callbacks.successCallback = task -> {
+            task.blackBoard.itemTransfer.reset();
+            task.blackBoard.itemTransfer.transferMany = true;
+            task.blackBoard.itemTransfer.takingReserved = true;
+
+            task.blackBoard.constructable = task.blackBoard.target.getComponent(Constructable.class);
+
+            task.blackBoard.itemTransfer.itemsToTransfer.addAll(task.blackBoard.constructable.getItemsNeeded());
+
+
+        };
+
+        return mainSelector;
     }
 
     public static Task exploreUnexplored(BlackBoard blackBoard, BehaviourManagerComp behComp){

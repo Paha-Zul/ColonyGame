@@ -303,8 +303,8 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
             builder.append("Overall Items:\n");
             int counter = 0;
             for (Inventory.InventoryItem item : inv.values()) {
-                if (item.getAmount() != 0) {
-                    builder.append(item.getAmount()).append(" ").append(item.itemRef.getDisplayName()).append("\n");
+                if (item.getAmount(false) != 0) {
+                    builder.append(item.getAmount(false)).append(" ").append(item.itemRef.getDisplayName()).append("\n");
                     counter++;
                 }
             }
@@ -580,7 +580,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
                     Inventory.InventoryItem item = itemList.get(i);
                     String maxItemAmount = item.getMaxAmount() >= 0 ? ""+item.getMaxAmount() : "?";
                     //GUI.Label(item.itemRef.getDisplayName(), this.batch, this.tabsRect.x + leftOffset, this.tabsRect.y-i*10, this.tabsRect.width, this.tabsRect.height, this.UIStyle);
-                    GUI.Label(""+item.getAmount()+"/"+maxItemAmount, this.batch, xPos, yPos, 100, labelHeight, this.UIStyle);
+                    GUI.Label(""+item.getAmount(false)+"/"+maxItemAmount, this.batch, xPos, yPos, 100, labelHeight, this.UIStyle);
 
                     GUI.Texture(item.itemRef.iconTexture, batch, xPos, yPos, iconSize, iconSize);
 
