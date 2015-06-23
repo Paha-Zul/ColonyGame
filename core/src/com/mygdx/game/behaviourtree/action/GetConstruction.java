@@ -8,8 +8,8 @@ import com.mygdx.game.util.BlackBoard;
 /**
  * Created by Paha on 6/22/2015.
  */
-public class GetBuildingUnderConstruction extends LeafTask{
-    public GetBuildingUnderConstruction(String name, BlackBoard blackBoard) {
+public class GetConstruction extends LeafTask{
+    public GetConstruction(String name, BlackBoard blackBoard) {
         super(name, blackBoard);
     }
 

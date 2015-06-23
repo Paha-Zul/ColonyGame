@@ -400,7 +400,7 @@ public class PrebuiltTasks {
 
         Selector mainSelector = new Selector("Build", blackboard);
         Sequence constructionSeq = new Sequence("BuildSeq", blackboard);
-        GetBuildingUnderConstruction getConstruction = new GetBuildingUnderConstruction("GettingConstruction", blackboard);
+        GetConstruction getConstruction = new GetConstruction("GettingConstruction", blackboard);
         Sequence getItemsSeq = new Sequence("GetItemSeq", blackboard);
         AlwaysTrue alwaysTrue = new AlwaysTrue("AlwaysTrue", blackboard, getItemsSeq);
         CheckAndReserve reserve = new CheckAndReserve("CheckAndReserve", blackboard);
@@ -439,15 +439,19 @@ public class PrebuiltTasks {
         //First, we need to get a building under construction. Then, we need to get a list of items. Then we need to find a storage
         //building with any of the items we need.
         getConstruction.control.callbacks.successCallback = task -> {
+            //reset and set some values.
             task.blackBoard.itemTransfer.reset();
             task.blackBoard.itemTransfer.transferMany = true;
             task.blackBoard.itemTransfer.takingReserved = true;
 
+            //Get the constructable and get the items to transfer.
             task.blackBoard.constructable = task.blackBoard.target.getComponent(Constructable.class);
-
             task.blackBoard.itemTransfer.itemsToTransfer.addAll(task.blackBoard.constructable.getItemsNeeded());
 
-
+            //Get the storage and set it as the target.
+            Building storage = task.blackBoard.myManager.getEntityOwner().getComponent(Colonist.class).getColony().getOwnedFromColony(Building.class, b -> b.getEntityOwner().getTags().hasTag("construction"));
+            task.blackBoard.target = storage.getEntityOwner();
+            if(task.blackBoard.target == null) mainSelector.control.finishWithFailure();
         };
 
         return mainSelector;

@@ -2,10 +2,7 @@ package com.mygdx.game.util;
 
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
-import com.mygdx.game.component.BehaviourManagerComp;
-import com.mygdx.game.component.Constructable;
-import com.mygdx.game.component.Inventory;
-import com.mygdx.game.component.Resource;
+import com.mygdx.game.component.*;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.util.timer.Timer;
 
@@ -48,6 +45,9 @@ public class BlackBoard{
 
     //Construction stuff
     public Constructable constructable;
+
+    //GetEntity stuff
+    public Class<? extends Component> clazzType;
 
     //My stuff
     public Inventory myInventory;
