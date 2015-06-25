@@ -140,6 +140,7 @@ public class BehaviourManagerComp extends Component{
         if (this.currentBehaviour != null) {
             //If it has finished, try to start the next behaviour if there is one, repeat the last if
             if (this.currentBehaviour.getControl().hasFinished()) {
+                this.currentBehaviour.getControl().safeEnd();
 
                 //If our next behaviour is a task waiting to be executed, start it!
                 if(this.nextBehaviour != null){
