@@ -28,9 +28,10 @@ public class TransferItem extends LeafTask{
 
         //If we are transferring the whole inventory, go through each itemRef and add each one to the 'toInventory'. Clear the 'fromInventory'.
         if(this.blackBoard.itemTransfer.transferAll) {
-            for (Inventory.InventoryItem item : this.blackBoard.itemTransfer.fromInventory.getItemList())
+            for (Inventory.InventoryItem item : this.blackBoard.itemTransfer.fromInventory.getItemList()) {
                 this.blackBoard.itemTransfer.toInventory.addItem(item.itemRef.getItemName(), item.getAmount(false));
-            this.blackBoard.itemTransfer.fromInventory.clearInventory();
+                this.blackBoard.itemTransfer.fromInventory.removeItem(item.itemRef.getItemName(), item.getAmount());
+            }
 
         //If we are taking many items but not all of them.
         }else if(this.blackBoard.itemTransfer.transferMany){

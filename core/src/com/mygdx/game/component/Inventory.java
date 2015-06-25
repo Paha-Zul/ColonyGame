@@ -1,5 +1,6 @@
 package com.mygdx.game.component;
 
+import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.interfaces.IOwnable;
 import com.mygdx.game.util.DataBuilder;
@@ -90,43 +91,67 @@ public class Inventory extends Component implements IOwnable {
     }
 
     /**
-     * Reserves 1 of an item.
-     *
-     * @param itemName The name of the item.
-     * @return A positive number if the item was able to be reserved. This could be the amount requested or the a partial amount available. -1 indicates the item
-     * does not exist in the inventory, and 0 indicates that the item had none left available.
-     */
-    public int reserveItem(String itemName) {
-        return this.reserveItem(itemName, 1);
-    }
-
-    /**
      * Reserves an amount of an item.
      *
      * @param itemName The name of the item.
      * @param amount   The amount to reserve.
+     * @param id The id to use for a reserve.
      * @return A positive number if the item was able to be reserved. This could be the amount requested or the a partial amount available. 0 indicates either the item
      * does not exist or there were none available to reserve. To check more precisely if an item exists, use {@link Inventory#hasItem(String) hasItem} or {@link Inventory#getItemAmount(String) getItemAmount}.
      */
-    public int reserveItem(String itemName, int amount) {
+    public int reserveItem(String itemName, int amount, long id) {
         InventoryItem invItem = this.inventory.get(itemName);
         if (invItem == null) return 0;
-        return invItem.reserve(amount);
+        return invItem.reserve(amount, id);
     }
 
-    public int unReserveItem(String itemName) {
-        return this.unReserveItem(itemName, 1);
+    /**
+     * Unreserves an amount of an item using the 'id' for the reserve id.
+     * @param itemName The name of the item.
+     * @param id The id of the reserve.
+     * @return The amount that was unreserved.
+     */
+    public int unReserveItem(String itemName, long id) {
+        InventoryItem item = this.inventory.get(itemName);
+        if(item == null) return -1;
+        return item.unReserve(id);
     }
 
-    public int unReserveItem(String itemName, int amount) {
-        InventoryItem invItem = this.inventory.get(itemName);
-        if (invItem == null) return -1;
-        return invItem.unReserve(amount);
+    /**
+     * Adds an item to be on the way.
+     * @param itemName The name of the item.
+     * @param amount The amount of the item.
+     * @param id The id for the onTheWay record.
+     * @return The amount that was able to be added to this item. If the result is less than the 'amount' passed in, it means the
+     * item would not have enough space to fulfill the entire request. If the result is <= 0, either the item did not exist or no more could be
+     * put on the way.
+     */
+    public int addOnTheWay(String itemName, int amount, long id){
+        InventoryItem item = this.inventory.get(itemName);
+        if(amount <= 0) return 0;
+        if(item == null) {
+            item = new InventoryItem(itemName, 0, this.maxAmount);
+            this.inventory.put(itemName, item);
+        }
+        return item.addOnTheWay(amount, id);
+    }
+
+    /**
+     * Removes an item from being on the way.
+     * @param itemName The name of the item.
+     * @param id The id of the on the way record.
+     * @return The amount that was removed from being on the way. -1 if the item did not exist.
+     */
+    public int removeOnTheWay(String itemName, long id){
+        InventoryItem item = this.inventory.get(itemName);
+        if(item == null) return -1;
+        int _removed = item.removeOnTheWay(id);
+        if(item.amount <= 0 && item.onTheWayList.size <= 0) this.inventory.remove(itemName);
+        return _removed;
     }
 
     /**
      * Adds an amount of the item designated by the compName passed in.
-     *
      * @param itemName The compName of the item to add.
      * @param amount   The amount of the item to add. If the amount is <= 0, returns early.
      */
@@ -340,10 +365,11 @@ public class Inventory extends Component implements IOwnable {
     public static class InventoryItem {
         public DataBuilder.JsonItem itemRef;
         private int amount, maxAmount, reserved, onTheWay;
+        private Array<ItemLink> reserveList = new Array<>();
+        private Array<ItemLink> onTheWayList = new Array<>();
 
         /**
          * Creates a new InventoryItem. Uses the Item passed in to clone a new Item for reference.
-         *
          * @param itemRef The Item to clone.
          * @param amount  The amount of the itemRef to initially store.
          */
@@ -359,36 +385,77 @@ public class Inventory extends Component implements IOwnable {
 
         /**
          * Places a reserve on this item for some amount.
-         *
-         * @param amount The amount of this item to reserve.
+         * @param amountToReserve The amount of this item to reserve.
          * @return The amount reserved.
          */
-        public int reserve(int amount) {
+        public int reserve(int amountToReserve, long id) {
+            ItemLink link = new ItemLink(id, amountToReserve);
+            reserveList.add(link);
+
             int _available = this.getAvailable(); //Get the available amount.
-            int _reserved = amount <= _available ? amount : _available; //Take what we can!
+            int _reserved = amountToReserve <= _available ? amountToReserve : _available; //Take what we can!
+            link.amount = _reserved; //Set the link.amount to the amount we were able to reserve.
             this.reserved += _reserved; //Add this amount to the item's reserved amount.
             return _reserved; //Return it!
         }
 
         /**
          * Unreserves an amount on this item.
-         *
-         * @param amount The amount to unreserve.
+         * @param id The id to use for the reserve
          * @return The amount that was unreserved.
          */
-        public int unReserve(int amount) {
-            //Either take the amount requested (if under the total amount), or the total amount if amount > total
-            int _unReserved = amount <= this.getAmount(false) ? amount : this.getAmount(false);
-            this.reserved -= _unReserved; //Take away from the reserves.
+        public int unReserve(long id) {
+            ItemLink link=null;
+            for (ItemLink _link : reserveList) {
+                if (_link.id == id) {
+                    link = _link;
+                    break;
+                }
+            }
+
+            int _unReserved = 0;
+            if(link == null) return _unReserved;
+            else {
+                //TODO Clean this up! Since we have the reserve list now, we probably don't need to check for bounds.
+                //Either take the amount requested (if under the total amount), or the total amount if amount > total
+                _unReserved = link.amount <= this.getAmount(false) ? link.amount : this.getAmount(false);
+                this.reserved -= _unReserved;   //Take away from the reserves.
+                link.amount -= _unReserved;     //Take away from the link amount.
+
+                //If the link amount is 0 or less and the id is not 0, remove it from the list.
+                if(link.amount <= 0) this.reserveList.removeValue(link, true);
+            }
             return _unReserved; //Return it!
         }
 
-        public void addOnTheWay(int amount) {
+        /**
+         * Adds an amount to be on the way.
+         * @param amount The amount on the way.
+         * @param id The id for the amount on the way.
+         */
+        public int addOnTheWay(int amount, long id) {
             this.onTheWay += amount;
+            //Add to the list if not if 0
+            this.onTheWayList.add(new ItemLink(id, amount));
+            return amount;
         }
 
-        public void removeOnTheWay(int amount) {
-            this.onTheWay = this.onTheWay - amount < 0 ? 0 : this.onTheWay - amount;
+        /**
+         * Removes an amount from being on the way.
+         * @param id The id to use.
+         */
+        public int removeOnTheWay(long id) {
+            ItemLink link=null;
+            for(ItemLink _link : reserveList){
+                if(_link.id == id){
+                    link = _link;
+                    break;
+                }
+            }
+            if(link == null) return 0;
+            this.onTheWay = this.onTheWay - link.amount < 0 ? 0 : this.onTheWay - link.amount;
+            this.onTheWayList.removeValue(link, true); //Remove it from the list.
+            return link.amount;
         }
 
         /**
@@ -398,12 +465,29 @@ public class Inventory extends Component implements IOwnable {
             return this.amount + this.onTheWay;
         }
 
+        /**
+         * Checks if an amount can be added to this item.
+         * @param amount The amount to add.
+         * @return True if possible, false otherwise.
+         */
         public boolean canAddAmount(int amount) {
             return this.amount + amount <= maxAmount || this.maxAmount < 0;
         }
 
-        public void addAmount(int amount) {
-            this.amount += amount;
+        /**
+         * Adds an amount to this item.
+         * @param amountToAdd The amount to add.
+         * @return The amount that was able to be added.
+         */
+        public int addAmount(int amountToAdd) {
+            //-1 indicates infinite. So if below 0, just skip this.
+            if(this.maxAmount >= 0) {
+                amountToAdd = this.maxAmount - (this.amount + amountToAdd);
+                if (amountToAdd <= 0) amountToAdd = 0;
+            }
+            //Add the amount and return how much we added.
+            this.amount += amountToAdd;
+            return amountToAdd;
         }
 
         /**
@@ -423,16 +507,47 @@ public class Inventory extends Component implements IOwnable {
             return this.amount;
         }
 
+        /**
+         * @return The maximum amount that this item can stack to.
+         */
         public int getMaxAmount() {
             return this.maxAmount;
         }
 
+        /**
+         * @return The amount reserved of this item.
+         */
         public int getReserved() {
             return this.reserved;
         }
 
+        /**
+         * @return The total amount that is on the way to the inventory that owns this item.
+         */
+        public int getOnTheWay(){
+            return this.onTheWay;
+        }
+
+        /**
+         * @return The amount available of this item. The amount available is the total amount minus the amount reserved.
+         */
         public int getAvailable() {
             return this.amount - this.reserved;
+        }
+
+        private class ItemLink{
+            public long id;
+            public int amount;
+
+            public ItemLink(long id, int amount){
+                this.id = id;
+                this.amount = amount;
+            }
+
+            @Override
+            public boolean equals(Object obj) {
+                return obj instanceof ItemLink && this.id == ((ItemLink)obj).id;
+            }
         }
     }
 }

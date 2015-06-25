@@ -291,7 +291,7 @@ public class PrebuiltTasks {
                 for(int i=0;i<task.blackBoard.itemTransfer.itemsToTransfer.size;i++){
                     ItemNeeded item = task.blackBoard.itemTransfer.itemsToTransfer.get(i);
                     String itemName = item.itemName;
-                    task.blackBoard.itemTransfer.fromInventory.unReserveItem(itemName, item.amountNeeded);
+                    task.blackBoard.itemTransfer.fromInventory.unReserveItem(itemName, task.blackBoard.myManager.getEntityOwner().getID());
                 }
             }
         };
@@ -348,12 +348,15 @@ public class PrebuiltTasks {
         //Set some flags and get a list of item names to be removed.
         seq.control.callbacks.startCallback = task -> {
             task.blackBoard.itemTransfer.reset();
-
             task.blackBoard.itemTransfer.transferMany = true;
+        };
 
-            String[] toolNames = task.blackBoard.myManager.getComponent(Equipment.class).getToolNames();
-            for (String toolName : toolNames)
-                task.blackBoard.itemTransfer.itemsToTransfer.add(new ItemNeeded(toolName, 1));
+        seq.control.callbacks.finishCallback = task -> {
+            System.out.println("Seq finished");
+            for(ItemNeeded item : task.blackBoard.itemTransfer.itemsToTransfer){
+                task.blackBoard.itemTransfer.toInventory.removeOnTheWay(item.itemName, task.blackBoard.myManager.getEntityOwner().getID());
+                System.out.println("Remvoed "+item.itemName);
+            }
         };
 
         //We need a building with the tag "equipment".
@@ -370,6 +373,13 @@ public class PrebuiltTasks {
         findShed.control.callbacks.successCallback = task -> {
             task.blackBoard.itemTransfer.toInventory = task.blackBoard.target.getComponent(Inventory.class);
             task.blackBoard.itemTransfer.fromInventory = task.blackBoard.myManager.getEntityOwner().getComponent(Inventory.class);
+
+            String[] toolNames = task.blackBoard.myManager.getComponent(Equipment.class).getToolNames();
+            for (String toolName : toolNames) {
+                task.blackBoard.itemTransfer.itemsToTransfer.add(new ItemNeeded(toolName, 1));
+                //TODO Don't leave this as is.
+                task.blackBoard.itemTransfer.toInventory.addOnTheWay(toolName, 1, task.blackBoard.myManager.getEntityOwner().getID());
+            }
         };
 
         return seq;

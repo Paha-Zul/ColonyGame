@@ -570,7 +570,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
                 this.UIStyle.paddingTop = 0;
                 int topOffset = this.UIStyle.paddingLeft = 10, iconSize =  32;
                 float leftOffset = iconSize/1.5f;
-                float labelHeight = iconSize;
+                float labelHeight = iconSize, labelWidth = 200;
 
                 float xPos = this.tabsRect.x;
                 float yPos = this.tabsRect.y+tabsRect.height-iconSize;
@@ -580,13 +580,13 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
                     Inventory.InventoryItem item = itemList.get(i);
                     String maxItemAmount = item.getMaxAmount() >= 0 ? ""+item.getMaxAmount() : "?";
                     //GUI.Label(item.itemRef.getDisplayName(), this.batch, this.tabsRect.x + leftOffset, this.tabsRect.y-i*10, this.tabsRect.width, this.tabsRect.height, this.UIStyle);
-                    GUI.Label(""+item.getAmount(false)+"/"+maxItemAmount, this.batch, xPos, yPos, 100, labelHeight, this.UIStyle);
+                    GUI.Label(""+item.getAmount(false)+"/"+maxItemAmount+"(a:"+item.getAvailable()+"/r:"+item.getReserved()+"/otw:"+item.getOnTheWay(), this.batch, xPos, yPos, labelWidth, labelHeight, this.UIStyle);
 
                     GUI.Texture(item.itemRef.iconTexture, batch, xPos, yPos, iconSize, iconSize);
 
                     yPos-=iconSize;
                     if(yPos < this.tabsRect.y){
-                        xPos+= 100;
+                        xPos+= labelWidth;
                         yPos = this.tabsRect.y+tabsRect.height-iconSize;
                     }
                 }
