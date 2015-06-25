@@ -288,11 +288,8 @@ public class PrebuiltTasks {
         //When we finish, if we still have plans to take items (itemNamesToTransfer and itemAmountsToTransfer is not null), try to unreserve it.
         seq.control.callbacks.finishCallback = task -> {
             if(task.blackBoard.itemTransfer.itemsToTransfer != null && task.blackBoard.itemTransfer.fromInventory != null){
-                for(int i=0;i<task.blackBoard.itemTransfer.itemsToTransfer.size;i++){
-                    ItemNeeded item = task.blackBoard.itemTransfer.itemsToTransfer.get(i);
-                    String itemName = item.itemName;
-                    task.blackBoard.itemTransfer.fromInventory.unReserveItem(itemName, task.blackBoard.myManager.getEntityOwner().getID());
-                }
+                for(ItemNeeded item : task.blackBoard.itemTransfer.itemsToTransfer)
+                    task.blackBoard.itemTransfer.fromInventory.unReserveItem(item.itemName, task.blackBoard.myManager.getEntityOwner().getID());
             }
         };
 
@@ -351,12 +348,10 @@ public class PrebuiltTasks {
             task.blackBoard.itemTransfer.transferMany = true;
         };
 
+        //When this finishes remove any on the way stuff
         seq.control.callbacks.finishCallback = task -> {
-            System.out.println("Seq finished");
-            for(ItemNeeded item : task.blackBoard.itemTransfer.itemsToTransfer){
+            for(ItemNeeded item : task.blackBoard.itemTransfer.itemsToTransfer)
                 task.blackBoard.itemTransfer.toInventory.removeOnTheWay(item.itemName, task.blackBoard.myManager.getEntityOwner().getID());
-                System.out.println("Remvoed "+item.itemName);
-            }
         };
 
         //We need a building with the tag "equipment".
@@ -491,6 +486,7 @@ public class PrebuiltTasks {
             task.blackBoard.targetNode = null;
         };
 
+        //Get the main building of the colony as our target to explore around.
         findClosestUnexplored.control.callbacks.startCallback = task -> {
             Colonist col = task.blackBoard.myManager.getEntityOwner().getComponent(Colonist.class);
             task.blackBoard.target = col.getColony().getOwnedFromColony(Building.class, building -> building.buildingTags.hasTag("main")).getEntityOwner();
@@ -601,9 +597,10 @@ public class PrebuiltTasks {
         ((ParentTaskController) mainSeq.getControl()).addTask(attackTarget(blackBoard, behComp)); //Add the attack target task to this sequence.
         ((ParentTaskController) mainSeq.getControl()).addTask(gatherTarget(blackBoard, behComp)); //Add the gather target task to this sequence.
 
+        //Get an alive animal.
         fc.control.callbacks.successCriteria = ent -> {
             Entity entity = (Entity)ent;
-            return entity.getTags().hasTag("animal") && entity.getTags().hasTag("alive");
+            return entity.getTags().hasTags("animal", "alive");
         };
 
         //Creates a floating text object when trying to find an animal fails.
@@ -740,11 +737,13 @@ public class PrebuiltTasks {
         ((ParentTaskController)sequence.getControl()).addTask(findNearbyTile);
         ((ParentTaskController)sequence.getControl()).addTask(moveTo);
 
+        //We want to end when the counter is more than 5.
         repeatFiveTimes.getControl().callbacks.successCriteria = tsk -> {
             Task task = (Task)tsk;
             return task.blackBoard.counter > 5 || (findNearbyTile.getControl().hasFinished() && findNearbyTile.getControl().hasFailed());
         };
 
+        //Reset the counter when we start.
         repeatFiveTimes.getControl().callbacks.startCallback = task -> task.blackBoard.counter = 0;
 
         //Reset some stuff.

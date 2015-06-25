@@ -37,7 +37,8 @@ public class TransferItem extends LeafTask{
         }else if(this.blackBoard.itemTransfer.transferMany){
             for(int i=0;i<this.blackBoard.itemTransfer.itemsToTransfer.size;i++){
                 ItemNeeded item = this.blackBoard.itemTransfer.itemsToTransfer.get(i);
-                int amount = this.blackBoard.itemTransfer.fromInventory.removeItem(item.itemName, item.amountNeeded, this.blackBoard.itemTransfer.takingReserved);
+                long id = this.blackBoard.itemTransfer.takingReserved ? this.blackBoard.myManager.getEntityOwner().getID() : 0;
+                int amount = this.blackBoard.itemTransfer.fromInventory.removeItem(item.itemName, item.amountNeeded, id);
                 this.blackBoard.itemTransfer.toInventory.addItem(item.itemName, amount);
             }
 

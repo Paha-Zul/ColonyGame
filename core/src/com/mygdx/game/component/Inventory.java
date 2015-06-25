@@ -203,7 +203,7 @@ public class Inventory extends Component implements IOwnable {
      * @return The amount removed of the item from the Inventory.
      */
     public int removeItem(String itemName) {
-        return this.removeItem(itemName, 1, false);
+        return this.removeItem(itemName, 1, 0);
     }
 
     /**
@@ -214,31 +214,27 @@ public class Inventory extends Component implements IOwnable {
      * @return The amount of the item removed from the Inventory.
      */
     public int removeItem(String itemName, int amount) {
-        return this.removeItem(itemName, amount, false);
+        return this.removeItem(itemName, amount, 0);
     }
 
     /**
      * Attempts to remove an amount of an item from this inventory. It will either remove the requested amount
      * or will remove all of the item if the amount requested was higher than the stock of the item. Returns the amount
      * removed from this inventory.
-     *
-     * @param itemName       The compName of the Item.
-     * @param amount         The amount of the item to remove.
-     * @param takingReserved True if the item being removed was reserved first, false otherwise.
+     * @param itemName The compName of the Item.
+     * @param amount The amount of the item to remove.
+     * @param id The id to use if we are taking from a reserved item. If this is 0, that indicates not taking from reserve.
      * @return The amount removed from the inventory.
      */
-    public int removeItem(String itemName, int amount, boolean takingReserved) {
-        //If the amount to remove is <= 0, return 0.
-        if (amount <= 0) return 0;
+    public int removeItem(String itemName, int amount, long id) {
+        if (amount <= 0) return 0; //If the amount to remove is <= 0, return 0.
         InventoryItem invItem = this.inventory.get(itemName); //Get the item.
-        //If it didn't exist or it was empty, return 0.
-        if (invItem == null) return 0;
+        if (invItem == null) return 0; //If it didn't exist or it was empty, return 0.
 
         int removeAmount = (amount >= invItem.amount) ? invItem.amount : amount; //If amount is equal or more than the inv amount, take all of it, otherwise the amount.
-        invItem.amount -= removeAmount;                         //Set the inventory Item's amount.
-        if (takingReserved)
-            invItem.reserved -= removeAmount;    //If we are taking a reserved item, reduce the reserved amount also.
-        this.currTotalItems -= removeAmount;                      //Subtract the amount being removed from the counter.
+        invItem.amount -= removeAmount;         //Set the inventory Item's amount.
+        if (id!=0) invItem.unReserve(id);       //Unreserve from the item.
+        this.currTotalItems -= removeAmount;    //Subtract the amount being removed from the counter.
 
         //Remove the item from the inventory if all of it has been taken.
         if (invItem.amount <= 0)
@@ -446,7 +442,7 @@ public class Inventory extends Component implements IOwnable {
          */
         public int removeOnTheWay(long id) {
             ItemLink link=null;
-            for(ItemLink _link : reserveList){
+            for(ItemLink _link : this.onTheWayList){
                 if(_link.id == id){
                     link = _link;
                     break;
