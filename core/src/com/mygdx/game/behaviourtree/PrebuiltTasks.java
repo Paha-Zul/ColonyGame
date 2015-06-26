@@ -406,8 +406,8 @@ public class PrebuiltTasks {
         Selector mainSelector = new Selector("Build", blackboard);
         Sequence constructionSeq = new Sequence("BuildSeq", blackboard);
         GetConstruction getConstruction = new GetConstruction("GettingConstruction", blackboard);
-        Sequence getItemsSeq = new Sequence("GetItemSeq", blackboard);
-        AlwaysTrue alwaysTrue = new AlwaysTrue("AlwaysTrue", blackboard, getItemsSeq);
+        Sequence getItemsForConstSeq = new Sequence("GetItemSeq", blackboard);
+        AlwaysTrue getItemsSeqTrue = new AlwaysTrue("AlwaysTrue", blackboard, getItemsForConstSeq);
         CheckAndReserve reserve = new CheckAndReserve("CheckAndReserve", blackboard);
         FindPath fpToStorage = new FindPath("PathToStorage", blackboard);
         MoveTo mtStorage = new MoveTo("MoveToStorage", blackboard);
@@ -417,7 +417,7 @@ public class PrebuiltTasks {
         FindPath fpToBuilding = new FindPath("FindPathBuilding", blackboard);
         MoveTo mtBuilding = new MoveTo("MoveToBuilding", blackboard);
         TransferItem transferToBuilding = new TransferItem("TransferToBuilding", blackboard);
-        //Construct construct = new Construct("Constructing", blackboard);
+        Construct construct = new Construct("Constructing", blackboard);
 
         //The main selector between constructing and idling
         mainSelector.control.addTask(constructionSeq);
@@ -425,19 +425,20 @@ public class PrebuiltTasks {
 
         //The main sequence of construction.
         constructionSeq.control.addTask(getConstruction);
-        constructionSeq.control.addTask(alwaysTrue); //Use the always true as getting items ins't necessary
+        constructionSeq.control.addTask(getItemsSeqTrue); //Use the always true as getting items ins't necessary
         constructionSeq.control.addTask(buildSeq);
 
         //Get items sequence
-        getItemsSeq.control.addTask(reserve);
-        getItemsSeq.control.addTask(fpToStorage);
-        getItemsSeq.control.addTask(mtStorage);
-        getItemsSeq.control.addTask(transferItems);
+        getItemsForConstSeq.control.addTask(reserve);
+        getItemsForConstSeq.control.addTask(fpToStorage);
+        getItemsForConstSeq.control.addTask(mtStorage);
+        getItemsForConstSeq.control.addTask(transferItems);
 
         //Build sequence
         buildSeq.control.addTask(fpToBuilding);
         buildSeq.control.addTask(mtBuilding);
         buildSeq.control.addTask(transferToBuilding);
+        buildSeq.control.addTask(construct);
 
         //Time for the crap
 
@@ -454,9 +455,15 @@ public class PrebuiltTasks {
             task.blackBoard.itemTransfer.itemsToTransfer.addAll(task.blackBoard.constructable.getItemsNeeded());
 
             //Get the storage and set it as the target.
-            Building storage = task.blackBoard.myManager.getEntityOwner().getComponent(Colonist.class).getColony().getOwnedFromColony(Building.class, b -> b.getEntityOwner().getTags().hasTag("construction"));
+            Building storage = task.blackBoard.myManager.getEntityOwner().getComponent(Colonist.class).getColony().getOwnedFromColony(Building.class, b -> b.buildingTags.hasTag("storage"));
             task.blackBoard.target = storage.getEntityOwner();
             if(task.blackBoard.target == null) mainSelector.control.finishWithFailure();
+        };
+
+        getItemsForConstSeq.control.callbacks.finishCallback = task -> {
+            task.blackBoard.target = task.blackBoard.constructable.getEntityOwner();
+            task.blackBoard.itemTransfer.fromInventory = task.blackBoard.myManager.getEntityOwner().getComponent(Inventory.class);
+            task.blackBoard.itemTransfer.toInventory = task.blackBoard.target.getComponent(Inventory.class);
         };
 
         return mainSelector;

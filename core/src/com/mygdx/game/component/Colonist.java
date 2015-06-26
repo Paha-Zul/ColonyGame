@@ -171,7 +171,7 @@ public class Colonist extends Component implements IInteractable, IOwnable{
 
         Tree taskTree = this.getBehManager().getTaskTree();
 
-        Tree.TreeNode[] nodeList = taskTree.addNode("root", "gather", "hunt", "explore", "idle");
+        Tree.TreeNode[] nodeList = taskTree.addNode("root", "gather", "hunt", "explore", "build", "idle");
 
         //For each node, we set up a TaskInfo object and assign it to the node's userData field.
         for(Tree.TreeNode node : nodeList) {
@@ -202,6 +202,7 @@ public class Colonist extends Component implements IInteractable, IOwnable{
         getBehManager().getBehaviourStates().addState("attackTarget", false, PrebuiltTasks::attackTarget).repeat = false;
         getBehManager().getBehaviourStates().addState("hunt", false, PrebuiltTasks::searchAndHunt).repeat = true;
         getBehManager().getBehaviourStates().addState("returnTools", false, PrebuiltTasks::returnTools).repeat = false;
+        getBehManager().getBehaviourStates().addState("build", false, PrebuiltTasks::build).repeat = true;
 
         EventSystem.onEntityEvent(this.owner, "task_started", args -> {
             Task task = (Task)args[0];

@@ -59,7 +59,7 @@ public class Building extends Component implements IOwnable, IInteractable{
         if(this.timer != null) {
             //System.out.println("Updating timer");
             this.owner.getGraphicIdentity().getSprite().setAlpha(0.5f);
-            this.timer.update(delta);
+            //this.timer.update(delta);
         }
 
         if(this.constructable.isComplete()){

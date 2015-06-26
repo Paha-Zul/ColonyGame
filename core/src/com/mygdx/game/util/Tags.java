@@ -216,6 +216,10 @@ public class Tags {
 
     @Override
     public String toString() {
-        return ""+Integer.toBinaryString(tagMask);
+        //return ""+Integer.toBinaryString(tagMask);
+        String tags="";
+        for(String tag : getTagsAsString())
+            tags+=tag+",";
+        return tags;
     }
 }

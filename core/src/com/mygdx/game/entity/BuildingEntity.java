@@ -21,7 +21,7 @@ public class BuildingEntity extends Entity{
     public BuildingEntity(Vector2 position, float rotation, String[] graphicName, int drawLevel) {
         super(position, rotation, drawLevel);
         this.name = "Main Base";
-        this.tags.addTags("building", "constructing");
+        this.tags.addTags("building");
 
         this.addComponent(new GraphicIdentity()).setSprite(graphicName[0], graphicName[1]);
         this.addComponent(new GridComponent()).setGridType(Constants.GRIDSTATIC).setGrid(ColonyGame.worldGrid).setExploreRadius(8).setAddMulti(true);

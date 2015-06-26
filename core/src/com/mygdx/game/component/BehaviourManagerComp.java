@@ -55,6 +55,7 @@ public class BehaviourManagerComp extends Component{
         BehaviourManagerComp.addTaskToMap("fleeTarget", PrebuiltTasks::fleeTarget);
         BehaviourManagerComp.addTaskToMap("returnToBase", PrebuiltTasks::returnToBase);
         BehaviourManagerComp.addTaskToMap("returnTools", PrebuiltTasks::returnTools);
+        BehaviourManagerComp.addTaskToMap("build", PrebuiltTasks::build);
     }
 
     @Override
