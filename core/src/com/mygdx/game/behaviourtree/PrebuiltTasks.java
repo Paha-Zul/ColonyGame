@@ -425,7 +425,7 @@ public class PrebuiltTasks {
 
         //The main sequence of construction.
         constructionSeq.control.addTask(getConstruction);
-        constructionSeq.control.addTask(getItemsSeqTrue); //Use the always true as getting items ins't necessary
+        constructionSeq.control.addTask(getItemsSeqTrue); //Use the always true as getting items isn't necessary
         constructionSeq.control.addTask(buildSeq);
 
         //Get items sequence
@@ -462,8 +462,19 @@ public class PrebuiltTasks {
 
         getItemsForConstSeq.control.callbacks.finishCallback = task -> {
             task.blackBoard.target = task.blackBoard.constructable.getEntityOwner();
-            task.blackBoard.itemTransfer.fromInventory = task.blackBoard.myManager.getEntityOwner().getComponent(Inventory.class);
-            task.blackBoard.itemTransfer.toInventory = task.blackBoard.target.getComponent(Inventory.class);
+            if(task.blackBoard.target != null) {
+                task.blackBoard.itemTransfer.fromInventory = task.blackBoard.myManager.getEntityOwner().getComponent(Inventory.class);
+                task.blackBoard.itemTransfer.toInventory = task.blackBoard.target.getComponent(Inventory.class);
+            }
+        };
+
+        //Make sure the building either has materials or we have the materials.
+        buildSeq.control.callbacks.checkCriteria = task -> {
+            for(ItemNeeded item : task.blackBoard.itemTransfer.itemsToTransfer){
+                if(task.blackBoard.itemTransfer.toInventory.hasItem(item.itemName) || task.blackBoard.itemTransfer.fromInventory.hasItem(item.itemName))
+                    return true;
+            }
+            return false;
         };
 
         return mainSelector;

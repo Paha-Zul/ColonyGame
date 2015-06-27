@@ -14,7 +14,8 @@ public class CheckAndReserve extends LeafTask{
 
     @Override
     public boolean check() {
-        return super.check() && this.blackBoard.itemTransfer.itemsToTransfer != null && this.blackBoard.itemTransfer.itemsToTransfer.size != 0;
+        return super.check() && this.blackBoard.itemTransfer.itemsToTransfer != null && this.blackBoard.itemTransfer.itemsToTransfer.size != 0 &&
+                this.blackBoard.itemTransfer.fromInventory != null && this.blackBoard.itemTransfer.toInventory != null;
     }
 
     @Override

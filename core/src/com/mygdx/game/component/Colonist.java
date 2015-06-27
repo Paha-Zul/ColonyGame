@@ -196,13 +196,13 @@ public class Colonist extends Component implements IInteractable, IOwnable{
             node.userData = taskInfo;
         }
 
-        getBehManager().getBehaviourStates().addState("gather", false, PrebuiltTasks::gatherResource).repeat = true;
-        getBehManager().getBehaviourStates().addState("explore", false, PrebuiltTasks::exploreUnexplored).repeat = true;
-        getBehManager().getBehaviourStates().addState("consume", false, PrebuiltTasks::consumeTask).repeat = false;
-        getBehManager().getBehaviourStates().addState("attackTarget", false, PrebuiltTasks::attackTarget).repeat = false;
-        getBehManager().getBehaviourStates().addState("hunt", false, PrebuiltTasks::searchAndHunt).repeat = true;
-        getBehManager().getBehaviourStates().addState("returnTools", false, PrebuiltTasks::returnTools).repeat = false;
-        getBehManager().getBehaviourStates().addState("build", false, PrebuiltTasks::build).repeat = true;
+        getBehManager().getBehaviourStates().addState("gather", false, PrebuiltTasks::gatherResource).setRepeat(true);
+        getBehManager().getBehaviourStates().addState("explore", false, PrebuiltTasks::exploreUnexplored).setRepeat(true);
+        getBehManager().getBehaviourStates().addState("consume", false, PrebuiltTasks::consumeTask).setRepeat(false);
+        getBehManager().getBehaviourStates().addState("attackTarget", false, PrebuiltTasks::attackTarget).setRepeat(false);
+        getBehManager().getBehaviourStates().addState("hunt", false, PrebuiltTasks::searchAndHunt).setRepeat(true);
+        getBehManager().getBehaviourStates().addState("returnTools", false, PrebuiltTasks::returnTools).setRepeat(false);
+        getBehManager().getBehaviourStates().addState("build", false, PrebuiltTasks::build).setRepeat(true).setDefaultOnFail(true);
 
         EventSystem.onEntityEvent(this.owner, "task_started", args -> {
             Task task = (Task)args[0];

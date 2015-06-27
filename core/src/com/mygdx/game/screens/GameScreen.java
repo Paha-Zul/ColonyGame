@@ -117,18 +117,21 @@ public class GameScreen implements Screen{
     }
 
     private void spawnAnimals(){
+        int wolfPackSpawns = 0;
+        int squirrelSpawn = 0;
+        boolean spawnBossWolf = false;
 
         String atlasName = "interactables";
 
         //Spawns some squirrels
-        for(int i=0;i<100;i++) {
+        for(int i=0;i<squirrelSpawn;i++) {
             Vector2 pos = new Vector2(20 + MathUtils.random(grid.getWidth()-40)*grid.getSquareSize(), 20 + MathUtils.random(grid.getHeight()-40)*grid.getSquareSize());
             Entity animal = new AnimalEnt("squirrel", pos, 0, new String[]{"squirrel", atlasName}, 11);
             ListHolder.addEntity(animal);
         }
 
         //Spawn some angry wolf packs.
-        for(int i=0;i<5;i++){
+        for(int i=0;i<wolfPackSpawns;i++){
             Group group = new Group();
             Vector2 pos = new Vector2(20 + MathUtils.random(grid.getWidth()-40)*grid.getSquareSize(), 20 + MathUtils.random(grid.getHeight()-40)*grid.getSquareSize());
             AnimalEnt wolfLeader = new AnimalEnt("wolf", pos, 0, new String[]{"wolf", atlasName}, 11);
@@ -148,27 +151,29 @@ public class GameScreen implements Screen{
             }
         }
 
-        //spawn big boss wolf
-        Group group = new Group();
-        Vector2 pos = new Vector2(20 + MathUtils.random(grid.getWidth()-40)*grid.getSquareSize(), 20 + MathUtils.random(grid.getHeight()-40)*grid.getSquareSize());
-        DataBuilder.JsonAnimal bossWolfRef = DataManager.getData("bosswolf", DataBuilder.JsonAnimal.class);
-        AnimalEnt bossWolf = new AnimalEnt(bossWolfRef, pos, 0, new String[]{bossWolfRef.img, atlasName} , 11);
-        bossWolf.getGraphicIdentity().setSprite(bossWolfRef.img, "interactables");
-        group.setLeader(bossWolf);
-        bossWolf.getTransform().setScale(2f);
-        bossWolf.addComponent(group);
-        ListHolder.addEntity(bossWolf);
+        if(spawnBossWolf) {
+            //spawn big boss wolf
+            Group group = new Group();
+            Vector2 pos = new Vector2(20 + MathUtils.random(grid.getWidth() - 40) * grid.getSquareSize(), 20 + MathUtils.random(grid.getHeight() - 40) * grid.getSquareSize());
+            DataBuilder.JsonAnimal bossWolfRef = DataManager.getData("bosswolf", DataBuilder.JsonAnimal.class);
+            AnimalEnt bossWolf = new AnimalEnt(bossWolfRef, pos, 0, new String[]{bossWolfRef.img, atlasName}, 11);
+            bossWolf.getGraphicIdentity().setSprite(bossWolfRef.img, "interactables");
+            group.setLeader(bossWolf);
+            bossWolf.getTransform().setScale(2f);
+            bossWolf.addComponent(group);
+            ListHolder.addEntity(bossWolf);
 
-        int amount = (int)(bossWolfRef.packAmount[0] + Math.random()*(bossWolfRef.packAmount[1] - bossWolfRef.packAmount[0]));
-        for(int j=0;j<amount; j++){
-            DataBuilder.JsonAnimal childWolf = DataManager.getData(bossWolfRef.typeInPack[0], DataBuilder.JsonAnimal.class);
+            int amount = (int) (bossWolfRef.packAmount[0] + Math.random() * (bossWolfRef.packAmount[1] - bossWolfRef.packAmount[0]));
+            for (int j = 0; j < amount; j++) {
+                DataBuilder.JsonAnimal childWolf = DataManager.getData(bossWolfRef.typeInPack[0], DataBuilder.JsonAnimal.class);
 
-            Vector2 pos2 = new Vector2(pos.x + MathUtils.random()*1 - 2, pos.y + MathUtils.random()*1 - 2);
-            AnimalEnt wolf = new AnimalEnt(childWolf, pos2, 0, new String[]{childWolf.img, atlasName}, 11);
-            wolf.getGraphicIdentity().setSprite(childWolf.img, "interactables");
-            wolf.addComponent(group);
-            group.addEntityToGroup(wolf);
-            ListHolder.addEntity(wolf);
+                Vector2 pos2 = new Vector2(pos.x + MathUtils.random() * 1 - 2, pos.y + MathUtils.random() * 1 - 2);
+                AnimalEnt wolf = new AnimalEnt(childWolf, pos2, 0, new String[]{childWolf.img, atlasName}, 11);
+                wolf.getGraphicIdentity().setSprite(childWolf.img, "interactables");
+                wolf.addComponent(group);
+                group.addEntityToGroup(wolf);
+                ListHolder.addEntity(wolf);
+            }
         }
     }
 

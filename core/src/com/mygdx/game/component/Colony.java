@@ -51,7 +51,7 @@ public class Colony extends Component implements IInteractable {
         Building mainBuilding = this.getOwnedFromColony(Building.class, building -> building.buildingTags.hasTag("main"));
 
         //Make some colonists!
-        for(int i=0;i<5;i++) {
+        for(int i=0;i<1;i++) {
             Entity c = this.makeColonist(mainBuilding.owner.getTransform().getPosition(), GH.toMeters(200), "colonist");
             c.getComponent(Colonist.class).setName(GameScreen.firstNames[MathUtils.random(GameScreen.firstNames.length - 1)], GameScreen.lastNames[MathUtils.random(GameScreen.lastNames.length - 1)]);
             this.addColonist(c.getComponent(Colonist.class));
@@ -154,8 +154,8 @@ public class Colony extends Component implements IInteractable {
         equipInv.addItem("pick");
         equipInv.addItem("shovel");
         equipInv.addItem("hatchet");
-        equipInv.addItem("wood", 30);
-        equipInv.addItem("stone", 40);
+        //equipInv.addItem("wood", 30);
+        //equipInv.addItem("stone", 40);
 
         //Destroys resources in an area around the Colony Entity.
         radius = 8;

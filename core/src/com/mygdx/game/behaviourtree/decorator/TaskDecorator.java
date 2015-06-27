@@ -60,6 +60,7 @@ public abstract class TaskDecorator extends Task
     @Override
     public void end()
     {
+        //TODO Probably should be careful here. This will call the callbacks.
         this.task.getControl().safeEnd();
     }
 

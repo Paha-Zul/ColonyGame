@@ -99,7 +99,7 @@ public class Animal extends Component implements IInteractable{
     }
 
     private void makeBehaviourStuff(){
-        this.behComp.getBehaviourStates().addState("attackTarget").repeat = false;
+        this.behComp.getBehaviourStates().addState("attackTarget").setRepeat(false);
     }
 
     @Override

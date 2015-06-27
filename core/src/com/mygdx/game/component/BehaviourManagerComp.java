@@ -151,8 +151,13 @@ public class BehaviourManagerComp extends Component{
                 //If the next behaviour is empty, do something based on the state.
                 }else {
                     StateSystem.State<BiFunction<BlackBoard, BehaviourManagerComp, Task>> state = behaviourStates.getDefaultState();
+                    StateSystem.State<BiFunction<BlackBoard, BehaviourManagerComp, Task>> currState = behaviourStates.getCurrState();
                     BiFunction<BlackBoard, BehaviourManagerComp, Task> data;
-                    if(behaviourStates.getCurrState().repeat) state = behaviourStates.getCurrState();
+
+                    //If the job has failed and is supposed to default on fail, get the default state.
+                    if(this.currentBehaviour.getControl().hasFailed() && currState.getDefaultOnFail()) state = behaviourStates.getDefaultState();
+                    //If the job is supposed to repeat, repeat it!
+                    else if(currState.getRepeat()) state = currState;
 
                     data = state.getUserData();
                     this.changeTaskImmediate(data.apply(blackBoard, this));

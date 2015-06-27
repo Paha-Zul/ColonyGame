@@ -77,7 +77,7 @@ public class StateSystem<T>{
 
     /**
      * Sets the current State of this system. If the State compName does not exist, the default State becomes the current State.
-     * @param stateName
+     * @param stateName The name of the state to become the current state.
      */
     public void setCurrState(String stateName){
         this.currState = this.stateMap.getOrDefault(stateName, defaultState);
@@ -100,7 +100,8 @@ public class StateSystem<T>{
 
     public static class State<T>{
         public String stateName;
-        public boolean repeat;
+        private boolean repeat;
+        private boolean defaultOnFail;
         private T userData;
 
         public State(String stateName, boolean repeat, T userData){
@@ -111,6 +112,23 @@ public class StateSystem<T>{
 
         public T getUserData(){
             return this.userData;
+        }
+
+        public State<T> setRepeat(boolean val){
+            this.repeat = val;
+            return this;
+        }
+
+        public State<T> setDefaultOnFail(boolean val){
+            this.defaultOnFail = val;
+            return this;
+        }
+
+        public boolean getRepeat(){
+            return this.repeat;
+        }
+        public boolean getDefaultOnFail(){
+            return this.defaultOnFail;
         }
     }
 }

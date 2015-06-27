@@ -60,10 +60,12 @@ public class Constructable extends Component{
         return this;
     }
 
-    public Constructable build(){
+    public int build(){
+        boolean hasAnItem = false;
         for(ConstructableItemAmounts item : itemMap.values()){
             int amount = this.inventory.getItemAmount(item.itemName);
             if(amount > 0){
+                hasAnItem = true;
                 int useAmount = 1; //How much to consume.
                 this.inventory.removeItem(item.itemName, useAmount); //Remove the amount from the inventory
                 this.totalItemsSupplied+=useAmount; //Add the amount to the total items supplied
@@ -74,10 +76,18 @@ public class Constructable extends Component{
             }
         }
 
-        if(itemMap.size() == 0)
-            this.setComplete();
+        //If we didn't have any items to build, return -1 for no items.
+        if(!hasAnItem)
+            return -1;
 
-        return this;
+        //If we have no more items needed, return 1 for complete.
+        if(itemMap.size() == 0) {
+            this.setComplete();
+            return 1;
+        }
+
+        //Otherwise, we aren't finished and there are no errors.
+        return 0;
     }
 
     /**
