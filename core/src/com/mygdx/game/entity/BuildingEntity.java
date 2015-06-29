@@ -28,7 +28,7 @@ public class BuildingEntity extends Entity{
         this.addComponent(new Building());
         this.addComponent(new Interactable()).setInterType("building");
         this.addComponent(new Inventory());
-        this.addComponent(new Constructable()).addItem("wood", 20).addItem("stone", 30);
+        this.addComponent(new Constructable()).addItemRequirement("wood", 20).addItemRequirement("stone", 30);
 
         this.makeCollider();
     }

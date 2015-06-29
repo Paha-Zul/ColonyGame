@@ -54,9 +54,9 @@ public class Constructable extends Component{
      * @param itemAmount The amount of the item.
      * @return The Constructable for chaining.
      */
-    public Constructable addItem(String itemName, int itemAmount){
+    public Constructable addItemRequirement(String itemName, int itemAmount){
         this.itemMap.put(itemName, new ConstructableItemAmounts(itemName, itemAmount));
-        this.totalItemsSupplied+=itemAmount;
+        this.totalItemsNeeded+=itemAmount;
         return this;
     }
 
@@ -119,7 +119,7 @@ public class Constructable extends Component{
      * @return A value between 0 and 1.
      */
     public float getPercentageDone(){
-        return this.totalItemsSupplied/this.totalItemsNeeded;
+        return (float)this.totalItemsSupplied/(float)this.totalItemsNeeded;
     }
 
     /**

@@ -621,6 +621,14 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
                     }
                 }
             }
+
+            if(innerInter.getConstructable() != null){
+                Constructable constructable = innerInter.getConstructable();
+                Rectangle rect = this.ordersRect;
+                GUI.Label("constructing", this.batch, rect.x, rect.y + rect.height-20, rect.width, 20);
+                GUI.Label("Progress", this.batch, rect.x, rect.y + rect.height - 40, rect.width, 20);
+                GUI.DrawBar(this.batch, rect.x + rect.width/2 - 50, rect.y + rect.height - 60, 100, 20, constructable.getPercentageDone(), true, null, null);
+            }
         }
     }
 

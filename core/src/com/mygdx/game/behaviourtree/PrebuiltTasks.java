@@ -458,6 +458,10 @@ public class PrebuiltTasks {
             Building storage = task.blackBoard.myManager.getEntityOwner().getComponent(Colonist.class).getColony().getOwnedFromColony(Building.class, b -> b.buildingTags.hasTag("storage"));
             task.blackBoard.target = storage.getEntityOwner();
             if(task.blackBoard.target == null) mainSelector.control.finishWithFailure();
+            else{
+                task.blackBoard.itemTransfer.fromInventory = storage.getInventory();
+                task.blackBoard.itemTransfer.toInventory = task.blackBoard.myManager.getEntityOwner().getComponent(Inventory.class);
+            }
         };
 
         getItemsForConstSeq.control.callbacks.finishCallback = task -> {

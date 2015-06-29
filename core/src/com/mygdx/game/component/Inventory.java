@@ -478,8 +478,11 @@ public class Inventory extends Component implements IOwnable {
         public int addAmount(int amountToAdd) {
             //-1 indicates infinite. So if below 0, just skip this.
             if(this.maxAmount >= 0) {
-                amountToAdd = this.maxAmount - (this.amount + amountToAdd);
-                if (amountToAdd <= 0) amountToAdd = 0;
+                //If we are over the max amount, calculate what we can add and use that.
+                if(amountToAdd + this.amount >= this.maxAmount)
+                    amountToAdd = this.maxAmount - this.amount;
+                if(amountToAdd < 0)
+                    amountToAdd = 0;
             }
             //Add the amount and return how much we added.
             this.amount += amountToAdd;

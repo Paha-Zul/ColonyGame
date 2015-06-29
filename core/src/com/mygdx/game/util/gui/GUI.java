@@ -105,6 +105,39 @@ public class GUI {
         batch.setColor(batchColor);
     }
 
+    /**
+     * Draws a bar for a percentage
+     * @param x The x location to start at.
+     * @param y The Y location to start at.
+     * @param width The width of the bar.
+     * @param height The height of the bar.
+     * @param percentage The percentage completed.
+     */
+    public static void DrawBar(SpriteBatch batch, float x, float y, float width, float height, float percentage, boolean displayText, GUIStyle style, Color color){
+        if(style == null) style = defaultGUIStyle;
+        if(color == null) color = Color.GREEN;
+
+        style.alignment = Align.left;
+        style.alignment = Align.center;
+
+        float outerX = x;
+        float innerX = x + 2;
+
+        Color batchColor = batch.getColor();
+        //Draw the out rectangle
+        batch.setColor(Color.BLACK);
+        GUI.Texture(new TextureRegion(WorldGen.whiteTex), batch, outerX, y, width, height);
+
+        //Draw the inner rectangle (shrink it by 2 inches on all sides, 'padding')
+        batch.setColor(color);
+        float newWidth = percentage*(width-4);
+        GUI.Texture(whiteTexture, batch, innerX, y + 2, newWidth, height - 4);
+
+        if(displayText) GUI.Label(""+(int)(percentage*100), batch, outerX, y, width, height);
+
+        batch.setColor(batchColor);
+    }
+
     public static boolean Button(SpriteBatch batch, Rectangle rect){
         return GUI.Button(batch, "", rect, null);
     }
