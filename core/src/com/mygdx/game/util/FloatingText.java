@@ -2,6 +2,7 @@ package com.mygdx.game.util;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.mygdx.game.ColonyGame;
@@ -18,6 +19,7 @@ public class FloatingText implements IDestroyable{
 
     private double diff, counter;
     private float percent, fadingDiff, fadePercent;
+    private TextureRegion image;
 
     private boolean destroyed = false;
     private static GUI.GUIStyle style;
@@ -49,6 +51,11 @@ public class FloatingText implements IDestroyable{
         this.fadingDiff = 1 - fadePercent;
 
         ListHolder.addFloatingText(this);
+    }
+
+    public FloatingText(TextureRegion image, String text, Vector2 start, Vector2 end, float time, float fadePercent){
+        this(text, start, end, time, fadePercent);
+        this.image = image;
     }
 
     public void update(float delta){

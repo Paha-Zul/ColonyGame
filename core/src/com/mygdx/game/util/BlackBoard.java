@@ -74,6 +74,7 @@ public class BlackBoard{
         public int itemAmountToTransfer;
 
         public String itemNameToTransfer;
+        public Array<String> itemTypesToIgnore;
         public Array<ItemNeeded> itemsToTransfer;
 
         public Inventory toInventory;
@@ -87,6 +88,7 @@ public class BlackBoard{
             itemNameToTransfer = "";
 
             toInventory = fromInventory = null;
+            itemTypesToIgnore = new Array<>();
         }
     }
 }

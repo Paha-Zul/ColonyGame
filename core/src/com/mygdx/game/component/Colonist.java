@@ -203,6 +203,7 @@ public class Colonist extends Component implements IInteractable, IOwnable{
         getBehManager().getBehaviourStates().addState("hunt", false, PrebuiltTasks::searchAndHunt).setRepeat(true);
         getBehManager().getBehaviourStates().addState("returnTools", false, PrebuiltTasks::returnTools).setRepeat(false);
         getBehManager().getBehaviourStates().addState("build", false, PrebuiltTasks::build).setRepeat(true).setDefaultOnFail(true);
+        getBehManager().getBehaviourStates().addState("returnItems", false, PrebuiltTasks::returnItems).setRepeat(false).setDefaultOnFail(true);
 
         EventSystem.onEntityEvent(this.owner, "task_started", args -> {
             Task task = (Task)args[0];
@@ -229,8 +230,13 @@ public class Colonist extends Component implements IInteractable, IOwnable{
                 if(!this.getBehManager().getBehaviourStates().getCurrState().stateName.equals("attackTarget"))
                     this.getBehManager().changeTaskImmediate("attackTarget");
             }
-        }else if(this.getBehManager().getBehaviourStates().isCurrState("idle") && this.equipment.hasTools()){
-            this.getBehManager().changeTaskImmediate("returnTools");
+        }else if(this.getBehManager().getBehaviourStates().isCurrState("idle")){
+            //TODO Since tools are in the inventory, we can ignore them while transferring but this will try to run very update.
+            if(!this.inventory.isEmpty()){
+                this.getBehManager().changeTaskImmediate("returnItems");
+            }else if(this.equipment.hasTools()){
+                this.getBehManager().changeTaskImmediate("returnTools");
+            }
         }
 
         effects.testAndSetEffect("starving", this.stats);

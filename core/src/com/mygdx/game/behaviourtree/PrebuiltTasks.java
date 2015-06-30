@@ -381,6 +381,44 @@ public class PrebuiltTasks {
 
     }
 
+    public static Task returnItems(BlackBoard blackBoard, BehaviourManagerComp behComp){
+        /**
+         *  Sequence
+         *      Find storage
+         *      get path to storage
+         *      move to storage
+         *      transfer all items.  (except tools)
+         */
+
+        Sequence mainSeq = new Sequence("Dropping Off", blackBoard);
+        FindPath fpStorage = new FindPath("Finding path", blackBoard);
+        MoveTo mtStorage = new MoveTo("Moving to storage", blackBoard);
+        TransferItem transfer = new TransferItem("Transferring", blackBoard);
+
+        mainSeq.control.addTask(fpStorage);
+        mainSeq.control.addTask(mtStorage);
+        mainSeq.control.addTask(transfer);
+
+        mainSeq.control.callbacks.startCallback = task -> {
+            Colonist col = task.blackBoard.myManager.getComponent(Colonist.class);
+            Building building = col.getColony().getOwnedFromColony(Building.class, b -> b.buildingTags.hasTag("storage"));
+            if(building == null) task.getControl().finishWithFailure();
+            else {
+                task.blackBoard.target = building.getEntityOwner();
+                if (task.blackBoard.target == null) task.getControl().finishWithFailure();
+                else{
+                    task.blackBoard.itemTransfer.reset();
+                    task.blackBoard.itemTransfer.fromInventory = col.getInventory();
+                    task.blackBoard.itemTransfer.toInventory = building.getInventory();
+                    task.blackBoard.itemTransfer.transferAll = true;
+                    task.blackBoard.itemTransfer.itemTypesToIgnore.add("tool");
+                }
+            }
+        };
+
+        return mainSeq;
+    }
+
     public static Task build(BlackBoard blackboard, BehaviourManagerComp behComp){
         /**
          *  Selector
@@ -411,7 +449,7 @@ public class PrebuiltTasks {
         CheckAndReserve reserve = new CheckAndReserve("CheckAndReserve", blackboard);
         FindPath fpToStorage = new FindPath("PathToStorage", blackboard);
         MoveTo mtStorage = new MoveTo("MoveToStorage", blackboard);
-        TransferItem transferItems = new TransferItem("Transfering", blackboard);
+        TransferItem transferItems = new TransferItem("Transferring", blackboard);
 
         Sequence buildSeq = new Sequence("Build", blackboard);
         FindPath fpToBuilding = new FindPath("FindPathBuilding", blackboard);
