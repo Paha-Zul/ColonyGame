@@ -31,8 +31,10 @@ public class TransferItem extends LeafTask{
             for (Inventory.InventoryItem item : this.blackBoard.itemTransfer.fromInventory.getItemList()) {
                 //If the types to ignore is 0 (no types to ignore) or the item's type is not in the list, transfer.
                 if(this.blackBoard.itemTransfer.itemTypesToIgnore.size == 0 || !this.blackBoard.itemTransfer.itemTypesToIgnore.contains(item.itemRef.getItemType(), false)) {
-                    this.blackBoard.itemTransfer.toInventory.addItem(item.itemRef.getItemName(), item.getAmount(false));
-                    this.blackBoard.itemTransfer.fromInventory.removeItem(item.itemRef.getItemName(), item.getAmount());
+                    int canAddAmount = this.blackBoard.itemTransfer.toInventory.getItemCanAddAmount(item.itemRef.getItemName()); //Get the amount we can add to the inventory.
+                    int amountToRemove = canAddAmount < item.getAmount() ? canAddAmount : item.getAmount(); //Choose the lower of the two.
+                    int amountRemoved = this.blackBoard.itemTransfer.fromInventory.removeItem(item.itemRef.getItemName(), canAddAmount); //Remove what we can.
+                    this.blackBoard.itemTransfer.toInventory.addItem(item.itemRef.getItemName(), amountRemoved); //Add the item to the inventory.
                 }
             }
 

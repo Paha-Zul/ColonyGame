@@ -578,7 +578,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
                 //TODO Make this shift to the right when no more space to go down...
                 for(int i=0;i<itemList.size();i++){
                     Inventory.InventoryItem item = itemList.get(i);
-                    String maxItemAmount = item.getMaxAmount() >= 0 ? ""+item.getMaxAmount() : "?";
+                    String maxItemAmount = item.getMaxAmount() != Integer.MAX_VALUE ? ""+item.getMaxAmount() : "?";
                     //GUI.Label(item.itemRef.getDisplayName(), this.batch, this.tabsRect.x + leftOffset, this.tabsRect.y-i*10, this.tabsRect.width, this.tabsRect.height, this.UIStyle);
                     GUI.Label(""+item.getAmount(false)+"/"+maxItemAmount+"(a:"+item.getAvailable()+"/r:"+item.getReserved()+"/otw:"+item.getOnTheWay(), this.batch, xPos, yPos, labelWidth, labelHeight, this.UIStyle);
 

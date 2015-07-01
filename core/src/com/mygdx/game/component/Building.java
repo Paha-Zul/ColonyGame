@@ -65,6 +65,8 @@ public class Building extends Component implements IOwnable, IInteractable{
         if(this.constructable.isComplete()){
             this.owner.destroyComponent(Constructable.class);
             this.owner.getTags().removeTag("constructing");
+            this.constructable = null;
+            this.owner.getGraphicIdentity().getSprite().setAlpha(1);
             this.timer = null;
             this.setActive(false);
         }

@@ -32,9 +32,10 @@ public class CheckAndReserve extends LeafTask{
 
         if(this.blackBoard.itemTransfer.transferMany) {
             //For each item name in the array, try to reserve.
-            for (int i = 0; i < this.blackBoard.itemTransfer.itemsToTransfer.size; i++) {
-                ItemNeeded item = this.blackBoard.itemTransfer.itemsToTransfer.get(i);
-                int reserve = this.blackBoard.itemTransfer.fromInventory.reserveItem(item.itemName, item.amountNeeded, this.blackBoard.myManager.getEntityOwner().getID()); //Attempt to reserve
+            for (ItemNeeded item : this.blackBoard.itemTransfer.itemsToTransfer) {
+                int amountCanAdd = this.blackBoard.itemTransfer.toInventory.getItemCanAddAmount(item.itemName); //Get the amount we can reserve.
+                int amountToReserve = Math.min(amountCanAdd, item.amountNeeded); //Get the smaller of the two values.
+                int reserve = this.blackBoard.itemTransfer.fromInventory.reserveItem(item.itemName, amountToReserve, this.blackBoard.myManager.getEntityOwner().getID()); //Attempt to reserve
                 item.amountNeeded = reserve; //Set the amount to the amount we were able to reserve.
                 if(reserve > 0) atLeastOne = true;
             }

@@ -230,9 +230,9 @@ public class Colonist extends Component implements IInteractable, IOwnable{
                 if(!this.getBehManager().getBehaviourStates().getCurrState().stateName.equals("attackTarget"))
                     this.getBehManager().changeTaskImmediate("attackTarget");
             }
-        }else if(this.getBehManager().getBehaviourStates().isCurrState("idle")){
-            //TODO Since tools are in the inventory, we can ignore them while transferring but this will try to run very update.
-            if(!this.inventory.isEmpty()){
+        }else if(this.getBehManager().getBehaviourStates().isCurrState("idle") && !this.inventory.isEmpty()){
+            //TODO Since tools are in the inventory, we can ignore them while transferring but this will try to run every update.
+            if(!this.inventory.hasItemTypeOnly("tool")){
                 this.getBehManager().changeTaskImmediate("returnItems");
             }else if(this.equipment.hasTools()){
                 this.getBehManager().changeTaskImmediate("returnTools");
