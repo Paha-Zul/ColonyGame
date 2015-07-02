@@ -2,12 +2,15 @@ package com.mygdx.game.component;
 
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.entity.Entity;
+import com.mygdx.game.util.DataBuilder;
 import com.mygdx.game.util.ItemNeeded;
+import com.mygdx.game.util.managers.DataManager;
 
 import java.util.HashMap;
 
 /**
  * Created by Paha on 6/20/2015.
+ * A Constructable class that can be attached to Entities that must be constructed.
  */
 public class Constructable extends Component{
     private Inventory inventory;
@@ -27,6 +30,13 @@ public class Constructable extends Component{
     @Override
     public void start() {
         super.start();
+
+        //Get the recipe for this building and set the items required.
+        DataBuilder.JsonRecipe recipe = DataManager.getData(this.getComponent(Building.class).getBuildingName(), DataBuilder.JsonRecipe.class);
+        for(int i=0;i<recipe.items.length;i++){
+            int amount = recipe.itemAmounts[i];
+            this.addItemRequirement(recipe.items[i], amount);
+        }
 
         this.load();
     }

@@ -2,7 +2,9 @@ package com.mygdx.game.component;
 
 import com.mygdx.game.interfaces.IInteractable;
 import com.mygdx.game.interfaces.IOwnable;
+import com.mygdx.game.util.DataBuilder;
 import com.mygdx.game.util.Tags;
+import com.mygdx.game.util.managers.DataManager;
 import com.mygdx.game.util.timer.RepeatingTimer;
 import com.mygdx.game.util.timer.Timer;
 import org.codehaus.jackson.annotate.JsonIgnore;
@@ -12,6 +14,9 @@ import org.codehaus.jackson.annotate.JsonProperty;
  * Created by Paha on 5/19/2015.
  */
 public class Building extends Component implements IOwnable, IInteractable{
+    @JsonProperty
+    public final Tags buildingTags = new Tags("building");
+
     @JsonIgnore
     private Timer timer;
     @JsonIgnore
@@ -20,8 +25,9 @@ public class Building extends Component implements IOwnable, IInteractable{
     private Colony colonyOwner;
     @JsonIgnore
     private Inventory inventory;
-    @JsonProperty
-    public final Tags buildingTags = new Tags("building");
+
+    private String buildingName;
+
 
     public Building(){
 
@@ -31,6 +37,11 @@ public class Building extends Component implements IOwnable, IInteractable{
     public void start() {
         super.start();
 
+        DataBuilder.JsonBuilding jBuilding = DataManager.getData(this.buildingName, DataBuilder.JsonBuilding.class);
+        //Add each tag that exists.
+        for(String tag : jBuilding.tags) this.buildingTags.addTag(tag);
+        //Add an inventory if this building has inventory
+        if(jBuilding.inventory) this.inventory = this.addComponent(new Inventory());
         this.load();
     }
 
@@ -70,6 +81,14 @@ public class Building extends Component implements IOwnable, IInteractable{
             this.timer = null;
             this.setActive(false);
         }
+    }
+
+    public void setBuildingName(String name){
+        this.buildingName = name;
+    }
+
+    public String getBuildingName(){
+        return this.buildingName;
     }
 
     @Override

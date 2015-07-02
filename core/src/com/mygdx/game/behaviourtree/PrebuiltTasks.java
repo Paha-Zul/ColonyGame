@@ -51,9 +51,9 @@ public class PrebuiltTasks {
          *          move to resource
          *          gather resource
          *
-         *      find storage
-         *      find path to storage
-         *      move to storage
+         *      find inventory
+         *      find path to inventory
+         *      move to inventory
          *      transfer items.
          */
 
@@ -167,9 +167,9 @@ public class PrebuiltTasks {
          *  find path to resource
          *  move to resource
          *  gather resource
-         *  find path to storage
-         *  move to storage
-         *  transfer itemNames to storage
+         *  find path to inventory
+         *  move to inventory
+         *  transfer itemNames to inventory
          */
 
         Sequence sequence = new Sequence("gatherTarget", blackBoard);
@@ -355,9 +355,9 @@ public class PrebuiltTasks {
     public static Task returnItems(BlackBoard blackBoard, BehaviourManagerComp behComp){
         /**
          *  Sequence
-         *      Find storage
-         *      get path to storage
-         *      move to storage
+         *      Find inventory
+         *      get path to inventory
+         *      move to inventory
          *      transfer all items.  (except tools)
          */
 
@@ -397,10 +397,10 @@ public class PrebuiltTasks {
          *          find a building under construction
          *          Sequence - Always true decorator
          *              get list of items needed to build
-         *              find storage
+         *              find inventory
          *              reserve items
-         *              find path to storage
-         *              move to storage
+         *              find path to inventory
+         *              move to inventory
          *              transfer items.
          *         Sequence
          *              get path to building
@@ -414,14 +414,14 @@ public class PrebuiltTasks {
 
         /**
          * TODO When the building only needs a limited amount (ie: building needs 5 stone and the colonist has 10 stone), the colonists inventory
-         * TODO is cleared, but not all items are transferred. Make sure we only remove from the inventory what we need to.
+         * TODO is cleared, but not all items are transferred. Make sure we only remove from the inventory what we need to. Maybe... can't reproduce it.
         */
 
         Selector mainSelector = new Selector("Build", blackboard);
         Sequence constructionSeq = new Sequence("BuildSeq", blackboard);
         GetConstruction getConstruction = new GetConstruction("GettingConstruction", blackboard);
 
-        //Thbis is where we possible get items for the construction.
+        //This is where we possible get items for the construction.
         Sequence getItemsForConstSeq = new Sequence("GetItemSeq", blackboard);
         AlwaysTrue getItemsSeqTrue = new AlwaysTrue("AlwaysTrue", blackboard, getItemsForConstSeq);
         CheckAndReserve reserve = new CheckAndReserve("CheckAndReserve", blackboard);
@@ -459,7 +459,7 @@ public class PrebuiltTasks {
 
         //Time for the crap
 
-        //First, we need to get a building under construction. Then, we need to get a list of items. Then we need to find a storage
+        //First, we need to get a building under construction. Then, we need to get a list of items. Then we need to find a inventory
         //building with any of the items we need.
         getConstruction.control.callbacks.successCallback = task -> {
             //reset and set some values.
@@ -471,7 +471,7 @@ public class PrebuiltTasks {
             task.blackBoard.constructable = task.blackBoard.target.getComponent(Constructable.class);
             task.blackBoard.itemTransfer.itemsToTransfer.addAll(task.blackBoard.constructable.getItemsNeeded());
 
-            //Get the storage and set it as the target.
+            //Get the inventory and set it as the target.
             Building storage = task.blackBoard.myManager.getEntityOwner().getComponent(Colonist.class).getColony().getOwnedFromColony(Building.class, b -> b.buildingTags.hasTag("storage"));
             task.blackBoard.target = storage.getEntityOwner();
             if(task.blackBoard.target == null) mainSelector.control.finishWithFailure();
@@ -569,9 +569,9 @@ public class PrebuiltTasks {
     public static Task consumeTask(BlackBoard blackBoard, BehaviourManagerComp behComp){
         /**
          * Sequence:
-         *  check that the inventory of the storage has the item effect we want/need
-         *  find path to storage
-         *  move to storage
+         *  check that the inventory of the inventory has the item effect we want/need
+         *  find path to inventory
+         *  move to inventory
          *  transfer needed item to me (colonist)
          *  consume item
          */
@@ -595,7 +595,7 @@ public class PrebuiltTasks {
             task.blackBoard.targetNode = null; //We don't want this set.
             task.blackBoard.itemTransfer.itemAmountToTransfer = 1; //We only want to take 1
 
-            //Get a storage building from my colony, store the entity as the target, and set the from/to inventory.
+            //Get a inventory building from my colony, store the entity as the target, and set the from/to inventory.
             Building storage = task.blackBoard.myManager.getEntityOwner().getComponent(Colonist.class).getColony().getOwnedFromColony(Building.class, b -> b.buildingTags.hasTag("storage"));
             task.blackBoard.target = storage.getEntityOwner();
             task.blackBoard.itemTransfer.fromInventory = storage.getComponent(Inventory.class);
@@ -624,10 +624,10 @@ public class PrebuiltTasks {
          *      get path to resource
          *      move to resource
          *      gather resource
-         *      find storage building
+         *      find inventory building
          *      find path to building
          *      move to building
-         *      transfer itemNames to storage
+         *      transfer itemNames to inventory
          */
 
         blackBoard.itemTransfer.transferAll = true;

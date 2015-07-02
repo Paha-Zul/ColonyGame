@@ -137,25 +137,17 @@ public class Colony extends Component implements IInteractable {
         ListHolder.addEntity(colonyEnt);
         ColonyGame.camera.position.set(colonyEnt.getTransform().getPosition().x, colonyEnt.getTransform().getPosition().y, 0);
         Building colonyBuilding = colonyEnt.getComponent(Building.class);
+        colonyBuilding.setBuildingName("colony_building");
         this.addOwnedToColony(colonyBuilding);
-        colonyBuilding.buildingTags.addTag("main");
-        colonyBuilding.buildingTags.addTag("storage");
         colonyEnt.getComponent(Constructable.class).setComplete();
 
         //Spawns the Equipment building.
         BuildingEntity equipEnt = new BuildingEntity(new Vector2(start.x - 5, start.y - 5), 0, new String[]{"Colony",""}, 10);
         equipEnt.getTags().addTag("constructing");
-        equipEnt.name = "Equipment Shed";
         ListHolder.addEntity(equipEnt);
         Building equipBuilding = equipEnt.getComponent(Building.class);
+        equipBuilding.setBuildingName("equipment_shed");
         this.addOwnedToColony(equipBuilding);
-        equipBuilding.buildingTags.addTag("equipment");
-        Inventory equipInv = equipEnt.getComponent(Inventory.class);
-        equipInv.addItem("pick");
-        equipInv.addItem("shovel");
-        equipInv.addItem("hatchet");
-        //equipInv.addItem("wood", 30);
-        //equipInv.addItem("stone", 40);
 
         //Destroys resources in an area around the Colony Entity.
         radius = 8;

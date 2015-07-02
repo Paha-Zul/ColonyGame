@@ -1,21 +1,42 @@
 [
   {
-    "itemName": "pick",
-    "displayName": "Pick",
+    "itemName": "wood_pick",
+    "displayName": "Wood Pick",
     "itemType": "tool",
     "description": "Awesome pick.",
     "icon": "pick"
   },
   {
-    "itemName": "shovel",
-    "displayName": "Shovel",
+    "itemName": "wood_shovel",
+    "displayName": "Wood Shovel",
     "itemType": "tool",
     "description": "A shovel.",
     "icon": "shovel"
   },
   {
-    "itemName": "hatchet",
-    "displayName": "Hatchet",
+    "itemName": "wood_hatchet",
+    "displayName": "Wood Hatchet",
+    "itemType": "tool",
+    "description": "Crazy hatchet.",
+    "icon": "hatchet"
+  },
+  {
+    "itemName": "stone_pick",
+    "displayName": "Stone Pick",
+    "itemType": "tool",
+    "description": "Awesome pick.",
+    "icon": "pick"
+  },
+  {
+    "itemName": "stone_shovel",
+    "displayName": "Stone Shovel",
+    "itemType": "tool",
+    "description": "A shovel.",
+    "icon": "shovel"
+  },
+  {
+    "itemName": "stone_hatchet",
+    "displayName": "Stone Hatchet",
     "itemType": "tool",
     "description": "Crazy hatchet.",
     "icon": "hatchet"

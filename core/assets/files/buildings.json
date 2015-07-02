@@ -1,0 +1,23 @@
+[
+  {
+    "name": "colony_building",
+    "displayName": "Colony Base",
+    "tags": ["equipment"],
+    "inventory": true,
+    "storageTypes": ["tool"]
+  },
+  {
+    "name": "equipment_shed",
+    "displayName": "Equipment Shed",
+    "tags": ["equipment"],
+    "inventory": true,
+    "storageTypes": ["tool"]
+  },
+  {
+    "name": "workshop",
+    "displayName": "Workshop",
+    "tags": ["workshop"],
+    "inventory": false,
+    "crafting": ["wood_pick", "wood_shovel", "wood_hatchet"]
+  }
+]

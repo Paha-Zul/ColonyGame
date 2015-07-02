@@ -28,19 +28,24 @@ public abstract class Component implements IDelayedDestroyable, ISaveable {
 	}
 
 	/**
-	 * The initialization of this Component. This should only be called by the Entity owner. This function will
-	 * set the owner of this Component and other Components of the owner may not be available to access.
-     * Override this when an immediate reference to the owner is needed. This function does not guarantee that any other
-     * Components are available to be accessed.
+	 * Called when the Component is created. This can be used for anything that isn't dependant on any other data at the time of
+	 * creation.
 	 * @param owner The Entity owner of this Component.
 	 */
-	public void init(Entity owner){
+	public void created(Entity owner){
 		this.owner = owner;
+	}
+
+	/**
+	 * Called right before the Component is added to the Entity. The Entity owner is already set and can be used
+	 * to interact with the owner or any fields that may have been set after the creation but is needed before the start() method.
+	 */
+	public void init(){
 		this.initiated = true;
 	}
 
 	/**
-	 * The start of this Component. This is where other Components of the owner can be accessed and stored as a reference.
+	 * The start of this Component. This is where other Components of the owner can be accessed and stored as a reference or interacted with.
 	 */
 	public void start(){
 		this.started = true;

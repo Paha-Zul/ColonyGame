@@ -5,7 +5,10 @@ import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.mygdx.game.ColonyGame;
-import com.mygdx.game.component.*;
+import com.mygdx.game.component.Building;
+import com.mygdx.game.component.Constructable;
+import com.mygdx.game.component.GridComponent;
+import com.mygdx.game.component.Interactable;
 import com.mygdx.game.component.collider.Collider;
 import com.mygdx.game.component.graphic.GraphicIdentity;
 import com.mygdx.game.util.Constants;
@@ -27,8 +30,7 @@ public class BuildingEntity extends Entity{
         this.addComponent(new GridComponent()).setGridType(Constants.GRIDSTATIC).setGrid(ColonyGame.worldGrid).setExploreRadius(8).setAddMulti(true);
         this.addComponent(new Building());
         this.addComponent(new Interactable()).setInterType("building");
-        this.addComponent(new Inventory());
-        this.addComponent(new Constructable()).addItemRequirement("wood", 20).addItemRequirement("stone", 30);
+        this.addComponent(new Constructable());
 
         this.makeCollider();
     }

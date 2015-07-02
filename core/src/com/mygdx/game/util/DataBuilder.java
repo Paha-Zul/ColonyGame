@@ -44,6 +44,8 @@ public class DataBuilder implements IDestroyable{
     private final String modInfoFilePath = "/info.json";
     private final String modFilePath = "/mods.json";
     private final String eventsFilePath = "/events.json";
+    private final String recipesFilePath = "/recipes.json";
+    private final String buildingsFilePath = "/buildings.json";
     private final String prefabFilePath = "/prefabs.json";
     private final String miscPath = "/misc.json";
 
@@ -125,17 +127,20 @@ public class DataBuilder implements IDestroyable{
             }
         });
 
-        //Build resources.
-        buildJson(Gdx.files.internal(path + filePath + resourcePath), JsonResource[].class, buildResources);
+        //Build buildings.
+        buildJson(Gdx.files.internal(path + filePath + buildingsFilePath), JsonBuilding[].class, value -> {
+            for (JsonBuilding building : value)
+                DataManager.addData(building.name, building, JsonBuilding.class);
+        });
 
-//        for(String itemName : DataManager.getKeysForType(JsonItem.class)){
-//            JsonItem item = DataManager.getData(itemName, JsonItem.class);
-//            System.out.print("Item: " + item.getItemName() + ", tools: ");
-//            for(String tool : item.possibleTools){
-//                System.out.print("'"+tool+"', ");
-//            }
-//            System.out.println();
-//        }
+        //Build recipes.
+        buildJson(Gdx.files.internal(path + filePath + recipesFilePath), JsonRecipe[].class, value -> {
+            for (JsonRecipe recipe : value)
+                DataManager.addData(recipe.name, recipe, JsonRecipe.class);
+        });
+
+        //Build resources
+        buildJson(Gdx.files.internal(path + filePath + resourcePath), JsonResource[].class, buildResources);
 
         //Build tiles
         buildJson(Gdx.files.internal(path + filePath + tilePath), JsonTileGroup[].class, buildTiles);
@@ -612,6 +617,25 @@ public class DataBuilder implements IDestroyable{
         public String mainMenuMusic;
     }
 
+    /**
+     * A class to hold data from the recipes.json file.
+     */
+    public static class JsonRecipe{
+        public String name, displayName;
+        public String[] items;
+        public int[] itemAmounts;
+    }
+
+    /**
+     * A class to hold data from the buildings.json file.
+     */
+    public static class JsonBuilding{
+        public String name, displayName;
+        public String[] tags;
+        public boolean inventory;
+        public String[] storageTypes;
+        public String[] crafting;
+    }
 
     private static class FolderStructure{
         public int rank=0;

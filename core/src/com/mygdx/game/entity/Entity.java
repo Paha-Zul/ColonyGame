@@ -227,19 +227,17 @@ public class Entity implements IDelayedDestroyable, ISaveable{
 					destroyComponentList.clear(); //Clear the list.
 				}
 
-				//Start all new components.
+				//Init all new components
 				if (this.newComponentList.size > 0) {
-					Array<Component> newCompCopy = new Array<>(this.newComponentList);
-					//Call start on all new Components. This is where the component can access other
-					//components on this Entity.
-					newCompCopy.forEach(com.mygdx.game.component.Component::start);
-
-					this.newComponentList.clear(); //Clear the new Component list.
+					Array<Component> newCompCopy = new Array<>(this.newComponentList); //Make a copy.
+                    this.newComponentList = new Array<>(); //Clear this before we call init() in case we add more components during init().
+					newCompCopy.forEach(Component::init); //Init all new comps.
 				}
 
 				Array<Component> activeCompCopy = new Array<>(this.activeComponentList);
 				//Update all Components
 				for (Component comp : activeCompCopy) {
+					if(!comp.isStarted()) comp.start(); //If it's not started, start it!
 					comp.update(delta);
 					comp.lateUpdate(delta);
 				}
@@ -255,9 +253,9 @@ public class Entity implements IDelayedDestroyable, ISaveable{
 		 */
 		@SuppressWarnings("unchecked")
 		public final <T extends Component> T addComponent(T comp){
-			comp.init(owner); //Initialize the component with this Entity as the owner.
+            comp.created(this.owner);
             if(!comp.isStarted())
-                this.newComponentList.add(comp); //Add it to the new list for the start() method.
+                this.newComponentList.add(comp); //Add it to the new list for the init() method.
 			//Add it to the active or inactive list.
             if (comp.isActive()) this.activeComponentList.add(comp);
             else this.inactiveComponentList.add(comp);
