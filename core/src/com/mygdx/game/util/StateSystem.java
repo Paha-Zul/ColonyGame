@@ -131,4 +131,13 @@ public class StateSystem<T>{
             return this.defaultOnFail;
         }
     }
+
+    public static class DefineTask{
+        public String taskOnSuccess, taskOnFailure;
+
+        public DefineTask(String taskOnSuccess, String taskOnFailure) {
+            this.taskOnSuccess = taskOnSuccess;
+            this.taskOnFailure = taskOnFailure;
+        }
+    }
 }

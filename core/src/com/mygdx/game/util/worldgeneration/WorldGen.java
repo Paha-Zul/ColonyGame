@@ -267,8 +267,7 @@ public class WorldGen {
         resEnt.addComponent(res);
         resEnt.getTransform().setScale(treeScale);
         resEnt.name = res.getDisplayName();
-        if(!jRes.resourceName.equals("waterSource"))
-            ListHolder.addEntity(resEnt);
+        ListHolder.addEntity(resEnt);
     }
 
     /**

@@ -66,9 +66,11 @@ public class ListHolder {
 					continue;
 				}
 
-				//Update the Entity
-				e.update(delta);
-				e.render(delta, ColonyGame.batch);
+				if(e.active) {
+					//Update the Entity
+					e.update(delta);
+					e.render(delta, ColonyGame.batch);
+				}
 			}
 		}
 

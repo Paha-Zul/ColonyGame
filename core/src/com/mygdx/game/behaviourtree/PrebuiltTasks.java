@@ -13,8 +13,6 @@ import com.mygdx.game.component.*;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.util.*;
 
-import java.util.function.Consumer;
-
 /**
  * Created by Paha on 4/11/2015.
  */
@@ -35,39 +33,32 @@ public class PrebuiltTasks {
     }
 
     public static Task gatherResource(BlackBoard blackBoard, BehaviourManagerComp behComp){
-        /*
-         * Sequence:
-         *      Sequence
-         *          figure out tools for gathering
-         *          find the tool shed
-         *          check the shed and reserve
-         *          find path to shed
-         *          move to shed
-         *          transfer tools
+        /**
+         *  Selector:
+         *      Sequence:
+         *          Sequence
+         *              figure out tools for gathering
+         *              find the tool shed
+         *              check the shed and reserve
+         *              find path to shed
+         *              move to shed
+         *              transfer tools
          *
-         *      Repeat (until we are full on the items toggled):
-         *          find resource
-         *          find path to resource
-         *          move to resource
-         *          gather resource
+         *          Repeat (until we are full on the items toggled):
+         *              find resource
+         *              find path to resource
+         *              move to resource
+         *              gather resource
          *
-         *      find inventory
-         *      find path to inventory
-         *      move to inventory
-         *      transfer items.
+         *          find inventory
+         *          find path to inventory
+         *          move to inventory
+         *          transfer items.
+         *
+         *     explore
          */
 
-        //If we fail to find a resource, we need to explore until we find one...
-        Consumer<Task> fail = tsk -> {
-            Vector2 pos = tsk.blackBoard.myManager.getEntityOwner().getTransform().getPosition();
-            new FloatingText("Couldn't find a nearby resource!", new Vector2(pos.x, pos.y + 1), new Vector2(pos.x, pos.y + 10), 1.5f, 0.8f);
-
-            //When we finish moving to the newly explored area, try to gather a resource again.
-            Task task = exploreUnexplored(blackBoard, behComp);
-            task.getControl().getCallbacks().successCallback = tsk2 -> behComp.changeTaskImmediate("gather"); //When we finish, try to gather.
-            behComp.changeTaskImmediate(task);
-        };
-
+        Selector gatherOrExplore = new Selector("Gathering", blackBoard);
         Sequence sequence = new Sequence("Gathering Resource", blackBoard);
 
         //All this should be under a repeat.
@@ -78,14 +69,18 @@ public class PrebuiltTasks {
         MoveTo mtResource = new MoveTo("Moving to Resource", blackBoard);
         Gather gather = new Gather("Gathering Resource", blackBoard);
 
+        //Selector - either gather sequence or explore.
+        gatherOrExplore.control.addTask(sequence);
+        gatherOrExplore.control.addTask(exploreUnexplored(blackBoard, behComp));
+
         sequence.control.addTask(getTools(blackBoard, behComp));
 
         //Add the repeat gather task to the main sequence, and then the rest to the inner sequence under repeat.
-        ((ParentTaskController)sequence.getControl()).addTask(repeatGather);
-        ((ParentTaskController)innerGatherSeq.getControl()).addTask(fr);
-        ((ParentTaskController)innerGatherSeq.getControl()).addTask(fpResource);
-        ((ParentTaskController)innerGatherSeq.getControl()).addTask(mtResource);
-        ((ParentTaskController)innerGatherSeq.getControl()).addTask(gather);
+        sequence.control.addTask(repeatGather);
+        innerGatherSeq.control.addTask(fr);
+        innerGatherSeq.control.addTask(fpResource);
+        innerGatherSeq.control.addTask(mtResource);
+        innerGatherSeq.control.addTask(gather);
 
         //Add these to the main sequence.
         ((ParentTaskController)sequence.getControl()).addTask(returnItems(blackBoard, behComp));
@@ -114,9 +109,6 @@ public class PrebuiltTasks {
             return true;
         };
 
-        //If we fail, call the fail callback.
-        fr.getControl().callbacks.failureCallback = fail;
-
         //Check if our resourceTypeTags are empty. If so, no use trying to find an entity.
         fr.control.callbacks.checkCriteria = task -> !task.blackBoard.resourceTypeTags.isEmpty();
 
@@ -133,6 +125,9 @@ public class PrebuiltTasks {
 
             return notTaken && hasTag && hasAvailableItem;
         };
+
+        //If we fail this, we should fail the repeat gather cause we found nothing at all!
+        fr.getControl().callbacks.failureCallback = task -> repeatGather.getControl().finishWithFailure();
 
         //On success, set the resource as taken if not already taken.
         fr.getControl().callbacks.successCallback = task ->  {
@@ -158,7 +153,7 @@ public class PrebuiltTasks {
         };
 
 
-        return sequence;
+        return gatherOrExplore;
     }
 
     private static Task gatherTarget(BlackBoard blackBoard, BehaviourManagerComp behComo){
@@ -650,7 +645,8 @@ public class PrebuiltTasks {
         fc.getControl().callbacks.failureCallback = task -> {
             Vector2 pos = blackBoard.myManager.getEntityOwner().getTransform().getPosition();
             new FloatingText("Couldn't find a nearby animal to hunt!", new Vector2(pos.x, pos.y + 1), new Vector2(pos.x, pos.y + 10), 1.5f, 0.8f);
-            behComp.changeTaskImmediate(behComp.getBehaviourStates().getDefaultState().getUserData().apply(behComp.getBlackBoard(), behComp));
+            //TODO What did this do? Change to default state? Redundant I think.
+            //behComp.changeTaskImmediate(behComp.getBehaviourStates().getDefaultState().getUserData().apply(behComp.getBlackBoard(), behComp));
         };
 
         return mainSeq;

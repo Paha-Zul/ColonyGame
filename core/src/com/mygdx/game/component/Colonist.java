@@ -204,6 +204,7 @@ public class Colonist extends Component implements IInteractable, IOwnable{
         getBehManager().getBehaviourStates().addState("returnTools", false, PrebuiltTasks::returnTools).setRepeat(false);
         getBehManager().getBehaviourStates().addState("build", false, PrebuiltTasks::build).setRepeat(true).setDefaultOnFail(true);
         getBehManager().getBehaviourStates().addState("returnItems", false, PrebuiltTasks::returnItems).setRepeat(false).setDefaultOnFail(true);
+        getBehManager().getBehaviourStates().addState("consume", false, PrebuiltTasks::consumeTask).setRepeat(false).setDefaultOnFail(false);
 
         EventSystem.onEntityEvent(this.owner, "task_started", args -> {
             Task task = (Task)args[0];

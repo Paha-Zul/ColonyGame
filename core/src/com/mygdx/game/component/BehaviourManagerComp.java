@@ -14,6 +14,7 @@ import com.mygdx.game.util.Tree;
 import com.mygdx.game.util.timer.OneShotTimer;
 import com.mygdx.game.util.timer.Timer;
 import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.annotate.JsonProperty;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,7 +27,9 @@ public class BehaviourManagerComp extends Component{
     @JsonIgnore
     private BlackBoard blackBoard;
     @JsonIgnore
-    private Task currentBehaviour, nextBehaviour;
+    private Task currentBehaviour;
+    @JsonProperty
+    private String nextBehaviour;
     @JsonIgnore
     private Stats stats;
     @JsonIgnore
@@ -94,17 +97,16 @@ public class BehaviourManagerComp extends Component{
         load();
     }
 
-    /**
-     * Changes the next Task to the Task passed in. This essentially saves the current task to 'lastBehaviour' and sets the 'nextBehaviour' to the Task passed in.
-     * @param task The Task to start immediately.
-     */
-    public void changeTaskImmediate(Task task){
+    public void changeTaskImmediate(String taskName){
+        behaviourStates.setCurrState(taskName);
+
         //End the current task.
         if(this.currentBehaviour != null && !this.currentBehaviour.getControl().hasFinished()) {
             this.currentBehaviour.getControl().finishWithFailure();
             this.currentBehaviour.getControl().safeEnd();
         }
 
+        Task task = taskMap.get(taskName).apply(this.blackBoard, this);
         this.currentBehaviour = task;
         this.currentBehaviour.getControl().reset();
         this.currentBehaviour.getControl().safeStart();
@@ -115,21 +117,8 @@ public class BehaviourManagerComp extends Component{
         EventSystem.notifyEntityEvent(this.getEntityOwner(), "task_started", task);
     }
 
-    /**
-     * Queues the task to be the next task to be executed.
-     * @param task The next task.
-     */
-    public void changeTaskQueued(Task task){
-        this.nextBehaviour = task;
-    }
-
-    public void changeTaskImmediate(String taskName){
-        behaviourStates.setCurrState(taskName);
-        changeTaskImmediate(taskMap.get(taskName).apply(this.blackBoard, this));
-    }
-
     public void changeTaskQueued(String taskName){
-        changeTaskQueued(taskMap.get(taskName).apply(this.blackBoard, this));
+        this.nextBehaviour = taskName;
     }
 
     @Override
@@ -151,18 +140,17 @@ public class BehaviourManagerComp extends Component{
 
                 //If the next behaviour is empty, do something based on the state.
                 }else {
-                    StateSystem.State<BiFunction<BlackBoard, BehaviourManagerComp, Task>> state = behaviourStates.getDefaultState();
+                    //Get the default state as the next state for now, and get the current state.
+                    StateSystem.State<BiFunction<BlackBoard, BehaviourManagerComp, Task>> nextState = behaviourStates.getDefaultState();
                     StateSystem.State<BiFunction<BlackBoard, BehaviourManagerComp, Task>> currState = behaviourStates.getCurrState();
-                    BiFunction<BlackBoard, BehaviourManagerComp, Task> data;
 
                     //If the job has failed and is supposed to default on fail, get the default state.
-                    if(this.currentBehaviour.getControl().hasFailed() && currState.getDefaultOnFail()) state = behaviourStates.getDefaultState();
+                    if(this.currentBehaviour.getControl().hasFailed() && currState.getDefaultOnFail()) nextState = behaviourStates.getDefaultState();
                     //If the job is supposed to repeat, repeat it!
-                    else if(currState.getRepeat()) state = currState;
+                    else if(currState.getRepeat()) nextState = currState;
 
-                    data = state.getUserData();
-                    this.changeTaskImmediate(data.apply(blackBoard, this));
-                    behaviourStates.setCurrState(state.stateName);
+                    this.changeTaskImmediate(nextState.stateName);
+                    behaviourStates.setCurrState(nextState.stateName);
                 }
 
             //Update the job.
@@ -171,7 +159,7 @@ public class BehaviourManagerComp extends Component{
 
         //If our behaviour is null, set the next behaviour to the default behaviour.
         } else
-            this.changeTaskImmediate(behaviourStates.getDefaultState().getUserData().apply(blackBoard, this));
+            this.changeTaskImmediate(behaviourStates.getDefaultState().stateName);
     }
 
     @JsonIgnore

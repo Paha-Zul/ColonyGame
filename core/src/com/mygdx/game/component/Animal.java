@@ -2,7 +2,6 @@ package com.mygdx.game.component;
 
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.Fixture;
-import com.mygdx.game.behaviourtree.PrebuiltTasks;
 import com.mygdx.game.component.collider.Collider;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.interfaces.Functional;
@@ -168,8 +167,9 @@ public class Animal extends Component implements IInteractable{
         if (!myInfo.tags.hasTag(Constants.COLLIDER_DETECTOR) && otherInfo.owner.getTags().hasTag("projectile")) {
             this.getComponent(Stats.class).getStat("health").addToCurrent(-20);
             behComp.getBlackBoard().target = otherInfo.owner.getComponent(Projectile.class).projOwner;
+
             //If not aggressive, flee. Otherwise, attack!
-            if(!animalRef.aggressive) behComp.changeTaskImmediate(PrebuiltTasks.fleeTarget(behComp.getBlackBoard(), behComp));
+            if(!animalRef.aggressive) behComp.changeTaskImmediate("fleeTarget");
             else attackTarget(behComp.getBlackBoard().target);
             otherInfo.owner.setToDestroy();
 
