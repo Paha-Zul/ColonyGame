@@ -64,8 +64,8 @@ public class Collider extends Component implements IScalable{
     }
 
     @Override
-    public void init(Entity owner) {
-        super.init(owner);
+    public void init() {
+        super.init();
     }
 
     @Override

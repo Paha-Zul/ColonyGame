@@ -4,7 +4,6 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.ColonyGame;
-import com.mygdx.game.entity.Entity;
 
 import java.util.HashMap;
 import java.util.function.Predicate;
@@ -17,8 +16,8 @@ public class Effects extends Component{
     private Array<Effect> activeEffects = new Array<>();
 
     @Override
-    public void init(Entity owner) {
-        super.init(owner);
+    public void init() {
+        super.init();
 
         this.setActive(false);
     }

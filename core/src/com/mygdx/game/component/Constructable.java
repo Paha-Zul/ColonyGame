@@ -1,7 +1,6 @@
 package com.mygdx.game.component;
 
 import com.badlogic.gdx.utils.Array;
-import com.mygdx.game.entity.Entity;
 import com.mygdx.game.util.DataBuilder;
 import com.mygdx.game.util.ItemNeeded;
 import com.mygdx.game.util.managers.DataManager;
@@ -23,8 +22,8 @@ public class Constructable extends Component{
     }
 
     @Override
-    public void init(Entity owner) {
-        super.init(owner);
+    public void init() {
+        super.init();
     }
 
     @Override

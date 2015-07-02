@@ -33,8 +33,8 @@ public class GridComponent extends Component{
     }
 
     @Override
-    public void init(Entity owner) {
-        super.init(owner);
+    public void init() {
+        super.init();
     }
 
     @Override

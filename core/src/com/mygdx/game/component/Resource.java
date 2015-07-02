@@ -113,8 +113,8 @@ public class Resource extends Component implements IInteractable{
     }
 
     @Override
-    public void init(Entity owner) {
-        super.init(owner);
+    public void init() {
+        super.init();
 
     }
 

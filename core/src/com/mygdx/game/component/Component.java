@@ -27,25 +27,25 @@ public abstract class Component implements IDelayedDestroyable, ISaveable {
         if(this.compID == 0) this.compID = currID++;
 	}
 
-	/**
-	 * Called when the Component is created. This can be used for anything that isn't dependant on any other data at the time of
-	 * creation.
-	 * @param owner The Entity owner of this Component.
-	 */
+    /**
+     * Called as soon as the Component has been created. Use this to either interact with the Entity owner
+     * or perform any task that does not rely on fields or other Components.
+     * @param owner The Entity owner of this Component.
+     */
 	public void created(Entity owner){
 		this.owner = owner;
 	}
 
 	/**
-	 * Called right before the Component is added to the Entity. The Entity owner is already set and can be used
-	 * to interact with the owner or any fields that may have been set after the creation but is needed before the start() method.
-	 */
+     * Called after created() but before start(). Use this to interact with any fields that may have been set on this Component
+     * but not other Components on the Entity.
+     */
 	public void init(){
 		this.initiated = true;
 	}
 
 	/**
-	 * The start of this Component. This is where other Components of the owner can be accessed and stored as a reference or interacted with.
+	 * The start of this Component. This is where other Components of the owner can be accessed and stored as a reference.
 	 */
 	public void start(){
 		this.started = true;
