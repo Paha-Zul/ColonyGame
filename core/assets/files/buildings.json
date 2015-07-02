@@ -2,9 +2,9 @@
   {
     "name": "colony_building",
     "displayName": "Colony Base",
-    "tags": ["equipment"],
+    "tags": ["main", "storage"],
     "inventory": true,
-    "storageTypes": ["tool"]
+    "storageTypes": ["all"]
   },
   {
     "name": "equipment_shed",

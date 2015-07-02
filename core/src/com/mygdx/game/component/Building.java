@@ -12,11 +12,11 @@ import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
  * Created by Paha on 5/19/2015.
+ * A building component that can be attached to Entities.
  */
 public class Building extends Component implements IOwnable, IInteractable{
     @JsonProperty
     public final Tags buildingTags = new Tags("building");
-
     @JsonIgnore
     private Timer timer;
     @JsonIgnore
@@ -25,7 +25,7 @@ public class Building extends Component implements IOwnable, IInteractable{
     private Colony colonyOwner;
     @JsonIgnore
     private Inventory inventory;
-
+    @JsonProperty
     private String buildingName;
 
 
@@ -38,10 +38,10 @@ public class Building extends Component implements IOwnable, IInteractable{
         super.start();
 
         DataBuilder.JsonBuilding jBuilding = DataManager.getData(this.buildingName, DataBuilder.JsonBuilding.class);
-        //Add each tag that exists.
-        for(String tag : jBuilding.tags) this.buildingTags.addTag(tag);
-        //Add an inventory if this building has inventory
-        if(jBuilding.inventory) this.inventory = this.addComponent(new Inventory());
+        for(String tag : jBuilding.tags) this.buildingTags.addTag(tag); //Add each tag that exists.
+        if(jBuilding.inventory) this.inventory = this.addComponent(new Inventory()); //Add an inventory if this building has inventory
+        this.owner.name = jBuilding.displayName;
+
         this.load();
     }
 
@@ -52,10 +52,15 @@ public class Building extends Component implements IOwnable, IInteractable{
 
     @Override
     public void load() {
-        this.inventory = this.getComponent(Inventory.class);
-        this.inventory.setMaxAmount(-1);
-        this.constructable = this.getComponent(Constructable.class);
+        DataBuilder.JsonBuilding jBuilding = DataManager.getData(this.buildingName, DataBuilder.JsonBuilding.class);
+        if(jBuilding.inventory) {
+            if (this.inventory == null) this.inventory = this.getComponent(Inventory.class);
+            this.inventory.setMaxAmount(-1);
+        }
+
+        //If we are constructing this on load, set the timer and get the constructable component.
         if(this.owner.getTags().hasTag("constructing")){
+            this.constructable = this.getComponent(Constructable.class);
             this.timer = new RepeatingTimer(0.1, this.constructable::build);
         }else{
             this.setActive(false);

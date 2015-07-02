@@ -48,15 +48,6 @@ public class Colony extends Component implements IInteractable {
 
         load();
         placeStart();
-        Building mainBuilding = this.getOwnedFromColony(Building.class, building -> building.buildingTags.hasTag("main"));
-
-        //Make some colonists!
-        for(int i=0;i<1;i++) {
-            Entity c = this.makeColonist(mainBuilding.owner.getTransform().getPosition(), GH.toMeters(200), "colonist");
-            c.getComponent(Colonist.class).setName(GameScreen.firstNames[MathUtils.random(GameScreen.firstNames.length - 1)], GameScreen.lastNames[MathUtils.random(GameScreen.lastNames.length - 1)]);
-            this.addColonist(c.getComponent(Colonist.class));
-            ListHolder.addEntity(c);
-        }
     }
 
     @Override
@@ -146,7 +137,7 @@ public class Colony extends Component implements IInteractable {
         equipEnt.getTags().addTag("constructing");
         ListHolder.addEntity(equipEnt);
         Building equipBuilding = equipEnt.getComponent(Building.class);
-        equipBuilding.setBuildingName("equipment_shed");
+        equipBuilding.setBuildingName("workshop");
         this.addOwnedToColony(equipBuilding);
 
         //Destroys resources in an area around the Colony Entity.
@@ -161,6 +152,15 @@ public class Colony extends Component implements IInteractable {
         //Perform the things.
         //this.grid.perform(destroyNearbyResources);
         grid.performOnEntityInRadius(treeConsumer, notWaterNode, radius, grid.getIndex(colonyEnt.getTransform().getPosition()));
+
+
+        //Make some colonists!
+        for(int i=0;i<1;i++) {
+            Entity c = this.makeColonist(colonyEnt.getTransform().getPosition(), GH.toMeters(200), "colonist");
+            c.getComponent(Colonist.class).setName(GameScreen.firstNames[MathUtils.random(GameScreen.firstNames.length - 1)], GameScreen.lastNames[MathUtils.random(GameScreen.lastNames.length - 1)]);
+            this.addColonist(c.getComponent(Colonist.class));
+            ListHolder.addEntity(c);
+        }
     }
 
     @Override

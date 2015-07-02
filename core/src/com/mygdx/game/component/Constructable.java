@@ -24,18 +24,21 @@ public class Constructable extends Component{
     @Override
     public void init() {
         super.init();
+
+        //For the case that we instant build (testing or what not), don't do this if complete.
+        if(!this.isComplete()) {
+            //Get the recipe for this building and set the items required.
+            DataBuilder.JsonRecipe recipe = DataManager.getData(this.getComponent(Building.class).getBuildingName(), DataBuilder.JsonRecipe.class);
+            for (int i = 0; i < recipe.items.length; i++) {
+                int amount = recipe.itemAmounts[i];
+                this.addItemRequirement(recipe.items[i], amount);
+            }
+        }
     }
 
     @Override
     public void start() {
         super.start();
-
-        //Get the recipe for this building and set the items required.
-        DataBuilder.JsonRecipe recipe = DataManager.getData(this.getComponent(Building.class).getBuildingName(), DataBuilder.JsonRecipe.class);
-        for(int i=0;i<recipe.items.length;i++){
-            int amount = recipe.itemAmounts[i];
-            this.addItemRequirement(recipe.items[i], amount);
-        }
 
         this.load();
     }
