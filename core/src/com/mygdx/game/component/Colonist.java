@@ -5,7 +5,6 @@ import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.mygdx.game.ColonyGame;
-import com.mygdx.game.behaviourtree.PrebuiltTasks;
 import com.mygdx.game.behaviourtree.Task;
 import com.mygdx.game.component.collider.Collider;
 import com.mygdx.game.entity.Entity;
@@ -14,6 +13,7 @@ import com.mygdx.game.interfaces.IInteractable;
 import com.mygdx.game.interfaces.IOwnable;
 import com.mygdx.game.ui.PlayerInterface;
 import com.mygdx.game.util.EventSystem;
+import com.mygdx.game.util.StateSystem;
 import com.mygdx.game.util.Tree;
 import com.mygdx.game.util.gui.GUI;
 import com.mygdx.game.util.managers.DataManager;
@@ -129,7 +129,7 @@ public class Colonist extends Component implements IInteractable, IOwnable{
         stats.addTimer(new RepeatingTimer(5f, () -> {
             foodStat.addToCurrent(-1);
             //If under 20, try to eat.
-            if(foodStat.getCurrVal() <= 20) {
+            if(foodStat.getCurrVal() <= 20 && !getBehManager().getBehaviourStates().isCurrState("consume")) {
                 getBehManager().getBlackBoard().itemEffect = "feed";
                 getBehManager().getBlackBoard().itemEffectAmount = 1;
                 getBehManager().changeTaskQueued("consume");
@@ -140,7 +140,7 @@ public class Colonist extends Component implements IInteractable, IOwnable{
         stats.addTimer(new RepeatingTimer(10f, () -> {
             waterStat.addToCurrent(-1);
             //If under 20, try to drink.
-            if (waterStat.getCurrVal() <= 20) {
+            if (waterStat.getCurrVal() <= 20 && !getBehManager().getBehaviourStates().isCurrState("consume")) {
                 getBehManager().getBlackBoard().itemEffect = "thirst";
                 getBehManager().getBlackBoard().itemEffectAmount = 1;
                 getBehManager().changeTaskQueued("consume");
@@ -196,15 +196,14 @@ public class Colonist extends Component implements IInteractable, IOwnable{
             node.userData = taskInfo;
         }
 
-        getBehManager().getBehaviourStates().addState("gather", false, PrebuiltTasks::gatherResource).setRepeat(true);
-        getBehManager().getBehaviourStates().addState("explore", false, PrebuiltTasks::exploreUnexplored).setRepeat(true);
-        getBehManager().getBehaviourStates().addState("consume", false, PrebuiltTasks::consumeTask).setRepeat(false);
-        getBehManager().getBehaviourStates().addState("attackTarget", false, PrebuiltTasks::attackTarget).setRepeat(false);
-        getBehManager().getBehaviourStates().addState("hunt", false, PrebuiltTasks::searchAndHunt).setRepeat(true);
-        getBehManager().getBehaviourStates().addState("returnTools", false, PrebuiltTasks::returnTools).setRepeat(false);
-        getBehManager().getBehaviourStates().addState("build", false, PrebuiltTasks::build).setRepeat(true).setDefaultOnFail(true);
-        getBehManager().getBehaviourStates().addState("returnItems", false, PrebuiltTasks::returnItems).setRepeat(false).setDefaultOnFail(true);
-        getBehManager().getBehaviourStates().addState("consume", false, PrebuiltTasks::consumeTask).setRepeat(false).setDefaultOnFail(false);
+        getBehManager().getBehaviourStates().addState("gather", false, new StateSystem.DefineTask("gather", "idle")).setRepeat(true);
+        getBehManager().getBehaviourStates().addState("explore", false, new StateSystem.DefineTask("explore", "idle")).setRepeat(true);
+        getBehManager().getBehaviourStates().addState("consume", false, new StateSystem.DefineTask("idle", "idle")).setRepeat(false).setRepeatLastState(true);
+        getBehManager().getBehaviourStates().addState("attackTarget", false, new StateSystem.DefineTask("attackTarget", "idle")).setRepeat(false);
+        getBehManager().getBehaviourStates().addState("hunt", false, new StateSystem.DefineTask("hunt", "idle")).setRepeat(true);
+        getBehManager().getBehaviourStates().addState("returnTools", false, new StateSystem.DefineTask("idle", "idle")).setRepeat(false);
+        getBehManager().getBehaviourStates().addState("build", false, new StateSystem.DefineTask("build", "idle")).setRepeat(true);
+        getBehManager().getBehaviourStates().addState("returnItems", false, new StateSystem.DefineTask("idle", "idle")).setRepeat(false);
 
         EventSystem.onEntityEvent(this.owner, "task_started", args -> {
             Task task = (Task)args[0];

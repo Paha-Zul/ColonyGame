@@ -39,7 +39,7 @@ public class BehaviourManagerComp extends Component{
     @JsonIgnore
     private Tree taskTree = new Tree("taskTree", "root");
     @JsonIgnore
-    private StateSystem<BiFunction<BlackBoard, BehaviourManagerComp, Task>> behaviourStates = new StateSystem<>();
+    private StateSystem<StateSystem.DefineTask> behaviourStates = new StateSystem<>();
     @JsonIgnore
     private static HashMap<String, BiFunction<BlackBoard, BehaviourManagerComp, Task>> taskMap = new HashMap<>();
 
@@ -82,7 +82,7 @@ public class BehaviourManagerComp extends Component{
         this.stats = this.owner.getComponent(Stats.class);
         this.blackBoard.myInventory = this.getComponent(Inventory.class);
 
-        getBehaviourStates().addState("idle", true, PrebuiltTasks::idleTask);
+        getBehaviourStates().addState("idle", true, new StateSystem.DefineTask("idle", "idle"));
         getBehaviourStates().setCurrState(getBehaviourStates().getDefaultState().stateName);
     }
 
@@ -98,7 +98,10 @@ public class BehaviourManagerComp extends Component{
     }
 
     public void changeTaskImmediate(String taskName){
-        behaviourStates.setCurrState(taskName);
+        StateSystem.State<StateSystem.DefineTask> lastState = behaviourStates.getCurrState();
+        StateSystem.State<StateSystem.DefineTask> currState = behaviourStates.setCurrState(taskName);
+
+        if(currState.getRepeatLastState()) currState.getUserData().lastState = lastState.stateName;
 
         //End the current task.
         if(this.currentBehaviour != null && !this.currentBehaviour.getControl().hasFinished()) {
@@ -141,16 +144,20 @@ public class BehaviourManagerComp extends Component{
                 //If the next behaviour is empty, do something based on the state.
                 }else {
                     //Get the default state as the next state for now, and get the current state.
-                    StateSystem.State<BiFunction<BlackBoard, BehaviourManagerComp, Task>> nextState = behaviourStates.getDefaultState();
-                    StateSystem.State<BiFunction<BlackBoard, BehaviourManagerComp, Task>> currState = behaviourStates.getCurrState();
+                    StateSystem.State<StateSystem.DefineTask> nextState;
+                    StateSystem.State<StateSystem.DefineTask> currState = behaviourStates.getCurrState();
 
-                    //If the job has failed and is supposed to default on fail, get the default state.
-                    if(this.currentBehaviour.getControl().hasFailed() && currState.getDefaultOnFail()) nextState = behaviourStates.getDefaultState();
-                    //If the job is supposed to repeat, repeat it!
+                    //Repeat the last state if needed.
+                    if(currState.getRepeatLastState()) nextState = behaviourStates.getState(currState.getUserData().lastState);
+                    //If the job failed, try to set the current state to what is defined for "taskOnFailure".
+                    else if(this.currentBehaviour.getControl().hasFailed()) nextState = behaviourStates.getState(currState.getUserData().taskOnFailure);
+                    //Otherwise, if it didn't fail and needs to repeat, repeat it!.
                     else if(currState.getRepeat()) nextState = currState;
+                    //Otherwise, if the task didn't fail and doesn't repeat, get what is defined for "taskOnSuccess".
+                    else nextState = behaviourStates.getState(currState.getUserData().taskOnSuccess);
 
+                    //Change the task and state.
                     this.changeTaskImmediate(nextState.stateName);
-                    behaviourStates.setCurrState(nextState.stateName);
                 }
 
             //Update the job.
@@ -252,7 +259,7 @@ public class BehaviourManagerComp extends Component{
     }
 
     @JsonIgnore
-    public StateSystem<BiFunction<BlackBoard, BehaviourManagerComp, Task>> getBehaviourStates(){
+    public StateSystem<StateSystem.DefineTask> getBehaviourStates(){
         return behaviourStates;
     }
 

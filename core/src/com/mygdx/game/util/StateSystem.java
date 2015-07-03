@@ -78,9 +78,20 @@ public class StateSystem<T>{
     /**
      * Sets the current State of this system. If the State compName does not exist, the default State becomes the current State.
      * @param stateName The name of the state to become the current state.
+     * @return The state that the current state was assigned;
      */
-    public void setCurrState(String stateName){
+    public State<T> setCurrState(String stateName){
         this.currState = this.stateMap.getOrDefault(stateName, defaultState);
+        return this.currState;
+    }
+
+    /**
+     * Gets a state by name from this StateSystem.
+     * @param stateName The name of the state.
+     * @return Either the State that was found by 'stateName', or the default state of this system if it did not exist.
+     */
+    public State<T> getState(String stateName){
+        return this.stateMap.getOrDefault(stateName, defaultState);
     }
 
     /**
@@ -100,8 +111,7 @@ public class StateSystem<T>{
 
     public static class State<T>{
         public String stateName;
-        private boolean repeat;
-        private boolean defaultOnFail;
+        private boolean repeat, repeatLastState;
         private T userData;
 
         public State(String stateName, boolean repeat, T userData){
@@ -119,21 +129,22 @@ public class StateSystem<T>{
             return this;
         }
 
-        public State<T> setDefaultOnFail(boolean val){
-            this.defaultOnFail = val;
+        public State<T> setRepeatLastState(boolean val){
+            this.repeatLastState = val;
             return this;
         }
 
         public boolean getRepeat(){
             return this.repeat;
         }
-        public boolean getDefaultOnFail(){
-            return this.defaultOnFail;
+
+        public boolean getRepeatLastState(){
+            return this.repeatLastState;
         }
     }
 
     public static class DefineTask{
-        public String taskOnSuccess, taskOnFailure;
+        public String taskOnSuccess, taskOnFailure, lastState;
 
         public DefineTask(String taskOnSuccess, String taskOnFailure) {
             this.taskOnSuccess = taskOnSuccess;
