@@ -6,11 +6,13 @@ import com.mygdx.game.interfaces.Functional;
 import com.mygdx.game.util.timer.RepeatingTimer;
 import com.mygdx.game.util.timer.Timer;
 import com.sun.istack.internal.NotNull;
+import org.codehaus.jackson.annotate.JsonGetter;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 /**
  * Stat Component for an Entity that includes stats like health, hunger, thirst, etc. Also uses the update() method to
@@ -18,9 +20,7 @@ import java.util.HashMap;
  */
 public class Stats extends Component{
     @JsonIgnore
-    private HashMap<String, Stat> statMap = new HashMap<>();
-    @JsonProperty
-    private ArrayList<Stat> statList = new ArrayList<>();
+    private LinkedHashMap<String, Stat> statMap = new LinkedHashMap<>();
     @JsonIgnore
     private ArrayList<RepeatingTimer> timerList = new ArrayList<>();
 
@@ -41,8 +41,6 @@ public class Stats extends Component{
     @Override
     public void load() {
         super.load();
-
-        statList.forEach(stat -> statMap.put(stat.name, stat));
     }
 
     @Override
@@ -77,10 +75,7 @@ public class Stats extends Component{
      * @return The Stat that was created.
      */
     public Stat addStat(String name, float initCurrValue, float initMaxValue){
-        Stat stat = new Stat(name, initCurrValue, initMaxValue);
-        this.statMap.put(name, stat);
-        this.statList.add(stat);
-        return stat;
+        return this.addStat(name, null, initCurrValue, initMaxValue);
     }
 
     /**
@@ -96,7 +91,6 @@ public class Stats extends Component{
         Stat stat = new Stat(name, initCurrValue, initMaxValue);
         stat.effect = effect;
         this.statMap.put(name, stat);
-        this.statList.add(stat);
         return stat;
     }
 
@@ -120,16 +114,22 @@ public class Stats extends Component{
      */
     @JsonIgnore
     public Stat getStatWithEffect(String effect){
-        for(Stat stat : statList)
+        for(Stat stat : statMap.values())
             if(stat.effect != null && stat.effect.equals(effect))
                 return stat;
 
         return null;
     }
 
-    @JsonIgnore
+    @JsonProperty("statList")
     public final ArrayList<Stat> getStatList(){
-        return this.statList;
+        return new ArrayList<>(this.statMap.values());
+    }
+
+    @JsonProperty("statList")
+    private final void setStatList(ArrayList<Stat> list){
+        for(Stat stat : list)
+            this.statMap.put(stat.name, stat);
     }
 
     public void clearAllStats(){
@@ -139,9 +139,8 @@ public class Stats extends Component{
     @Override
     public void destroy(Entity destroyer) {
         super.destroy(destroyer);
-        statMap.clear();
-        statList.clear();
-        timerList.clear();
+        statMap=null;
+        timerList=null;
     }
 
     public static class Stat{
