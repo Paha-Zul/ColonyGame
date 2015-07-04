@@ -531,18 +531,22 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
             //If it has stats, draw the stats...
             if(innerInter.getStats() != null){
+                GUI.Label("Stats", this.batch, this.statusTopRect, this.UIStyle);
+
                 //GUI.Texture(statusRect, ColonyGame.assetManager.get("menuButton_normal", Texture.class), this.batch);
                 Stats stats = innerInter.getStats();
+                Rectangle rect = this.statusRect;
 
-                GUI.Label("Stats", this.batch, this.statusTopRect, this.UIStyle);
                 ArrayList<Stats.Stat> list = stats.getStatList();
-                float space = ((statusRect.height - list.size()*20)/list.size()+1)/2;
-                float x = statusRect.x + 10;
-                float y = statusRect.y + statusRect.height - 20;
+                float space = ((rect.height - list.size()*20)/list.size()+1)/2;
+                float x = rect.x + 10;
+                float y = rect.y + rect.height - 20;
+                float barWidth = rect.getWidth()*0.4f;
+                float barHeight = barWidth*0.2f;
 
                 for(int i=0;i<list.size();i++){
                     Stats.Stat stat = list.get(i);
-                    drawBar(stat.name, x, y-(i+1)*space - 20*i, 100, 20, stat.getCurrVal(), stat.getMaxVal());
+                    drawBar(stat.name, x, y-(i+1)*space - 20*i, barWidth, barHeight, stat.getCurrVal(), stat.getMaxVal());
                 }
 
             //If no stats, maybe it has stat text?
