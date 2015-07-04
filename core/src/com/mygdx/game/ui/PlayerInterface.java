@@ -562,38 +562,8 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
             //If it has an inventory, draw the inventory...
             if(innerInter.getInventory() != null){
                 //GUI.Texture(tabsRect, ColonyGame.assetManager.get("menuButton_normal", Texture.class), this.batch);
-
-                batch.setColor(Color.WHITE);
                 GUI.Label("Inventory", this.batch, this.tabsTopRect, this.UIStyle);
-                ArrayList<Inventory.InventoryItem> itemList = innerInter.getInventory().getItemList();
-                this.UIStyle.alignment = Align.center;
-                this.UIStyle.paddingTop = 0;
-                int topOffset = this.UIStyle.paddingLeft = 10, iconSize =  32;
-                float leftOffset = iconSize/1.5f;
-                float labelHeight = iconSize, labelWidth = 200;
-
-                float xPos = this.tabsRect.x;
-                float yPos = this.tabsRect.y+tabsRect.height-iconSize;
-
-                //TODO Make this shift to the right when no more space to go down...
-                for(int i=0;i<itemList.size();i++){
-                    Inventory.InventoryItem item = itemList.get(i);
-                    String maxItemAmount = item.getMaxAmount() != Integer.MAX_VALUE ? ""+item.getMaxAmount() : "?";
-                    //GUI.Label(item.itemRef.getDisplayName(), this.batch, this.tabsRect.x + leftOffset, this.tabsRect.y-i*10, this.tabsRect.width, this.tabsRect.height, this.UIStyle);
-                    GUI.Label(""+item.getAmount(false)+"/"+maxItemAmount+"(a:"+item.getAvailable()+"/r:"+item.getReserved()+"/otw:"+item.getOnTheWay(), this.batch, xPos, yPos, labelWidth, labelHeight, this.UIStyle);
-
-                    GUI.Texture(item.itemRef.iconTexture, batch, xPos, yPos, iconSize, iconSize);
-
-                    yPos-=iconSize;
-                    if(yPos < this.tabsRect.y){
-                        xPos+= labelWidth;
-                        yPos = this.tabsRect.y+tabsRect.height-iconSize;
-                    }
-                }
-                this.batch.setColor(Color.WHITE);
-                this.UIStyle.alignment = Align.center;
-                this.UIStyle.paddingLeft = 0;
-                this.UIStyle.paddingTop = 0;
+                this.drawInventory(innerInter.getInventory(), this.tabsRect);
             }
 
             if(innerInter.getBehManager() != null){
@@ -630,6 +600,46 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
                 GUI.DrawBar(this.batch, rect.x + rect.width/2 - 50, rect.y + rect.height - 60, 100, 20, constructable.getPercentageDone(), true, null, null);
             }
         }
+    }
+
+    /**
+     * Displays an inventory.
+     * @param inventory The Inventory to get data from.
+     * @param rect The Rectangle to display the inventory inside of.
+     */
+    private void drawInventory(Inventory inventory, Rectangle rect){
+        batch.setColor(Color.WHITE);
+        ArrayList<Inventory.InventoryItem> itemList = inventory.getItemList();
+        this.UIStyle.alignment = Align.center;
+        this.UIStyle.paddingTop = 0;
+        int topOffset = this.UIStyle.paddingLeft = 10, iconSize =  32;
+        float leftOffset = iconSize/1.5f;
+        float labelHeight = iconSize, labelWidth = 200;
+
+        //Starting X and Y pos.
+        float xPos = rect.x;
+        float yPos = rect.y + rect.height-iconSize;
+
+        //Draw each item.
+        for(Inventory.InventoryItem item : itemList){
+            String maxItemAmount = item.getMaxAmount() != Integer.MAX_VALUE ? ""+item.getMaxAmount() : "?";
+            //Draw the label of the amount and the icon.
+            GUI.Label(""+item.getAmount(false)+"/"+maxItemAmount+"(a:"+item.getAvailable()+"/r:"+item.getReserved()+"/otw:"+item.getOnTheWay(), this.batch, xPos, yPos, labelWidth, labelHeight, this.UIStyle);
+            GUI.Texture(item.itemRef.iconTexture, batch, xPos, yPos, iconSize, iconSize);
+
+            //Increment the yPos, if we're too far down, reset Y and shift X.
+            yPos-=iconSize;
+            if(yPos < rect.y){
+                xPos+= labelWidth;
+                yPos = rect.y+rect.height-iconSize;
+            }
+        }
+
+        //Reset color and paddings/alignment
+        this.batch.setColor(Color.WHITE);
+        this.UIStyle.alignment = Align.center;
+        this.UIStyle.paddingLeft = 0;
+        this.UIStyle.paddingTop = 0;
     }
 
     //Draws the buttons for each selectedEntity colonist that we have control of.
