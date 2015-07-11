@@ -121,11 +121,19 @@ public class Stats extends Component{
         return null;
     }
 
+    /**
+     * Mainly for saving the stat list to a file.
+     * @return A list of the stats.
+     */
     @JsonProperty("statList")
     public final ArrayList<Stat> getStatList(){
         return new ArrayList<>(this.statMap.values());
     }
 
+    /**
+     * Mainly for loading the stat list back in from a save file.
+     * @param list The list of stats to load in.
+     */
     @JsonProperty("statList")
     private final void setStatList(ArrayList<Stat> list){
         for(Stat stat : list)

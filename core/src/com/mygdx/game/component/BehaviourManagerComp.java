@@ -1,7 +1,9 @@
 package com.mygdx.game.component;
 
+import com.badlogic.gdx.math.EarClippingTriangulator;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.behaviourtree.PrebuiltTasks;
 import com.mygdx.game.behaviourtree.Task;
@@ -112,7 +114,8 @@ public class BehaviourManagerComp extends Component{
         Task task = taskMap.get(taskName).apply(this.blackBoard, this);
         this.currentBehaviour = task;
         this.currentBehaviour.getControl().reset();
-        this.currentBehaviour.getControl().safeStart();
+        if(!this.currentBehaviour.check()) this.currentBehaviour.getControl().finishWithFailure();
+        else this.currentBehaviour.getControl().safeStart();
 
         //Set the next behaviour.
         //this.nextBehaviour = task;
@@ -149,13 +152,12 @@ public class BehaviourManagerComp extends Component{
 
                     //Repeat the last state if needed.
                     if(currState.getRepeatLastState()) nextState = behaviourStates.getState(currState.getUserData().lastState);
-                    //If the job failed, try to set the current state to what is defined for "taskOnFailure".
-                    else if(this.currentBehaviour.getControl().hasFailed()) nextState = behaviourStates.getState(currState.getUserData().taskOnFailure);
                     //Otherwise, if it didn't fail and needs to repeat, repeat it!.
                     else if(currState.getRepeat()) nextState = currState;
+                    //If the job failed, try to set the current state to what is defined for "taskOnFailure".
+                    else if(this.currentBehaviour.getControl().hasFailed()) nextState = behaviourStates.getState(currState.getUserData().taskOnFailure);
                     //Otherwise, if the task didn't fail and doesn't repeat, get what is defined for "taskOnSuccess".
                     else nextState = behaviourStates.getState(currState.getUserData().taskOnSuccess);
-
                     //Change the task and state.
                     this.changeTaskImmediate(nextState.stateName);
                 }

@@ -85,6 +85,8 @@ public class PrebuiltTasks {
         //Add these to the main sequence.
         ((ParentTaskController)sequence.getControl()).addTask(returnItems(blackBoard, behComp));
 
+        gatherOrExplore.control.callbacks.checkCriteria = task -> !task.blackBoard.resourceTypeTags.isEmpty();
+
         //Reset some values.
         sequence.control.callbacks.startCallback = task -> {
             //Reset blackboard values...
