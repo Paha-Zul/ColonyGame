@@ -8,9 +8,9 @@ import java.util.LinkedList;
  * A basic, no specialization, tree.
  */
 public class Tree<T> {
-    private String treeName;
-    private TreeNode<T> root;
-    private LinkedList<TreeNode<T>> queue = new LinkedList<>() ;
+    protected String treeName;
+    protected TreeNode<T> root;
+    protected LinkedList<TreeNode<T>> queue = new LinkedList<>() ;
 
     public Tree(String treeName, String rootName){
         this.treeName = treeName;
@@ -35,7 +35,7 @@ public class Tree<T> {
      * @param nodeNames The names of the new nodes to add.
      * @return This Tree object.
      */
-    public TreeNode[] addNode(String parent, String... nodeNames){
+    public TreeNode<T>[] addNode(String parent, String... nodeNames){
         TreeNode<T> parentNode = getNode(node -> node.nodeName.equals(parent));
         if(parentNode == null) return null;
 

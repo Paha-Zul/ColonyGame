@@ -14,6 +14,7 @@ import com.mygdx.game.interfaces.IOwnable;
 import com.mygdx.game.ui.PlayerInterface;
 import com.mygdx.game.util.EventSystem;
 import com.mygdx.game.util.StateSystem;
+import com.mygdx.game.util.StateTree;
 import com.mygdx.game.util.Tree;
 import com.mygdx.game.util.gui.GUI;
 import com.mygdx.game.util.managers.DataManager;
@@ -174,14 +175,17 @@ public class Colonist extends Component implements IInteractable, IOwnable{
         this.getBehManager().getBlackBoard().attackDamage = 30f;
         this.getBehManager().getBlackBoard().attackRange = 500f;
 
-        Tree taskTree = this.getBehManager().getTaskTree();
+        StateTree<BehaviourManagerComp.TaskInfo> taskTree = this.getBehManager().getTaskTree();
 
-        Tree.TreeNode[] nodeList = taskTree.addNode("root", "gather", "hunt", "explore", "build", "idle");
+        Tree.TreeNode<BehaviourManagerComp.TaskInfo>[] nodeList = taskTree.addNode("root", "gather", "hunt", "explore", "build", "idle");
 
         //For each node, we set up a TaskInfo object and assign it to the node's userData field.
         for(Tree.TreeNode node : nodeList) {
             BehaviourManagerComp.TaskInfo taskInfo = new BehaviourManagerComp.TaskInfo(node.nodeName);
-            taskInfo.callback = () -> getBehManager().changeTaskImmediate(node.nodeName);
+            taskInfo.callback = () -> {
+                getBehManager().changeTaskImmediate(node.nodeName); //Change the task.
+                taskTree.moveDowntoChild(node.nodeName); //Move to this node.
+            };
             taskInfo.userData = DataManager.getData(node.nodeName+"Style", GUI.GUIStyle.class);
             if(taskInfo.userData == null) taskInfo.userData = DataManager.getData("blankStyle", GUI.GUIStyle.class);
 
@@ -190,7 +194,7 @@ public class Colonist extends Component implements IInteractable, IOwnable{
 
         nodeList = taskTree.addNode("gather", "food", "water", "herbs", "wood", "stone", "metal");
 
-        for(Tree.TreeNode node : nodeList) {
+        for(Tree.TreeNode<BehaviourManagerComp.TaskInfo> node : nodeList) {
             BehaviourManagerComp.TaskInfo taskInfo = new BehaviourManagerComp.TaskInfo(node.nodeName);
             taskInfo.callback = () -> {
                 taskInfo.active = !taskInfo.active;

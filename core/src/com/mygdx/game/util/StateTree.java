@@ -3,11 +3,13 @@ package com.mygdx.game.util;
 /**
  * Created by brad on 7/11/15.
  */
-public class StateTree<T> extends Tree{
+public class StateTree<T> extends Tree<T>{
     private TreeNode<T> currTreeNode = null;
 
     public StateTree(String treeName, String rootName) {
         super(treeName, rootName);
+
+        this.currTreeNode = this.root;
     }
 
     /**

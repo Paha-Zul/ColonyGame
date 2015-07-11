@@ -9,10 +9,7 @@ import com.mygdx.game.behaviourtree.PrebuiltTasks;
 import com.mygdx.game.behaviourtree.Task;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.interfaces.Functional;
-import com.mygdx.game.util.BlackBoard;
-import com.mygdx.game.util.EventSystem;
-import com.mygdx.game.util.StateSystem;
-import com.mygdx.game.util.Tree;
+import com.mygdx.game.util.*;
 import com.mygdx.game.util.timer.OneShotTimer;
 import com.mygdx.game.util.timer.Timer;
 import org.codehaus.jackson.annotate.JsonIgnore;
@@ -39,7 +36,7 @@ public class BehaviourManagerComp extends Component{
     @JsonIgnore
     private Timer feedTimer = new OneShotTimer(5f, null);
     @JsonIgnore
-    private Tree<?> taskTree = new Tree("taskTree", "root");
+    private StateTree<TaskInfo> taskTree = new StateTree<>("taskTree", "root");
     @JsonIgnore
     private StateSystem<StateSystem.DefineTask> behaviourStates = new StateSystem<>();
     @JsonIgnore
@@ -257,7 +254,7 @@ public class BehaviourManagerComp extends Component{
      * @return The task Tree of this Behaviour Component.
      */
     @JsonIgnore
-    public Tree<?> getTaskTree(){
+    public StateTree<TaskInfo> getTaskTree(){
         return this.taskTree;
     }
 
