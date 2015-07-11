@@ -631,7 +631,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
             }
         }
 
-        //Reset color and paddings/alignment
+        //Reset color and padding/alignment
         this.batch.setColor(Color.WHITE);
         this.UIStyle.alignment = Align.center;
         this.UIStyle.paddingLeft = 0;
@@ -641,6 +641,8 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     //Draws the buttons for each selectedEntity colonist that we have control of.
     private void drawBehaviourButtons(IInteractable interactable){
         StateTree<BehaviourManagerComp.TaskInfo> tree = interactable.getBehManager().getTaskTree();
+
+        //TODO Need to make sure multiple selections work since this was changed.
 
         //Set some position variables.
         float width = (ordersRect.getWidth()/(tree.getCurrentTreeNode().getChildren().size+1));
