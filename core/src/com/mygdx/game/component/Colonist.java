@@ -205,6 +205,12 @@ public class Colonist extends Component implements IInteractable, IOwnable{
             node.userData = taskInfo;
         }
 
+        Tree.TreeNode<BehaviourManagerComp.TaskInfo> back = taskTree.addNode("gather", "back");
+        BehaviourManagerComp.TaskInfo taskInfo = new BehaviourManagerComp.TaskInfo(back.nodeName);
+        taskInfo.callback = taskTree::moveUp;
+        back.userData = taskInfo;
+
+
         getBehManager().getBehaviourStates().addState("gather", false, new StateSystem.DefineTask("gather", "idle")).setRepeat(true);
         getBehManager().getBehaviourStates().addState("explore", false, new StateSystem.DefineTask("explore", "idle")).setRepeat(true);
         getBehManager().getBehaviourStates().addState("consume", false, new StateSystem.DefineTask("idle", "idle")).setRepeat(false).setRepeatLastState(true);

@@ -56,4 +56,11 @@ public class StateTree<T> extends Tree<T>{
         if(node != null) this.currTreeNode = node;
         return this.currTreeNode;
     }
+
+    /**
+     * @return The current tree node.
+     */
+    public TreeNode<T> getCurrentTreeNode(){
+        return this.currTreeNode;
+    }
 }

@@ -23,7 +23,7 @@ public class Tree<T> {
      * @param newNodeName The new node's compName.
      * @return The TreeNode that was created to add to the tree, or null if the parent was not found.
      */
-    public TreeNode addNode(String parent, String newNodeName){
+    public TreeNode<T> addNode(String parent, String newNodeName){
         TreeNode<T> parentNode = getNode(node -> node.nodeName.equals(parent));
         if(parentNode == null) return null;
         return parentNode.addChild(new TreeNode<>(newNodeName));

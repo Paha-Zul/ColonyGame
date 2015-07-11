@@ -51,8 +51,6 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     private TextureRegion background, UIBackgroundBase, UIBackgroundTop;
     private World world;
 
-    private StateSystem buttonStateSystem = new StateSystem();
-
     private boolean drawingInfo = false;
     private boolean drawingProfiler = false;
     private boolean mouseDown = false;
@@ -112,7 +110,6 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
     private Color gray = new Color(Color.BLACK);
     private Texture blueSquare;
-    private Tree.TreeNode currStateNode = null;
     private Stage stage;
     private static PlayerInterface playerInterface;
 
@@ -227,11 +224,6 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         gatherStyle.font.setColor(new Color(126f / 255f, 75f / 255f, 27f / 255f, 1));
         exploreStyle.font.setColor(new Color(126f / 255f, 75f / 255f, 27f / 255f, 1));
         huntStyle.font.setColor(126f / 255f, 75f / 255f, 27f / 255f, 1);
-
-        buttonStateSystem.addState("main", true);
-        buttonStateSystem.addState("gather");
-        buttonStateSystem.addState("hunt");
-        buttonStateSystem.setCurrState("main");
 
         InputMultiplexer multiplexer = new InputMultiplexer();
         multiplexer.addProcessor(stage);
@@ -581,7 +573,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
                     //GUI.Texture(ordersRect, ColonyGame.assetManager.get("menuButton_normal", Texture.class), this.batch);
                     if(innerInter.getBehManager() != null) {
-                        drawButtons(innerInter);
+                        drawBehaviourButtons(innerInter);
 
                         //Set to saveContainer camera and draw the path lines.
                         batch.setProjectionMatrix(ColonyGame.camera.combined);
@@ -647,18 +639,16 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     }
 
     //Draws the buttons for each selectedEntity colonist that we have control of.
-    private void drawButtons(IInteractable interactable){
-        //If this selectedProfile was recently selectedEntity, this will be null. Set it to the root of the currently selectedEntity selectedProfile.
-        if(currStateNode == null)
-            currStateNode = interactable.getBehManager().getTaskTree().getNode(node -> node.nodeName.equals("root"));
+    private void drawBehaviourButtons(IInteractable interactable){
+        StateTree<BehaviourManagerComp.TaskInfo> tree = interactable.getBehManager().getTaskTree();
 
         //Set some position variables.
-        float width = (ordersRect.getWidth()/(currStateNode.getChildren().size+1));
+        float width = (ordersRect.getWidth()/(tree.getCurrentTreeNode().getChildren().size+1));
         float height = ordersRect.y + 25;
         float x = ordersRect.x;
 
         //Get the children of the current root node. This will display all children buttons of our current selection.
-        Array<Tree.TreeNode> nodeList = currStateNode.getChildren();
+        Array<Tree.TreeNode<BehaviourManagerComp.TaskInfo>> nodeList = tree.getCurrentTreeNode().getChildren();
         for(int i=0;i<nodeList.size;i++) {
             //Get the task node and its user data.
             Tree.TreeNode currTaskNode = nodeList.get(i);
@@ -699,8 +689,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
                 //Get the node from the gather TreeNode. If it has children, set the currStateNode
                 Tree.TreeNode tmpNode = interactable.getBehManager().getTaskTree().getNode(node -> node.nodeName.equals(currTaskNode.nodeName));
                 if (tmpNode.hasChildren()) {
-                    buttonStateSystem.setCurrState(currTaskNode.nodeName);
-                    currStateNode = tmpNode;
+                    tree.setCurrentTreeNode(tmpNode);
                 }
             }
         }
@@ -947,8 +936,6 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         if(button == Input.Buttons.LEFT){
             this.selectedProfileList.forEach(profile -> profile.entity.getTags().removeTag("selected"));
             this.selectedProfileList.clear();
-            this.buttonStateSystem.setToDefaultState();
-            this.currStateNode = null;
             this.finishDragging(worldCoords.x, worldCoords.y);
 
             //If we don't have something that was selected before this point, follow through with our click test.
