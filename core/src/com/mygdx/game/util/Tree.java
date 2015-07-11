@@ -97,6 +97,9 @@ public class Tree {
         return str.toString();
     }
 
+    /**
+     * The node of the tree.
+     */
     public static class TreeNode {
         public String nodeName;
         public TreeNode parent;
@@ -108,12 +111,22 @@ public class Tree {
             this.nodeName = nodeName;
         }
 
+        /**
+         * Adds a child node to this node.
+         * @param treeNode The new node to add.
+         * @return The node that was added as a child.
+         */
         public TreeNode addChild(TreeNode treeNode){
             this.children.add(treeNode);
             treeNode.parent = this;
             return treeNode;
         }
 
+        /**
+         * Searches this node's children for a node with 'nodeName'.
+         * @param nodeName The name of the child node to find.
+         * @return The node if it was found, null otherwise.
+         */
         public TreeNode getChild(String nodeName){
             for(TreeNode treeNode : children)
                 if(nodeName.equals(treeNode.nodeName))
@@ -122,10 +135,16 @@ public class Tree {
             return null;
         }
 
+        /**
+         * @return True if this node has children, false otherwise.
+         */
         public boolean hasChildren(){
             return children.size > 0;
         }
 
+        /**
+         * @return A list of the children.
+         */
         public Array<TreeNode> getChildren(){
             return this.children;
         }

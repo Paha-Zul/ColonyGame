@@ -111,6 +111,7 @@ public class BehaviourManagerComp extends Component{
             this.currentBehaviour.getControl().safeEnd();
         }
 
+        //Gets the new task from the task map, resets it (in case its being reused), checks and start.
         Task task = taskMap.get(taskName).apply(this.blackBoard, this);
         this.currentBehaviour = task;
         this.currentBehaviour.getControl().reset();
