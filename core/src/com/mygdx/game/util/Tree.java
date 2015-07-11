@@ -51,7 +51,7 @@ public class Tree<T> {
      * @param test The Predicate function to test each node.
      * @return The TreeNode if one was found that passed the Predicate function, null otherwise.
      */
-    public TreeNode<T> getNode(java.util.function.Predicate<TreeNode> test) {
+    public TreeNode<T> getNode(java.util.function.Predicate<TreeNode<T>> test) {
         if (this.root == null)
             return null;
 
@@ -102,8 +102,8 @@ public class Tree<T> {
      */
     public static class TreeNode<T> {
         public String nodeName;
-        public TreeNode parent;
-        public Object userData;
+        public TreeNode<T> parent;
+        public T userData;
 
         private Array<TreeNode<T>> children = new Array<>();
 
