@@ -17,6 +17,7 @@ import com.mygdx.game.util.managers.DataManager;
 import com.mygdx.game.util.managers.GameEventManager;
 import com.mygdx.game.util.managers.ScriptManager;
 import com.mygdx.game.util.worldgeneration.WorldGen;
+import org.codehaus.jackson.annotate.JsonIgnore;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -419,6 +420,7 @@ public class DataBuilder implements IDestroyable{
         }
     };
 
+    @JsonIgnore
     Consumer<JsonTileGroup[]> buildTiles = value -> {
         //For each group of tiles
         for (JsonTileGroup group : value) {
@@ -464,6 +466,7 @@ public class DataBuilder implements IDestroyable{
         }
     };
 
+    @JsonIgnore
     Consumer<JsonWorld> compileWorldGen = world -> {
         for(NoiseMap map : world.noiseMaps) {
             world.noiseMapHashMap.put(map.rank, map);

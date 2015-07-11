@@ -66,6 +66,7 @@ public class Colonist extends Component implements IInteractable, IOwnable{
         this.createStats();
     }
 
+    @JsonIgnore
     //Creates a range sensor for when we get a ranged weapon.
     private void createRangeSensor(){
         if(this.collider == null || this.collider.body == null || this.collider.fixture == null) return;
@@ -81,11 +82,13 @@ public class Colonist extends Component implements IInteractable, IOwnable{
         shape.dispose();
     }
 
+    @JsonIgnore
     @Override
     public void save() {
 
     }
 
+    @JsonIgnore
     @Override
     public void load() {
         super.load();
@@ -109,6 +112,7 @@ public class Colonist extends Component implements IInteractable, IOwnable{
         this.createEffects();
     }
 
+    @JsonIgnore
     //Creates the stats for this colonist.
     private void createStats(){
         //Create these 4 stats.
@@ -164,6 +168,7 @@ public class Colonist extends Component implements IInteractable, IOwnable{
         healthStat.onZero = onZero;
     }
 
+    @JsonIgnore
     //Creates all the buttons for the colonists behaviours.
     private void createBehaviourButtons(){
         this.getBehManager().getBlackBoard().attackDamage = 30f;
@@ -211,12 +216,14 @@ public class Colonist extends Component implements IInteractable, IOwnable{
         });
     }
 
+    @JsonIgnore
     private void createEffects(){
         this.effects.addNewEffect("starving", "Starving", "starvation_effect", (Stats stats) -> stats.getStat("food").getCurrVal() <= 0);
         this.effects.addNewEffect("dehydrated", "Dehydrated", "dehydration_effect", (Stats stats) -> stats.getStat("water").getCurrVal() <= 0);
         this.effects.addNewEffect("sleepy", "Sleepy", "sleepy_effect", (Stats stats) -> stats.getStat("energy").getCurrVal() <= 20);
     }
 
+    @JsonIgnore
     @Override
     public void update(float delta) {
         super.update(delta);
@@ -265,6 +272,7 @@ public class Colonist extends Component implements IInteractable, IOwnable{
         return this.alert = alert;
     }
 
+    @JsonIgnore
     /**
      * Toggles the attack range sensor on this colonist.
      * @return True if alert was set to true, false if alert was set to false.
@@ -380,6 +388,7 @@ public class Colonist extends Component implements IInteractable, IOwnable{
         this.colony = colony;
     }
 
+    @JsonIgnore
     public void setName(String firstName, String lastName) {
         this.firstName = firstName;
         this.lastName = lastName;
@@ -447,6 +456,7 @@ public class Colonist extends Component implements IInteractable, IOwnable{
     }
 
     @Override
+    @JsonIgnore
     public void addedToColony(Colony colony) {
         this.colony = colony;
     }
@@ -470,6 +480,7 @@ public class Colonist extends Component implements IInteractable, IOwnable{
     }
 
     @Override
+    @JsonIgnore
     public void destroy(Entity destroyer) {
         super.destroy(destroyer);
     }

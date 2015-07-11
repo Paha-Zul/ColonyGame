@@ -39,7 +39,7 @@ public class BehaviourManagerComp extends Component{
     @JsonIgnore
     private Timer feedTimer = new OneShotTimer(5f, null);
     @JsonIgnore
-    private Tree taskTree = new Tree("taskTree", "root");
+    private Tree<?> taskTree = new Tree("taskTree", "root");
     @JsonIgnore
     private StateSystem<StateSystem.DefineTask> behaviourStates = new StateSystem<>();
     @JsonIgnore
@@ -257,7 +257,7 @@ public class BehaviourManagerComp extends Component{
      * @return The task Tree of this Behaviour Component.
      */
     @JsonIgnore
-    public Tree getTaskTree(){
+    public Tree<?> getTaskTree(){
         return this.taskTree;
     }
 

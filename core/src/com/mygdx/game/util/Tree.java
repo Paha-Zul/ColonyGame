@@ -7,14 +7,14 @@ import java.util.LinkedList;
 /**
  * A basic, no specialization, tree.
  */
-public class Tree {
+public class Tree<T> {
     private String treeName;
-    private TreeNode root;
-    private LinkedList<TreeNode> queue = new LinkedList<>() ;
+    private TreeNode<T> root;
+    private LinkedList<TreeNode<T>> queue = new LinkedList<>() ;
 
     public Tree(String treeName, String rootName){
         this.treeName = treeName;
-        this.root = new TreeNode(rootName);
+        this.root = new TreeNode<>(rootName);
     }
 
     /**
@@ -24,9 +24,9 @@ public class Tree {
      * @return The TreeNode that was created to add to the tree, or null if the parent was not found.
      */
     public TreeNode addNode(String parent, String newNodeName){
-        TreeNode parentNode = getNode(node -> node.nodeName.equals(parent));
+        TreeNode<T> parentNode = getNode(node -> node.nodeName.equals(parent));
         if(parentNode == null) return null;
-        return parentNode.addChild(new TreeNode(newNodeName));
+        return parentNode.addChild(new TreeNode<>(newNodeName));
     }
 
     /**
@@ -36,12 +36,12 @@ public class Tree {
      * @return This Tree object.
      */
     public TreeNode[] addNode(String parent, String... nodeNames){
-        TreeNode parentNode = getNode(node -> node.nodeName.equals(parent));
+        TreeNode<T> parentNode = getNode(node -> node.nodeName.equals(parent));
         if(parentNode == null) return null;
 
         Array<TreeNode> nodeList = new Array<>();
         for(String name : nodeNames)
-            nodeList.add(parentNode.addChild(new TreeNode(name)));
+            nodeList.add(parentNode.addChild(new TreeNode<>(name)));
 
         return nodeList.toArray(TreeNode.class);
     }
@@ -51,7 +51,7 @@ public class Tree {
      * @param test The Predicate function to test each node.
      * @return The TreeNode if one was found that passed the Predicate function, null otherwise.
      */
-    public TreeNode getNode(java.util.function.Predicate<TreeNode> test) {
+    public TreeNode<T> getNode(java.util.function.Predicate<TreeNode> test) {
         if (this.root == null)
             return null;
 
@@ -60,11 +60,11 @@ public class Tree {
         queue.add(this.root);
 
         while(!queue.isEmpty()){
-            TreeNode node = queue.remove();
+            TreeNode<T> node = queue.remove();
             if(test.test(node))
                 return node;
 
-            for(TreeNode child : node.children)
+            for(TreeNode<T> child : node.children)
                 queue.add(child);
         }
 
@@ -80,12 +80,12 @@ public class Tree {
         queue.add(root);
 
         while(!queue.isEmpty()){
-            TreeNode node = queue.remove();
+            TreeNode<T> node = queue.remove();
 
             if(node.children.size > 0) str.append(node.nodeName).append("->(");
 
             for(int i=0; i < node.children.size; i++) {
-                queue.add(node.children.get(i));
+                queue.add(node.getChildren().get(i));
                 str.append(node.children.get(i).nodeName);
                 if(i != node.children.size-1) str.append(",");
             }
@@ -100,12 +100,12 @@ public class Tree {
     /**
      * The node of the tree.
      */
-    public static class TreeNode {
+    public static class TreeNode<T> {
         public String nodeName;
         public TreeNode parent;
         public Object userData;
 
-        private Array<TreeNode> children = new Array<>();
+        private Array<TreeNode<T>> children = new Array<>();
 
         public TreeNode(String nodeName){
             this.nodeName = nodeName;
@@ -116,7 +116,7 @@ public class Tree {
          * @param treeNode The new node to add.
          * @return The node that was added as a child.
          */
-        public TreeNode addChild(TreeNode treeNode){
+        public TreeNode<T> addChild(TreeNode<T> treeNode){
             this.children.add(treeNode);
             treeNode.parent = this;
             return treeNode;
@@ -127,8 +127,8 @@ public class Tree {
          * @param nodeName The name of the child node to find.
          * @return The node if it was found, null otherwise.
          */
-        public TreeNode getChild(String nodeName){
-            for(TreeNode treeNode : children)
+        public TreeNode<T> getChild(String nodeName){
+            for(TreeNode<T> treeNode : children)
                 if(nodeName.equals(treeNode.nodeName))
                     return treeNode;
 
@@ -145,7 +145,7 @@ public class Tree {
         /**
          * @return A list of the children.
          */
-        public Array<TreeNode> getChildren(){
+        public Array<TreeNode<T>> getChildren(){
             return this.children;
         }
     }
