@@ -63,7 +63,6 @@ public class GameScreen implements Screen{
     @Override
     public void show() {
         //generateLarger();
-
     }
 
     public void render(float delta){
@@ -82,7 +81,7 @@ public class GameScreen implements Screen{
         else delta *= PlayerInterface.getInstance().gameSpeed;
 
         //drawMap();
-        renderMap();
+        if(PlayerInterface.getInstance().renderWorld) renderMap();
         updateEntities(delta);
         NotificationManager.update(delta);
     }
@@ -178,26 +177,27 @@ public class GameScreen implements Screen{
     }
 
     private void generateLarger(){
-        int scale = 4;
+        int scale = 1; //The scale to divide the sizes by. So if we have scale of 4, everything will be 1/4th smaller.
         //TODO Almost works, but is strangely stretched
 
         TextureRegion region = new TextureRegion();
         Grid.GridInstance grid = ColonyGame.worldGrid;
-        int squareSize = grid.getOriginalSquareSize()/scale;
-        int pixelSize = 2048/scale;
-        int regionSize = pixelSize/squareSize;
-        int currX = 0, currY = 0;
-        int totalX = grid.getWidth()/regionSize, totalY = grid.getHeight()/regionSize;
-        map = new TextureRegion[totalX+1][totalY+1];
+        int squareSize = grid.getOriginalSquareSize()/scale; //The grid square size altered by the scale.
+        int imageSize = 256/scale; //The total size of the image we want to generate.
+        int regionSize = imageSize/squareSize; //The size of the region which is the image size divided by the size of the squares. so 256/32 = 8
+        int totalX = grid.getWidth()/regionSize, totalY = grid.getHeight()/regionSize; //The total regions in the X and Y dimension.
+        map = new TextureRegion[totalX+1][totalY+1]; //Initialize the map texture array to be the size of the total X and Y + 1.
 
-        TextureAtlas terrainAtlas = ColonyGame.assetManager.get("terrain", TextureAtlas.class);
+        int currX = 0, currY = 0; //Some counters.
+
+        TextureAtlas terrainAtlas = ColonyGame.assetManager.get("terrain", TextureAtlas.class); //Get the terrain atlas.
         SpriteBatch batch = new SpriteBatch();
+        batch.begin();
 
         //This loops over the entire map, generating large pixmaps to be made into textures.
-        while(currY <= totalY) {
-            FrameBuffer fb = new FrameBuffer(Pixmap.Format.RGBA8888, pixelSize, pixelSize, false);
+        while(currX < 1) {
+            FrameBuffer fb = new FrameBuffer(Pixmap.Format.RGBA8888, imageSize, imageSize, false);
             fb.begin();
-            batch.begin();
 
             int counterX=0, counterY=0;
             //Loops over each terrain tile in this 'region'. The region size is how many pixels for each region there should be. Must pick a number divisible by the tiles.
@@ -208,7 +208,7 @@ public class GameScreen implements Screen{
                         Grid.TerrainTile tile = node.getTerrainTile();
                         if (tile != null) {
                             batch.draw(terrainAtlas.findRegion(tile.tileTextureName), counterX * grid.getOriginalSquareSize(), counterY * grid.getOriginalSquareSize(), grid.getOriginalSquareSize(), grid.getOriginalSquareSize());
-                            //System.out.println("Drawing " + (xSquare) + " " + (ySquare));
+                            System.out.println("Drawing " + (xSquare) + " " + (ySquare)+" origSq: "+grid.getOriginalSquareSize());
                         }
                     }
                     counterX++;
@@ -219,9 +219,9 @@ public class GameScreen implements Screen{
 
             //System.out.println("Out");
 
-            batch.end();
+            batch.flush();
             //Then retrieve the Pixmap from the buffer.
-            Pixmap pm = ScreenUtils.getFrameBufferPixmap(0, 0, pixelSize, pixelSize);
+            Pixmap pm = ScreenUtils.getFrameBufferPixmap(0, 0, imageSize, imageSize);
             map[currX][currY] = new TextureRegion(new Texture(pm));
             map[currX][currY].flip(false, true);
 
@@ -239,6 +239,8 @@ public class GameScreen implements Screen{
                 currY++;
             }
         }
+
+        batch.end();
     }
 
     private void drawMap(){
@@ -246,11 +248,12 @@ public class GameScreen implements Screen{
 
         batch.setProjectionMatrix(ColonyGame.camera.combined);
         batch.begin();
-        double area = GH.toMeters(2048);
+        double area = 256;
         float size = (float)area;
         for(int y=0;y<map.length;y++){
             for(int x=0;x<map[y].length;x++){
-                batch.draw(map[x][y], x*size, y*size, size, size);
+                if(map[x][y] != null)
+                    batch.draw(map[x][y], x*size, y*size, size, size);
             }
         }
         batch.end();
