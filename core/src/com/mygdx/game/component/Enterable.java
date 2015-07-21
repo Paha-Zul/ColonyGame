@@ -2,6 +2,7 @@ package com.mygdx.game.component;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.mygdx.game.util.GH;
 
 /**
  * Created by Paha on 7/17/2015.
@@ -37,8 +38,15 @@ public class Enterable extends Component{
      * @param positions The offset positions from the center of the Entity.
      */
     public void setEnterPositions(Vector2... positions){
-        this.originalEnterPositions = positions; //Assign to the original.
-        this.enterPositions = new Vector2[positions.length]; //Make a new array.
+        //Make some new arrays.
+        this.originalEnterPositions = new Vector2[positions.length];
+        this.enterPositions = new Vector2[positions.length];
+
+        //Fill in the original and regular positions.
+        for(int i=0;i<positions.length;i++) {
+            this.originalEnterPositions[i] = new Vector2(GH.toMeters(positions[i].x), GH.toMeters(positions[i].y));
+            this.enterPositions[i] = new Vector2(0,0);
+        }
         this.calculatePositions(this.originalEnterPositions);
     }
 
@@ -68,9 +76,9 @@ public class Enterable extends Component{
         //Copy the positions and factor in rotation and Entity owner position
         for(int i=0;i<original.length;i++) {
             Vector2 pos = this.originalEnterPositions[i];
-            float x = MathUtils.cos(trans.getRotation())*pos.x;
-            float y = MathUtils.sin(trans.getRotation())*pos.y;
-            this.enterPositions[i] = new Vector2(trans.getPosition().x + x, trans.getPosition().y + y);
+            float x = MathUtils.cos(trans.getRotation())*pos.x - MathUtils.sin(trans.getRotation())*pos.y; //cosX - sinY
+            float y = MathUtils.sin(trans.getRotation())*pos.x + MathUtils.cos(trans.getRotation())*pos.y; //sinX + cosY ... some property I guess?
+            this.enterPositions[i].set(trans.getPosition().x + x, trans.getPosition().y + y);
         }
 
         return this.enterPositions;

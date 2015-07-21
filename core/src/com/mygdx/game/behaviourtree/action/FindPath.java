@@ -1,7 +1,7 @@
 package com.mygdx.game.behaviourtree.action;
 
-import com.mygdx.game.ColonyGame;
 import com.mygdx.game.behaviourtree.LeafTask;
+import com.mygdx.game.component.Enterable;
 import com.mygdx.game.util.BlackBoard;
 import com.mygdx.game.util.Grid;
 import com.mygdx.game.util.Pathfinder;
@@ -24,16 +24,19 @@ public class FindPath extends LeafTask {
     public void start() {
         super.start();
 
-        //If we have a target, get the target node here...
-        if(this.blackBoard.target != null)
-            this.blackBoard.targetNode = ColonyGame.worldGrid.getNode(this.blackBoard.target);
-
+        //Get the start node and target node.
         Grid.Node startNode = this.blackBoard.colonyGrid.getNode(this.blackBoard.myManager.getEntityOwner());
         Grid.Node targetNode;
         if(this.blackBoard.targetNode != null)
             targetNode = this.blackBoard.targetNode;
-        else
-            targetNode = this.blackBoard.colonyGrid.getNode(this.blackBoard.target);
+        else {
+            Enterable enterable = this.blackBoard.target.getComponent(Enterable.class);
+            if(enterable == null)
+                targetNode = this.blackBoard.colonyGrid.getNode(this.blackBoard.target);
+            else {
+                targetNode = this.blackBoard.colonyGrid.getNode(enterable.getEnterPositions()[0]);
+            }
+        }
 
         this.blackBoard.path = Pathfinder.findPath(startNode, targetNode);
         this.control.finishWithSuccess();
