@@ -1,15 +1,16 @@
 package com.mygdx.game.component;
 
-import com.badlogic.gdx.math.EarClippingTriangulator;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.behaviourtree.PrebuiltTasks;
 import com.mygdx.game.behaviourtree.Task;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.interfaces.Functional;
-import com.mygdx.game.util.*;
+import com.mygdx.game.util.BlackBoard;
+import com.mygdx.game.util.EventSystem;
+import com.mygdx.game.util.StateSystem;
+import com.mygdx.game.util.StateTree;
 import com.mygdx.game.util.timer.OneShotTimer;
 import com.mygdx.game.util.timer.Timer;
 import org.codehaus.jackson.annotate.JsonIgnore;
@@ -59,6 +60,7 @@ public class BehaviourManagerComp extends Component{
         BehaviourManagerComp.addTaskToMap("returnTools", PrebuiltTasks::returnTools);
         BehaviourManagerComp.addTaskToMap("build", PrebuiltTasks::build);
         BehaviourManagerComp.addTaskToMap("returnItems", PrebuiltTasks::returnItems);
+        BehaviourManagerComp.addTaskToMap("sleep", PrebuiltTasks::sleep);
     }
 
     @Override

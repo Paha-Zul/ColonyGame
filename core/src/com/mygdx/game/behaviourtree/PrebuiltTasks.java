@@ -837,4 +837,41 @@ public class PrebuiltTasks {
 
         return seq;
     }
+
+    public static Task sleep(BlackBoard blackBoard, BehaviourManagerComp behComp){
+        /**
+         *  Sequence
+         *      Sequence (always true / optional)
+         *          Find building
+         *          path to building
+         *          enter building
+         *      sleep...
+         *      exit building
+         */
+
+        Sequence mainSeq = new Sequence("Sleeping", blackBoard);
+        FindPath fp = new FindPath("Pathing", blackBoard);
+        MoveTo mt = new MoveTo("Moving", blackBoard);
+        Enter enter = new Enter("Entering", blackBoard);
+        Sleep sleep = new Sleep("Sleeping", blackBoard);
+        Leave leave = new Leave("Leaving", blackBoard);
+
+        mainSeq.control.addTask(fp);
+        mainSeq.control.addTask(mt);
+        mainSeq.control.addTask(enter);
+        mainSeq.control.addTask(sleep);
+        mainSeq.control.addTask(leave);
+
+        mainSeq.control.callbacks.startCallback = task -> {
+            task.blackBoard.targetNode = null;
+
+            Colonist col = task.blackBoard.myManager.getEntityOwner().getComponent(Colonist.class);
+            Colony colony = col.getColony();
+            Building building = colony.getOwnedFromColony(Building.class, b -> b.buildingTags.hasTag("main"));
+            if(building == null) task.getControl().finishWithFailure();
+            else task.blackBoard.target = building.getEntityOwner();
+        };
+
+        return mainSeq;
+    }
 }

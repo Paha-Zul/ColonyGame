@@ -29,9 +29,9 @@ public class StateTree<T> extends Tree<T>{
      * @param nodeName The name of the child node.
      * @return The new current node.
      */
-    public TreeNode<T> moveDowntoChild(String nodeName){
+    public TreeNode<T> moveDownToChild(String nodeName, boolean onlyMoveIfHasChildren){
         TreeNode<T> node = this.currTreeNode.getChild(nodeName);
-        if(node != null) this.currTreeNode = node;
+        if(node != null && (!onlyMoveIfHasChildren || node.hasChildren())) this.currTreeNode = node;
         return this.currTreeNode;
     }
 

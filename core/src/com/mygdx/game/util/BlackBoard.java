@@ -43,6 +43,9 @@ public class BlackBoard{
     public float attackDamage = 10f;
     public Timer attackTimer = null;
 
+    //Sleep
+    public float timeToSleep = 5f;
+
     //Construction stuff
     public Constructable constructable;
 

@@ -35,6 +35,7 @@ public class GraphicIdentity extends Component {
 
 	@Override
 	public void start() {
+        super.start();
         //This is initially needed for getting the sprite to be the right size. If we simply scaled it using this method, then
         //the image would draw the right size, but the offset from the width and height being unaffected causes real problems whenever the image
         //is not centered.

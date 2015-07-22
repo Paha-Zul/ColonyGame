@@ -112,7 +112,7 @@ public class Entity implements IDelayedDestroyable, ISaveable{
 	 * @param batch The SpriteBatch to draw with.
 	 */
 	public void render(float delta, SpriteBatch batch){
-		if(this.components.getIdentity() != null) this.components.identity.render(delta, batch);
+		if(this.components.getIdentity() != null && this.components.getIdentity().isActive()) this.components.identity.render(delta, batch);
 	}
 
     public final <T extends Component> T addComponent(T comp){
@@ -251,11 +251,11 @@ public class Entity implements IDelayedDestroyable, ISaveable{
 		 * @param <T> The Component class interType of the component being added.
 		 * @return The Component that was added.
 		 */
-		@SuppressWarnings("unchecked")
 		public final <T extends Component> T addComponent(T comp){
-            comp.created(this.owner);
-            if(!comp.isStarted())
-                this.newComponentList.add(comp); //Add it to the new list for the init() method.
+            if(!comp.isStarted()) {
+				comp.created(this.owner);
+				this.newComponentList.add(comp); //Add it to the new list for the init() method.
+			}
 			//Add it to the active or inactive list.
             if (comp.isActive()) this.activeComponentList.add(comp);
             else this.inactiveComponentList.add(comp);

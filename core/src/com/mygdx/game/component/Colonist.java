@@ -134,22 +134,22 @@ public class Colonist extends Component implements IInteractable, IOwnable{
         stats.addTimer(new RepeatingTimer(5f, () -> {
             foodStat.addToCurrent(-1);
             //If under 20, try to eat.
-            if(foodStat.getCurrVal() <= 20 && !getBehManager().getBehaviourStates().isCurrState("consume")) {
-                getBehManager().getBlackBoard().itemEffect = "feed";
-                getBehManager().getBlackBoard().itemEffectAmount = 1;
-                getBehManager().changeTaskQueued("consume");
-            }
+//            if(foodStat.getCurrVal() <= 20 && !getBehManager().getBehaviourStates().isCurrState("consume")) {
+//                getBehManager().getBlackBoard().itemEffect = "feed";
+//                getBehManager().getBlackBoard().itemEffectAmount = 1;
+//                getBehManager().changeTaskQueued("consume");
+//            }
         }));
 
         //Subtract water every 10 seconds and try to drink when it's too low.
         stats.addTimer(new RepeatingTimer(10f, () -> {
             waterStat.addToCurrent(-1);
             //If under 20, try to drink.
-            if (waterStat.getCurrVal() <= 20 && !getBehManager().getBehaviourStates().isCurrState("consume")) {
-                getBehManager().getBlackBoard().itemEffect = "thirst";
-                getBehManager().getBlackBoard().itemEffectAmount = 1;
-                getBehManager().changeTaskQueued("consume");
-            }
+//            if (waterStat.getCurrVal() <= 20 && !getBehManager().getBehaviourStates().isCurrState("consume")) {
+//                getBehManager().getBlackBoard().itemEffect = "thirst";
+//                getBehManager().getBlackBoard().itemEffectAmount = 1;
+//                getBehManager().changeTaskQueued("consume");
+//            }
         })); //Subtract water every 10 seconds.
 
         //If food or water is 0, subtract health.
@@ -177,14 +177,14 @@ public class Colonist extends Component implements IInteractable, IOwnable{
 
         StateTree<BehaviourManagerComp.TaskInfo> taskTree = this.getBehManager().getTaskTree();
 
-        Tree.TreeNode<BehaviourManagerComp.TaskInfo>[] nodeList = taskTree.addNode("root", "gather", "hunt", "explore", "build", "idle");
+        Tree.TreeNode<BehaviourManagerComp.TaskInfo>[] nodeList = taskTree.addNode("root", "gather", "hunt", "explore", "build", "idle", "sleep");
 
         //For each node, we set up a TaskInfo object and assign it to the node's userData field.
         for(Tree.TreeNode node : nodeList) {
             BehaviourManagerComp.TaskInfo taskInfo = new BehaviourManagerComp.TaskInfo(node.nodeName);
             taskInfo.callback = () -> {
                 getBehManager().changeTaskImmediate(node.nodeName); //Change the task.
-                taskTree.moveDowntoChild(node.nodeName); //Move to this node.
+                taskTree.moveDownToChild(node.nodeName, true); //Move to this node.
             };
             taskInfo.userData = DataManager.getData(node.nodeName+"Style", GUI.GUIStyle.class);
             if(taskInfo.userData == null) taskInfo.userData = DataManager.getData("blankStyle", GUI.GUIStyle.class);
@@ -210,7 +210,6 @@ public class Colonist extends Component implements IInteractable, IOwnable{
         taskInfo.callback = taskTree::moveUp;
         back.userData = taskInfo;
 
-
         getBehManager().getBehaviourStates().addState("gather", false, new StateSystem.DefineTask("gather", "idle")).setRepeat(true);
         getBehManager().getBehaviourStates().addState("explore", false, new StateSystem.DefineTask("explore", "idle")).setRepeat(true);
         getBehManager().getBehaviourStates().addState("consume", false, new StateSystem.DefineTask("idle", "idle")).setRepeat(false).setRepeatLastState(true);
@@ -219,6 +218,7 @@ public class Colonist extends Component implements IInteractable, IOwnable{
         getBehManager().getBehaviourStates().addState("returnTools", false, new StateSystem.DefineTask("idle", "idle")).setRepeat(false);
         getBehManager().getBehaviourStates().addState("build", false, new StateSystem.DefineTask("build", "idle")).setRepeat(true);
         getBehManager().getBehaviourStates().addState("returnItems", false, new StateSystem.DefineTask("idle", "idle")).setRepeat(false);
+        getBehManager().getBehaviourStates().addState("sleep", false, new StateSystem.DefineTask("idle", "idle")).setRepeat(false);
 
         EventSystem.onEntityEvent(this.owner, "task_started", args -> {
             Task task = (Task)args[0];
