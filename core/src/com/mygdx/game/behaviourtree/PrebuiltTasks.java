@@ -872,6 +872,11 @@ public class PrebuiltTasks {
             else task.blackBoard.target = building.getEntityOwner();
         };
 
+        mainSeq.control.callbacks.finishCallback = task -> {
+            task.blackBoard.myManager.getEntityOwner().getGraphicIdentity().setActive(true);
+            task.blackBoard.myManager.getEntityOwner().getTags().addTag("selectable");
+        };
+
         return mainSeq;
     }
 }

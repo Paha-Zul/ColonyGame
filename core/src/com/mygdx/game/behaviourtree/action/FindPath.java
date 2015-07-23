@@ -1,5 +1,6 @@
 package com.mygdx.game.behaviourtree.action;
 
+import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.behaviourtree.LeafTask;
 import com.mygdx.game.component.Enterable;
 import com.mygdx.game.util.BlackBoard;
@@ -27,18 +28,22 @@ public class FindPath extends LeafTask {
         //Get the start node and target node.
         Grid.Node startNode = this.blackBoard.colonyGrid.getNode(this.blackBoard.myManager.getEntityOwner());
         Grid.Node targetNode;
-        if(this.blackBoard.targetNode != null)
+        Vector2 target;
+        if(this.blackBoard.targetNode != null) {
             targetNode = this.blackBoard.targetNode;
-        else {
+            target = new Vector2(targetNode.getXCenter(), targetNode.getYCenter());
+        }else {
             Enterable enterable = this.blackBoard.target.getComponent(Enterable.class);
-            if(enterable == null)
+            if(enterable == null) {
                 targetNode = this.blackBoard.colonyGrid.getNode(this.blackBoard.target);
-            else {
+                target = this.blackBoard.target.getTransform().getPosition();
+            }else {
                 targetNode = this.blackBoard.colonyGrid.getNode(enterable.getEnterPositions()[0]);
+                target = enterable.getEnterPositions()[0];
             }
         }
 
-        this.blackBoard.path = Pathfinder.findPath(startNode, targetNode);
+        this.blackBoard.path = Pathfinder.findPath(new Vector2(startNode.getXCenter(), startNode.getYCenter()), target);
         this.control.finishWithSuccess();
     }
 

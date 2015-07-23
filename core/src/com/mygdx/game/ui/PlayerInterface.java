@@ -56,7 +56,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     private boolean mouseDown = false;
     private boolean dragging = false;
     private boolean drawGrid = false;
-    public boolean renderWorld = false;
+    public boolean renderWorld = true;
 
     private Rectangle buttonRect = new Rectangle();
     private Rectangle uiBackgroundBaseRect = new Rectangle();
@@ -104,8 +104,8 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     private Timer FPSTimer;
 
     private Vector2 testPoint = new Vector2(); //A reusable vector
-    private static boolean newlySelected = false; //If we have selected a new entity, this will stop the left click from getting rid of it.
-    private static UnitProfile selectedProfile = null; //The currently selected UnitProfile.
+    private boolean newlySelected = false; //If we have selected a new entity, this will stop the left click from getting rid of it.
+    private UnitProfile selectedProfile = null; //The currently selected UnitProfile.
     private ArrayList<UnitProfile> selectedProfileList = new ArrayList<>(); //The list of selected UnitProfiles.
 
     private Color gray = new Color(Color.BLACK);
@@ -131,7 +131,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     //For selecting a single unit.
     private QueryCallback callback = fixture -> {
         Collider.ColliderInfo info = (Collider.ColliderInfo)fixture.getUserData();
-        if(info.tags.hasTag(Constants.COLLIDER_CLICKABLE) && fixture.testPoint(testPoint.x, testPoint.y)){
+        if(info.tags.hasTag(Constants.COLLIDER_CLICKABLE) && fixture.testPoint(testPoint.x, testPoint.y) && info.owner.getTags().hasTag("selectable")){
             setSelectedEntity(info.owner);
             return false;
         }
@@ -144,12 +144,8 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         Collider.ColliderInfo selectedInfo = (Collider.ColliderInfo)fixture.getUserData();
 
         //If not null, the entity is a colonist, and the collider is clickable.
-        if(selectedInfo != null && selectedInfo.owner.getTags().hasTags("colonist", "alive") && selectedInfo.tags.hasTag(Constants.COLLIDER_CLICKABLE)) {
-            UnitProfile profile = new UnitProfile(); //Make a unit profile.
-            setSelectedEntity(selectedInfo.owner); //Set our selectedEntity
-            profile.entity = selectedInfo.owner; //Get the Entity that we clicked.
-            profile.entity.getTags().addTag("selected");
-            profile.interactable = selectedInfo.owner.getComponent(Interactable.class); //Get teh selectedProfile Component.
+        if(selectedInfo != null && selectedInfo.owner.getTags().hasTags("colonist", "alive", "selectable") && selectedInfo.tags.hasTag(Constants.COLLIDER_CLICKABLE)) {
+            UnitProfile profile = setSelectedEntity(selectedInfo.owner); //Set our selectedEntity
             selectedProfileList.add(profile); //Add it to the list.
             return true;
         }
@@ -286,6 +282,15 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         batch.begin();
     }
 
+    /**
+     * Checks if the GUI is moused over or not.
+     */
+    private boolean checkMousedOver(){
+        //Determines if any UI is moused over or not.
+        return this.uiBackgroundBaseRect.contains(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY()) ||
+                this.uiBackgroundBaseRect.contains(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY());
+    }
+
     private void drawInvAmounts(int width, int height, SpriteBatch batch){
         PlayerManager.Player player = PlayerManager.getPlayer("Player");
         if(player != null) {
@@ -381,21 +386,12 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
                     comp.getBlackBoard().target = this.currentEvent.eventTargetOther;
                     comp.changeTaskImmediate(this.currentEvent.behaviours[i]);
                     this.gameSpeed = 1f; //Reset game speed
-                    this.paused = false; //Unpaude
+                    this.paused = false; //Unpause
                     this.currentEvent = null;
                     return;
                 }
             }
         }
-    }
-
-    /**
-     * Checks if the GUI is moused over or not.
-     */
-    private boolean checkMousedOver(){
-        //Determines if any UI is moused over or not.
-        return this.uiBackgroundBaseRect.contains(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY()) ||
-                this.uiBackgroundBaseRect.contains(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY());
     }
 
     /**
@@ -418,6 +414,26 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
             this.batch.draw(WorldGen.whiteTex, start.x, start.y, end.x - start.x, end.y - start.y);
             this.batch.setColor(saved);
         }
+    }
+
+    /**
+     * Attempts to deselect this entity from the selected list.
+     * @param entity The Entity to attempt to deselect.
+     */
+    public void deselectEntity(Entity entity){
+        if(this.selectedProfile != null && entity == this.selectedProfile.entity) {
+            this.selectedProfile.entity.getTags().removeTag("selected");
+            this.selectedProfile = null;
+        }
+
+        for(int i=0;i<=this.selectedProfileList.size();i++)
+            if(this.selectedProfileList.get(i).entity == entity) {
+                this.selectedProfileList.remove(i);
+                break;
+            }
+
+        if(this.selectedProfile == null && this.selectedProfileList.size() > 0)
+            this.selectedProfile = this.selectedProfileList.get(0);
     }
 
     /**
@@ -795,10 +811,12 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
      * Sets the selectedEntity entity for viewing.
      * @param entity The Entity to set as the selectedEntity Entity.
      */
-    public static void setSelectedEntity(Entity entity){
-        newlySelected = true;
-        selectedProfile = new UnitProfile(entity);
-        selectedProfile.entity.getTags().addTag("selected");
+    public UnitProfile setSelectedEntity(Entity entity){
+        this.newlySelected = true;
+        this.selectedProfile = new UnitProfile(entity);
+        this.selectedProfile.entity.getTags().addTag("selected");
+        this.selectedProfile.interactable = entity.getComponent(Interactable.class); //Get the selectedProfile Component.
+        return this.selectedProfile;
     }
 
     //Reveals the entire map by adding a viewer to every tile.

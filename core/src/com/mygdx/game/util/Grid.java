@@ -580,12 +580,20 @@ public class Grid {
             return Math.abs(this.getX() - otherNode.getX()) + Math.abs(this.getY() - otherNode.getY());
         }
 
+        /**
+         * Gets the real X center (not an index) of this Node using the node's bottom left position plus half the square size of the grid.
+         * @return The real X center of this Node.
+         */
         public float getXCenter(){
-            return this.x * gridOwner.getSquareSize();
+            return this.x * gridOwner.getSquareSize() + gridOwner.getSquareSize()/2;
         }
 
+        /**
+         * Gets the real Y center (not an index) of this Node using the node's bottom left position plus half the square size of the grid.
+         * @return The real Y center of this Node.
+         */
         public float getYCenter(){
-            return this.y * gridOwner.getSquareSize();
+            return this.y * gridOwner.getSquareSize() + gridOwner.getSquareSize()/2;
         }
 
         @Override

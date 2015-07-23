@@ -2,6 +2,7 @@ package com.mygdx.game.behaviourtree.action;
 
 import com.mygdx.game.behaviourtree.LeafTask;
 import com.mygdx.game.component.graphic.GraphicIdentity;
+import com.mygdx.game.entity.Entity;
 import com.mygdx.game.util.BlackBoard;
 
 /**
@@ -26,9 +27,12 @@ public class Leave extends LeafTask{
     public void update(float delta) {
         super.update(delta);
 
+        Entity owner = this.blackBoard.myManager.getEntityOwner();
+
         //TODO setActive() is expensive...
-        GraphicIdentity identity = this.blackBoard.myManager.getEntityOwner().getGraphicIdentity();
+        GraphicIdentity identity = owner.getGraphicIdentity();
         identity.setActive(true);
+        owner.getTags().addTag("selectable");
 
         this.control.finishWithSuccess();
     }

@@ -23,7 +23,7 @@ public class ResourceEnt extends Entity{
 
     public ResourceEnt(Vector2 position, float rotation, String[] graphicName, int drawLevel) {
         super(position, rotation, drawLevel);
-        this.getTags().addTag("resource");
+        this.getTags().addTags("resource", "selectable");
         this.name = "Resource";
 
         this.components.addComponent(new GraphicIdentity()).setSprite(graphicName[0], graphicName[1]);
