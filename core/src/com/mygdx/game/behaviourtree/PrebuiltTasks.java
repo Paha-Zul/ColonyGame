@@ -879,4 +879,17 @@ public class PrebuiltTasks {
 
         return mainSeq;
     }
+
+    public static Task craftItem(BlackBoard blackBoard, BehaviourManagerComp behComp){
+        /**
+         *  Sequence
+         *      Repeat until
+         *          Sequence
+         *              gather a list of items we need
+         *
+         *
+         */
+
+        return null;
+    }
 }
