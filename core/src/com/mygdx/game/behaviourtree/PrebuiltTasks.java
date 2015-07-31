@@ -249,7 +249,6 @@ public class PrebuiltTasks {
 
         seq.control.callbacks.startCallback = task -> {
             task.blackBoard.itemTransfer.reset();
-            task.blackBoard.itemTransfer.transferMany = true;
             task.blackBoard.itemTransfer.takingReserved = true;
         };
 
@@ -313,7 +312,6 @@ public class PrebuiltTasks {
         //Set some flags and get a list of item names to be removed.
         seq.control.callbacks.startCallback = task -> {
             task.blackBoard.itemTransfer.reset();
-            task.blackBoard.itemTransfer.transferMany = true;
         };
 
         //When this finishes remove any on the way stuff
@@ -378,7 +376,6 @@ public class PrebuiltTasks {
                     task.blackBoard.itemTransfer.reset();
                     task.blackBoard.itemTransfer.fromInventory = col.getInventory();
                     task.blackBoard.itemTransfer.toInventory = building.getInventory();
-                    task.blackBoard.itemTransfer.transferAll = true;
                     task.blackBoard.itemTransfer.itemTypesToIgnore.add("tool");
                 }
             }
@@ -469,7 +466,6 @@ public class PrebuiltTasks {
         getConstruction.control.callbacks.successCallback = task -> {
             //reset and set some values.
             task.blackBoard.itemTransfer.reset();
-            task.blackBoard.itemTransfer.transferMany = true;
             task.blackBoard.itemTransfer.takingReserved = true;
 
             //Get the constructable and get the items to transfer.
@@ -576,6 +572,8 @@ public class PrebuiltTasks {
          *  consume item
          */
 
+        //TODO The itemTransfer stuff was refactored and probably broke this area, namely the CheckInventoryHas class.
+
         Sequence sequence = new Sequence("consume", blackBoard);
 
         CheckInventoryHas check = new CheckInventoryHas("Checking Inventory", blackBoard);
@@ -593,7 +591,6 @@ public class PrebuiltTasks {
         sequence.getControl().callbacks.startCallback = task->{
             task.blackBoard.itemTransfer.reset(); //Reset item transfers
             task.blackBoard.targetNode = null; //We don't want this set.
-            task.blackBoard.itemTransfer.itemAmountToTransfer = 1; //We only want to take 1
 
             //Get a inventory building from my colony, store the entity as the target, and set the from/to inventory.
             Building storage = task.blackBoard.myManager.getEntityOwner().getComponent(Colonist.class).getColony().getOwnedFromColony(Building.class, b -> b.buildingTags.hasTag("storage"));
@@ -629,8 +626,6 @@ public class PrebuiltTasks {
          *      move to building
          *      transfer itemNames to inventory
          */
-
-        blackBoard.itemTransfer.transferAll = true;
 
         Sequence mainSeq = new Sequence("hunt", blackBoard);
 
@@ -725,8 +720,6 @@ public class PrebuiltTasks {
          * Transfer all resources.
          */
 
-        blackBoard.itemTransfer.transferAll = true;
-        blackBoard.itemTransfer.itemNameToTransfer = null;
         blackBoard.itemTransfer.fromInventory = blackBoard.myManager.getEntityOwner().getComponent(Inventory.class);
 
         Sequence seq = new Sequence("fish", blackBoard);

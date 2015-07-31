@@ -42,7 +42,7 @@
   },
   {
     "name": "workshop",
-    "items": ["wood"],
-    "itemAmounts": [100]
+    "items": ["wood", "stone", "herbs"],
+    "itemAmounts": [100, 50, 10]
   }
 ]

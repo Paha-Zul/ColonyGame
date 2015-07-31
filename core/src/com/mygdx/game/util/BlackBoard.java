@@ -69,14 +69,9 @@ public class BlackBoard{
     }
 
     public static class ItemTransfer{
-        public boolean transferAll;     //If we are to transfer all items or just amounts specified.
-        public boolean transferMany;    //If we are transferring many items.
         public boolean takingReserved;  //If we are taking from a reserve
         public boolean reserveToTake;   //If we should be reserving the item to take.
 
-        public int itemAmountToTransfer;
-
-        public String itemNameToTransfer;
         public Array<String> itemTypesToIgnore;
         public Array<ItemNeeded> itemsToTransfer;
 
@@ -84,14 +79,12 @@ public class BlackBoard{
         public Inventory fromInventory;
 
         public void reset(){
-            transferAll = transferMany = takingReserved = false;
-            itemAmountToTransfer = 0;
+            this.takingReserved = false;
 
-            itemsToTransfer = new Array<>();
-            itemNameToTransfer = "";
+            this.itemsToTransfer = new Array<>();
 
-            toInventory = fromInventory = null;
-            itemTypesToIgnore = new Array<>();
+            this.toInventory = this.fromInventory = null;
+            this.itemTypesToIgnore = new Array<>();
         }
     }
 }

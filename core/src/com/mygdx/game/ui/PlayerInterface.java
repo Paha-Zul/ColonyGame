@@ -121,6 +121,13 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     private boolean extendedTooltip;
     private Timer extendedTooltipTimer = new OneShotTimer(2f, () -> extendedTooltip = true);
 
+    /**
+     * Stuff for drawing colony
+     */
+    public boolean drawingColony = false;
+    private Rectangle colonyScreenRect = new Rectangle();
+    private TextureRegion colonyScreen;
+
     private void loadHuntButtonStyle(){
         huntStyle.normal = ColonyGame.assetManager.get("huntbutton_normal", Texture.class);
         huntStyle.moused = ColonyGame.assetManager.get("huntbutton_moused", Texture.class);
@@ -226,6 +233,8 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         Gdx.input.setInputProcessor(multiplexer);
 
         ColonyGame.camera.zoom = 1.5f;
+
+        this.colonyScreen = new TextureRegion(ColonyGame.assetManager.get("eventWindowBackground", Texture.class));
     }
 
     private void generateFonts(){
@@ -262,6 +271,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         this.drawSelectedEntity();
         this.drawInvAmounts(screenW, screenH, batch);
         this.drawCurrentNotifications(screenW, screenH, delta);
+        this.drawColonyScreen();
 
         if(this.drawingProfiler) Profiler.drawDebug(batch, 200, height - 20);
 
@@ -433,6 +443,12 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
         if(this.selectedProfile == null && this.selectedProfileList.size() > 0)
             this.selectedProfile = this.selectedProfileList.get(0);
+    }
+
+    private void drawColonyScreen(){
+        if(!this.drawingColony) return;
+
+        GUI.Texture(this.colonyScreen, this.batch, this.colonyScreenRect);
     }
 
     /**
@@ -611,9 +627,10 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
                 GUI.Label("Progress", this.batch, rect.x, rect.y + rect.height - 40, rect.width, 20);
                 GUI.DrawBar(this.batch, rect.x + rect.width/2 - 50, rect.y + rect.height - 60, 100, 20, constructable.getPercentageDone(), true, null, null);
 
+                GUI.Label("Items needed:", this.batch, rect.x, rect.y + rect.height - 50 - 10, 50, 100);
                 Array<ItemNeeded> list = constructable.getItemsNeeded();
                 for(int i=0;i<list.size;i++) {
-                    this.reusableImageLabelRect.set(rect.x, rect.y + rect.height - 100 - i*30, 25, 25);
+                    this.reusableImageLabelRect.set(rect.x, rect.y + rect.height - 50 - i*25, 25, 25);
                     GUI.ImageLabel(DataManager.getData(list.get(i).itemName, DataBuilder.JsonItem.class).iconTexture, ""+list.get(i).amountNeeded, this.batch, this.reusableImageLabelRect, 100);
                 }
 
@@ -883,6 +900,8 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         this.tabsTopRect.set(statusTopRect.x + statusTopRect.width, uiBackgroundTopRect.y, width * tabsWidth, uiBackgroundTopRect.height); //The top tabs area
         this.ordersTopRect.set(tabsTopRect.x + tabsTopRect.width, uiBackgroundTopRect.y, width - (tabsRect.x + tabsRect.width), uiBackgroundTopRect.height); //The top orders ares
 
+        this.colonyScreenRect.set(width / 2 - 300, height / 2 - 200, 600, 400);
+
         this.bottomLeftRect.set(width - 100, 0, 100, height * 0.05f);
         this.stage.getViewport().update(width, height);
     }
@@ -924,6 +943,8 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
                 ((Colonist)profile.interactable.getInteractable().getComponent()).setAlert(alert);
             }
 
+        }else if(keycode == Input.Keys.I) { //T - toggle the colonists (if we have a colonist selected) 'alert' mode.
+            this.drawingColony = !this.drawingColony;
         }else
             return false;
 
