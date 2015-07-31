@@ -82,10 +82,11 @@ public class PrebuiltTasks {
         innerGatherSeq.control.addTask(mtResource);
         innerGatherSeq.control.addTask(gather);
 
+        //If we are not actually set to find any resources, just fail the task!
+        gatherOrExplore.control.callbacks.checkCriteria = task -> !task.blackBoard.resourceTypeTags.isEmpty();
+
         //Add these to the main sequence.
         ((ParentTaskController)sequence.getControl()).addTask(returnItems(blackBoard, behComp));
-
-        gatherOrExplore.control.callbacks.checkCriteria = task -> !task.blackBoard.resourceTypeTags.isEmpty();
 
         //Reset some values.
         sequence.control.callbacks.startCallback = task -> {
