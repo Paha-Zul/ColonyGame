@@ -249,6 +249,11 @@ public class GUI {
         return mouseInside;
     }
 
+    public static void ImageLabel(TextureRegion image, String text, SpriteBatch batch, Rectangle imageRect, float textWidth){
+        batch.draw(image, imageRect.x, imageRect.y, imageRect.width, imageRect.height);
+        GUI.Label(text, batch, imageRect.x + imageRect.width, imageRect.y, textWidth, imageRect.height);
+    }
+
     public static String TextBox(String text, SpriteBatch batch, float x, float y){
         return "";
     }

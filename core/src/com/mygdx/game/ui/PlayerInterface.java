@@ -84,13 +84,12 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     private Rectangle statusRect = new Rectangle();
     private Rectangle tabsRect = new Rectangle();
     private Rectangle ordersRect = new Rectangle();
-
     private Rectangle bottomLeftRect = new Rectangle();
-
     private Rectangle selectionBox = new Rectangle();
     private Rectangle profileButtonRect = new Rectangle();
-
     private Rectangle orderButtonRect = new Rectangle();
+
+    private Rectangle reusableImageLabelRect = new Rectangle();
 
     private GUI.GUIStyle gatherStyle = new GUI.GUIStyle();
     private GUI.GUIStyle exploreStyle = new GUI.GUIStyle();
@@ -604,12 +603,20 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
                 }
             }
 
+            //If it has a constructable...
             if(innerInter.getConstructable() != null){
                 Constructable constructable = innerInter.getConstructable();
                 Rectangle rect = this.ordersRect;
                 GUI.Label("constructing", this.batch, rect.x, rect.y + rect.height-20, rect.width, 20);
                 GUI.Label("Progress", this.batch, rect.x, rect.y + rect.height - 40, rect.width, 20);
                 GUI.DrawBar(this.batch, rect.x + rect.width/2 - 50, rect.y + rect.height - 60, 100, 20, constructable.getPercentageDone(), true, null, null);
+
+                Array<ItemNeeded> list = constructable.getItemsNeeded();
+                for(int i=0;i<list.size;i++) {
+                    this.reusableImageLabelRect.set(rect.x, rect.y + rect.height - 100 - i*30, 25, 25);
+                    GUI.ImageLabel(DataManager.getData(list.get(i).itemName, DataBuilder.JsonItem.class).iconTexture, ""+list.get(i).amountNeeded, this.batch, this.reusableImageLabelRect, 100);
+                }
+
             }
         }
     }

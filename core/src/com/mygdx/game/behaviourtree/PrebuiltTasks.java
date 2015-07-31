@@ -421,6 +421,7 @@ public class PrebuiltTasks {
         //This is where we possible get items for the construction.
         Sequence getItemsForConstSeq = new Sequence("GetItemSeq", blackboard);
         AlwaysTrue getItemsSeqTrue = new AlwaysTrue("AlwaysTrue", blackboard, getItemsForConstSeq);
+        FindStorageWithItem findItem = new FindStorageWithItem("FindStorageWithItem", blackboard);
         CheckAndReserve reserve = new CheckAndReserve("CheckAndReserve", blackboard);
         FindPath fpToStorage = new FindPath("PathToStorage", blackboard);
         MoveTo mtStorage = new MoveTo("MoveToStorage", blackboard);
@@ -443,6 +444,8 @@ public class PrebuiltTasks {
         constructionSeq.control.addTask(buildSeq);
 
         //Get items sequence
+        //Find a storage with any of the items we need.
+        getItemsForConstSeq.control.addTask(findItem);
         getItemsForConstSeq.control.addTask(reserve);
         getItemsForConstSeq.control.addTask(fpToStorage);
         getItemsForConstSeq.control.addTask(mtStorage);
@@ -456,6 +459,11 @@ public class PrebuiltTasks {
 
         //Time for the crap
 
+        constructionSeq.control.callbacks.startCallback = task -> {
+            task.blackBoard.target = null;
+            task.blackBoard.targetNode = null;
+        };
+
         //First, we need to get a building under construction. Then, we need to get a list of items. Then we need to find a inventory
         //building with any of the items we need.
         getConstruction.control.callbacks.successCallback = task -> {
@@ -466,16 +474,9 @@ public class PrebuiltTasks {
 
             //Get the constructable and get the items to transfer.
             task.blackBoard.constructable = task.blackBoard.target.getComponent(Constructable.class);
-            task.blackBoard.itemTransfer.itemsToTransfer.addAll(task.blackBoard.constructable.getItemsNeeded());
+            for(ItemNeeded needed : task.blackBoard.constructable.getItemsNeeded()) //Copy the result
+                task.blackBoard.itemTransfer.itemsToTransfer.add(new ItemNeeded(needed.itemName, needed.amountNeeded));
 
-            //Get the inventory and set it as the target.
-            Building storage = task.blackBoard.myManager.getEntityOwner().getComponent(Colonist.class).getColony().getOwnedFromColony(Building.class, b -> b.buildingTags.hasTag("storage"));
-            task.blackBoard.target = storage.getEntityOwner();
-            if(task.blackBoard.target == null) mainSelector.control.finishWithFailure();
-            else{
-                task.blackBoard.itemTransfer.fromInventory = storage.getInventory();
-                task.blackBoard.itemTransfer.toInventory = task.blackBoard.myManager.getEntityOwner().getComponent(Inventory.class);
-            }
         };
 
         getItemsForConstSeq.control.callbacks.finishCallback = task -> {
@@ -488,6 +489,8 @@ public class PrebuiltTasks {
 
         buildSeq.control.callbacks.startCallback = task -> {
             task.blackBoard.itemTransfer.takingReserved = false;
+            task.blackBoard.target = task.blackBoard.constructable.getEntityOwner();
+            task.blackBoard.targetNode = null;
         };
 
         //Make sure the building either has materials or we have the materials.

@@ -16,21 +16,25 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 public class GraphicIdentity extends Component {
+    @JsonProperty("textureName")
+    public String spriteTextureName = "";
+    @JsonProperty("atlasName")
+    public String atlasName = "";
     @JsonIgnore
     private Sprite sprite;
     @JsonIgnore
     private Effects effects;
     @JsonProperty
-    public int alignment = 0; //center
+    private Vector2 anchor;
+
     @JsonProperty
     private int currVisibility=0;
-    @JsonProperty("textureName")
-    public String spriteTextureName = "";
-    @JsonProperty("atlasName")
-    public String atlasName = "";
+
 
     public GraphicIdentity(){
         this.setActive(true);
+
+        this.anchor = new Vector2(0.5f, 0.5f);
     }
 
 	@Override
@@ -87,11 +91,7 @@ public class GraphicIdentity extends Component {
             this.getSprite().setRotation(this.owner.getTransform().getRotation());
             this.getSprite().setScale(this.owner.getTransform().getScale());
 
-            if (alignment == 0)
-                this.getSprite().setPosition(pos.x - (getSprite().getWidth() / 2), pos.y - (getSprite().getHeight() / 2));
-            if (alignment == 1)
-                this.getSprite().setPosition(pos.x - (getSprite().getWidth() / 2), pos.y);
-
+            this.sprite.setPosition(pos.x - (getSprite().getWidth()*this.anchor.x), pos.y - (getSprite().getHeight()*this.anchor.y));
             this.getSprite().draw(batch);
 
             if(effects != null){
@@ -140,6 +140,19 @@ public class GraphicIdentity extends Component {
         }
 
         this.configureSprite(this.getSprite());
+    }
+
+    /**
+     * Sets the anchor of this graphic identity. The values need to be between 0 and 1 (inclusive).
+     * @param x The anchor point for the X position.
+     * @param y THe anchor point for the Y position.
+     */
+    @JsonIgnore
+    public void setAnchor(float x, float y){
+        if(x < 0 || x > 1 || y < 0 || x > 1)
+            GH.writeErrorMessage("The anchor X or Y value was below 0 or above 1 (out of bounds). Fix this problem!", true);
+        else
+            this.anchor.set(x, y);
     }
 
     @JsonIgnore

@@ -10,7 +10,6 @@ import com.mygdx.game.component.Interactable;
 import com.mygdx.game.component.collider.Collider;
 import com.mygdx.game.component.graphic.GraphicIdentity;
 import com.mygdx.game.util.Constants;
-import com.mygdx.game.util.GH;
 
 /**
  * Created by Paha on 2/28/2015.
@@ -34,9 +33,9 @@ public class ResourceEnt extends Entity{
         gridComp.setGrid(ColonyGame.worldGrid);
         gridComp.setExploreRadius(-1);
         GraphicIdentity identity = this.getComponent(GraphicIdentity.class);
-        if(identity != null) identity.alignment = 1;
+        if(identity != null) identity.setAnchor(0.5f, 0.05f);
 
-        this.makeCollider();
+        this.load();
     }
 
     @Override
@@ -47,7 +46,7 @@ public class ResourceEnt extends Entity{
     @Override
     public void load() {
         super.load();
-        makeCollider();
+        this.makeCollider();
     }
 
     private void makeCollider(){
@@ -55,21 +54,24 @@ public class ResourceEnt extends Entity{
         GraphicIdentity graphic = this.getComponent(GraphicIdentity.class);
         if(graphic == null || graphic.getSprite() == null) return;
 
+        //Make a new body definition
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.StaticBody;
         //bodyDef.active = false;
 
         //Set the polygon shape as a box using the sprite's width and height
         PolygonShape box = new PolygonShape();
-        float width = GH.toMeters(graphic.getSprite().getWidth()), height = GH.toMeters(graphic.getSprite().getHeight());
+        float width = graphic.getSprite().getWidth(), height = graphic.getSprite().getHeight();
         Vector2 center = new Vector2(graphic.getSprite().getX(), graphic.getSprite().getY() + height/2);
         box.setAsBox(width/4, height/2, center, 0);
 
-        box.setRadius(0.5f);
+        //Make a new fixture definition
+        //box.setRadius(0.5f);
         FixtureDef fixDef = new FixtureDef();
         fixDef.isSensor = true;
         fixDef.shape = box;
 
+        //Try to get the collider. If null, make a new one!
         Collider collider = getComponent(Collider.class);
         if(collider == null){
             collider = new Collider();

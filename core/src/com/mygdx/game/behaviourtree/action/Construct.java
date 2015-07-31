@@ -31,7 +31,7 @@ public class Construct extends LeafTask{
         super.start();
 
         this.constructable = this.blackBoard.target.getComponent(Constructable.class);
-        this.buildTimer = new RepeatingTimer(0.1, false, () -> {
+        this.buildTimer = new RepeatingTimer(1, false, () -> {
             int rand = MathUtils.random(2) + 1;
             ColonyGame.assetManager.get("hammer_"+rand, Sound.class).play();
             int result = this.constructable.build();

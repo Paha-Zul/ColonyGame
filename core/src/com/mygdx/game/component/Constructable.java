@@ -13,7 +13,8 @@ import java.util.HashMap;
  */
 public class Constructable extends Component{
     private Inventory inventory;
-    private HashMap<String, ConstructableItemAmounts> itemMap = new HashMap<>();
+    private HashMap<String, ConstructableItemAmounts> itemsNeededMap = new HashMap<>();
+    private Array<ItemNeeded> itemsNeededList = new Array<>();
     private int totalItemsNeeded, totalItemsSupplied;
     private boolean complete=false;
 
@@ -58,6 +59,7 @@ public class Constructable extends Component{
         super.load();
 
         this.inventory = this.getComponent(Inventory.class);
+        this.calculateItemsNeeded();
     }
 
     /**
@@ -67,14 +69,19 @@ public class Constructable extends Component{
      * @return The Constructable for chaining.
      */
     public Constructable addItemRequirement(String itemName, int itemAmount){
-        this.itemMap.put(itemName, new ConstructableItemAmounts(itemName, itemAmount));
+        this.itemsNeededMap.put(itemName, new ConstructableItemAmounts(itemName, itemAmount));
         this.totalItemsNeeded+=itemAmount;
         return this;
     }
 
+    /**
+     * Builds the constructable using any items in the inventory that are usable for this construction.
+     * @return -1 for not having enough items to finish the construction, 0 for not being finished but we can still continue to build,
+     * and 1 for completing the construction.
+     */
     public int build(){
         boolean hasAnItem = false;
-        for(ConstructableItemAmounts item : itemMap.values()){
+        for(ConstructableItemAmounts item : itemsNeededMap.values()){
             int amount = this.inventory.getItemAmount(item.itemName);
             if(amount > 0){
                 hasAnItem = true;
@@ -83,7 +90,8 @@ public class Constructable extends Component{
                 this.totalItemsSupplied+=useAmount; //Add the amount to the total items supplied
                 item.amountFulfilled+=useAmount;    //Add the amount to the item's amount fulfilled
                 if(item.amountFulfilled >= item.amountNeeded)  //If we have fulfilled it all, remove it from the needed materials.
-                    this.itemMap.remove(item.itemName);
+                    this.itemsNeededMap.remove(item.itemName);
+                this.calculateItemsNeeded();
                 break;
             }
         }
@@ -93,7 +101,7 @@ public class Constructable extends Component{
             return -1;
 
         //If we have no more items needed, return 1 for complete.
-        if(itemMap.size() == 0) {
+        if(itemsNeededMap.size() == 0) {
             this.setComplete();
             return 1;
         }
@@ -103,27 +111,32 @@ public class Constructable extends Component{
     }
 
     /**
-     * Gets the remaining items needed and the amounts to finish this construction.
-     * @return An object that holds an item name and an amount needed.
+     * Recalculates the items needed for this constructable. Stores it in the itemsNeededList (reused).
      */
-    public Array<ItemNeeded> getItemsNeeded(){
-        Array<ItemNeeded> items = new Array<>();
-        for(String item : itemMap.keySet()){
+    private void calculateItemsNeeded(){
+        this.itemsNeededList = new Array<>();
+        for(String item : itemsNeededMap.keySet()){
             int amountNeeded = itemAmountNeeded(item);
             if(amountNeeded > 0) //Only add if we actually need some.
-                items.add(new ItemNeeded(item, amountNeeded));
+                this.itemsNeededList.add(new ItemNeeded(item, amountNeeded));
         }
-
-        return items;
     }
 
     /**
-     * Gets the amount needed of an item by the name of 'itemName' to fulfill the need for that item.
+     * Gets the remaining items needed and the amounts to finish this construction.
+     * @return An object that holds an item name and an amount needed. This list is reused.
+     */
+    public final Array<ItemNeeded> getItemsNeeded(){
+        return this.itemsNeededList;
+    }
+
+    /**
+     * Gets the amount needed of an item by the name of 'itemName' to fulfill the need for that item. This includes the item in the inventory if it exists.
      * @param itemName The name of the item.
      * @return A positive number if the constructable requires more of the item. 0 or negative means none needed or an overflow respectively.
      */
     public int itemAmountNeeded(String itemName){
-        ConstructableItemAmounts amounts = itemMap.get(itemName);
+        ConstructableItemAmounts amounts = itemsNeededMap.get(itemName);
         return amounts.amountNeeded - amounts.amountFulfilled - this.inventory.getItemAmount(itemName, true);
     }
 
@@ -147,6 +160,7 @@ public class Constructable extends Component{
     public void setComplete(){
         this.owner.getGraphicIdentity().getSprite().setAlpha(1f);
         this.complete = true;
+        this.getEntityOwner().removeComponent(this);
     }
 
     /**
@@ -157,9 +171,9 @@ public class Constructable extends Component{
     }
 
     private class ConstructableItemAmounts{
-        public String itemName;
-        public int amountNeeded=0;
-        public int amountFulfilled=0;
+        public String itemName; //The name
+        public int amountNeeded=0; //The amount that is needed
+        public int amountFulfilled=0; //The amount that has been used in the construction.
 
         public ConstructableItemAmounts(String itemName, int amountNeeded){
             this.itemName = itemName;
