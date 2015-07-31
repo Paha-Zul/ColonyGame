@@ -449,6 +449,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         if(!this.drawingColony) return;
 
         GUI.Texture(this.colonyScreen, this.batch, this.colonyScreenRect);
+        this.drawInventory(PlayerManager.getPlayer("Player").colony.getInventory(), this.colonyScreenRect);
     }
 
     /**

@@ -244,7 +244,7 @@ public class Inventory extends Component implements IOwnable {
         if(itemMap.size() == 0) this.inventory.remove(itemRef.getItemType());
 
         //Removed the amount from the colony if possible and fire an event.
-        if (colony != null) colony.addItemToGlobal(itemRef, -amountToRemove);
+        if (this.colony != null) colony.addItemToGlobal(itemRef, -removed);
         EventSystem.notifyEntityEvent(this.owner, "removed_item", itemRef, amountToRemove);
 
         return removed;

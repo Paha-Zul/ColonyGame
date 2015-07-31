@@ -46,6 +46,8 @@ public class Colony extends Component implements IInteractable {
         super.start();
         this.owner.name = "emptyColonyObject";
 
+        this.inventory = this.owner.addComponent(new Inventory());
+        this.inventory.setMaxAmount(-1);
         load();
         placeStart();
     }
@@ -223,25 +225,13 @@ public class Colony extends Component implements IInteractable {
      * @param amount The amount to add.
      */
     public void addItemToGlobal(DataBuilder.JsonItem itemRef, int amount){
-        Inventory.InventoryItem invItem = quickInv.get(itemRef.getItemName());
-        if(invItem == null) {
-            quickInv.put(itemRef.getItemName(), new Inventory.InventoryItem(itemRef, amount, -1));
-        }else
-            invItem.addAmount(amount);
+        if(amount > 0) this.inventory.addItem(itemRef.getItemName(), amount);
+        else if(amount < 0) this.inventory.removeItem(itemRef.getItemName(), -amount);
     }
 
     @JsonIgnore
     public final HashMap<String, Inventory.InventoryItem> getGlobalInv(){
         return quickInv;
-    }
-
-    /**
-     * Gets the total number of stocked resources for this Colony.
-     * @return An integer which is the total number of stocked resources.
-     */
-    @JsonIgnore
-    public int getTotalStockedResources(){
-        return this.inventory.getCurrTotalItems();
     }
 
     /**

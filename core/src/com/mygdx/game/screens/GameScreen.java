@@ -87,7 +87,7 @@ public class GameScreen implements Screen{
     }
 
     private void generateStart(Vector2 start){
-        //Add our colony to an empty entity.
+        //Add our colony to an empty entity and create a player using the colony.
         Entity empty = new Entity(new Vector2(0,0), 0, 0);
         ListHolder.addEntity(empty);
         Colony colony = empty.addComponent(new Colony());
