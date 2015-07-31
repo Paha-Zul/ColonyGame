@@ -64,7 +64,9 @@ public class PrebuiltTasks {
         //All this should be under a repeat.
         Sequence innerGatherSeq = new Sequence("Gathering", blackBoard);
         RepeatUntilCondition repeatGather = new RepeatUntilCondition("Repeat", blackBoard, innerGatherSeq);
-        FindClosestEntity fr = new FindClosestEntity("Finding Closest Resource", blackBoard);
+        FindResource _fr = new FindResource("Finding resource", blackBoard);
+        ReserveResource rr = new ReserveResource("Reserving", blackBoard);
+        //FindClosestEntity fr = new FindClosestEntity("Finding Closest Resource", blackBoard);
         FindPath fpResource = new FindPath("Finding Path to Resource", blackBoard);
         MoveTo mtResource = new MoveTo("Moving to Resource", blackBoard);
         Gather gather = new Gather("Gathering Resource", blackBoard);
@@ -77,7 +79,8 @@ public class PrebuiltTasks {
 
         //Add the repeat gather task to the main sequence, and then the rest to the inner sequence under repeat.
         sequence.control.addTask(repeatGather);
-        innerGatherSeq.control.addTask(fr);
+        innerGatherSeq.control.addTask(_fr);
+        innerGatherSeq.control.addTask(rr);
         innerGatherSeq.control.addTask(fpResource);
         innerGatherSeq.control.addTask(mtResource);
         innerGatherSeq.control.addTask(gather);
@@ -94,13 +97,6 @@ public class PrebuiltTasks {
             task.blackBoard.itemTransfer.reset();
         };
 
-        //When we finish, set the target back to not taken IF it is still a valid target (if we ended early).
-        sequence.getControl().callbacks.finishCallback = task -> {
-            if (blackBoard.targetResource != null && blackBoard.targetResource.isValid() && sequence.getBlackboard().targetResource.getTaken() == sequence.getBlackboard().myManager.getEntityOwner()) {
-                sequence.getBlackboard().targetResource.setTaken(null);
-            }
-        };
-
         //Check if we can still add more items that we are looking for. Return true if we can't (to end the repeat)
         //and false to keep repeating.
         repeatGather.getControl().callbacks.successCriteria = tsk -> {
@@ -111,50 +107,6 @@ public class PrebuiltTasks {
             for(String itemName : itemNames) if(inv.canAddItem(itemName)) return false;
             return true;
         };
-
-        //Check if our resourceTypeTags are empty. If so, no use trying to find an entity.
-        fr.control.callbacks.checkCriteria = task -> !task.blackBoard.resourceTypeTags.isEmpty();
-
-        //Check to make sure the resource isn't taken. Also make sure the resource has an item we want.
-        fr.getControl().callbacks.successCriteria = (e) -> {
-            Entity ent = (Entity)e;
-            Resource resource = ent.getComponent(Resource.class);
-            if(resource == null || blackBoard.resourceTypeTags.isEmpty()) return false;
-
-            String[] blackTags = blackBoard.resourceTypeTags.getTagsAsString();
-            boolean notTaken = !resource.isTaken();
-            boolean hasTag = resource.resourceTypeTags.hasAnyTag(blackTags);
-            boolean hasAvailableItem = resource.peekAvailableOnlyWanted(blackBoard.myInventory, blackTags);
-
-            return notTaken && hasTag && hasAvailableItem;
-        };
-
-        //If we fail this, we should fail the repeat gather cause we found nothing at all!
-        fr.getControl().callbacks.failureCallback = task -> repeatGather.getControl().finishWithFailure();
-
-        //On success, set the resource as taken if not already taken.
-        fr.getControl().callbacks.successCallback = task ->  {
-            task.blackBoard.targetResource = task.blackBoard.target.getComponent(Resource.class);
-            if(!task.blackBoard.targetResource.isTaken() || task.blackBoard.targetResource.getTaken() == task.blackBoard.myManager.getEntityOwner()) {
-                task.blackBoard.targetResource.setTaken(task.blackBoard.myManager.getEntityOwner());
-            }
-        };
-
-        //If we don't have a target resource, try to get one from our target. Then check if it's valid and owned by us.
-        //If not, cancel the job. This secondary check is done because the job can be threaded
-        fpResource.control.callbacks.checkCriteria = task -> {
-            if(task.blackBoard.targetResource == null) task.blackBoard.targetResource = task.blackBoard.target.getComponent(Resource.class);
-            return task.blackBoard.targetResource != null && (task.blackBoard.targetResource.getTaken() == null || task.blackBoard.targetResource.getTaken() == task.blackBoard.myManager.getEntityOwner());
-        };
-
-
-        //When we finish gathering from a source, try to untake it in case it's infinite (like a water source)
-        gather.getControl().callbacks.finishCallback = task -> {
-            if(blackBoard.targetResource != null && blackBoard.targetResource.isValid())
-                if(blackBoard.targetResource.getTaken() == blackBoard.myManager.getEntityOwner())
-                    blackBoard.targetResource.setTaken(null);
-        };
-
 
         return gatherOrExplore;
     }

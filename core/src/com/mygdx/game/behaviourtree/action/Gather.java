@@ -135,7 +135,8 @@ public class Gather extends LeafTask{
 
     @Override
     public void end() {
-
         super.end();
+        if(this.blackBoard.targetResource != null)
+            this.blackBoard.targetResource.setTaken(null);
     }
 }

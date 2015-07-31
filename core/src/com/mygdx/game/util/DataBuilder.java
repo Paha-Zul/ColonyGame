@@ -116,6 +116,12 @@ public class DataBuilder implements IDestroyable{
                 jsonItem.iconTexture = atlas.findRegion(jsonItem.icon);
                 if(jsonItem.iconTexture == null) jsonItem.iconTexture = atlas.findRegion("missing");
                 DataManager.addData(jsonItem.itemName, jsonItem, JsonItem.class);
+                Array<String> typeList = JsonItem.categoryMap.get(jsonItem.category);
+                if(typeList == null) {
+                    typeList = new Array<>();
+                    JsonItem.categoryMap.put(jsonItem.category, typeList);
+                }
+                if(!typeList.contains(jsonItem.getItemType(), false)) typeList.add(jsonItem.getItemType());
             }
         });
 
@@ -125,6 +131,12 @@ public class DataBuilder implements IDestroyable{
                 tool.iconTexture = atlas.findRegion(tool.icon);
                 if(tool.iconTexture == null) tool.iconTexture = atlas.findRegion("missing");
                 DataManager.addData(tool.itemName, tool, JsonItem.class);
+                Array<String> typeList = JsonItem.categoryMap.get(tool.category);
+                if(typeList == null) {
+                    typeList = new Array<>();
+                    JsonItem.categoryMap.put(tool.category, typeList);
+                }
+                if(!typeList.contains(tool.getItemType(), false)) typeList.add(tool.getItemType());
             }
         });
 
@@ -493,15 +505,15 @@ public class DataBuilder implements IDestroyable{
     };
 
     public static class JsonItem{
+        public static HashMap<String, Array<String>> categoryMap = new HashMap<>();
         public Array<JsonResource> inResources = new Array<>(); //A link to the resources this item is in.
         public Array<String> possibleTools = new Array<>();
 
-        protected String itemName, displayName, itemType, description, img;
+        protected String itemName, displayName, category, itemType, description, img;
         protected String[] effects;
         protected int[] strengths;
         public String icon;
         public TextureRegion iconTexture;
-
 
         public String getItemName() {
             return itemName;

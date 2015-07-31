@@ -181,7 +181,8 @@ public class Resource extends Component implements IInteractable{
     }
 
     /**
-     * Only peeks for available resources that we want, which is supplied by the 'wanted' parameter.
+     * Peeks in the resource for any items that match the 'wanted' string list. If any one of the items in the list
+     * are found to be in the resource, the function returns true.
      * @param inventory The Inventory to check against.
      * @param wanted The String array of wanted types. Every item checked to be added will first be checked if it is wanted.
      * @return True if an item is wanted, false otherwise.
@@ -190,15 +191,15 @@ public class Resource extends Component implements IInteractable{
         if(!peek()) return false; //If this resource has nothing left, return false.
 
         //Try to find an item we can take.
-        int flag = itemIndex;
+        int flag = this.itemIndex;
         do{
             //First, check that the current item from the resource is one that we want and can be added to the inventory. Return true if so.
             for(String want : wanted)
-                if(want.equals(itemNames.get(itemIndex)) && inventory.canAddItem(itemNames.get(itemIndex)))
+                if(want.equals(itemNames.get(this.itemIndex)) && inventory.canAddItem(itemNames.get(this.itemIndex)))
                     return true; //If we can take this, return true.
 
-            itemIndex = (itemIndex + 1)% itemNames.size;
-        }while(itemIndex != flag);
+            this.itemIndex = (this.itemIndex + 1)% itemNames.size; //Increment the itemIndex. This will basically preposition the index.
+        }while(this.itemIndex != flag);
 
         //If we could find nothing we could take, return false.
         return false;

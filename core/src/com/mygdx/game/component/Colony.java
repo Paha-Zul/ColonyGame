@@ -156,7 +156,7 @@ public class Colony extends Component implements IInteractable {
         grid.performOnEntityInRadius(treeConsumer, notWaterNode, radius, grid.getIndex(colonyEnt.getTransform().getPosition()));
 
         //Make some colonists!
-        for(int i=0;i<2;i++) {
+        for(int i=0;i<1;i++) {
             Entity c = this.makeColonist(colonyEnt.getTransform().getPosition(), GH.toMeters(200), "colonist");
             c.getComponent(Colonist.class).setName(GameScreen.firstNames[MathUtils.random(GameScreen.firstNames.length - 1)], GameScreen.lastNames[MathUtils.random(GameScreen.lastNames.length - 1)]);
             this.addColonist(c.getComponent(Colonist.class));

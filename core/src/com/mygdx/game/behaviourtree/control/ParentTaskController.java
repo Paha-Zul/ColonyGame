@@ -54,9 +54,8 @@ public class ParentTaskController extends TaskController{
 
         //Skip the safe end. That's for when it ends normally. We don't want to call the callbacks a second time.
         this.subTasks.forEach(task -> {
-            if(task.getControl().finished)
-                task.end();
-            else {
+            //TODO Maybe not do task.end if the task is finished, because it has already ended?
+            if(!task.getControl().finished){
                 task.getControl().finishWithFailure();
                 task.getControl().safeEnd();
             }

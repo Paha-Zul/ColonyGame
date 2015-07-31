@@ -292,6 +292,17 @@ public class Inventory extends Component implements IOwnable {
     }
 
     /**
+     * Gets a list of the items for the specific type passed in.
+     * @param itemType The type of item to get a list of.
+     * @return An array of items of the 'itemType'. Could be 0 if the type doesn't exist or there are no items of the type.
+     */
+    public final InventoryItem[] getItemsOfTypeList(String itemType){
+        HashMap<String, InventoryItem> map = this.inventory.get(itemType);
+        if(map == null) return new InventoryItem[0];
+        return map.values().toArray(new InventoryItem[map.size()]);
+    }
+
+    /**
      * Gets a list of the inventory.
      * @return An ArrayList containing the InventoryItems of the inventory.
      */
@@ -359,6 +370,15 @@ public class Inventory extends Component implements IOwnable {
         return item.getMaxAmount() - item.getAmount();
     }
 
+
+    /**
+     * Gets the max amount per item.
+     * @return The max amount per item. If the max amount is -1 to signify infinite, it will return the max value of an integer (2147483647).
+     */
+    public int getMaxAmount() {
+        return this.maxAmount == -1 ? Integer.MAX_VALUE : this.maxAmount;
+    }
+
     /**
      * Checks if the itemType passed in is the only type in this inventory.
      * @param itemType The type of the item.
@@ -383,14 +403,6 @@ public class Inventory extends Component implements IOwnable {
      */
     public boolean isEmpty() {
         return this.inventory.size() == 0;
-    }
-
-    /**
-     * Gets the max amount per item.
-     * @return The max amount per item. If the max amount is -1 to signify infinite, it will return the max value of an integer (2147483647).
-     */
-    public int getMaxAmount() {
-        return this.maxAmount == -1 ? Integer.MAX_VALUE : this.maxAmount;
     }
 
     /**

@@ -2,6 +2,7 @@
   {
     "itemName": "stone",
     "displayName": "Stones",
+    "category": "raw",
     "itemType": "stone",
     "description": "Hard stuff.",
     "icon": "stone"
@@ -9,6 +10,7 @@
   {
     "itemName": "metal",
     "displayName": "Metal Fragments",
+    "category": "raw",
     "itemType": "metal",
     "description": "Shiny fragments.",
     "icon": "metal"
@@ -16,12 +18,14 @@
   {
     "itemName": "nitrate",
     "displayName": "Nitrates",
+    "category": "raw",
     "itemType": "metal",
     "description": "It's like nitrogen?"
   },
   {
     "itemName": "fish",
     "displayName": "Fish",
+    "category": "raw",
     "itemType": "food",
     "description": "A slippery fish.",
     "effects": ["feed"],
@@ -30,6 +34,7 @@
   {
     "itemName": "wood",
     "displayName": "Wood Log",
+    "category": "raw",
     "itemType": "wood",
     "description": "A wood log.",
     "icon": "wood"
@@ -37,12 +42,14 @@
   {
     "itemName": "twig",
     "displayName": "Twig",
+    "category": "raw",
     "itemType": "wood",
     "description": "A Twig."
   },
   {
     "itemName": "herbs",
     "displayName": "Herbs",
+    "category": "raw",
     "itemType": "herbs",
     "description": "Medicinal Herbs.",
     "effects": ["heal"],
@@ -52,6 +59,7 @@
   {
     "itemName": "food",
     "displayName": "Food",
+    "category": "raw",
     "itemType": "food",
     "description": "Yummy food.",
     "effects": ["feed"],
@@ -61,6 +69,7 @@
   {
     "itemName": "water",
     "displayName": "Water",
+    "category": "raw",
     "itemType": "water",
     "description": "Yummy water.",
     "effects": ["thirst"],
@@ -70,6 +79,7 @@
   {
     "itemName": "hide",
     "displayName": "Animal Hide",
+    "category": "raw",
     "itemType": "hide",
     "description": "Awesome animal hide.",
     "icon": "hide"
