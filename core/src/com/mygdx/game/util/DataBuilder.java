@@ -122,6 +122,7 @@ public class DataBuilder implements IDestroyable{
                     JsonItem.categoryMap.put(jsonItem.category, typeList);
                 }
                 if(!typeList.contains(jsonItem.getItemType(), false)) typeList.add(jsonItem.getItemType());
+                JsonItem.allItems.add(jsonItem.itemName);
             }
         });
 
@@ -137,6 +138,7 @@ public class DataBuilder implements IDestroyable{
                     JsonItem.categoryMap.put(tool.category, typeList);
                 }
                 if(!typeList.contains(tool.getItemType(), false)) typeList.add(tool.getItemType());
+                JsonItem.allItems.add(tool.itemName);
             }
         });
 
@@ -506,6 +508,8 @@ public class DataBuilder implements IDestroyable{
 
     public static class JsonItem{
         public static HashMap<String, Array<String>> categoryMap = new HashMap<>();
+        public static Array<String> allItems = new Array<>();
+
         public Array<JsonResource> inResources = new Array<>(); //A link to the resources this item is in.
         public Array<String> possibleTools = new Array<>();
 

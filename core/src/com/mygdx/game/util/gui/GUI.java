@@ -213,20 +213,23 @@ public class GUI {
         y -= style.paddingTop;
         height -= style.paddingBottom;
 
-
+        //If center, push the X and Y towards the center by half the width/height
         if(style.alignment == Align.center){
             adjX += width/2 - boundsWidth/2;
             adjY += height/2 + bounds.height/2;
             alignment = BitmapFont.HAlignment.CENTER;
 
+            //If left, leave X but center Y.
         }else if(style.alignment == Align.left) {
             adjY += height / 2 + bounds.height / 2;
             alignment = BitmapFont.HAlignment.LEFT;
 
+        //If top left, leave X and Y
         }else if(style.alignment == Align.topLeft) {
             adjY += height;
             alignment = BitmapFont.HAlignment.LEFT;
 
+        //If top, center X but leave Y.
         }else if(style.alignment == Align.top){
             adjY += height;
             adjX += width/2 - boundsWidth/2;
@@ -250,8 +253,16 @@ public class GUI {
     }
 
     public static void ImageLabel(TextureRegion image, String text, SpriteBatch batch, Rectangle imageRect, float textWidth){
-        batch.draw(image, imageRect.x, imageRect.y, imageRect.width, imageRect.height);
-        GUI.Label(text, batch, imageRect.x + imageRect.width, imageRect.y, textWidth, imageRect.height);
+        GUI.ImageLabel(image, text, batch, imageRect.x, imageRect.y, imageRect.width, imageRect.height, textWidth);
+    }
+
+    public static void ImageLabel(TextureRegion image, String text, SpriteBatch batch, float x, float y, float imageWidth, float imageHeight, float textWidth){
+        GUI.ImageLabel(image, text, batch, x, y, imageWidth, imageHeight, textWidth, null);
+    }
+
+    public static void ImageLabel(TextureRegion image, String text, SpriteBatch batch, float x, float y, float imageWidth, float imageHeight, float textWidth, GUIStyle style){
+        batch.draw(image, x, y, imageWidth, imageHeight);
+        GUI.Label(text, batch, x + imageWidth, y, textWidth, imageHeight, style);
     }
 
     public static String TextBox(String text, SpriteBatch batch, float x, float y){

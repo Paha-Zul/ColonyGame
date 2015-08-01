@@ -449,7 +449,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         if(!this.drawingColony) return;
 
         GUI.Texture(this.colonyScreen, this.batch, this.colonyScreenRect);
-        this.drawInventory(PlayerManager.getPlayer("Player").colony.getInventory(), this.colonyScreenRect);
+        this.drawColonyInventory(PlayerManager.getPlayer("Player").colony.getInventory(), this.colonyScreenRect);
     }
 
     /**
@@ -677,6 +677,48 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         this.UIStyle.alignment = Align.center;
         this.UIStyle.paddingLeft = 0;
         this.UIStyle.paddingTop = 0;
+    }
+
+    private void drawColonyInventory(Inventory inventory, Rectangle rect){
+        //We need to use the global list of items.
+        Array<String> itemList = DataBuilder.JsonItem.allItems;
+
+        batch.setColor(Color.WHITE);
+        this.UIStyle.alignment = Align.center;
+        this.UIStyle.paddingTop = 0;
+        int iconSize =  32;
+        float labelWidth = 50;
+
+        //Starting X and Y pos.
+        float xPos = rect.x + 10;
+        float yPos = rect.y + rect.height - iconSize - 10;
+        TextureRegion _icon = null;
+        this.UIStyle.background = new TextureRegion(ColonyGame.assetManager.get("background", Texture.class));
+
+        //Draw each item.
+        for(int i=0;i<itemList.size;i++){
+            String itemName = itemList.get(i);
+            int itemAmount = inventory.getItemAmount(itemName);
+            String label = ""+itemAmount;
+            _icon = DataManager.getData(itemName, DataBuilder.JsonItem.class).iconTexture;
+
+            //Draw the label of the amount and the icon.
+            GUI.ImageLabel(_icon, label, this.batch, xPos, yPos, iconSize, iconSize, labelWidth, this.UIStyle);
+
+            //Increment the yPos, if we're too far down, reset Y and shift X.
+            yPos -= iconSize + 5;
+            if(yPos < rect.y){
+                xPos += iconSize + labelWidth + 10;
+                yPos = rect.y+rect.height - iconSize- 10;
+            }
+        }
+
+        //Reset color and padding/alignment
+        this.batch.setColor(Color.WHITE);
+        this.UIStyle.alignment = Align.center;
+        this.UIStyle.paddingLeft = 0;
+        this.UIStyle.paddingTop = 0;
+        this.UIStyle.background = null;
     }
 
     //Draws the buttons for each selectedEntity colonist that we have control of.

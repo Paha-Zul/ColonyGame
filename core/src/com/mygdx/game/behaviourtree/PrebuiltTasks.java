@@ -64,7 +64,7 @@ public class PrebuiltTasks {
         //All this should be under a repeat.
         Sequence innerGatherSeq = new Sequence("Gathering", blackBoard);
         RepeatUntilCondition repeatGather = new RepeatUntilCondition("Repeat", blackBoard, innerGatherSeq);
-        FindResource _fr = new FindResource("Finding resource", blackBoard);
+        FindResource fr = new FindResource("Finding resource", blackBoard);
         ReserveResource rr = new ReserveResource("Reserving", blackBoard);
         //FindClosestEntity fr = new FindClosestEntity("Finding Closest Resource", blackBoard);
         FindPath fpResource = new FindPath("Finding Path to Resource", blackBoard);
@@ -79,7 +79,7 @@ public class PrebuiltTasks {
 
         //Add the repeat gather task to the main sequence, and then the rest to the inner sequence under repeat.
         sequence.control.addTask(repeatGather);
-        innerGatherSeq.control.addTask(_fr);
+        innerGatherSeq.control.addTask(fr);
         innerGatherSeq.control.addTask(rr);
         innerGatherSeq.control.addTask(fpResource);
         innerGatherSeq.control.addTask(mtResource);
@@ -93,9 +93,11 @@ public class PrebuiltTasks {
 
         //Reset some values.
         sequence.control.callbacks.startCallback = task -> {
-            //Reset blackboard values...
             task.blackBoard.itemTransfer.reset();
         };
+
+        //If we failed during the find resource stage, that means we need to explore. Fail the repeat task so we don't repeat!
+        fr.control.callbacks.failureCallback = task -> repeatGather.getControl().finishWithFailure();
 
         //Check if we can still add more items that we are looking for. Return true if we can't (to end the repeat)
         //and false to keep repeating.
