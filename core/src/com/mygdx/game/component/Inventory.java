@@ -467,25 +467,27 @@ public class Inventory extends Component implements IOwnable {
          * @return The amount that was unreserved.
          */
         public int unReserve(long id) {
-            ItemLink link=null;
+            //First, try to find the reserve.
+            ItemLink reserve=null;
             for (ItemLink _link : reserveList) {
                 if (_link.id == id) {
-                    link = _link;
+                    reserve = _link;
                     break;
                 }
             }
 
             int _unReserved = 0;
-            if(link == null) return _unReserved;
+            //If no reserve was found, return 0.
+            if(reserve == null) return _unReserved;
             else {
                 //TODO Clean this up! Since we have the reserve list now, we probably don't need to check for bounds.
                 //Either take the amount requested (if under the total amount), or the total amount if amount > total
-                _unReserved = link.amount <= this.getAmount(false) ? link.amount : this.getAmount(false);
+                _unReserved = reserve.amount <= this.getAmount(false) ? reserve.amount : this.getAmount(false);
                 this.reserved -= _unReserved;   //Take away from the reserves.
-                link.amount -= _unReserved;     //Take away from the link amount.
+                reserve.amount -= _unReserved;     //Take away from the link amount.
 
                 //If the link amount is 0 or less and the id is not 0, remove it from the list.
-                if(link.amount <= 0) this.reserveList.removeValue(link, true);
+                if(reserve.amount <= 0) this.reserveList.removeValue(reserve, true);
             }
             return _unReserved; //Return it!
         }
@@ -507,17 +509,19 @@ public class Inventory extends Component implements IOwnable {
          * @param id The id to use.
          */
         public int removeOnTheWay(long id) {
-            ItemLink link=null;
+            //First, try to find the reserve.
+            ItemLink onTheWay=null;
             for(ItemLink _link : this.onTheWayList){
                 if(_link.id == id){
-                    link = _link;
+                    onTheWay = _link;
                     break;
                 }
             }
-            if(link == null) return 0;
-            this.onTheWay = this.onTheWay - link.amount < 0 ? 0 : this.onTheWay - link.amount;
-            this.onTheWayList.removeValue(link, true); //Remove it from the list.
-            return link.amount;
+            //If no reserve was found, return 0.
+            if(onTheWay == null) return 0;
+            this.onTheWay = this.onTheWay - onTheWay.amount < 0 ? 0 : this.onTheWay - onTheWay.amount;
+            this.onTheWayList.removeValue(onTheWay, true); //Remove it from the list.
+            return onTheWay.amount;
         }
 
         /**

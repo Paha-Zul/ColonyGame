@@ -35,13 +35,17 @@ public class TransferItem extends LeafTask{
             }
         }
 
-
         this.control.finishWithSuccess();
     }
 
     @Override
     public void end() {
         super.end();
+
+        //Attempt to unreserve the list of items...
+        for (Inventory.InventoryItem item : this.blackBoard.itemTransfer.fromInventory.getItemList()) {
+            this.blackBoard.itemTransfer.fromInventory.unReserveItem(item.itemRef.getItemName(), this.blackBoard.myManager.getEntityOwner().getID());
+        }
     }
 
     @Override

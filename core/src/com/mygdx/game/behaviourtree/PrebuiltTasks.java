@@ -207,14 +207,6 @@ public class PrebuiltTasks {
             task.blackBoard.itemTransfer.takingReserved = true;
         };
 
-        //When we finish, if we still have plans to take items (itemNamesToTransfer and itemAmountsToTransfer is not null), try to unreserve it.
-        seq.control.callbacks.finishCallback = task -> {
-            if(task.blackBoard.itemTransfer.itemsToTransfer != null && task.blackBoard.itemTransfer.fromInventory != null){
-                for(ItemNeeded item : task.blackBoard.itemTransfer.itemsToTransfer)
-                    task.blackBoard.itemTransfer.fromInventory.unReserveItem(item.itemName, task.blackBoard.myManager.getEntityOwner().getID());
-            }
-        };
-
         //We need to find a building with that tag 'equipment'.
         findShed.control.callbacks.successCriteria = entity -> {
             Entity ent = (Entity)entity;
@@ -430,6 +422,7 @@ public class PrebuiltTasks {
 
         };
 
+        //Set the to and from inventories.
         getItemsForConstSeq.control.callbacks.finishCallback = task -> {
             task.blackBoard.target = task.blackBoard.constructable.getEntityOwner();
             if(task.blackBoard.target != null) {
@@ -438,6 +431,7 @@ public class PrebuiltTasks {
             }
         };
 
+        //Set the target and reset the targetNode for pathing.
         buildSeq.control.callbacks.startCallback = task -> {
             task.blackBoard.itemTransfer.takingReserved = false;
             task.blackBoard.target = task.blackBoard.constructable.getEntityOwner();
