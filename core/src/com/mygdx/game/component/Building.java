@@ -4,7 +4,6 @@ import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.interfaces.IInteractable;
 import com.mygdx.game.interfaces.IOwnable;
 import com.mygdx.game.util.DataBuilder;
-import com.mygdx.game.util.Tags;
 import com.mygdx.game.util.managers.DataManager;
 import com.mygdx.game.util.timer.RepeatingTimer;
 import com.mygdx.game.util.timer.Timer;
@@ -16,8 +15,6 @@ import org.codehaus.jackson.annotate.JsonProperty;
  * A building component that can be attached to Entities.
  */
 public class Building extends Component implements IOwnable, IInteractable{
-    @JsonProperty
-    public final Tags buildingTags = new Tags("building");
     @JsonIgnore
     private Timer timer;
     @JsonIgnore
@@ -40,7 +37,7 @@ public class Building extends Component implements IOwnable, IInteractable{
 
         //Get the JsonBuilding reference, add the tags, add an inventory if under construction, and set the name.
         DataBuilder.JsonBuilding jBuilding = DataManager.getData(this.buildingName, DataBuilder.JsonBuilding.class);
-        for(String tag : jBuilding.tags) this.buildingTags.addTag(tag); //Add each tag that exists.
+        for(String tag : jBuilding.tags) this.owner.getTags().addTag(tag); //Add each tag that exists.
         //Add an inventory if under construction OR if the building is supposed to have one...
         if(this.owner.getTags().hasTag("constructing") || jBuilding.inventory) this.inventory = this.addComponent(new Inventory());
         this.owner.name = jBuilding.displayName; //Set the display name.

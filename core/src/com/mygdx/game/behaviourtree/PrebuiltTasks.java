@@ -211,7 +211,7 @@ public class PrebuiltTasks {
         findShed.control.callbacks.successCriteria = entity -> {
             Entity ent = (Entity)entity;
             if(ent.getTags().hasTag("building"))
-                if(ent.getComponent(Building.class).buildingTags.hasTag("equipment"))
+                if(ent.getComponent(Building.class).getEntityOwner().getTags().hasTag("equipment"))
                     return true;
             return false;
         };
@@ -271,7 +271,7 @@ public class PrebuiltTasks {
         findShed.control.callbacks.successCriteria = entity -> {
             Entity ent = (Entity)entity;
             if(ent.getTags().hasTag("building"))
-                if(ent.getComponent(Building.class).buildingTags.hasTag("equipment"))
+                if(ent.getComponent(Building.class).getEntityOwner().getTags().hasTag("equipment"))
                     return true;
 
             return false;
@@ -314,7 +314,7 @@ public class PrebuiltTasks {
 
         mainSeq.control.callbacks.startCallback = task -> {
             Colonist col = task.blackBoard.myManager.getComponent(Colonist.class);
-            Building building = col.getColony().getOwnedFromColony(Building.class, b -> b.buildingTags.hasTag("storage"));
+            Building building = col.getColony().getOwnedFromColony(Building.class, b -> b.getEntityOwner().getTags().hasTag("storage"));
             if(building == null) task.getControl().finishWithFailure();
             else {
                 task.blackBoard.target = building.getEntityOwner();
@@ -477,7 +477,7 @@ public class PrebuiltTasks {
         //Get the main building of the colony as our target to explore around.
         findClosestUnexplored.control.callbacks.startCallback = task -> {
             Colonist col = task.blackBoard.myManager.getEntityOwner().getComponent(Colonist.class);
-            task.blackBoard.target = col.getColony().getOwnedFromColony(Building.class, building -> building.buildingTags.hasTag("main")).getEntityOwner();
+            task.blackBoard.target = col.getColony().getOwnedFromColony(Building.class, building -> building.getEntityOwner().getTags().hasTag("main")).getEntityOwner();
         };
 
         ((ParentTaskController) sequence.getControl()).addTask(findClosestUnexplored);
@@ -542,7 +542,7 @@ public class PrebuiltTasks {
             task.blackBoard.targetNode = null; //We don't want this set.
 
             //Get a inventory building from my colony, store the entity as the target, and set the from/to inventory.
-            Building storage = task.blackBoard.myManager.getEntityOwner().getComponent(Colonist.class).getColony().getOwnedFromColony(Building.class, b -> b.buildingTags.hasTag("storage"));
+            Building storage = task.blackBoard.myManager.getEntityOwner().getComponent(Colonist.class).getColony().getOwnedFromColony(Building.class, b -> b.getEntityOwner().getTags().hasTag("storage"));
             task.blackBoard.target = storage.getEntityOwner();
             task.blackBoard.itemTransfer.fromInventory = storage.getComponent(Inventory.class);
             task.blackBoard.itemTransfer.toInventory = blackBoard.myManager.getEntityOwner().getComponent(Inventory.class);
@@ -812,7 +812,7 @@ public class PrebuiltTasks {
 
             Colonist col = task.blackBoard.myManager.getEntityOwner().getComponent(Colonist.class);
             Colony colony = col.getColony();
-            Building building = colony.getOwnedFromColony(Building.class, b -> b.buildingTags.hasTag("main"));
+            Building building = colony.getOwnedFromColony(Building.class, b -> b.getEntityOwner().getTags().hasTag("main"));
             if(building == null) task.getControl().finishWithFailure();
             else task.blackBoard.target = building.getEntityOwner();
         };
