@@ -89,7 +89,7 @@ public class PrebuiltTasks {
         gatherOrExplore.control.callbacks.checkCriteria = task -> !task.blackBoard.resourceTypeTags.isEmpty();
 
         //Add these to the main sequence.
-        ((ParentTaskController)sequence.getControl()).addTask(returnItems(blackBoard, behComp));
+        sequence.control.addTask(returnItems(blackBoard, behComp));
 
         //Reset some values.
         sequence.control.callbacks.startCallback = task -> {
@@ -190,6 +190,7 @@ public class PrebuiltTasks {
             task.blackBoard.itemTransfer.reset();
             task.blackBoard.itemTransfer.takingReserved = true;
             task.blackBoard.targetNode = null;
+            task.blackBoard.tagsToSearch = new String[]{"building", "equipment"};
         };
 
         //When we find the shed, assign the to and from inventory.
@@ -222,7 +223,7 @@ public class PrebuiltTasks {
          */
 
         Sequence seq = new Sequence("Returning tools", blackBoard);
-        FindClosestEntity findShed = new FindClosestEntity("Finding tool shed", blackBoard);
+        GetBuildingFromColony findShed = new GetBuildingFromColony("Finding tool shed", blackBoard);
         FindPath fpToShed = new FindPath("PathToShed", blackBoard);
         MoveTo mtShed = new MoveTo("Moving", blackBoard);
         TransferItem transferTools = new TransferItem("Transferring", blackBoard);
@@ -235,22 +236,13 @@ public class PrebuiltTasks {
         //Set some flags and get a list of item names to be removed.
         seq.control.callbacks.startCallback = task -> {
             task.blackBoard.itemTransfer.reset();
+            task.blackBoard.tagsToSearch = new String[]{"building", "equipment"};
         };
 
         //When this finishes remove any on the way stuff
         seq.control.callbacks.finishCallback = task -> {
             for(ItemNeeded item : task.blackBoard.itemTransfer.itemsToTransfer)
                 task.blackBoard.itemTransfer.toInventory.removeOnTheWay(item.itemName, task.blackBoard.myManager.getEntityOwner().getID());
-        };
-
-        //We need a building with the tag "equipment".
-        findShed.control.callbacks.successCriteria = entity -> {
-            Entity ent = (Entity)entity;
-            if(ent.getTags().hasTag("building"))
-                if(ent.getComponent(Building.class).getEntityOwner().getTags().hasTag("equipment"))
-                    return true;
-
-            return false;
         };
 
         //When we are successful in finding the shed, set the inventories.
@@ -280,28 +272,26 @@ public class PrebuiltTasks {
          */
 
         Sequence mainSeq = new Sequence("Dropping Off", blackBoard);
+        GetBuildingFromColony getStorage = new GetBuildingFromColony("Getting building", blackBoard);
         FindPath fpStorage = new FindPath("Finding path", blackBoard);
         MoveTo mtStorage = new MoveTo("Moving to storage", blackBoard);
         TransferItem transfer = new TransferItem("Transferring", blackBoard);
 
+        mainSeq.control.addTask(getStorage);
         mainSeq.control.addTask(fpStorage);
         mainSeq.control.addTask(mtStorage);
         mainSeq.control.addTask(transfer);
 
         mainSeq.control.callbacks.startCallback = task -> {
-            Colonist col = task.blackBoard.myManager.getComponent(Colonist.class);
-            Building building = col.getColony().getOwnedFromColony(Building.class, b -> b.getEntityOwner().getTags().hasTag("storage"));
-            if(building == null) task.getControl().finishWithFailure();
-            else {
-                task.blackBoard.target = building.getEntityOwner();
-                if (task.blackBoard.target == null) task.getControl().finishWithFailure();
-                else{
-                    task.blackBoard.itemTransfer.reset();
-                    task.blackBoard.itemTransfer.fromInventory = col.getInventory();
-                    task.blackBoard.itemTransfer.toInventory = building.getInventory();
-                    task.blackBoard.itemTransfer.itemTypesToIgnore.add("tool");
-                }
-            }
+            task.blackBoard.targetNode = null;
+            task.blackBoard.tagsToSearch = new String[]{"building", "storage"};
+        };
+
+        getStorage.control.callbacks.successCallback = task -> {
+            task.blackBoard.itemTransfer.reset();
+            task.blackBoard.itemTransfer.fromInventory = task.blackBoard.myManager.getComponent(Inventory.class); //Get from me
+            task.blackBoard.itemTransfer.toInventory = task.blackBoard.target.getComponent(Inventory.class); //Get from target.
+            task.blackBoard.itemTransfer.itemTypesToIgnore.add("tool"); //Ignore tools.
         };
 
         return mainSeq;

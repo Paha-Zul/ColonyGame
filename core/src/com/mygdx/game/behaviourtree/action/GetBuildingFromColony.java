@@ -36,8 +36,10 @@ public class GetBuildingFromColony extends LeafTask{
             this.blackBoard.target = building.getEntityOwner();
             this.control.finishWithSuccess();
         //Otherwise, finish with failure.
-        }else
+        }else {
+            this.blackBoard.target = null;
             this.control.finishWithFailure();
+        }
     }
 
     @Override
