@@ -1,10 +1,10 @@
 package com.mygdx.game.behaviourtree.action;
 
+import com.mygdx.game.behaviourtree.BlackBoard;
 import com.mygdx.game.behaviourtree.LeafTask;
 import com.mygdx.game.component.graphic.GraphicIdentity;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.ui.PlayerInterface;
-import com.mygdx.game.util.BlackBoard;
 
 /**
  * Created by Paha on 7/21/2015.

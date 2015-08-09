@@ -1,13 +1,13 @@
 package com.mygdx.game.behaviourtree.action;
 
+import com.mygdx.game.behaviourtree.BlackBoard;
 import com.mygdx.game.behaviourtree.LeafTask;
 import com.mygdx.game.component.Inventory;
-import com.mygdx.game.util.BlackBoard;
 
 /**
  * Created by Paha on 1/30/2015.
- * <p>Transfers items from the {@link com.mygdx.game.util.BlackBoard.ItemTransfer#fromInventory blackBoard.fromInventory} to
- * the {@link com.mygdx.game.util.BlackBoard.ItemTransfer#toInventory blackBoard.toInventory}. If
+ * <p>Transfers items from the {@link BlackBoard.ItemTransfer#fromInventory blackBoard.fromInventory} to
+ * the {@link BlackBoard.ItemTransfer#toInventory blackBoard.toInventory}. If
  */
 public class TransferItem extends LeafTask{
     public TransferItem(String name, BlackBoard blackBoard) {
@@ -42,6 +42,7 @@ public class TransferItem extends LeafTask{
     public void end() {
         super.end();
 
+        //Make sure the inventory isn't null before trying toa ccess a list of items...
         if(this.blackBoard.itemTransfer.fromInventory != null) {
             //Attempt to unreserve the list of items...
             for (Inventory.InventoryItem item : this.blackBoard.itemTransfer.fromInventory.getItemList()) {

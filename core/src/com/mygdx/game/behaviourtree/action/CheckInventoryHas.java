@@ -1,9 +1,9 @@
 package com.mygdx.game.behaviourtree.action;
 
 import com.badlogic.gdx.utils.Array;
+import com.mygdx.game.behaviourtree.BlackBoard;
 import com.mygdx.game.behaviourtree.LeafTask;
 import com.mygdx.game.component.Inventory;
-import com.mygdx.game.util.BlackBoard;
 import com.mygdx.game.util.DataBuilder;
 import com.mygdx.game.util.ItemNeeded;
 import com.mygdx.game.util.managers.DataManager;

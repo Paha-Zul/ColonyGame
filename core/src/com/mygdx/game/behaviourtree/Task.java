@@ -1,7 +1,6 @@
 package com.mygdx.game.behaviourtree;
 
 import com.mygdx.game.behaviourtree.control.TaskController;
-import com.mygdx.game.util.BlackBoard;
 
 /**
  * Created by Bbent_000 on 12/31/2014.

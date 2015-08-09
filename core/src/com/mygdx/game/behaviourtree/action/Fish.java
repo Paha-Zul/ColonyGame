@@ -1,8 +1,8 @@
 package com.mygdx.game.behaviourtree.action;
 
+import com.mygdx.game.behaviourtree.BlackBoard;
 import com.mygdx.game.behaviourtree.LeafTask;
 import com.mygdx.game.component.Inventory;
-import com.mygdx.game.util.BlackBoard;
 import com.mygdx.game.util.timer.RepeatingTimer;
 import com.mygdx.game.util.timer.Timer;
 

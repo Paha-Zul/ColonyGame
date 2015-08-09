@@ -1,9 +1,9 @@
 package com.mygdx.game.behaviourtree.action;
 
 import com.badlogic.gdx.math.Vector2;
+import com.mygdx.game.behaviourtree.BlackBoard;
 import com.mygdx.game.behaviourtree.LeafTask;
 import com.mygdx.game.component.Enterable;
-import com.mygdx.game.util.BlackBoard;
 import com.mygdx.game.util.Grid;
 import com.mygdx.game.util.Pathfinder;
 

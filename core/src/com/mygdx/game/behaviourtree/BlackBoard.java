@@ -1,9 +1,15 @@
-package com.mygdx.game.util;
+package com.mygdx.game.behaviourtree;
 
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
-import com.mygdx.game.component.*;
+import com.mygdx.game.component.BehaviourManagerComp;
+import com.mygdx.game.component.Constructable;
+import com.mygdx.game.component.Inventory;
+import com.mygdx.game.component.Resource;
 import com.mygdx.game.entity.Entity;
+import com.mygdx.game.util.Grid;
+import com.mygdx.game.util.ItemNeeded;
+import com.mygdx.game.util.Tags;
 import com.mygdx.game.util.timer.Timer;
 
 import java.util.LinkedList;
@@ -49,9 +55,6 @@ public class BlackBoard{
     //Construction stuff
     public Constructable constructable;
 
-    //GetEntity stuff
-    public Class<? extends Component> clazzType;
-
     //My stuff
     public Inventory myInventory;
     public float moveSpeed = 100f;
@@ -59,6 +62,10 @@ public class BlackBoard{
 
     //Random
     public int counter;
+
+    //Getting stuff from colony
+    public Class<?> clazzType;
+    public String[] tagsToSearch;
 
     public BlackBoard() {
 

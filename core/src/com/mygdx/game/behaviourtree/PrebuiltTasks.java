@@ -196,7 +196,7 @@ public class PrebuiltTasks {
         AlwaysTrue alwaysTrue = new AlwaysTrue("Always true", blackBoard);
         Sequence seq = new Sequence("Getting tools", blackBoard);
         GetToolsForGathering get = new GetToolsForGathering("Figuring tools", blackBoard);
-        FindClosestEntity findShed = new FindClosestEntity("Finding tool shed", blackBoard);
+        GetBuildingFromColony findShed = new GetBuildingFromColony("Finding tool shed", blackBoard);
         CheckAndReserve checkShed = new CheckAndReserve("CheckingReserving", blackBoard);
         FindPath fpToShed = new FindPath("PathToShed", blackBoard);
         MoveTo mtShed = new MoveTo("Moving", blackBoard);
@@ -205,15 +205,7 @@ public class PrebuiltTasks {
         seq.control.callbacks.startCallback = task -> {
             task.blackBoard.itemTransfer.reset();
             task.blackBoard.itemTransfer.takingReserved = true;
-        };
-
-        //We need to find a building with that tag 'equipment'.
-        findShed.control.callbacks.successCriteria = entity -> {
-            Entity ent = (Entity)entity;
-            if(ent.getTags().hasTag("building"))
-                if(ent.getComponent(Building.class).getEntityOwner().getTags().hasTag("equipment"))
-                    return true;
-            return false;
+            task.blackBoard.targetNode = null;
         };
 
         //When we find the shed, assign the to and from inventory.

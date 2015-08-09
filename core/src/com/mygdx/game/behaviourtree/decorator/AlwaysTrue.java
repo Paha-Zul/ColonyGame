@@ -1,7 +1,7 @@
 package com.mygdx.game.behaviourtree.decorator;
 
+import com.mygdx.game.behaviourtree.BlackBoard;
 import com.mygdx.game.behaviourtree.Task;
-import com.mygdx.game.util.BlackBoard;
 
 /**
  * Created by brad on 6/10/15.

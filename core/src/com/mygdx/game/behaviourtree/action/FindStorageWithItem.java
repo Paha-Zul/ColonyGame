@@ -1,27 +1,27 @@
 package com.mygdx.game.behaviourtree.action;
 
+import com.mygdx.game.behaviourtree.BlackBoard;
 import com.mygdx.game.behaviourtree.LeafTask;
 import com.mygdx.game.component.Building;
 import com.mygdx.game.component.Colonist;
 import com.mygdx.game.component.Constructable;
 import com.mygdx.game.component.Inventory;
-import com.mygdx.game.util.BlackBoard;
 import com.mygdx.game.util.ItemNeeded;
 
 /**
  * Created by Paha on 7/30/2015.
  *
  * <p>
- * Finds a storage building that contains any item in the {@link com.mygdx.game.util.BlackBoard.ItemTransfer#itemsToTransfer blackboard.itemsToTransfer} array.
- * If a valid storage is found, the entity is stored in {@link com.mygdx.game.util.BlackBoard#target blackboard.target} for further use.
+ * Finds a storage building that contains any item in the {@link BlackBoard.ItemTransfer#itemsToTransfer blackboard.itemsToTransfer} array.
+ * If a valid storage is found, the entity is stored in {@link BlackBoard#target blackboard.target} for further use.
  * </p>
  * <p>
  * In short:
  * </p>
  * uses:
  *  <ul>
- *      <li>{@link com.mygdx.game.util.BlackBoard.ItemTransfer#itemsToTransfer blackboard.itemsToTransfer} for checking the storage</li>
- *      <li>{@link com.mygdx.game.util.BlackBoard#target blackboard.target} to store the result in.</li>
+ *      <li>{@link BlackBoard.ItemTransfer#itemsToTransfer blackboard.itemsToTransfer} for checking the storage</li>
+ *      <li>{@link BlackBoard#target blackboard.target} to store the result in.</li>
  *  </ul>
  *  </p>
  */

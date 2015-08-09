@@ -1,10 +1,10 @@
 package com.mygdx.game.behaviourtree.action;
 
 import com.badlogic.gdx.math.MathUtils;
+import com.mygdx.game.behaviourtree.BlackBoard;
 import com.mygdx.game.behaviourtree.LeafTask;
 import com.mygdx.game.component.Transform;
 import com.mygdx.game.interfaces.Functional;
-import com.mygdx.game.util.BlackBoard;
 import com.mygdx.game.util.Grid;
 
 import java.util.ArrayList;

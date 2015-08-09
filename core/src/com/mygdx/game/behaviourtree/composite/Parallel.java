@@ -1,8 +1,8 @@
 package com.mygdx.game.behaviourtree.composite;
 
+import com.mygdx.game.behaviourtree.BlackBoard;
 import com.mygdx.game.behaviourtree.ParentTask;
 import com.mygdx.game.behaviourtree.Task;
-import com.mygdx.game.util.BlackBoard;
 
 
 /**
