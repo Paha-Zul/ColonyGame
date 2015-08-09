@@ -130,7 +130,7 @@ public class PrebuiltTasks {
         FindPath findPath = new FindPath("Finding Path to Resource", blackBoard);
         MoveTo move = new MoveTo("Moving to Resource", blackBoard);
         Gather gather = new Gather("Gathering Resource", blackBoard);
-        FindClosestEntity findStorage = new FindClosestEntity("Finding storage.", blackBoard);
+        GetBuildingFromColony findStorage = new GetBuildingFromColony("Finding storage.", blackBoard);
         FindPath findPathToStorage = new FindPath("Finding Path to Storage", blackBoard);
         MoveTo moveToStorage = new MoveTo("Moving to Storage", blackBoard);
         TransferItem transferItems = new TransferItem("Transferring Resources", blackBoard);
@@ -143,14 +143,7 @@ public class PrebuiltTasks {
         ((ParentTaskController)sequence.getControl()).addTask(moveToStorage);
         ((ParentTaskController)sequence.getControl()).addTask(transferItems);
 
-        //When we finish, set the target back to not taken IF it is still a valid target (if we ended early).
-        sequence.getControl().callbacks.finishCallback = task -> {
-            if (blackBoard.targetResource != null && blackBoard.targetResource.isValid() && sequence.getBlackboard().targetResource.getTaken() == sequence.getBlackboard().myManager.getEntityOwner()) {
-                sequence.getBlackboard().targetResource.setTaken(null);
-            }
-        };
-
-        //Make sure we have a target resource and
+        //Make sure we have a target resource and it is either unowned or owned by us.
         sequence.control.callbacks.checkCriteria = task -> {
             if(task.blackBoard.targetResource == null) task.blackBoard.targetResource = task.blackBoard.target.getComponent(Resource.class);
             return task.blackBoard.targetResource != null && (task.blackBoard.targetResource.getTaken() == null || task.blackBoard.targetResource.getTaken() == task.blackBoard.myManager.getEntityOwner());
@@ -160,23 +153,14 @@ public class PrebuiltTasks {
         sequence.getControl().callbacks.startCallback = task -> {
             task.blackBoard.itemTransfer.fromInventory = task.blackBoard.myManager.getEntityOwner().getComponent(Inventory.class);
             task.blackBoard.targetResource.setTaken(blackBoard.myManager.getEntityOwner());
+            task.blackBoard.tagsToSearch = new String[]{"building", "storage"};
         };
-
-        //Make sure we are getting a building...
-        findStorage.control.callbacks.successCriteria = ent -> ((Entity)ent).getTags().hasTag("building");
 
         //When finding a path to the resource, make sure it's actually a resource and we are the ones that have claimed it!
         findPath.getControl().callbacks.checkCriteria = task -> {
             Resource res = task.blackBoard.targetResource; //Get the target resource from the blackboard.
             if(res == null) task.blackBoard.targetResource = res = task.blackBoard.target.getComponent(Resource.class); //If null, try to get it from the target.
             return res != null && task.getBlackboard().targetResource.getTaken() == task.getBlackboard().myManager.getEntityOwner(); //Return true if not null and we are the ones that took it. False otherwise.
-        };
-
-        //When we finish gathering from a source, try to untake it in case it's infinite (like a water source)
-        gather.getControl().callbacks.finishCallback = task -> {
-            if(blackBoard.targetResource != null && blackBoard.targetResource.isValid())
-                if(blackBoard.targetResource.getTaken() == blackBoard.myManager.getEntityOwner())
-                    blackBoard.targetResource.setTaken(null);
         };
 
         return sequence;
