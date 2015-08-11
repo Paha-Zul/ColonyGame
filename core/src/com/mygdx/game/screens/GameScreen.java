@@ -81,9 +81,14 @@ public class GameScreen implements Screen{
         else delta *= PlayerInterface.getInstance().gameSpeed;
 
         //drawMap();
+        //If we should render the world, render it! (for debugging mostly)
         if(PlayerInterface.getInstance().renderWorld) renderMap();
+        //Updates all the entities.
         updateEntities(delta);
+        //Updates the Notification manager.
         NotificationManager.update(delta);
+        //Updates the pathfinder.
+        Pathfinder.GetInstance().update(ColonyGame.currTick);
     }
 
     private void generateStart(Vector2 start){

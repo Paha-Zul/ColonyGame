@@ -6,13 +6,47 @@ import com.mygdx.game.ColonyGame;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.PriorityQueue;
+import java.util.function.Consumer;
 
 /**
  * Created by Paha on 7/20/2015.
  */
 public class Pathfinder {
+    private static Pathfinder instance = null;
+    private LinkedList<FindPathInfo> queue = new LinkedList<>();
+    private long lastTick = 0;
 
-    public static LinkedList<Vector2> findPath(Grid.Node startNode, Grid.Node targetNode){
+    public Pathfinder(){
+
+    }
+
+    /**
+     * Updates the Pathfinder.
+     * @param tick The current tick of the game.
+     */
+    public void update(long tick){
+        if(queue.size() > 0 && tick != this.lastTick){
+            this.lastTick = tick;
+            FindPathInfo fp = this.queue.pop();
+            if(fp.startNode != null && fp.endNode != null)
+                fp.consumer.accept(this.findPath(fp.startNode, fp.endNode));
+            else if(fp.startPos != null && fp.endPos != null)
+                fp.consumer.accept(this.findPath(fp.startPos, fp.endPos));
+            else{
+                GH.writeErrorMessage("The pathfinding requested was null in both nodes and positions. What happened?", true);
+            }
+        }
+    }
+
+    public void findPath(Grid.Node startNode, Grid.Node targetNode, Consumer<LinkedList<Vector2>> consumer){
+        this.queue.add(new FindPathInfo(null, null, startNode, targetNode, consumer));
+    }
+
+    public void findPath(Vector2 start, Vector2 end, Consumer<LinkedList<Vector2>> consumer){
+        this.queue.add(new FindPathInfo(start, end, null, null, consumer));
+    }
+
+    private LinkedList<Vector2> findPath(Grid.Node startNode, Grid.Node targetNode){
         boolean found = false;
         Grid.PathNode target = null;
 
@@ -91,7 +125,7 @@ public class Pathfinder {
         return path;
     }
 
-    public static LinkedList<Vector2> findPath(Vector2 start, Vector2 end){
+    private LinkedList<Vector2> findPath(Vector2 start, Vector2 end){
         boolean found = false;
         Grid.PathNode target = null;
         Grid.Node startNode = ColonyGame.worldGrid.getNode(start);
@@ -177,5 +211,27 @@ public class Pathfinder {
         }
 
         return path;
+    }
+
+    public static Pathfinder GetInstance(){
+        if(Pathfinder.instance == null)
+            Pathfinder.instance = new Pathfinder();
+
+        return Pathfinder.instance;
+    }
+
+    private class FindPathInfo{
+        Vector2 startPos, endPos;
+        Grid.Node startNode;
+        Grid.Node endNode;
+        Consumer<LinkedList<Vector2>> consumer;
+
+        public FindPathInfo(Vector2 startPos, Vector2 endPos, Grid.Node startNode, Grid.Node endNode, Consumer<LinkedList<Vector2>> consumer) {
+            this.startPos = startPos;
+            this.endPos = endPos;
+            this.startNode = startNode;
+            this.endNode = endNode;
+            this.consumer = consumer;
+        }
     }
 }

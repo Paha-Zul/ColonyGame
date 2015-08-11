@@ -24,6 +24,7 @@ public class ColonyGame extends Game {
 	public static OrthographicCamera camera;
 	public static OrthographicCamera UICamera;
 	public static Grid.GridInstance worldGrid;
+	public static long currTick = 0;
 
 	public static SpriteBatch batch;
 	public static ShapeRenderer renderer;
@@ -54,6 +55,8 @@ public class ColonyGame extends Game {
 
 	@Override
 	public void render () {
+		ColonyGame.currTick++;
+
 		try {
             Gdx.gl.glClearColor(screenColor.r, screenColor.g, screenColor.b, screenColor.a);
             Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);

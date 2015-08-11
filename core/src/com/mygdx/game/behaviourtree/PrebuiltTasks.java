@@ -368,7 +368,6 @@ public class PrebuiltTasks {
         buildSeq.control.addTask(construct);
 
         //Time for the crap
-
         constructionSeq.control.callbacks.startCallback = task -> {
             task.blackBoard.target = null;
             task.blackBoard.targetNode = null;

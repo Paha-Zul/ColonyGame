@@ -43,8 +43,10 @@ public class FindPath extends LeafTask {
             }
         }
 
-        this.blackBoard.path = Pathfinder.findPath(new Vector2(startNode.getXCenter(), startNode.getYCenter()), target);
-        this.control.finishWithSuccess();
+        Pathfinder.GetInstance().findPath(new Vector2(startNode.getXCenter(), startNode.getYCenter()), target, path -> {
+            this.blackBoard.path = path;
+            this.control.finishWithSuccess();
+        });
     }
 
     @Override
