@@ -15,6 +15,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Predicate;
 
 /**
@@ -45,6 +46,9 @@ public class Colony extends Component implements IInteractable {
         this.inventory = this.owner.addComponent(new Inventory());
         this.inventory.setMaxAmount(-1);
         load();
+
+        CraftingJob job = new CraftingJob(null, "wood_hatchet", 1);
+        System.out.println("Okayer");
     }
 
     @Override
@@ -204,19 +208,65 @@ public class Colony extends Component implements IInteractable {
             this.amount = amount;
             this.materials = new Array<>();
             this.raw = new Array<>();
+
+            this.calculateMaterials();
         }
 
         //TODO This needs some serious recursiveness or something...
 
         private void calculateMaterials(){
-            for(int i=0;i<itemRecipe.items.length;i++){
-                DataBuilder.JsonItem item = DataManager.getData(itemRecipe.items[i], DataBuilder.JsonItem.class);
-                if(item.getItemCategory().equals("material")){
-                    materials.add(new ItemNeeded(item.getItemName(), itemRecipe.itemAmounts[i]));
-                }
+            HashMap<String, Integer> materialMap = new HashMap<>(10);
+            HashMap<String, Integer> rawMap = new HashMap<>(10);
 
+            for(int i=0;i<itemRecipe.items.length;i++){
+                DataBuilder.JsonItem subItem = DataManager.getData(itemRecipe.items[i], DataBuilder.JsonItem.class);
+                //If it's a material, add it to the hashmap and recurse!!
+                if(subItem.getItemCategory().equals("material")){
+                    this.addToMap(materialMap, subItem, itemRecipe.itemAmounts[i]);
+                    this.calc(subItem, materialMap, rawMap);
+                //Otherwise, just add to raw map.
+                }else
+                    this.addToMap(rawMap, subItem, itemRecipe.itemAmounts[i]);
+            }
+
+            //Convert the materialMap into an array of ItemNeeded objects.
+            for(Map.Entry<String,Integer> entry : materialMap.entrySet()){
+                String itemName = entry.getKey();
+                int amount = entry.getValue();
+                this.materials.add(new ItemNeeded(itemName, amount));
+            }
+
+            //Convert the rawMap into an array of ItemNeeded objects.
+            for(Map.Entry<String,Integer> entry : rawMap.entrySet()){
+                String itemName = entry.getKey();
+                int amount = entry.getValue();
+                this.raw.add(new ItemNeeded(itemName, amount));
             }
         }
 
+        private void calc(DataBuilder.JsonItem itemRef, HashMap<String, Integer> materialMap, HashMap<String, Integer> rawMap){
+            //Get the recipe...
+            DataBuilder.JsonRecipe recipe = DataManager.getData(itemRef.getItemName(), DataBuilder.JsonRecipe.class);
+            //For each item of the recipe, get it's items...
+            for(int i=0;i<recipe.items.length;i++){
+                //Get the sub item.
+                DataBuilder.JsonItem subItem = DataManager.getData(recipe.items[i], DataBuilder.JsonItem.class);
+                //If it's a material, add it to the hashmap and recurse!!
+                if(subItem.getItemCategory().equals("material")){
+                    this.addToMap(materialMap, subItem, recipe.itemAmounts[i]);
+                    this.calc(subItem, materialMap, rawMap);
+                //Otherwise, just add to raw map.
+                }else
+                    this.addToMap(rawMap, subItem, recipe.itemAmounts[i]);
+            }
+        }
+
+        private void addToMap(HashMap<String, Integer> map, DataBuilder.JsonItem itemRef, int amountToAdd){
+            Integer amount = map.get(itemRef.getItemName()); //Get the amount already in the hashmap
+            int _amount = 0;
+            if(amount != null) _amount = amount; //If it existed, set it to our temp variable
+            _amount += amountToAdd; //Add the amount needed.
+            map.put(itemRef.getItemName(), _amount); //Put it back into the hashmap.
+        }
     }
 }
