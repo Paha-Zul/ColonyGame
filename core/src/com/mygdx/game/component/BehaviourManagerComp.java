@@ -155,9 +155,11 @@ public class BehaviourManagerComp extends Component{
                     //Otherwise, if it didn't fail and needs to repeat, repeat it!.
                     else if(currState.getRepeat()) nextState = currState;
                     //If the job failed, try to set the current state to what is defined for "taskOnFailure".
-                    else if(this.currentBehaviour.getControl().hasFailed()) nextState = behaviourStates.getState(currState.getUserData().taskOnFailure);
+                    else if(this.currentBehaviour.getControl().hasFailed() && currState.getUserData() != null) nextState = behaviourStates.getState(currState.getUserData().taskOnFailure);
                     //Otherwise, if the task didn't fail and doesn't repeat, get what is defined for "taskOnSuccess".
-                    else nextState = behaviourStates.getState(currState.getUserData().taskOnSuccess);
+                    else if(currState.getUserData() != null) nextState = behaviourStates.getState(currState.getUserData().taskOnSuccess);
+                    //Otherwise, everything failed so get the default state.
+                    else nextState = behaviourStates.getDefaultState();
                     //Change the task and state.
                     this.changeTaskImmediate(nextState.stateName);
                 }

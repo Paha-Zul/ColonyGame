@@ -4,9 +4,10 @@ import com.mygdx.game.behaviourtree.BlackBoard;
 import com.mygdx.game.behaviourtree.ParentTask;
 import com.mygdx.game.behaviourtree.Task;
 
-
 /**
  * A ParentTask that runs its subtasks in parallel (not threaded, but calling update on each subtask every frame).
+ * A task is only executed if the task is not finished.
+ * If all tasks are finished for any reason, this parallel task finishes with success.
  */
 public class Parallel extends ParentTask{
     public Parallel(String name, BlackBoard blackBoard) {
@@ -31,6 +32,7 @@ public class Parallel extends ParentTask{
 
     @Override
     public void update(float delta) {
+        boolean atLeastOneLeft = false;
         //If we succeed, finish with success.
         if(control.callbacks.successCriteria != null && control.callbacks.successCriteria.test(this)){
             this.control.finishWithSuccess();
@@ -49,9 +51,14 @@ public class Parallel extends ParentTask{
                 task.start();
 
             //If the task is not finished, update it.
-            if(!task.getControl().hasFinished())
+            if(!task.getControl().hasFinished()) {
                 task.update(delta);
+                atLeastOneLeft = true;
+            }
         }
+
+        if(!atLeastOneLeft)
+            this.control.finishWithSuccess();
     }
 
     @Override

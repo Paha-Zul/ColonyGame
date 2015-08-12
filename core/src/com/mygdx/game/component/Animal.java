@@ -2,6 +2,7 @@ package com.mygdx.game.component;
 
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.Fixture;
+import com.mygdx.game.behaviourtree.BlackBoard;
 import com.mygdx.game.component.collider.Collider;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.interfaces.Functional;
@@ -67,7 +68,7 @@ public class Animal extends Component implements IInteractable{
         //Remove its animal properties and make it a resource.
         stats.getStat("health").onZero = onDeath();
 
-        behComp.getBlackBoard().attackRange = 15f;
+        this.behComp.getBlackBoard().attackRange = 15f;
         this.behComp.getBlackBoard().moveSpeed = 250f;
 
         EventSystem.onEntityEvent(this.owner, "collide_start", onCollideStart);
@@ -99,6 +100,11 @@ public class Animal extends Component implements IInteractable{
 
     private void makeBehaviourStuff(){
         this.behComp.getBehaviourStates().addState("attackTarget").setRepeat(false);
+
+        BlackBoard bb = this.getBehManager().getBlackBoard();
+        bb.idleDistance = 3;
+        bb.baseIdleTime = 0.3f;
+        bb.randomIdleTime = 1f;
     }
 
     @Override
@@ -207,12 +213,15 @@ public class Animal extends Component implements IInteractable{
     private void groupAttack(Entity target){
         if(group.getLeader() == null) return;
 
+        //Let's get the leader of the group and set his target as our target and change the task to attacking it.
         BehaviourManagerComp leaderComp = group.getLeader().getComponent(BehaviourManagerComp.class);
         leaderComp.getBlackBoard().target = target;
         leaderComp.changeTaskImmediate("attackTarget");
         EventSystem.notifyEntityEvent(target, "attacking_group", this.group);
 
+        //Then, tell each unit in the group to attack our target.
         this.group.getGroupList().forEach(ent ->{
+            System.out.println("Group member attacking");
             BehaviourManagerComp entComp = ent.getComponent(BehaviourManagerComp.class);
             entComp.getBlackBoard().target = target;
             entComp.changeTaskImmediate("attackTarget");

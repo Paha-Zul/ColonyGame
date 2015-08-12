@@ -3,7 +3,6 @@ package com.mygdx.game.behaviourtree;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.behaviourtree.action.*;
-import com.mygdx.game.behaviourtree.composite.Parallel;
 import com.mygdx.game.behaviourtree.composite.Selector;
 import com.mygdx.game.behaviourtree.composite.Sequence;
 import com.mygdx.game.behaviourtree.control.ParentTaskController;
@@ -574,36 +573,42 @@ public class PrebuiltTasks {
      */
     public static Task attackTarget(BlackBoard blackBoard, BehaviourManagerComp behComp){
         /**
-         * repeatUntilCondition:
-         *  Parallel:
-         *      find path to target
-         *      move to target
+         *  Sequence
+         *      repeatUntilCondition:
+         *          Sequence:
+         *              find path to target
+         *              move to target
          *      attack target
          */
-        Parallel parallel = new Parallel("Attacking", blackBoard);
-        RepeatUntilCondition mainRepeat = new RepeatUntilCondition("attackTarget", blackBoard, parallel);
+        Sequence mainSeq = new Sequence("Attack Target", blackBoard);
+        Sequence getPathAndMoveSeq = new Sequence("Moving to attack", blackBoard);
+        RepeatUntilCondition mainRepeat = new RepeatUntilCondition("attackTarget", blackBoard, getPathAndMoveSeq);
 
         FindPath fp = new FindPath("Finding path", blackBoard);
         Follow mt = new Follow("Following", blackBoard);
         Attack attack = new Attack("Attacking Target", blackBoard);
 
+        getPathAndMoveSeq.control.callbacks.startCallback  = task -> {
+            task.blackBoard.targetNode = null;
+        };
+
         //Make sure the target is not null.
-        mainRepeat.getControl().callbacks.checkCriteria = task -> task.getBlackboard().target != null && task.blackBoard.target.getTags().hasTag("alive");
+        mainRepeat.getControl().callbacks.checkCriteria = task -> {
+            return task.getBlackboard().target != null && task.blackBoard.target.getTags().hasTag("alive");
+        };
 
         //To succeed this repeat job, the target must be null, not valid, or not alive.
         mainRepeat.getControl().callbacks.successCriteria = task -> {
-            Entity target = ((Task)task).getBlackboard().target;
-            return target == null || !target.isValid() || !target.getTags().hasTag("alive");
+            Task tsk = (Task)task;
+            //If the attack range is greater than the distance between the two, we are in range!
+            return tsk.blackBoard.attackRange >= tsk.blackBoard.myManager.getEntityOwner().getTransform().getPosition().dst(tsk.blackBoard.target.getTransform().getPosition());
         };
 
         //If the target has moved away from it's last square AND the move job is still active (why repath if not moving?), fail the parallel job.
-        parallel.getControl().callbacks.failCriteria = tsk -> {
+        mt.getControl().callbacks.failCriteria = tsk -> {
             Task task = (Task)tsk;
-            boolean moved = task.getBlackboard().targetNode != ColonyGame.worldGrid.getNode((task.getBlackboard().target));
-            boolean moveJobAlive = !mt.control.hasFinished();
-            boolean outOfRange = attack.control.hasFinished() && attack.control.hasFailed();
-
-            return (moveJobAlive && moved) || (!moveJobAlive && outOfRange);
+            boolean diff = task.getBlackboard().targetNode != ColonyGame.worldGrid.getNode((task.getBlackboard().target));
+            return diff;
         };
 
         //If we are within range of the target, succeed the MoveTo task.
@@ -613,13 +618,20 @@ public class PrebuiltTasks {
             return dis <= GH.toMeters(task.getBlackboard().attackRange);
         };
 
+        //If our target is null or dead, might as well not find a path...
         fp.control.callbacks.checkCriteria = task -> task.blackBoard.target != null && task.blackBoard.target.getTags().hasTag("alive");
 
-        ((ParentTaskController)parallel.getControl()).addTask(fp);
-        ((ParentTaskController)parallel.getControl()).addTask(mt);
-        ((ParentTaskController)parallel.getControl()).addTask(attack);
+        //Add the main repeat.
+        mainSeq.control.addTask(mainRepeat);
 
-        return mainRepeat;
+        //The find path and move to tasks to run in parallel.
+        getPathAndMoveSeq.control.addTask(fp);
+        getPathAndMoveSeq.control.addTask(mt);
+
+        //The attack task after we have got within range!
+        mainSeq.control.addTask(attack);
+
+        return mainSeq;
     }
 
     public static Task fish(BlackBoard blackBoard, BehaviourManagerComp behComp){

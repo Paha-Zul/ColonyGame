@@ -48,12 +48,14 @@ public class Follow extends LeafTask{
             return;
         }
 
+        //If our fail criteria passes, fail this task.
         if(this.getControl().getCallbacks().failCriteria != null && this.getControl().getCallbacks().failCriteria.test(this)){
             this.collider.body.setLinearVelocity(0, 0);
             this.control.finishWithFailure();
             return;
         }
 
+        //If our success criteria passes, succeed this task.
         if(this.getControl().getCallbacks().successCriteria != null && this.getControl().getCallbacks().successCriteria.test(this)){
             this.collider.body.setLinearVelocity(0, 0);
             this.control.finishWithSuccess();

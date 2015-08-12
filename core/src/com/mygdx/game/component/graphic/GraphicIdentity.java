@@ -82,11 +82,13 @@ public class GraphicIdentity extends Component {
             if (!isWithinBounds()) return;
 
             Grid.Node node = grid.getNode(this.owner);
-            int visibility = grid.getVisibilityMap()[node.getX()][node.getY()].getVisibility();
-            if (visibility == Constants.VISIBILITY_UNEXPLORED)
-                return;
+            if(node != null) {
+                int visibility = grid.getVisibilityMap()[node.getX()][node.getY()].getVisibility();
+                if (visibility == Constants.VISIBILITY_UNEXPLORED)
+                    return;
 
-            this.changeVisibility(visibility);
+                this.changeVisibility(visibility);
+            }
 
             this.getSprite().setRotation(this.owner.getTransform().getRotation());
             this.getSprite().setScale(this.owner.getTransform().getScale());

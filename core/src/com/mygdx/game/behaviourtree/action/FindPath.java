@@ -1,6 +1,7 @@
 package com.mygdx.game.behaviourtree.action;
 
 import com.badlogic.gdx.math.Vector2;
+import com.mygdx.game.ColonyGame;
 import com.mygdx.game.behaviourtree.BlackBoard;
 import com.mygdx.game.behaviourtree.LeafTask;
 import com.mygdx.game.component.Enterable;
@@ -45,6 +46,7 @@ public class FindPath extends LeafTask {
 
         Pathfinder.GetInstance().findPath(new Vector2(startNode.getXCenter(), startNode.getYCenter()), target, path -> {
             this.blackBoard.path = path;
+            this.blackBoard.targetNode = ColonyGame.worldGrid.getNode(target);
             this.control.finishWithSuccess();
         });
     }

@@ -5,7 +5,6 @@ import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.mygdx.game.ColonyGame;
-import com.mygdx.game.behaviourtree.BlackBoard;
 import com.mygdx.game.component.*;
 import com.mygdx.game.component.collider.Collider;
 import com.mygdx.game.component.graphic.GraphicIdentity;
@@ -24,21 +23,19 @@ public class AnimalEnt extends Entity{
 
     public AnimalEnt(DataBuilder.JsonAnimal animalRef, Vector2 position, float rotation, String[] graphicName, int drawLevel) {
         super(position, rotation, drawLevel);
-        this.getTags().addTag("animal");
-        this.getTags().addTag("alive");
+        this.getTags().addTags("animal", "alive");
         this.name = "AnimalDefault";
 
         //Add the graphic.
-        ((GraphicIdentity)this.components.addComponent(new GraphicIdentity())).setSprite(graphicName[0], graphicName[1]);
-        ((Animal)this.addComponent(new Animal())).setAnimalRef(animalRef);         //Add the animal
-        this.addComponent(new Stats());  //Add the stats.
-        ((Interactable)this.addComponent(new Interactable())).setInterType("animal");
-        ((GridComponent)this.addComponent(new GridComponent())).setGridType(Constants.GRIDACTIVE).setGrid(ColonyGame.worldGrid).setExploreRadius(-1);
-        BehaviourManagerComp behManager = this.addComponent(new BehaviourManagerComp());
+        this.addComponent(new GraphicIdentity()).setSprite(graphicName[0], graphicName[1]);
+        this.addComponent(new BehaviourManagerComp());
+        this.addComponent(new Animal()).setAnimalRef(animalRef);            //Add the animal
+        this.addComponent(new Stats());                                     //Add the stats.
+        this.addComponent(new Interactable()).setInterType("animal");
+        this.addComponent(new GridComponent()).setGridType(Constants.GRIDACTIVE).setGrid(ColonyGame.worldGrid).setExploreRadius(-1);
 
         this.makeCollider();
 
-        tuneBehaviour(behManager);
     }
 
     public AnimalEnt(String animalName, Vector2 position, float rotation, String[] graphicName, int drawLevel) {
@@ -76,10 +73,4 @@ public class AnimalEnt extends Entity{
         circle.dispose();
     }
 
-    private void tuneBehaviour(BehaviourManagerComp behManager){
-        BlackBoard bb = behManager.getBlackBoard();
-        bb.idleDistance = 3;
-        bb.baseIdleTime = 0.3f;
-        bb.randomIdleTime = 1f;
-    }
 }

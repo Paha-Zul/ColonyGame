@@ -21,6 +21,7 @@ public class Group extends Component{
 
     public Group(){
 
+        this.setActive(false);
     }
 
     @Override
