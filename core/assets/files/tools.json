@@ -8,44 +8,12 @@
     "icon": "pick_wood"
   },
   {
-    "itemName": "stone_pick",
-    "displayName": "Stone Pick",
-    "category": "tool",
-    "itemType": "tool",
-    "description": "Awesome pick.",
-    "icon": "pick_stone"
-  },
-  {
-    "itemName": "iron_pick",
-    "displayName": "Iron Pick",
-    "category": "tool",
-    "itemType": "tool",
-    "description": "Awesome pick.",
-    "icon": "pick_iron"
-  },
-  {
     "itemName": "wood_shovel",
     "displayName": "Wood Shovel",
     "category": "tool",
     "itemType": "tool",
     "description": "A shovel.",
     "icon": "shovel_wood"
-  },
-  {
-    "itemName": "stone_shovel",
-    "displayName": "Stone Shovel",
-    "category": "tool",
-    "itemType": "tool",
-    "description": "A shovel.",
-    "icon": "shovel_stone"
-  },
-  {
-    "itemName": "iron_shovel",
-    "displayName": "Iron Shovel",
-    "category": "tool",
-    "itemType": "tool",
-    "description": "A shovel.",
-    "icon": "shovel_iron"
   },
   {
     "itemName": "wood_hatchet",
@@ -56,12 +24,44 @@
     "icon": "hatchet_wood"
   },
   {
+    "itemName": "stone_pick",
+    "displayName": "Stone Pick",
+    "category": "tool",
+    "itemType": "tool",
+    "description": "Awesome pick.",
+    "icon": "pick_stone"
+  },
+  {
+    "itemName": "stone_shovel",
+    "displayName": "Stone Shovel",
+    "category": "tool",
+    "itemType": "tool",
+    "description": "A shovel.",
+    "icon": "shovel_stone"
+  },
+  {
     "itemName": "stone_hatchet",
     "displayName": "Stone Hatchet",
     "category": "tool",
     "itemType": "tool",
     "description": "Crazy hatchet.",
     "icon": "hatchet_stone"
+  },
+  {
+    "itemName": "iron_pick",
+    "displayName": "Iron Pick",
+    "category": "tool",
+    "itemType": "tool",
+    "description": "Awesome pick.",
+    "icon": "pick_iron"
+  },
+  {
+    "itemName": "iron_shovel",
+    "displayName": "Iron Shovel",
+    "category": "tool",
+    "itemType": "tool",
+    "description": "A shovel.",
+    "icon": "shovel_iron"
   },
   {
     "itemName": "iron_hatchet",

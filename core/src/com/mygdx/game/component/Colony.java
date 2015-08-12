@@ -3,27 +3,23 @@ package com.mygdx.game.component;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
-import com.mygdx.game.ColonyGame;
-import com.mygdx.game.entity.BuildingEntity;
 import com.mygdx.game.entity.ColonistEnt;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.interfaces.IInteractable;
 import com.mygdx.game.interfaces.IOwnable;
-import com.mygdx.game.screens.GameScreen;
 import com.mygdx.game.util.DataBuilder;
-import com.mygdx.game.util.GH;
-import com.mygdx.game.util.Grid;
-import com.mygdx.game.util.ListHolder;
+import com.mygdx.game.util.ItemNeeded;
+import com.mygdx.game.util.managers.DataManager;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /**
  * Created by Paha on 1/17/2015.
+ * The Colony Component should be attached to an empty Entity. The Colony is not the main building, but more of a hidden control center.
  */
 public class Colony extends Component implements IInteractable {
     @JsonProperty
@@ -49,7 +45,6 @@ public class Colony extends Component implements IInteractable {
         this.inventory = this.owner.addComponent(new Inventory());
         this.inventory.setMaxAmount(-1);
         load();
-        placeStart();
     }
 
     @Override
@@ -62,106 +57,16 @@ public class Colony extends Component implements IInteractable {
         this.inventory = this.owner.getComponent(Inventory.class);
     }
 
-    private Entity makeColonist(Vector2 start, float offset, String textureName){
+    /**
+     * Makes a new colonist (hiding some ugly stuff) using the start position + a random offset.
+     * @param start The location to center the creation on.
+     * @param offset The offset which is random'd and added to the start (-offset to +offset)
+     * @param textureName The name of the texture to use for the colonist.
+     * @return The newly created colonist!
+     */
+    public Entity makeColonist(Vector2 start, float offset, String textureName){
         Vector2 newPos = new Vector2(start.x + MathUtils.random()*offset*2 - offset, start.y + MathUtils.random()*offset*2 - offset);
         return new ColonistEnt(newPos, 0, new String[]{textureName,""}, 10);
-    }
-
-    private void placeStart(){
-        //Find a suitable place to spawn our Colony
-        int radius = 0, areaToSearch = 5;
-        boolean placed = false;
-        Grid.GridInstance grid = ColonyGame.worldGrid;
-        Vector2 start = new Vector2(grid.getWidth()/2, grid.getHeight()/2);
-        int[] index = grid.getIndex(start);
-
-        /**
-         * For now, starts in the middle of the map. For each loop, search an area ('areaToSearch') that is suitable. This will check an area (ex: 5x5) to make sure
-         * there are no obstacles or terrain problems. If the area is suitable, the building is placed. Otherwise, we increase the radius and keep searching.
-         */
-        while (!placed) {
-            int startX = index[0] - radius;
-            int endX = index[0] + radius;
-            int startY = index[1] - radius;
-            int endY = index[1] + radius;
-
-            //Loop over each tile.
-            for (int x = startX; x <= endX && !placed; x++) {
-                for (int y = startY; y <= endY && !placed; y++) {
-
-                    //If we're not on the edge, continue. We don't want to search the inner areas as we go.
-                    if (x != startX && x != endX && y != startY && y != endY)
-                        continue;
-
-                    if(startX < 0 || endX > grid.getWidth() || startY < 0 || endY > grid.getHeight())
-                        GH.writeErrorMessage("Couldn't find a place to spawn the base!");
-
-                    //For each tile, we want to check if there is a 4x4 surrounding area.
-                    int innerStartX = x - areaToSearch;
-                    int innerEndX = x + areaToSearch;
-                    int innerStartY = y - areaToSearch;
-                    int innerEndY = y + areaToSearch;
-
-                    //If the node is null (outside the bounds), continue.
-                    if (grid.getNode(innerStartX, innerStartY) == null || grid.getNode(innerEndX, innerEndY) == null)
-                        continue;
-
-                    placed = true;
-
-                    //Check over the inner area. If all tiles are not set to avoid, we have a place we can spawn our Colony.
-                    for (int innerX = innerStartX; innerX <= innerEndX && placed; innerX++) {
-                        for (int innerY = innerStartY; innerY <= innerEndY && placed; innerY++) {
-                            Grid.TerrainTile tile = grid.getNode(innerX, innerY).getTerrainTile();
-                            if (tile.tileRef.avoid)//If there is a single tile set to avoid, break!
-                                placed = false;
-                        }
-                    }
-
-                    //If passed, calculate the start vector.
-                    if(placed)
-                        start.set(x * grid.getSquareSize(), y * grid.getSquareSize());
-                }
-            }
-            radius++;
-        }
-
-        //Spawns the Colony Entity and centers the camera on it.
-        BuildingEntity colonyEnt = new BuildingEntity(start, 0, new String[]{"Colony",""}, 10);
-        ListHolder.addEntity(colonyEnt);
-        ColonyGame.camera.position.set(colonyEnt.getTransform().getPosition().x, colonyEnt.getTransform().getPosition().y, 0);
-        Building colonyBuilding = colonyEnt.getComponent(Building.class);
-        colonyBuilding.setBuildingName("colony_building");
-        this.addOwnedToColony(colonyBuilding);
-        colonyEnt.getComponent(Constructable.class).setComplete();
-
-        //Spawns the Equipment building.
-        BuildingEntity equipEnt = new BuildingEntity(new Vector2(start.x - 5, start.y - 5), 0, new String[]{"Colony",""}, 10);
-        equipEnt.getTags().addTag("constructing");
-        ListHolder.addEntity(equipEnt);
-        Building equipBuilding = equipEnt.getComponent(Building.class);
-        equipBuilding.setBuildingName("workshop");
-        this.addOwnedToColony(equipBuilding);
-
-        //Destroys resources in an area around the Colony Entity.
-        radius = 8;
-        Predicate<Grid.Node> notWaterNode = node -> !node.getTerrainTile().tileRef.category.equals("water");
-
-        //A consumer function to use. If the entity is a tree, destroy it!
-        Consumer<Entity> treeConsumer = ent -> {
-            if(ent.getTags().hasTag("resource")) ent.setToDestroy();
-        };
-
-        //Perform the things.
-        //this.grid.perform(destroyNearbyResources);
-        grid.performOnEntityInRadius(treeConsumer, notWaterNode, radius, grid.getIndex(colonyEnt.getTransform().getPosition()));
-
-        //Make some colonists!
-        for(int i=0;i<1;i++) {
-            Entity c = this.makeColonist(colonyEnt.getTransform().getPosition(), GH.toMeters(200), "colonist");
-            c.getComponent(Colonist.class).setName(GameScreen.firstNames[MathUtils.random(GameScreen.firstNames.length - 1)], GameScreen.lastNames[MathUtils.random(GameScreen.lastNames.length - 1)]);
-            this.addColonist(c.getComponent(Colonist.class));
-            ListHolder.addEntity(c);
-        }
     }
 
     @Override
@@ -283,5 +188,35 @@ public class Colony extends Component implements IInteractable {
     @JsonIgnore
     public Constructable getConstructable() {
         return null;
+    }
+
+    public static class CraftingJob{
+        public Building building;
+        public DataBuilder.JsonItem itemRef;
+        public DataBuilder.JsonRecipe itemRecipe;
+        public int amount;
+        public Array<ItemNeeded> materials, raw;
+
+        public CraftingJob(Building building, String itemName, int amount){
+            this.building = building;
+            this.itemRef = DataManager.getData(itemName, DataBuilder.JsonItem.class);
+            this.itemRecipe = DataManager.getData(itemName, DataBuilder.JsonRecipe.class);
+            this.amount = amount;
+            this.materials = new Array<>();
+            this.raw = new Array<>();
+        }
+
+        //TODO This needs some serious recursiveness or something...
+
+        private void calculateMaterials(){
+            for(int i=0;i<itemRecipe.items.length;i++){
+                DataBuilder.JsonItem item = DataManager.getData(itemRecipe.items[i], DataBuilder.JsonItem.class);
+                if(item.getItemCategory().equals("material")){
+                    materials.add(new ItemNeeded(item.getItemName(), itemRecipe.itemAmounts[i]));
+                }
+
+            }
+        }
+
     }
 }

@@ -2,6 +2,7 @@
   {
     "itemName": "stone",
     "displayName": "Stones",
+    "comment": "The category is the overall type (raw, material, tool) whereas the itemType is more specific (water, food, hammer)",
     "category": "raw",
     "itemType": "stone",
     "description": "Hard stuff.",
@@ -81,6 +82,22 @@
     "displayName": "Animal Hide",
     "category": "raw",
     "itemType": "hide",
+    "description": "Awesome animal hide.",
+    "icon": "hide"
+  },
+  {
+    "itemName": "wood_shaft",
+    "displayName": "Wooden Shaft",
+    "category": "material",
+    "itemType": "shaft",
+    "description": "Awesome animal hide.",
+    "icon": "hide"
+  },
+  {
+    "itemName": "wood_hatchet_head",
+    "displayName": "Wooden Shaft",
+    "category": "material",
+    "itemType": "shaft",
     "description": "Awesome animal hide.",
     "icon": "hide"
   }

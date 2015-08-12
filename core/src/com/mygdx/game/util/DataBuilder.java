@@ -523,6 +523,10 @@ public class DataBuilder implements IDestroyable{
             return itemName;
         }
 
+        public String getItemCategory() {
+            return this.category;
+        }
+
         public String getDisplayName() {
             return displayName;
         }

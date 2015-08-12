@@ -18,10 +18,9 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.mygdx.game.ColonyGame;
-import com.mygdx.game.component.Animal;
-import com.mygdx.game.component.Colony;
-import com.mygdx.game.component.Group;
+import com.mygdx.game.component.*;
 import com.mygdx.game.entity.AnimalEnt;
+import com.mygdx.game.entity.BuildingEntity;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.ui.PlayerInterface;
 import com.mygdx.game.ui.UI;
@@ -30,6 +29,9 @@ import com.mygdx.game.util.managers.DataManager;
 import com.mygdx.game.util.managers.NotificationManager;
 import com.mygdx.game.util.managers.PlayerManager;
 import com.mygdx.game.util.worldgeneration.WorldGen;
+
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 /**
  * Created by Bbent_000 on 12/25/2014.
@@ -74,6 +76,7 @@ public class GameScreen implements Screen{
             if(generatedTrees){
                 startLocation.set((ColonyGame.worldGrid.getWidth()/2)*ColonyGame.worldGrid.getSquareSize(), (ColonyGame.worldGrid.getHeight()/2)*ColonyGame.worldGrid.getSquareSize());
                 generateStart(startLocation);
+                this.spawnAnimals();
             }
         }
 
@@ -98,9 +101,100 @@ public class GameScreen implements Screen{
         Colony colony = empty.addComponent(new Colony());
         PlayerManager.Player player = PlayerManager.addPlayer("Player", colony);
 
-        this.spawnAnimals();
-
         NotificationManager.init(player, 1f);
+
+        //Find a suitable place to spawn our Colony
+        int radius = 0, areaToSearch = 5;
+        boolean placed = false;
+        Grid.GridInstance grid = ColonyGame.worldGrid;
+        int[] index = grid.getIndex(start);
+
+        /**
+         * For now, starts in the middle of the map. For each loop, search an area ('areaToSearch') that is suitable. This will check an area (ex: 5x5) to make sure
+         * there are no obstacles or terrain problems. If the area is suitable, the building is placed. Otherwise, we increase the radius and keep searching.
+         */
+        while (!placed) {
+            int startX = index[0] - radius;
+            int endX = index[0] + radius;
+            int startY = index[1] - radius;
+            int endY = index[1] + radius;
+
+            //Loop over each tile.
+            for (int x = startX; x <= endX && !placed; x++) {
+                for (int y = startY; y <= endY && !placed; y++) {
+
+                    //If we're not on the edge, continue. We don't want to search the inner areas as we go.
+                    if (x != startX && x != endX && y != startY && y != endY)
+                        continue;
+
+                    if(startX < 0 || endX > grid.getWidth() || startY < 0 || endY > grid.getHeight())
+                        GH.writeErrorMessage("Couldn't find a place to spawn the base!");
+
+                    //For each tile, we want to check if there is a 4x4 surrounding area.
+                    int innerStartX = x - areaToSearch;
+                    int innerEndX = x + areaToSearch;
+                    int innerStartY = y - areaToSearch;
+                    int innerEndY = y + areaToSearch;
+
+                    //If the node is null (outside the bounds), continue.
+                    if (grid.getNode(innerStartX, innerStartY) == null || grid.getNode(innerEndX, innerEndY) == null)
+                        continue;
+
+                    placed = true;
+
+                    //Check over the inner area. If all tiles are not set to avoid, we have a place we can spawn our Colony.
+                    for (int innerX = innerStartX; innerX <= innerEndX && placed; innerX++) {
+                        for (int innerY = innerStartY; innerY <= innerEndY && placed; innerY++) {
+                            Grid.TerrainTile tile = grid.getNode(innerX, innerY).getTerrainTile();
+                            if (tile.tileRef.avoid)//If there is a single tile set to avoid, break!
+                                placed = false;
+                        }
+                    }
+
+                    //If passed, calculate the start vector.
+                    if(placed)
+                        start.set(x * grid.getSquareSize(), y * grid.getSquareSize());
+                }
+            }
+            radius++;
+        }
+
+        //Spawns the Colony Entity and centers the camera on it.
+        BuildingEntity colonyEnt = new BuildingEntity(start, 0, new String[]{"Colony",""}, 10);
+        ListHolder.addEntity(colonyEnt);
+        ColonyGame.camera.position.set(colonyEnt.getTransform().getPosition().x, colonyEnt.getTransform().getPosition().y, 0);
+        Building colonyBuilding = colonyEnt.getComponent(Building.class);
+        colonyBuilding.setBuildingName("colony_building");
+        colony.addOwnedToColony(colonyBuilding);
+        colonyEnt.getComponent(Constructable.class).setComplete();
+
+        //Spawns the Equipment building.
+        BuildingEntity equipEnt = new BuildingEntity(new Vector2(start.x - 5, start.y - 5), 0, new String[]{"Colony",""}, 10);
+        equipEnt.getTags().addTag("constructing");
+        ListHolder.addEntity(equipEnt);
+        Building equipBuilding = equipEnt.getComponent(Building.class);
+        equipBuilding.setBuildingName("workshop");
+        colony.addOwnedToColony(equipBuilding);
+
+        //Destroys resources in an area around the Colony Entity.
+        radius = 8;
+        Predicate<Grid.Node> notWaterNode = node -> !node.getTerrainTile().tileRef.category.equals("water");
+
+        //A consumer function to use. If the entity is a tree, destroy it!
+        Consumer<Entity> treeConsumer = ent -> {
+            if(ent.getTags().hasTag("resource")) ent.setToDestroy();
+        };
+
+        //Perform the things.
+        grid.performOnEntityInRadius(treeConsumer, notWaterNode, radius, grid.getIndex(colonyEnt.getTransform().getPosition()));
+
+        //Make some colonists!
+        for(int i=0;i<1;i++) {
+            Entity c = colony.makeColonist(colonyEnt.getTransform().getPosition(), GH.toMeters(200), "colonist");
+            c.getComponent(Colonist.class).setName(GameScreen.firstNames[MathUtils.random(GameScreen.firstNames.length - 1)], GameScreen.lastNames[MathUtils.random(GameScreen.lastNames.length - 1)]);
+            colony.addColonist(c.getComponent(Colonist.class));
+            ListHolder.addEntity(c);
+        }
     }
 
     private void updateEntities(float delta){

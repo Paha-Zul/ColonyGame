@@ -12,8 +12,8 @@
   },
   {
     "name": "wood_hatchet",
-    "items": ["wood"],
-    "itemAmounts": [10]
+    "items": ["wood_shaft", "wood_hatchet_head"],
+    "itemAmounts": [1, 1]
   },
   {
     "name": "stone_pick",
@@ -29,6 +29,31 @@
     "name": "stone_hatchet",
     "items": ["wood", "stone"],
     "itemAmounts": [10, 10]
+  },
+  {
+    "name": "iron_pick",
+    "items": ["wood", "stone"],
+    "itemAmounts": [10, 10]
+  },
+  {
+    "name": "iron_shovel",
+    "items": ["wood", "stone"],
+    "itemAmounts": [10, 10]
+  },
+  {
+    "name": "stone_hatchet",
+    "items": ["wood", "stone"],
+    "itemAmounts": [10, 10]
+  },
+  {
+    "name": "wood_shaft",
+    "items": ["wood"],
+    "itemAmounts": [10]
+  },
+  {
+    "name": "wood_hatchet_head",
+    "items": ["wood"],
+    "itemAmounts": [10]
   },
   {
     "name": "colony_building",
