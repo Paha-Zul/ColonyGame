@@ -1,5 +1,7 @@
 package com.mygdx.game.util.managers;
 
+import com.mygdx.game.util.Logger;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -25,7 +27,9 @@ public class DataManager {
             dataMap.put(c, map);
         }
 
-        map.put(dataName, data);
+        if(map.put(dataName, data) != null)
+            Logger.log(Logger.NORMAL, dataName+" of type "+c.getSimpleName()+" already has data in the DataManager. Either getting overwritten by a duplicate or a mod.");
+
     }
 
     /**

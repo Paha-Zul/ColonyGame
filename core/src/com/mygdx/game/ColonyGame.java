@@ -32,6 +32,8 @@ public class ColonyGame extends Game {
 	public static Box2DDebugRenderer debugRenderer;
     public static ExecutorService threadPool;
 
+    public static boolean closed = false;
+
     public static EasyAssetManager assetManager;
 
 	private Color screenColor = new Color(0, 0, 0, 1);
@@ -80,8 +82,14 @@ public class ColonyGame extends Game {
 			camera.update();
 		}catch(Exception e){
 			e.printStackTrace();
+            closed = true;
 			threadPool.shutdownNow();
-			GH.writeErrorMessage(e);
+            threadPool = null;
+            assetManager = null;
+            GH.writeErrorMessage(e);
+			Logger.log(Logger.ERROR, "Game closing due to error...");
+            e.printStackTrace(Logger.getPrintWriter());
+			Logger.close();
 			Gdx.app.exit();
 		}
 

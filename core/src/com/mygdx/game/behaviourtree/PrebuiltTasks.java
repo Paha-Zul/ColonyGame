@@ -588,14 +588,11 @@ public class PrebuiltTasks {
         Follow mt = new Follow("Following", blackBoard);
         Attack attack = new Attack("Attacking Target", blackBoard);
 
-        getPathAndMoveSeq.control.callbacks.startCallback  = task -> {
-            task.blackBoard.targetNode = null;
-        };
+        //Make sure the targetNode is null. That way the target is used for pathfinding.
+        getPathAndMoveSeq.control.callbacks.startCallback  = task -> task.blackBoard.targetNode = null;
 
         //Make sure the target is not null.
-        mainRepeat.getControl().callbacks.checkCriteria = task -> {
-            return task.getBlackboard().target != null && task.blackBoard.target.getTags().hasTag("alive");
-        };
+        mainRepeat.getControl().callbacks.checkCriteria = task -> task.getBlackboard().target != null && task.blackBoard.target.getTags().hasTag("alive");
 
         //To succeed this repeat job, the target must be null, not valid, or not alive.
         mainRepeat.getControl().callbacks.successCriteria = task -> {
@@ -607,8 +604,7 @@ public class PrebuiltTasks {
         //If the target has moved away from it's last square AND the move job is still active (why repath if not moving?), fail the parallel job.
         mt.getControl().callbacks.failCriteria = tsk -> {
             Task task = (Task)tsk;
-            boolean diff = task.getBlackboard().targetNode != ColonyGame.worldGrid.getNode((task.getBlackboard().target));
-            return diff;
+            return task.getBlackboard().targetNode != ColonyGame.worldGrid.getNode((task.getBlackboard().target));
         };
 
         //If we are within range of the target, succeed the MoveTo task.

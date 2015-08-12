@@ -130,14 +130,18 @@ public class DataBuilder implements IDestroyable{
         //Build tools
         buildJson(Gdx.files.internal(path + filePath + toolPath), JsonTool[].class, value -> {
             for (JsonTool tool : value) {
+                //Find the texture for the tool. If it wasn't found, use the "missing" texture.
                 tool.iconTexture = atlas.findRegion(tool.icon);
                 if(tool.iconTexture == null) tool.iconTexture = atlas.findRegion("missing");
+                //Add the tool to the data manager
                 DataManager.addData(tool.itemName, tool, JsonItem.class);
+                //Add the category of the tool to the JsonItem category map.
                 Array<String> typeList = JsonItem.categoryMap.get(tool.category);
                 if(typeList == null) {
                     typeList = new Array<>();
                     JsonItem.categoryMap.put(tool.category, typeList);
                 }
+                //If the list doesn't contain the type already, add it! Then add this tool to the 'allItems' list.
                 if(!typeList.contains(tool.getItemType(), false)) typeList.add(tool.getItemType());
                 JsonItem.allItems.add(tool.itemName);
             }

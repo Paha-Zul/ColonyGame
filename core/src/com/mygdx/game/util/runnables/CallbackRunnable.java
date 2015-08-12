@@ -1,5 +1,6 @@
 package com.mygdx.game.util.runnables;
 
+import com.mygdx.game.ColonyGame;
 import com.mygdx.game.interfaces.Functional;
 
 /**
@@ -14,6 +15,7 @@ public class CallbackRunnable implements Runnable{
 
     @Override
     public void run() {
+        if(ColonyGame.closed) return;
         this.callback.callback();
     }
 }

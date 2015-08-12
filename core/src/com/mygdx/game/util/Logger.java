@@ -1,8 +1,8 @@
 package com.mygdx.game.util;
 
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
+import com.badlogic.gdx.Gdx;
+
+import java.io.*;
 
 /**
  * Created by Paha on 8/12/2015.
@@ -14,7 +14,16 @@ public class Logger {
 
     static{
         try {
-            Logger.writer = new PrintWriter("log.txt", "UTF-8");
+            boolean append = false;
+            boolean autoFlush = true;
+            String charset = "UTF-8";
+            String filePath = Gdx.files.internal("").file().getAbsolutePath() + "/log.txt";
+
+            File file = new File(filePath); //Create a new file (or the already existing one)
+            FileOutputStream fos = new FileOutputStream(file, append); //This allows us to choose to append or not.
+            OutputStreamWriter osw = new OutputStreamWriter(fos, charset); //This allows us to choose the charset.
+            BufferedWriter bw = new BufferedWriter(osw); //This buffers the output for more efficient writing.
+            Logger.writer = new PrintWriter(bw, autoFlush); //This gives us easy methods like println().
         } catch (FileNotFoundException | UnsupportedEncodingException e) {
             e.printStackTrace();
         }
@@ -30,8 +39,19 @@ public class Logger {
         else if(type == ERROR)
             text = "[ERROR] "+text;
 
-        writer.append(text);
+        writer.println(text);
         if(printToConsole) System.out.println(text);
         writer.flush();
+    }
+
+    /**
+     * @return The PrintWriter to use (for printing the stack trace to a file...)
+     */
+    public static PrintWriter getPrintWriter(){
+        return Logger.writer;
+    }
+
+    public static void close(){
+        Logger.writer.close();
     }
 }
