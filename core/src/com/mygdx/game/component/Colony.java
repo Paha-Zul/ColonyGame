@@ -46,9 +46,6 @@ public class Colony extends Component implements IInteractable {
         this.inventory = this.owner.addComponent(new Inventory());
         this.inventory.setMaxAmount(-1);
         load();
-
-        CraftingJob job = new CraftingJob(null, "wood_hatchet", 1);
-        System.out.println("Okayer");
     }
 
     @Override
@@ -212,22 +209,13 @@ public class Colony extends Component implements IInteractable {
             this.calculateMaterials();
         }
 
-        //TODO This needs some serious recursiveness or something...
 
+        //Starts the calculations...
         private void calculateMaterials(){
             HashMap<String, Integer> materialMap = new HashMap<>(10);
             HashMap<String, Integer> rawMap = new HashMap<>(10);
 
-            for(int i=0;i<itemRecipe.items.length;i++){
-                DataBuilder.JsonItem subItem = DataManager.getData(itemRecipe.items[i], DataBuilder.JsonItem.class);
-                //If it's a material, add it to the hashmap and recurse!!
-                if(subItem.getItemCategory().equals("material")){
-                    this.addToMap(materialMap, subItem, itemRecipe.itemAmounts[i]);
-                    this.calc(subItem, materialMap, rawMap);
-                //Otherwise, just add to raw map.
-                }else
-                    this.addToMap(rawMap, subItem, itemRecipe.itemAmounts[i]);
-            }
+            this.calc(this.itemRef, materialMap, rawMap);
 
             //Convert the materialMap into an array of ItemNeeded objects.
             for(Map.Entry<String,Integer> entry : materialMap.entrySet()){
@@ -244,6 +232,12 @@ public class Colony extends Component implements IInteractable {
             }
         }
 
+        /**
+         * Processes an item and calculates all it's materials/raw that it needs.
+         * @param itemRef The JsonItem to calculate for.
+         * @param materialMap The material map where required materials and amounts are placed.
+         * @param rawMap The raw map where required raw and amounts are placed.
+         */
         private void calc(DataBuilder.JsonItem itemRef, HashMap<String, Integer> materialMap, HashMap<String, Integer> rawMap){
             //Get the recipe...
             DataBuilder.JsonRecipe recipe = DataManager.getData(itemRef.getItemName(), DataBuilder.JsonRecipe.class);
@@ -261,6 +255,12 @@ public class Colony extends Component implements IInteractable {
             }
         }
 
+        /**
+         * Adds an item to a map.
+         * @param map The map to add to.
+         * @param itemRef The item to add.
+         * @param amountToAdd The amount to add.
+         */
         private void addToMap(HashMap<String, Integer> map, DataBuilder.JsonItem itemRef, int amountToAdd){
             Integer amount = map.get(itemRef.getItemName()); //Get the amount already in the hashmap
             int _amount = 0;

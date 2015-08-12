@@ -1,6 +1,8 @@
 package com.mygdx.game.util.managers;
 
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Stores all data that needs to be referenced for information in the future. This is for stuff like
@@ -40,10 +42,22 @@ public class DataManager {
         return (T)map.get(dataName);
     }
 
-    public static <T> String[] getKeysForType(Class <T> c){
+    public static <T> String[] getKeyListForType(Class <T> c){
         HashMap<String, Object> map = dataMap.get(c);
 
         return map.keySet().toArray(new String[map.size()]);
+    }
+
+    public static <T> Object[] getValueListForType(Class <T> c){
+        HashMap<String, Object> map = dataMap.get(c);
+
+        return map.values().toArray(new Object[map.size()]);
+    }
+
+    public static <T> Set<Map.Entry<String, Object>> getEntrySetForType(Class <T> c){
+        HashMap<String, Object> map = dataMap.get(c);
+
+        return map.entrySet();
     }
 
 //    private static <T> void assignFields(DataBuilder.JsonPrefab.FieldInit[] fields, Class<T> clazz, Object objectInstance){

@@ -21,6 +21,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Consumer;
 
 /**
@@ -153,6 +154,12 @@ public class DataBuilder implements IDestroyable{
             for (JsonRecipe recipe : value)
                 DataManager.addData(recipe.name, recipe, JsonRecipe.class);
         });
+
+        //We need to do this after the items and recipes are built.
+        for(Object item : DataManager.getValueListForType(JsonItem.class)){
+            JsonItem _item = (JsonItem)item;
+            this.calculateMaterials(_item, _item.materialsForCrafting, _item.rawForCrafting);
+        }
 
         //Build resources
         buildJson(Gdx.files.internal(path + filePath + resourcePath), JsonResource[].class, buildResources);
@@ -506,9 +513,79 @@ public class DataBuilder implements IDestroyable{
         worldData = world;
     };
 
+    //Starts the calculations...
+    private void calculateMaterials(JsonItem itemRef, Array<ItemNeeded> materials, Array<ItemNeeded> raw){
+        HashMap<String, Integer> materialMap = new HashMap<>(10);
+        HashMap<String, Integer> rawMap = new HashMap<>(10);
+
+        this.calcSingleItem(itemRef, materialMap, rawMap);
+
+        //Convert the materialMap into an array of ItemNeeded objects.
+        for(Map.Entry<String,Integer> entry : materialMap.entrySet()){
+            String itemName = entry.getKey();
+            int amount = entry.getValue();
+            materials.add(new ItemNeeded(itemName, amount));
+        }
+
+        //Convert the rawMap into an array of ItemNeeded objects.
+        for(Map.Entry<String,Integer> entry : rawMap.entrySet()){
+            String itemName = entry.getKey();
+            int amount = entry.getValue();
+            raw.add(new ItemNeeded(itemName, amount));
+        }
+    }
+
+    /**
+     * Processes an item and calculates all it's materials/raw that it needs.
+     * @param itemRef The JsonItem to calculate for.
+     * @param materialMap The material map where required materials and amounts are placed.
+     * @param rawMap The raw map where required raw and amounts are placed.
+     */
+    private void calcSingleItem(DataBuilder.JsonItem itemRef, HashMap<String, Integer> materialMap, HashMap<String, Integer> rawMap){
+        if(itemRef.category.equals("raw")) return;
+
+        //Get the recipe...
+        DataBuilder.JsonRecipe recipe = DataManager.getData(itemRef.getItemName(), DataBuilder.JsonRecipe.class);
+
+        if(recipe == null){
+            Logger.log(Logger.WARNING, "Couldn't find a recipe for " + itemRef.getItemName() + ". This will probably result in a crash", true);
+            return;
+        }
+
+        //For each item of the recipe, get it's items...
+        for(int i=0;i<recipe.items.length;i++){
+            //Get the sub item.
+            DataBuilder.JsonItem subItem = DataManager.getData(recipe.items[i], DataBuilder.JsonItem.class);
+            //If it's a material, add it to the hashmap and recurse!!
+            if(subItem.getItemCategory().equals("material")){
+                this.addToMap(materialMap, subItem, recipe.itemAmounts[i]);
+                this.calcSingleItem(subItem, materialMap, rawMap); //Recursive call
+            //Otherwise, just add to raw map.
+            }else
+                this.addToMap(rawMap, subItem, recipe.itemAmounts[i]);
+        }
+    }
+
+    /**
+     * Adds an item to a map.
+     * @param map The map to add to.
+     * @param itemRef The item to add.
+     * @param amountToAdd The amount to add.
+     */
+    private void addToMap(HashMap<String, Integer> map, DataBuilder.JsonItem itemRef, int amountToAdd){
+        Integer amount = map.get(itemRef.getItemName()); //Get the amount already in the hashmap
+        int _amount = 0;
+        if(amount != null) _amount = amount; //If it existed, set it to our temp variable
+        _amount += amountToAdd; //Add the amount needed.
+        map.put(itemRef.getItemName(), _amount); //Put it back into the hashmap.
+    }
+
     public static class JsonItem{
         public static HashMap<String, Array<String>> categoryMap = new HashMap<>();
         public static Array<String> allItems = new Array<>();
+
+        public Array<ItemNeeded> materialsForCrafting = new Array<>();
+        public Array<ItemNeeded> rawForCrafting = new Array<>();
 
         public Array<JsonResource> inResources = new Array<>(); //A link to the resources this item is in.
         public Array<String> possibleTools = new Array<>();

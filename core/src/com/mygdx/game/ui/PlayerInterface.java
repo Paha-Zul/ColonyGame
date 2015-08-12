@@ -692,11 +692,12 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         //Starting X and Y pos.
         float xPos = rect.x + 10;
         float yPos = rect.y + rect.height - iconSize - 10;
-        TextureRegion _icon = null;
         this.UIStyle.background = new TextureRegion(ColonyGame.assetManager.get("background", Texture.class));
+        TextureRegion _icon;
 
         //Draw each item.
         for(int i=0;i<itemList.size;i++){
+            //Get the itemName and itemAmount and the _icon
             String itemName = itemList.get(i);
             int itemAmount = inventory.getItemAmount(itemName);
             String label = ""+itemAmount;

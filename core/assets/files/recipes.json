@@ -12,8 +12,8 @@
   },
   {
     "name": "wood_hatchet",
-    "items": ["wood_shaft", "wood_hatchet_head", "stone"],
-    "itemAmounts": [1, 1, 10]
+    "items": ["wood_shaft", "wood_hatchet_head"],
+    "itemAmounts": [1, 1]
   },
   {
     "name": "stone_pick",
