@@ -82,9 +82,9 @@ public class GameScreen implements Screen{
 
         //drawMap();
         //If we should render the world, render it! (for debugging mostly)
-        if(PlayerInterface.getInstance().renderWorld) renderMap();
+        if(PlayerInterface.getInstance().renderWorld) this.renderMap();
         //Updates all the entities.
-        updateEntities(delta);
+        this.updateEntities(delta);
         //Updates the Notification manager.
         NotificationManager.update(delta);
         //Updates the pathfinder.

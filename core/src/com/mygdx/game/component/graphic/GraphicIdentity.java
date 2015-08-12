@@ -155,6 +155,10 @@ public class GraphicIdentity extends Component {
             this.anchor.set(x, y);
     }
 
+    public Vector2 getAnchor(){
+        return this.anchor;
+    }
+
     @JsonIgnore
     public String getSpriteTextureName(String name){
         return this.spriteTextureName;

@@ -1,6 +1,5 @@
 package com.mygdx.game.component;
 
-import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.interfaces.IInteractable;
 import com.mygdx.game.interfaces.IOwnable;
 import com.mygdx.game.util.DataBuilder;
@@ -38,12 +37,16 @@ public class Building extends Component implements IOwnable, IInteractable{
         //Get the JsonBuilding reference, add the tags, add an inventory if under construction, and set the name.
         DataBuilder.JsonBuilding jBuilding = DataManager.getData(this.buildingName, DataBuilder.JsonBuilding.class);
         for(String tag : jBuilding.tags) this.owner.getTags().addTag(tag); //Add each tag that exists.
+
         //Add an inventory if under construction OR if the building is supposed to have one...
         if(this.owner.getTags().hasTag("constructing") || jBuilding.inventory) this.inventory = this.addComponent(new Inventory());
         this.owner.name = jBuilding.displayName; //Set the display name.
 
-        Enterable enterable = this.addComponent(new Enterable());
-        enterable.setEnterPositions(new Vector2(44,-82));
+        if(jBuilding.enterable) {
+            Enterable enterable = this.addComponent(new Enterable());
+            enterable.setEnterPositions(jBuilding.enterablePositions);
+            enterable.setMaxOccupants(jBuilding.enterableMaxOccupancy);
+        }
 
         this.load();
     }

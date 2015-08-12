@@ -760,12 +760,14 @@ public class PrebuiltTasks {
          */
 
         Sequence mainSeq = new Sequence("Sleeping", blackBoard);
+        GetBuildingFromColony getBunks = new GetBuildingFromColony("Getting bunk", blackBoard);
         FindPath fp = new FindPath("Pathing", blackBoard);
         MoveTo mt = new MoveTo("Moving", blackBoard);
         Enter enter = new Enter("Entering", blackBoard);
         Sleep sleep = new Sleep("Sleeping", blackBoard);
         Leave leave = new Leave("Leaving", blackBoard);
 
+        mainSeq.control.addTask(getBunks);
         mainSeq.control.addTask(fp);
         mainSeq.control.addTask(mt);
         mainSeq.control.addTask(enter);
@@ -774,12 +776,7 @@ public class PrebuiltTasks {
 
         mainSeq.control.callbacks.startCallback = task -> {
             task.blackBoard.targetNode = null;
-
-            Colonist col = task.blackBoard.myManager.getEntityOwner().getComponent(Colonist.class);
-            Colony colony = col.getColony();
-            Building building = colony.getOwnedFromColony(Building.class, b -> b.getEntityOwner().getTags().hasTag("main"));
-            if(building == null) task.getControl().finishWithFailure();
-            else task.blackBoard.target = building.getEntityOwner();
+            task.blackBoard.tagsToSearch = new String[]{"enterable"};
         };
 
         return mainSeq;

@@ -652,8 +652,10 @@ public class DataBuilder implements IDestroyable{
         public String name, displayName;
         public String[] tags;
         public boolean inventory;
-        public String[] storageTypes;
-        public String[] crafting;
+        public String[] storageTypes, crafting;
+        public boolean enterable;
+        public int enterableMaxOccupancy;
+        public float[][] enterablePositions;
     }
 
     private static class FolderStructure{

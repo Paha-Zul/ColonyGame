@@ -2,9 +2,12 @@
   {
     "name": "colony_building",
     "displayName": "Colony Base",
-    "tags": ["main", "storage"],
+    "tags": ["main", "storage", "enterable"],
     "inventory": true,
-    "storageTypes": ["all"]
+    "storageTypes": ["all"],
+    "enterable": true,
+    "enterableMaxOccupancy": 1,
+    "enterablePositions": [[0.675, 0.1]]
   },
   {
     "name": "equipment_shed",
