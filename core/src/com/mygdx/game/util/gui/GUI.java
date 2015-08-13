@@ -9,8 +9,10 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.utils.Align;
+import com.mygdx.game.util.GH;
 import com.mygdx.game.util.worldgeneration.WorldGen;
 import com.sun.istack.internal.NotNull;
+import com.sun.istack.internal.Nullable;
 
 /**
  * Created by Bbent_000 on 12/25/2014.
@@ -26,12 +28,15 @@ public class GUI {
 
     public static GUIStyle defaultGUIStyle = new GUIStyle();
 
+    public static final int NONE=0,OVER=1,DOWN=2,UP=3;
+
     private static boolean clicked = false;
     private static boolean up = false;
     private static Rectangle rect1 = new Rectangle();
 
     private static TextureRegion whiteTexture;
     private static float boundsWidth = 0;
+
 
     static{
         font = defaultFont;
@@ -138,21 +143,57 @@ public class GUI {
         batch.setColor(batchColor);
     }
 
-    public static boolean Button(SpriteBatch batch, Rectangle rect){
+    /**
+     * Draws a button using the GUIStyle passed in. If the style is null, uses a default style.
+     * @param batch The SpriteBatch to use.
+     * @param rect The Rectangle to use for boundaries.
+     * @return GUI.NONE (0) for not moused over/clicked, GUI.OVER (1) if moused over but not clicked, GUI.DOWN (2) if clicked down,
+     * GUI.UP (3) if just released.
+     */
+    public static int Button(SpriteBatch batch, Rectangle rect){
         return GUI.Button(batch, "", rect, null);
     }
 
-    public static boolean Button(SpriteBatch batch, Rectangle rect, String text){
+    /**
+     * Draws a button using the GUIStyle passed in. If the style is null, uses a default style.
+     * @param batch The SpriteBatch to use.
+     * @param text The Text to put on the button using the GUIStyle (or default if null) font properties.
+     * @param rect The Rectangle to use for boundaries.
+     * @return GUI.NONE (0) for not moused over/clicked, GUI.OVER (1) if moused over but not clicked, GUI.DOWN (2) if clicked down,
+     * GUI.UP (3) if just released.
+     */
+    public static int Button(SpriteBatch batch, Rectangle rect, String text){
         return GUI.Button(batch, text, rect, null);
     }
 
-    public static boolean Button(SpriteBatch batch, String text, float x, float y, float width, float height, GUIStyle style){
+    /**
+     * Draws a button using the GUIStyle passed in. If the style is null, uses a default style.
+     * @param batch The SpriteBatch to use.
+     * @param text The Text to put on the button using the GUIStyle (or default if null) font properties.
+     * @param x The left X position.
+     * @param y The bottom Y position.
+     * @param width The width of the button.
+     * @param height The height of the button.
+     * @param style The GUIStyle to use. If null, uses a default style.
+     * @return GUI.NONE (0) for not moused over/clicked, GUI.OVER (1) if moused over but not clicked, GUI.DOWN (2) if clicked down,
+     * GUI.UP (3) if just released.
+     */
+    public static int Button(SpriteBatch batch, String text, float x, float y, float width, float height, @Nullable GUIStyle style){
         rect1.set(x, y, width, height);
         return GUI.Button(batch, text, rect1, style);
     }
 
-    public static boolean Button(SpriteBatch batch, String text, Rectangle rect, GUIStyle style){
-        boolean clicked = false;
+    /**
+     * Draws a button using the GUIStyle passed in. If the style is null, uses a default style.
+     * @param batch The SpriteBatch to use.
+     * @param text The Text to put on the button using the GUIStyle (or default if null) font properties.
+     * @param rect The Rectangle to use for boundaries.
+     * @param style The GUIStyle to use. If null, uses a default style.
+     * @return GUI.NONE (0) for not moused over/clicked, GUI.OVER (1) if moused over but not clicked, GUI.DOWN (2) if clicked down,
+     * GUI.UP (3) if just released.
+     */
+    public static int Button(SpriteBatch batch, String text, Rectangle rect, @Nullable GUIStyle style){
+        int state = NONE;
 
         if(style == null)
             style = defaultGUIStyle;
@@ -160,23 +201,20 @@ public class GUI {
         Texture currTexture = style.normal;
         if(style.activated) currTexture = style.active;
 
-        if(rect.contains(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY())){
-            if(GUI.clicked){
-                currTexture = style.clicked;
-            }else if(GUI.up){
-                currTexture = style.moused;
-                clicked = true;
-            }else {
-                currTexture = style.moused;
-            }
+        state = GUI.getState(rect);
 
-        }
+        if(state == DOWN) //If down...
+            currTexture = style.clicked;
+        else if(state == UP) //If up...
+            currTexture = style.moused;
+        else if(state == OVER) //If over...
+            currTexture = style.moused;
 
         batch.draw(currTexture, rect.x, rect.y, rect.getWidth(), rect.getHeight());
         BitmapFont.TextBounds bounds = font.getBounds(text);                                //Get the bounds of the text
         if(!text.isEmpty()) GUI.Label(text, batch, rect.x, rect.y, rect.getWidth(), rect.getHeight(), style);
 
-        return clicked;
+        return state;
     }
 
     public static boolean Label(@NotNull String text, @NotNull SpriteBatch batch, @NotNull Rectangle rect){
@@ -252,17 +290,18 @@ public class GUI {
         return mouseInside;
     }
 
-    public static void ImageLabel(TextureRegion image, String text, SpriteBatch batch, Rectangle imageRect, float textWidth){
-        GUI.ImageLabel(image, text, batch, imageRect.x, imageRect.y, imageRect.width, imageRect.height, textWidth);
+    public static int ImageLabel(TextureRegion image, String text, SpriteBatch batch, Rectangle imageRect, float textWidth){
+        return GUI.ImageLabel(image, text, batch, imageRect.x, imageRect.y, imageRect.width, imageRect.height, textWidth);
     }
 
-    public static void ImageLabel(TextureRegion image, String text, SpriteBatch batch, float x, float y, float imageWidth, float imageHeight, float textWidth){
-        GUI.ImageLabel(image, text, batch, x, y, imageWidth, imageHeight, textWidth, null);
+    public static int ImageLabel(TextureRegion image, String text, SpriteBatch batch, float x, float y, float imageWidth, float imageHeight, float textWidth){
+        return GUI.ImageLabel(image, text, batch, x, y, imageWidth, imageHeight, textWidth, null);
     }
 
-    public static void ImageLabel(TextureRegion image, String text, SpriteBatch batch, float x, float y, float imageWidth, float imageHeight, float textWidth, GUIStyle style){
+    public static int ImageLabel(TextureRegion image, String text, SpriteBatch batch, float x, float y, float imageWidth, float imageHeight, float textWidth, GUIStyle style){
         batch.draw(image, x, y, imageWidth, imageHeight);
         GUI.Label(text, batch, x + imageWidth, y, textWidth, imageHeight, style);
+        return GUI.getState(Rectangle.tmp.set(x, y, imageWidth, imageHeight));
     }
 
     public static String TextBox(String text, SpriteBatch batch, float x, float y){
@@ -275,7 +314,11 @@ public class GUI {
         GUI.font.setScale(1f);
     }
 
-    public static void checkState(){
+    public static void update(){
+        checkState();
+    }
+
+    private static void checkState(){
         boolean down = Gdx.input.isButtonPressed(Input.Buttons.LEFT);
 
         if(down){
@@ -288,6 +331,19 @@ public class GUI {
             GUI.up = false;
             GUI.clicked = false;
         }
+    }
+
+    private static int getState(Rectangle rect){
+        int state = NONE;
+        if(rect.contains(GH.getFixedScreenMouseCoords())){
+            state = OVER; //Set it to over if our mouse is inside.
+            if(GUI.clicked){
+                state = DOWN; //Set the state to down if we're inside and clicked.
+            }else if(GUI.up){
+                state = UP;   //Set the state to up if we are releasing.
+            }
+        }
+        return state;
     }
 
     public static class GUIStyle {

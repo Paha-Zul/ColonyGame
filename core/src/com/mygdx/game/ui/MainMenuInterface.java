@@ -191,7 +191,7 @@ public class MainMenuInterface extends UI{
         GUI.ResetFont();
 
         //Start button.
-        if(GUI.Button(this.batch, "", startRect, startButtonStyle)){
+        if(GUI.Button(this.batch, "", startRect, startButtonStyle) == GUI.UP){
             for(int i=0;i<scriptCheckBoxList.size;i++){
                 if(scriptCheckBoxList.get(i).isChecked())
                     ScriptManager.scripts.get(i).start();
@@ -207,7 +207,7 @@ public class MainMenuInterface extends UI{
         GUI.Button(this.batch, "", blank3Rect, blank3Style);
 
         //Quit button.
-        if(GUI.Button(this.batch, "", quitRect, quitButtonStyle)){
+        if(GUI.Button(this.batch, "", quitRect, quitButtonStyle) == GUI.UP){
             Gdx.app.exit();
         }
 

@@ -389,7 +389,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
             for(int i=0;i<this.currentEvent.choices.length;i++){
                 String choice = this.currentEvent.choices[i];
-                if(GUI.Button(this.batch, choice, windowX + (i+1)*spacing + i*buttonWidth, windowY + windowHeight*0.01f, buttonWidth, buttonHeight, blankStyle)){
+                if(GUI.Button(this.batch, choice, windowX + (i+1)*spacing + i*buttonWidth, windowY + windowHeight*0.01f, buttonWidth, buttonHeight, blankStyle) == GUI.UP){
                     BehaviourManagerComp comp = this.currentEvent.eventTarget.getComponent(BehaviourManagerComp.class);
                     if(comp == null) return;
                     comp.getBlackBoard().target = this.currentEvent.eventTargetOther;
@@ -520,7 +520,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
                 }
 
                 //Draw the button for the individual profile. If clicked, make it our selected profile.
-                if(GUI.Button(this.batch, profileButtonRect, profile.interactable.getInteractable().getName()))
+                if(GUI.Button(this.batch, profileButtonRect, profile.interactable.getInteractable().getName()) == GUI.UP)
                     selectedProfile = profile;
 
                 //If we go too far down the screen, move over.
@@ -689,6 +689,8 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         int iconSize =  32;
         float labelWidth = 50;
 
+        float craftButtonWidth = 50, craftButtonHeight = 32*0.5f;
+
         //Starting X and Y pos.
         float xPos = rect.x + 10;
         float yPos = rect.y + rect.height - iconSize - 10;
@@ -701,15 +703,19 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
             String itemName = itemList.get(i);
             int itemAmount = inventory.getItemAmount(itemName);
             String label = ""+itemAmount;
-            _icon = DataManager.getData(itemName, DataBuilder.JsonItem.class).iconTexture;
+            DataBuilder.JsonItem _itemRef = DataManager.getData(itemName, DataBuilder.JsonItem.class);
+            _icon = _itemRef.iconTexture;
 
             //Draw the label of the amount and the icon.
             GUI.ImageLabel(_icon, label, this.batch, xPos, yPos, iconSize, iconSize, labelWidth, this.UIStyle);
+            if(!_itemRef.getItemCategory().equals("raw")) {
+                int state = GUI.Button(this.batch, "Craft", xPos + iconSize + labelWidth + 10, yPos, craftButtonWidth, iconSize, null);
+            }
 
             //Increment the yPos, if we're too far down, reset Y and shift X.
             yPos -= iconSize + 5;
             if(yPos < rect.y){
-                xPos += iconSize + labelWidth + 10;
+                xPos += iconSize + labelWidth + craftButtonWidth + 20;
                 yPos = rect.y+rect.height - iconSize- 10;
             }
         }
@@ -751,7 +757,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
             //Set the location and draw the button. If clicked, we need to do some tricky things...
             orderButtonRect.set(x + (i + 1) * width, height, 50, 50);
-            if (GUI.Button(this.batch, currTaskNode.nodeName, orderButtonRect, style)) {
+            if (GUI.Button(this.batch, currTaskNode.nodeName, orderButtonRect, style) == GUI.UP) {
                 taskInfo.doCallback();
 
                 //For each profile selectedEntity, tell them to gather.

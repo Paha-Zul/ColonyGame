@@ -82,30 +82,35 @@ public class ColonyGame extends Game {
 			camera.update();
 		}catch(Exception e){
 			e.printStackTrace();
-            closed = true;
-			threadPool.shutdownNow();
-            threadPool = null;
-            assetManager = null;
-            GH.writeErrorMessage(e);
-			Logger.log(Logger.ERROR, "Game closing due to error...");
             e.printStackTrace(Logger.getPrintWriter());
-			Logger.close();
-			Gdx.app.exit();
+            GH.writeErrorMessage(e);
+            this.dispose();
+            Gdx.app.exit();
 		}
 
     }
 
 	private void updateVarious(float delta){
 		Profiler.update(delta);
-		GUI.checkState();
+		GUI.update();
 	}
-
-
 
 	private void updateGUI(float delta){
 		//Draw GUI stuff.
 		batch.setProjectionMatrix(UICamera.combined);
 		ListHolder.updateGUI(delta, batch);
         EventSystem.notifyGameEvent("render_GUI", delta, batch);
+    }
+
+    @Override
+    public void dispose() {
+        super.dispose();
+
+        closed = true;
+        threadPool.shutdownNow();
+        threadPool = null;
+        assetManager = null;
+        Logger.log(Logger.ERROR, "Game closing due to error...");
+        Logger.close();
     }
 }

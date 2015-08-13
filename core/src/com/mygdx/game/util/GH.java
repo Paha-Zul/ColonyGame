@@ -3,6 +3,7 @@ package com.mygdx.game.util;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Vector2;
 
 import java.io.File;
 import java.io.Serializable;
@@ -14,6 +15,8 @@ import java.util.Date;
  * Created by Bbent_000 on 11/17/2014.
  */
 public class GH {
+    private static Vector2 tmp = new Vector2();
+
 	public static <T> T as(Class<T> t, Object o) {
 		return t.isInstance(o) ? t.cast(o) : null;
 	}
@@ -117,6 +120,13 @@ public class GH {
         original = original.replace("%eot", event.eventTargetOther.name);
 
         return original;
+    }
+
+    /**
+     * @return The fixed mouse screen coordinates (don't use this for world coordinates). Uses a reusable Vector2.
+     */
+    public static Vector2 getFixedScreenMouseCoords(){
+        return tmp.set(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY());
     }
 
 

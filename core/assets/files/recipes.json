@@ -41,7 +41,7 @@
     "itemAmounts": [10, 10]
   },
   {
-    "name": "stone_hatchet",
+    "name": "iron_hatchet",
     "items": ["wood", "stone"],
     "itemAmounts": [10, 10]
   },
