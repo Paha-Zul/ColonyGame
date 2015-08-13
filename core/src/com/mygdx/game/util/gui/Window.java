@@ -28,11 +28,13 @@ public abstract class Window{
     public void update(float delta, SpriteBatch batch){
         this.mousedState = 0;
 
-        if(this.mainWindowRect != null)
-            this.recordMouseState(GUI.getState(this.mainWindowRect));
+        if(this.active) {
+            if (this.mainWindowRect != null)
+                this.recordMouseState(GUI.getState(this.mainWindowRect));
 
-        if(this.draggable)
-            this.dragWindow(batch);
+            if (this.draggable)
+                this.dragWindow(batch);
+        }
     }
 
     public void dragWindow(SpriteBatch batch){

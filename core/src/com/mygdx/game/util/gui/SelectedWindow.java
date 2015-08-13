@@ -113,13 +113,14 @@ public class SelectedWindow extends Window{
                 float y = rect.y + rect.height - 20;
                 float barWidth = rect.getWidth()*0.4f;
                 float barHeight = barWidth*0.2f;
+                float labelWidth = 50;
 
+                //Draw the stats!
                 for(int i=0;i<list.size();i++){
                     Stats.Stat stat = list.get(i);
                     float _y = y - (i + 1) * space - 20 * i;
-                    GUI.Label(stat.name, batch, x, _y, 100, barHeight);
-                    GUI.DrawBar(batch, x + 100, _y, barWidth, barHeight, stat.getCurrVal(), stat.getMaxVal(), true, null, null);
-                    //GUI.DrawBar(batch, stat.name, x, y - (i + 1) * space - 20 * i, barWidth, barHeight, stat.getCurrVal(), stat.getMaxVal());
+                    GUI.Label(stat.name, batch, x, _y, labelWidth, barHeight);
+                    GUI.DrawBar(batch, x + labelWidth, _y, barWidth, barHeight, stat.getCurrVal(), stat.getMaxVal(), true, null, null);
                 }
 
                 //If no stats, maybe it has stat text?
