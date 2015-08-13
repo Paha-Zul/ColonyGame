@@ -26,9 +26,11 @@ import com.mygdx.game.component.collider.Collider;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.interfaces.Functional;
 import com.mygdx.game.interfaces.IGUI;
-import com.mygdx.game.interfaces.IInteractable;
 import com.mygdx.game.util.*;
+import com.mygdx.game.util.gui.Button;
 import com.mygdx.game.util.gui.GUI;
+import com.mygdx.game.util.gui.SelectedWindow;
+import com.mygdx.game.util.gui.Window;
 import com.mygdx.game.util.managers.DataManager;
 import com.mygdx.game.util.managers.NotificationManager;
 import com.mygdx.game.util.managers.PlayerManager;
@@ -49,8 +51,10 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     public static boolean active = false;
     public float gameSpeed = 1;
 
-    private TextureRegion background, UIBackgroundBase, UIBackgroundTop;
+    private TextureRegion background;
     private World world;
+    private Array<Window> windowList;
+    private Array<Button> buttonList;
 
     private boolean drawingInfo = false;
     private boolean drawingProfiler = false;
@@ -58,41 +62,16 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     private boolean dragging = false;
     private boolean drawGrid = false;
     public boolean renderWorld = true;
-    public boolean mousedOverUI = true;
 
     private Rectangle buttonRect = new Rectangle();
-    private Rectangle uiBackgroundBaseRect = new Rectangle();
-    private Rectangle uiBackgroundTopRect = new Rectangle();
+
     private float FPS = 0;
 
     private static final float camMoveSpeed = 100f;
     private static final float camZoomSpeed = 5f;
 
-    private final float mainHeight = 0.12f;
-    private final float topHeight = 0.03f;
-    private final float infoWidth = 0.13f;
-    private final float statusWidth = 0.135f;
-    private final float tabsWidth = 0.262f;
-    private final float ordersWidth = 0.479f;
-
-    private float barW = 100, barH = 20;
-
-    private Rectangle infoTopRect = new Rectangle();
-    private Rectangle statusTopRect = new Rectangle();
-    private Rectangle tabsTopRect = new Rectangle();
-    private Rectangle ordersTopRect = new Rectangle();
-
-    private Rectangle infoRect = new Rectangle();
-    private Rectangle statusRect = new Rectangle();
-    private Rectangle tabsRect = new Rectangle();
-    private Rectangle ordersRect = new Rectangle();
-
     private Rectangle bottomLeftRect = new Rectangle();
     private Rectangle selectionBox = new Rectangle();
-    private Rectangle profileButtonRect = new Rectangle();
-    private Rectangle orderButtonRect = new Rectangle();
-
-    private Rectangle reusableImageLabelRect = new Rectangle();
 
     private GUI.GUIStyle gatherStyle = new GUI.GUIStyle();
     private GUI.GUIStyle exploreStyle = new GUI.GUIStyle();
@@ -102,16 +81,16 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     private GUI.GUIStyle gameSpeedStyle = new GUI.GUIStyle();
     private GUI.GUIStyle notificationStyle = new GUI.GUIStyle();
     private GUI.GUIStyle mousedOverNotiStyle = new GUI.GUIStyle();
-    private GUI.GUIStyle UIStyle;
+    public GUI.GUIStyle UIStyle;
     private Timer FPSTimer;
 
     private Vector2 testPoint = new Vector2(); //A reusable vector
     private boolean newlySelected = false; //If we have selected a new entity, this will stop the left click from getting rid of it.
     private UnitProfile selectedProfile = null; //The currently selected UnitProfile.
-    private ArrayList<UnitProfile> selectedProfileList = new ArrayList<>(); //The list of selected UnitProfiles.
+    private Array<UnitProfile> selectedProfileList = new Array<>(); //The list of selected UnitProfiles.
 
     private Color gray = new Color(Color.BLACK);
-    private Texture blueSquare;
+    public Texture blueSquare;
     private Stage stage;
     private static PlayerInterface playerInterface;
 
@@ -171,6 +150,11 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         this.world = world;
         this.whiteTexture = new TextureRegion(WorldGen.whiteTex);
 
+        this.windowList = new Array<>();
+        this.windowList.add(new SelectedWindow(this));
+
+        this.buttonList = new Array<>();
+
         this.eventDescStyle = new GUI.GUIStyle();
         eventDescStyle.background = new TextureRegion(ColonyGame.assetManager.get("eventWindowDescriptionBackground", Texture.class));
 
@@ -181,8 +165,6 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         this.blueSquare = ColonyGame.assetManager.get("blueSquare", Texture.class);
 
         this.background = new TextureRegion(ColonyGame.assetManager.get("background", Texture.class));
-        this.UIBackgroundBase = new TextureRegion(ColonyGame.assetManager.get("UIBackground_base", Texture.class));
-        this.UIBackgroundTop = new TextureRegion(ColonyGame.assetManager.get("UIBackground_top", Texture.class));
 
         this.buttonRect.set(0, Gdx.graphics.getHeight() - 100, 200, 100);
 
@@ -266,12 +248,13 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         int height = Gdx.graphics.getHeight();
         FPSTimer.update(delta);
 
+        this.windowList.forEach(window -> window.update(delta, ColonyGame.batch));
+
         this.moveCamera(); //Move the camera
         this.drawSelectionBox(); //Draws the selection box.
         this.drawDebugInfo(height); //Draws some debug information.
         this.drawTerrainInfo(this.bottomLeftRect); //Draws information about the moused over terrain piece.
         this.drawGameSpeed(screenW, screenH, batch, this.gameSpeedStyle);
-        this.drawSelectedEntity();
         this.drawInvAmounts(screenW, screenH, batch);
         this.drawCurrentNotifications(screenW, screenH, delta);
         this.drawColonyScreen();
@@ -347,15 +330,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         this.mousedOverNotification = newlyMousedOver;
     }
 
-    private void drawSelectedEntity(){
-        //Draw stuff about the selectedEntity entity.
-        if(selectedProfile != null || this.selectedProfileList.size() > 0){
-            GUI.Texture(this.UIBackgroundBase, this.batch, this.uiBackgroundBaseRect);
-            GUI.Texture(this.UIBackgroundTop, this.batch, this.uiBackgroundTopRect);
-            this.drawMultipleProfiles(this.ordersRect);
-            this.drawSelected();
-        }
-    }
+
 
     private void drawCurrentEvent(int width, int height){
         if(this.currentEvent != null){
@@ -429,13 +404,13 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
             this.selectedProfile = null;
         }
 
-        for(int i=0;i<=this.selectedProfileList.size();i++)
+        for(int i=0;i<=this.selectedProfileList.size;i++)
             if(this.selectedProfileList.get(i).entity == entity) {
-                this.selectedProfileList.remove(i);
+                this.selectedProfileList.removeIndex(i);
                 break;
             }
 
-        if(this.selectedProfile == null && this.selectedProfileList.size() > 0)
+        if(this.selectedProfile == null && this.selectedProfileList.size > 0)
             this.selectedProfile = this.selectedProfileList.get(0);
     }
 
@@ -495,150 +470,11 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     }
 
     /**
-     * Draws the multiple selectedEntity profiles.
-     * @param rect The rectangle to draw the information inside of.
-     */
-    private void drawMultipleProfiles(Rectangle rect){
-        //If there is more than one unit selectedEntity.. display in a group format.
-        if(selectedProfileList.size() > 1){
-            profileButtonRect.set(rect.getX() + rect.getWidth() - 115, rect.getY() + rect.getHeight() - 20, 50, 20);
-
-            //For each profile, draw a button to access each individual entity.
-            for(int i=0;i<selectedProfileList.size();i++) {
-                UnitProfile profile = selectedProfileList.get(i);
-                if(!profile.entity.getTags().hasTag("alive")){
-                    profile.entity.getTags().removeTag("selected");
-                    selectedProfileList.remove(i);
-                    i--;
-                    continue;
-                }
-
-                //Draw the button for the individual profile. If clicked, make it our selected profile.
-                if(GUI.Button(this.batch, profileButtonRect, profile.interactable.getInteractable().getName()) == GUI.UP)
-                    selectedProfile = profile;
-
-                //If we go too far down the screen, move over.
-                profileButtonRect.setY(profileButtonRect.getY() - 22);
-                if(profileButtonRect.y <= rect.getY() + 10)
-                    profileButtonRect.set(rect.getX() + rect.getWidth() - 65, rect.getY() + rect.getHeight() - 20, 50, 20);
-
-            }
-        }
-    }
-
-    /**
-     * Displays the selectedEntity Entity.
-     */
-    private void drawSelected(){
-        //Make sure the selectedProfile we have selectedEntity isn't null!
-        if(selectedProfile != null){
-            if(selectedProfileList.size() > 1 && !selectedProfile.entity.getTags().hasTag("alive")){
-                selectedProfileList.forEach(profile -> {if(profile.entity != selectedProfile.entity) selectedProfile = profile;});
-            }
-
-            IInteractable innerInter = selectedProfile.interactable.getInteractable(); //Get the selectedProfile!
-            if(innerInter == null) {
-                selectedProfile = null;
-                return;
-        }
-
-            //If it has a compName, draw the compName...
-            if(innerInter.getName() != null) {
-                GUI.Label(innerInter.getName(), this.batch, this.infoTopRect, this.UIStyle);
-            }
-
-            //If it has stats, draw the stats...
-            if(innerInter.getStats() != null){
-                GUI.Label("Stats", this.batch, this.statusTopRect, this.UIStyle);
-
-                //GUI.Texture(statusRect, ColonyGame.assetManager.get("menuButton_normal", Texture.class), this.batch);
-                Stats stats = innerInter.getStats();
-                Rectangle rect = this.statusRect;
-
-                ArrayList<Stats.Stat> list = stats.getStatList();
-                float space = ((rect.height - list.size()*20)/list.size()+1)/2;
-                float x = rect.x + 10;
-                float y = rect.y + rect.height - 20;
-                float barWidth = rect.getWidth()*0.4f;
-                float barHeight = barWidth*0.2f;
-
-                for(int i=0;i<list.size();i++){
-                    Stats.Stat stat = list.get(i);
-                    drawBar(stat.name, x, y-(i+1)*space - 20*i, barWidth, barHeight, stat.getCurrVal(), stat.getMaxVal());
-                }
-
-            //If no stats, maybe it has stat text?
-            }else if(innerInter.getStatsText() != null){
-                GUI.Label("Resources", this.batch, this.statusTopRect, this.UIStyle);
-                this.UIStyle.multiline = true;
-                this.UIStyle.alignment = Align.topLeft;
-                this.UIStyle.paddingLeft = 10;
-                this.UIStyle.paddingTop = 5;
-                GUI.Label(innerInter.getStatsText(), this.batch, this.statusRect, this.UIStyle);
-                this.UIStyle.paddingLeft = 0;
-                this.UIStyle.paddingTop = 0;
-                this.UIStyle.alignment = Align.center;
-                this.UIStyle.multiline = false;
-            }
-
-            //If it has an inventory, draw the inventory...
-            if(innerInter.getInventory() != null){
-                //GUI.Texture(tabsRect, ColonyGame.assetManager.get("menuButton_normal", Texture.class), this.batch);
-                GUI.Label("Inventory", this.batch, this.tabsTopRect, this.UIStyle);
-                this.drawInventory(innerInter.getInventory(), this.tabsRect);
-            }
-
-            if(innerInter.getBehManager() != null){
-                GUI.Label("currTask: "+innerInter.getBehManager().getCurrentTaskName(), this.batch, this.ordersRect.x, this.ordersRect.y + 70, this.ordersRect.width, this.ordersRect.height - 50, this.UIStyle);
-                GUI.Label("nextTask: "+innerInter.getBehManager().getNextTaskName(), this.batch, this.ordersRect.x, this.ordersRect.y + 60, this.ordersRect.width, this.ordersRect.height - 50, this.UIStyle);
-                GUI.Label("currState: "+innerInter.getBehManager().getBehaviourStates().getCurrState().stateName, this.batch, this.ordersRect.x, this.ordersRect.y + 50, this.ordersRect.width, this.ordersRect.height - 50, this.UIStyle);
-
-                //If it's a humanoid that we can control, draw some order buttons and its current path.
-                if(selectedProfile.interactable.interType.equals("humanoid")){
-                    GUI.Label("Orders", this.batch, this.ordersTopRect, this.UIStyle);
-
-                    //GUI.Texture(ordersRect, ColonyGame.assetManager.get("menuButton_normal", Texture.class), this.batch);
-                    if(innerInter.getBehManager() != null) {
-                        drawBehaviourButtons(innerInter);
-
-                        //Set to saveContainer camera and draw the path lines.
-                        batch.setProjectionMatrix(ColonyGame.camera.combined);
-                        BehaviourManagerComp.Line[] lines = innerInter.getBehManager().getLines();
-                        for(BehaviourManagerComp.Line line : lines)
-                            batch.draw(blueSquare, line.startX, line.startY, 0, 0, line.width, 0.1f, 1, 1, line.rotation, 0, 0, blueSquare.getWidth(), blueSquare.getHeight(), false, false);
-
-                        //Set back to UI camera.
-                        batch.setProjectionMatrix(ColonyGame.UICamera.combined);
-
-                    }
-                }
-            }
-
-            //If it has a constructable...
-            if(innerInter.getConstructable() != null){
-                Constructable constructable = innerInter.getConstructable();
-                Rectangle rect = this.ordersRect;
-                GUI.Label("constructing", this.batch, rect.x, rect.y + rect.height-20, rect.width, 20);
-                GUI.Label("Progress", this.batch, rect.x, rect.y + rect.height - 40, rect.width, 20);
-                GUI.DrawBar(this.batch, rect.x + rect.width/2 - 50, rect.y + rect.height - 60, 100, 20, constructable.getPercentageDone(), true, null, null);
-
-                GUI.Label("Items needed:", this.batch, rect.x, rect.y + rect.height - 50 - 10, 50, 100);
-                Array<ItemNeeded> list = constructable.getItemsNeeded();
-                for(int i=0;i<list.size;i++) {
-                    this.reusableImageLabelRect.set(rect.x, rect.y + rect.height - 50 - i*25, 25, 25);
-                    GUI.ImageLabel(DataManager.getData(list.get(i).itemName, DataBuilder.JsonItem.class).iconTexture, ""+list.get(i).amountNeeded, this.batch, this.reusableImageLabelRect, 100);
-                }
-
-            }
-        }
-    }
-
-    /**
      * Displays an inventory.
      * @param inventory The Inventory to get data from.
      * @param rect The Rectangle to display the inventory inside of.
      */
-    private void drawInventory(Inventory inventory, Rectangle rect){
+    public void drawInventory(Inventory inventory, Rectangle rect){
         batch.setColor(Color.WHITE);
         ArrayList<Inventory.InventoryItem> itemList = inventory.getItemList();
         this.UIStyle.alignment = Align.center;
@@ -720,65 +556,6 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         this.UIStyle.paddingLeft = 0;
         this.UIStyle.paddingTop = 0;
         this.UIStyle.background = null;
-    }
-
-    //Draws the buttons for each selectedEntity colonist that we have control of.
-    private void drawBehaviourButtons(IInteractable interactable){
-        StateTree<BehaviourManagerComp.TaskInfo> tree = interactable.getBehManager().getTaskTree();
-
-        //TODO Need to make sure multiple selections work since this was changed.
-
-        //Set some position variables.
-        float width = (ordersRect.getWidth()/(tree.getCurrentTreeNode().getChildren().size+1));
-        float height = ordersRect.y + 25;
-        float x = ordersRect.x;
-
-        //Get the children of the current root node. This will display all children buttons of our current selection.
-        Array<Tree.TreeNode<BehaviourManagerComp.TaskInfo>> nodeList = tree.getCurrentTreeNode().getChildren();
-        for(int i=0;i<nodeList.size;i++) {
-            //Get the task node and its user data.
-            Tree.TreeNode currTaskNode = nodeList.get(i);
-            BehaviourManagerComp.TaskInfo taskInfo = (BehaviourManagerComp.TaskInfo)currTaskNode.userData;
-
-            //Get the GUIStyle from the taskInfo's object data. If it's null, get the default style from the GUI class.
-            Object userData = taskInfo.userData;
-            GUI.GUIStyle style;
-            if(userData != null) {
-                style = (GUI.GUIStyle) userData;
-                style.activated = taskInfo.active;
-            }else
-                style = GUI.defaultGUIStyle;
-
-            //Set the location and draw the button. If clicked, we need to do some tricky things...
-            orderButtonRect.set(x + (i + 1) * width, height, 50, 50);
-            if (GUI.Button(this.batch, currTaskNode.nodeName, orderButtonRect, style) == GUI.UP) {
-                taskInfo.doCallback();
-
-                //For each profile selectedEntity, tell them to gather.
-                for (UnitProfile profile : selectedProfileList) {
-                    if(profile.entity == selectedProfile.entity) continue;
-
-                    //Get the BehaviourComponent and TreeNode.
-                    BehaviourManagerComp comp = profile.interactable.getInteractable().getBehManager();
-                    Tree.TreeNode treeNode = comp.getTaskTree().getNode(node -> node.nodeName.equals(currTaskNode.nodeName));
-                    BehaviourManagerComp.TaskInfo profTaskInfo = (BehaviourManagerComp.TaskInfo)treeNode.userData;
-
-                    //Do the callback and sync the active booleans. Assign this profile's active state to the main selectedEntity profile.
-                    profTaskInfo.doCallback();
-                    ((BehaviourManagerComp.TaskInfo) treeNode.userData).active = taskInfo.active; //Toggle the treeNode.
-
-                    //If it's toggled, add the tag, otherwise, remove the tag.
-                    if(((BehaviourManagerComp.TaskInfo) treeNode.userData).active) comp.getBlackBoard().resourceTypeTags.addTag(treeNode.nodeName);
-                    else comp.getBlackBoard().resourceTypeTags.removeTag(treeNode.nodeName);
-                }
-
-                //Get the node from the gather TreeNode. If it has children, set the currStateNode
-                Tree.TreeNode tmpNode = interactable.getBehManager().getTaskTree().getNode(node -> node.nodeName.equals(currTaskNode.nodeName));
-                if (tmpNode.hasChildren()) {
-                    tree.setCurrentTreeNode(tmpNode);
-                }
-            }
-        }
     }
 
     /**
@@ -878,13 +655,14 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
      * Checks if the GUI is moused over or not.
      */
     private boolean checkMousedOver(){
-        Vector2 mouseCoords = GH.getFixedScreenMouseCoords();
-        //Determines if any UI is moused over or not.
-        return (this.selectedProfile != null && this.uiBackgroundBaseRect.contains(mouseCoords)) || this.colonyScreenRect.contains(mouseCoords);
+        for(Window window : this.windowList)
+            if(window.mousedOver()) return true;
+        return false;
     }
 
     /**
-     * Sets the selectedEntity entity for viewing.
+     * Sets the selectedEntity entity for viewing. This will create a new UnitProfile for the Entity (which will get the Interactable Component from it)
+     * and set it as the current selected profile.
      * @param entity The Entity to set as the selectedEntity Entity.
      */
     public UnitProfile setSelectedEntity(Entity entity){
@@ -915,16 +693,34 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         this.batch.begin();
     }
 
+    /**
+     * Triggers a new Event for the player. THis will pause the game and set the current event to the event passed in. It will also focus the
+     * camera on the event.eventTarget if event.focusOnEvent is set to true.
+     * @param playerEvent The PlayerEvent to set as the current event.
+     */
     public void newPlayerEvent(DataBuilder.JsonPlayerEvent playerEvent){
         this.paused = playerEvent.pauseGame;
         this.currentEvent = playerEvent;
         if(playerEvent.focusOnEvent) ColonyGame.camera.position.set(playerEvent.eventTarget.getTransform().getPosition().x, playerEvent.eventTarget.getTransform().getPosition().y, 0);
     }
 
+    public void setSelectedProfile(UnitProfile profile){
+        this.selectedProfile = profile;
+    }
+
+    public UnitProfile getSelectedProfile(){
+        return this.selectedProfile;
+    }
+
+    public Array<UnitProfile> getSelectedProfileList(){
+        return this.selectedProfileList;
+    }
+
     public static PlayerInterface getInstance(){
         if(playerInterface == null) playerInterface = new PlayerInterface(ColonyGame.batch, ColonyGame.world);
         return playerInterface;
     }
+
 
     @Override
     public void destroy() {
@@ -933,25 +729,13 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         selectedProfile = null;
         this.world = null;
         this.buttonRect = null;
-        this.infoRect = null;
     }
 
     @Override
     public void resize(int width, int height) {
+        this.windowList.forEach(window -> window.resize(width, height));
+
         this.buttonRect.set(0, Gdx.graphics.getHeight() - 100, 200, 100);
-
-        this.uiBackgroundBaseRect.set(0, 0, width, height * mainHeight);
-        this.infoRect.set(0, 0, width * infoWidth, height* mainHeight);
-        this.statusRect.set(infoRect.x + infoRect.width, 0, width*statusWidth, height*mainHeight);
-        this.tabsRect.set(statusRect.x + statusRect.width, 0, width * tabsWidth, height * mainHeight);
-        this.ordersRect.set(tabsRect.x + tabsRect.width, 0, width - (tabsRect.x + tabsRect.width), height * mainHeight);
-
-        this.uiBackgroundTopRect.set(0, uiBackgroundBaseRect.y + uiBackgroundBaseRect.height, width, height * topHeight);
-        this.infoTopRect.set(uiBackgroundTopRect.x, uiBackgroundTopRect.y, width * infoWidth, uiBackgroundTopRect.height); //The top info area
-        this.statusTopRect.set(infoTopRect.x + infoTopRect.width, uiBackgroundTopRect.y, width*statusWidth, uiBackgroundTopRect.height); //The top status area
-        this.tabsTopRect.set(statusTopRect.x + statusTopRect.width, uiBackgroundTopRect.y, width * tabsWidth, uiBackgroundTopRect.height); //The top tabs area
-        this.ordersTopRect.set(tabsTopRect.x + tabsTopRect.width, uiBackgroundTopRect.y, width - (tabsRect.x + tabsRect.width), uiBackgroundTopRect.height); //The top orders ares
-
         this.colonyScreenRect.set(width / 2 - 300, height / 2 - 200, 600, 400);
 
         this.bottomLeftRect.set(width - 100, 0, 100, height * 0.05f);
@@ -1045,7 +829,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
                 selectedProfile = null;
 
                 //Try to get a selection of Entities. If not, maybe we clicked just one?
-                if (this.selectedProfileList.size() < 1) {
+                if (this.selectedProfileList.size < 1) {
                     this.testPoint.set(worldCoords.x, worldCoords.y);
                     this.world.QueryAABB(this.callback, worldCoords.x - 0.01f, worldCoords.y - 0.011f, worldCoords.x + 0.01f, worldCoords.y + 0.01f);
                 }
@@ -1091,7 +875,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         return false;
     }
 
-    private static class UnitProfile{
+    public static class UnitProfile{
         public Entity entity;
         public Interactable interactable;
         public GridComponent gridComp;
@@ -1106,21 +890,4 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
             this.gridComp = entity.getComponent(GridComponent.class);
         }
     }
-
-    private abstract class Window{
-        boolean active;
-
-        public abstract void update(float delta);
-    }
-
-    private class SelectedWindow extends Window{
-        public SelectedWindow() {
-        }
-
-        @Override
-        public void update(float delta) {
-
-        }
-    }
-
 }

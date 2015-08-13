@@ -43,12 +43,30 @@ public class GUI {
         whiteTexture = new TextureRegion(WorldGen.whiteTex);
     }
 
-    public static void Texture(@NotNull TextureRegion texture, @NotNull SpriteBatch batch, Rectangle rect){
-        batch.draw(texture, rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight());
+    /**
+     * Draws a texture with the position and dimensions of the Rectangle passed in.
+     * @param texture The Texture to draw.
+     * @param batch The SpriteBatch to use.
+     * @param rect The Rectangle to use for position and dimension.
+     * @return 0 for not moused over, 1 for moused over, 2 for clicked down, 3 for just up.
+     */
+    public static int Texture(@NotNull TextureRegion texture, @NotNull SpriteBatch batch, Rectangle rect){
+        return GUI.Texture(texture, batch, rect.x, rect.y, rect.width, rect.height);
     }
 
-    public static void Texture(@NotNull TextureRegion texture, @NotNull SpriteBatch batch, float x, float y, float width, float height){
+    /**
+     * Draws a texture.
+     * @param texture The texture to draw.
+     * @param batch The SpriteBatch to use.
+     * @param x The x position to draw at.
+     * @param y The y position to draw at.
+     * @param width The width of the texture.
+     * @param height The height of the texture.
+     * @return 0 for not moused over, 1 for moused over, 2 for clicked down, 3 for just up.
+     */
+    public static int Texture(@NotNull TextureRegion texture, @NotNull SpriteBatch batch, float x, float y, float width, float height){
         batch.draw(texture, x, y, width, height);
+        return GUI.getState(Rectangle.tmp.set(x, y, width, height));
     }
 
     public static void Text(String text, SpriteBatch batch, float x, float y){
@@ -69,7 +87,6 @@ public class GUI {
         }else
             y += style.font.getLineHeight();
 
-
         if(!style.multiline)
             style.font.draw(batch, text, x, y);
         else
@@ -85,7 +102,7 @@ public class GUI {
      * @param currVal THe current value.
      * @param maxVal The maximum value.
      */
-    public static void DrawBar(SpriteBatch batch, float x, float y, float width, float height, float currVal, float maxVal, boolean displayText, GUIStyle style, Color color){
+    public static void DrawBar(SpriteBatch batch, float x, float y, float width, float height, float currVal, float maxVal, boolean displayText, @Nullable GUIStyle style, @Nullable Color color){
         if(style == null) style = defaultGUIStyle;
         if(color == null) color = Color.GREEN;
 
@@ -301,7 +318,8 @@ public class GUI {
     public static int ImageLabel(TextureRegion image, String text, SpriteBatch batch, float x, float y, float imageWidth, float imageHeight, float textWidth, GUIStyle style){
         batch.draw(image, x, y, imageWidth, imageHeight);
         GUI.Label(text, batch, x + imageWidth, y, textWidth, imageHeight, style);
-        return GUI.getState(Rectangle.tmp.set(x, y, imageWidth, imageHeight));
+
+        return GUI.getState(Rectangle.tmp.set(x, y, imageWidth, imageHeight)); //Return if the image is being moused over.
     }
 
     public static String TextBox(String text, SpriteBatch batch, float x, float y){
