@@ -342,26 +342,45 @@ public class GUI {
         if(down && (GUI.justDown || GUI.down)){
             GUI.down = true;
             GUI.up = GUI.justDown = false;
-            System.out.println("down");
 
         //If down but not recently just down, justdown!
         }else if(down && !GUI.justDown) {
             GUI.justDown = true;
             GUI.up = GUI.down = false;
-            System.out.println("just down");
 
         }else if(!down && (GUI.down || GUI.justDown) && !GUI.justUp){
             GUI.justUp = true;
             GUI.up = GUI.down = GUI.justDown = false;
-            System.out.println("just up");
         //If not down and was recently just up
         }else if(!down && (GUI.justUp || GUI.up)){
             GUI.up = true;
             GUI.justUp = GUI.down = GUI.justDown = false;
-            System.out.println("up");
         }
     }
 
+    /**
+     * Checks for the 'general' state of the mouse for the GUI system.
+     * @return 2 (JUSTDOWN), 3 (DOWN), 4 (JUSTUP), 5 (UP).
+     */
+    public static int getState(){
+        int state = UP;
+        if(GUI.justDown){
+            state = JUSTDOWN; //Set the state to just down.
+        }else if(GUI.down){
+            state = DOWN; //Set the state to down.
+        }else if(GUI.justUp)
+            state = JUSTUP; //Set the state to just up.
+        else if(GUI.up)
+            state = UP; //Set the state to up
+
+        return state;
+    }
+
+    /**
+     * Checks for the state of the mouse when interacting with a Rectangle area.
+     * @param rect The Rectangle area to check the mouse state in.
+     * @return 0 (NONE - not over), 1 (OVER), 2 (JUSTDOWN), 3 (DOWN), 4 (JUSTUP)
+     */
     public static int getState(Rectangle rect){
         int state = NONE;
         if(rect.contains(GH.getFixedScreenMouseCoords())){
@@ -373,7 +392,7 @@ public class GUI {
             }else if(GUI.justUp)
                 state = JUSTUP; //Set the state to just up.
             else if(GUI.up)
-                state = UP; //Set the state to up
+                state = OVER; //Set the state to up
         }
 
         return state;

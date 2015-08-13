@@ -28,6 +28,7 @@ public class ColonyWindow extends Window{
 
         this.colonyWindowStyle = new GUI.GUIStyle();
         this.colonyScreen = new TextureRegion(ColonyGame.assetManager.get("eventWindowBackground", Texture.class));
+        this.draggable = true;
     }
 
     @Override
@@ -37,6 +38,8 @@ public class ColonyWindow extends Window{
 
         if(this.active)
             this.drawColonyScreen(batch);
+
+        GUI.Texture(new TextureRegion(this.playerInterface.blueSquare), batch, this.dragWindowRect);
     }
 
     private void drawColonyScreen(SpriteBatch batch){
@@ -97,6 +100,7 @@ public class ColonyWindow extends Window{
     @Override
     public void resize(int width, int height) {
         this.colonyScreenRect.set(width / 2 - 300, height / 2 - 200, 600, 400);
+        this.setMainWindowRect(this.colonyScreenRect);
 
     }
 }
