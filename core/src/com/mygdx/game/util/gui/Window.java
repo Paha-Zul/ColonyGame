@@ -16,9 +16,16 @@ public abstract class Window{
         this.playerInterface = playerInterface;
     }
 
-    public abstract void update(float delta, SpriteBatch batch);
+    public void update(float delta, SpriteBatch batch){
+        this.mousedState = 0;
+    };
+
     public abstract void resize(int width, int height);
+
     public boolean mousedOver(){
         return this.active && this.mousedState > 0;
+    }
+    protected void recordMouseState(int state){
+        this.mousedState = this.mousedState > state ? this.mousedState : state;
     }
 }

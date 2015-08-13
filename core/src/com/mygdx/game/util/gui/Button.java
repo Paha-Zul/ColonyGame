@@ -16,6 +16,7 @@ public class Button {
     public Functional.Callback onOver, onDown, onUp, onOut;
     public TextureRegion overImage, downImage, normalImage;
     public boolean consumeInput = false; //If false, the UI will keep checking for elements under this even if we are moused over this.
+    public boolean active = true;
 
     private int x, y, width, height;
     private String imageName, textureAtlasName;
@@ -45,6 +46,8 @@ public class Button {
     }
 
     public boolean render(SpriteBatch batch){
+        if(active) return false;
+
         int state = GUI.Button(batch, "", x, y, width, height, null);
         if(state != this.lastState){
             if(state == GUI.NONE && onOut != null) onOut.callback();

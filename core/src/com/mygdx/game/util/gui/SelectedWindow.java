@@ -56,7 +56,7 @@ public class SelectedWindow extends Window{
 
     @Override
     public void update(float delta, SpriteBatch batch) {
-        this.mousedState = 0;
+        super.update(delta, batch);
         //Determine if the window is active by checking the selected profile list size...
         this.active = this.playerInterface.getSelectedProfileList().size > 0;
         if(this.active) {
@@ -67,10 +67,8 @@ public class SelectedWindow extends Window{
     private void drawSelectedEntities(SpriteBatch batch){
         //Draw stuff about the selectedEntity entity.
         if(this.playerInterface.getSelectedProfile() != null || this.playerInterface.getSelectedProfileList().size > 0){
-            this.mousedState = GUI.Texture(this.UIBackgroundBase, batch, this.uiBackgroundBaseRect);
-            this.mousedState = GUI.Texture(this.UIBackgroundTop, batch, this.uiBackgroundTopRect);
-
-            System.out.println("MouysedOverStat "+this.mousedState);
+            this.recordMouseState(GUI.Texture(this.UIBackgroundBase, batch, this.uiBackgroundBaseRect));
+            this.recordMouseState(GUI.Texture(this.UIBackgroundTop, batch, this.uiBackgroundTopRect));
 
             this.drawMultipleProfiles(batch, this.ordersRect);
             this.drawSelected(batch);

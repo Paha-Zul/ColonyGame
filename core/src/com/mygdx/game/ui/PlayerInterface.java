@@ -27,10 +27,7 @@ import com.mygdx.game.entity.Entity;
 import com.mygdx.game.interfaces.Functional;
 import com.mygdx.game.interfaces.IGUI;
 import com.mygdx.game.util.*;
-import com.mygdx.game.util.gui.Button;
-import com.mygdx.game.util.gui.GUI;
-import com.mygdx.game.util.gui.SelectedWindow;
-import com.mygdx.game.util.gui.Window;
+import com.mygdx.game.util.gui.*;
 import com.mygdx.game.util.managers.DataManager;
 import com.mygdx.game.util.managers.NotificationManager;
 import com.mygdx.game.util.managers.PlayerManager;
@@ -107,8 +104,6 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
      * Stuff for drawing colony
      */
     public boolean drawingColony = false;
-    private Rectangle colonyScreenRect = new Rectangle();
-    private TextureRegion colonyScreen;
 
     private void loadHuntButtonStyle(){
         huntStyle.normal = ColonyGame.assetManager.get("huntbutton_normal", Texture.class);
@@ -152,6 +147,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
         this.windowList = new Array<>();
         this.windowList.add(new SelectedWindow(this));
+        this.windowList.add(new ColonyWindow(this));
 
         this.buttonList = new Array<>();
 
@@ -219,7 +215,6 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
         ColonyGame.camera.zoom = 1.5f;
 
-        this.colonyScreen = new TextureRegion(ColonyGame.assetManager.get("eventWindowBackground", Texture.class));
     }
 
     private void generateFonts(){
@@ -249,6 +244,8 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         FPSTimer.update(delta);
 
         this.windowList.forEach(window -> window.update(delta, ColonyGame.batch));
+        for(Button button : this.buttonList)
+            if(button.render(ColonyGame.batch)) break;
 
         this.moveCamera(); //Move the camera
         this.drawSelectionBox(); //Draws the selection box.
@@ -257,7 +254,6 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         this.drawGameSpeed(screenW, screenH, batch, this.gameSpeedStyle);
         this.drawInvAmounts(screenW, screenH, batch);
         this.drawCurrentNotifications(screenW, screenH, delta);
-        this.drawColonyScreen();
 
         if(this.drawingProfiler) Profiler.drawDebug(batch, 200, height - 20);
 
@@ -329,8 +325,6 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         }
         this.mousedOverNotification = newlyMousedOver;
     }
-
-
 
     private void drawCurrentEvent(int width, int height){
         if(this.currentEvent != null){
@@ -414,12 +408,6 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
             this.selectedProfile = this.selectedProfileList.get(0);
     }
 
-    private void drawColonyScreen(){
-        if(!this.drawingColony) return;
-
-        GUI.Texture(this.colonyScreen, this.batch, this.colonyScreenRect);
-        this.drawColonyInventory(PlayerManager.getPlayer("Player").colony.getInventory(), this.colonyScreenRect);
-    }
 
     /**
      * Moves the camera when keys are pressed.
@@ -509,54 +497,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         this.UIStyle.paddingTop = 0;
     }
 
-    private void drawColonyInventory(Inventory inventory, Rectangle rect){
-        //We need to use the global list of items.
-        Array<String> itemList = DataBuilder.JsonItem.allItems;
 
-        batch.setColor(Color.WHITE);
-        this.UIStyle.alignment = Align.center;
-        this.UIStyle.paddingTop = 0;
-        int iconSize =  32;
-        float labelWidth = 50;
-
-        float craftButtonWidth = 50, craftButtonHeight = 32*0.5f;
-
-        //Starting X and Y pos.
-        float xPos = rect.x + 10;
-        float yPos = rect.y + rect.height - iconSize - 10;
-        this.UIStyle.background = new TextureRegion(ColonyGame.assetManager.get("background", Texture.class));
-        TextureRegion _icon;
-
-        //Draw each item.
-        for(int i=0;i<itemList.size;i++){
-            //Get the itemName and itemAmount and the _icon
-            String itemName = itemList.get(i);
-            int itemAmount = inventory.getItemAmount(itemName);
-            String label = ""+itemAmount;
-            DataBuilder.JsonItem _itemRef = DataManager.getData(itemName, DataBuilder.JsonItem.class);
-            _icon = _itemRef.iconTexture;
-
-            //Draw the label of the amount and the icon.
-            GUI.ImageLabel(_icon, label, this.batch, xPos, yPos, iconSize, iconSize, labelWidth, this.UIStyle);
-            if(!_itemRef.getItemCategory().equals("raw")) {
-                int state = GUI.Button(this.batch, "Craft", xPos + iconSize + labelWidth + 10, yPos, craftButtonWidth, iconSize, null);
-            }
-
-            //Increment the yPos, if we're too far down, reset Y and shift X.
-            yPos -= iconSize + 5;
-            if(yPos < rect.y){
-                xPos += iconSize + labelWidth + craftButtonWidth + 20;
-                yPos = rect.y+rect.height - iconSize- 10;
-            }
-        }
-
-        //Reset color and padding/alignment
-        this.batch.setColor(Color.WHITE);
-        this.UIStyle.alignment = Align.center;
-        this.UIStyle.paddingLeft = 0;
-        this.UIStyle.paddingTop = 0;
-        this.UIStyle.background = null;
-    }
 
     /**
      * Draws the game speed window.
@@ -736,7 +677,6 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         this.windowList.forEach(window -> window.resize(width, height));
 
         this.buttonRect.set(0, Gdx.graphics.getHeight() - 100, 200, 100);
-        this.colonyScreenRect.set(width / 2 - 300, height / 2 - 200, 600, 400);
 
         this.bottomLeftRect.set(width - 100, 0, 100, height * 0.05f);
         this.stage.getViewport().update(width, height);
