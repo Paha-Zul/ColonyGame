@@ -118,7 +118,7 @@ public class SelectedWindow extends Window{
                     Stats.Stat stat = list.get(i);
                     float _y = y - (i + 1) * space - 20 * i;
                     GUI.Label(stat.name, batch, x, _y, 100, barHeight);
-                    GUI.DrawBar(batch, x, _y, barWidth, barHeight, stat.getCurrVal(), stat.getMaxVal(), true, null, null);
+                    GUI.DrawBar(batch, x + 100, _y, barWidth, barHeight, stat.getCurrVal(), stat.getMaxVal(), true, null, null);
                     //GUI.DrawBar(batch, stat.name, x, y - (i + 1) * space - 20 * i, barWidth, barHeight, stat.getCurrVal(), stat.getMaxVal());
                 }
 
@@ -221,7 +221,7 @@ public class SelectedWindow extends Window{
 
             //Set the location and draw the button. If clicked, we need to do some tricky things...
             this.orderButtonRect.set(x + (i + 1) * width, height, 50, 50);
-            if (GUI.Button(batch, currTaskNode.nodeName, orderButtonRect, style) == GUI.UP) {
+            if (GUI.Button(batch, currTaskNode.nodeName, orderButtonRect, style) == GUI.JUSTUP) {
                 taskInfo.doCallback();
 
                 //For each profile selectedEntity, tell them to gather.

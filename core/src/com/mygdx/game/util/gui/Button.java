@@ -53,7 +53,7 @@ public class Button {
             if(state == GUI.NONE && onOut != null) onOut.callback();
             else if(state == GUI.OVER && onOver != null) onOver.callback();
             else if(state == GUI.DOWN && onDown != null) onDown.callback();
-            else if(state == GUI.UP && onUp != null) onUp.callback();
+            else if(state == GUI.JUSTUP && onUp != null) onUp.callback();
 
             this.lastState = state;
         }

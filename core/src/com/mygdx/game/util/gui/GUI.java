@@ -28,10 +28,9 @@ public class GUI {
 
     public static GUIStyle defaultGUIStyle = new GUIStyle();
 
-    public static final int NONE=0,OVER=1,DOWN=2,UP=3;
+    public static final int NONE=0,OVER=1, JUSTDOWN=2, DOWN=3, JUSTUP=4, UP=5;
 
-    private static boolean clicked = false;
-    private static boolean up = false;
+    private static boolean down, justDown, up, justUp;
     private static Rectangle rect1 = new Rectangle();
 
     private static TextureRegion whiteTexture;
@@ -339,28 +338,44 @@ public class GUI {
     private static void checkState(){
         boolean down = Gdx.input.isButtonPressed(Input.Buttons.LEFT);
 
-        if(down){
-            GUI.clicked = true;
-            GUI.up = false;
-        }else if(GUI.clicked){
+        //If down but already just down or down... still down!
+        if(down && (GUI.justDown || GUI.down)){
+            GUI.down = true;
+            GUI.up = GUI.justDown = false;
+            System.out.println("down");
+
+        //If down but not recently just down, justdown!
+        }else if(down && !GUI.justDown) {
+            GUI.justDown = true;
+            GUI.up = GUI.down = false;
+            System.out.println("just down");
+
+        }else if(!down && (GUI.down || GUI.justDown) && !GUI.justUp){
+            GUI.justUp = true;
+            GUI.up = GUI.down = GUI.justDown = false;
+            System.out.println("just up");
+        //If not down and was recently just up
+        }else if(!down && (GUI.justUp || GUI.up)){
             GUI.up = true;
-            GUI.clicked = false;
-        }else if(GUI.up){
-            GUI.up = false;
-            GUI.clicked = false;
+            GUI.justUp = GUI.down = GUI.justDown = false;
+            System.out.println("up");
         }
     }
 
-    private static int getState(Rectangle rect){
+    public static int getState(Rectangle rect){
         int state = NONE;
         if(rect.contains(GH.getFixedScreenMouseCoords())){
             state = OVER; //Set it to over if our mouse is inside.
-            if(GUI.clicked){
-                state = DOWN; //Set the state to down if we're inside and clicked.
-            }else if(GUI.up){
-                state = UP;   //Set the state to up if we are releasing.
-            }
+            if(GUI.justDown){
+                state = JUSTDOWN; //Set the state to just down.
+            }else if(GUI.down){
+                state = DOWN; //Set the state to down.
+            }else if(GUI.justUp)
+                state = JUSTUP; //Set the state to just up.
+            else if(GUI.up)
+                state = UP; //Set the state to up
         }
+
         return state;
     }
 

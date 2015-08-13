@@ -352,7 +352,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
             for(int i=0;i<this.currentEvent.choices.length;i++){
                 String choice = this.currentEvent.choices[i];
-                if(GUI.Button(this.batch, choice, windowX + (i+1)*spacing + i*buttonWidth, windowY + windowHeight*0.01f, buttonWidth, buttonHeight, blankStyle) == GUI.UP){
+                if(GUI.Button(this.batch, choice, windowX + (i+1)*spacing + i*buttonWidth, windowY + windowHeight*0.01f, buttonWidth, buttonHeight, blankStyle) == GUI.JUSTUP){
                     BehaviourManagerComp comp = this.currentEvent.eventTarget.getComponent(BehaviourManagerComp.class);
                     if(comp == null) return;
                     comp.getBlackBoard().target = this.currentEvent.eventTargetOther;

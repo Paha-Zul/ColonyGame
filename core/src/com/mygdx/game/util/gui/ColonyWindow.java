@@ -16,6 +16,7 @@ import com.mygdx.game.util.managers.PlayerManager;
 
 /**
  * Created by Paha on 8/12/2015.
+ * Handles displaying Colony related stuff.
  */
 public class ColonyWindow extends Window{
     private Rectangle colonyScreenRect = new Rectangle();
