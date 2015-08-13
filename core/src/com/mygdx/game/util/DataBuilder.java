@@ -74,12 +74,17 @@ public class DataBuilder implements IDestroyable{
 
         //Load all the base game stuff and the mod list.
         loadFilesForMod(Gdx.files.internal("./"));
+
         //Load the changelog separately as mods don't have changelogs that display in game.
         changelog = buildJson(Gdx.files.internal("./"+filePath+changeLogPath), JsonChangeLog.class, null);
 
         //Get the base mod dir.
         FileHandle modBaseDir = Gdx.files.internal("./"+modPath);
-        Mod[] modValue = buildJson(Gdx.files.internal("./" + modFilePath), Mod[].class, null);
+
+        //This builds the mods from the mods.json file.
+        Mod[] modValue = buildJson(Gdx.files.internal("./" + modPath +""+modFilePath), Mod[].class, null);
+
+        //If we loaded stuff from the mods.json file, make a list from it. Otherwise, just give us a new list.
         Array<Mod> modList;
         if(modValue != null) modList = new Array<>(modValue);
         else modList = new Array<>();
