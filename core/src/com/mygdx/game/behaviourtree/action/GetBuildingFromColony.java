@@ -7,6 +7,8 @@ import com.mygdx.game.component.Colonist;
 
 /**
  * Created by Paha on 8/9/2015.
+ *
+ * Finds a building from the Entity's (the one executing this task) colony. Uses control.callbacks.successCriteria for additional tests of the entity.
  */
 public class GetBuildingFromColony extends LeafTask{
     public GetBuildingFromColony(String name, BlackBoard blackBoard) {
@@ -29,7 +31,8 @@ public class GetBuildingFromColony extends LeafTask{
 
         //Get the colonist and use to get a building from its colony.
         Colonist col = this.blackBoard.myManager.getEntityOwner().getComponent(Colonist.class);
-        Building building = col.getColony().getOwnedFromColony(Building.class, b -> b.getEntityOwner().getTags().hasTags(this.blackBoard.tagsToSearch));
+        Building building = col.getColony().getOwnedFromColony(Building.class, b -> b.getEntityOwner().getTags().hasTags(this.blackBoard.tagsToSearch)
+                && (this.control.callbacks.successCriteria == null || this.control.callbacks.successCriteria.test(b)));
 
         //If the building is not null, set it as the target and finish with success.
         if(building != null){

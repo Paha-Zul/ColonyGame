@@ -95,6 +95,8 @@ public class GameScreen implements Screen{
     }
 
     private void generateStart(Vector2 start){
+        int colonistSpawn = 2;
+
         //Add our colony to an empty entity and create a player using the colony.
         Entity empty = new Entity(new Vector2(0,0), 0, 0);
         ListHolder.addEntity(empty);
@@ -189,7 +191,7 @@ public class GameScreen implements Screen{
         grid.performOnEntityInRadius(treeConsumer, notWaterNode, radius, grid.getIndex(colonyEnt.getTransform().getPosition()));
 
         //Make some colonists!
-        for(int i=0;i<1;i++) {
+        for(int i=0;i<colonistSpawn;i++) {
             Entity c = colony.makeColonist(colonyEnt.getTransform().getPosition(), GH.toMeters(200), "colonist");
             c.getComponent(Colonist.class).setName(GameScreen.firstNames[MathUtils.random(GameScreen.firstNames.length - 1)], GameScreen.lastNames[MathUtils.random(GameScreen.lastNames.length - 1)]);
             colony.addColonist(c.getComponent(Colonist.class));

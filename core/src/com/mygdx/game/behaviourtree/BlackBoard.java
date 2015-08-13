@@ -2,10 +2,7 @@ package com.mygdx.game.behaviourtree;
 
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
-import com.mygdx.game.component.BehaviourManagerComp;
-import com.mygdx.game.component.Constructable;
-import com.mygdx.game.component.Inventory;
-import com.mygdx.game.component.Resource;
+import com.mygdx.game.component.*;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.util.Grid;
 import com.mygdx.game.util.ItemNeeded;
@@ -20,7 +17,8 @@ import java.util.LinkedList;
 public class BlackBoard{
     public Grid.GridInstance colonyGrid;
     public Grid.Node targetNode;
-    public Entity target;
+    public Entity target; //TODO Maybe we should get rid of target? Or at least make the pathfinding not use target... it results in tons of hard to find bugs when targetNode is still set and it uses that instead of the intended target.
+    public Enterable enterable;
     public LinkedList<Vector2> path;
     public Resource targetResource;
 

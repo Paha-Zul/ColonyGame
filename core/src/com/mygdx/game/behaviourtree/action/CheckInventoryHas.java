@@ -27,8 +27,6 @@ public class CheckInventoryHas extends LeafTask {
     public void start() {
         super.start();
 
-        //TODO This probably needs to be fixed. Maybe it worked out alright though.
-
         //Loop over each item in the "fromInventory" and check if any of the items has the effect we want.
         for(Inventory.InventoryItem item : this.blackBoard.itemTransfer.fromInventory.getItemList()){
             DataBuilder.JsonItem itemRef = DataManager.getData(item.itemRef.getItemName(), DataBuilder.JsonItem.class);

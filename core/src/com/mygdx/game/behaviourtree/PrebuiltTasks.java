@@ -775,17 +775,26 @@ public class PrebuiltTasks {
         Sleep sleep = new Sleep("Sleeping", blackBoard);
         Leave leave = new Leave("Leaving", blackBoard);
 
+        //Make sure we have tags to search for!
+        mainSeq.control.callbacks.startCallback = task -> {
+            task.blackBoard.targetNode = null;
+            task.blackBoard.tagsToSearch = new String[]{"enterable"};
+        };
+        //Check if the enterable is full. Might as well store it while we're at it.
+        getBunks.control.callbacks.successCriteria = b -> {
+            blackBoard.enterable = ((Building)b).getComponent(Enterable.class);
+            return !blackBoard.enterable.isFull();
+        };
+
+        //Fail the move to if the enterable is full.
+        mt.control.callbacks.failCriteria = task -> ((Task)task).blackBoard.enterable.isFull();
+
         mainSeq.control.addTask(getBunks);
         mainSeq.control.addTask(fp);
         mainSeq.control.addTask(mt);
         mainSeq.control.addTask(enter);
         mainSeq.control.addTask(sleep);
         mainSeq.control.addTask(leave);
-
-        mainSeq.control.callbacks.startCallback = task -> {
-            task.blackBoard.targetNode = null;
-            task.blackBoard.tagsToSearch = new String[]{"enterable"};
-        };
 
         return mainSeq;
     }

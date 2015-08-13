@@ -399,7 +399,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
             this.selectedProfile = null;
         }
 
-        for(int i=0;i<=this.selectedProfileList.size;i++)
+        for(int i=0;i<this.selectedProfileList.size;i++)
             if(this.selectedProfileList.get(i).entity == entity) {
                 this.selectedProfileList.removeIndex(i);
                 break;

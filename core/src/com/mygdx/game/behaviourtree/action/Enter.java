@@ -8,6 +8,7 @@ import com.mygdx.game.ui.PlayerInterface;
 
 /**
  * Created by Paha on 7/21/2015.
+ * Enters an Enterable...
  */
 public class Enter extends LeafTask{
     public Enter(String name, BlackBoard blackBoard) {
@@ -16,7 +17,8 @@ public class Enter extends LeafTask{
 
     @Override
     public boolean check() {
-        return super.check();
+        //Make sure we have an Enterable and it's not full.
+        return super.check() && this.blackBoard.enterable != null && !this.blackBoard.enterable.isFull();
     }
 
     @Override
@@ -35,6 +37,7 @@ public class Enter extends LeafTask{
         identity.setActive(false);
         owner.getTags().removeTag("selectable");
         PlayerInterface.getInstance().deselectEntity(owner);
+        this.blackBoard.enterable.enter(owner);
 
         this.control.finishWithSuccess();
     }

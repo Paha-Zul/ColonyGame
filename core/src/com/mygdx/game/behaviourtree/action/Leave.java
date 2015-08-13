@@ -29,6 +29,7 @@ public class Leave extends LeafTask{
         //We leave this blank because our main code is in the end() function. This is so that even if the job ends early and the unit
         //leaves a building, it still is performed.
 
+        this.blackBoard.enterable.leave(this.blackBoard.myManager.getEntityOwner());
         this.control.finishWithSuccess();
     }
 

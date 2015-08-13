@@ -18,6 +18,10 @@ public class WindowManager {
     public void update(SpriteBatch batch){
         this.mousedOver = false;
 
+        //TODO We're going to need a way to limit dragging to one window. There's nothing stopping from the mouse passing over
+        //TODO 2 windows and dragging them both. Maybe some 'startedDragging' and 'stoppedDragging' methods with a reference to the
+        //TODO currently dragging windows?
+
         //Update the list. We the weird assignment means that if the moused over boolean is ever true this update, it stays true.
         this.windowList.forEach(window -> this.mousedOver = window.update(batch) || this.mousedOver);
     }

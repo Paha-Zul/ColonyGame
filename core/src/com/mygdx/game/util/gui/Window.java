@@ -28,9 +28,11 @@ public abstract class Window{
         this.mousedState = 0;
 
         if(this.active) {
+            ///If we have a main window, record the mouse state of the main window.
             if (this.mainWindowRect != null)
                 this.recordMouseState(GUI.getState(this.mainWindowRect));
 
+            //If we want this window to be draggable, drag it!
             if (this.draggable)
                 this.dragWindow();
         }
