@@ -42,6 +42,7 @@ import java.util.HashMap;
 
 /**
  * Created by Bbent_000 on 12/25/2014.
+ * The PlayerInterface handles all the GUI rendering to the screen to display information for the player.
  */
 public class PlayerInterface extends UI implements IGUI, InputProcessor {
     public boolean paused = false;
@@ -57,6 +58,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     private boolean dragging = false;
     private boolean drawGrid = false;
     public boolean renderWorld = true;
+    public boolean mousedOverUI = true;
 
     private Rectangle buttonRect = new Rectangle();
     private Rectangle uiBackgroundBaseRect = new Rectangle();
@@ -84,6 +86,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     private Rectangle statusRect = new Rectangle();
     private Rectangle tabsRect = new Rectangle();
     private Rectangle ordersRect = new Rectangle();
+
     private Rectangle bottomLeftRect = new Rectangle();
     private Rectangle selectionBox = new Rectangle();
     private Rectangle profileButtonRect = new Rectangle();
@@ -289,15 +292,6 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         stage.draw();
         batch.end();
         batch.begin();
-    }
-
-    /**
-     * Checks if the GUI is moused over or not.
-     */
-    private boolean checkMousedOver(){
-        //Determines if any UI is moused over or not.
-        return this.uiBackgroundBaseRect.contains(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY()) ||
-                this.uiBackgroundBaseRect.contains(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY());
     }
 
     private void drawInvAmounts(int width, int height, SpriteBatch batch){
@@ -877,8 +871,16 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
      * @return True if moused over, false otherwise.
      */
     public boolean isOnUI(){
-        boolean windowActive = ((selectedProfile != null && selectedProfile != null) || this.selectedProfileList.size() > 0);
-        return this.checkMousedOver() && windowActive;
+        return this.checkMousedOver();
+    }
+
+    /**
+     * Checks if the GUI is moused over or not.
+     */
+    private boolean checkMousedOver(){
+        Vector2 mouseCoords = GH.getFixedScreenMouseCoords();
+        //Determines if any UI is moused over or not.
+        return (this.selectedProfile != null && this.uiBackgroundBaseRect.contains(mouseCoords)) || this.colonyScreenRect.contains(mouseCoords);
     }
 
     /**
@@ -973,13 +975,12 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
             this.paused = !this.paused;
         else if(keycode == Input.Keys.F4) //F4 - reveal map
             this.revealMap();
-        else if(keycode == Input.Keys.F5) {
+        else if(keycode == Input.Keys.F5) { //F5 - save
             SaveGameHelper.saveWorld();
-        }else if(keycode == Input.Keys.F6){
+        }else if(keycode == Input.Keys.F6){ //F6 - load
             SaveGameHelper.loadWorld();
             this.paused = true;
         }else if(keycode == Input.Keys.PLUS) //+ - increase game speed
-
             gameSpeed*=2;
         else if(keycode == Input.Keys.MINUS)//- - decrease game speed
             gameSpeed*=0.5f;
@@ -1025,7 +1026,8 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-        if(this.isOnUI() && !this.dragging)
+        //This is when we release the mouse. If we are on the UI or dragging a selection box, simply return false.
+        if(this.isOnUI())
             return false;
 
         this.mouseDown = false;
@@ -1105,5 +1107,20 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         }
     }
 
+    private abstract class Window{
+        boolean active;
+
+        public abstract void update(float delta);
+    }
+
+    private class SelectedWindow extends Window{
+        public SelectedWindow() {
+        }
+
+        @Override
+        public void update(float delta) {
+
+        }
+    }
 
 }
