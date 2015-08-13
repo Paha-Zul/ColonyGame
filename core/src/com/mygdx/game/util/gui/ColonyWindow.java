@@ -32,15 +32,17 @@ public class ColonyWindow extends Window{
     }
 
     @Override
-    public void update(float delta, SpriteBatch batch) {
+    public boolean update(SpriteBatch batch) {
         this.active = this.playerInterface.drawingColony;
-
-        super.update(delta, batch);
+        super.update(batch);
 
         if(this.active) {
             this.drawColonyScreen(batch);
-            GUI.Texture(new TextureRegion(this.playerInterface.blueSquare), batch, this.dragWindowRect);
+            //This was for debugging...
+            //GUI.Texture(new TextureRegion(this.playerInterface.blueSquare), batch, this.dragWindowRect);
         }
+
+        return this.mousedState > 0;
     }
 
     private void drawColonyScreen(SpriteBatch batch){

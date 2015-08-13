@@ -55,13 +55,15 @@ public class SelectedWindow extends Window{
     }
 
     @Override
-    public void update(float delta, SpriteBatch batch) {
-        super.update(delta, batch);
+    public boolean update(SpriteBatch batch) {
+        super.update(batch);
         //Determine if the window is active by checking the selected profile list size...
         this.active = this.playerInterface.getSelectedProfileList().size > 0;
         if(this.active) {
             this.drawSelectedEntities(batch);
         }
+
+        return this.mousedState > 0;
     }
 
     private void drawSelectedEntities(SpriteBatch batch){

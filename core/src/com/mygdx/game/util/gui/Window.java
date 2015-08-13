@@ -1,7 +1,6 @@
 package com.mygdx.game.util.gui;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.ui.PlayerInterface;
@@ -25,7 +24,7 @@ public abstract class Window{
         this.playerInterface = playerInterface;
     }
 
-    public void update(float delta, SpriteBatch batch){
+    public boolean update(SpriteBatch batch){
         this.mousedState = 0;
 
         if(this.active) {
@@ -33,14 +32,20 @@ public abstract class Window{
                 this.recordMouseState(GUI.getState(this.mainWindowRect));
 
             if (this.draggable)
-                this.dragWindow(batch);
+                this.dragWindow();
         }
+
+        //Return if something was moused over or not.
+        return this.mousedState > 0;
     }
 
-    public void dragWindow(SpriteBatch batch){
+    /**
+     * Drags the window using the mainWindowRect and dragWindowRect. If either of these are null, the dragging will not happen.
+     */
+    private void dragWindow(){
         if(this.mainWindowRect == null || this.dragWindowRect == null) return;
 
-        GUI.Texture(new TextureRegion(this.playerInterface.blueSquare), batch, this.dragWindowRect);
+        //Get the state in reference to the rectangle and in general...
         int rectState = GUI.getState(this.dragWindowRect);
         int genState = GUI.getState();
 
@@ -63,16 +68,25 @@ public abstract class Window{
         }
     }
 
+    /**
+     * Resizes the window.
+     * @param width The width of the game window.
+     * @param height The height of the game window.
+     */
     public abstract void resize(int width, int height);
 
-    public boolean mousedOver(){
-        return this.active && this.mousedState > 0;
-    }
-
+    /**
+     * Records the mouse state, keeping the highest of the two (either the incoming 'state' input, or the existing mouseState).
+     * @param state The incoming state of the mouse from interacting with a window.
+     */
     protected void recordMouseState(int state){
         this.mousedState = this.mousedState > state ? this.mousedState : state;
     }
 
+    /**
+     * Sets the main window and dragWindowRect for use.
+     * @param mainWindowRect The main window which the dragWindowRect will use for making it draggable (if enabled).
+     */
     protected void setMainWindowRect(Rectangle mainWindowRect){
         this.mainWindowRect = mainWindowRect;
         this.dragWindowRect = new Rectangle(mainWindowRect.x, mainWindowRect.y + mainWindowRect.height - mainWindowRect.height*0.05f, mainWindowRect.width, mainWindowRect.height*0.05f);

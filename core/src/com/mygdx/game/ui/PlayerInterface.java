@@ -50,7 +50,8 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
     private TextureRegion background;
     private World world;
-    private Array<Window> windowList;
+    private WindowManager windowManager;
+
     private Array<Button> buttonList;
 
     private boolean drawingInfo = false;
@@ -145,9 +146,9 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         this.world = world;
         this.whiteTexture = new TextureRegion(WorldGen.whiteTex);
 
-        this.windowList = new Array<>();
-        this.windowList.add(new SelectedWindow(this));
-        this.windowList.add(new ColonyWindow(this));
+        this.windowManager = new WindowManager();
+        this.windowManager.addWindow(new SelectedWindow(this));
+        this.windowManager.addWindow(new ColonyWindow(this));
 
         this.buttonList = new Array<>();
 
@@ -243,7 +244,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         int height = Gdx.graphics.getHeight();
         FPSTimer.update(delta);
 
-        this.windowList.forEach(window -> window.update(delta, ColonyGame.batch));
+        this.windowManager.update(this.batch);
         for(Button button : this.buttonList)
             if(button.render(ColonyGame.batch)) break;
 
@@ -596,23 +597,10 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
      * Checks if the GUI is moused over or not.
      */
     private boolean checkMousedOver(){
-        for(Window window : this.windowList)
-            if(window.mousedOver()) return true;
-        return false;
+        return this.windowManager.isMousedOver();
     }
 
-    /**
-     * Sets the selectedEntity entity for viewing. This will create a new UnitProfile for the Entity (which will get the Interactable Component from it)
-     * and set it as the current selected profile.
-     * @param entity The Entity to set as the selectedEntity Entity.
-     */
-    public UnitProfile setSelectedEntity(Entity entity){
-        this.newlySelected = true;
-        this.selectedProfile = new UnitProfile(entity);
-        this.selectedProfile.entity.getTags().addTag("selected");
-        this.selectedProfile.interactable = entity.getComponent(Interactable.class); //Get the selectedProfile Component.
-        return this.selectedProfile;
-    }
+
 
     //Reveals the entire map by adding a viewer to every tile.
     private void revealMap(){
@@ -645,6 +633,23 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         if(playerEvent.focusOnEvent) ColonyGame.camera.position.set(playerEvent.eventTarget.getTransform().getPosition().x, playerEvent.eventTarget.getTransform().getPosition().y, 0);
     }
 
+    /**
+     * Sets the selectedEntity entity for viewing. This will create a new UnitProfile for the Entity (which will get the Interactable Component from it)
+     * and set it as the current selected profile.
+     * @param entity The Entity to set as the selectedEntity Entity.
+     */
+    public UnitProfile setSelectedEntity(Entity entity){
+        this.newlySelected = true;
+        this.selectedProfile = new UnitProfile(entity);
+        this.selectedProfile.entity.getTags().addTag("selected");
+        this.selectedProfile.interactable = entity.getComponent(Interactable.class); //Get the selectedProfile Component.
+        return this.selectedProfile;
+    }
+
+    /**
+     * Sets the selected profile.
+     * @param profile The UnitProfile to set as the selected profile.
+     */
     public void setSelectedProfile(UnitProfile profile){
         this.selectedProfile = profile;
     }
@@ -662,7 +667,6 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         return playerInterface;
     }
 
-
     @Override
     public void destroy() {
         super.destroy();
@@ -674,7 +678,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
     @Override
     public void resize(int width, int height) {
-        this.windowList.forEach(window -> window.resize(width, height));
+        this.windowManager.resize(width, height);
 
         this.buttonRect.set(0, Gdx.graphics.getHeight() - 100, 200, 100);
 
