@@ -8,7 +8,7 @@
     "itemChances": [1],
     "img": ["Rock1"],
     "gatherTime": 3,
-    "tool" : "shovel",
+    "tool" : "wood_shovel",
     "toolRequired": true
   },
   {
@@ -20,7 +20,7 @@
     "itemChances": [1, 0.1],
     "img": ["Ore1"],
     "gatherTime": 3,
-    "tool" : "pick",
+    "tool" : "wood_pick",
     "toolRequired": true
   },
   {

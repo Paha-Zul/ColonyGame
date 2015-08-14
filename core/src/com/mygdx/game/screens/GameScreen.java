@@ -175,8 +175,9 @@ public class GameScreen implements Screen{
         equipEnt.getTags().addTag("constructing");
         ListHolder.addEntity(equipEnt);
         Building equipBuilding = equipEnt.getComponent(Building.class);
-        equipBuilding.setBuildingName("workshop");
+        equipBuilding.setBuildingName("equipment_shed");
         colony.addOwnedToColony(equipBuilding);
+        equipBuilding.getComponent(Constructable.class).setComplete();
 
         //Destroys resources in an area around the Colony Entity.
         radius = 8;

@@ -161,6 +161,7 @@ public class Constructable extends Component{
         this.owner.getGraphicIdentity().getSprite().setAlpha(1f);
         this.complete = true;
         this.getEntityOwner().removeComponent(this);
+        this.getEntityOwner().getTags().removeTag("constructing");
     }
 
     /**

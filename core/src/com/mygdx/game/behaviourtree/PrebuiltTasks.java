@@ -236,6 +236,7 @@ public class PrebuiltTasks {
         seq.control.callbacks.startCallback = task -> {
             task.blackBoard.itemTransfer.reset();
             task.blackBoard.tagsToSearch = new String[]{"building", "equipment"};
+            task.blackBoard.targetNode = null;
         };
 
         //When this finishes remove any on the way stuff

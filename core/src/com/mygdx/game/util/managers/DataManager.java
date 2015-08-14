@@ -42,8 +42,9 @@ public class DataManager {
     public static <T> T getData(String dataName, Class<T> c){
         HashMap<String, Object> map = dataMap.get(c);
         //if(map == null || !map.containsKey(dataName)) GH.writeErrorMessage("Data of class "+c.getName()+" with compName "+dataName+" does not exist!");
-
-        return (T)map.get(dataName);
+        Object data = map.get(dataName);
+        if(data == null) Logger.log(Logger.WARNING, "Data with "+dataName+" trying to be retrieved from the DataManager doesn't exist. Hope this null value is handled...");
+        return (T)data;
     }
 
     public static <T> String[] getKeyListForType(Class <T> c){

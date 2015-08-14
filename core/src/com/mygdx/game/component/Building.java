@@ -65,6 +65,7 @@ public class Building extends Component implements IOwnable, IInteractable{
         if(isConstructing || jBuilding.inventory){
             if (this.inventory == null) this.inventory = this.getComponent(Inventory.class);
             this.inventory.setMaxAmount(-1);
+            this.inventory.addItem("wood_pick", 1);
         }
 
         //If we are constructing this on load, set the timer and get the constructable component.

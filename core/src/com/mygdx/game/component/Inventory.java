@@ -5,7 +5,9 @@ import com.mygdx.game.entity.Entity;
 import com.mygdx.game.interfaces.IOwnable;
 import com.mygdx.game.util.DataBuilder;
 import com.mygdx.game.util.EventSystem;
+import com.mygdx.game.util.Logger;
 import com.mygdx.game.util.managers.DataManager;
+import gnu.trove.map.hash.TLongObjectHashMap;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
 
@@ -35,11 +37,16 @@ public class Inventory extends Component implements IOwnable {
     @JsonIgnore
     private HashMap<String, HashMap<String, InventoryItem>> inventory = new HashMap<>(20);
 
+    //So basically a hashMap -> lists that hold item links.
+    @JsonIgnore
+    private TLongObjectHashMap<Array<ItemLink>> reserveMap, onTheWayMap;
+
     /**
      * Creates a default Inventory Component with the default values. This means this inventory can hold unlimited of everything.
      */
     public Inventory() {
-
+        this.reserveMap = new TLongObjectHashMap<>(10, 0.75f);
+        this.onTheWayMap = new TLongObjectHashMap<>(10, 0.75f);
     }
 
     @Override
@@ -102,29 +109,84 @@ public class Inventory extends Component implements IOwnable {
      * does not exist or there were none available to reserve. To check more precisely if an item exists, use {@link Inventory#hasItem(String) hasItem} or {@link Inventory#getItemAmount(String) getItemAmount}.
      */
     public int reserveItem(String itemName, int amount, long id) {
+        if(amount == 0 || id == 0) return 0; //We don't reserve if the ID is 0... Entities never have 0 as an ID, that indicates NOT an Entity.
+        //Gets the item reference and then gets the item from the inventory. If the itemMap or item is null, return 0...
         DataBuilder.JsonItem itemRef = DataManager.getData(itemName, DataBuilder.JsonItem.class);
+        if(itemRef == null) {
+            Logger.log(Logger.WARNING, "Item with name " + itemName + " was not found in the data manager. Is it the correct name?");
+            return 0;
+        }
         HashMap<String, InventoryItem> itemMap = this.inventory.get(itemRef.getItemType());
         if(itemMap == null) return 0;
-
         InventoryItem invItem = itemMap.get(itemName);
         if (invItem == null) return 0;
-        return invItem.reserve(amount, id);
+
+        //First, let's reserve an amount from the item and store it in the amount...
+        amount = invItem.reserve(amount);
+        if(amount == 0) return 0; //Return 0 if we didn't reserve any.
+
+        //This is where we place a reserve of the item.
+        //Get the list of reserves for this id. If it doesn't exist, add one!
+        Array<ItemLink> list = this.reserveMap.get(id);
+        if(list == null) {
+            list = new Array<>(5);
+            this.reserveMap.put(id, list);
+        }
+        ItemLink link=null;
+
+        //Search over the list and find an existing reserve to add to. If we found one, save its reference.
+        for(ItemLink _link : list) {
+            if (_link.itemName.equals(itemName)) {
+                _link.amount += amount;
+                link = _link;
+                break;
+            }
+        }
+
+        //If this is null, we didn't find a link. Create a new link and add it to the list.
+        if(link == null) {
+            link = new ItemLink(itemName, amount);
+            list.add(link);
+        }
+
+        //Return the amount reserved.
+        return amount;
     }
 
     /**
      * Unreserves an amount of an item using the 'id' for the reserve id.
      * @param itemName The name of the item.
      * @param id The id of the reserve.
-     * @return The amount that was unreserved.
+     * @return The amount that was unreserved. 0 If the item was not reserved or the id supplied didn't have any reserves.
      */
     public int unReserveItem(String itemName, long id) {
         DataBuilder.JsonItem itemRef = DataManager.getData(itemName, DataBuilder.JsonItem.class);
         HashMap<String, InventoryItem> itemMap = this.inventory.get(itemRef.getItemType());
         if(itemMap == null) return 0;
-
         InventoryItem item = itemMap.get(itemName);
         if(item == null) return 0;
-        return item.unReserve(id);
+
+        return this.unReserveItem(item, id);
+    }
+
+    private int unReserveItem(InventoryItem item, long id){
+        Array<ItemLink> list = this.reserveMap.get(id);
+        if(list == null) return 0; //Return 0, we don't have a reserve for this id.
+
+        //Search the list for an existing link.
+        ItemLink link=null;
+        for(int i=0;i<list.size;i++){
+            ItemLink _link = list.get(i);
+            if(_link.itemName.equals(item.itemRef.getItemName())){
+                link = _link;
+                list.removeIndex(i); //Since the unreserve will be using the whole amount, remove the link from the list here.
+                break;
+            }
+        }
+
+        if(link == null) return 0; //No link was found, unable to unreserve.
+
+        return item.unReserve(link.amount);
     }
 
     /**
@@ -147,7 +209,7 @@ public class Inventory extends Component implements IOwnable {
             item = new InventoryItem(itemName, 0, this.maxAmount);
             this.addItem(itemName, 0);
         }
-        return item.addOnTheWay(amount, id);
+        return item.addOnTheWay(amount);
     }
 
     /**
@@ -157,15 +219,16 @@ public class Inventory extends Component implements IOwnable {
      * @return The amount that was removed from being on the way. -1 if the item did not exist.
      */
     public int removeOnTheWay(String itemName, long id){
-        DataBuilder.JsonItem itemRef = DataManager.getData(itemName, DataBuilder.JsonItem.class);
-        HashMap<String, InventoryItem> itemMap = this.inventory.get(itemRef.getItemType());
-        if(itemMap == null) return 0;
-
-        InventoryItem item = itemMap.get(itemName);
-        if(item == null) return 0;
-        int _removed = item.removeOnTheWay(id);
-        if(item.amount <= 0 && item.onTheWayList.size <= 0) this.inventory.remove(itemName);
-        return _removed;
+//        DataBuilder.JsonItem itemRef = DataManager.getData(itemName, DataBuilder.JsonItem.class);
+//        HashMap<String, InventoryItem> itemMap = this.inventory.get(itemRef.getItemType());
+//        if(itemMap == null) return 0;
+//
+//        InventoryItem item = itemMap.get(itemName);
+//        if(item == null) return 0;
+//        int _removed = item.removeOnTheWay(id);
+//        if(item.amount <= 0 && item.onTheWayList.size <= 0) this.inventory.remove(itemName);
+//        return _removed;
+        return 0;
     }
 
     /**
@@ -235,7 +298,8 @@ public class Inventory extends Component implements IOwnable {
         //TODO Watch this area... might be problematic.
         //Remove the item amount.
         int removed;
-        if(id != 0) removed = item.removeAmount(item.unReserve(id)); //Remove the amount taken from the reserve.
+        //TODO We find the item from the hashmap, and then call unReserveItem which gets the item again from the hashMap. Fix this!
+        if(id != 0) removed = item.removeAmount(this.unReserveItem(item, id)); //Remove the amount taken from the reserve.
         else removed = item.removeAmount(amountToRemove); //Otherwise, simply remove the amount
 
         //If the amount is now 0, remove it from the item map.
@@ -427,8 +491,6 @@ public class Inventory extends Component implements IOwnable {
     public static class InventoryItem {
         public DataBuilder.JsonItem itemRef;
         private int amount, maxAmount, reserved, onTheWay;
-        private Array<ItemLink> reserveList = new Array<>();
-        private Array<ItemLink> onTheWayList = new Array<>();
 
         /**
          * Creates a new InventoryItem. Uses the Item passed in to clone a new Item for reference.
@@ -450,78 +512,36 @@ public class Inventory extends Component implements IOwnable {
          * @param amountToReserve The amount of this item to reserve.
          * @return The amount reserved.
          */
-        public int reserve(int amountToReserve, long id) {
-            ItemLink link = new ItemLink(id, amountToReserve);
-            reserveList.add(link);
-
-            int _available = this.getAvailable(); //Get the available amount.
-            int _reserved = amountToReserve <= _available ? amountToReserve : _available; //Take what we can!
-            link.amount = _reserved; //Set the link.amount to the amount we were able to reserve.
-            this.reserved += _reserved; //Add this amount to the item's reserved amount.
-            return _reserved; //Return it!
+        private int reserve(int amountToReserve) {
+            //Either get the amountToReserve, or the amount available if we are requesting over the available amount.
+            int _reserved = amountToReserve <= this.getAvailable() ? amountToReserve : this.getAmount();
+            this.reserved += _reserved;
+            return _reserved;
         }
 
         /**
-         * Unreserves an amount on this item. Does not actaully take from the item amount, simply removes the reserve placed on an item.
-         * @param id The id to use for the reserve
+         * Unreserves an amount on this item. Does not actually take from the item amount.
+         * @param amountToUnreserve The amount to unreserve.
          * @return The amount that was unreserved.
          */
-        public int unReserve(long id) {
-            //First, try to find the reserve.
-            ItemLink reserve=null;
-            for (ItemLink _link : reserveList) {
-                if (_link.id == id) {
-                    reserve = _link;
-                    break;
-                }
-            }
-
-            int _unReserved = 0;
-            //If no reserve was found, return 0.
-            if(reserve == null) return _unReserved;
-            else {
-                //TODO Clean this up! Since we have the reserve list now, we probably don't need to check for bounds.
-                //Either take the amount requested (if under the total amount), or the total amount if amount > total
-                _unReserved = reserve.amount <= this.getAmount(false) ? reserve.amount : this.getAmount(false);
-                this.reserved -= _unReserved;   //Take away from the reserves.
-                reserve.amount -= _unReserved;     //Take away from the link amount.
-
-                //If the link amount is 0 or less and the id is not 0, remove it from the list.
-                if(reserve.amount <= 0) this.reserveList.removeValue(reserve, true);
-            }
-            return _unReserved; //Return it!
+        private int unReserve(int amountToUnreserve) {
+            this.reserved -= amountToUnreserve;
+            return amountToUnreserve;
         }
 
         /**
          * Adds an amount to be on the way.
-         * @param amount The amount on the way.
-         * @param id The id for the amount on the way.
+         * @param amount The amount to add on the way.
          */
-        public int addOnTheWay(int amount, long id) {
-            this.onTheWay += amount;
-            //Add to the list if not if 0
-            this.onTheWayList.add(new ItemLink(id, amount));
-            return amount;
+        public int addOnTheWay(int amount) {
+            return this.onTheWay += amount;
         }
 
         /**
          * Removes an amount from being on the way.
-         * @param id The id to use.
          */
-        public int removeOnTheWay(long id) {
-            //First, try to find the reserve.
-            ItemLink onTheWay=null;
-            for(ItemLink _link : this.onTheWayList){
-                if(_link.id == id){
-                    onTheWay = _link;
-                    break;
-                }
-            }
-            //If no reserve was found, return 0.
-            if(onTheWay == null) return 0;
-            this.onTheWay = this.onTheWay - onTheWay.amount < 0 ? 0 : this.onTheWay - onTheWay.amount;
-            this.onTheWayList.removeValue(onTheWay, true); //Remove it from the list.
-            return onTheWay.amount;
+        public int removeOnTheWay(int amount) {
+            return this.onTheWay -= amount;
         }
 
         /**
@@ -622,20 +642,15 @@ public class Inventory extends Component implements IOwnable {
         public int getAvailable() {
             return this.amount - this.reserved;
         }
+    }
 
-        private class ItemLink{
-            public long id;
-            public int amount;
+    private class ItemLink{
+        public String itemName;
+        public int amount;
 
-            public ItemLink(long id, int amount){
-                this.id = id;
-                this.amount = amount;
-            }
-
-            @Override
-            public boolean equals(Object obj) {
-                return obj instanceof ItemLink && this.id == ((ItemLink)obj).id;
-            }
+        public ItemLink(String itemName, int amount){
+            this.itemName = itemName;
+            this.amount = amount;
         }
     }
 }

@@ -642,6 +642,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         this.selectedProfile = new UnitProfile(entity);
         this.selectedProfile.entity.getTags().addTag("selected");
         this.selectedProfile.interactable = entity.getComponent(Interactable.class); //Get the selectedProfile Component.
+        this.selectedProfileList.add(this.selectedProfile);
         return this.selectedProfile;
     }
 
