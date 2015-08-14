@@ -32,17 +32,17 @@
   },
   {
     "name": "iron_pick",
-    "items": ["wood", "stone"],
+    "items": ["wood", "metal"],
     "itemAmounts": [10, 10]
   },
   {
     "name": "iron_shovel",
-    "items": ["wood", "stone"],
+    "items": ["wood", "metal"],
     "itemAmounts": [10, 10]
   },
   {
     "name": "iron_hatchet",
-    "items": ["wood", "stone"],
+    "items": ["wood", "metal"],
     "itemAmounts": [10, 10]
   },
   {

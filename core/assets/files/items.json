@@ -91,7 +91,7 @@
     "category": "material",
     "itemType": "shaft",
     "description": "Awesome animal hide.",
-    "icon": "hide"
+    "icon": "wood_shaft"
   },
   {
     "itemName": "wood_hatchet_head",
@@ -99,6 +99,6 @@
     "category": "material",
     "itemType": "shaft",
     "description": "Awesome animal hide.",
-    "icon": "hide"
+    "icon": "wood_hatchet_head"
   }
 ]

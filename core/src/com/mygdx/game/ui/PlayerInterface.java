@@ -409,7 +409,6 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
             this.selectedProfile = this.selectedProfileList.get(0);
     }
 
-
     /**
      * Moves the camera when keys are pressed.
      */

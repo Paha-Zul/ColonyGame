@@ -245,22 +245,31 @@ public class GUI {
         return GUI.Label(text, batch, x, y, width, height, null);
     }
 
+    /**
+     * Draws a Label with text.
+     * @param text The text for the label.
+     * @param batch The SpriteBatch to use.
+     * @param x The X position.
+     * @param y The Y position.
+     * @param width The width of the label (-1 can be used to indicate auto length)
+     * @param height The height of the label.
+     * @param style The GUIStyle of the label. If null, a default style will be used.
+     * @return True for if the mouse is inside the label, false otherwise.
+     */
     public static boolean Label(@NotNull String text, @NotNull SpriteBatch batch, float x, float y, float width, float height, GUIStyle style){
         if(style == null) style = defaultGUIStyle;
         BitmapFont.HAlignment alignment;
-        boolean mouseInside = false;
-        Rectangle.tmp.set(x, y, width, height);
-        if(Rectangle.tmp.contains(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY()))
-            mouseInside = true;
+
+        //y += style.font.getLineHeight();
+        BitmapFont.TextBounds bounds = style.font.getBounds(text);
+        boundsWidth = bounds.width;
+
+        if(width == -1) width = boundsWidth;
+
+        float adjX = x, adjY = y;
 
         if(style.background != null)
             GUI.Texture(style.background, batch, x, y, width, height);
-
-        //y += style.font.getLineHeight();
-        BitmapFont.TextBounds bounds = font.getBounds(text);
-        boundsWidth = bounds.width;
-
-        float adjX = x, adjY = y;
 
         adjX += style.paddingLeft; //Push to the right for left padding.
         width -= style.paddingLeft; //Since we pushed the X to the left, we must shrink the width by an equal amount.
@@ -303,7 +312,8 @@ public class GUI {
         else if(!style.wrap) style.font.drawMultiLine(batch, text, x, y);
         else style.font.drawWrapped(batch, text, x, y, width, alignment);
 
-        return mouseInside;
+        Rectangle.tmp.set(x, y, width, height);
+        return Rectangle.tmp.contains(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY());
     }
 
     public static int ImageLabel(TextureRegion image, String text, SpriteBatch batch, Rectangle imageRect, float textWidth){
