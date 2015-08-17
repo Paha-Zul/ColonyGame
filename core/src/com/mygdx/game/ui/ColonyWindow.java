@@ -1,4 +1,4 @@
-package com.mygdx.game.util.gui;
+package com.mygdx.game.ui;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
@@ -10,9 +10,10 @@ import com.badlogic.gdx.scenes.scene2d.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.component.Inventory;
-import com.mygdx.game.ui.PlayerInterface;
+import com.mygdx.game.entity.Entity;
 import com.mygdx.game.util.DataBuilder;
 import com.mygdx.game.util.GH;
+import com.mygdx.game.util.gui.GUI;
 import com.mygdx.game.util.managers.DataManager;
 import com.mygdx.game.util.managers.PlayerManager;
 
@@ -27,8 +28,8 @@ public class ColonyWindow extends Window{
 
     private DataBuilder.JsonItem itemMousedOver  = null;
 
-    public ColonyWindow(PlayerInterface playerInterface) {
-        super(playerInterface);
+    public ColonyWindow(PlayerInterface playerInterface, Entity target) {
+        super(playerInterface, target);
 
         this.colonyWindowStyle = new GUI.GUIStyle();
         this.colonyScreenBackground = new TextureRegion(ColonyGame.assetManager.get("eventWindowBackground", Texture.class));

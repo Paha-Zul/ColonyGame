@@ -29,6 +29,7 @@
     "category": "raw",
     "itemType": "food",
     "description": "A slippery fish.",
+    "icon": "fish",
     "effects": ["feed"],
     "strengths":[10]
   },

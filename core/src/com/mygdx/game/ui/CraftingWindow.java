@@ -1,4 +1,4 @@
-package com.mygdx.game.util.gui;
+package com.mygdx.game.ui;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
@@ -10,10 +10,11 @@ import com.badlogic.gdx.scenes.scene2d.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.component.Inventory;
-import com.mygdx.game.ui.PlayerInterface;
+import com.mygdx.game.entity.Entity;
 import com.mygdx.game.util.DataBuilder;
 import com.mygdx.game.util.GH;
 import com.mygdx.game.util.ItemNeeded;
+import com.mygdx.game.util.gui.GUI;
 import com.mygdx.game.util.managers.DataManager;
 import com.sun.istack.internal.Nullable;
 
@@ -25,8 +26,8 @@ public class CraftingWindow extends Window{
     private Rectangle craftingWindowRect;
     private TextureRegion craftingBackground, darkBackground;
 
-    public CraftingWindow(PlayerInterface playerInterface) {
-        super(playerInterface);
+    public CraftingWindow(PlayerInterface playerInterface, Entity target) {
+        super(playerInterface, target);
 
         this.craftingWindowRect = new Rectangle();
         this.craftingBackground = new TextureRegion(ColonyGame.assetManager.get("eventWindowBackground", Texture.class));

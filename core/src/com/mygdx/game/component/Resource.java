@@ -401,4 +401,9 @@ public class Resource extends Component implements IInteractable{
     public Building getBuilding() {
         return null;
     }
+
+    @Override
+    public Enterable getEnterable() {
+        return null;
+    }
 }

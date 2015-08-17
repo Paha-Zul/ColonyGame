@@ -1,10 +1,11 @@
-package com.mygdx.game.util.gui;
+package com.mygdx.game.ui;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.mygdx.game.ui.PlayerInterface;
+import com.mygdx.game.entity.Entity;
 import com.mygdx.game.util.GH;
+import com.mygdx.game.util.gui.GUI;
 
 /**
  * Created by Paha on 8/12/2015.
@@ -16,12 +17,19 @@ public abstract class Window{
     protected PlayerInterface playerInterface;
     protected Rectangle mainWindowRect;
     protected Rectangle dragWindowRect;
+    //The target of the window. This doesn't need to be assign for non-entity things (like colony inventory screen), but should be for things like crafting windows.
+    protected Entity target;
 
     private float xOffset, yOffset;
     private boolean dragging = false;
 
     public Window(PlayerInterface playerInterface){
         this.playerInterface = playerInterface;
+    }
+
+    public Window(PlayerInterface playerInterface, Entity target){
+        this.playerInterface = playerInterface;
+        this.target = target;
     }
 
     /**
@@ -97,5 +105,13 @@ public abstract class Window{
     protected final void setMainWindowRect(Rectangle mainWindowRect){
         this.mainWindowRect = mainWindowRect;
         this.dragWindowRect = new Rectangle(mainWindowRect.x, mainWindowRect.y + mainWindowRect.height - mainWindowRect.height*0.05f, mainWindowRect.width, mainWindowRect.height*0.05f);
+    }
+
+    public final void setTarget(Entity target){
+        this.target = target;
+    }
+
+    public final Entity getTarget(){
+        return this.target;
     }
 }

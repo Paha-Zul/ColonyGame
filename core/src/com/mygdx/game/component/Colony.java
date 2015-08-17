@@ -200,6 +200,11 @@ public class Colony extends Component implements IInteractable {
         return null;
     }
 
+    @Override
+    public Enterable getEnterable() {
+        return null;
+    }
+
     public static class CraftingJob{
         public Building building;
         public DataBuilder.JsonItem itemRef;

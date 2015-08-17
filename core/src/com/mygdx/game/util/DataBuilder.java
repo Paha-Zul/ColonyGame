@@ -739,13 +739,14 @@ public class DataBuilder implements IDestroyable{
      * A class to hold data from the buildings.json file.
      */
     public static class JsonBuilding{
-        public String name, displayName;
+        public String name, displayName, image, spriteSheet;
         public String[] tags;
         public boolean inventory;
         public String[] storageTypes, crafting;
         public boolean enterable;
         public int enterableMaxOccupancy;
         public float[][] enterablePositions;
+        public int[] dimensions;
     }
 
     private static class FolderStructure{

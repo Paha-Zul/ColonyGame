@@ -27,7 +27,8 @@ import com.mygdx.game.entity.Entity;
 import com.mygdx.game.interfaces.Functional;
 import com.mygdx.game.interfaces.IGUI;
 import com.mygdx.game.util.*;
-import com.mygdx.game.util.gui.*;
+import com.mygdx.game.util.gui.Button;
+import com.mygdx.game.util.gui.GUI;
 import com.mygdx.game.util.managers.DataManager;
 import com.mygdx.game.util.managers.NotificationManager;
 import com.mygdx.game.util.managers.PlayerManager;
@@ -147,8 +148,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         this.whiteTexture = new TextureRegion(WorldGen.whiteTex);
 
         this.windowManager = new WindowManager();
-        this.windowManager.addWindow(new SelectedWindow(this));
-        this.windowManager.addWindow(new ColonyWindow(this));
+        this.windowManager.addWindowToSelfManagingList(new SelectedWindow(this));
 
         this.buttonList = new Array<>();
 
@@ -215,7 +215,6 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         Gdx.input.setInputProcessor(multiplexer);
 
         ColonyGame.camera.zoom = 1.5f;
-
     }
 
     private void generateFonts(){
@@ -729,6 +728,9 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
         }else if(keycode == Input.Keys.I) { //T - toggle the colonists (if we have a colonist selected) 'alert' mode.
             this.drawingColony = !this.drawingColony;
+            this.windowManager.addWindowIfNotExistByTarget(ColonyWindow.class, PlayerManager.getPlayer("Player").colony.getEntityOwner(), this);
+        }else if(keycode == Input.Keys.ESCAPE){
+            this.windowManager.removeTopMostWindow();
         }else
             return false;
 

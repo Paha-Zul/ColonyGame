@@ -3,6 +3,9 @@
     "name": "colony_building",
     "displayName": "Colony Base",
     "tags": ["main", "storage", "enterable"],
+    "image": "Colony2",
+    "spriteSheet": "interactables",
+    "dimensions": [200,200],
     "inventory": true,
     "storageTypes": ["all"],
     "enterable": true,
@@ -13,6 +16,9 @@
     "name": "equipment_shed",
     "displayName": "Equipment Shed",
     "tags": ["equipment"],
+    "image": "Colony2",
+    "spriteSheet": "interactables",
+    "dimensions": [200,200],
     "inventory": true,
     "storageTypes": ["tool"]
   },
@@ -20,6 +26,9 @@
     "name": "workshop",
     "displayName": "Workshop",
     "tags": ["workshop"],
+    "image": "Colony2",
+    "spriteSheet": "interactables",
+    "dimensions": [200,200],
     "inventory": false,
     "crafting": ["wood_pick", "wood_shovel", "wood_hatchet"]
   }

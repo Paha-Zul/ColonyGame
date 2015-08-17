@@ -27,7 +27,8 @@ public class Building extends Component implements IOwnable, IInteractable{
     private Inventory inventory;
     @JsonProperty
     private String buildingName;
-
+    @JsonIgnore
+    private Enterable enterable;
 
     public Building(){
 
@@ -46,12 +47,6 @@ public class Building extends Component implements IOwnable, IInteractable{
         if(this.owner.getTags().hasTag("constructing") || jBuilding.inventory) this.inventory = this.addComponent(new Inventory());
         this.owner.name = jBuilding.displayName; //Set the display name.
 
-        if(jBuilding.enterable) {
-            Enterable enterable = this.addComponent(new Enterable());
-            enterable.setEnterPositions(jBuilding.enterablePositions);
-            enterable.setMaxOccupants(jBuilding.enterableMaxOccupancy);
-        }
-
         this.load();
     }
 
@@ -67,7 +62,8 @@ public class Building extends Component implements IOwnable, IInteractable{
 
         //If we are constructing still on a load OR this building should have an inventory...
         if(isConstructing || jBuilding.inventory){
-            if (this.inventory == null) this.inventory = this.getComponent(Inventory.class);
+            //Since this method (load) is called in the init() function, make sure the inventory is still null.
+            if(this.inventory == null) this.inventory = this.getComponent(Inventory.class);
             this.inventory.setMaxAmount(-1);
             this.inventory.addItem("wood_pick", 1);
         }
@@ -79,6 +75,21 @@ public class Building extends Component implements IOwnable, IInteractable{
         }else{
             this.setActive(false);
         }
+
+        //If we are an Enterable, create the Enterable (if it doesn't exist already or on the Entity) and set some stuff.
+        if(jBuilding.enterable) {
+            if(this.enterable == null) this.enterable = this.getComponent(Enterable.class); //First try to get
+            if(this.enterable == null) this.enterable = this.addComponent(new Enterable()); //Then create.
+            enterable.setEnterPositions(jBuilding.enterablePositions);
+            enterable.setMaxOccupants(jBuilding.enterableMaxOccupancy);
+        }
+
+        //Set the image and dimensions (if not null)
+        if(jBuilding.dimensions != null)
+            this.owner.getComponents().getIdentity().setSprite(jBuilding.image, jBuilding.spriteSheet, jBuilding.dimensions[0], jBuilding.dimensions[1]);
+        else
+            this.owner.getComponents().getIdentity().setSprite(jBuilding.image, null);
+
     }
 
     @Override
@@ -183,5 +194,10 @@ public class Building extends Component implements IOwnable, IInteractable{
     @Override
     public Building getBuilding() {
         return this;
+    }
+
+    @Override
+    public Enterable getEnterable() {
+        return this.enterable;
     }
 }

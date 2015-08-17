@@ -15,5 +15,6 @@ public interface IInteractable {
     Constructable getConstructable();
     Craftable getCraftable();
     Building getBuilding();
+    Enterable getEnterable();
 
 }

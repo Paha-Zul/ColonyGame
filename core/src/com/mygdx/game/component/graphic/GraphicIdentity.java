@@ -66,11 +66,6 @@ public class GraphicIdentity extends Component {
         this.effects = this.getComponent(Effects.class);
     }
 
-    protected void configureSprite(Sprite sprite){
-        sprite.setSize(GH.toMeters(sprite.getRegionWidth()), GH.toMeters(sprite.getRegionHeight()));
-        sprite.setOrigin(sprite.getWidth() / 2, sprite.getHeight() / 2);
-    }
-
     @Override
     public void render(float delta, SpriteBatch batch) {
         super.render(delta, batch);
@@ -114,12 +109,16 @@ public class GraphicIdentity extends Component {
         return ColonyGame.camera.frustum.boundsInFrustum(pos.x, pos.y, 0, getSprite().getWidth(), getSprite().getHeight(), 0);
     }
 
+    public void setSprite(String textureName, String atlasName){
+        this.setSprite(textureName, atlasName, -1, -1);
+    }
+
     /**
      * Sets the sprite via texture name and atlas name. If the atlas name does not apply (empty or null), the asset manager will be searched for the image.
      * @param textureName The name of the texture.
      * @param atlasName The name of the atlas (if applicable) where the texture is.
      */
-    public void setSprite(String textureName, String atlasName){
+    public void setSprite(String textureName, String atlasName, int width, int height){
         if(textureName == null) return;
         this.spriteTextureName = textureName;
 
@@ -130,8 +129,8 @@ public class GraphicIdentity extends Component {
             if(region == null)
                 GH.writeErrorMessage("TextureRegion is null when creating sprite in GraphicIdentity. Texture: "+textureName+", atlasName: "+atlasName+". Does it exist?");
 
-            if(this.getSprite() == null) this.setSprite(new Sprite(region));
-            else this.getSprite().setTexture(region.getTexture());
+            if (this.getSprite() == null) this.setSprite(new Sprite(region));
+            else this.getSprite().setRegion(region);
 
         //If no atlas is used, get it normally.
         }else {
@@ -141,7 +140,31 @@ public class GraphicIdentity extends Component {
             else this.getSprite().setTexture(texture);
         }
 
-        this.configureSprite(this.getSprite());
+        this.configureSprite(this.getSprite(), width, height);
+    }
+
+    /**
+     * Call this method when a change to the sprite occurs (change in size, texture, etc...). This will adjust the size/dimensions and such.
+     * @param sprite The Sprite to configure.
+     */
+    protected void configureSprite(Sprite sprite){
+        this.configureSprite(sprite, -1, -1);
+    }
+
+    /**
+     * Call this method when a change to the sprite occurs (change in size, texture, etc...). This will adjust the size/dimensions and such.
+     * @param sprite The sprite to configure
+     * @param width The width to make the sprite.
+     * @param height The height to make the sprite.
+     */
+    protected void configureSprite(Sprite sprite, float width, float height){
+        if(width == -1 || height == -1) {
+            sprite.setSize(GH.toMeters(sprite.getRegionWidth()), GH.toMeters(sprite.getRegionHeight()));
+            sprite.setOrigin(sprite.getWidth() * this.anchor.x, sprite.getHeight() * this.anchor.y);
+        }else{
+            sprite.setSize(GH.toMeters(width), GH.toMeters(height));
+            sprite.setOrigin(sprite.getWidth() * this.anchor.x, sprite.getHeight() * this.anchor.y);
+        }
     }
 
     /**

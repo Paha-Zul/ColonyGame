@@ -1,4 +1,4 @@
-package com.mygdx.game.util.gui;
+package com.mygdx.game.ui;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -11,11 +11,11 @@ import com.mygdx.game.component.BehaviourManagerComp;
 import com.mygdx.game.component.Constructable;
 import com.mygdx.game.component.Stats;
 import com.mygdx.game.interfaces.IInteractable;
-import com.mygdx.game.ui.PlayerInterface;
 import com.mygdx.game.util.DataBuilder;
 import com.mygdx.game.util.ItemNeeded;
 import com.mygdx.game.util.StateTree;
 import com.mygdx.game.util.Tree;
+import com.mygdx.game.util.gui.GUI;
 import com.mygdx.game.util.managers.DataManager;
 
 import java.util.ArrayList;
@@ -48,7 +48,7 @@ public class SelectedWindow extends Window{
     private TextureRegion UIBackgroundBase, UIBackgroundTop;
 
     public SelectedWindow(PlayerInterface playerInterface) {
-        super(playerInterface);
+        super(playerInterface, null);
 
         this.UIBackgroundBase = new TextureRegion(ColonyGame.assetManager.get("UIBackground_base", Texture.class));
         this.UIBackgroundTop = new TextureRegion(ColonyGame.assetManager.get("UIBackground_top", Texture.class));
