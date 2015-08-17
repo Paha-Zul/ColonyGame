@@ -595,6 +595,12 @@ public class PrebuiltTasks {
         //Make sure the target is not null.
         mainRepeat.getControl().callbacks.checkCriteria = task -> task.getBlackboard().target != null && task.blackBoard.target.getTags().hasTag("alive");
 
+        //This is essential. We must fail the task if the target is no longer alive or is invalid.
+        mainRepeat.getControl().callbacks.failCriteria = task -> {
+            Task tsk = (Task)task;
+            return !tsk.blackBoard.target.isValid() || !tsk.blackBoard.target.getTags().hasTag("alive");
+        };
+
         //To succeed this repeat job, the target must be null, not valid, or not alive.
         mainRepeat.getControl().callbacks.successCriteria = task -> {
             Task tsk = (Task)task;

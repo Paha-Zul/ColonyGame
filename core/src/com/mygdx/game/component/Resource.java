@@ -391,4 +391,14 @@ public class Resource extends Component implements IInteractable{
     public Constructable getConstructable() {
         return null;
     }
+
+    @Override
+    public Craftable getCraftable() {
+        return null;
+    }
+
+    @Override
+    public Building getBuilding() {
+        return null;
+    }
 }

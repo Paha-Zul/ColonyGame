@@ -24,6 +24,11 @@ public abstract class Window{
         this.playerInterface = playerInterface;
     }
 
+    /**
+     * Updates the window.
+     * @param batch The SpriteBatch to draw with.
+     * @return True if the window was moused over. This can be used to stop any further input checks on other windows. False otherwise.
+     */
     public boolean update(SpriteBatch batch){
         this.mousedState = 0;
 
@@ -81,7 +86,7 @@ public abstract class Window{
      * Records the mouse state, keeping the highest of the two (either the incoming 'state' input, or the existing mouseState).
      * @param state The incoming state of the mouse from interacting with a window.
      */
-    protected void recordMouseState(int state){
+    protected final void recordMouseState(int state){
         this.mousedState = this.mousedState > state ? this.mousedState : state;
     }
 
@@ -89,7 +94,7 @@ public abstract class Window{
      * Sets the main window and dragWindowRect for use.
      * @param mainWindowRect The main window which the dragWindowRect will use for making it draggable (if enabled).
      */
-    protected void setMainWindowRect(Rectangle mainWindowRect){
+    protected final void setMainWindowRect(Rectangle mainWindowRect){
         this.mainWindowRect = mainWindowRect;
         this.dragWindowRect = new Rectangle(mainWindowRect.x, mainWindowRect.y + mainWindowRect.height - mainWindowRect.height*0.05f, mainWindowRect.width, mainWindowRect.height*0.05f);
     }

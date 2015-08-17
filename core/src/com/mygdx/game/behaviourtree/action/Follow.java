@@ -25,7 +25,7 @@ public class Follow extends LeafTask{
 
     @Override
     public boolean check() {
-        return super.check();
+        return super.check() && this.blackBoard.target.isValid() && this.blackBoard.target.getTags().hasTag("alive");
     }
 
     @Override

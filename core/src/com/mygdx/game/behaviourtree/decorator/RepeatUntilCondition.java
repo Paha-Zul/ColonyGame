@@ -29,16 +29,17 @@ public class RepeatUntilCondition extends TaskDecorator{
         this.task.update(delta);
 
         if(this.task.getControl().hasFinished()){
-            if(control.callbacks.successCriteria != null && control.callbacks.successCriteria.test(this.task)) {
-                this.control.finishWithSuccess();
-                System.out.println("Ending repeat with success");
-            }else if(control.callbacks.failCriteria != null && control.callbacks.failCriteria.test(this.task)) {
+            if(control.callbacks.failCriteria != null && control.callbacks.failCriteria.test(this.task)) {
                 this.control.finishWithFailure();
-                System.out.println("Ending repeat with failure");
+            }else if(control.callbacks.successCriteria != null && control.callbacks.successCriteria.test(this.task)) {
+                this.control.finishWithSuccess();
             }else{
-                System.out.println("repeating");
-                this.task.getControl().reset();
-                this.task.getControl().safeStart();
+                if(task.check()) {
+                    this.task.getControl().reset();
+                    this.task.getControl().safeStart();
+                }else{
+                    this.control.finishWithFailure();
+                }
             }
         }
     }

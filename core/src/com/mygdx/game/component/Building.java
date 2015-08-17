@@ -1,5 +1,6 @@
 package com.mygdx.game.component;
 
+import com.mygdx.game.entity.Entity;
 import com.mygdx.game.interfaces.IInteractable;
 import com.mygdx.game.interfaces.IOwnable;
 import com.mygdx.game.util.DataBuilder;
@@ -14,6 +15,8 @@ import org.codehaus.jackson.annotate.JsonProperty;
  * A building component that can be attached to Entities.
  */
 public class Building extends Component implements IOwnable, IInteractable{
+    @JsonIgnore
+    public DataBuilder.JsonBuilding jBuilding;
     @JsonIgnore
     private Timer timer;
     @JsonIgnore
@@ -36,6 +39,7 @@ public class Building extends Component implements IOwnable, IInteractable{
 
         //Get the JsonBuilding reference, add the tags, add an inventory if under construction, and set the name.
         DataBuilder.JsonBuilding jBuilding = DataManager.getData(this.buildingName, DataBuilder.JsonBuilding.class);
+        this.jBuilding = jBuilding;
         for(String tag : jBuilding.tags) this.owner.getTags().addTag(tag); //Add each tag that exists.
 
         //Add an inventory if under construction OR if the building is supposed to have one...
@@ -88,6 +92,7 @@ public class Building extends Component implements IOwnable, IInteractable{
             //this.timer.update(delta);
         }
 
+        //When construction is complete, remove all constructing related stuff.
         if(this.constructable.isComplete()){
             this.owner.destroyComponent(Constructable.class);
             this.owner.getTags().removeTag("constructing");
@@ -101,6 +106,12 @@ public class Building extends Component implements IOwnable, IInteractable{
             }
             this.setActive(false);
         }
+    }
+
+    @Override
+    public void destroy(Entity destroyer) {
+
+        super.destroy(destroyer);
     }
 
     public void setBuildingName(String name){
@@ -162,5 +173,15 @@ public class Building extends Component implements IOwnable, IInteractable{
     @JsonIgnore
     public Constructable getConstructable() {
         return this.constructable;
+    }
+
+    @Override
+    public Craftable getCraftable() {
+        return null;
+    }
+
+    @Override
+    public Building getBuilding() {
+        return this;
     }
 }

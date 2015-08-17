@@ -13,5 +13,7 @@ public interface IInteractable {
     BehaviourManagerComp getBehManager();
     Component getComponent();
     Constructable getConstructable();
+    Craftable getCraftable();
+    Building getBuilding();
 
 }

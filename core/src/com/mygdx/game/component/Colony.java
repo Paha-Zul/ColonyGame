@@ -190,6 +190,16 @@ public class Colony extends Component implements IInteractable {
         return null;
     }
 
+    @Override
+    public Craftable getCraftable() {
+        return null;
+    }
+
+    @Override
+    public Building getBuilding() {
+        return null;
+    }
+
     public static class CraftingJob{
         public Building building;
         public DataBuilder.JsonItem itemRef;

@@ -327,6 +327,11 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         this.mousedOverNotification = newlyMousedOver;
     }
 
+    /**
+     * Draws the current event that is being presented to the player while the game is paused.
+     * @param width The width of the game screen. This will be use to calculate the event window widht.
+     * @param height The height of the game screen. Used to calculate the event window height.
+     */
     private void drawCurrentEvent(int width, int height){
         if(this.currentEvent != null){
             float windowWidth = width/3.2f, windowHeight = height/2.7f;

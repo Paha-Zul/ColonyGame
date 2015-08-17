@@ -50,6 +50,13 @@ public class Inventory extends Component implements IOwnable {
     }
 
     @Override
+    public void created(Entity owner) {
+        super.created(owner);
+        Building building = this.getComponent(Building.class);
+        if (building != null) this.colony = building.getOwningColony();
+    }
+
+    @Override
     public void start() {
         super.start();
         load();
@@ -62,8 +69,7 @@ public class Inventory extends Component implements IOwnable {
 
     @Override
     public void load() {
-        Building building = this.getComponent(Building.class);
-        if (building != null) this.colony = building.getOwningColony();
+
     }
 
     @Override
