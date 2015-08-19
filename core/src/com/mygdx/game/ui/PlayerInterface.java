@@ -307,7 +307,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
             NotificationManager.Notification notification = list.get(i);
 
             //GUI.Texture(whiteTexture, batch, x, y, labelW, labelH);
-            if(GUI.Label(notification.name, this.batch, x, y, labelW, labelH, notificationStyle)){
+            if(GUI.Label(notification.name, this.batch, x, y, labelW, labelH, notificationStyle) > 0){
                 newlyMousedOver = notification; //Set the flag(ish) variable.
 
                 mousedOverNotiStyle.wrap = true;
@@ -664,6 +664,10 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
     public Array<UnitProfile> getSelectedProfileList(){
         return this.selectedProfileList;
+    }
+
+    public WindowManager getWindowManager(){
+        return this.windowManager;
     }
 
     public static PlayerInterface getInstance(){

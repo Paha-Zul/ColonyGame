@@ -62,6 +62,8 @@ public class WindowManager {
         Window window = null;
         if(clazz == ColonyWindow.class)
             window = new ColonyWindow(pi, target);
+        else if(clazz == CraftingWindow.class)
+            window = new CraftingWindow(pi, target);
 
         //Push the window and force a resize. Many windows initially set many of their sizes by using the resize method.
         this.windowStack.push(window);

@@ -209,7 +209,6 @@ public class GUI {
      * GUI.UP (3) if just released.
      */
     public static int Button(SpriteBatch batch, String text, Rectangle rect, @Nullable GUIStyle style){
-        int state = NONE;
 
         if(style == null)
             style = defaultGUIStyle;
@@ -217,7 +216,7 @@ public class GUI {
         Texture currTexture = style.normal;
         if(style.activated) currTexture = style.active;
 
-        state = GUI.getState(rect);
+        int state = GUI.getState(rect);
 
         if(state == DOWN) //If down...
             currTexture = style.clicked;
@@ -227,21 +226,20 @@ public class GUI {
             currTexture = style.moused;
 
         batch.draw(currTexture, rect.x, rect.y, rect.getWidth(), rect.getHeight());
-        BitmapFont.TextBounds bounds = font.getBounds(text);                                //Get the bounds of the text
         if(!text.isEmpty()) GUI.Label(text, batch, rect.x, rect.y, rect.getWidth(), rect.getHeight(), style);
 
         return state;
     }
 
-    public static boolean Label(@NotNull String text, @NotNull SpriteBatch batch, @NotNull Rectangle rect){
+    public static int Label(@NotNull String text, @NotNull SpriteBatch batch, @NotNull Rectangle rect){
         return GUI.Label(text, batch, rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight(), null);
     }
 
-    public static boolean Label(@NotNull String text, @NotNull SpriteBatch batch, @NotNull Rectangle rect, GUIStyle style){
+    public static int Label(@NotNull String text, @NotNull SpriteBatch batch, @NotNull Rectangle rect, GUIStyle style){
         return GUI.Label(text, batch, rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight(), style);
     }
 
-    public static boolean Label(@NotNull String text, @NotNull SpriteBatch batch, float x, float y, float width, float height){
+    public static int Label(@NotNull String text, @NotNull SpriteBatch batch, float x, float y, float width, float height){
         return GUI.Label(text, batch, x, y, width, height, null);
     }
 
@@ -256,7 +254,7 @@ public class GUI {
      * @param style The GUIStyle of the label. If null, a default style will be used.
      * @return True for if the mouse is inside the label, false otherwise.
      */
-    public static boolean Label(@NotNull String text, @NotNull SpriteBatch batch, float x, float y, float width, float height, GUIStyle style){
+    public static int Label(@NotNull String text, @NotNull SpriteBatch batch, float x, float y, float width, float height, GUIStyle style){
         if(style == null) style = defaultGUIStyle;
         BitmapFont.HAlignment alignment;
 
@@ -312,8 +310,8 @@ public class GUI {
         else if(!style.wrap) style.font.drawMultiLine(batch, text, x, y);
         else style.font.drawWrapped(batch, text, x, y, width, alignment);
 
-        Rectangle.tmp.set(x, y, width, height);
-        return Rectangle.tmp.contains(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY());
+        Rectangle.tmp.set(x, y - height, width, height);
+        return GUI.getState(Rectangle.tmp);
     }
 
     public static int ImageLabel(TextureRegion image, String text, SpriteBatch batch, Rectangle imageRect, float textWidth){

@@ -4,6 +4,7 @@ import com.mygdx.game.entity.Entity;
 import com.mygdx.game.interfaces.IInteractable;
 import com.mygdx.game.interfaces.IOwnable;
 import com.mygdx.game.util.DataBuilder;
+import com.mygdx.game.util.Logger;
 import com.mygdx.game.util.managers.DataManager;
 import com.mygdx.game.util.timer.RepeatingTimer;
 import com.mygdx.game.util.timer.Timer;
@@ -90,8 +91,10 @@ public class Building extends Component implements IOwnable, IInteractable{
         if(jBuilding.crafting != null){
             if(this.craftingStation == null) this.craftingStation = this.getComponent(CraftingStation.class);
             if(this.craftingStation == null) this.craftingStation = this.addComponent(new CraftingStation());
-            this.colonyOwner.addOwnedToColony(this.craftingStation); //Add it to the colony crafting centers...
+            if(this.jBuilding.crafting == null) Logger.log(Logger.WARNING, "The crafting list for building "+this.jBuilding.name+" is null. This could be a problem... Fix it in the Buildings.json file.");
+            this.craftingStation.setCraftingList(this.jBuilding.crafting);
             this.craftingStation.addCraftingJob("wood_pick", 1);
+            this.colonyOwner.addOwnedToColony(this.craftingStation); //Add it to the colony crafting centers...
         }
 
         //Set the image and dimensions (if not null)
@@ -198,7 +201,7 @@ public class Building extends Component implements IOwnable, IInteractable{
 
     @Override
     public CraftingStation getCraftingStation() {
-        return null;
+        return this.craftingStation;
     }
 
     @Override

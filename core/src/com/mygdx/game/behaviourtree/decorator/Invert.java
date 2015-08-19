@@ -5,9 +5,10 @@ import com.mygdx.game.behaviourtree.Task;
 
 /**
  * Created by Paha on 8/18/2015.
+ * Inverts its task to return opposite of what it actually returned.
  */
-public class ReturnOpposite extends TaskDecorator{
-    public ReturnOpposite(String name, BlackBoard bb, Task task) {
+public class Invert extends TaskDecorator{
+    public Invert(String name, BlackBoard bb, Task task) {
         super(name, bb, task);
     }
 

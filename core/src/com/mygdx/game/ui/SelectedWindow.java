@@ -9,6 +9,7 @@ import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.component.BehaviourManagerComp;
 import com.mygdx.game.component.Constructable;
+import com.mygdx.game.component.CraftingStation;
 import com.mygdx.game.component.Stats;
 import com.mygdx.game.interfaces.IInteractable;
 import com.mygdx.game.util.DataBuilder;
@@ -148,10 +149,9 @@ public class SelectedWindow extends Window{
 
             if(innerInter.getBehManager() != null){
                 this.drawBehaviourInformation(batch, ordersRect, innerInter);
-            }
 
             //If it has a constructable...
-            if(innerInter.getConstructable() != null){
+            }else if(innerInter.getConstructable() != null){
                 Constructable constructable = innerInter.getConstructable();
                 Rectangle rect = this.ordersRect;
                 GUI.Label("constructing", batch, rect.x, rect.y + rect.height-20, rect.width, 20);
@@ -165,6 +165,12 @@ public class SelectedWindow extends Window{
                     GUI.ImageLabel(DataManager.getData(list.get(i).itemName, DataBuilder.JsonItem.class).iconTexture, ""+list.get(i).amountNeeded, batch, Rectangle.tmp, 100);
                 }
 
+            //If it has a crafting station...
+            }else if(innerInter.getCraftingStation() != null){
+                CraftingStation station = innerInter.getCraftingStation();
+                if(GUI.Button(batch, "Crafting", this.ordersRect, null) == GUI.JUSTUP){
+                    this.playerInterface.getWindowManager().addWindowIfNotExistByTarget(CraftingWindow.class, station.getEntityOwner(), this.playerInterface);
+                }
             }
         }
     }

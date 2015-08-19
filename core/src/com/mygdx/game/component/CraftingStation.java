@@ -22,9 +22,10 @@ public class CraftingStation extends Component implements IOwnable{
     private LinkedList<CraftingJob> inProgressJobs;
     /** Jobs that were started but stopped for some reason.*/
     private LinkedList<CraftingJob> stalledJobs;
-    private Inventory inventory; //Crafting stations need an inventory, so this better have one.
 
+    private Inventory inventory; //Crafting stations need an inventory, so this better have one.
     private Colony owningColony;
+    private String[] craftingList;
 
     public CraftingStation() {
 
@@ -148,6 +149,10 @@ public class CraftingStation extends Component implements IOwnable{
         return !this.stalledJobs.isEmpty();
     }
 
+    public void setCraftingList(String[] craftingList){
+        this.craftingList = craftingList;
+    }
+
     /**
      * Transfers the first available CraftingJob from the available list to the in-progress list.
      * @return The CraftingJob that was transferred from available to in progress.
@@ -203,6 +208,14 @@ public class CraftingStation extends Component implements IOwnable{
         }
 
         return list;
+    }
+
+    public String[] getCraftingList(){
+        return this.craftingList;
+    }
+
+    public Inventory getInventory(){
+        return this.inventory;
     }
 
     @Override

@@ -7,9 +7,9 @@ import com.mygdx.game.behaviourtree.composite.Selector;
 import com.mygdx.game.behaviourtree.composite.Sequence;
 import com.mygdx.game.behaviourtree.control.ParentTaskController;
 import com.mygdx.game.behaviourtree.decorator.AlwaysTrue;
+import com.mygdx.game.behaviourtree.decorator.Invert;
 import com.mygdx.game.behaviourtree.decorator.RepeatUntilCondition;
 import com.mygdx.game.behaviourtree.decorator.RepeatUntilFailure;
-import com.mygdx.game.behaviourtree.decorator.ReturnOpposite;
 import com.mygdx.game.component.*;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.util.*;
@@ -866,7 +866,7 @@ public class PrebuiltTasks {
         TransferItemsFromMeToTarget transferToCraftingStation = new TransferItemsFromMeToTarget("Transfer items to crafting station", blackBoard);
 
         GetItemsForCrafting checkEnoughItems = new GetItemsForCrafting("Checking if enough", blackBoard); //Don't need to add this anywhere else except to checkEnough.
-        ReturnOpposite checkEnough = new ReturnOpposite("Checking if enough", blackBoard, checkEnoughItems);
+        Invert checkEnough = new Invert("Checking if enough", blackBoard, checkEnoughItems);
         GetTargetFromCraftingStation getTargetForCrafting = new GetTargetFromCraftingStation("Getting target from the crafting station to go craft", blackBoard);
         GetEnterableFromTarget getEnterableFromTarget = new GetEnterableFromTarget("Getting enterable", blackBoard);
         FindPath findPathToTarget = new FindPath("Getting path to target crafting station", blackBoard);

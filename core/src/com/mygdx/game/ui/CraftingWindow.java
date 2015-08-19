@@ -1,18 +1,15 @@
 package com.mygdx.game.ui;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.ColonyGame;
-import com.mygdx.game.component.Inventory;
+import com.mygdx.game.component.CraftingStation;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.util.DataBuilder;
-import com.mygdx.game.util.GH;
 import com.mygdx.game.util.ItemNeeded;
 import com.mygdx.game.util.gui.GUI;
 import com.mygdx.game.util.managers.DataManager;
@@ -23,107 +20,68 @@ import com.sun.istack.internal.Nullable;
  * A Window for interacting with Entities that provide crafting options.
  */
 public class CraftingWindow extends Window{
-    private Rectangle craftingWindowRect;
-    private TextureRegion craftingBackground, darkBackground;
+    private Rectangle craftRect, selectRect, infoRect, stalledRect, openRect, craftButtonRect;
+    private TextureRegion craftBackground, selectBackground, infoBackground, stalledBackground, openBackground;
+    private CraftingStation craftingStation;
+    private DataBuilder.JsonItem selectedItem;
 
     public CraftingWindow(PlayerInterface playerInterface, Entity target) {
         super(playerInterface, target);
 
-        this.craftingWindowRect = new Rectangle();
-        this.craftingBackground = new TextureRegion(ColonyGame.assetManager.get("eventWindowBackground", Texture.class));
-        this.darkBackground = new TextureRegion(ColonyGame.assetManager.get("darkBackground", Texture.class));
+        this.craftRect = new Rectangle();
+        this.selectRect = new Rectangle();
+        this.infoRect = new Rectangle();
+        this.stalledRect = new Rectangle();
+        this.openRect = new Rectangle();
 
+        this.craftBackground = new TextureRegion(ColonyGame.assetManager.get("craftingWindowBackground", Texture.class));
+        this.selectBackground = new TextureRegion(ColonyGame.assetManager.get("craftingWindowSelectionBackground", Texture.class));
+        this.infoBackground = new TextureRegion(ColonyGame.assetManager.get("craftingWindowInfoBackground", Texture.class));
+        this.stalledBackground = new TextureRegion(ColonyGame.assetManager.get("stalledJobsBackground", Texture.class));
+        this.openBackground = new TextureRegion(ColonyGame.assetManager.get("openJobsBackground", Texture.class));
+
+        this.craftingStation = this.target.getComponent(CraftingStation.class);
+
+        this.draggable = true;
     }
 
     @Override
     public boolean update(SpriteBatch batch) {
         if(this.active) {
-            GUI.Texture(this.craftingBackground, batch, this.craftingWindowRect);
+            GUI.Texture(this.craftBackground, batch, this.craftRect);
+            GUI.Texture(this.selectBackground, batch, this.selectRect);
+            GUI.Texture(this.infoBackground, batch, this.infoRect);
+            GUI.Texture(this.openBackground, batch, this.openRect);
+            GUI.Texture(this.stalledBackground, batch, this.stalledRect);
+
+            //GUI.Texture(new TextureRegion(this.playerInterface.blueSquare), ColonyGame.batch, this.dragWindowRect);
+            this.drawCraftingWindow(batch, this.playerInterface.UIStyle);
         }
 
         return super.update(batch);
     }
 
-    private void drawColonyInventory(SpriteBatch batch, Inventory inventory, Rectangle rect, GUI.GUIStyle style, TextureRegion windowBackground, TextureRegion darkBackground){
-        //We need to use the global list of items.
-        Array<String> itemList = DataBuilder.JsonItem.allItems;
+    private void drawCraftingWindow(SpriteBatch batch, GUI.GUIStyle style){
+        String[] items = this.craftingStation.getCraftingList();
+        style.alignment = Align.left;
+        style.paddingLeft = 5;
 
-        batch.setColor(Color.WHITE);
-        style.alignment = Align.center;
-        style.paddingTop = 0;
-        int iconSize =  32;
-        float labelWidth = 50;
+        float labelHeight = 25;
+        float startX = selectRect.x;
+        float startY = selectRect.y + selectRect.height - labelHeight;
 
-        float craftButtonWidth = 50, craftButtonHeight = 32*0.5f;
+        for(int i=0;i<items.length;i++){
+            String item = items[i];
+            DataBuilder.JsonItem _itemRef = DataManager.getData(item, DataBuilder.JsonItem.class);
 
-        //Starting X and Y pos.
-        float xPos = rect.x + 10;
-        float yPos = rect.y + rect.height - iconSize - 10;
-        style.background = new TextureRegion(ColonyGame.assetManager.get("background", Texture.class));
-        DataBuilder.JsonItem itemMousedOver = null;
-        this.playerInterface.UIStyle.alignment = Align.center;
-
-//        batch.flush(); //Flush the current contents to it isn't affected by the clipping bounds...
-
-//        Rectangle scissors = new Rectangle(); //The scissor area.
-//        Rectangle clipBounds = new Rectangle(this.colonyScreenRect); //The bounds to use.
-//        ScissorStack.calculateScissors(ColonyGame.UICamera, batch.getTransformMatrix(), clipBounds, scissors);
-//        ScissorStack.pushScissors(scissors); //Push the scissors onto the stack.
-
-        DataBuilder.JsonItem mousedItem = null;
-
-        //Draw each item.
-        for(int i=0;i<itemList.size;i++){
-            //Get the itemName and itemAmount and the _icon
-            String itemName = itemList.get(i);
-            int itemAmount = inventory.getItemAmount(itemName);
-            String label = ""+itemAmount;
-            DataBuilder.JsonItem _itemRef = DataManager.getData(itemName, DataBuilder.JsonItem.class);
-            TextureRegion _icon = _itemRef.iconTexture;
-
-            //Draw the background texture, icon texture, and a label...
-            int _state = GUI.Texture(this.darkBackground, batch, xPos, yPos, iconSize, iconSize);
-            GUI.Texture(_icon, batch, xPos, yPos, iconSize, iconSize);
-            GUI.Label(label, batch, xPos + iconSize, yPos, iconSize, iconSize, this.playerInterface.UIStyle);
-
-            if(_state == GUI.OVER) mousedItem = _itemRef;
-
-            if(!_itemRef.getItemCategory().equals("raw")) {
-                //iconSize*2 cause 1 for the icon and 1 for the label, which also uses iconSize
-                if(GUI.Button(batch, "Craft", xPos + iconSize*2 + 10, yPos, craftButtonWidth, iconSize, null) > 0)
-                    itemMousedOver = _itemRef;
-            }
-
-            //Increment the yPos, if we're too far down, reset Y and shift X.
-            yPos -= iconSize + 5;
-            if(yPos < rect.y){
-                xPos += iconSize + labelWidth + craftButtonWidth + 20;
-                yPos = rect.y+rect.height - iconSize- 10;
-            }
+            Rectangle.tmp.set(startX, startY - i*labelHeight, selectRect.width, labelHeight);
+            if(GUI.Label(_itemRef.getDisplayName(), batch, Rectangle.tmp, style) == GUI.JUSTUP)
+                this.selectedItem = _itemRef;
         }
 
-        if(mousedItem != null) {
-            this.playerInterface.UIStyle.background = this.darkBackground;
-            Vector2 mouse = GH.getFixedScreenMouseCoords();
-            GUI.Label(mousedItem.getDisplayName(), batch, mouse.x, mouse.y, -1, 25, this.playerInterface.UIStyle);
-            this.playerInterface.UIStyle.background = null;
+        if(this.selectedItem != null) {
+            this.drawCraftingInfo(this.selectedItem, batch, this.infoRect, style, this.infoBackground);
         }
-
-        //Flush the contents and pop the scissors.
-//        batch.flush();
-//        ScissorStack.popScissors();
-
-        if(itemMousedOver != null){
-            //TODO Add a timer to delay the crafting popup?
-            this.drawCraftingInfo(itemMousedOver, batch, this.craftingWindowRect, this.playerInterface.UIStyle, this.craftingBackground);
-        }
-
-        //Reset color and padding/alignment
-        batch.setColor(Color.WHITE);
-        style.alignment = Align.center;
-        style.paddingLeft = 0;
-        style.paddingTop = 0;
-        style.background = null;
     }
 
     /**
@@ -134,8 +92,6 @@ public class CraftingWindow extends Window{
      * @param style The GUIStyle to draw with. This may be null.
      */
     private void drawCraftingInfo(DataBuilder.JsonItem itemRef, SpriteBatch batch, Rectangle rect, @Nullable GUI.GUIStyle style, TextureRegion windowTexture){
-        Vector2 mouse = GH.getFixedScreenMouseCoords(); //Get fixed mouse coords
-        rect.setPosition(mouse.x, mouse.y); //Set position of the rectangle
         GUI.Texture(windowTexture, batch, rect); //Draw the texture
         Array<ItemNeeded> mats = itemRef.materialsForCrafting, raw = itemRef.rawForCrafting; //Get the lists.
 
@@ -187,10 +143,30 @@ public class CraftingWindow extends Window{
                 rect.y + rect.height - iconSize - 25, iconSize, iconSize);
     }
 
+    @Override
+    protected void dragWindow() {
+        super.dragWindow();
+
+        this.selectRect.setPosition(this.craftRect.x + this.craftRect.width * 0.034f, this.craftRect.y + this.craftRect.height * 0.03f);
+        this.infoRect.setPosition(this.craftRect.x + this.craftRect.width * 0.678f, this.craftRect.y + this.craftRect.height * 0.502f);
+    }
 
     @Override
     public void resize(int width, int height) {
-        this.craftingWindowRect = new Rectangle(width/2 - 400/2, height/2 - 400/2, 400, 400);
-        this.setMainWindowRect(this.craftingWindowRect);
+        this.craftRect.set(width / 2 - 600 / 2, height / 2 - 500 / 2, 600, 500);
+
+        this.selectRect.set(this.craftRect.x + this.craftRect.width * 0.034f, this.craftRect.y + this.craftRect.height * 0.03f,
+                this.craftRect.width * 0.333f, this.craftRect.height * 0.892f);
+
+        this.infoRect.set(this.craftRect.x + this.craftRect.width * 0.678f, this.craftRect.y + this.craftRect.height * 0.502f,
+                this.craftRect.width * 0.2857f, this.craftRect.height * 0.422f);
+
+        this.openRect.set(this.craftRect.x + this.craftRect.width * 0.357f, this.craftRect.y + this.craftRect.height * 0.502f,
+                this.craftRect.width * 0.2857f, this.craftRect.height * 0.422f);
+
+        this.stalledRect.set(this.craftRect.x + this.craftRect.width * 0.357f, this.craftRect.y + this.craftRect.height * 0.03f,
+                this.craftRect.width * 0.2857f, this.craftRect.height * 0.422f);
+
+        this.setMainWindowRect(this.craftRect);
     }
 }

@@ -12,7 +12,7 @@ import com.mygdx.game.util.gui.GUI;
  * An abstract Window class for displaying UI elements.
  */
 public abstract class Window{
-    protected boolean active, draggable = false;
+    protected boolean active=true, draggable = false;
     protected int mousedState = 0;
     protected PlayerInterface playerInterface;
     protected Rectangle mainWindowRect;
@@ -57,7 +57,7 @@ public abstract class Window{
     /**
      * Drags the window using the mainWindowRect and dragWindowRect. If either of these are null, the dragging will not happen.
      */
-    private void dragWindow(){
+    protected void dragWindow(){
         if(this.mainWindowRect == null || this.dragWindowRect == null) return;
 
         //Get the state in reference to the rectangle and in general...
