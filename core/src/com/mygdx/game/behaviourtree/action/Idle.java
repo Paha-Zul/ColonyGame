@@ -12,11 +12,11 @@ import com.mygdx.game.util.timer.Timer;
 public class Idle extends LeafTask {
     private Timer timer;
 
-    public Idle(String name, BlackBoard blackBoard, float baseAmountOfTime, float rangeOfTime) {
+    public Idle(String name, BlackBoard blackBoard) {
         super(name, blackBoard);
 
         //Random a timer.
-        timer = new OneShotTimer(baseAmountOfTime + MathUtils.random()*rangeOfTime, null);
+        timer = new OneShotTimer(this.blackBoard.baseIdleTime + MathUtils.random()*this.blackBoard.randomIdleTime, null);
     }
 
     @Override

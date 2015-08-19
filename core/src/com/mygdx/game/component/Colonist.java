@@ -490,7 +490,7 @@ public class Colonist extends Component implements IInteractable, IOwnable{
     }
 
     @Override
-    public Craftable getCraftable() {
+    public CraftingStation getCraftingStation() {
         return null;
     }
 

@@ -21,6 +21,7 @@ public class BlackBoard{
     public Enterable enterable;
     public LinkedList<Vector2> path;
     public Resource targetResource;
+    public CraftingStation targetCraftingStation;
 
     //Related to gathering resources
     public Tags resourceTypeTags = new Tags("resource");

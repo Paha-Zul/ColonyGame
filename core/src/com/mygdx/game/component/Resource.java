@@ -393,7 +393,7 @@ public class Resource extends Component implements IInteractable{
     }
 
     @Override
-    public Craftable getCraftable() {
+    public CraftingStation getCraftingStation() {
         return null;
     }
 

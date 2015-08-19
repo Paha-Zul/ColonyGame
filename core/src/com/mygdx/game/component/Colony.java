@@ -8,7 +8,6 @@ import com.mygdx.game.entity.Entity;
 import com.mygdx.game.interfaces.IInteractable;
 import com.mygdx.game.interfaces.IOwnable;
 import com.mygdx.game.util.DataBuilder;
-import com.mygdx.game.util.managers.DataManager;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
 
@@ -191,7 +190,7 @@ public class Colony extends Component implements IInteractable {
     }
 
     @Override
-    public Craftable getCraftable() {
+    public CraftingStation getCraftingStation() {
         return null;
     }
 
@@ -203,20 +202,5 @@ public class Colony extends Component implements IInteractable {
     @Override
     public Enterable getEnterable() {
         return null;
-    }
-
-    public static class CraftingJob{
-        public Building building;
-        public DataBuilder.JsonItem itemRef;
-        public DataBuilder.JsonRecipe itemRecipe;
-        public int amount;
-
-        public CraftingJob(Building building, String itemName, int amount){
-            this.building = building;
-            this.itemRef = DataManager.getData(itemName, DataBuilder.JsonItem.class);
-            this.itemRecipe = DataManager.getData(itemName, DataBuilder.JsonRecipe.class);
-            this.amount = amount;
-
-        }
     }
 }

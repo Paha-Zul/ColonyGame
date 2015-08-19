@@ -29,6 +29,8 @@ public class Building extends Component implements IOwnable, IInteractable{
     private String buildingName;
     @JsonIgnore
     private Enterable enterable;
+    @JsonIgnore
+    private CraftingStation craftingStation;
 
     public Building(){
 
@@ -82,6 +84,13 @@ public class Building extends Component implements IOwnable, IInteractable{
             if(this.enterable == null) this.enterable = this.addComponent(new Enterable()); //Then create.
             enterable.setEnterPositions(jBuilding.enterablePositions);
             enterable.setMaxOccupants(jBuilding.enterableMaxOccupancy);
+        }
+
+        //If this building is supposed to craft stuff, add a crafting station to it!
+        if(jBuilding.crafting != null){
+            if(this.craftingStation == null) this.craftingStation = this.getComponent(CraftingStation.class);
+            if(this.craftingStation == null) this.craftingStation = this.addComponent(new CraftingStation());
+            this.colonyOwner.addOwnedToColony(this.craftingStation); //Add it to the colony crafting centers...
         }
 
         //Set the image and dimensions (if not null)
@@ -187,7 +196,7 @@ public class Building extends Component implements IOwnable, IInteractable{
     }
 
     @Override
-    public Craftable getCraftable() {
+    public CraftingStation getCraftingStation() {
         return null;
     }
 

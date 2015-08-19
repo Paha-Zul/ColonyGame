@@ -6,6 +6,9 @@ import com.mygdx.game.util.ItemNeeded;
 
 /**
  * Created by brad on 6/10/15.
+ * <p>Attempts to reserve each item in the blackboard.itemTransfer.itemsToTransfer from the blackboard.itemTransfer.fromInventory.</p>
+ * <p>The fromInventory and toInventory must already be set, and itemsToTransfer must not be null or empty.</p>
+ * <p>Finishes with success if at least one item was able to be reserved.</p>
  */
 public class CheckAndReserve extends LeafTask{
     public CheckAndReserve(String name, BlackBoard blackBoard) {

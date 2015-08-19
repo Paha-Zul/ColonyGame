@@ -9,8 +9,8 @@ import com.mygdx.game.component.Inventory;
  * <p>Transfers items from the {@link BlackBoard.ItemTransfer#fromInventory blackBoard.fromInventory} to
  * the {@link BlackBoard.ItemTransfer#toInventory blackBoard.toInventory}. If
  */
-public class TransferItem extends LeafTask{
-    public TransferItem(String name, BlackBoard blackBoard) {
+public class TransferInventory extends LeafTask{
+    public TransferInventory(String name, BlackBoard blackBoard) {
         super(name, blackBoard);
     }
 

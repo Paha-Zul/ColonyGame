@@ -4,7 +4,6 @@ import com.mygdx.game.behaviourtree.BlackBoard;
 import com.mygdx.game.behaviourtree.LeafTask;
 import com.mygdx.game.component.Building;
 import com.mygdx.game.component.Colonist;
-import com.mygdx.game.component.Constructable;
 import com.mygdx.game.component.Inventory;
 import com.mygdx.game.util.ItemNeeded;
 
@@ -45,14 +44,17 @@ public class FindStorageWithItem extends LeafTask{
     public void update(float delta) {
         super.update(delta);
 
+        //Get the colonist Component.
         Colonist colonist = this.blackBoard.myManager.getEntityOwner().getComponent(Colonist.class);
+        //Search for a building that satisfies the function defined...
         Building storageWithItem = colonist.getColony().getOwnedFromColony(Building.class, building -> {
-            Inventory inv = building.getComponent(Inventory.class);
-            Constructable constructable = building.getComponent(Constructable.class);
-            if(inv == null || constructable != null) //If there is no inventory or the building is being constructed, give up on this one.
-                return false;
+            //Let's not steal items from buildings being constructed.
+            if(building.getEntityOwner().getTags().hasTag("constructing")) return false;
 
+            Inventory inv = building.getComponent(Inventory.class); //Get the inventory
+            //Search for at least one item from our list in the inventory of the building.
             for(ItemNeeded item : this.blackBoard.itemTransfer.itemsToTransfer)
+                //If the inventory does have an item, set our target as the building, the to and from inventories, and finish with success.
                 if(inv.hasItem(item.itemName)) {
                     this.blackBoard.target = building.getEntityOwner();
                     this.blackBoard.itemTransfer.fromInventory = inv; //Might as well cache this...
@@ -61,6 +63,7 @@ public class FindStorageWithItem extends LeafTask{
                     return true;
                 }
 
+            //Otherwise, we didn't find anything. Return false.
             return false;
         });
 

@@ -293,7 +293,7 @@ public class Animal extends Component implements IInteractable{
     }
 
     @Override
-    public Craftable getCraftable() {
+    public CraftingStation getCraftingStation() {
         return null;
     }
 

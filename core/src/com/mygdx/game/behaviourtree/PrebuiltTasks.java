@@ -8,6 +8,7 @@ import com.mygdx.game.behaviourtree.composite.Sequence;
 import com.mygdx.game.behaviourtree.control.ParentTaskController;
 import com.mygdx.game.behaviourtree.decorator.AlwaysTrue;
 import com.mygdx.game.behaviourtree.decorator.RepeatUntilCondition;
+import com.mygdx.game.behaviourtree.decorator.RepeatUntilFailure;
 import com.mygdx.game.component.*;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.util.*;
@@ -132,7 +133,7 @@ public class PrebuiltTasks {
         GetBuildingFromColony findStorage = new GetBuildingFromColony("Finding storage.", blackBoard);
         FindPath findPathToStorage = new FindPath("Finding Path to Storage", blackBoard);
         MoveTo moveToStorage = new MoveTo("Moving to Storage", blackBoard);
-        TransferItem transferItems = new TransferItem("Transferring Resources", blackBoard);
+        TransferInventory transferItems = new TransferInventory("Transferring Resources", blackBoard);
 
         ((ParentTaskController)sequence.getControl()).addTask(findPath);
         ((ParentTaskController)sequence.getControl()).addTask(move);
@@ -183,7 +184,7 @@ public class PrebuiltTasks {
         CheckAndReserve checkShed = new CheckAndReserve("CheckingReserving", blackBoard);
         FindPath fpToShed = new FindPath("PathToShed", blackBoard);
         MoveTo mtShed = new MoveTo("Moving", blackBoard);
-        TransferItem transferTools = new TransferItem("Transferring", blackBoard);
+        TransferInventory transferTools = new TransferInventory("Transferring", blackBoard);
 
         seq.control.callbacks.startCallback = task -> {
             task.blackBoard.itemTransfer.reset();
@@ -225,7 +226,7 @@ public class PrebuiltTasks {
         GetBuildingFromColony findShed = new GetBuildingFromColony("Finding tool shed", blackBoard);
         FindPath fpToShed = new FindPath("PathToShed", blackBoard);
         MoveTo mtShed = new MoveTo("Moving", blackBoard);
-        TransferItem transferTools = new TransferItem("Transferring", blackBoard);
+        TransferInventory transferTools = new TransferInventory("Transferring", blackBoard);
 
         seq.control.addTask(findShed);
         seq.control.addTask(fpToShed);
@@ -275,7 +276,7 @@ public class PrebuiltTasks {
         GetBuildingFromColony getStorage = new GetBuildingFromColony("Getting building", blackBoard);
         FindPath fpStorage = new FindPath("Finding path", blackBoard);
         MoveTo mtStorage = new MoveTo("Moving to storage", blackBoard);
-        TransferItem transfer = new TransferItem("Transferring", blackBoard);
+        TransferInventory transfer = new TransferInventory("Transferring", blackBoard);
 
         mainSeq.control.addTask(getStorage);
         mainSeq.control.addTask(fpStorage);
@@ -335,13 +336,13 @@ public class PrebuiltTasks {
         CheckAndReserve reserve = new CheckAndReserve("CheckAndReserve", blackboard);
         FindPath fpToStorage = new FindPath("PathToStorage", blackboard);
         MoveTo mtStorage = new MoveTo("MoveToStorage", blackboard);
-        TransferItem transferItems = new TransferItem("Transferring", blackboard);
+        TransferInventory transferItems = new TransferInventory("Transferring", blackboard);
 
         //This is where we build
         Sequence buildSeq = new Sequence("Build", blackboard);
         FindPath fpToBuilding = new FindPath("FindPathBuilding", blackboard);
         MoveTo mtBuilding = new MoveTo("MoveToBuilding", blackboard);
-        TransferItem transferToBuilding = new TransferItem("TransferToBuilding", blackboard);
+        TransferInventory transferToBuilding = new TransferInventory("TransferToBuilding", blackboard);
         Construct construct = new Construct("Constructing", blackboard);
 
         //The main selector between constructing and idling
@@ -466,7 +467,7 @@ public class PrebuiltTasks {
         FindRandomNearbyLocation findNearbyLocation = new FindRandomNearbyLocation("Finding Nearby Location", blackBoard, blackBoard.idleDistance);
         FindPath findPath = new FindPath("Finding Path to Nearby Location", blackBoard);
         MoveTo moveTo = new MoveTo("Moving to Nearby Location", blackBoard);
-        Idle idle = new Idle("Standing Still", blackBoard, blackBoard.baseIdleTime, blackBoard.randomIdleTime);
+        Idle idle = new Idle("Standing Still", blackBoard);
 
         ((ParentTaskController) sequence.getControl()).addTask(findNearbyLocation);
         ((ParentTaskController) sequence.getControl()).addTask(findPath);
@@ -486,14 +487,14 @@ public class PrebuiltTasks {
          *  consume item
          */
 
-        //TODO The itemTransfer stuff was refactored and probably broke this area, namely the CheckInventoryHas class.
+        //TODO The itemTransfer stuff was refactored and probably broke this area, namely the CheckInventoryHasItemWithEffectAndReserve class.
 
         Sequence sequence = new Sequence("consume", blackBoard);
 
-        CheckInventoryHas check = new CheckInventoryHas("Checking Inventory", blackBoard);
+        CheckInventoryHasItemWithEffectAndReserve check = new CheckInventoryHasItemWithEffectAndReserve("Checking Inventory", blackBoard);
         FindPath fp = new FindPath("Finding Path to consume item", blackBoard);
         MoveTo moveTo = new MoveTo("Moving to consume item", blackBoard);
-        TransferItem tr = new TransferItem("Transferring Consumable", blackBoard);
+        TransferInventory tr = new TransferInventory("Transferring Consumable", blackBoard);
         Consume consume = new Consume("Consuming Item", blackBoard);
 
         ((ParentTaskController) sequence.getControl()).addTask(check);
@@ -660,7 +661,7 @@ public class PrebuiltTasks {
         FindClosestEntity fc = new FindClosestEntity("Finding base", blackBoard);
         FindPath fpBase = new FindPath("Finding path to base", blackBoard);
         MoveTo mtBase = new MoveTo("Moving to base", blackBoard);
-        TransferItem tr = new TransferItem("Transferring resources", blackBoard);
+        TransferInventory tr = new TransferInventory("Transferring resources", blackBoard);
 
         //We need to tell this fct what can pass as a valid tile.
         fct.getControl().callbacks.successCriteria = nd -> {
@@ -808,14 +809,92 @@ public class PrebuiltTasks {
 
     public static Task craftItem(BlackBoard blackBoard, BehaviourManagerComp behComp){
         /**
-         *  Sequence
-         *      Repeat until
-         *          Sequence
-         *              gather a list of items we need
+         *  Selector
+         *  -Sequence
+         *  -Get a crafting building with a crafting job in it
          *
+         *  //This area will repeatedly transport items/materials until no more are needed.
+         *  --Repeat until failure
+         *  ---Sequence
+         *  ----gather a list of items we need (if none, we end this sequence with failure, we have enough items to craft it)
+         *  ----find a storage building with those items
+         *  ----reserve items
+         *  ----find path to storage
+         *  ----move to storage
+         *  ----transfer items
+         *  ----find path to building with crafting job
+         *  ----move to crafting building
+         *  ----transfer items
+         *
+         *  //This area makes sure we have the items/materials to craft and crafts and puts the finished item in storage
+         *  --Make sure the building has enough items/materials to craft the item we want.
+         *  --Find path to the building
+         *  --Move to the building
+         *  --Enter the building
+         *  --Craft the item
+         *  --Exit the building
+         *  --Get closest storage (set the TO and FROM inventories)
+         *  --Find path to storage
+         *  --Move to storage
+         *  --Transfer items
+         *
+         *  //Otherwise, idle.
+         *  -idle
          *
          */
 
-        return null;
+        Selector mainSelector = new Selector("Craft Item", blackBoard);
+        Sequence craftItemSequence = new Sequence("CraftingItem", blackBoard);
+
+        Sequence getNeededItemsSequence = new Sequence("GettingNeededItems", blackBoard);
+        RepeatUntilFailure getItemsNeededUntilFailure = new RepeatUntilFailure("Repeating", blackBoard, getNeededItemsSequence);
+
+        GetItemsForCrafting getItemsForCrafting = new GetItemsForCrafting("Getting item list", blackBoard);
+        FindStorageWithItem findItem = new FindStorageWithItem("Finding item", blackBoard);
+        CheckAndReserve reserveItems = new CheckAndReserve("Reserving items", blackBoard);
+        FindPath findPathToItemStorage = new FindPath("Getting path to item storage", blackBoard);
+        MoveTo moveToItemStorage = new MoveTo("Moving to item storage", blackBoard);
+        TransferItems transferItems = new TransferItems("Transfering items", blackBoard);
+        GetTargetFromCraftingStation getTargetFromCraftingStation = new GetTargetFromCraftingStation("Getting target", blackBoard);
+        FindPath findPathToCraftingStation = new FindPath("Finding path to crafting station", blackBoard);
+        MoveTo moveToCraftingStation = new MoveTo("Moving to crafting station", blackBoard);
+        TransferItems transferToCraftingStation = new TransferItems("Transfer items to crafting station", blackBoard);
+
+        GetItemsForCrafting checkEnoughItems = new GetItemsForCrafting("Checking if enough", blackBoard);
+        ItemsToTransferIsEmpty checkEnough = new ItemsToTransferIsEmpty("Checking if enough part 2", blackBoard);
+        GetTargetFromCraftingStation getTargetForCrafting = new GetTargetFromCraftingStation("Getting target from the crafting station to go craft", blackBoard);
+        FindPath findPathToTarget = new FindPath("Getting path to target crafting station", blackBoard);
+        MoveTo moveToTargetCrafting = new MoveTo("Move to crafting station", blackBoard);
+        Enter enterCraftingStation = new Enter("Entering crafting station", blackBoard);
+        CraftItem craftItem = new CraftItem("Crafting item", blackBoard);
+        Leave leaveCraftingStation = new Leave("Leaving crafting station", blackBoard);
+
+        Idle idle = new Idle("Waiting for crafting job", blackBoard);
+
+        mainSelector.control.addTask(craftItemSequence);
+        mainSelector.control.addTask(idle);
+
+        craftItemSequence.control.addTask(getItemsNeededUntilFailure);
+        craftItemSequence.control.addTask(checkEnoughItems);
+        craftItemSequence.control.addTask(checkEnough);
+        craftItemSequence.control.addTask(getTargetForCrafting);
+        craftItemSequence.control.addTask(findPathToTarget);
+        craftItemSequence.control.addTask(moveToTargetCrafting);
+        craftItemSequence.control.addTask(enterCraftingStation);
+        craftItemSequence.control.addTask(craftItem);
+        craftItemSequence.control.addTask(leaveCraftingStation);
+
+        getNeededItemsSequence.control.addTask(getItemsForCrafting);
+        getNeededItemsSequence.control.addTask(findItem);
+        getNeededItemsSequence.control.addTask(reserveItems);
+        getNeededItemsSequence.control.addTask(findPathToItemStorage);
+        getNeededItemsSequence.control.addTask(moveToItemStorage);
+        getNeededItemsSequence.control.addTask(transferItems);
+        getNeededItemsSequence.control.addTask(getTargetFromCraftingStation);
+        getNeededItemsSequence.control.addTask(findPathToCraftingStation);
+        getNeededItemsSequence.control.addTask(moveToCraftingStation);
+        getNeededItemsSequence.control.addTask(transferToCraftingStation);
+
+        return mainSelector;
     }
 }
