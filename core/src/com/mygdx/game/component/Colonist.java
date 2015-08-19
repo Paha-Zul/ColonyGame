@@ -109,6 +109,7 @@ public class Colonist extends Component implements IInteractable, IOwnable{
         EventSystem.onEntityEvent(this.owner, "attacking", onBeingAttacked);
 
         this.createBehaviourButtons();
+        this.createBehaviourStates();
         this.createRangeSensor();
         this.createEffects();
     }
@@ -177,7 +178,7 @@ public class Colonist extends Component implements IInteractable, IOwnable{
 
         StateTree<BehaviourManagerComp.TaskInfo> taskTree = this.getBehManager().getTaskTree();
 
-        Tree.TreeNode<BehaviourManagerComp.TaskInfo>[] nodeList = taskTree.addNode("root", "gather", "hunt", "explore", "build", "idle", "sleep");
+        Tree.TreeNode<BehaviourManagerComp.TaskInfo>[] nodeList = taskTree.addNode("root", "gather", "hunt", "explore", "build", "idle", "sleep", "craftItem");
 
         //For each node, we set up a TaskInfo object and assign it to the node's userData field.
         for(Tree.TreeNode node : nodeList) {
@@ -210,6 +211,13 @@ public class Colonist extends Component implements IInteractable, IOwnable{
         taskInfo.callback = taskTree::moveUp;
         back.userData = taskInfo;
 
+        EventSystem.onEntityEvent(this.owner, "task_started", args -> {
+            Task task = (Task)args[0];
+            if(task.getName().equals("exploreUnexplored")) task.getBlackboard().target = this.getColony().getEntityOwner();
+        });
+    }
+
+    private void createBehaviourStates(){
         getBehManager().getBehaviourStates().addState("gather", false, new StateSystem.DefineTask("gather", "idle")).setRepeat(true);
         getBehManager().getBehaviourStates().addState("explore", false, new StateSystem.DefineTask("explore", "idle")).setRepeat(true);
         getBehManager().getBehaviourStates().addState("consume", false, new StateSystem.DefineTask("idle", "idle")).setRepeat(false).setRepeatLastState(true);
@@ -219,11 +227,7 @@ public class Colonist extends Component implements IInteractable, IOwnable{
         getBehManager().getBehaviourStates().addState("build", false, new StateSystem.DefineTask("build", "idle")).setRepeat(true);
         getBehManager().getBehaviourStates().addState("returnItems", false, new StateSystem.DefineTask("idle", "idle")).setRepeat(false);
         getBehManager().getBehaviourStates().addState("sleep", false, new StateSystem.DefineTask("idle", "idle")).setRepeat(false);
-
-        EventSystem.onEntityEvent(this.owner, "task_started", args -> {
-            Task task = (Task)args[0];
-            if(task.getName().equals("exploreUnexplored")) task.getBlackboard().target = this.getColony().getEntityOwner();
-        });
+        getBehManager().getBehaviourStates().addState("craftItem", false, new StateSystem.DefineTask("idle", "idle")).setRepeat(false);
     }
 
     @JsonIgnore

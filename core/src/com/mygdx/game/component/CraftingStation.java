@@ -6,6 +6,7 @@ import com.mygdx.game.entity.Entity;
 import com.mygdx.game.interfaces.IOwnable;
 import com.mygdx.game.util.DataBuilder;
 import com.mygdx.game.util.ItemNeeded;
+import com.mygdx.game.util.Logger;
 import com.mygdx.game.util.managers.DataManager;
 
 import java.util.Iterator;
@@ -32,15 +33,16 @@ public class CraftingStation extends Component implements IOwnable{
     @Override
     public void created(Entity owner) {
         super.created(owner);
+
+        this.availableJobs = new LinkedList<>();
+        this.inProgressJobs = new LinkedList<>();
+        this.stalledJobs = new LinkedList<>();
     }
 
     @Override
     public void init() {
         super.init();
 
-        this.availableJobs = new LinkedList<>();
-        this.inProgressJobs = new LinkedList<>();
-        this.stalledJobs = new LinkedList<>();
     }
 
     @Override
@@ -65,6 +67,7 @@ public class CraftingStation extends Component implements IOwnable{
         super.load();
 
         this.inventory = this.getComponent(Inventory.class);
+        if(this.inventory == null) Logger.log(Logger.ERROR, "CraftingStation on Entity "+this.owner.name+" does not have an inventory and probably should. Get ready for a crash!");
     }
 
     @Override

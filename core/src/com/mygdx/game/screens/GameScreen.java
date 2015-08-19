@@ -175,7 +175,7 @@ public class GameScreen implements Screen{
         equipEnt.getTags().addTag("constructing");
         ListHolder.addEntity(equipEnt);
         Building equipBuilding = equipEnt.getComponent(Building.class);
-        equipBuilding.setBuildingName("equipment_shed");
+        equipBuilding.setBuildingName("workshop");
         colony.addOwnedToColony(equipBuilding);
         equipBuilding.getComponent(Constructable.class).setComplete();
 

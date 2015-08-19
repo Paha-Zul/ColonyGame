@@ -9,6 +9,7 @@ import com.mygdx.game.util.ItemNeeded;
 
 /**
  * Created by Paha on 8/18/2015.
+ * <p>Crafts an item.</p>
  */
 public class CraftItem extends LeafTask{
     private CraftingStation.CraftingJob craftingJob;
@@ -37,9 +38,11 @@ public class CraftItem extends LeafTask{
             this.craftingJob = this.blackBoard.targetCraftingStation.setFirstAvailableToInProgress();
             if(this.craftingJob == null) this.control.finishWithFailure(); //If the job we tried to transfer was null, fail! (it didn't exist)
             else {
-                this.craftTickAmount = 1/this.craftingJob.itemRecipe.time; //100%/time in seconds
                 this.blackBoard.itemTransfer.toInventory = this.blackBoard.targetCraftingStation.getComponent(Inventory.class); //Set the toInventory...
-                this.control.finishWithSuccess();
+                for(int i=0;i<this.craftingJob.itemRecipe.items.length;i++) //Remove all of the items that are needed for the item from the inventory.
+                    this.blackBoard.itemTransfer.toInventory.removeItem(this.craftingJob.itemRecipe.items[i], this.craftingJob.itemRecipe.itemAmounts[i]);
+
+                this.craftTickAmount = 1f/this.craftingJob.itemRecipe.time; // 100%/time in seconds
             }
         }
     }

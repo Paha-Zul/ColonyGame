@@ -9,6 +9,7 @@ import com.mygdx.game.behaviourtree.control.ParentTaskController;
 import com.mygdx.game.behaviourtree.decorator.AlwaysTrue;
 import com.mygdx.game.behaviourtree.decorator.RepeatUntilCondition;
 import com.mygdx.game.behaviourtree.decorator.RepeatUntilFailure;
+import com.mygdx.game.behaviourtree.decorator.ReturnOpposite;
 import com.mygdx.game.component.*;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.util.*;
@@ -843,8 +844,12 @@ public class PrebuiltTasks {
          *
          */
 
+        //TODO We need to deal with stalled jobs. Maybe check for stalled jobs first and skip over getting items?
+
         Selector mainSelector = new Selector("Craft Item", blackBoard);
         Sequence craftItemSequence = new Sequence("CraftingItem", blackBoard);
+
+        GetCraftingStationWithJob getCraftingStationWithJob = new GetCraftingStationWithJob("Getting crafting station", blackBoard);
 
         Sequence getNeededItemsSequence = new Sequence("GettingNeededItems", blackBoard);
         RepeatUntilFailure getItemsNeededUntilFailure = new RepeatUntilFailure("Repeating", blackBoard, getNeededItemsSequence);
@@ -854,28 +859,34 @@ public class PrebuiltTasks {
         CheckAndReserve reserveItems = new CheckAndReserve("Reserving items", blackBoard);
         FindPath findPathToItemStorage = new FindPath("Getting path to item storage", blackBoard);
         MoveTo moveToItemStorage = new MoveTo("Moving to item storage", blackBoard);
-        TransferItems transferItems = new TransferItems("Transfering items", blackBoard);
+        TransferItemsFromTargetToMe transferItemsFromStorage = new TransferItemsFromTargetToMe("Transferring items", blackBoard);
         GetTargetFromCraftingStation getTargetFromCraftingStation = new GetTargetFromCraftingStation("Getting target", blackBoard);
         FindPath findPathToCraftingStation = new FindPath("Finding path to crafting station", blackBoard);
         MoveTo moveToCraftingStation = new MoveTo("Moving to crafting station", blackBoard);
-        TransferItems transferToCraftingStation = new TransferItems("Transfer items to crafting station", blackBoard);
+        TransferItemsFromMeToTarget transferToCraftingStation = new TransferItemsFromMeToTarget("Transfer items to crafting station", blackBoard);
 
-        GetItemsForCrafting checkEnoughItems = new GetItemsForCrafting("Checking if enough", blackBoard);
-        ItemsToTransferIsEmpty checkEnough = new ItemsToTransferIsEmpty("Checking if enough part 2", blackBoard);
+        GetItemsForCrafting checkEnoughItems = new GetItemsForCrafting("Checking if enough", blackBoard); //Don't need to add this anywhere else except to checkEnough.
+        ReturnOpposite checkEnough = new ReturnOpposite("Checking if enough", blackBoard, checkEnoughItems);
         GetTargetFromCraftingStation getTargetForCrafting = new GetTargetFromCraftingStation("Getting target from the crafting station to go craft", blackBoard);
+        GetEnterableFromTarget getEnterableFromTarget = new GetEnterableFromTarget("Getting enterable", blackBoard);
         FindPath findPathToTarget = new FindPath("Getting path to target crafting station", blackBoard);
         MoveTo moveToTargetCrafting = new MoveTo("Move to crafting station", blackBoard);
         Enter enterCraftingStation = new Enter("Entering crafting station", blackBoard);
         CraftItem craftItem = new CraftItem("Crafting item", blackBoard);
         Leave leaveCraftingStation = new Leave("Leaving crafting station", blackBoard);
 
-        Idle idle = new Idle("Waiting for crafting job", blackBoard);
+        //Idle idle = new Idle("Waiting for crafting job", blackBoard);
+
+        mainSelector.control.callbacks.startCallback = task -> {
+            task.blackBoard.itemTransfer.reset();
+            task.blackBoard.targetNode = null;
+        };
 
         mainSelector.control.addTask(craftItemSequence);
-        mainSelector.control.addTask(idle);
+        mainSelector.control.addTask(idleTask(blackBoard, behComp));
 
+        craftItemSequence.control.addTask(getCraftingStationWithJob);
         craftItemSequence.control.addTask(getItemsNeededUntilFailure);
-        craftItemSequence.control.addTask(checkEnoughItems);
         craftItemSequence.control.addTask(checkEnough);
         craftItemSequence.control.addTask(getTargetForCrafting);
         craftItemSequence.control.addTask(findPathToTarget);
@@ -889,8 +900,9 @@ public class PrebuiltTasks {
         getNeededItemsSequence.control.addTask(reserveItems);
         getNeededItemsSequence.control.addTask(findPathToItemStorage);
         getNeededItemsSequence.control.addTask(moveToItemStorage);
-        getNeededItemsSequence.control.addTask(transferItems);
+        getNeededItemsSequence.control.addTask(transferItemsFromStorage);
         getNeededItemsSequence.control.addTask(getTargetFromCraftingStation);
+        getNeededItemsSequence.control.addTask(getEnterableFromTarget);
         getNeededItemsSequence.control.addTask(findPathToCraftingStation);
         getNeededItemsSequence.control.addTask(moveToCraftingStation);
         getNeededItemsSequence.control.addTask(transferToCraftingStation);

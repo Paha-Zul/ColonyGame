@@ -91,6 +91,7 @@ public class Building extends Component implements IOwnable, IInteractable{
             if(this.craftingStation == null) this.craftingStation = this.getComponent(CraftingStation.class);
             if(this.craftingStation == null) this.craftingStation = this.addComponent(new CraftingStation());
             this.colonyOwner.addOwnedToColony(this.craftingStation); //Add it to the colony crafting centers...
+            this.craftingStation.addCraftingJob("wood_pick", 1);
         }
 
         //Set the image and dimensions (if not null)

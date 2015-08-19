@@ -61,6 +61,7 @@ public class BehaviourManagerComp extends Component{
         BehaviourManagerComp.addTaskToMap("build", PrebuiltTasks::build);
         BehaviourManagerComp.addTaskToMap("returnItems", PrebuiltTasks::returnItems);
         BehaviourManagerComp.addTaskToMap("sleep", PrebuiltTasks::sleep);
+        BehaviourManagerComp.addTaskToMap("craftItem", PrebuiltTasks::craftItem);
     }
 
     @Override

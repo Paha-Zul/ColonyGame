@@ -733,7 +733,7 @@ public class DataBuilder implements IDestroyable{
         public String name, displayName;
         public String[] items;
         public int[] itemAmounts;
-        public int time=0;
+        public float time=0;
     }
 
     /**
