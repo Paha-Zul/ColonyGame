@@ -1,5 +1,6 @@
 package com.mygdx.game.ui;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -70,6 +71,7 @@ public class CraftingWindow extends Window{
             }
         });
         this.CraftingWindow.setSize(700, 500);
+        this.CraftingWindow.setPosition(Gdx.graphics.getWidth()/2 - 700/2, Gdx.graphics.getHeight()/2 - 500/2);
         this.playerInterface.stage.addActor(this.CraftingWindow);
 
     }
@@ -174,14 +176,6 @@ public class CraftingWindow extends Window{
     }
 
     @Override
-    protected void dragWindow() {
-        super.dragWindow();
-
-        this.selectRect.setPosition(this.craftRect.x + this.craftRect.width * 0.034f, this.craftRect.y + this.craftRect.height * 0.03f);
-        this.infoRect.setPosition(this.craftRect.x + this.craftRect.width * 0.678f, this.craftRect.y + this.craftRect.height * 0.502f);
-    }
-
-    @Override
     public void resize(int width, int height) {
         this.craftRect.set(width / 2 - 600 / 2, height / 2 - 500 / 2, 600, 500);
 
@@ -197,7 +191,6 @@ public class CraftingWindow extends Window{
         this.stalledRect.set(this.craftRect.x + this.craftRect.width * 0.357f, this.craftRect.y + this.craftRect.height * 0.03f,
                 this.craftRect.width * 0.2857f, this.craftRect.height * 0.422f);
 
-        this.setMainWindowRect(this.craftRect);
     }
 
     @Override
