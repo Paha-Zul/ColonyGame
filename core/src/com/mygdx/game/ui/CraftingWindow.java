@@ -1,15 +1,21 @@
 package com.mygdx.game.ui;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.Align;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.component.CraftingStation;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.util.DataBuilder;
+import com.mygdx.game.util.GH;
 import com.mygdx.game.util.ItemNeeded;
 import com.mygdx.game.util.gui.GUI;
 import com.mygdx.game.util.managers.DataManager;
@@ -22,8 +28,11 @@ import com.sun.istack.internal.Nullable;
 public class CraftingWindow extends Window{
     private Rectangle craftRect, selectRect, infoRect, stalledRect, openRect, craftButtonRect;
     private TextureRegion craftBackground, selectBackground, infoBackground, stalledBackground, openBackground;
+    private com.badlogic.gdx.scenes.scene2d.ui.Window CraftingWindow;
     private CraftingStation craftingStation;
     private DataBuilder.JsonItem selectedItem;
+
+    private Vector2 offset;
 
     public CraftingWindow(PlayerInterface playerInterface, Entity target) {
         super(playerInterface, target);
@@ -41,21 +50,42 @@ public class CraftingWindow extends Window{
         this.openBackground = new TextureRegion(ColonyGame.assetManager.get("openJobsBackground", Texture.class));
 
         this.craftingStation = this.target.getComponent(CraftingStation.class);
+        this.offset = new Vector2();
 
-        this.draggable = true;
+        com.badlogic.gdx.scenes.scene2d.ui.Window.WindowStyle style = new com.badlogic.gdx.scenes.scene2d.ui.Window.WindowStyle(this.playerInterface.UIStyle.font, Color.BLACK, new TextureRegionDrawable(this.craftBackground));
+        this.CraftingWindow = new com.badlogic.gdx.scenes.scene2d.ui.Window("WindowTop", style);
+        this.CraftingWindow.addListener(new ClickListener(){
+
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                offset.set(GH.getFixedScreenMouseCoords().x - CraftingWindow.getX(), GH.getFixedScreenMouseCoords().y - CraftingWindow.getY());
+                return super.touchDown(event, x, y, pointer, button);
+            }
+
+            @Override
+            public void touchDragged(InputEvent event, float x, float y, int pointer) {
+                super.touchDragged(event, x, y, pointer);
+                Vector2 mouse = GH.getFixedScreenMouseCoords();
+                CraftingWindow.setPosition(mouse.x - offset.x, mouse.y - offset.y);
+            }
+        });
+        this.CraftingWindow.setSize(700, 500);
+        this.playerInterface.stage.addActor(this.CraftingWindow);
+
     }
 
     @Override
     public boolean update(SpriteBatch batch) {
         if(this.active) {
-            GUI.Texture(this.craftBackground, batch, this.craftRect);
-            GUI.Texture(this.selectBackground, batch, this.selectRect);
-            GUI.Texture(this.infoBackground, batch, this.infoRect);
-            GUI.Texture(this.openBackground, batch, this.openRect);
-            GUI.Texture(this.stalledBackground, batch, this.stalledRect);
+
+//            GUI.Texture(this.craftBackground, batch, this.craftRect);
+//            GUI.Texture(this.selectBackground, batch, this.selectRect);
+//            GUI.Texture(this.infoBackground, batch, this.infoRect);
+//            GUI.Texture(this.openBackground, batch, this.openRect);
+//            GUI.Texture(this.stalledBackground, batch, this.stalledRect);
 
             //GUI.Texture(new TextureRegion(this.playerInterface.blueSquare), ColonyGame.batch, this.dragWindowRect);
-            this.drawCraftingWindow(batch, this.playerInterface.UIStyle);
+//            this.drawCraftingWindow(batch, this.playerInterface.UIStyle);
         }
 
         return super.update(batch);
@@ -168,5 +198,11 @@ public class CraftingWindow extends Window{
                 this.craftRect.width * 0.2857f, this.craftRect.height * 0.422f);
 
         this.setMainWindowRect(this.craftRect);
+    }
+
+    @Override
+    public void destroy() {
+        this.CraftingWindow.remove();
+        super.destroy();
     }
 }

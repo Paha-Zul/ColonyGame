@@ -90,7 +90,6 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
     private Color gray = new Color(Color.BLACK);
     public Texture blueSquare;
-    private Stage stage;
     private static PlayerInterface playerInterface;
 
     private DataBuilder.JsonPlayerEvent currentEvent;
@@ -101,6 +100,8 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
     private boolean extendedTooltip;
     private Timer extendedTooltipTimer = new OneShotTimer(2f, () -> extendedTooltip = true);
+
+    public Stage stage;
 
     /**
      * Stuff for drawing colony
@@ -158,7 +159,6 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         this.eventTitleStyle = new GUI.GUIStyle();
         this.eventTitleStyle.background = new TextureRegion(ColonyGame.assetManager.get("eventWindowTitleBackground", Texture.class));
 
-        this.stage = new Stage(new ScreenViewport(ColonyGame.UICamera));
         this.blueSquare = ColonyGame.assetManager.get("blueSquare", Texture.class);
 
         this.background = new TextureRegion(ColonyGame.assetManager.get("background", Texture.class));
@@ -209,6 +209,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         exploreStyle.font.setColor(new Color(126f / 255f, 75f / 255f, 27f / 255f, 1));
         huntStyle.font.setColor(126f / 255f, 75f / 255f, 27f / 255f, 1);
 
+        this.stage = new Stage(new ScreenViewport(ColonyGame.UICamera));
         InputMultiplexer multiplexer = new InputMultiplexer();
         multiplexer.addProcessor(stage);
         multiplexer.addProcessor(this);

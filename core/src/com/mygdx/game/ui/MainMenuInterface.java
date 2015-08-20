@@ -32,11 +32,11 @@ public class MainMenuInterface extends UI{
     public static Texture mainMenuTexture;
     public static Music music;
 
-    GUI.GUIStyle startButtonStyle = new GUI.GUIStyle();
-    GUI.GUIStyle quitButtonStyle = new GUI.GUIStyle();
-    GUI.GUIStyle blank1Style = new GUI.GUIStyle();
-    GUI.GUIStyle blank2Style = new GUI.GUIStyle();
-    GUI.GUIStyle blank3Style = new GUI.GUIStyle();
+    private GUI.GUIStyle startButtonStyle = new GUI.GUIStyle();
+    private GUI.GUIStyle quitButtonStyle = new GUI.GUIStyle();
+    private GUI.GUIStyle blank1Style = new GUI.GUIStyle();
+    private GUI.GUIStyle blank2Style = new GUI.GUIStyle();
+    private GUI.GUIStyle blank3Style = new GUI.GUIStyle();
 
     Rectangle[] buttonRects = new Rectangle[5];
 
@@ -234,6 +234,7 @@ public class MainMenuInterface extends UI{
         quitRect = null;
 
         stage.dispose();
+        stage = null;
     }
 
     @Override

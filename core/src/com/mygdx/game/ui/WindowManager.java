@@ -76,7 +76,7 @@ public class WindowManager {
      * Removes the topmost Window of the stack.
      */
     public void removeTopMostWindow(){
-        if(!this.windowStack.empty()) this.windowStack.pop();
+        if(!this.windowStack.empty()) this.windowStack.pop().destroy();
     }
 
     public boolean isWindowStackEmpty(){
