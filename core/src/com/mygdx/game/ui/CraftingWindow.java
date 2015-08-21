@@ -1,6 +1,5 @@
 package com.mygdx.game.ui;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -8,6 +7,10 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.List;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.Align;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
@@ -16,33 +19,41 @@ import com.mygdx.game.ColonyGame;
 import com.mygdx.game.component.CraftingStation;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.util.DataBuilder;
+import com.mygdx.game.util.EventSystem;
 import com.mygdx.game.util.GH;
 import com.mygdx.game.util.ItemNeeded;
 import com.mygdx.game.util.gui.GUI;
 import com.mygdx.game.util.managers.DataManager;
 import com.sun.istack.internal.Nullable;
 
+import java.text.DecimalFormat;
+import java.util.LinkedList;
+import java.util.function.Consumer;
+
 /**
  * Created by Paha on 8/16/2015.
  * A Window for interacting with Entities that provide crafting options.
  */
 public class CraftingWindow extends Window{
-    private Rectangle craftRect, selectRect, infoRect, stalledRect, openRect, craftButtonRect;
     private TextureRegion craftBackground, selectBackground, infoBackground, stalledBackground, openBackground;
-    private com.badlogic.gdx.scenes.scene2d.ui.Window CraftingWindow;
+    private com.badlogic.gdx.scenes.scene2d.ui.Window craftingWindow;
+
     private CraftingStation craftingStation;
     private DataBuilder.JsonItem selectedItem;
 
+    private Array<Label> availabelLabels, inProgressLabels, stalledLabels, craftingLabels;
+    private List<Label> aList, ipList, sList, cList;
+    private Table craftingWindowTable;
+
+    private Consumer<Object[]> function;
+
     private Vector2 offset;
+
+    private DecimalFormat percentFormat = new DecimalFormat("#.0");
+
 
     public CraftingWindow(PlayerInterface playerInterface, Entity target) {
         super(playerInterface, target);
-
-        this.craftRect = new Rectangle();
-        this.selectRect = new Rectangle();
-        this.infoRect = new Rectangle();
-        this.stalledRect = new Rectangle();
-        this.openRect = new Rectangle();
 
         this.craftBackground = new TextureRegion(ColonyGame.assetManager.get("craftingWindowBackground", Texture.class));
         this.selectBackground = new TextureRegion(ColonyGame.assetManager.get("craftingWindowSelectionBackground", Texture.class));
@@ -54,12 +65,12 @@ public class CraftingWindow extends Window{
         this.offset = new Vector2();
 
         com.badlogic.gdx.scenes.scene2d.ui.Window.WindowStyle style = new com.badlogic.gdx.scenes.scene2d.ui.Window.WindowStyle(this.playerInterface.UIStyle.font, Color.BLACK, new TextureRegionDrawable(this.craftBackground));
-        this.CraftingWindow = new com.badlogic.gdx.scenes.scene2d.ui.Window("WindowTop", style);
-        this.CraftingWindow.addListener(new ClickListener(){
+        this.craftingWindow = new com.badlogic.gdx.scenes.scene2d.ui.Window("WindowTop", style);
+        this.craftingWindow.addListener(new ClickListener() {
 
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                offset.set(GH.getFixedScreenMouseCoords().x - CraftingWindow.getX(), GH.getFixedScreenMouseCoords().y - CraftingWindow.getY());
+                offset.set(GH.getFixedScreenMouseCoords().x - craftingWindow.getX(), GH.getFixedScreenMouseCoords().y - craftingWindow.getY());
                 return super.touchDown(event, x, y, pointer, button);
             }
 
@@ -67,18 +78,124 @@ public class CraftingWindow extends Window{
             public void touchDragged(InputEvent event, float x, float y, int pointer) {
                 super.touchDragged(event, x, y, pointer);
                 Vector2 mouse = GH.getFixedScreenMouseCoords();
-                CraftingWindow.setPosition(mouse.x - offset.x, mouse.y - offset.y);
+                craftingWindow.setPosition(mouse.x - offset.x, mouse.y - offset.y);
             }
         });
-        this.CraftingWindow.setSize(700, 500);
-        this.CraftingWindow.setPosition(Gdx.graphics.getWidth()/2 - 700/2, Gdx.graphics.getHeight()/2 - 500/2);
-        this.playerInterface.stage.addActor(this.CraftingWindow);
 
+        //Add the crafting window.
+        this.craftingWindow.setSize(700, 500);
+        this.playerInterface.stage.addActor(this.craftingWindow);
+
+        this.craftingWindowTable = new Table();
+        this.craftingWindow.addActor(this.craftingWindowTable);
+
+        List.ListStyle aStyle = new List.ListStyle(this.playerInterface.UIStyle.font, Color.BLUE, Color.BLACK, new TextureRegionDrawable(this.selectBackground));
+        List.ListStyle ipStyle = new List.ListStyle(this.playerInterface.UIStyle.font, Color.BLUE, Color.BLACK, new TextureRegionDrawable(this.selectBackground));
+        List.ListStyle sStyle = new List.ListStyle(this.playerInterface.UIStyle.font, Color.BLUE, Color.BLACK, new TextureRegionDrawable(this.selectBackground));
+        List.ListStyle cStyle = new List.ListStyle(this.playerInterface.UIStyle.font, Color.BLUE, Color.BLACK, new TextureRegionDrawable(this.selectBackground));
+        aStyle.background = new TextureRegionDrawable(this.selectBackground);
+        ipStyle.background = new TextureRegionDrawable(this.selectBackground);
+        sStyle.background = new TextureRegionDrawable(this.selectBackground);
+        cStyle.background = new TextureRegionDrawable(this.selectBackground);
+
+        //Make the lists.
+        this.aList = new List<>(aStyle);
+        this.ipList = new List<>(ipStyle);
+        this.sList = new List<>(sStyle);
+        this.cList = new List<>(cStyle);
+
+        this.craftingWindowTable.setFillParent(true);
+        this.craftingWindowTable.left().top().pad(50, 20, 20, 20);
+
+        //Add the lists to the crafting window
+        this.craftingWindowTable.add(cList).prefSize(150, 200);
+        this.craftingWindowTable.add().prefWidth(25);
+        this.craftingWindowTable.add(aList).prefSize(150, 200);
+        this.craftingWindowTable.add().prefWidth(25);
+        this.craftingWindowTable.add(ipList).prefSize(150, 200);
+        this.craftingWindowTable.add().prefWidth(25);
+        this.craftingWindowTable.add(sList).prefSize(150, 200);
+
+        this.craftingWindowTable.row();
+        this.craftingWindowTable.add().expand().fill();
+        this.craftingWindowTable.add().expand().fill();
+        this.craftingWindowTable.add().expand().fill();
+        this.craftingWindowTable.add().expand().fill();
+        this.craftingWindowTable.add().expand().fill();
+        this.craftingWindowTable.add().expand().fill();
+        this.craftingWindowTable.add().expand().fill();
+        this.craftingWindowTable.row();
+        this.craftingWindowTable.add().expand().fill();
+        this.craftingWindowTable.add().expand().fill();
+        this.craftingWindowTable.add().expand().fill();
+        this.craftingWindowTable.add().expand().fill();
+        this.craftingWindowTable.add().expand().fill();
+        this.craftingWindowTable.add().expand().fill();
+
+        this.makeCraftButton();
+
+        this.makeLabels();
+
+        //TODO Really inefficient, but using for fast prototyping.
+        this.function = EventSystem.onEntityEvent(this.target, "crafting_job_switched", (args) -> makeLabels());
+
+        this.playerInterface.stage.setDebugAll(true);
+    }
+
+    private void makeLabels(){
+        //Make new arrays
+        this.availabelLabels = new Array<>();
+        this.inProgressLabels = new Array<>();
+        this.stalledLabels = new Array<>();
+        this.craftingLabels = new Array<>();
+
+        for(String item : this.craftingStation.getCraftingList()){
+            String itemName = DataManager.getData(item, DataBuilder.JsonItem.class).getDisplayName();
+            this.craftingLabels.add(new Label(itemName, new Label.LabelStyle(this.playerInterface.UIStyle.font, Color.BLACK)));
+        }
+
+        for(CraftingStation.CraftingJob job : this.craftingStation.getAvailableList()){
+            this.availabelLabels.add(new Label(job.itemRef.getDisplayName(), new Label.LabelStyle(this.playerInterface.UIStyle.font, Color.BLACK)));
+        }
+
+        for(CraftingStation.CraftingJob job : this.craftingStation.getInProgressJobs()){
+            this.inProgressLabels.add(new Label(job.itemRef.getDisplayName(), new Label.LabelStyle(this.playerInterface.UIStyle.font, Color.BLACK)));
+        }
+
+        for(CraftingStation.CraftingJob job : this.craftingStation.getStalledJobs()){
+            this.stalledLabels.add(new Label(job.itemRef.getDisplayName()+" - "+percentFormat.format(job.percentageDone*100), new Label.LabelStyle(this.playerInterface.UIStyle.font, Color.BLACK)));
+        }
+
+        //Add the stuff to the lists.
+        this.aList.setItems(this.availabelLabels);
+        this.ipList.setItems(this.inProgressLabels);
+        this.sList.setItems(this.stalledLabels);
+        this.cList.setItems(this.craftingLabels);
+    }
+
+    private void makeCraftButton(){
+        TextureRegionDrawable up = new TextureRegionDrawable(new TextureRegion(ColonyGame.assetManager.get("defaultButton_normal", Texture.class)));
+        TextureRegionDrawable over = new TextureRegionDrawable(new TextureRegion(ColonyGame.assetManager.get("defaultButton_moused", Texture.class)));
+        TextureRegionDrawable down = new TextureRegionDrawable(new TextureRegion(ColonyGame.assetManager.get("defaultButton_clicked", Texture.class)));
+
+        TextButton.TextButtonStyle buttonStyle = new TextButton.TextButtonStyle(up, down, up, this.playerInterface.UIStyle.font);
+        buttonStyle.over = over;
+        buttonStyle.checkedOver = over;
+
+        TextButton button = new TextButton("Craft", buttonStyle);
+        this.craftingWindowTable.add(button).right().bottom();
     }
 
     @Override
     public boolean update(SpriteBatch batch) {
         if(this.active) {
+
+            LinkedList<CraftingStation.CraftingJob> jobList = this.craftingStation.getInProgressJobs();
+            Array<String> content = new Array<>(jobList.size());
+            for (CraftingStation.CraftingJob aJobList : jobList)
+                content.add(aJobList.itemRef.getDisplayName() + " - " + percentFormat.format(aJobList.percentageDone * 100)+"%");
+
+            this.ipList.setItems(content);
 
 //            GUI.Texture(this.craftBackground, batch, this.craftRect);
 //            GUI.Texture(this.selectBackground, batch, this.selectRect);
@@ -91,29 +208,6 @@ public class CraftingWindow extends Window{
         }
 
         return super.update(batch);
-    }
-
-    private void drawCraftingWindow(SpriteBatch batch, GUI.GUIStyle style){
-        String[] items = this.craftingStation.getCraftingList();
-        style.alignment = Align.left;
-        style.paddingLeft = 5;
-
-        float labelHeight = 25;
-        float startX = selectRect.x;
-        float startY = selectRect.y + selectRect.height - labelHeight;
-
-        for(int i=0;i<items.length;i++){
-            String item = items[i];
-            DataBuilder.JsonItem _itemRef = DataManager.getData(item, DataBuilder.JsonItem.class);
-
-            Rectangle.tmp.set(startX, startY - i*labelHeight, selectRect.width, labelHeight);
-            if(GUI.Label(_itemRef.getDisplayName(), batch, Rectangle.tmp, style) == GUI.JUSTUP)
-                this.selectedItem = _itemRef;
-        }
-
-        if(this.selectedItem != null) {
-            this.drawCraftingInfo(this.selectedItem, batch, this.infoRect, style, this.infoBackground);
-        }
     }
 
     /**
@@ -177,25 +271,13 @@ public class CraftingWindow extends Window{
 
     @Override
     public void resize(int width, int height) {
-        this.craftRect.set(width / 2 - 600 / 2, height / 2 - 500 / 2, 600, 500);
-
-        this.selectRect.set(this.craftRect.x + this.craftRect.width * 0.034f, this.craftRect.y + this.craftRect.height * 0.03f,
-                this.craftRect.width * 0.333f, this.craftRect.height * 0.892f);
-
-        this.infoRect.set(this.craftRect.x + this.craftRect.width * 0.678f, this.craftRect.y + this.craftRect.height * 0.502f,
-                this.craftRect.width * 0.2857f, this.craftRect.height * 0.422f);
-
-        this.openRect.set(this.craftRect.x + this.craftRect.width * 0.357f, this.craftRect.y + this.craftRect.height * 0.502f,
-                this.craftRect.width * 0.2857f, this.craftRect.height * 0.422f);
-
-        this.stalledRect.set(this.craftRect.x + this.craftRect.width * 0.357f, this.craftRect.y + this.craftRect.height * 0.03f,
-                this.craftRect.width * 0.2857f, this.craftRect.height * 0.422f);
 
     }
 
     @Override
     public void destroy() {
-        this.CraftingWindow.remove();
+        this.craftingWindow.remove();
+        EventSystem.unregisterEventFunction(this.target, "crafting_job_switched", this.function);
         super.destroy();
     }
 }

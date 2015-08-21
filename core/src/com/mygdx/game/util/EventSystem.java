@@ -5,6 +5,7 @@ import com.sun.istack.internal.NotNull;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.function.Consumer;
 
 /**
  * Created by Paha on 3/26/2015.
@@ -21,8 +22,8 @@ public class EventSystem {
      * @param eventName The event name, ie: "collidestart" to indicate which event to call.
      * @param function The Consumer function to be called on an event.
      */
-    public static void onEntityEvent(Entity entity, String eventName, java.util.function.Consumer<Object[]> function){
-        registerEvent(entity.getID(), eventName, function);
+    public static Consumer<Object[]> onEntityEvent(Entity entity, String eventName, java.util.function.Consumer<Object[]> function){
+        return registerEvent(entity.getID(), eventName, function);
     }
 
     /**
@@ -30,8 +31,8 @@ public class EventSystem {
      * @param eventName The name of the event.
      * @param function THe Consumer function to be called on an event.
      */
-    public static void onGameEvent(String eventName, java.util.function.Consumer<Object[]> function){
-        registerEvent(gameEventID, eventName, function);
+    public static Consumer<Object[]> onGameEvent(String eventName, java.util.function.Consumer<Object[]> function){
+        return registerEvent(gameEventID, eventName, function);
     }
 
     /**
@@ -40,7 +41,7 @@ public class EventSystem {
      * @param eventName The name of the Event to call.
      * @param function The function to register to this Event.
      */
-    private static void registerEvent(long id, String eventName, java.util.function.Consumer<Object[]> function){
+    private static Consumer<Object[]> registerEvent(long id, String eventName, java.util.function.Consumer<Object[]> function){
         //If the map for the Entity id is null, add a new map.
         if(entityMap.get(id) == null)
             entityMap.put(id, new HashMap<>());
@@ -58,6 +59,7 @@ public class EventSystem {
         }
 
         list.add(function);
+        return function;
     }
 
     /**
@@ -66,7 +68,7 @@ public class EventSystem {
      * @param handlerName The compName of the Event/Handler.
      * @param function The function/Event to remove from the system.
      */
-    public static void unregisterEvent(Entity entity, String handlerName, java.util.function.Consumer<Object[]> function){
+    public static void unregisterEventFunction(Entity entity, String handlerName, java.util.function.Consumer<Object[]> function){
         if(entityMap.get(entity.getID()) != null && entityMap.get(entity.getID()).get(handlerName) != null)
             entityMap.get(entity.getID()).get(handlerName).remove(function);
     }
@@ -76,7 +78,7 @@ public class EventSystem {
      * @param entity The Entity to remove from.
      * @param eventName The compName of the event to remove.
      */
-    public static void unregisterHandler(Entity entity, String eventName){
+    public static void UnregisterEvent(Entity entity, String eventName){
         if(entityMap.get(entity.getID()) != null && entityMap.get(entity.getID()).get(eventName) != null)
             entityMap.get(entity.getID()).remove(eventName);
     }

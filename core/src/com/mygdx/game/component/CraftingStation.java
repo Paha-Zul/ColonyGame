@@ -5,6 +5,7 @@ import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.interfaces.IOwnable;
 import com.mygdx.game.util.DataBuilder;
+import com.mygdx.game.util.EventSystem;
 import com.mygdx.game.util.ItemNeeded;
 import com.mygdx.game.util.Logger;
 import com.mygdx.game.util.managers.DataManager;
@@ -86,49 +87,6 @@ public class CraftingStation extends Component implements IOwnable{
     }
 
     /**
-     * Sets an in-progress job to stalled.
-     * @param id The ID of the in-progress job to set to stalled.
-     * @return True if the job with 'id' was able to be transferred. False otherwise.
-     */
-    public boolean setInProgressToStalled(long id){
-        CraftingJob job = null;
-        //Gotta use an iterator since we are using a linked list and need to remove while iterating...
-        Iterator<CraftingJob> iter = this.inProgressJobs.iterator();
-        while(iter.hasNext()){
-            CraftingJob j = iter.next();
-            if(j.id == id){
-                job = j;
-                iter.remove();
-                break;
-            }
-        }
-
-        if(job == null) return false;
-        this.stalledJobs.add(job);
-        return true;
-    }
-
-    /**
-     * Removes (finishes) a CraftingJob in the in-progress list.
-     * @param id The ID of the CraftingJob to finish (remove).
-     * @return True if the CraftingJob was found and removed, false otherwise.
-     */
-    public boolean finishJobInProgress(long id){
-        //Gotta use an iterator since we are using a linked list and need to remove while iterating...
-        Iterator<CraftingJob> iter = this.inProgressJobs.iterator();
-        while(iter.hasNext()){
-            CraftingJob j = iter.next();
-            if(j.id == id){
-                iter.remove();
-                return true; //Found and removed!! Return true!
-            }
-        }
-
-        //Nothing was found, return false...
-        return false;
-    }
-
-    /**
      * @return True if this crafting station has an available job to be started.
      */
     public boolean hasAvailableJob(){
@@ -154,6 +112,27 @@ public class CraftingStation extends Component implements IOwnable{
     }
 
     /**
+     * Removes (finishes) a CraftingJob in the in-progress list.
+     * @param id The ID of the CraftingJob to finish (remove).
+     * @return True if the CraftingJob was found and removed, false otherwise.
+     */
+    public boolean finishJobInProgress(long id){
+        //Gotta use an iterator since we are using a linked list and need to remove while iterating...
+        Iterator<CraftingJob> iter = this.inProgressJobs.iterator();
+        while(iter.hasNext()){
+            CraftingJob j = iter.next();
+            if(j.id == id){
+                iter.remove();
+                EventSystem.notifyEntityEvent(this.owner, "crafting_job_switched", "available", "finished", j);
+                return true; //Found and removed!! Return true!
+            }
+        }
+
+        //Nothing was found, return false...
+        return false;
+    }
+
+    /**
      * Transfers the first available CraftingJob from the available list to the in-progress list.
      * @return The CraftingJob that was transferred from available to in progress.
      */
@@ -164,8 +143,33 @@ public class CraftingStation extends Component implements IOwnable{
 
         if(job == null) return null;
         this.inProgressJobs.add(job);
+        EventSystem.notifyEntityEvent(this.owner, "crafting_job_switched", "available", "inProgress", job);
 
         return job;
+    }
+
+    /**
+     * Sets an in-progress job to stalled.
+     * @param id The ID of the in-progress job to set to stalled.
+     * @return True if the job with 'id' was able to be transferred. False otherwise.
+     */
+    public boolean setInProgressToStalled(long id){
+        CraftingJob job = null;
+        //Gotta use an iterator since we are using a linked list and need to remove while iterating...
+        Iterator<CraftingJob> iter = this.inProgressJobs.iterator();
+        while(iter.hasNext()){
+            CraftingJob j = iter.next();
+            if(j.id == id){
+                job = j;
+                iter.remove();
+                break;
+            }
+        }
+
+        if(job == null) return false;
+        this.stalledJobs.add(job);
+        EventSystem.notifyEntityEvent(this.owner, "crafting_job_switched", "inProgress", "stalled", job);
+        return true;
     }
 
     /**
@@ -181,30 +185,30 @@ public class CraftingStation extends Component implements IOwnable{
      * @param id The ID of the job to get items for.
      * @return An Array of ItemNeeded that indicates the item names and amounts needed. Returns an empty list if nothing is needed, and null if no job with that ID could be found.
      */
-    public Array<ItemNeeded> getItemsNeededForJob(long id){
+    public Array<ItemNeeded> getItemsNeededForJob(long id) {
         //TODO For now we are only basing this on one item for testing...
 
         CraftingJob job = null;
         //Try to get a job from the available jobs
-        for(CraftingJob j : this.availableJobs)
-            if(j.id == id) {
+        for (CraftingJob j : this.availableJobs)
+            if (j.id == id) {
                 job = j;
                 break;
             }
 
         //If the job is still null, return null.
-        if(job == null) return null;
+        if (job == null) return null;
 
         //Make a list of the items that we need.
         Array<ItemNeeded> list = new Array<>();
         DataBuilder.JsonRecipe recipe = job.itemRecipe;
-        for(int i=0;i<recipe.items.length;i++) {
+        for (int i = 0; i < recipe.items.length; i++) {
             String itemName = recipe.items[i];
             int recipeAmount = recipe.itemAmounts[i];
 
             //Get the amount needed. If it's more than 0, we need some more! Otherwise, we don't need any, don't add!
             int amountNeeded = recipeAmount - this.inventory.getItemAmount(itemName);
-            if(amountNeeded > 0) list.add(new ItemNeeded(itemName, amountNeeded));
+            if (amountNeeded > 0) list.add(new ItemNeeded(itemName, amountNeeded));
         }
 
         return list;
@@ -212,6 +216,18 @@ public class CraftingStation extends Component implements IOwnable{
 
     public String[] getCraftingList(){
         return this.craftingList;
+    }
+
+    public LinkedList<CraftingJob> getAvailableList(){
+        return this.availableJobs;
+    }
+
+    public LinkedList<CraftingJob> getInProgressJobs(){
+        return this.inProgressJobs;
+    }
+
+    public LinkedList<CraftingJob> getStalledJobs(){
+        return this.stalledJobs;
     }
 
     public Inventory getInventory(){
