@@ -227,7 +227,7 @@ public class Colonist extends Component implements IInteractable, IOwnable{
         getBehManager().getBehaviourStates().addState("build", false, new StateSystem.DefineTask("build", "idle")).setRepeat(true);
         getBehManager().getBehaviourStates().addState("returnItems", false, new StateSystem.DefineTask("idle", "idle")).setRepeat(false);
         getBehManager().getBehaviourStates().addState("sleep", false, new StateSystem.DefineTask("idle", "idle")).setRepeat(false);
-        getBehManager().getBehaviourStates().addState("craftItem", false, new StateSystem.DefineTask("idle", "idle")).setRepeat(false);
+        getBehManager().getBehaviourStates().addState("craftItem", false, new StateSystem.DefineTask("idle", "idle")).setRepeat(true);
     }
 
     @JsonIgnore

@@ -14,7 +14,7 @@ public class ReserveResource extends LeafTask{
     @Override
     public boolean check() {
         return super.check() && this.blackBoard.targetResource != null
-                && (!this.blackBoard.targetResource.isTaken() || this.blackBoard.targetResource.getTaken() == this.blackBoard.myManager.getEntityOwner());
+                && (!this.blackBoard.targetResource.isTaken() || this.blackBoard.targetResource.isTakenBy(this.blackBoard.myManager.getEntityOwner()));
     }
 
     @Override

@@ -38,6 +38,8 @@ public class FindStorageWithItem extends LeafTask{
     @Override
     public void start() {
         super.start();
+
+        this.blackBoard.targetNode = null;
     }
 
     @Override

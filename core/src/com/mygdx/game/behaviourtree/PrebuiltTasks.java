@@ -66,8 +66,7 @@ public class PrebuiltTasks {
         Sequence innerGatherSeq = new Sequence("Gathering", blackBoard);
         RepeatUntilCondition repeatGather = new RepeatUntilCondition("Repeat", blackBoard, innerGatherSeq);
         FindResource fr = new FindResource("Finding resource", blackBoard);
-        ReserveResource rr = new ReserveResource("Reserving", blackBoard);
-        //FindClosestEntity fr = new FindClosestEntity("Finding Closest Resource", blackBoard);
+        ReserveResource rr = new ReserveResource("Reserving", blackBoard); //Reserve it separately from the find resource, since find resource is on a thread. This avoids data races.
         FindPath fpResource = new FindPath("Finding Path to Resource", blackBoard);
         MoveTo mtResource = new MoveTo("Moving to Resource", blackBoard);
         Gather gather = new Gather("Gathering Resource", blackBoard);

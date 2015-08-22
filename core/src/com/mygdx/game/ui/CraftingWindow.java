@@ -6,15 +6,14 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.List;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.Align;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.SnapshotArray;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.component.CraftingStation;
 import com.mygdx.game.entity.Entity;
@@ -41,8 +40,9 @@ public class CraftingWindow extends Window{
     private CraftingStation craftingStation;
     private DataBuilder.JsonItem selectedItem;
 
-    private Array<Label> availabelLabels, inProgressLabels, stalledLabels, craftingLabels;
-    private List<Label> aList, ipList, sList, cList;
+    private TextButton craftButton;
+    private Container<VerticalGroup> aContainer, ipContainer, sContainer, cContainer;
+    private VerticalGroup aList, ipList, sList, cList;
     private Table craftingWindowTable;
 
     private Consumer<Object[]> function;
@@ -50,6 +50,10 @@ public class CraftingWindow extends Window{
     private Vector2 offset;
 
     private DecimalFormat percentFormat = new DecimalFormat("#.0");
+
+    private Label selectedLabel;
+
+    private boolean justSelected = false;
 
 
     public CraftingWindow(PlayerInterface playerInterface, Entity target) {
@@ -67,6 +71,16 @@ public class CraftingWindow extends Window{
         com.badlogic.gdx.scenes.scene2d.ui.Window.WindowStyle style = new com.badlogic.gdx.scenes.scene2d.ui.Window.WindowStyle(this.playerInterface.UIStyle.font, Color.BLACK, new TextureRegionDrawable(this.craftBackground));
         this.craftingWindow = new com.badlogic.gdx.scenes.scene2d.ui.Window("WindowTop", style);
         this.craftingWindow.addListener(new ClickListener() {
+
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                super.touchUp(event, x, y, pointer, button);
+                if(!justSelected && selectedItem != null) {
+                    selectedLabel.getStyle().background = null;
+                    selectedItem = null;
+                    selectedLabel = null;
+                }else justSelected = false;
+            }
 
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
@@ -89,6 +103,42 @@ public class CraftingWindow extends Window{
         this.craftingWindowTable = new Table();
         this.craftingWindow.addActor(this.craftingWindowTable);
 
+        //Make the lists.
+        this.aList = new VerticalGroup();
+        this.ipList = new VerticalGroup();
+        this.sList = new VerticalGroup();
+        this.cList = new VerticalGroup();
+
+        //Make sure they are left aligned.
+        this.aList.left();
+        this.ipList.left();
+        this.sList.left();
+        this.cList.left();
+
+        //Make the containers...
+        this.aContainer = new Container<>();
+        this.ipContainer = new Container<>();
+        this.sContainer = new Container<>();
+        this.cContainer = new Container<>();
+
+        this.aContainer.background(new TextureRegionDrawable(this.selectBackground));
+        this.ipContainer.background(new TextureRegionDrawable(this.selectBackground));
+        this.sContainer.background(new TextureRegionDrawable(this.selectBackground));
+        this.cContainer.background(new TextureRegionDrawable(this.selectBackground));
+
+        //Set the container actors as the vertical groups.
+        this.aContainer.setActor(aList);
+        this.ipContainer.setActor(ipList);
+        this.sContainer.setActor(sList);
+        this.cContainer.setActor(cList);
+
+        //this.cContainer.getActor().setFillParent(true);
+        this.cContainer.top().left().padLeft(5);
+        this.aContainer.top().left().padLeft(5);
+        this.ipContainer.top().left().padLeft(5);
+        this.sContainer.top().left().padLeft(5);
+
+        //Make the styles
         List.ListStyle aStyle = new List.ListStyle(this.playerInterface.UIStyle.font, Color.BLUE, Color.BLACK, new TextureRegionDrawable(this.selectBackground));
         List.ListStyle ipStyle = new List.ListStyle(this.playerInterface.UIStyle.font, Color.BLUE, Color.BLACK, new TextureRegionDrawable(this.selectBackground));
         List.ListStyle sStyle = new List.ListStyle(this.playerInterface.UIStyle.font, Color.BLUE, Color.BLACK, new TextureRegionDrawable(this.selectBackground));
@@ -98,23 +148,17 @@ public class CraftingWindow extends Window{
         sStyle.background = new TextureRegionDrawable(this.selectBackground);
         cStyle.background = new TextureRegionDrawable(this.selectBackground);
 
-        //Make the lists.
-        this.aList = new List<>(aStyle);
-        this.ipList = new List<>(ipStyle);
-        this.sList = new List<>(sStyle);
-        this.cList = new List<>(cStyle);
-
         this.craftingWindowTable.setFillParent(true);
         this.craftingWindowTable.left().top().pad(50, 20, 20, 20);
 
         //Add the lists to the crafting window
-        this.craftingWindowTable.add(cList).prefSize(150, 200);
+        this.craftingWindowTable.add(cContainer).prefSize(150, 200).maxSize(150, 200);
         this.craftingWindowTable.add().prefWidth(25);
-        this.craftingWindowTable.add(aList).prefSize(150, 200);
+        this.craftingWindowTable.add(aContainer).prefSize(150, 200);
         this.craftingWindowTable.add().prefWidth(25);
-        this.craftingWindowTable.add(ipList).prefSize(150, 200);
+        this.craftingWindowTable.add(ipContainer).prefSize(150, 200);
         this.craftingWindowTable.add().prefWidth(25);
-        this.craftingWindowTable.add(sList).prefSize(150, 200);
+        this.craftingWindowTable.add(sContainer).prefSize(150, 200);
 
         this.craftingWindowTable.row();
         this.craftingWindowTable.add().expand().fill();
@@ -143,34 +187,48 @@ public class CraftingWindow extends Window{
     }
 
     private void makeLabels(){
-        //Make new arrays
-        this.availabelLabels = new Array<>();
-        this.inProgressLabels = new Array<>();
-        this.stalledLabels = new Array<>();
-        this.craftingLabels = new Array<>();
+        this.cList.clear();
+        this.aList.clear();
+        this.ipList.clear();
+        this.sList.clear();
 
         for(String item : this.craftingStation.getCraftingList()){
-            String itemName = DataManager.getData(item, DataBuilder.JsonItem.class).getDisplayName();
-            this.craftingLabels.add(new Label(itemName, new Label.LabelStyle(this.playerInterface.UIStyle.font, Color.BLACK)));
+            DataBuilder.JsonItem itemRef = DataManager.getData(item, DataBuilder.JsonItem.class);
+            String itemName = itemRef.getDisplayName();
+            Label label = new Label(itemName, new Label.LabelStyle(this.playerInterface.UIStyle.font, Color.BLACK));
+            label.addListener(new ClickListener(){
+                @Override
+                public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                    if(selectedLabel != null) selectedLabel.getStyle().background = null;
+
+                    selectedItem = itemRef;
+                    selectedLabel = label;
+                    justSelected = true;
+                    label.getStyle().background = new TextureRegionDrawable(selectBackground);
+                    return super.touchDown(event, x, y, pointer, button);
+                }
+            });
+
+            this.cList.addActor(label);
         }
 
         for(CraftingStation.CraftingJob job : this.craftingStation.getAvailableList()){
-            this.availabelLabels.add(new Label(job.itemRef.getDisplayName(), new Label.LabelStyle(this.playerInterface.UIStyle.font, Color.BLACK)));
+            this.aList.addActor(new Label(job.itemRef.getDisplayName(), new Label.LabelStyle(this.playerInterface.UIStyle.font, Color.BLACK)));
         }
 
         for(CraftingStation.CraftingJob job : this.craftingStation.getInProgressJobs()){
-            this.inProgressLabels.add(new Label(job.itemRef.getDisplayName(), new Label.LabelStyle(this.playerInterface.UIStyle.font, Color.BLACK)));
+            this.ipList.addActor(new Label(job.itemRef.getDisplayName(), new Label.LabelStyle(this.playerInterface.UIStyle.font, Color.BLACK)));
         }
 
         for(CraftingStation.CraftingJob job : this.craftingStation.getStalledJobs()){
-            this.stalledLabels.add(new Label(job.itemRef.getDisplayName()+" - "+percentFormat.format(job.percentageDone*100), new Label.LabelStyle(this.playerInterface.UIStyle.font, Color.BLACK)));
+            this.sList.addActor(new Label(job.itemRef.getDisplayName() + " - " + percentFormat.format(job.percentageDone * 100), new Label.LabelStyle(this.playerInterface.UIStyle.font, Color.BLACK)));
         }
-
-        //Add the stuff to the lists.
-        this.aList.setItems(this.availabelLabels);
-        this.ipList.setItems(this.inProgressLabels);
-        this.sList.setItems(this.stalledLabels);
-        this.cList.setItems(this.craftingLabels);
+//
+//        //Add the stuff to the lists.
+//        this.aList.setItems(this.availabelLabels);
+//        this.ipList.setItems(this.inProgressLabels);
+//        this.sList.setItems(this.stalledLabels);
+//        this.cList.setItems(this.craftingLabels);
     }
 
     private void makeCraftButton(){
@@ -182,20 +240,36 @@ public class CraftingWindow extends Window{
         buttonStyle.over = over;
         buttonStyle.checkedOver = over;
 
-        TextButton button = new TextButton("Craft", buttonStyle);
-        this.craftingWindowTable.add(button).right().bottom();
+        this.craftButton = new TextButton("Craft", buttonStyle);
+        this.craftingWindowTable.add(this.craftButton).right().bottom();
+
+        this.craftButton.addListener(new ClickListener(){
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                craftingStation.addCraftingJob(selectedItem.getItemName(), 1);
+                makeLabels();
+                super.touchUp(event, x, y, pointer, button);
+            }
+        });
     }
 
     @Override
     public boolean update(SpriteBatch batch) {
         if(this.active) {
 
+            //Get the in-progress list and the job list from the crafting station.
+            SnapshotArray<Actor> content = this.ipList.getChildren();
             LinkedList<CraftingStation.CraftingJob> jobList = this.craftingStation.getInProgressJobs();
-            Array<String> content = new Array<>(jobList.size());
-            for (CraftingStation.CraftingJob aJobList : jobList)
-                content.add(aJobList.itemRef.getDisplayName() + " - " + percentFormat.format(aJobList.percentageDone * 100)+"%");
 
-            this.ipList.setItems(content);
+            int i=0;
+            //For each in progress job, try to set it's corresponding UI content to reflect its percentage done.
+            for (CraftingStation.CraftingJob aJobList : jobList) {
+                if(content.size <= i) break; //If the content size is less than or equal to i, break. This can happen when jobs are being switch and the UI is not caught up.
+                ((Label)content.get(i)).setText(aJobList.itemRef.getDisplayName() + " - " + percentFormat.format(aJobList.percentageDone * 100) + "%");
+                i++;
+            }
+//
+//            this.ipList.setItems(content);
 
 //            GUI.Texture(this.craftBackground, batch, this.craftRect);
 //            GUI.Texture(this.selectBackground, batch, this.selectRect);

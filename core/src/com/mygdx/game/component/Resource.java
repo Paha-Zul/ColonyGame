@@ -316,6 +316,16 @@ public class Resource extends Component implements IInteractable{
     }
 
     /**
+     * Checks if this resource is taken by the Entity passed in.
+     * @param entity The Entity that is in question of owning this resource.
+     * @return True if the resource is taken by the Entity passed in, false otherwise.
+     */
+    @JsonIgnore
+    public boolean isTakenBy(Entity entity){
+        return this.getTaken() == entity;
+    }
+
+    /**
      * Sets this Resource as taken or not taken.
      * @param entity The Entity to take this resource. Null if setting the resource as not taken.
      */

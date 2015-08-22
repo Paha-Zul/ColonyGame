@@ -51,7 +51,7 @@ public class Gather extends LeafTask{
 
         //If we can't get a resource component from the target, end this with failure.
         this.resource = this.blackBoard.targetResource;
-        if(this.resource == null){
+        if(this.resource == null || !this.resource.isTakenBy(this.blackBoard.myManager.getEntityOwner())){
             this.control.finishWithFailure();
             return;
         }
@@ -64,7 +64,7 @@ public class Gather extends LeafTask{
 
         //Gather after the amount of time needed.
         this.gatherTimer = new RepeatingTimer(resource.getGatherTick(), ()->{
-            if(this.resource.isDestroyed()){
+            if(!this.resource.isValid()){
                 this.control.finishWithFailure();
                 return;
             }
@@ -136,7 +136,7 @@ public class Gather extends LeafTask{
     @Override
     public void end() {
         super.end();
-        if(this.blackBoard.targetResource != null)
+        if(this.blackBoard.targetResource != null && this.blackBoard.targetResource.isTakenBy(this.blackBoard.myManager.getEntityOwner()))
             this.blackBoard.targetResource.setTaken(null);
     }
 }

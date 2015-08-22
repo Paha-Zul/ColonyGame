@@ -37,13 +37,15 @@ public abstract class ParentTask extends Task{
 
         //If the task hasn't been started, start it!
         }else if(!this.control.getCurrTask().getControl().hasStarted()) {
-            if(!currTask.check())
+            if (!currTask.check()) {
                 this.control.finishWithFailure();
-            else
+                currTask.getControl().finishWithFailure(); //Fail the task so we don't update it below! (And so it calls end and such)
+            }else
                 currTask.getControl().safeStart();
+        }
 
         //If the task has finished, end it!
-        }else if(currTask.getControl().hasFinished()){
+        if(currTask.getControl().hasFinished()){
             currTask.getControl().safeEnd(); //End the task.
             //If failed, call childFailed.
             if(currTask.getControl().hasFailed())
