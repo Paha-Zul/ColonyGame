@@ -123,7 +123,7 @@ public class CraftingStation extends Component implements IOwnable{
             CraftingJob j = iter.next();
             if(j.id == id){
                 iter.remove();
-                EventSystem.notifyEntityEvent(this.owner, "crafting_job_switched", "available", "finished", j);
+                EventSystem.notifyEntityEvent(this.owner, "crafting_job_switched", "inProgress", "finished", j);
                 return true; //Found and removed!! Return true!
             }
         }

@@ -51,7 +51,7 @@ public class FindStorageWithItem extends LeafTask{
         //Search for a building that satisfies the function defined...
         Building storageWithItem = colonist.getColony().getOwnedFromColony(Building.class, building -> {
             //Let's not steal items from buildings being constructed.
-            if(building.getEntityOwner().getTags().hasTag("constructing")) return false;
+            if(building.getEntityOwner().getTags().hasTag("constructing") || !building.getEntityOwner().getTags().hasTag("storage")) return false;
 
             Inventory inv = building.getComponent(Inventory.class); //Get the inventory
             //Search for at least one item from our list in the inventory of the building.

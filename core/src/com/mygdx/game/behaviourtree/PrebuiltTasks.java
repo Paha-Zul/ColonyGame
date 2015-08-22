@@ -47,6 +47,7 @@ public class PrebuiltTasks {
          *
          *          Repeat (until we are full on the items toggled):
          *              find resource
+         *              reserve resource
          *              find path to resource
          *              move to resource
          *              gather resource

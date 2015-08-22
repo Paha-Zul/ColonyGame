@@ -118,7 +118,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     private QueryCallback callback = fixture -> {
         Collider.ColliderInfo info = (Collider.ColliderInfo)fixture.getUserData();
         if(info.tags.hasTag(Constants.COLLIDER_CLICKABLE) && fixture.testPoint(testPoint.x, testPoint.y) && info.owner.getTags().hasTag("selectable")){
-            setSelectedEntity(info.owner);
+            this.setSelectedEntity(info.owner);
             return false;
         }
 
@@ -131,10 +131,9 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
         //If not null, the entity is a colonist, and the collider is clickable.
         if(selectedInfo != null && selectedInfo.owner.getTags().hasTags("colonist", "alive", "selectable") && selectedInfo.tags.hasTag(Constants.COLLIDER_CLICKABLE)) {
-            UnitProfile profile = setSelectedEntity(selectedInfo.owner); //Set our selectedEntity
-            selectedProfileList.add(profile); //Add it to the list.
-            return true;
+            this.setSelectedEntity(selectedInfo.owner); //Set our selectedEntity
         }
+
         return true;
     };
 
@@ -640,6 +639,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     /**
      * Sets the selectedEntity entity for viewing. This will create a new UnitProfile for the Entity (which will get the Interactable Component from it)
      * and set it as the current selected profile.
+     * Also adds the new profile to the selectedProfile list.
      * @param entity The Entity to set as the selectedEntity Entity.
      */
     public UnitProfile setSelectedEntity(Entity entity){
@@ -647,7 +647,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         this.selectedProfile = new UnitProfile(entity);
         this.selectedProfile.entity.getTags().addTag("selected");
         this.selectedProfile.interactable = entity.getComponent(Interactable.class); //Get the selectedProfile Component.
-        this.selectedProfileList.add(this.selectedProfile);
+        this.selectedProfileList.add(this.selectedProfile); //Add it to the list.
         return this.selectedProfile;
     }
 

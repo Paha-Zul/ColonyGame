@@ -35,6 +35,7 @@ import java.util.function.Consumer;
  */
 public class CraftingWindow extends Window{
     private TextureRegion craftBackground, selectBackground, infoBackground, stalledBackground, openBackground;
+    private TextureRegionDrawable selectionTexture;
     private com.badlogic.gdx.scenes.scene2d.ui.Window craftingWindow;
 
     private CraftingStation craftingStation;
@@ -53,7 +54,7 @@ public class CraftingWindow extends Window{
 
     private Label selectedLabel;
 
-    private boolean justSelected = false;
+    private boolean justSelected = false, craftButtonPressed = false;
 
 
     public CraftingWindow(PlayerInterface playerInterface, Entity target) {
@@ -64,6 +65,7 @@ public class CraftingWindow extends Window{
         this.infoBackground = new TextureRegion(ColonyGame.assetManager.get("craftingWindowInfoBackground", Texture.class));
         this.stalledBackground = new TextureRegion(ColonyGame.assetManager.get("stalledJobsBackground", Texture.class));
         this.openBackground = new TextureRegion(ColonyGame.assetManager.get("openJobsBackground", Texture.class));
+        this.selectionTexture = new TextureRegionDrawable(new TextureRegion(ColonyGame.assetManager.get("selection", Texture.class)));
 
         this.craftingStation = this.target.getComponent(CraftingStation.class);
         this.offset = new Vector2();
@@ -75,11 +77,14 @@ public class CraftingWindow extends Window{
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
                 super.touchUp(event, x, y, pointer, button);
-                if(!justSelected && selectedItem != null) {
+                if(!justSelected && !craftButtonPressed && selectedItem != null) {
                     selectedLabel.getStyle().background = null;
                     selectedItem = null;
                     selectedLabel = null;
-                }else justSelected = false;
+                }else {
+                    justSelected = false;
+                    craftButtonPressed = false;
+                }
             }
 
             @Override
@@ -132,33 +137,29 @@ public class CraftingWindow extends Window{
         this.sContainer.setActor(sList);
         this.cContainer.setActor(cList);
 
-        //this.cContainer.getActor().setFillParent(true);
-        this.cContainer.top().left().padLeft(5);
-        this.aContainer.top().left().padLeft(5);
-        this.ipContainer.top().left().padLeft(5);
-        this.sContainer.top().left().padLeft(5);
+        //Fill to the parent container. This makes the VerticalGroups fill to the width of the Container.
+        this.cContainer.getActor().fill();
+        this.ipContainer.getActor().fill();
+        this.sContainer.getActor().fill();
+        this.cContainer.getActor().fill();
 
-        //Make the styles
-        List.ListStyle aStyle = new List.ListStyle(this.playerInterface.UIStyle.font, Color.BLUE, Color.BLACK, new TextureRegionDrawable(this.selectBackground));
-        List.ListStyle ipStyle = new List.ListStyle(this.playerInterface.UIStyle.font, Color.BLUE, Color.BLACK, new TextureRegionDrawable(this.selectBackground));
-        List.ListStyle sStyle = new List.ListStyle(this.playerInterface.UIStyle.font, Color.BLUE, Color.BLACK, new TextureRegionDrawable(this.selectBackground));
-        List.ListStyle cStyle = new List.ListStyle(this.playerInterface.UIStyle.font, Color.BLUE, Color.BLACK, new TextureRegionDrawable(this.selectBackground));
-        aStyle.background = new TextureRegionDrawable(this.selectBackground);
-        ipStyle.background = new TextureRegionDrawable(this.selectBackground);
-        sStyle.background = new TextureRegionDrawable(this.selectBackground);
-        cStyle.background = new TextureRegionDrawable(this.selectBackground);
+        //Put the containers in the top left, pad the insides some, and fill to the width of the parent (table cell).
+        this.cContainer.top().left().pad(0, 3, 0, 3).fillX();
+        this.aContainer.top().left().pad(0, 3, 0, 3).fillX();
+        this.ipContainer.top().left().pad(0, 3, 0, 3).fillX();
+        this.sContainer.top().left().pad(0, 3, 0, 3).fillX();
 
         this.craftingWindowTable.setFillParent(true);
         this.craftingWindowTable.left().top().pad(50, 20, 20, 20);
 
         //Add the lists to the crafting window
-        this.craftingWindowTable.add(cContainer).prefSize(150, 200).maxSize(150, 200);
+        this.craftingWindowTable.add(cContainer).prefSize(150, 200).maxSize(150, 200).expandX().fillX();
         this.craftingWindowTable.add().prefWidth(25);
-        this.craftingWindowTable.add(aContainer).prefSize(150, 200);
+        this.craftingWindowTable.add(aContainer).prefSize(150, 200).expandX().fillX();
         this.craftingWindowTable.add().prefWidth(25);
-        this.craftingWindowTable.add(ipContainer).prefSize(150, 200);
+        this.craftingWindowTable.add(ipContainer).prefSize(150, 200).expandX().fillX();
         this.craftingWindowTable.add().prefWidth(25);
-        this.craftingWindowTable.add(sContainer).prefSize(150, 200);
+        this.craftingWindowTable.add(sContainer).prefSize(150, 200).expandX().fillX();
 
         this.craftingWindowTable.row();
         this.craftingWindowTable.add().expand().fill();
@@ -178,19 +179,64 @@ public class CraftingWindow extends Window{
 
         this.makeCraftButton();
 
-        this.makeLabels();
+        this.buildAvailableList();
+        this.buildInProgressList();
+        this.buildStalledList();
+        this.buildCraftingList();
 
         //TODO Really inefficient, but using for fast prototyping.
-        this.function = EventSystem.onEntityEvent(this.target, "crafting_job_switched", (args) -> makeLabels());
+        this.function = EventSystem.onEntityEvent(this.target, "crafting_job_switched", (args) -> {
+            String from = (String)args[0];
+            String to = (String)args[1];
+
+            if(from.equals("available") && to.equals("inProgress")){
+                this.buildAvailableList();
+                this.buildInProgressList();
+            }else if(from.equals("inProgress")){
+                this.buildInProgressList();
+                if(to.equals("stalled"))
+                    this.buildStalledList();
+            }
+        });
 
         this.playerInterface.stage.setDebugAll(true);
     }
 
-    private void makeLabels(){
-        this.cList.clear();
+    /**
+     * Builds/Rebuilds the available jobs list.
+     */
+    private void buildAvailableList(){
         this.aList.clear();
+        for(CraftingStation.CraftingJob job : this.craftingStation.getAvailableList()){
+            this.aList.addActor(new Label(job.itemRef.getDisplayName(), new Label.LabelStyle(this.playerInterface.UIStyle.font, Color.BLACK)));
+        }
+    }
+
+    /**
+     * Builds/rebuilds the in progress list.
+     */
+    private void buildInProgressList(){
         this.ipList.clear();
+        for(CraftingStation.CraftingJob job : this.craftingStation.getInProgressJobs()){
+            this.ipList.addActor(new Label(job.itemRef.getDisplayName(), new Label.LabelStyle(this.playerInterface.UIStyle.font, Color.BLACK)));
+        }
+    }
+
+    /**
+     * Builds/rebuilds the stalled list.
+     */
+    private void buildStalledList(){
         this.sList.clear();
+        for(CraftingStation.CraftingJob job : this.craftingStation.getStalledJobs()){
+            this.sList.addActor(new Label(job.itemRef.getDisplayName()+" - "+percentFormat.format(job.percentageDone*100), new Label.LabelStyle(this.playerInterface.UIStyle.font, Color.BLACK)));
+        }
+    }
+
+    /**
+     * Builds/rebuilds the crafting list.
+     */
+    private void buildCraftingList(){
+        this.cList.clear();
 
         for(String item : this.craftingStation.getCraftingList()){
             DataBuilder.JsonItem itemRef = DataManager.getData(item, DataBuilder.JsonItem.class);
@@ -204,31 +250,13 @@ public class CraftingWindow extends Window{
                     selectedItem = itemRef;
                     selectedLabel = label;
                     justSelected = true;
-                    label.getStyle().background = new TextureRegionDrawable(selectBackground);
+                    label.getStyle().background = selectionTexture;
                     return super.touchDown(event, x, y, pointer, button);
                 }
             });
 
             this.cList.addActor(label);
         }
-
-        for(CraftingStation.CraftingJob job : this.craftingStation.getAvailableList()){
-            this.aList.addActor(new Label(job.itemRef.getDisplayName(), new Label.LabelStyle(this.playerInterface.UIStyle.font, Color.BLACK)));
-        }
-
-        for(CraftingStation.CraftingJob job : this.craftingStation.getInProgressJobs()){
-            this.ipList.addActor(new Label(job.itemRef.getDisplayName(), new Label.LabelStyle(this.playerInterface.UIStyle.font, Color.BLACK)));
-        }
-
-        for(CraftingStation.CraftingJob job : this.craftingStation.getStalledJobs()){
-            this.sList.addActor(new Label(job.itemRef.getDisplayName() + " - " + percentFormat.format(job.percentageDone * 100), new Label.LabelStyle(this.playerInterface.UIStyle.font, Color.BLACK)));
-        }
-//
-//        //Add the stuff to the lists.
-//        this.aList.setItems(this.availabelLabels);
-//        this.ipList.setItems(this.inProgressLabels);
-//        this.sList.setItems(this.stalledLabels);
-//        this.cList.setItems(this.craftingLabels);
     }
 
     private void makeCraftButton(){
@@ -247,7 +275,8 @@ public class CraftingWindow extends Window{
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
                 craftingStation.addCraftingJob(selectedItem.getItemName(), 1);
-                makeLabels();
+                buildAvailableList();
+                craftButtonPressed = true;
                 super.touchUp(event, x, y, pointer, button);
             }
         });
@@ -256,7 +285,6 @@ public class CraftingWindow extends Window{
     @Override
     public boolean update(SpriteBatch batch) {
         if(this.active) {
-
             //Get the in-progress list and the job list from the crafting station.
             SnapshotArray<Actor> content = this.ipList.getChildren();
             LinkedList<CraftingStation.CraftingJob> jobList = this.craftingStation.getInProgressJobs();
@@ -268,17 +296,6 @@ public class CraftingWindow extends Window{
                 ((Label)content.get(i)).setText(aJobList.itemRef.getDisplayName() + " - " + percentFormat.format(aJobList.percentageDone * 100) + "%");
                 i++;
             }
-//
-//            this.ipList.setItems(content);
-
-//            GUI.Texture(this.craftBackground, batch, this.craftRect);
-//            GUI.Texture(this.selectBackground, batch, this.selectRect);
-//            GUI.Texture(this.infoBackground, batch, this.infoRect);
-//            GUI.Texture(this.openBackground, batch, this.openRect);
-//            GUI.Texture(this.stalledBackground, batch, this.stalledRect);
-
-            //GUI.Texture(new TextureRegion(this.playerInterface.blueSquare), ColonyGame.batch, this.dragWindowRect);
-//            this.drawCraftingWindow(batch, this.playerInterface.UIStyle);
         }
 
         return super.update(batch);

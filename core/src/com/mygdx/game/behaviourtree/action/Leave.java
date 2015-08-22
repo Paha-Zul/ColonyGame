@@ -37,6 +37,7 @@ public class Leave extends LeafTask{
     public void end() {
         super.end();
 
+        this.blackBoard.enterable.leave(this.blackBoard.myManager.getEntityOwner());
         this.blackBoard.myManager.getEntityOwner().getGraphicIdentity().setActive(true);
         this.blackBoard.myManager.getEntityOwner().getTags().addTag("selectable");
     }
