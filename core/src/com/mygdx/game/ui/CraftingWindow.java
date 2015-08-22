@@ -44,7 +44,7 @@ public class CraftingWindow extends Window{
     private TextButton craftButton;
     private Container<VerticalGroup> aContainer, ipContainer, sContainer, cContainer;
     private VerticalGroup aList, ipList, sList, cList;
-    private Table craftingWindowTable;
+    private Table craftingWindowTable, previewWindow;
 
     private Consumer<Object[]> function;
 
@@ -121,45 +121,69 @@ public class CraftingWindow extends Window{
         this.cList.left();
 
         //Make the containers...
+        this.cContainer = new Container<>();
         this.aContainer = new Container<>();
         this.ipContainer = new Container<>();
         this.sContainer = new Container<>();
-        this.cContainer = new Container<>();
 
+        this.cContainer.background(new TextureRegionDrawable(this.selectBackground));
         this.aContainer.background(new TextureRegionDrawable(this.selectBackground));
         this.ipContainer.background(new TextureRegionDrawable(this.selectBackground));
         this.sContainer.background(new TextureRegionDrawable(this.selectBackground));
-        this.cContainer.background(new TextureRegionDrawable(this.selectBackground));
 
         //Set the container actors as the vertical groups.
+        this.cContainer.setActor(cList);
         this.aContainer.setActor(aList);
         this.ipContainer.setActor(ipList);
         this.sContainer.setActor(sList);
-        this.cContainer.setActor(cList);
 
         //Fill to the parent container. This makes the VerticalGroups fill to the width of the Container.
         this.cContainer.getActor().fill();
+        this.aContainer.getActor().fill();
         this.ipContainer.getActor().fill();
         this.sContainer.getActor().fill();
-        this.cContainer.getActor().fill();
 
         //Put the containers in the top left, pad the insides some, and fill to the width of the parent (table cell).
-        this.cContainer.top().left().pad(0, 3, 0, 3).fillX();
-        this.aContainer.top().left().pad(0, 3, 0, 3).fillX();
-        this.ipContainer.top().left().pad(0, 3, 0, 3).fillX();
-        this.sContainer.top().left().pad(0, 3, 0, 3).fillX();
+        this.cContainer.top().left().pad(0, 3, 0, 3).fillX().setClip(true);
+        this.aContainer.top().left().pad(0, 3, 0, 3).fillX().setClip(true);
+        this.ipContainer.top().left().pad(0, 3, 0, 3).fillX().setClip(true);
+        this.sContainer.top().left().pad(0, 3, 0, 3).fillX().setClip(true);
 
         this.craftingWindowTable.setFillParent(true);
-        this.craftingWindowTable.left().top().pad(50, 20, 20, 20);
+        this.craftingWindowTable.left().top().pad(20, 20, 20, 20);
+
+        Label.LabelStyle titleStyle = new Label.LabelStyle(this.playerInterface.UIStyle.font, Color.BLACK);
+        Label craftTitle = new Label("Craftable", titleStyle);
+        Label readyLabel = new Label("Queue", titleStyle);
+        Label inProgressLabel = new Label("In Progress", titleStyle);
+        Label stalledLabel = new Label("Stalled", titleStyle);
+
+        craftTitle.setAlignment(Align.center);
+        readyLabel.setAlignment(Align.center);
+        inProgressLabel.setAlignment(Align.center);
+        stalledLabel.setAlignment(Align.center);
+
+        this.previewWindow = new Table();
+        this.previewWindow.background(new TextureRegionDrawable(this.selectBackground));
+
 
         //Add the lists to the crafting window
+        this.craftingWindowTable.add(craftTitle).prefSize(150, 25).maxSize(150, 25).expandX().fillX().center();
+        this.craftingWindowTable.add().expandX().fillX();
+        this.craftingWindowTable.add(readyLabel).prefSize(150, 25).expandX().fillX().center();
+        this.craftingWindowTable.add().expandX().fillX();
+        this.craftingWindowTable.add(inProgressLabel).prefSize(150, 25).expandX().fillX().center();
+        this.craftingWindowTable.add().expandX().fillX();
+        this.craftingWindowTable.add(stalledLabel).prefSize(150, 25).expandX().fillX().center();
+
+        this.craftingWindowTable.row();
         this.craftingWindowTable.add(cContainer).prefSize(150, 200).maxSize(150, 200).expandX().fillX();
-        this.craftingWindowTable.add().prefWidth(25);
-        this.craftingWindowTable.add(aContainer).prefSize(150, 200).expandX().fillX();
-        this.craftingWindowTable.add().prefWidth(25);
-        this.craftingWindowTable.add(ipContainer).prefSize(150, 200).expandX().fillX();
-        this.craftingWindowTable.add().prefWidth(25);
-        this.craftingWindowTable.add(sContainer).prefSize(150, 200).expandX().fillX();
+        this.craftingWindowTable.add().expandX().fillX();
+        this.craftingWindowTable.add(aContainer).prefSize(150, 200).maxSize(150, 200).expandX().fillX();
+        this.craftingWindowTable.add().expandX().fillX();
+        this.craftingWindowTable.add(ipContainer).prefSize(150, 200).maxSize(150, 200).expandX().fillX();
+        this.craftingWindowTable.add().expandX().fillX();
+        this.craftingWindowTable.add(sContainer).prefSize(150, 200).maxSize(150, 200).expandX().fillX();
 
         this.craftingWindowTable.row();
         this.craftingWindowTable.add().expand().fill();
@@ -170,7 +194,7 @@ public class CraftingWindow extends Window{
         this.craftingWindowTable.add().expand().fill();
         this.craftingWindowTable.add().expand().fill();
         this.craftingWindowTable.row();
-        this.craftingWindowTable.add().expand().fill();
+        this.craftingWindowTable.add(this.previewWindow).prefSize(150,150).expand().fill().top();
         this.craftingWindowTable.add().expand().fill();
         this.craftingWindowTable.add().expand().fill();
         this.craftingWindowTable.add().expand().fill();
@@ -199,7 +223,7 @@ public class CraftingWindow extends Window{
             }
         });
 
-        this.playerInterface.stage.setDebugAll(true);
+        //this.playerInterface.stage.setDebugAll(true);
     }
 
     /**
@@ -232,6 +256,81 @@ public class CraftingWindow extends Window{
         }
     }
 
+    private void makePreviewTable(){
+        this.previewWindow.clear();
+
+        /*
+         This area creates the item's icon.
+         */
+        Image image = new Image(this.selectedItem.iconTexture);
+        image.setSize(32, 32);
+        this.previewWindow.add(image).expandX().maxSize(32).top();
+
+        this.previewWindow.row();
+
+        /*
+         * This area creates the description area and puts the item description in.
+         */
+        Label.LabelStyle style = new Label.LabelStyle(this.playerInterface.UIStyle.font, Color.BLACK);
+        Label label = new Label(this.selectedItem.getDescription(), style);
+        this.previewWindow.add(label).expand().top();
+
+        this.previewWindow.row();
+
+        /*
+         * This area creates the 'item' list with icons and amounts.
+         */
+        Table itemTable = new Table();
+        this.previewWindow.add(itemTable).left();
+
+        Label itemsLabel = new Label("items:", style);
+        itemTable.add(itemsLabel).prefHeight(32).padRight(10).padLeft(5);
+
+        //Adds the icons.
+        for(ItemNeeded itemNeeded : this.selectedItem.materialsForCrafting){
+            DataBuilder.JsonItem _itemRef = DataManager.getData(itemNeeded.itemName, DataBuilder.JsonItem.class);
+            Image icon = new Image(_itemRef.iconTexture);
+            icon.setSize(32, 32);
+            itemTable.add(icon).maxSize(32);
+        }
+        itemTable.row();
+        itemTable.add().expandX().fillX(); //Add an empty cell to be under the itemsLabel.
+        //Adds the amounts
+        for(ItemNeeded itemNeeded : this.selectedItem.materialsForCrafting){
+            Label amountLabel = new Label(""+itemNeeded.amountNeeded, style);
+            amountLabel.setAlignment(Align.center);
+            itemTable.add(amountLabel).expandX().fillX();
+        }
+
+
+        this.previewWindow.row();
+
+        /*
+         * This area creates hte 'raw' item list with icons and amounts.
+         */
+        Table rawTable = new Table();
+        this.previewWindow.add(rawTable).left();
+
+        Label rawLabel = new Label("raw:", style);
+        rawTable.add(rawLabel).prefHeight(32).padRight(10).padLeft(5);
+
+        //Adds the icons
+        for(ItemNeeded itemNeeded : this.selectedItem.rawForCrafting){
+            DataBuilder.JsonItem _itemRef = DataManager.getData(itemNeeded.itemName, DataBuilder.JsonItem.class);
+            Image icon = new Image(_itemRef.iconTexture);
+            icon.setSize(32, 32);
+            rawTable.add(icon).maxSize(32);
+        }
+        rawTable.row();
+        rawTable.add().expandX().fillX(); //Add an empty cell to be under the rawLabel
+        //Adds the amounts
+        for(ItemNeeded itemNeeded : this.selectedItem.rawForCrafting){
+            Label amountLabel = new Label(""+itemNeeded.amountNeeded, style);
+            amountLabel.setAlignment(Align.center);
+            rawTable.add(amountLabel).expandX().fillX();
+        }
+    }
+
     /**
      * Builds/rebuilds the crafting list.
      */
@@ -251,6 +350,7 @@ public class CraftingWindow extends Window{
                     selectedLabel = label;
                     justSelected = true;
                     label.getStyle().background = selectionTexture;
+                    makePreviewTable();
                     return super.touchDown(event, x, y, pointer, button);
                 }
             });

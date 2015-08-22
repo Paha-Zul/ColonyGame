@@ -31,7 +31,7 @@
     "dimensions": [200,200],
     "inventory": true,
     "enterable": true,
-    "enterableMaxOccupancy": 1,
+    "enterableMaxOccupancy": 2,
     "enterablePositions": [[0.675, 0.1]],
     "crafting": ["wood_pick", "wood_shovel", "wood_hatchet"]
   }
