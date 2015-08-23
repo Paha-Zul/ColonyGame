@@ -6,12 +6,10 @@ import com.mygdx.game.interfaces.Functional;
 import com.mygdx.game.util.timer.RepeatingTimer;
 import com.mygdx.game.util.timer.Timer;
 import com.sun.istack.internal.NotNull;
-import org.codehaus.jackson.annotate.JsonGetter;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 /**

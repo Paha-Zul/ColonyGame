@@ -73,7 +73,7 @@ public class DataBuilder implements IDestroyable{
     public void loadFiles(){
 
         //Load all the base game stuff and the mod list.
-        loadFilesForMod(Gdx.files.internal("./"));
+        this.loadFilesForMod(Gdx.files.internal("./"));
 
         //Load the changelog separately as mods don't have changelogs that display in game.
         changelog = buildJson(Gdx.files.internal("./"+filePath+changeLogPath), JsonChangeLog.class, null);
@@ -110,10 +110,10 @@ public class DataBuilder implements IDestroyable{
         TextureAtlas atlas = new TextureAtlas(Gdx.files.internal("atlas/icons.atlas"));
 
         //TODO Separate the loading of image assets and file assets. Image assets should be first...
-        buildAssets(fileHandle);
+        this.buildAssets(fileHandle); //We load all the assets (sound, music, art)
         String path = fileHandle.path();
 
-        //Build misc
+        //Build misc Json file
         buildJson(Gdx.files.internal(path + filePath + miscPath), JsonMisc.class, value -> DataManager.addData("misc", value, JsonMisc.class));
 
         //Build items

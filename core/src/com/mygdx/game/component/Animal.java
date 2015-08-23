@@ -150,13 +150,14 @@ public class Animal extends Component implements IInteractable{
                 this.collider.body.setLinearVelocity(0, 0); //0 velocity!
                 this.owner.getTags().clearTags(); //Clear all tags
                 this.owner.getTags().addTag("resource"); //Add the resource tag
-                Resource res = this.owner.addComponent(new Resource()); //Add a Resource Component.
-                res.copyResource(DataManager.getData(animalRef.resourceName, DataBuilder.JsonResource.class));
-                if (interactable != null) interactable.setInterType("resource");
                 this.owner.destroyComponent(BehaviourManagerComp.class); //Destroy the BehaviourManagerComp
                 this.owner.destroyComponent(Stats.class); //Destroy the Stats component.
                 this.owner.destroyComponent(Animal.class); //Destroy this (Animal) Component.
                 this.owner.destroyComponent(Group.class); //Destroy this (Animal) Component.
+
+                Resource res = this.owner.addComponent(new Resource()); //Add a Resource Component.
+                res.copyResource(DataManager.getData(animalRef.resourceName, DataBuilder.JsonResource.class));
+                if (interactable != null) interactable.setInterType("resource");
             }
         };
     }

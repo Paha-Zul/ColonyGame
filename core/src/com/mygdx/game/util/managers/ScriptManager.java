@@ -36,11 +36,13 @@ public class ScriptManager {
                 //We then need to strip away the first and second AND THIRD '/' characters, which will make it look like 'wahteverdir/ClassNameHere'
                 //Then we turn each '/' into a '.' because that's how packages work, which looks like 'waheteverdir.ClassNameHere'
                 String fileName = file.path().substring(0, index);
-                fileName = fileName.substring(fileName.indexOf('/')+1, fileName.length());
-                fileName = fileName.substring(fileName.indexOf('/')+1, fileName.length());
-                fileName = fileName.substring(fileName.indexOf('/')+1, fileName.length());
-                fileName = fileName.substring(fileName.indexOf('/')+1, fileName.length());
+//                fileName = fileName.substring(fileName.indexOf('/')+1, fileName.length());
+//                fileName = fileName.substring(fileName.indexOf('/')+1, fileName.length());
+//                fileName = fileName.substring(fileName.indexOf('/')+1, fileName.length());
+//                fileName = fileName.substring(fileName.indexOf('/')+1, fileName.length());
+                fileName = fileName.substring(fileName.lastIndexOf('/')+1, fileName.length());
                 fileName = fileName.replace('/', '.');
+                System.out.println("fileName:"+fileName);
 
                 // Convert File to a URL. This should be the absolute directory to the './scripts' directory.
                 URL url = Gdx.files.internal(original).file().toURI().toURL();    // file: 'absoultepath'/scripts
