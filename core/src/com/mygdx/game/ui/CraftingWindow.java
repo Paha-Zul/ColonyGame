@@ -35,7 +35,7 @@ import java.util.function.Consumer;
  */
 public class CraftingWindow extends Window{
     private TextureRegion craftBackground, selectBackground, infoBackground, stalledBackground, openBackground;
-    private TextureRegionDrawable selectionTexture;
+    private TextureRegionDrawable selectionTexture, exitTexture;
     private com.badlogic.gdx.scenes.scene2d.ui.Window craftingWindow;
 
     private CraftingStation craftingStation;
@@ -65,7 +65,9 @@ public class CraftingWindow extends Window{
         this.infoBackground = new TextureRegion(ColonyGame.assetManager.get("craftingWindowInfoBackground", Texture.class));
         this.stalledBackground = new TextureRegion(ColonyGame.assetManager.get("stalledJobsBackground", Texture.class));
         this.openBackground = new TextureRegion(ColonyGame.assetManager.get("openJobsBackground", Texture.class));
+
         this.selectionTexture = new TextureRegionDrawable(new TextureRegion(ColonyGame.assetManager.get("selection", Texture.class)));
+        this.exitTexture = new TextureRegionDrawable(new TextureRegion(ColonyGame.assetManager.get("exit", Texture.class)));
 
         this.craftingStation = this.target.getComponent(CraftingStation.class);
         this.offset = new Vector2();
@@ -81,6 +83,7 @@ public class CraftingWindow extends Window{
                     selectedLabel.getStyle().background = null;
                     selectedItem = null;
                     selectedLabel = null;
+                    craftButton.setDisabled(true);
                 }else {
                     justSelected = false;
                     craftButtonPressed = false;
@@ -106,7 +109,7 @@ public class CraftingWindow extends Window{
         this.playerInterface.stage.addActor(this.craftingWindow);
 
         this.craftingWindowTable = new Table();
-        this.craftingWindow.addActor(this.craftingWindowTable);
+        this.craftingWindow.add(this.craftingWindowTable).expand().fill().pad(0, 0, 0, 0);
 
         //Make the lists.
         this.aList = new VerticalGroup();
@@ -149,8 +152,8 @@ public class CraftingWindow extends Window{
         this.ipContainer.top().left().pad(0, 3, 0, 3).fillX().setClip(true);
         this.sContainer.top().left().pad(0, 3, 0, 3).fillX().setClip(true);
 
-        this.craftingWindowTable.setFillParent(true);
         this.craftingWindowTable.left().top().pad(20, 20, 20, 20);
+
 
         Label.LabelStyle titleStyle = new Label.LabelStyle(this.playerInterface.UIStyle.font, Color.BLACK);
         Label craftTitle = new Label("Craftable", titleStyle);
@@ -165,7 +168,6 @@ public class CraftingWindow extends Window{
 
         this.previewWindow = new Table();
         this.previewWindow.background(new TextureRegionDrawable(this.selectBackground));
-
 
         //Add the lists to the crafting window
         this.craftingWindowTable.add(craftTitle).prefSize(150, 25).maxSize(150, 25).expandX().fillX().center();
@@ -223,7 +225,7 @@ public class CraftingWindow extends Window{
             }
         });
 
-        //this.playerInterface.stage.setDebugAll(true);
+        this.playerInterface.stage.setDebugAll(true);
     }
 
     /**
@@ -345,7 +347,7 @@ public class CraftingWindow extends Window{
                 @Override
                 public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
                     if(selectedLabel != null) selectedLabel.getStyle().background = null;
-
+                    craftButton.setDisabled(false);
                     selectedItem = itemRef;
                     selectedLabel = label;
                     justSelected = true;
@@ -374,12 +376,17 @@ public class CraftingWindow extends Window{
         this.craftButton.addListener(new ClickListener(){
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                craftingStation.addCraftingJob(selectedItem.getItemName(), 1);
-                buildAvailableList();
-                craftButtonPressed = true;
-                super.touchUp(event, x, y, pointer, button);
+                if(selectedItem != null) {
+                    craftingStation.addCraftingJob(selectedItem.getItemName(), 1);
+                    buildAvailableList();
+                    craftButtonPressed = true;
+                    super.touchUp(event, x, y, pointer, button);
+                }
             }
         });
+
+        //Initially set as disabled
+        this.craftButton.setDisabled(true);
     }
 
     @Override

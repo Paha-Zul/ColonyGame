@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.entity.Entity;
 
+import java.util.Iterator;
 import java.util.Stack;
 
 /**
@@ -30,7 +31,13 @@ public class WindowManager {
 
         //Update the list. We the weird assignment means that if the moused over boolean is ever true this update, it stays true.
         this.windowList.forEach(window -> this.mousedOver = window.update(batch) || this.mousedOver);
-        this.windowStack.forEach(window -> this.mousedOver = window.update(batch) || this.mousedOver);
+
+        Iterator<Window> iter = this.windowStack.iterator();
+        while(iter.hasNext()){
+            Window window = iter.next();
+            if(window.destroyed) iter.remove();
+            else window.update(batch);
+        }
     }
 
     /**

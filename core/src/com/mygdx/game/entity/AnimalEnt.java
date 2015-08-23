@@ -23,7 +23,7 @@ public class AnimalEnt extends Entity{
 
     public AnimalEnt(DataBuilder.JsonAnimal animalRef, Vector2 position, float rotation, String[] graphicName, int drawLevel) {
         super(position, rotation, drawLevel);
-        this.getTags().addTags("animal", "alive");
+        this.getTags().addTags("animal", "alive", "selectable");
         this.name = "AnimalDefault";
 
         //Add the graphic.

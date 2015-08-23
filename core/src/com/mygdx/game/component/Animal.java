@@ -53,7 +53,7 @@ public class Animal extends Component implements IInteractable{
     public void load() {
         if(this.animalRef == null) this.animalRef = DataManager.getData(this.animalRefName, DataBuilder.JsonAnimal.class);
 
-        if(animalRef == null) System.out.println("LOading animal with anme: "+this.animalRefName);
+        if(animalRef == null) System.out.println("Loading animal with anme: "+this.animalRefName);
         if(animalRef.boss) this.getEntityOwner().getTags().addTag("boss");
         this.getEntityOwner().name = animalRef.displayName;
 
@@ -111,6 +111,7 @@ public class Animal extends Component implements IInteractable{
     public void update(float delta) {
         super.update(delta);
 
+        //If our attack list is not empty and our current target is invalid, attack stuff!
         boolean validTarget = behComp.getBlackBoard().target != null && behComp.getBlackBoard().target.isValid() && behComp.getBlackBoard().target.getTags().hasTag("alive");
         if(attackList.size() > 0 && !validTarget) {
             Entity target = attackList.poll(); //Get the next target off of the list.
@@ -120,12 +121,12 @@ public class Animal extends Component implements IInteractable{
     }
 
     private void attackTarget(Entity target){
-        //If the target is not valid (not alive), let's not use it!
-        if(target.getTags().hasTag("alive")) behComp.getBlackBoard().target = target;
-        else behComp.getBlackBoard().target = null;
-
         //If we are already attacking something, give up.
         if(this.behComp.getBehaviourStates().getCurrState().stateName.equals("attackTarget")) return;
+
+        //If the target is alive (valid), use it. Otherwise, return.
+        if(target.getTags().hasTag("alive")) behComp.getBlackBoard().target = target;
+        else return;
 
         //Attack single or group attack.
         if(this.group != null) groupAttack(behComp.getBlackBoard().target);
@@ -145,8 +146,8 @@ public class Animal extends Component implements IInteractable{
             //Otherwise, prepare to be a resource!
             else {
                 EventSystem.unregisterEntity(this.owner); //Unregister for events.
-                this.owner.getTransform().setRotation(180);
-                this.collider.body.setLinearVelocity(0, 0);
+                this.owner.getTransform().setRotation(180); //Flip me over
+                this.collider.body.setLinearVelocity(0, 0); //0 velocity!
                 this.owner.getTags().clearTags(); //Clear all tags
                 this.owner.getTags().addTag("resource"); //Add the resource tag
                 Resource res = this.owner.addComponent(new Resource()); //Add a Resource Component.
@@ -172,11 +173,10 @@ public class Animal extends Component implements IInteractable{
         //If it is not a detector, the other is a bullet, hurt me! and kill the bullet!
         if (!myInfo.tags.hasTag(Constants.COLLIDER_DETECTOR) && otherInfo.owner.getTags().hasTag("projectile")) {
             this.getComponent(Stats.class).getStat("health").addToCurrent(-20);
-            behComp.getBlackBoard().target = otherInfo.owner.getComponent(Projectile.class).projOwner;
 
             //If not aggressive, flee. Otherwise, attack!
             if(!animalRef.aggressive) behComp.changeTaskImmediate("fleeTarget");
-            else attackTarget(behComp.getBlackBoard().target);
+            else attackTarget(otherInfo.owner.getComponent(Projectile.class).projOwner);
             otherInfo.owner.setToDestroy();
 
         //If I am a detector and the other is a colonist, we must attack it!

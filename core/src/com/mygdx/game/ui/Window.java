@@ -12,7 +12,7 @@ import com.mygdx.game.util.gui.GUI;
  * An abstract Window class for displaying UI elements.
  */
 public abstract class Window{
-    protected boolean active=true, draggable = false;
+    protected boolean active=true, draggable = false, destroyed = false;
     protected int mousedState = 0;
     protected PlayerInterface playerInterface;
     protected Rectangle mainWindowRect;
@@ -84,7 +84,7 @@ public abstract class Window{
     }
 
     public void destroy(){
-
+        this.destroyed = true;
     }
 
     /**
