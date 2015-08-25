@@ -1,5 +1,7 @@
 package com.mygdx.game.component;
 
+import com.mygdx.game.component.collider.BoxCollider;
+import com.mygdx.game.component.graphic.GraphicIdentity;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.interfaces.IInteractable;
 import com.mygdx.game.interfaces.IOwnable;
@@ -51,6 +53,9 @@ public class Building extends Component implements IOwnable, IInteractable{
         this.owner.name = jBuilding.displayName; //Set the display name.
 
         this.load();
+
+        GraphicIdentity identity = this.getComponent(GraphicIdentity.class);
+        this.getComponent(BoxCollider.class).setBodyPosition(identity.getSprite().getX(), identity.getSprite().getY());
     }
 
     @Override

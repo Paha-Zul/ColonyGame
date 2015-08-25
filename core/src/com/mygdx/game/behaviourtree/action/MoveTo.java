@@ -52,7 +52,7 @@ public class MoveTo extends LeafTask{
 
         //If the target is null, path is null, or path is empty, end this job with failure!
         if(this.path == null || this.path.size() < 1){
-            this.collider.body.setLinearVelocity(0, 0);
+            this.collider.getBody().setLinearVelocity(0, 0);
             this.control.finishWithSuccess();
             if(this.path != null) this.path.clear();
             this.path = null;
@@ -60,13 +60,13 @@ public class MoveTo extends LeafTask{
         }
 
         if(this.getControl().getCallbacks().failCriteria != null && this.getControl().getCallbacks().failCriteria.test(this)){
-            this.collider.body.setLinearVelocity(0, 0);
+            this.collider.getBody().setLinearVelocity(0, 0);
             this.control.finishWithFailure();
             return;
         }
 
         if(this.getControl().getCallbacks().successCriteria != null && this.getControl().getCallbacks().successCriteria.test(this)){
-            this.collider.body.setLinearVelocity(0, 0);
+            this.collider.getBody().setLinearVelocity(0, 0);
             this.control.finishWithSuccess();
             return;
         }
@@ -80,7 +80,7 @@ public class MoveTo extends LeafTask{
         float x = (float)Math.cos(rot)*this.blackBoard.moveSpeed*delta;
         float y = (float)Math.sin(rot)*this.blackBoard.moveSpeed*delta;
 
-        this.collider.body.setLinearVelocity(x, y);
+        this.collider.getBody().setLinearVelocity(x, y);
 
         if((Math.abs(transform.getPosition().x - nodeX) + Math.abs(transform.getPosition().y - nodeY) <= completeDst*(delta*blackBoard.moveSpeed))) {
             this.path.removeLast();
@@ -89,7 +89,7 @@ public class MoveTo extends LeafTask{
 
     @Override
     public void end() {
-        if(this.collider != null) this.collider.body.setLinearVelocity(0, 0);
+        if(this.collider != null) this.collider.getBody().setLinearVelocity(0, 0);
         super.end();
     }
 }

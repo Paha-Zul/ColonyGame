@@ -32,7 +32,7 @@ public class CraftingStation extends Component implements IOwnable{
     private String[] craftingList;
 
     public CraftingStation() {
-
+        this.setActive(false);
     }
 
     @Override

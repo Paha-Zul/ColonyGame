@@ -55,7 +55,7 @@ public class Projectile extends Component{
 			float rot = this.owner.getTransform().getRotation();
 			float x = MathUtils.cosDeg(rot) * speed * delta;
 			float y = MathUtils.sinDeg(rot) * speed * delta;
-			coll.body.setLinearVelocity(x, y);
+			coll.getBody().setLinearVelocity(x, y);
 		}
 	}
 }

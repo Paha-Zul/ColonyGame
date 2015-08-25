@@ -90,7 +90,7 @@ public class Animal extends Component implements IInteractable{
     public void addCircleSensor(){
         CircleShape circle = new CircleShape();
         circle.setRadius(10f);
-        attackSensor = collider.body.createFixture(circle, 1f);
+        attackSensor = collider.getBody().createFixture(circle, 1f);
         attackSensor.setSensor(true);
         Collider.ColliderInfo fixtureInfo = new Collider.ColliderInfo(this.owner);
         fixtureInfo.tags.addTag(Constants.COLLIDER_DETECTOR);
@@ -147,7 +147,7 @@ public class Animal extends Component implements IInteractable{
             else {
                 EventSystem.unregisterEntity(this.owner); //Unregister for events.
                 this.owner.getTransform().setRotation(180); //Flip me over
-                this.collider.body.setLinearVelocity(0, 0); //0 velocity!
+                this.collider.getBody().setLinearVelocity(0, 0); //0 velocity!
                 this.owner.getTags().clearTags(); //Clear all tags
                 this.owner.getTags().addTag("resource"); //Add the resource tag
                 this.owner.destroyComponent(BehaviourManagerComp.class); //Destroy the BehaviourManagerComp
@@ -311,6 +311,6 @@ public class Animal extends Component implements IInteractable{
     @Override
     public void destroy(Entity destroyer) {
         super.destroy(destroyer);
-        if(attackSensor != null) this.collider.body.destroyFixture(attackSensor);
+        if(attackSensor != null) this.collider.getBody().destroyFixture(attackSensor);
     }
 }

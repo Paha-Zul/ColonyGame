@@ -70,13 +70,13 @@ public class Colonist extends Component implements IInteractable, IOwnable{
     @JsonIgnore
     //Creates a range sensor for when we get a ranged weapon.
     private void createRangeSensor(){
-        if(this.collider == null || this.collider.body == null || this.collider.fixture == null) return;
+        if(this.collider == null || this.collider.getBody() == null || this.collider.getBody() == null) return;
         CircleShape shape = new CircleShape();
         shape.setRadius(0f);
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.isSensor = true;
         fixtureDef.shape = shape;
-        this.fixture = this.collider.body.createFixture(fixtureDef);
+        this.fixture = this.collider.getBody().createFixture(fixtureDef);
         Collider.ColliderInfo info = new Collider.ColliderInfo(this.owner);
         info.tags.addTag("attack_sensor");
         this.fixture.setUserData(info);
@@ -325,7 +325,7 @@ public class Colonist extends Component implements IInteractable, IOwnable{
             this.owner.getTransform().setRotation(90f);
             this.owner.destroyComponent(BehaviourManagerComp.class);
             this.manager = null;
-            this.collider.body.destroyFixture(this.fixture); //TODO THIS PROBABLY WILL BREAK IT!
+            this.collider.getBody().destroyFixture(this.fixture); //TODO THIS PROBABLY WILL BREAK IT!
             this.stats.clearTimers();
             GridComponent gridComp = this.getComponent(GridComponent.class);
             gridComp.setActive(false);

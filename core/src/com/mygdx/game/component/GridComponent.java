@@ -48,8 +48,8 @@ public class GridComponent extends Component{
             Collider collider = this.getComponent(Collider.class);
             float minX=0, maxX=0, minY=0, maxY=0;
 
-            if(collider.fixture.getShape().getType() == Shape.Type.Polygon){
-                PolygonShape shape = (PolygonShape)collider.fixture.getShape();
+            if(collider.getMainFixture().getShape().getType() == Shape.Type.Polygon){
+                PolygonShape shape = (PolygonShape)collider.getMainFixture().getShape();
                 Vector2 vertex = new Vector2();
                 //This basically forms the bounding box.
                 for(int i=0;i<shape.getVertexCount();i++){
@@ -59,8 +59,8 @@ public class GridComponent extends Component{
                     if(vertex.x > maxX || minX == 0) maxX = vertex.x;
                     if(vertex.y > maxY || minY == 0) maxY = vertex.y;
                 }
-            }else if(collider.fixture.getShape().getType() == Shape.Type.Circle){
-                CircleShape shape = (CircleShape)collider.fixture.getShape();
+            }else if(collider.getMainFixture().getShape().getType() == Shape.Type.Circle){
+                CircleShape shape = (CircleShape)collider.getMainFixture().getShape();
                 //Just use the radius if a circle
                 minX = minY = -shape.getRadius()/2;
                 maxX = maxY = shape.getRadius()/2;

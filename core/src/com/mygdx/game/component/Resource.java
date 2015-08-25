@@ -124,8 +124,9 @@ public class Resource extends Component implements IInteractable{
 
         owner.name = this.displayName;
 
-        if(resRef.resourceType.equals("water"))
+        if(resRef.resourceType.equals("water")) {
             owner.active = false;
+        }
     }
 
     @Override

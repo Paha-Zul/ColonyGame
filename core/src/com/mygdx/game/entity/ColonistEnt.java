@@ -2,11 +2,9 @@ package com.mygdx.game.entity;
 
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
-import com.badlogic.gdx.physics.box2d.CircleShape;
-import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.component.*;
-import com.mygdx.game.component.collider.Collider;
+import com.mygdx.game.component.collider.CircleCollider;
 import com.mygdx.game.component.graphic.ColonistGraphic;
 import com.mygdx.game.util.Constants;
 
@@ -24,7 +22,7 @@ public class ColonistEnt extends Entity{
         this.name = "Colonist";
         this.tags.addTags("humanoid", "colonist", "alive", "selectable");
 
-        this.components.addComponent(new ColonistGraphic()).setSprite(graphicName[0], graphicName[1]);
+        this.addComponent(new ColonistGraphic()).setSprite(graphicName[0], graphicName[1]);
         this.addComponent(new Colonist());
         this.addComponent(new GridComponent()).setGridType(Constants.GRIDACTIVE).setGrid(ColonyGame.worldGrid).setExploreRadius(3);
         this.addComponent(new Interactable()).setInterType("humanoid");
@@ -48,22 +46,9 @@ public class ColonistEnt extends Entity{
     }
 
     private void makeCollider(){
-        BodyDef bodyDef = new BodyDef();
-        bodyDef.type = BodyDef.BodyType.DynamicBody;
-        //bodyDef.active = false;
+        CircleCollider collider = getComponent(CircleCollider.class);
+        if(collider == null) collider = this.addComponent(new CircleCollider());
+        collider.setupBody(BodyDef.BodyType.DynamicBody, ColonyGame.world, this.getTransform().getPosition(), 1, true, true);
 
-        CircleShape circle = new CircleShape();
-        circle.setRadius(0.5f);
-        FixtureDef fixDef = new FixtureDef();
-        fixDef.isSensor = true;
-        fixDef.shape = circle;
-
-        Collider collider = getComponent(Collider.class);
-        if(collider == null) collider = this.addComponent(new Collider());
-        collider.setWorld(ColonyGame.world);
-        collider.setBody(bodyDef);
-        collider.setFixture(fixDef);
-
-        circle.dispose();
     }
 }

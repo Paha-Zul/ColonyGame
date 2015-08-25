@@ -44,20 +44,20 @@ public class Follow extends LeafTask{
 
         //If the path is null or empty, simply set velocity to 0 and return.
         if(this.path == null || this.path.size() < 1 || (control.callbacks.returnCriteria != null && control.callbacks.returnCriteria.test(this))){
-            this.collider.body.setLinearVelocity(0, 0);
+            this.collider.getBody().setLinearVelocity(0, 0);
             return;
         }
 
         //If our fail criteria passes, fail this task.
         if(this.getControl().getCallbacks().failCriteria != null && this.getControl().getCallbacks().failCriteria.test(this)){
-            this.collider.body.setLinearVelocity(0, 0);
+            this.collider.getBody().setLinearVelocity(0, 0);
             this.control.finishWithFailure();
             return;
         }
 
         //If our success criteria passes, succeed this task.
         if(this.getControl().getCallbacks().successCriteria != null && this.getControl().getCallbacks().successCriteria.test(this)){
-            this.collider.body.setLinearVelocity(0, 0);
+            this.collider.getBody().setLinearVelocity(0, 0);
             this.control.finishWithSuccess();
             return;
         }
@@ -88,16 +88,16 @@ public class Follow extends LeafTask{
             rot = (Math.atan2(nodeY - transform.getPosition().y, nodeX - transform.getPosition().x));
             x = (float)Math.cos(rot)*this.blackBoard.moveSpeed*delta;
             y = (float)Math.sin(rot)*this.blackBoard.moveSpeed*delta;
-            this.collider.body.setLinearVelocity(x, y);
+            this.collider.getBody().setLinearVelocity(x, y);
 
         //If we are within the stop range, then don't move!
         }else
-            collider.body.setLinearVelocity(0, 0);
+            collider.getBody().setLinearVelocity(0, 0);
     }
 
     @Override
     public void end() {
-        if(this.collider != null) this.collider.body.setLinearVelocity(0, 0);
+        if(this.collider != null) this.collider.getBody().setLinearVelocity(0, 0);
         this.transform = null;
         this.collider = null;
         this.name = null;

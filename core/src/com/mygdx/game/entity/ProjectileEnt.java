@@ -2,11 +2,9 @@ package com.mygdx.game.entity;
 
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
-import com.badlogic.gdx.physics.box2d.CircleShape;
-import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.component.Projectile;
-import com.mygdx.game.component.collider.Collider;
+import com.mygdx.game.component.collider.CircleCollider;
 import com.mygdx.game.component.graphic.GraphicIdentity;
 
 /**
@@ -21,7 +19,7 @@ public class ProjectileEnt extends Entity{
         super(position, rotation, drawLevel);
         this.tags.addTag("projectile");
 
-        ((GraphicIdentity)this.components.addComponent(new GraphicIdentity())).setSprite(graphicName[0], graphicName[1]);
+        this.components.addComponent(new GraphicIdentity()).setSprite(graphicName[0], graphicName[1]);
         this.addComponent(new Projectile());
         makeCollider();
     }
@@ -37,24 +35,8 @@ public class ProjectileEnt extends Entity{
     }
 
     private void makeCollider(){
-
-        BodyDef bodyDef = new BodyDef();
-        bodyDef.type = BodyDef.BodyType.DynamicBody;
-        bodyDef.bullet = true;
-        //bodyDef.active = false;
-
-        CircleShape circle = new CircleShape();
-        circle.setRadius(0.5f);
-        FixtureDef fixDef = new FixtureDef();
-        fixDef.isSensor = true;
-        fixDef.shape = circle;
-
-        Collider collider = getComponent(Collider.class);
-        if(collider == null) collider = this.addComponent(new Collider());
-        collider.setWorld(ColonyGame.world);
-        collider.setBody(bodyDef);
-        collider.setFixture(fixDef);
-
-        circle.dispose();
+        CircleCollider collider = getComponent(CircleCollider.class);
+        if(collider == null) collider = this.addComponent(new CircleCollider());
+        collider.setupBody(BodyDef.BodyType.DynamicBody, ColonyGame.world, this.getTransform().getPosition(), 1, true, true);
     }
 }

@@ -15,52 +15,16 @@ import org.codehaus.jackson.annotate.JsonProperty;
  */
 public class Collider extends Component implements IScalable{
     @JsonIgnore
-    public Body body;
+    protected Body body;
     @JsonIgnore
-    public Fixture fixture;
+    protected Fixture fixture;
     @JsonIgnore
-    private World world;
+    protected World world;
     @JsonProperty
-    private float originalRadius;
+    protected float originalRadius;
 
     public Collider(){
 
-    }
-
-    /**
-     * Uses default values to create the body and fixture. Can be changed through calls to the body and fixture.
-     * @param world The Box2D saveContainer.
-     * @param shape The Shape that the body should be.
-     */
-    public Collider(World world, Shape shape) {
-        super();
-
-        this.world = world;
-        BodyDef bodyDef = new BodyDef();
-        this.body = world.createBody(bodyDef);
-
-        FixtureDef fixtureDef = new FixtureDef();
-        fixtureDef.shape = shape;
-
-        this.fixture = body.createFixture(fixtureDef);
-
-        this.originalRadius = this.fixture.getShape().getRadius();
-
-        shape.dispose();
-    }
-
-    /**
-     * A more advanced setup which
-     * @param world The Box2D saveContainer.
-     * @param bodyDef The definition of the body.
-     * @param fixtureDef The definition of the fixture.
-     */
-    public Collider(World world, BodyDef bodyDef, FixtureDef fixtureDef){
-        this.world = world;
-        this.body = world.createBody(bodyDef);
-
-        this.fixture = this.body.createFixture(fixtureDef);
-        this.originalRadius = this.fixture.getShape().getRadius();
     }
 
     @Override
@@ -137,6 +101,22 @@ public class Collider extends Component implements IScalable{
         fixtureInfo.tags.addTag(Constants.COLLIDER_CLICKABLE);
         fixtureInfo.tags.addTag("entity");
         this.fixture.setUserData(fixtureInfo);
+    }
+
+    public void setBodyPosition(Vector2 position){
+        this.setBodyPosition(position.x, position.y);
+    }
+
+    public void setBodyPosition(float x, float y){
+        this.body.getPosition().set(x, y);
+    }
+
+    public Body getBody(){
+        return this.body;
+    }
+
+    public Fixture getMainFixture(){
+        return this.fixture;
     }
 
     @Override
