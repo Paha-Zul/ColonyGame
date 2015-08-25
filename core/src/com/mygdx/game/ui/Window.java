@@ -115,6 +115,10 @@ public abstract class Window{
         this.target = target;
     }
 
+    public boolean isDestroyed(){
+        return this.destroyed;
+    }
+
     public final Entity getTarget(){
         return this.target;
     }

@@ -1,5 +1,8 @@
 package com.mygdx.game.util.managers;
 
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.mygdx.game.ColonyGame;
 import com.mygdx.game.util.Logger;
 
 import java.util.HashMap;
@@ -41,10 +44,22 @@ public class DataManager {
      */
     public static <T> T getData(String dataName, Class<T> c){
         HashMap<String, Object> map = dataMap.get(c);
-        //if(map == null || !map.containsKey(dataName)) GH.writeErrorMessage("Data of class "+c.getName()+" with compName "+dataName+" does not exist!");
+        if(map == null) Logger.log(Logger.ERROR, "The map for class type "+c.getSimpleName()+" doesn't exist. This will crash...");
         Object data = map.get(dataName);
         if(data == null) Logger.log(Logger.WARNING, "Data with "+dataName+" trying to be retrieved from the DataManager doesn't exist. Hope this null value is handled...");
         return (T)data;
+    }
+
+    /**
+     * Convenience method to get a TextureRegion from an Atlas without having to go through the AssetManager for the Atlas.
+     * @param dataName The texture name.
+     * @param atlasName The atlas name.
+     * @return The TextureRegion from the Atlas if the Atlas was found and the TextureRegion was found in the Atlas. Null otherwise.
+     */
+    public static TextureRegion getTextureFromAtlas(String dataName, String atlasName){
+        TextureAtlas atlas = ColonyGame.assetManager.get(atlasName, TextureAtlas.class);
+        if(atlas == null) return null;
+        return atlas.findRegion(dataName);
     }
 
     public static <T> String[] getKeyListForType(Class <T> c){

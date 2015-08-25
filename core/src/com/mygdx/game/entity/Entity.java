@@ -202,8 +202,6 @@ public class Entity implements IDelayedDestroyable, ISaveable{
 		this.destroyed = true;
 	}
 
-
-
     public static class Components implements IDelayedDestroyable{
 		private Transform transform;
         private GraphicIdentity identity;

@@ -62,9 +62,9 @@ public class Colonist extends Component implements IInteractable, IOwnable{
 
     @Override
     public void start() {
-        super.start();
         load();
         this.createStats();
+        super.start();
     }
 
     @JsonIgnore
@@ -193,8 +193,10 @@ public class Colonist extends Component implements IInteractable, IOwnable{
             node.userData = taskInfo;
         }
 
+        //Add a list of nodes under the "gather" node.
         nodeList = taskTree.addNode("gather", "food", "water", "herbs", "wood", "stone", "metal");
 
+        //For each node we added, do stuff...
         for(Tree.TreeNode<BehaviourManagerComp.TaskInfo> node : nodeList) {
             BehaviourManagerComp.TaskInfo taskInfo = new BehaviourManagerComp.TaskInfo(node.nodeName);
             taskInfo.callback = () -> {
@@ -206,6 +208,7 @@ public class Colonist extends Component implements IInteractable, IOwnable{
             node.userData = taskInfo;
         }
 
+        //Add a back button in the tree.
         Tree.TreeNode<BehaviourManagerComp.TaskInfo> back = taskTree.addNode("gather", "back");
         BehaviourManagerComp.TaskInfo taskInfo = new BehaviourManagerComp.TaskInfo(back.nodeName);
         taskInfo.callback = taskTree::moveUp;
@@ -217,6 +220,9 @@ public class Colonist extends Component implements IInteractable, IOwnable{
         });
     }
 
+    /**
+     * Creates the behaviour states for the Colonist.
+     */
     private void createBehaviourStates(){
         getBehManager().getBehaviourStates().addState("gather", false, new StateSystem.DefineTask("gather", "idle")).setRepeat(true);
         getBehManager().getBehaviourStates().addState("explore", false, new StateSystem.DefineTask("explore", "idle")).setRepeat(true);
@@ -438,6 +444,11 @@ public class Colonist extends Component implements IInteractable, IOwnable{
     @JsonProperty("lastName")
     public String getLastName() {
         return lastName;
+    }
+
+    @JsonIgnore
+    public Effects getEffects(){
+        return this.effects;
     }
 
     @JsonProperty

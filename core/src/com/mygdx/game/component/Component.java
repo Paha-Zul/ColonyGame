@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.interfaces.IDelayedDestroyable;
 import com.mygdx.game.interfaces.ISaveable;
+import com.mygdx.game.util.EventSystem;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
@@ -34,6 +35,7 @@ public abstract class Component implements IDelayedDestroyable, ISaveable {
      */
 	public void created(Entity owner){
 		this.owner = owner;
+		EventSystem.notifyGameEvent("component_created", this.getClass(), this);
 	}
 
 	/**
@@ -49,7 +51,8 @@ public abstract class Component implements IDelayedDestroyable, ISaveable {
 	 */
 	public void start(){
 		this.started = true;
-	}
+        EventSystem.notifyGameEvent("component_started", this.getClass(), this);
+    }
 
 	@Override
 	public void save() {

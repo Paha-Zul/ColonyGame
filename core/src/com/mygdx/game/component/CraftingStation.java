@@ -15,6 +15,9 @@ import java.util.LinkedList;
 
 /**
  * Created by Paha on 8/18/2015.
+ * <p>A Component that designates an Entity as a crafting station, meaning items can be crafted on this Entity.</p>
+ * <p>The Entity that contains the crafting station must have an inventory to work with. It also needs an Enterable
+ * Component for colonists to enter to craft items.</p>
  */
 public class CraftingStation extends Component implements IOwnable{
     /** Jobs that have not been started yet. */
@@ -69,7 +72,7 @@ public class CraftingStation extends Component implements IOwnable{
         super.load();
 
         this.inventory = this.getComponent(Inventory.class);
-        if(this.inventory == null) Logger.log(Logger.ERROR, "CraftingStation on Entity "+this.owner.name+" does not have an inventory and probably should. Get ready for a crash!");
+        if(this.inventory == null) Logger.log(Logger.ERROR, "CraftingStation on Entity "+this.owner.name+" does not have an inventory and probably should. Get ready for a crash!", true);
     }
 
     @Override
@@ -107,6 +110,10 @@ public class CraftingStation extends Component implements IOwnable{
         return !this.stalledJobs.isEmpty();
     }
 
+    /**
+     * Sets the items that this CraftingStation can craft.
+     * @param craftingList The String array of item names.
+     */
     public void setCraftingList(String[] craftingList){
         this.craftingList = craftingList;
     }
@@ -214,22 +221,37 @@ public class CraftingStation extends Component implements IOwnable{
         return list;
     }
 
+    /**
+     * @return A String array of item names that can be crafting by this building.
+     */
     public String[] getCraftingList(){
         return this.craftingList;
     }
 
+    /**
+     * @return The available jobs list.
+     */
     public LinkedList<CraftingJob> getAvailableList(){
         return this.availableJobs;
     }
 
+    /**
+     * @return The in-progress jobs list.
+     */
     public LinkedList<CraftingJob> getInProgressJobs(){
         return this.inProgressJobs;
     }
 
+    /**
+     * @return The stalled jobs list.
+     */
     public LinkedList<CraftingJob> getStalledJobs(){
         return this.stalledJobs;
     }
 
+    /**
+     * @return The Inventory that this CraftingStation is using for items.
+     */
     public Inventory getInventory(){
         return this.inventory;
     }
@@ -249,6 +271,9 @@ public class CraftingStation extends Component implements IOwnable{
         return this.owningColony;
     }
 
+    /**
+     * Holds important information about a crafting job including the building, item reference, item recipe, amount, and percentage done.
+     */
     public static class CraftingJob{
         public Building building;
         public DataBuilder.JsonItem itemRef;

@@ -1,9 +1,10 @@
-package com.mygdx.game.ui;
+package com.mygdx.game.util.managers;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.entity.Entity;
+import com.mygdx.game.ui.*;
 
 import java.util.Iterator;
 import java.util.Stack;
@@ -35,7 +36,7 @@ public class WindowManager {
         Iterator<Window> iter = this.windowStack.iterator();
         while(iter.hasNext()){
             Window window = iter.next();
-            if(window.destroyed) iter.remove();
+            if(window.isDestroyed()) iter.remove();
             else window.update(batch);
         }
     }
@@ -62,7 +63,7 @@ public class WindowManager {
         //TODO We want to check for class type AND target. What if I wanted a crafting window and information window open on the same target?
         //Search for any duplicate window. If found, return false.
         for(Window window : this.windowStack)
-            if(window.target != null && window.target == target)
+            if(window.getTarget() != null && window.getTarget() == target && window.getClass() == clazz)
                 return false;
 
         //Let's create our window!
@@ -71,6 +72,8 @@ public class WindowManager {
             window = new ColonyWindow(pi, target);
         else if(clazz == CraftingWindow.class)
             window = new CraftingWindow(pi, target);
+        else if(clazz == PlacingConstructionWindow.class)
+            window = new PlacingConstructionWindow(pi, target);
 
         //Push the window and force a resize. Many windows initially set many of their sizes by using the resize method.
         this.windowStack.push(window);

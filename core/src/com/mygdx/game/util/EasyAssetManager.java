@@ -12,12 +12,18 @@ public class EasyAssetManager extends AssetManager{
     HashMap<String, DataReference> dataMap = new HashMap<>(100);
 
     public synchronized <T> T get(String commonName, Class<T> type) {
+        //Get the reference from the data map.
         DataReference ref = dataMap.get(commonName);
         if(ref == null) {
-            if(this.isLoaded(commonName))
+            //If it's null, let's try to find it in the underlying AssetManager by the common name. This really only is useful in cases where the underlying AssetManager loads its own file,
+            //for instance, when you load an Atlas file and it loads the images for you.
+            Logger.log(Logger.WARNING, "Data named "+commonName+" was not found in the EasyAssetManager. This could be bad. Trying to find it by the full path reference in the asset manager.");
+            if(this.isLoaded(commonName)) {
+                Logger.log(Logger.WARNING, commonName + " was found by the path in the underlying AssetManager. We're good!");
                 return super.get(commonName, type);
+            }
 
-            //GH.writeErrorMessage("Can't find file "+commonName+". Check to make sure it exists.");
+            Logger.log(Logger.WARNING, "Data named "+commonName+" was not found by the full path in the AssetManager. Crash incoming?");
             return null;
         }
         return super.get(dataMap.get(commonName).path, type);
@@ -33,6 +39,10 @@ public class EasyAssetManager extends AssetManager{
         dataMap.put(commonName, new DataReference(commonName, fileName));
     }
 
+    /**
+     * Basically holds a link from a simple name to the actual path. This makes it
+     * a lot easier to load an asset from the manager ("somePicture" vs "img/misc/buttons/somePicture.png")
+     */
     private class DataReference{
         private String name, path;
 

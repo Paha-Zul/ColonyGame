@@ -152,10 +152,19 @@ public class Stats extends Component{
     public static class Stat{
         @JsonIgnore
         public Functional.Callback onZero, onFull;
+        /**
+         * These are colors for usages like displaying small quick-view bars. Not actually used for the full sized version on the selected panel.
+         */
         @JsonIgnore
         public Color color = Color.GREEN;
         @JsonProperty
-        public String name, effect;
+        public String name;
+        /**
+         * The effect of the stat the influences it. For instance, the stat 'food' can have an effect of 'feed' where any item consumed with 'feed'
+         * will increase the current value.
+         */
+        @JsonProperty
+        public String effect;
         @JsonProperty
         private float current, max;
 

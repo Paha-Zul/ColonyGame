@@ -16,8 +16,12 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.QueryCallback;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.Align;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.mygdx.game.ColonyGame;
@@ -29,9 +33,7 @@ import com.mygdx.game.interfaces.IGUI;
 import com.mygdx.game.util.*;
 import com.mygdx.game.util.gui.Button;
 import com.mygdx.game.util.gui.GUI;
-import com.mygdx.game.util.managers.DataManager;
-import com.mygdx.game.util.managers.NotificationManager;
-import com.mygdx.game.util.managers.PlayerManager;
+import com.mygdx.game.util.managers.*;
 import com.mygdx.game.util.timer.OneShotTimer;
 import com.mygdx.game.util.timer.RepeatingTimer;
 import com.mygdx.game.util.timer.Timer;
@@ -147,9 +149,6 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         this.world = world;
         this.whiteTexture = new TextureRegion(WorldGen.whiteTex);
 
-        this.windowManager = new WindowManager();
-        this.windowManager.addWindowToSelfManagingList(new SelectedWindow(this));
-
         this.buttonList = new Array<>();
 
         this.eventDescStyle = new GUI.GUIStyle();
@@ -215,6 +214,34 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         Gdx.input.setInputProcessor(multiplexer);
 
         ColonyGame.camera.zoom = 1.5f;
+
+        this.windowManager = new WindowManager();
+        this.windowManager.addWindowToSelfManagingList(new SelectedWindow(this));
+        this.windowManager.addWindowToSelfManagingList(new PlacingConstructionWindow(this, null));
+
+        this.makeBuildButton();
+    }
+
+    private void makeBuildButton(){
+        TextureRegionDrawable up = new TextureRegionDrawable(new TextureRegion(ColonyGame.assetManager.get("defaultButton_normal", Texture.class)));
+        TextureRegionDrawable over = new TextureRegionDrawable(new TextureRegion(ColonyGame.assetManager.get("defaultButton_moused", Texture.class)));
+        TextureRegionDrawable down = new TextureRegionDrawable(new TextureRegion(ColonyGame.assetManager.get("defaultButton_clicked", Texture.class)));
+
+        TextButton.TextButtonStyle style = new TextButton.TextButtonStyle(up, down, up, this.UIStyle.font);
+        style.over = style.checkedOver = over;
+
+        TextButton button = new TextButton("Build", style);
+        button.setPosition(0,0);
+        this.stage.addActor(button);
+
+        button.addListener(new InputListener(){
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                windowManager.addWindowIfNotExistByTarget(PlacingConstructionWindow.class, null, PlayerInterface.getInstance());
+                PlaceConstructionManager.instance().setPlacingConstruction("workshop");
+                return true;
+            }
+        });
     }
 
     private void generateFonts(){
