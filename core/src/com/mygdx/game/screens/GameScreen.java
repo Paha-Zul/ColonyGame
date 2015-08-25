@@ -162,20 +162,18 @@ public class GameScreen implements Screen{
         }
 
         //Spawns the Colony Entity and centers the camera on it.
-        BuildingEntity colonyEnt = new BuildingEntity(start, 0, new String[]{"Colony",""}, 10);
+        BuildingEntity colonyEnt = new BuildingEntity(start, 0, "colony_building", 10);
         ListHolder.addEntity(colonyEnt);
         ColonyGame.camera.position.set(colonyEnt.getTransform().getPosition().x, colonyEnt.getTransform().getPosition().y, 0);
         Building colonyBuilding = colonyEnt.getComponent(Building.class);
-        colonyBuilding.setBuildingName("colony_building");
         colony.addOwnedToColony(colonyBuilding);
         colonyEnt.getComponent(Constructable.class).setComplete();
 
         //Spawns the Equipment building.
-        BuildingEntity equipEnt = new BuildingEntity(new Vector2(start.x - 5, start.y - 5), 0, new String[]{"Colony",""}, 10);
+        BuildingEntity equipEnt = new BuildingEntity(new Vector2(start.x - 5, start.y - 5), 0, "workshop", 10);
         equipEnt.getTags().addTag("constructing");
         ListHolder.addEntity(equipEnt);
         Building equipBuilding = equipEnt.getComponent(Building.class);
-        equipBuilding.setBuildingName("workshop");
         colony.addOwnedToColony(equipBuilding);
         equipBuilding.getComponent(Constructable.class).setComplete();
 

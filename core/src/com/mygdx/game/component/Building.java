@@ -1,7 +1,5 @@
 package com.mygdx.game.component;
 
-import com.mygdx.game.component.collider.BoxCollider;
-import com.mygdx.game.component.graphic.GraphicIdentity;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.interfaces.IInteractable;
 import com.mygdx.game.interfaces.IOwnable;
@@ -44,18 +42,13 @@ public class Building extends Component implements IOwnable, IInteractable{
         super.start();
 
         //Get the JsonBuilding reference, add the tags, add an inventory if under construction, and set the name.
-        DataBuilder.JsonBuilding jBuilding = DataManager.getData(this.buildingName, DataBuilder.JsonBuilding.class);
-        this.jBuilding = jBuilding;
-        for(String tag : jBuilding.tags) this.owner.getTags().addTag(tag); //Add each tag that exists.
+        for(String tag : this.jBuilding.tags) this.owner.getTags().addTag(tag); //Add each tag that exists.
 
         //Add an inventory if under construction OR if the building is supposed to have one...
-        if(this.owner.getTags().hasTag("constructing") || jBuilding.inventory) this.inventory = this.addComponent(new Inventory());
-        this.owner.name = jBuilding.displayName; //Set the display name.
+        if(this.owner.getTags().hasTag("constructing") || this.jBuilding.inventory) this.inventory = this.addComponent(new Inventory());
+        this.owner.name = this.jBuilding.displayName; //Set the display name.
 
         this.load();
-
-        GraphicIdentity identity = this.getComponent(GraphicIdentity.class);
-        this.getComponent(BoxCollider.class).setBodyPosition(identity.getSprite().getX(), identity.getSprite().getY());
     }
 
     @Override
@@ -65,15 +58,13 @@ public class Building extends Component implements IOwnable, IInteractable{
 
     @Override
     public void load() {
-        DataBuilder.JsonBuilding jBuilding = DataManager.getData(this.buildingName, DataBuilder.JsonBuilding.class);
         boolean isConstructing = this.owner.getTags().hasTag("constructing"); //If the building is under construction
 
         //If we are constructing still on a load OR this building should have an inventory...
-        if(isConstructing || jBuilding.inventory){
+        if(isConstructing || this.jBuilding.inventory){
             //Since this method (load) is called in the init() function, make sure the inventory is still null.
             if(this.inventory == null) this.inventory = this.getComponent(Inventory.class);
             this.inventory.setMaxAmount(-1);
-            this.inventory.addItem("wood_pick", 1);
         }
 
         //If we are constructing this on load, set the timer and get the constructable component.
@@ -97,8 +88,7 @@ public class Building extends Component implements IOwnable, IInteractable{
             if(this.craftingStation == null) this.craftingStation = this.getComponent(CraftingStation.class);
             if(this.craftingStation == null) this.craftingStation = this.addComponent(new CraftingStation());
             if(this.jBuilding.crafting == null) Logger.log(Logger.WARNING, "The crafting list for building "+this.jBuilding.name+" is null. This could be a problem... Fix it in the Buildings.json file.");
-            this.craftingStation.setCraftingList(this.jBuilding.crafting);
-            this.craftingStation.addCraftingJob("wood_pick", 1);
+            this.craftingStation.setCraftingList(this.jBuilding.crafting); //Set what it can craft.
             this.colonyOwner.addOwnedToColony(this.craftingStation); //Add it to the colony crafting centers...
         }
 
@@ -137,18 +127,35 @@ public class Building extends Component implements IOwnable, IInteractable{
         }
     }
 
-    @Override
-    public void destroy(Entity destroyer) {
-
-        super.destroy(destroyer);
+    /**
+     * Sets the building name, which will also set the buildingRef.
+     * @param name The name of the building.
+     * @return The Building for easy chaning.
+     */
+    public Building setBuildingName(String name){
+        this.buildingName = name;
+        this.jBuilding = DataManager.getData(name, DataBuilder.JsonBuilding.class);
+        return this;
     }
 
-    public void setBuildingName(String name){
-        this.buildingName = name;
+    /**
+     * Sets the buildingRef, which also sets the name.
+     * @param buildingRef The JsonBuilding to be the reference.
+     * @return The Building for eash chaining.
+     */
+    public Building setBuildingRef(DataBuilder.JsonBuilding buildingRef){
+        this.jBuilding = buildingRef;
+        this.buildingName = buildingRef.name;
+        return this;
     }
 
     public String getBuildingName(){
         return this.buildingName;
+    }
+
+    @Override
+    public void destroy(Entity destroyer) {
+        super.destroy(destroyer);
     }
 
     @Override

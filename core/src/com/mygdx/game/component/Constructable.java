@@ -26,6 +26,12 @@ public class Constructable extends Component{
     public void init() {
         super.init();
 
+
+    }
+
+    @Override
+    public void start() {
+        super.start();
         //For the case that we instant build (testing or what not), don't do this if complete.
         if(!this.isComplete()) {
             //Get the recipe for this building and set the items required.
@@ -35,12 +41,6 @@ public class Constructable extends Component{
                 this.addItemRequirement(recipe.items[i], amount);
             }
         }
-    }
-
-    @Override
-    public void start() {
-        super.start();
-
         this.load();
     }
 

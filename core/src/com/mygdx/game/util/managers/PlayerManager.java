@@ -1,6 +1,7 @@
 package com.mygdx.game.util.managers;
 
 import com.mygdx.game.component.Colony;
+import com.mygdx.game.util.Logger;
 
 import java.util.HashMap;
 
@@ -18,7 +19,9 @@ public class PlayerManager {
     }
 
     public static Player getPlayer(String playerName){
-        return playerHashMap.get(playerName);
+        Player player = playerHashMap.get(playerName);
+        if(player == null) Logger.log(Logger.WARNING, "Player by the name of "+playerName+" does not exist. Did you spell it wrong?");
+        return player;
     }
 
     public static class Player{

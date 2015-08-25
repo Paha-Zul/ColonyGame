@@ -83,7 +83,6 @@ public class CraftingWindow extends Window{
                     selectedLabel.getStyle().background = null;
                     selectedItem = null;
                     selectedLabel = null;
-                    craftButton.setDisabled(true);
                 }else {
                     justSelected = false;
                     craftButtonPressed = false;
@@ -347,7 +346,6 @@ public class CraftingWindow extends Window{
                 @Override
                 public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
                     if(selectedLabel != null) selectedLabel.getStyle().background = null;
-                    craftButton.setDisabled(false);
                     selectedItem = itemRef;
                     selectedLabel = label;
                     justSelected = true;
@@ -380,13 +378,10 @@ public class CraftingWindow extends Window{
                     craftingStation.addCraftingJob(selectedItem.getItemName(), 1);
                     buildAvailableList();
                     craftButtonPressed = true;
-                    super.touchUp(event, x, y, pointer, button);
                 }
+                super.touchUp(event, x, y, pointer, button);
             }
         });
-
-        //Initially set as disabled
-        this.craftButton.setDisabled(true);
     }
 
     @Override

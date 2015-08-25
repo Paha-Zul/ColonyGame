@@ -10,6 +10,8 @@ import com.mygdx.game.component.Interactable;
 import com.mygdx.game.component.collider.BoxCollider;
 import com.mygdx.game.component.graphic.GraphicIdentity;
 import com.mygdx.game.util.Constants;
+import com.mygdx.game.util.DataBuilder;
+import com.mygdx.game.util.managers.DataManager;
 
 /**
  * Created by Paha on 1/18/2015.
@@ -19,18 +21,22 @@ public class BuildingEntity extends Entity{
 
     }
 
-    public BuildingEntity(Vector2 position, float rotation, String[] graphicName, int drawLevel) {
+    public BuildingEntity(Vector2 position, float rotation, DataBuilder.JsonBuilding buildingRef, int drawLevel) {
         super(position, rotation, drawLevel);
         this.name = "Main Base";
-        this.tags.addTags("building", "selectable");
+        this.tags.addTags("building", "selectable", "constructing");
 
-        this.addComponent(new GraphicIdentity()).setSprite(graphicName[0], graphicName[1]);
+        this.addComponent(new GraphicIdentity()).setSprite(buildingRef.image, buildingRef.spriteSheet);
         this.addComponent(new GridComponent()).setGridType(Constants.GRIDSTATIC).setGrid(ColonyGame.worldGrid).setExploreRadius(8).setAddMulti(true);
-        this.addComponent(new Building());
+        this.addComponent(new Building()).setBuildingRef(buildingRef);
         this.addComponent(new Interactable()).setInterType("building");
         this.addComponent(new Constructable());
 
         this.makeCollider();
+    }
+
+    public BuildingEntity(Vector2 position, float rotation, String buildingName, int drawLevel) {
+        this(position, rotation, DataManager.getData(buildingName, DataBuilder.JsonBuilding.class), drawLevel);
     }
 
     @Override

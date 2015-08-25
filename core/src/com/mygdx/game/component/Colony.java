@@ -3,6 +3,7 @@ package com.mygdx.game.component;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.mygdx.game.entity.BuildingEntity;
 import com.mygdx.game.entity.ColonistEnt;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.interfaces.IInteractable;
@@ -111,6 +112,20 @@ public class Colony extends Component implements IInteractable {
     @Override
     public void destroy(Entity destroyer) {
         super.destroy(destroyer);
+    }
+
+    /**
+     * Under construction!!
+     * @param position
+     * @param rotation
+     * @param buildingRef
+     * @param drawLevel
+     * @return
+     */
+    public Entity addBuildingEntity(Vector2 position, float rotation, DataBuilder.JsonBuilding buildingRef, int drawLevel){
+        //TODO I should do things like this?
+        Entity building = new BuildingEntity(position, rotation, buildingRef, drawLevel);
+        return building;
     }
 
     /**
