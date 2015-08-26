@@ -63,7 +63,7 @@ public class WindowManager {
         //TODO We want to check for class type AND target. What if I wanted a crafting window and information window open on the same target?
         //Search for any duplicate window. If found, return false.
         for(Window window : this.windowStack)
-            if(window.getTarget() != null && window.getTarget() == target && window.getClass() == clazz)
+            if(window.getTarget() == target && window.getClass() == clazz)
                 return false;
 
         //Let's create our window!
