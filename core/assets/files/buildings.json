@@ -5,12 +5,12 @@
     "tags": ["main", "storage", "enterable"],
     "image": "Colony2",
     "spriteSheet": "interactables",
-    "dimensions": [200,200],
+    "dimensions": [100,100],
     "inventory": true,
     "storageTypes": ["all"],
     "enterable": true,
     "enterableMaxOccupancy": 1,
-    "enterablePositions": [[0.675, 0.1]]
+    "enterablePositions": [[0.275, 0.05]]
   },
   {
     "name": "equipment_shed",
@@ -18,9 +18,10 @@
     "tags": ["equipment"],
     "image": "equipmentShed",
     "spriteSheet": "interactables",
-    "dimensions": [200,200],
+    "dimensions": [100,100],
     "inventory": true,
-    "storageTypes": ["tool"]
+    "storageTypes": ["tool"],
+    "buildable": true
   },
   {
     "name": "workshop",
@@ -28,11 +29,12 @@
     "tags": ["workshop"],
     "image": "craftingBuilding",
     "spriteSheet": "interactables",
-    "dimensions": [200,200],
+    "dimensions": [100,100],
     "inventory": true,
     "enterable": true,
     "enterableMaxOccupancy": 2,
     "enterablePositions": [[0.675, 0.1]],
-    "crafting": ["wood_pick", "wood_shovel", "wood_hatchet"]
+    "crafting": ["wood_pick", "wood_shovel", "wood_hatchet"],
+    "buildable": true
   }
 ]

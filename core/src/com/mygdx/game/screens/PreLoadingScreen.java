@@ -25,7 +25,7 @@ public class PreLoadingScreen implements Screen{
     @Override
     public void show() {
         builder = new DataBuilder(ColonyGame.assetManager);
-        builder.loadFiles();
+        builder.loadAllAssets();
         this.loading = new Texture(Gdx.files.internal("img/misc/loading.png"), true);
         this.loading.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
     }
@@ -42,6 +42,7 @@ public class PreLoadingScreen implements Screen{
         ColonyGame.batch.end();
 
         if(builder.update()) {
+            builder.loadAllFiles();
             ColonyGame.worldGrid = Grid.newGridInstance("grid", Constants.GRID_WIDTH, Constants.GRID_HEIGHT, Constants.GRID_SQUARESIZE);
             this.game.setScreen(new MainMenuScreen(this.game));
         }

@@ -68,9 +68,9 @@ public class DataBuilder implements IDestroyable{
     }
 
     /**
-     * Loads all files needed for the game. This starts in the base directory where the jar file is located.
+     * Loads all configuration and Json files for the base game and all mods.
      */
-    public void loadFiles(){
+    public void loadAllFiles(){
 
         //Load all the base game stuff and the mod list.
         this.loadFilesForMod(Gdx.files.internal("./"));
@@ -82,35 +82,74 @@ public class DataBuilder implements IDestroyable{
         FileHandle modBaseDir = Gdx.files.internal("./"+modPath);
 
         //This builds the mods from the mods.json file.
-        Mod[] modValue = buildJson(Gdx.files.internal("./" + modPath +""+modFilePath), Mod[].class, null);
+        Mod[] modListInFile = buildJson(Gdx.files.internal("./" + modPath +""+modFilePath), Mod[].class, null);
 
         //If we loaded stuff from the mods.json file, make a list from it. Otherwise, just give us a new list.
         Array<Mod> modList;
-        if(modValue != null) modList = new Array<>(modValue);
+        if(modListInFile != null) modList = new Array<>(modListInFile);
         else modList = new Array<>();
 
         //Loop over each mod directory and load it if it's enabled.
         for(FileHandle modDir : modBaseDir.list()){
+            //We get the mod info from the mod directoy.
             ModInfo modInfo = buildJson(Gdx.files.internal(modDir.path()+ modInfoFilePath), ModInfo.class, null);
-            if(modInfo == null) continue;
-            for(Mod mod : modList)
-                if(mod.modName.equals(modInfo.name)){
-                    if(mod.enabled) loadFilesForMod(modDir);
+            if(modInfo == null) continue; //If it's null, don't bother.
+
+            //Loop over each mod in the modList. If one matches the modInfo file and it's enabled, load the files for it.
+            for(Mod mod : modList) {
+                if (mod.modName.equals(modInfo.name)) {
+                    if (mod.enabled) loadFilesForMod(modDir);
                     mod.modInfo = modInfo;
                     break;
                 }
+            }
         }
     }
 
     /**
-     * Loads all assets for a particular mod.
+     * Loads all assets for the base game and each mod.
+     */
+    public void loadAllAssets(){
+        this.loadAssets(Gdx.files.internal("./")); //We load all the assets (sound, music, art)
+
+        FileHandle modBaseDir = Gdx.files.internal("./"+modPath);
+
+        /**
+         * In this section, we load the mods from the mods.json file and convert it to an array. We then check each mod
+         * to see if it's enabled. If so, we load its files.
+         */
+
+        //This builds the mods from the mods.json file.
+        Mod[] modListInFile = buildJson(Gdx.files.internal("./" + modPath +""+modFilePath), Mod[].class, null);
+        //If we loaded stuff from the mods.json file, make a list from it. Otherwise, just give us a new list.
+        Array<Mod> modList;
+        if(modListInFile != null) modList = new Array<>(modListInFile);
+        else modList = new Array<>();
+
+        //Loop over each mod directory and load it if it's enabled.
+        for(FileHandle modDir : modBaseDir.list()){
+            //We get the mod info from the mod directoy.
+            ModInfo modInfo = buildJson(Gdx.files.internal(modDir.path()+ modInfoFilePath), ModInfo.class, null);
+            if(modInfo == null) continue; //If it's null, don't bother.
+
+            //Loop over each mod in the modList. If one matches the modInfo file and it's enabled, load the files for it.
+            for(Mod mod : modList) {
+                if (mod.modName.equals(modInfo.name)) {
+                    if (mod.enabled) loadAssets(modDir);
+                    mod.modInfo = modInfo;
+                    break;
+                }
+            }
+        }
+    }
+
+    /**
+     * Loads all configuration and Json files for a mod.
      * @param fileHandle The FileHandle for the folder that the assets reside in.
      */
     private void loadFilesForMod(FileHandle fileHandle){
         TextureAtlas atlas = new TextureAtlas(Gdx.files.internal("atlas/icons.atlas"));
 
-        //TODO Separate the loading of image assets and file assets. Image assets should be first...
-        this.buildAssets(fileHandle); //We load all the assets (sound, music, art)
         String path = fileHandle.path();
 
         //Build misc Json file
@@ -165,9 +204,19 @@ public class DataBuilder implements IDestroyable{
         });
 
         //We need to do this after the items and recipes are built.
-        for(Object item : DataManager.getValueListForType(JsonItem.class)){
-            JsonItem _item = (JsonItem)item;
-            this.calculateMaterials(_item, _item.materialsForCrafting, _item.rawForCrafting);
+        //Compile the list of items and raw that is needed for the recipe.
+        for(Object recipe : DataManager.getValueListForType(JsonRecipe.class)){
+            JsonRecipe _recipe = (JsonRecipe)recipe;
+            this.calculateMaterials(_recipe, _recipe.materialsForCrafting, _recipe.rawForCrafting);
+
+            //TODO This is kinda hacky. Try to get an item for an icon, otherwise get a building for an icon. There must be a better way...
+            JsonItem item = DataManager.getData(_recipe.name, JsonItem.class);
+            if(item != null) _recipe.icon = item.iconTexture;
+            else{
+                JsonBuilding building = DataManager.getData(_recipe.name, JsonBuilding.class);
+                if(building != null)
+                    _recipe.icon = DataManager.getTextureFromAtlas(building.image, building.spriteSheet);
+            }
         }
 
         //Build resources
@@ -209,7 +258,7 @@ public class DataBuilder implements IDestroyable{
      * Builds the assets (images, sounds, atlas files) using the fileHandle passed in.
      * @param fileHandle The base directory to load assets from.
      */
-    private void buildAssets(FileHandle fileHandle){
+    private void loadAssets(FileHandle fileHandle){
         TextureLoader.TextureParameter param = new TextureLoader.TextureParameter();
         param.minFilter = Texture.TextureFilter.MipMapLinearLinear;
         param.magFilter = Texture.TextureFilter.MipMapLinearLinear;
@@ -523,11 +572,11 @@ public class DataBuilder implements IDestroyable{
     };
 
     //Starts the calculations...
-    private void calculateMaterials(JsonItem itemRef, Array<ItemNeeded> materials, Array<ItemNeeded> raw){
+    private void calculateMaterials(JsonRecipe recipe, Array<ItemNeeded> materials, Array<ItemNeeded> raw){
         HashMap<String, Integer> materialMap = new HashMap<>(10);
         HashMap<String, Integer> rawMap = new HashMap<>(10);
 
-        this.calcSingleItem(itemRef, materialMap, rawMap);
+        this.calcSingleItem(DataManager.getData(recipe.name, JsonItem.class), recipe, materialMap, rawMap);
 
         //Convert the materialMap into an array of ItemNeeded objects.
         for(Map.Entry<String,Integer> entry : materialMap.entrySet()){
@@ -550,16 +599,9 @@ public class DataBuilder implements IDestroyable{
      * @param materialMap The material map where required materials and amounts are placed.
      * @param rawMap The raw map where required raw and amounts are placed.
      */
-    private void calcSingleItem(DataBuilder.JsonItem itemRef, HashMap<String, Integer> materialMap, HashMap<String, Integer> rawMap){
-        if(itemRef.category.equals("raw")) return;
-
-        //Get the recipe...
-        DataBuilder.JsonRecipe recipe = DataManager.getData(itemRef.getItemName(), DataBuilder.JsonRecipe.class);
-
-        if(recipe == null){
-            Logger.log(Logger.WARNING, "Couldn't find a recipe for " + itemRef.getItemName() + ". This will probably result in a crash", true);
-            return;
-        }
+    private void calcSingleItem(JsonItem itemRef, JsonRecipe recipe, HashMap<String, Integer> materialMap, HashMap<String, Integer> rawMap){
+        //We return if a raw item here because we recurse from item -> raw. Nothing is beyond raw to break down so we simply return.
+        if(itemRef != null && itemRef.category.equals("raw")) return;
 
         //For each item of the recipe, get it's items...
         for(int i=0;i<recipe.items.length;i++){
@@ -568,7 +610,7 @@ public class DataBuilder implements IDestroyable{
             //If it's a material, add it to the hashmap and recurse!!
             if(subItem.getItemCategory().equals("material")){
                 this.addToMap(materialMap, subItem, recipe.itemAmounts[i]);
-                this.calcSingleItem(subItem, materialMap, rawMap); //Recursive call
+                this.calcSingleItem(subItem, recipe, materialMap, rawMap); //Recursive call
             //Otherwise, just add to raw map.
             }else
                 this.addToMap(rawMap, subItem, recipe.itemAmounts[i]);
@@ -592,9 +634,6 @@ public class DataBuilder implements IDestroyable{
     public static class JsonItem{
         public static HashMap<String, Array<String>> categoryMap = new HashMap<>();
         public static Array<String> allItems = new Array<>();
-
-        public Array<ItemNeeded> materialsForCrafting = new Array<>();
-        public Array<ItemNeeded> rawForCrafting = new Array<>();
 
         public Array<JsonResource> inResources = new Array<>(); //A link to the resources this item is in.
         public Array<String> possibleTools = new Array<>();
@@ -730,24 +769,26 @@ public class DataBuilder implements IDestroyable{
      * A class to hold data from the recipes.json file.
      */
     public static class JsonRecipe{
-        public String name, displayName;
+        public Array<ItemNeeded> materialsForCrafting = new Array<>();
+        public Array<ItemNeeded> rawForCrafting = new Array<>();
         public String[] items;
         public int[] itemAmounts;
+        public String name, displayName;
         public float time=0;
+        public TextureRegion icon;
     }
 
     /**
      * A class to hold data from the buildings.json file.
      */
     public static class JsonBuilding{
-        public String name, displayName, image, spriteSheet;
         public String[] tags;
-        public boolean inventory;
         public String[] storageTypes, crafting;
-        public boolean enterable;
-        public int enterableMaxOccupancy;
         public float[][] enterablePositions;
         public int[] dimensions;
+        public String name, displayName, image, spriteSheet;
+        public boolean inventory, enterable, buildable;
+        public int enterableMaxOccupancy;
     }
 
     private static class FolderStructure{

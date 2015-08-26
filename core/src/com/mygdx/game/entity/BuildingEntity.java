@@ -26,7 +26,7 @@ public class BuildingEntity extends Entity{
         this.name = "Main Base";
         this.tags.addTags("building", "selectable", "constructing");
 
-        this.addComponent(new GraphicIdentity()).setSprite(buildingRef.image, buildingRef.spriteSheet);
+        this.addComponent(new GraphicIdentity()).setSprite(buildingRef.image, buildingRef.spriteSheet, buildingRef.dimensions[0], buildingRef.dimensions[1]);
         this.addComponent(new GridComponent()).setGridType(Constants.GRIDSTATIC).setGrid(ColonyGame.worldGrid).setExploreRadius(8).setAddMulti(true);
         this.addComponent(new Building()).setBuildingRef(buildingRef);
         this.addComponent(new Interactable()).setInterType("building");
