@@ -99,10 +99,12 @@ public class DataBuilder implements IDestroyable{
             //Loop over each mod in the modList. If one matches the modInfo file and it's enabled, load the files for it.
             for(Mod mod : modList) {
                 if (mod.modName.equals(modInfo.name)) {
-                    if (mod.enabled) loadAssets(modDir);
+                    if (mod.enabled) {
+                        loadAssets(modDir);
+                        enabledMods.add(mod);
+                    }
                     mod.modInfo = modInfo;
                     mod.path = modDir.path();
-                    enabledMods.add(mod);
                     break;
                 }
             }

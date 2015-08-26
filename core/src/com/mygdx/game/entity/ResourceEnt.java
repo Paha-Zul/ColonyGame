@@ -23,7 +23,7 @@ public class ResourceEnt extends Entity{
         this.getTags().addTags("resource", "selectable");
         this.name = "Resource";
 
-        this.components.addComponent(new GraphicIdentity()).setSprite(graphicName[0], graphicName[1]);
+        this.addComponent(new GraphicIdentity()).setSprite(graphicName[0], graphicName[1]);
         Interactable inter = this.addComponent(new Interactable());
         inter.setInterType("resource");
 
@@ -33,7 +33,10 @@ public class ResourceEnt extends Entity{
         gridComp.setExploreRadius(-1);
 
         GraphicIdentity identity = this.getComponent(GraphicIdentity.class);
-        if(identity != null) identity.setAnchor(0.5f, 0.05f);
+        if(identity != null) {
+            identity.setAnchor(0.5f, 0.05f);
+            identity.configureSprite();
+        }
 
         this.load();
     }
@@ -61,7 +64,7 @@ public class ResourceEnt extends Entity{
             collider.setActive(false);
             collider = this.addComponent(collider);
             collider.setupBody(BodyDef.BodyType.StaticBody, ColonyGame.world, graphic.getSprite().getWidth()/4, graphic.getSprite().getHeight()/2,
-                    new Vector2(graphic.getSprite().getX(), graphic.getSprite().getY()), false, false);
+                    new Vector2(graphic.getSprite().getX() + graphic.getSprite().getWidth()/2, graphic.getSprite().getY() + graphic.getSprite().getHeight()/2), false, false);
         }
 
     }

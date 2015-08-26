@@ -29,8 +29,7 @@ public class BoxCollider extends Collider{
 
         //Set the polygon shape as a box using the sprite's width and height
         PolygonShape box = new PolygonShape();
-        Vector2 cent = new Vector2(center.x, center.y);
-        box.setAsBox(hWidth, hHeight, new Vector2(0,0), 0);
+        box.setAsBox(hWidth, hHeight);
 
         //Make a new fixture definition
         //box.setRadius(0.5f);

@@ -1,7 +1,9 @@
 package com.mygdx.game.component;
 
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
+import com.mygdx.game.component.collider.BoxCollider;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.interfaces.IInteractable;
 import com.mygdx.game.util.DataBuilder;
@@ -126,6 +128,11 @@ public class Resource extends Component implements IInteractable{
 
         if(resRef.resourceType.equals("water")) {
             owner.active = false;
+        }else{
+            BoxCollider collider = this.getComponent(BoxCollider.class);
+            this.owner.getGraphicIdentity().configureSprite();
+            Sprite sprite = this.getEntityOwner().getComponents().getIdentity().getSprite();
+            //collider.setBodyPosition(sprite.getX(), sprite.getY(), 0);
         }
     }
 

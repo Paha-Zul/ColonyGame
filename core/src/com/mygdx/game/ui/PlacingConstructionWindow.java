@@ -217,5 +217,10 @@ public class PlacingConstructionWindow extends Window{
         PlaceConstructionManager.instance().setView(null);
         if(this.buildingImage != null) this.buildingImage.remove();
         this.clearBuildingBeingPlaced();
+        this.clearPreviewWindow();
+        this.buildingWindow.clear();
+        this.buildingWindow.remove();
+        this.buildingWindow = null;
+
     }
 }

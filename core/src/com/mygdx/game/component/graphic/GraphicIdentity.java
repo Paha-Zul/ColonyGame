@@ -143,6 +143,10 @@ public class GraphicIdentity extends Component {
         this.configureSprite(this.getSprite(), width, height);
     }
 
+    public void configureSprite(){
+        this.configureSprite(this.sprite, -1, -1);
+    }
+
     /**
      * Call this method when a change to the sprite occurs (change in size, texture, etc...). This will adjust the size/dimensions and such.
      * @param sprite The Sprite to configure.
@@ -158,6 +162,8 @@ public class GraphicIdentity extends Component {
      * @param height The height to make the sprite.
      */
     protected void configureSprite(Sprite sprite, float width, float height){
+        if(sprite == null) return;
+
         if(width == -1 || height == -1) {
             sprite.setSize(GH.toMeters(sprite.getRegionWidth()), GH.toMeters(sprite.getRegionHeight()));
             sprite.setOrigin(sprite.getWidth() * this.anchor.x, sprite.getHeight() * this.anchor.y);
@@ -165,6 +171,9 @@ public class GraphicIdentity extends Component {
             sprite.setSize(GH.toMeters(width), GH.toMeters(height));
             sprite.setOrigin(sprite.getWidth() * this.anchor.x, sprite.getHeight() * this.anchor.y);
         }
+
+        Vector2 pos = this.owner.getTransform().getPosition();
+        sprite.setPosition(pos.x - (sprite.getWidth()*this.anchor.x), pos.y - (sprite.getHeight()*this.anchor.y));
     }
 
     /**

@@ -53,10 +53,7 @@ public class Collider extends Component implements IScalable{
     public void load() {
         //TODO Under Construction! Apparently changing active state locks everything up.
 
-        Vector2 ownerPos = owner.getTransform().getPosition();
         if(this.body == null) return;
-
-        this.body.setTransform(ownerPos.x, ownerPos.y, this.owner.getTransform().getRotation());
 
         ColliderInfo bodyInfo = new ColliderInfo(owner);
         ColliderInfo fixtureInfo = new ColliderInfo(owner);
@@ -66,8 +63,6 @@ public class Collider extends Component implements IScalable{
         this.fixture.setUserData(fixtureInfo);
 
         this.body.setActive(true);
-
-
         //this.owner.getComponents().registerScalable(this);
         //this.body.setActive(false);
     }
@@ -90,7 +85,6 @@ public class Collider extends Component implements IScalable{
         this.body = world.createBody(bodyDef);
         ColliderInfo bodyInfo = new ColliderInfo(owner);
         this.body.setUserData(bodyInfo);
-        this.body.setTransform(this.owner.getTransform().getPosition(), 0);
     }
 
     @JsonIgnore
@@ -103,12 +97,12 @@ public class Collider extends Component implements IScalable{
         this.fixture.setUserData(fixtureInfo);
     }
 
-    public void setBodyPosition(Vector2 position){
-        this.setBodyPosition(position.x, position.y);
+    public void setBodyPosition(Vector2 position, float angle){
+        this.setBodyPosition(position.x, position.y, angle);
     }
 
-    public void setBodyPosition(float x, float y){
-        this.body.getPosition().set(x, y);
+    public void setBodyPosition(float x, float y, float angle){
+        this.body.setTransform(x, y, angle);
     }
 
     public Body getBody(){

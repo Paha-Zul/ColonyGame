@@ -5,7 +5,6 @@ import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.World;
-import com.mygdx.game.util.GH;
 
 /**
  * Created by Paha on 8/24/2015.
@@ -30,7 +29,7 @@ public class CircleCollider extends Collider{
 
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = bodyType;
-        bodyDef.position.set(GH.toMeters(center.x), GH.toMeters(center.y));
+        bodyDef.position.set(center.x, center.y);
         //bodyDef.active = false;
 
         CircleShape circle = new CircleShape();
