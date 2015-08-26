@@ -19,6 +19,9 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.Align;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
@@ -33,14 +36,16 @@ import com.mygdx.game.interfaces.IGUI;
 import com.mygdx.game.util.*;
 import com.mygdx.game.util.gui.Button;
 import com.mygdx.game.util.gui.GUI;
-import com.mygdx.game.util.managers.*;
+import com.mygdx.game.util.managers.DataManager;
+import com.mygdx.game.util.managers.NotificationManager;
+import com.mygdx.game.util.managers.PlayerManager;
+import com.mygdx.game.util.managers.WindowManager;
 import com.mygdx.game.util.timer.OneShotTimer;
 import com.mygdx.game.util.timer.RepeatingTimer;
 import com.mygdx.game.util.timer.Timer;
 import com.mygdx.game.util.worldgeneration.WorldGen;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 /**
  * Created by Bbent_000 on 12/25/2014.
@@ -207,9 +212,10 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         exploreStyle.font.setColor(new Color(126f / 255f, 75f / 255f, 27f / 255f, 1));
         huntStyle.font.setColor(126f / 255f, 75f / 255f, 27f / 255f, 1);
 
+        //Multiplex the stage and this interface.
         this.stage = new Stage(new ScreenViewport(ColonyGame.UICamera));
         InputMultiplexer multiplexer = new InputMultiplexer();
-        multiplexer.addProcessor(stage);
+        multiplexer.addProcessor(this.stage);
         multiplexer.addProcessor(this);
         Gdx.input.setInputProcessor(multiplexer);
 
@@ -217,7 +223,6 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
         this.windowManager = new WindowManager();
         this.windowManager.addWindowToSelfManagingList(new SelectedWindow(this));
-        this.windowManager.addWindowToSelfManagingList(new PlacingConstructionWindow(this, null));
 
         this.makeBuildButton();
     }
@@ -238,7 +243,6 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
                 windowManager.addWindowIfNotExistByTarget(PlacingConstructionWindow.class, null, PlayerInterface.getInstance());
-                PlaceConstructionManager.instance().setPlacingConstruction("workshop");
                 return true;
             }
         });
@@ -279,7 +283,6 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         this.drawDebugInfo(height); //Draws some debug information.
         this.drawTerrainInfo(this.bottomLeftRect); //Draws information about the moused over terrain piece.
         this.drawGameSpeed(screenW, screenH, batch, this.gameSpeedStyle);
-        this.drawInvAmounts(screenW, screenH, batch);
         this.drawCurrentNotifications(screenW, screenH, delta);
 
         if(this.drawingProfiler) Profiler.drawDebug(batch, 200, height - 20);
@@ -298,29 +301,6 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         stage.draw();
         batch.end();
         batch.begin();
-    }
-
-    private void drawInvAmounts(int width, int height, SpriteBatch batch){
-        PlayerManager.Player player = PlayerManager.getPlayer("Player");
-        if(player != null) {
-            batch.setColor(Color.WHITE);
-            HashMap<String, Inventory.InventoryItem> inv = PlayerManager.getPlayer("Player").colony.getGlobalInv();
-            StringBuilder builder = new StringBuilder();
-            builder.append("Overall Items:\n");
-            int counter = 0;
-            for (Inventory.InventoryItem item : inv.values()) {
-                if (item.getAmount(false) != 0) {
-                    builder.append(item.getAmount(false)).append(" ").append(item.itemRef.getDisplayName()).append("\n");
-                    counter++;
-                }
-            }
-
-            gameSpeedStyle.multiline = true;
-            gameSpeedStyle.alignment = Align.top;
-            gameSpeedStyle.paddingTop = 5;
-            GUI.Label(builder.toString(), batch, 0, height * 0.2f, width * 0.07f, height * 0.2f, gameSpeedStyle);
-            gameSpeedStyle.paddingTop = 0;
-        }
     }
 
     private void drawCurrentNotifications(int width, int height, float delta){
@@ -528,7 +508,90 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         this.UIStyle.paddingTop = 0;
     }
 
+    public void makePreviewTable(DataBuilder.JsonRecipe recipe, Table previewWindow){
+        previewWindow.clear();
 
+        String description;
+        DataBuilder.JsonItem item = DataManager.getData(recipe.name, DataBuilder.JsonItem.class);
+        DataBuilder.JsonBuilding building = null;
+        if(item == null) {
+            building = DataManager.getData(recipe.name, DataBuilder.JsonBuilding.class);
+            description = "A building";
+        }else
+            description = item.getDescription();
+
+        /*
+         This area creates the item's icon.
+         */
+        Image image = new Image(recipe.icon);
+        image.setSize(32, 32);
+
+        previewWindow.add(image).expandX().maxSize(32).top();
+        previewWindow.row();
+
+        /*
+         * This area creates the description area and puts the item description in.
+         */
+        Label.LabelStyle style = new Label.LabelStyle(this.UIStyle.font, Color.BLACK);
+        Label label = new Label(description, style);
+
+        previewWindow.add(label).expand().top();
+        previewWindow.row();
+
+        /*
+         * This area creates the 'item' list with icons and amounts.
+         */
+        Table itemTable = new Table();
+        previewWindow.add(itemTable).left();
+
+        Label itemsLabel = new Label("items:", style);
+        itemTable.add(itemsLabel).prefHeight(32).padRight(10).padLeft(5);
+
+        //Adds the icons.
+        for(ItemNeeded itemNeeded : recipe.materialsForCrafting){
+            DataBuilder.JsonItem _itemRef = DataManager.getData(itemNeeded.itemName, DataBuilder.JsonItem.class);
+            Image icon = new Image(_itemRef.iconTexture);
+            icon.setSize(32, 32);
+            itemTable.add(icon).maxSize(32);
+        }
+
+        itemTable.row();
+        itemTable.add().expandX().fillX(); //Add an empty cell to be under the itemsLabel.
+
+        //Adds the amounts
+        for(ItemNeeded itemNeeded : recipe.materialsForCrafting){
+            Label amountLabel = new Label(""+itemNeeded.amountNeeded, style);
+            amountLabel.setAlignment(Align.center);
+            itemTable.add(amountLabel).expandX().fillX();
+        }
+
+        previewWindow.row();
+
+        /*
+         * This area creates hte 'raw' item list with icons and amounts.
+         */
+        Table rawTable = new Table();
+        previewWindow.add(rawTable).left();
+
+        Label rawLabel = new Label("raw:", style);
+        rawTable.add(rawLabel).prefHeight(32).padRight(10).padLeft(5);
+
+        //Adds the icons
+        for(ItemNeeded itemNeeded : recipe.rawForCrafting){
+            DataBuilder.JsonItem _itemRef = DataManager.getData(itemNeeded.itemName, DataBuilder.JsonItem.class);
+            Image icon = new Image(_itemRef.iconTexture);
+            icon.setSize(32, 32);
+            rawTable.add(icon).maxSize(32);
+        }
+        rawTable.row();
+        rawTable.add().expandX().fillX(); //Add an empty cell to be under the rawLabel
+        //Adds the amounts
+        for(ItemNeeded itemNeeded : recipe.rawForCrafting){
+            Label amountLabel = new Label(""+itemNeeded.amountNeeded, style);
+            amountLabel.setAlignment(Align.center);
+            rawTable.add(amountLabel).expandX().fillX();
+        }
+    }
 
     /**
      * Draws the game speed window.

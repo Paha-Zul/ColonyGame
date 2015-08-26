@@ -4,7 +4,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -12,7 +11,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.Align;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.SnapshotArray;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.component.CraftingStation;
@@ -20,10 +18,7 @@ import com.mygdx.game.entity.Entity;
 import com.mygdx.game.util.DataBuilder;
 import com.mygdx.game.util.EventSystem;
 import com.mygdx.game.util.GH;
-import com.mygdx.game.util.ItemNeeded;
-import com.mygdx.game.util.gui.GUI;
 import com.mygdx.game.util.managers.DataManager;
-import com.sun.istack.internal.Nullable;
 
 import java.text.DecimalFormat;
 import java.util.LinkedList;
@@ -257,81 +252,6 @@ public class CraftingWindow extends Window{
         }
     }
 
-    private void makePreviewTable(){
-        this.previewWindow.clear();
-
-        /*
-         This area creates the item's icon.
-         */
-        Image image = new Image(this.selectedItem.iconTexture);
-        image.setSize(32, 32);
-        this.previewWindow.add(image).expandX().maxSize(32).top();
-
-        this.previewWindow.row();
-
-        /*
-         * This area creates the description area and puts the item description in.
-         */
-        Label.LabelStyle style = new Label.LabelStyle(this.playerInterface.UIStyle.font, Color.BLACK);
-        Label label = new Label(this.selectedItem.getDescription(), style);
-        this.previewWindow.add(label).expand().top();
-
-        this.previewWindow.row();
-
-        /*
-         * This area creates the 'item' list with icons and amounts.
-         */
-        Table itemTable = new Table();
-        this.previewWindow.add(itemTable).left();
-
-        Label itemsLabel = new Label("items:", style);
-        itemTable.add(itemsLabel).prefHeight(32).padRight(10).padLeft(5);
-
-        //Adds the icons.
-        for(ItemNeeded itemNeeded : this.selectedItem.materialsForCrafting){
-            DataBuilder.JsonItem _itemRef = DataManager.getData(itemNeeded.itemName, DataBuilder.JsonItem.class);
-            Image icon = new Image(_itemRef.iconTexture);
-            icon.setSize(32, 32);
-            itemTable.add(icon).maxSize(32);
-        }
-        itemTable.row();
-        itemTable.add().expandX().fillX(); //Add an empty cell to be under the itemsLabel.
-        //Adds the amounts
-        for(ItemNeeded itemNeeded : this.selectedItem.materialsForCrafting){
-            Label amountLabel = new Label(""+itemNeeded.amountNeeded, style);
-            amountLabel.setAlignment(Align.center);
-            itemTable.add(amountLabel).expandX().fillX();
-        }
-
-
-        this.previewWindow.row();
-
-        /*
-         * This area creates hte 'raw' item list with icons and amounts.
-         */
-        Table rawTable = new Table();
-        this.previewWindow.add(rawTable).left();
-
-        Label rawLabel = new Label("raw:", style);
-        rawTable.add(rawLabel).prefHeight(32).padRight(10).padLeft(5);
-
-        //Adds the icons
-        for(ItemNeeded itemNeeded : this.selectedItem.rawForCrafting){
-            DataBuilder.JsonItem _itemRef = DataManager.getData(itemNeeded.itemName, DataBuilder.JsonItem.class);
-            Image icon = new Image(_itemRef.iconTexture);
-            icon.setSize(32, 32);
-            rawTable.add(icon).maxSize(32);
-        }
-        rawTable.row();
-        rawTable.add().expandX().fillX(); //Add an empty cell to be under the rawLabel
-        //Adds the amounts
-        for(ItemNeeded itemNeeded : this.selectedItem.rawForCrafting){
-            Label amountLabel = new Label(""+itemNeeded.amountNeeded, style);
-            amountLabel.setAlignment(Align.center);
-            rawTable.add(amountLabel).expandX().fillX();
-        }
-    }
-
     /**
      * Builds/rebuilds the crafting list.
      */
@@ -350,7 +270,8 @@ public class CraftingWindow extends Window{
                     selectedLabel = label;
                     justSelected = true;
                     label.getStyle().background = selectionTexture;
-                    makePreviewTable();
+                    playerInterface.makePreviewTable(DataManager.getData(itemRef.getItemName(), DataBuilder.JsonRecipe.class), previewWindow);
+                    //makePreviewTable();
                     return super.touchDown(event, x, y, pointer, button);
                 }
             });
@@ -401,65 +322,6 @@ public class CraftingWindow extends Window{
         }
 
         return super.update(batch);
-    }
-
-    /**
-     * Draws the crafting info for an item inside a Rectangle.
-     * @param itemRef The item reference.
-     * @param batch The SpriteBatch to draw with.
-     * @param rect The Rectangle to draw inside.
-     * @param style The GUIStyle to draw with. This may be null.
-     */
-    private void drawCraftingInfo(DataBuilder.JsonItem itemRef, SpriteBatch batch, Rectangle rect, @Nullable GUI.GUIStyle style, TextureRegion windowTexture){
-        GUI.Texture(windowTexture, batch, rect); //Draw the texture
-        Array<ItemNeeded> mats = itemRef.materialsForCrafting, raw = itemRef.rawForCrafting; //Get the lists.
-
-        float iconSize = 32;
-        float labelWidth = 50;
-        float startX = rect.x + labelWidth;
-        float startY = rect.y + 20;
-        float spacingX = iconSize + 5;
-        float spacingY = iconSize + 10;
-        TextureRegion _icon;
-        DataBuilder.JsonItem _item;
-
-        style.alignment = Align.left;
-        style.paddingLeft = 5;
-        GUI.Label("Raw:", batch, rect.x, startY, labelWidth, iconSize, style);
-        style.alignment = Align.center;
-        style.paddingLeft = 0;
-
-        //Draw the raw mats first
-        for(int i=0;i<raw.size;i++){
-            _item = DataManager.getData(raw.get(i).itemName, DataBuilder.JsonItem.class);
-            _icon = _item.iconTexture;
-            float x = startX + spacingX*i, y = startY;
-            GUI.Texture(_icon, batch, x, startY, iconSize, iconSize);
-            GUI.Label("x"+raw.get(i).amountNeeded, batch, x, startY - 15, iconSize, 15, style);
-        }
-
-        style.alignment = Align.left;
-        style.paddingLeft = 5;
-        GUI.Label("Mats:", batch, rect.x, startY + spacingY, labelWidth, iconSize, style);
-        style.alignment = Align.center;
-        style.paddingLeft = 0;
-
-        //Draw the materials
-        for(int i=0;i<mats.size;i++){
-            _item = DataManager.getData(mats.get(i).itemName, DataBuilder.JsonItem.class);
-            _icon = _item.iconTexture;
-            float x = startX + spacingX*i, y = startY + spacingY;
-            GUI.Texture(_icon, batch, startX + spacingX*i, startY + spacingY, iconSize, iconSize);
-            GUI.Label("x"+mats.get(i).amountNeeded, batch, x, y - 15, iconSize, 15, style);
-        }
-
-        //Draw the name of the item above the icon...
-        GUI.Label(""+itemRef.getDisplayName(), batch, rect.x, rect.y + rect.height - 25,
-                rect.width, 25);
-
-        //Draw the icon for the item we are crafting...
-        GUI.Texture(itemRef.iconTexture, batch, rect.x + rect.width / 2 - iconSize / 2,
-                rect.y + rect.height - iconSize - 25, iconSize, iconSize);
     }
 
     @Override
