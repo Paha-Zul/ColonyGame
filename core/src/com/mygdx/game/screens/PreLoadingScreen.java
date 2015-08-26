@@ -24,6 +24,7 @@ public class PreLoadingScreen implements Screen{
 
     @Override
     public void show() {
+        //Load the assets first.
         builder = new DataBuilder(ColonyGame.assetManager);
         builder.loadAllAssets();
         this.loading = new Texture(Gdx.files.internal("img/misc/loading.png"), true);
@@ -41,6 +42,7 @@ public class PreLoadingScreen implements Screen{
         rotation += rotationSpeed;
         ColonyGame.batch.end();
 
+        //When the assets are done being loaded, load all the config/Json files and change the screen.
         if(builder.update()) {
             builder.loadAllFiles();
             ColonyGame.worldGrid = Grid.newGridInstance("grid", Constants.GRID_WIDTH, Constants.GRID_HEIGHT, Constants.GRID_SQUARESIZE);

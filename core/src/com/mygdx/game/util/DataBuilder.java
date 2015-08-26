@@ -58,6 +58,7 @@ public class DataBuilder implements IDestroyable{
     public static JsonWorld worldData;
 
     private static HashMap<String, Mod> modTable = new HashMap<>();
+    public static Array<Mod> enabledMods = new Array<>();
 
     public DataBuilder(EasyAssetManager assetManager){
         this.assetManager = assetManager;
@@ -70,10 +71,10 @@ public class DataBuilder implements IDestroyable{
     /**
      * Loads all configuration and Json files for the base game and all mods.
      */
-    public void loadAllFiles(){
+    public void loadAllAssets(){
 
-        //Load all the base game stuff and the mod list.
-        this.loadFilesForMod(Gdx.files.internal("./"));
+        //Load all the assets (sounds, images)
+        this.loadAssets(Gdx.files.internal("./"));
 
         //Load the changelog separately as mods don't have changelogs that display in game.
         changelog = buildJson(Gdx.files.internal("./"+filePath+changeLogPath), JsonChangeLog.class, null);
@@ -91,15 +92,17 @@ public class DataBuilder implements IDestroyable{
 
         //Loop over each mod directory and load it if it's enabled.
         for(FileHandle modDir : modBaseDir.list()){
-            //We get the mod info from the mod directoy.
+            //We get the mod info from the mod directory.
             ModInfo modInfo = buildJson(Gdx.files.internal(modDir.path()+ modInfoFilePath), ModInfo.class, null);
             if(modInfo == null) continue; //If it's null, don't bother.
 
             //Loop over each mod in the modList. If one matches the modInfo file and it's enabled, load the files for it.
             for(Mod mod : modList) {
                 if (mod.modName.equals(modInfo.name)) {
-                    if (mod.enabled) loadFilesForMod(modDir);
+                    if (mod.enabled) loadAssets(modDir);
                     mod.modInfo = modInfo;
+                    mod.path = modDir.path();
+                    enabledMods.add(mod);
                     break;
                 }
             }
@@ -109,38 +112,17 @@ public class DataBuilder implements IDestroyable{
     /**
      * Loads all assets for the base game and each mod.
      */
-    public void loadAllAssets(){
-        this.loadAssets(Gdx.files.internal("./")); //We load all the assets (sound, music, art)
+    public void loadAllFiles(){
+        this.loadFilesForMod(Gdx.files.internal("./")); //We load all the config/json files
 
-        FileHandle modBaseDir = Gdx.files.internal("./"+modPath);
-
-        /**
-         * In this section, we load the mods from the mods.json file and convert it to an array. We then check each mod
-         * to see if it's enabled. If so, we load its files.
-         */
-
-        //This builds the mods from the mods.json file.
-        Mod[] modListInFile = buildJson(Gdx.files.internal("./" + modPath +""+modFilePath), Mod[].class, null);
-        //If we loaded stuff from the mods.json file, make a list from it. Otherwise, just give us a new list.
-        Array<Mod> modList;
-        if(modListInFile != null) modList = new Array<>(modListInFile);
-        else modList = new Array<>();
-
-        //Loop over each mod directory and load it if it's enabled.
-        for(FileHandle modDir : modBaseDir.list()){
-            //We get the mod info from the mod directoy.
-            ModInfo modInfo = buildJson(Gdx.files.internal(modDir.path()+ modInfoFilePath), ModInfo.class, null);
-            if(modInfo == null) continue; //If it's null, don't bother.
-
-            //Loop over each mod in the modList. If one matches the modInfo file and it's enabled, load the files for it.
-            for(Mod mod : modList) {
-                if (mod.modName.equals(modInfo.name)) {
-                    if (mod.enabled) loadAssets(modDir);
-                    mod.modInfo = modInfo;
-                    break;
-                }
-            }
+        //Since we compiled our enabledMods list when we ran loadAssets, we can easily use that.
+        for(Mod mod : enabledMods){
+            FileHandle dir = Gdx.files.internal(mod.path);
+            loadFilesForMod(dir);
         }
+
+        //Do this after everything has been loaded.
+        this.makeRecipes();
     }
 
     /**
@@ -203,22 +185,6 @@ public class DataBuilder implements IDestroyable{
                 DataManager.addData(recipe.name, recipe, JsonRecipe.class);
         });
 
-        //We need to do this after the items and recipes are built.
-        //Compile the list of items and raw that is needed for the recipe.
-        for(Object recipe : DataManager.getValueListForType(JsonRecipe.class)){
-            JsonRecipe _recipe = (JsonRecipe)recipe;
-            this.calculateMaterials(_recipe, _recipe.materialsForCrafting, _recipe.rawForCrafting);
-
-            //TODO This is kinda hacky. Try to get an item for an icon, otherwise get a building for an icon. There must be a better way...
-            JsonItem item = DataManager.getData(_recipe.name, JsonItem.class);
-            if(item != null) _recipe.icon = item.iconTexture;
-            else{
-                JsonBuilding building = DataManager.getData(_recipe.name, JsonBuilding.class);
-                if(building != null)
-                    _recipe.icon = DataManager.getTextureFromAtlas(building.image, building.spriteSheet);
-            }
-        }
-
         //Build resources
         buildJson(Gdx.files.internal(path + filePath + resourcePath), JsonResource[].class, buildResources);
 
@@ -270,6 +236,24 @@ public class DataBuilder implements IDestroyable{
         buildFilesInDir(Gdx.files.internal(path + this.imgPath), Texture.class, param, new String[]{"png"});
         buildFilesInDir(Gdx.files.internal(path + this.soundPath), Sound.class, null, new String[]{"ogg"});
         buildFilesInDir(Gdx.files.internal(path + this.atlasPath), TextureAtlas.class, null, new String[]{"atlas"});
+    }
+
+    private void makeRecipes(){
+        //Compile the list of items and raw that is needed for the recipe.
+        for(Object recipe : DataManager.getValueListForType(JsonRecipe.class)){
+            //Get the recipe and calculate its materials!
+            JsonRecipe _recipe = (JsonRecipe)recipe;
+            this.calculateMaterials(_recipe, _recipe.materialsForCrafting, _recipe.rawForCrafting);
+
+            //TODO This is kinda hacky. Try to get an item for an icon, otherwise get a building for an icon. There must be a better way...
+            JsonItem item = DataManager.getData(_recipe.name, JsonItem.class);
+            if(item != null) _recipe.icon = item.iconTexture;
+            else{
+                JsonBuilding building = DataManager.getData(_recipe.name, JsonBuilding.class);
+                if(building != null)
+                    _recipe.icon = DataManager.getTextureFromAtlas(building.image, building.spriteSheet);
+            }
+        }
     }
 
     /**
@@ -808,7 +792,7 @@ public class DataBuilder implements IDestroyable{
     }
 
     private static class Mod{
-        public String modName;
+        public String modName, path;
         public boolean enabled = false;
         public ModInfo modInfo;
     }
