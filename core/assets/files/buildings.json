@@ -9,7 +9,7 @@
     "inventory": true,
     "storageTypes": ["all"],
     "enterable": true,
-    "enterableMaxOccupancy": 1,
+    "enterableMaxOccupancy": 10,
     "enterablePositions": [[0.275, 0.05]]
   },
   {

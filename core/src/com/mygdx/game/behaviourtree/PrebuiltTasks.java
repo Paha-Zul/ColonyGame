@@ -495,7 +495,7 @@ public class PrebuiltTasks {
         CheckInventoryHasItemWithEffectAndReserve check = new CheckInventoryHasItemWithEffectAndReserve("Checking Inventory", blackBoard);
         FindPath fp = new FindPath("Finding Path to consume item", blackBoard);
         MoveTo moveTo = new MoveTo("Moving to consume item", blackBoard);
-        TransferInventory tr = new TransferInventory("Transferring Consumable", blackBoard);
+        TransferItemsFromTargetToMe tr = new TransferItemsFromTargetToMe("Transferring Consumable", blackBoard);
         Consume consume = new Consume("Consuming Item", blackBoard);
 
         ((ParentTaskController) sequence.getControl()).addTask(check);
@@ -782,7 +782,7 @@ public class PrebuiltTasks {
         MoveTo mt = new MoveTo("Moving", blackBoard);
         Enter enter = new Enter("Entering", blackBoard);
         Sleep sleep = new Sleep("Sleeping", blackBoard);
-        Leave leave = new Leave("Leaving", blackBoard);
+        Exit leave = new Exit("Leaving", blackBoard);
 
         //Make sure we have tags to search for!
         mainSeq.control.callbacks.startCallback = task -> {
@@ -873,7 +873,7 @@ public class PrebuiltTasks {
         MoveTo moveToTargetCrafting = new MoveTo("Move to crafting station", blackBoard);
         Enter enterCraftingStation = new Enter("Entering crafting station", blackBoard);
         CraftItem craftItem = new CraftItem("Crafting item", blackBoard);
-        Leave leaveCraftingStation = new Leave("Leaving crafting station", blackBoard);
+        Exit leaveCraftingStation = new Exit("Leaving crafting station", blackBoard);
 
         //Idle idle = new Idle("Waiting for crafting job", blackBoard);
 

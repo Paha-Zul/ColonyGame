@@ -62,18 +62,18 @@ public class MainMenuInterface extends UI{
         mainMenuTexture = ColonyGame.assetManager.get("Space2", Texture.class);
 
         //Set the states for the start button
-        startButtonStyle.normal = ColonyGame.assetManager.get("startbutton_normal", Texture.class);
-        startButtonStyle.moused = ColonyGame.assetManager.get("startbutton_moused", Texture.class);
-        startButtonStyle.clicked = ColonyGame.assetManager.get("startbutton_clicked", Texture.class);
+        startButtonStyle.normal = DataManager.getTextureFromAtlas("startbutton_normal", "buttons");
+        startButtonStyle.moused = DataManager.getTextureFromAtlas("startbutton_moused", "buttons");
+        startButtonStyle.clicked = DataManager.getTextureFromAtlas("startbutton_clicked", "buttons");
 
         //States for quit button.
-        quitButtonStyle.normal = ColonyGame.assetManager.get("quitbutton_normal", Texture.class);
-        quitButtonStyle.moused = ColonyGame.assetManager.get("quitbutton_moused", Texture.class);
-        quitButtonStyle.clicked = ColonyGame.assetManager.get("quitbutton_clicked", Texture.class);
+        quitButtonStyle.normal =  DataManager.getTextureFromAtlas("quitbutton_normal", "buttons");
+        quitButtonStyle.moused =  DataManager.getTextureFromAtlas("quitbutton_moused", "buttons");
+        quitButtonStyle.clicked =  DataManager.getTextureFromAtlas("quitbutton_clicked", "buttons");
 
         //For blank buttons
-        blank1Style.normal = blank1Style.moused = blank1Style.clicked = blank2Style.normal = blank2Style.moused = ColonyGame.assetManager.get("blankbutton_normal", Texture.class);
-        blank3Style.normal = blank3Style.moused = blank3Style.clicked = ColonyGame.assetManager.get("blankbutton_normal", Texture.class);
+        blank1Style.normal = blank1Style.moused = blank1Style.clicked = blank2Style.normal = blank2Style.moused = DataManager.getTextureFromAtlas("blankbutton_normal", "buttons");
+        blank3Style.normal = blank3Style.moused = blank3Style.clicked = DataManager.getTextureFromAtlas("blankbutton_normal", "buttons");
 
         //Assign all these to an array for easy displaying and resizing.
         buttonRects[0] = startRect;

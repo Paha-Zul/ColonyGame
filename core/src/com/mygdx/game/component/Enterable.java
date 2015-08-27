@@ -24,6 +24,7 @@ public class Enterable extends Component{
 
     public Enterable() {
         super();
+        this.currOccupants = new Array<>(this.maxOccupants);
     }
 
     @Override
@@ -34,7 +35,6 @@ public class Enterable extends Component{
     @Override
     public void start() {
         super.start();
-        this.currOccupants = new Array<>(this.maxOccupants);
     }
 
     @Override
@@ -90,6 +90,10 @@ public class Enterable extends Component{
         }
 
         return this.enterPositions;
+    }
+
+    public Array<Entity> getOccupants(){
+        return this.currOccupants;
     }
 
     /**

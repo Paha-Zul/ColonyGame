@@ -79,14 +79,14 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     private Rectangle bottomLeftRect = new Rectangle();
     private Rectangle selectionBox = new Rectangle();
 
-    private GUI.GUIStyle gatherStyle = new GUI.GUIStyle();
-    private GUI.GUIStyle exploreStyle = new GUI.GUIStyle();
-    private GUI.GUIStyle huntStyle = new GUI.GUIStyle();
-    private GUI.GUIStyle blankStyle = new GUI.GUIStyle();
-    private GUI.GUIStyle skillsStyle = new GUI.GUIStyle();
-    private GUI.GUIStyle gameSpeedStyle = new GUI.GUIStyle();
-    private GUI.GUIStyle notificationStyle = new GUI.GUIStyle();
-    private GUI.GUIStyle mousedOverNotiStyle = new GUI.GUIStyle();
+    private GUI.GUIStyle gatherStyle;
+    private GUI.GUIStyle exploreStyle;
+    private GUI.GUIStyle huntStyle;
+    private GUI.GUIStyle blankStyle;
+    private GUI.GUIStyle skillsStyle;
+    private GUI.GUIStyle gameSpeedStyle;
+    private GUI.GUIStyle notificationStyle;
+    private GUI.GUIStyle mousedOverNotiStyle;
     public GUI.GUIStyle UIStyle;
     private Timer FPSTimer;
 
@@ -116,9 +116,9 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     public boolean drawingColony = false;
 
     private void loadHuntButtonStyle(){
-        huntStyle.normal = ColonyGame.assetManager.get("huntbutton_normal", Texture.class);
-        huntStyle.moused = ColonyGame.assetManager.get("huntbutton_moused", Texture.class);
-        huntStyle.clicked = ColonyGame.assetManager.get("huntbutton_clicked", Texture.class);
+        huntStyle.normal = DataManager.getTextureFromAtlas("huntbutton_normal", "buttons");
+        huntStyle.moused = DataManager.getTextureFromAtlas("huntbutton_moused", "buttons");
+        huntStyle.clicked = DataManager.getTextureFromAtlas("huntbutton_clicked", "buttons");
     }
 
     //For selecting a single unit.
@@ -154,6 +154,15 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         this.world = world;
         this.whiteTexture = new TextureRegion(WorldGen.whiteTex);
 
+        this.gatherStyle = new GUI.GUIStyle();
+        this.exploreStyle = new GUI.GUIStyle();
+        this.huntStyle = new GUI.GUIStyle();
+        this.blankStyle = new GUI.GUIStyle();
+        this.skillsStyle = new GUI.GUIStyle();
+        this.gameSpeedStyle = new GUI.GUIStyle();
+        this.notificationStyle = new GUI.GUIStyle();
+        this.mousedOverNotiStyle = new GUI.GUIStyle();
+
         this.buttonList = new Array<>();
 
         this.eventDescStyle = new GUI.GUIStyle();
@@ -171,36 +180,36 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         Functional.Callback callback = () -> this.FPS = 1/Gdx.graphics.getDeltaTime();
         this.FPSTimer = new RepeatingTimer(0.5d, callback);
 
-        //Loads and configures stuff about buttons tyles.
+        //Loads and configures stuff about buttons styles.
         loadHuntButtonStyle();
 
         this.generateFonts();
 
-        gatherStyle.normal =  ColonyGame.assetManager.get("axebutton_normal", Texture.class);
-        gatherStyle.moused = ColonyGame.assetManager.get("axebutton_moused", Texture.class);
-        gatherStyle.clicked = ColonyGame.assetManager.get("axebutton_clicked", Texture.class);
-        gatherStyle.active = ColonyGame.assetManager.get("axebutton_clicked", Texture.class);
+        gatherStyle.normal =  DataManager.getTextureFromAtlas("axebutton_normal", "buttons");
+        gatherStyle.moused = DataManager.getTextureFromAtlas("axebutton_moused", "buttons");
+        gatherStyle.clicked = DataManager.getTextureFromAtlas("axebutton_clicked", "buttons");
+        gatherStyle.active = DataManager.getTextureFromAtlas("axebutton_clicked", "buttons");
 
         DataManager.addData("gatherStyle", gatherStyle, GUI.GUIStyle.class);
 
-        exploreStyle.normal = ColonyGame.assetManager.get("explorebutton_normal", Texture.class);
-        exploreStyle.moused = ColonyGame.assetManager.get("explorebutton_moused", Texture.class);
-        exploreStyle.clicked = ColonyGame.assetManager.get("explorebutton_clicked", Texture.class);
-        exploreStyle.active = ColonyGame.assetManager.get("explorebutton_clicked", Texture.class);
+        exploreStyle.normal = DataManager.getTextureFromAtlas("explorebutton_normal", "buttons");
+        exploreStyle.moused = DataManager.getTextureFromAtlas("explorebutton_moused", "buttons");
+        exploreStyle.clicked = DataManager.getTextureFromAtlas("explorebutton_clicked", "buttons");
+        exploreStyle.active = DataManager.getTextureFromAtlas("explorebutton_clicked", "buttons");
 
         DataManager.addData("exploreStyle", exploreStyle, GUI.GUIStyle.class);
 
-        huntStyle.normal = ColonyGame.assetManager.get("huntbutton_normal", Texture.class);
-        huntStyle.moused = ColonyGame.assetManager.get("huntbutton_moused", Texture.class);
-        huntStyle.clicked = ColonyGame.assetManager.get("huntbutton_clicked", Texture.class);
-        huntStyle.active = ColonyGame.assetManager.get("huntbutton_clicked", Texture.class);
+        huntStyle.normal = DataManager.getTextureFromAtlas("huntbutton_normal", "buttons");
+        huntStyle.moused = DataManager.getTextureFromAtlas("huntbutton_moused", "buttons");
+        huntStyle.clicked = DataManager.getTextureFromAtlas("huntbutton_clicked", "buttons");
+        huntStyle.active = DataManager.getTextureFromAtlas("huntbutton_clicked", "buttons");
 
         DataManager.addData("huntStyle", huntStyle, GUI.GUIStyle.class);
 
-        blankStyle.normal = ColonyGame.assetManager.get("blankbutton_normal", Texture.class);
-        blankStyle.moused = ColonyGame.assetManager.get("blankbutton_moused", Texture.class);
-        blankStyle.clicked = ColonyGame.assetManager.get("blankbutton_clicked", Texture.class);
-        blankStyle.active = ColonyGame.assetManager.get("blankbutton_clicked", Texture.class);
+        blankStyle.normal = DataManager.getTextureFromAtlas("blankbutton_normal", "buttons");
+        blankStyle.moused = DataManager.getTextureFromAtlas("blankbutton_moused", "buttons");
+        blankStyle.clicked = DataManager.getTextureFromAtlas("blankbutton_clicked", "buttons");
+        blankStyle.active = DataManager.getTextureFromAtlas("blankbutton_clicked", "buttons");
 
         DataManager.addData("blankStyle", blankStyle, GUI.GUIStyle.class);
 
@@ -228,9 +237,9 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     }
 
     private void makeBuildButton(){
-        TextureRegionDrawable up = new TextureRegionDrawable(new TextureRegion(ColonyGame.assetManager.get("defaultButton_normal", Texture.class)));
-        TextureRegionDrawable over = new TextureRegionDrawable(new TextureRegion(ColonyGame.assetManager.get("defaultButton_moused", Texture.class)));
-        TextureRegionDrawable down = new TextureRegionDrawable(new TextureRegion(ColonyGame.assetManager.get("defaultButton_clicked", Texture.class)));
+        TextureRegionDrawable up = new TextureRegionDrawable(DataManager.getTextureFromAtlas("defaultButton_normal", "buttons"));
+        TextureRegionDrawable over = new TextureRegionDrawable(DataManager.getTextureFromAtlas("defaultButton_moused", "buttons"));
+        TextureRegionDrawable down = new TextureRegionDrawable(DataManager.getTextureFromAtlas("defaultButton_clicked", "buttons"));
 
         TextButton.TextButtonStyle style = new TextButton.TextButtonStyle(up, down, up, this.UIStyle.font);
         style.over = style.checkedOver = over;
@@ -412,6 +421,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
         for(int i=0;i<this.selectedProfileList.size;i++)
             if(this.selectedProfileList.get(i).entity == entity) {
+                this.selectedProfileList.get(i).entity.getTags().removeTag("selected");
                 this.selectedProfileList.removeIndex(i);
                 break;
             }
@@ -818,7 +828,8 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
                     alert = ((Colonist) selectedProfile.interactable.getInteractable().getComponent()).toggleRangeSensor();
 
             for(UnitProfile profile : this.selectedProfileList){
-                ((Colonist)profile.interactable.getInteractable().getComponent()).setAlert(alert);
+                if(profile.interactable.getInteractable().getComponent().getEntityOwner().getTags().hasTag("colonist"))
+                    ((Colonist)profile.interactable.getInteractable().getComponent()).setAlert(alert);
             }
 
         }else if(keycode == Input.Keys.I) { //T - toggle the colonists (if we have a colonist selected) 'alert' mode.

@@ -82,6 +82,8 @@ public class ColonyGame extends Game {
 			camera.update();
 		}catch(Exception e){
 			e.printStackTrace();
+			Logger.log(Logger.ERROR, "Game closing due to error");
+			Logger.close();
             e.printStackTrace(Logger.getPrintWriter());
             GH.writeErrorMessage(e);
             this.dispose();
@@ -110,7 +112,7 @@ public class ColonyGame extends Game {
         threadPool.shutdownNow();
         threadPool = null;
         assetManager = null;
-        Logger.log(Logger.ERROR, "Game closing due to error...");
+        Logger.log(Logger.ERROR, "Game closing normally");
         Logger.close();
     }
 }

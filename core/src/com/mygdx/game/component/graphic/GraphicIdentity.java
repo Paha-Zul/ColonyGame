@@ -9,6 +9,8 @@ import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.component.Component;
 import com.mygdx.game.component.Effects;
+import com.mygdx.game.component.Enterable;
+import com.mygdx.game.entity.Entity;
 import com.mygdx.game.util.Constants;
 import com.mygdx.game.util.GH;
 import com.mygdx.game.util.Grid;
@@ -24,12 +26,13 @@ public class GraphicIdentity extends Component {
     private Sprite sprite;
     @JsonIgnore
     private Effects effects;
+    @JsonIgnore
+    private Enterable enterable;
     @JsonProperty
     private Vector2 anchor;
 
     @JsonProperty
     private int currVisibility=0;
-
 
     public GraphicIdentity(){
         this.setActive(true);
@@ -64,6 +67,7 @@ public class GraphicIdentity extends Component {
     public void load() {
         super.load();
         this.effects = this.getComponent(Effects.class);
+        this.enterable = this.getComponent(Enterable.class);
     }
 
     @Override
@@ -98,6 +102,15 @@ public class GraphicIdentity extends Component {
                 float startY = pos.y + sprite.getHeight()/2;
                 for(Effects.Effect effect : effects.getActiveEffects()){
                     batch.draw(effect.getIcon(), startX, startY, size, size);
+                    startX+=size;
+                }
+            }else if(this.enterable != null){
+                float size = GH.toMeters(24);
+                int num = this.enterable.getOccupants().size;
+                float startX = pos.x - num*(size/2);
+                float startY = pos.y + sprite.getHeight()/2;
+                for(Entity entity : this.enterable.getOccupants()){
+                    batch.draw(ColonyGame.assetManager.get("colonist", Texture.class), startX, startY, size, size);
                     startX+=size;
                 }
             }

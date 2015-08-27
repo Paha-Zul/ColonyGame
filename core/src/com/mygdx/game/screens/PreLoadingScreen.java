@@ -7,9 +7,11 @@ import com.mygdx.game.ColonyGame;
 import com.mygdx.game.util.Constants;
 import com.mygdx.game.util.DataBuilder;
 import com.mygdx.game.util.Grid;
+import com.mygdx.game.util.gui.GUI;
 
 /**
  * Created by Paha on 2/19/2015.
+ * <p>The screen where the blue circle thingy spins. Loads all assets and files before displaying the main menu.</p>
  */
 public class PreLoadingScreen implements Screen{
     private DataBuilder builder;
@@ -45,6 +47,7 @@ public class PreLoadingScreen implements Screen{
         //When the assets are done being loaded, load all the config/Json files and change the screen.
         if(builder.update()) {
             builder.loadAllFiles();
+            GUI.init();
             ColonyGame.worldGrid = Grid.newGridInstance("grid", Constants.GRID_WIDTH, Constants.GRID_HEIGHT, Constants.GRID_SQUARESIZE);
             this.game.setScreen(new MainMenuScreen(this.game));
         }

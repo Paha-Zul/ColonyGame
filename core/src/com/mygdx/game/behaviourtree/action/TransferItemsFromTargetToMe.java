@@ -7,7 +7,8 @@ import com.mygdx.game.util.ItemNeeded;
 
 /**
  * Created by Paha on 8/18/2015.
- * Transfers items from the blackboard.target to me!
+ * <p>Transfers items from the blackboard.target to me! Sets the toInventory as my inventory, and the fromInventory from the target.</p>
+ * <p>It then transfers all the items in blackBoard.itemTransfer.itemsToTransfer from fromInventory to toInventory, unreserving (hopefully) what was taken.</p>
  */
 public class TransferItemsFromTargetToMe extends LeafTask{
     public TransferItemsFromTargetToMe(String name, BlackBoard blackBoard) {

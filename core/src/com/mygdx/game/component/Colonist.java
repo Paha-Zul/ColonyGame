@@ -121,11 +121,12 @@ public class Colonist extends Component implements IInteractable, IOwnable{
         Stats.Stat healthStat = stats.addStat("health", 100, 100);
         Stats.Stat foodStat = stats.addStat("food", 5, 100);
         Stats.Stat waterStat = stats.addStat("water", 1, 100);
-        stats.addStat("energy", 100, 100).color = Color.YELLOW;
+        Stats.Stat energyStat = stats.addStat("energy", 100, 100);
 
         healthStat.color = Color.GREEN;
         foodStat.color = Color.RED;
         waterStat.color = Color.CYAN;
+        energyStat.color = Color.YELLOW;
 
         foodStat.effect = "feed";
         waterStat.effect = "thirst";
@@ -135,23 +136,32 @@ public class Colonist extends Component implements IInteractable, IOwnable{
         stats.addTimer(new RepeatingTimer(5f, () -> {
             foodStat.addToCurrent(-1);
             //If under 20, try to eat.
-//            if(foodStat.getCurrVal() <= 20 && !getBehManager().getBehaviourStates().isCurrState("consume")) {
-//                getBehManager().getBlackBoard().itemEffect = "feed";
-//                getBehManager().getBlackBoard().itemEffectAmount = 1;
-//                getBehManager().changeTaskQueued("consume");
-//            }
+            if(foodStat.getCurrVal() <= 20 && !getBehManager().getBehaviourStates().isCurrState("consume")) {
+                getBehManager().getBlackBoard().itemEffect = "feed";
+                getBehManager().getBlackBoard().itemEffectAmount = 1;
+                getBehManager().changeTaskQueued("consume");
+            }
         }));
 
         //Subtract water every 10 seconds and try to drink when it's too low.
         stats.addTimer(new RepeatingTimer(10f, () -> {
             waterStat.addToCurrent(-1);
             //If under 20, try to drink.
-//            if (waterStat.getCurrVal() <= 20 && !getBehManager().getBehaviourStates().isCurrState("consume")) {
-//                getBehManager().getBlackBoard().itemEffect = "thirst";
-//                getBehManager().getBlackBoard().itemEffectAmount = 1;
-//                getBehManager().changeTaskQueued("consume");
-//            }
+            if (waterStat.getCurrVal() <= 20 && !getBehManager().getBehaviourStates().isCurrState("consume")) {
+                getBehManager().getBlackBoard().itemEffect = "thirst";
+                getBehManager().getBlackBoard().itemEffectAmount = 1;
+                getBehManager().changeTaskQueued("consume");
+            }
         })); //Subtract water every 10 seconds.
+
+        //Subtract energy every so often...
+        stats.addTimer(new RepeatingTimer(0.5f, () -> {
+            energyStat.addToCurrent(-1);
+            //If under 20, sleep!
+            if (energyStat.getCurrVal() <= 20 && !getBehManager().getBehaviourStates().isCurrState("sleep")) {
+                getBehManager().changeTaskQueued("sleep");
+            }
+        })); //Subtract energy
 
         //If food or water is 0, subtract health.
         Timer timer = stats.addTimer(new RepeatingTimer(5f, null));
@@ -224,6 +234,7 @@ public class Colonist extends Component implements IInteractable, IOwnable{
      * Creates the behaviour states for the Colonist.
      */
     private void createBehaviourStates(){
+        getBehManager().getBehaviourStates().addState("moveTo", false, new StateSystem.DefineTask("idle", "idle")).setRepeat(false);
         getBehManager().getBehaviourStates().addState("gather", false, new StateSystem.DefineTask("gather", "idle")).setRepeat(true);
         getBehManager().getBehaviourStates().addState("explore", false, new StateSystem.DefineTask("explore", "idle")).setRepeat(true);
         getBehManager().getBehaviourStates().addState("consume", false, new StateSystem.DefineTask("idle", "idle")).setRepeat(false).setRepeatLastState(true);

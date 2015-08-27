@@ -1,6 +1,28 @@
 {
   "changes": [
     {
+      "version": "0.35",
+      "date": "8/26/2015",
+      "log": [
+        "- Added: Building! Click the 'Build' button in the bottom left to access the building menu (horrible temporary menu). Only a couple buildings at the moment. Hover over them to see their cost. Can't place on other buildings/trees/units.",
+        "- Added: Construction! Buildings have to be constructed by colonists. Click on a construction (see-throughish) to see what it needs and how much is done.",
+        "- Added: Crafting! The crafting building crafts stuff! Click on a crafting building and then on the huge horrible looking button in the bottom right.",
+        "- Added: Sleeping! You can tell your colonist to sleep or he will sleep when he gets below 20 energy.",
+        "- Added: Buildings show how many people are in a building by displaying mini people above the building.",
+        "- Added: When colonists are idle, they will return any items/tools they have to the appropriate building.",
+        "",
+        "- Fixed: No more lag when a pack of wolves attack. I found that the wolves were repathing towards the colonist every frame which could result in up to 2000 repathing requests a second. Holy freaking.",
+        "- Fixed: Buildings and resources should be easier to click on.",
+        "",
+        "- Changed: Colonists will try to navigate around the graphic of a building, but only around the base of resources.",
+        "- Changed: Buildings can have 'enter' positions where a colonist will move towards to enter the building.",
+        "",
+        "- Possible Bug/Unintended Behavior: Colonists may get stuck consuming food/water or may ignore consuming it if they are occupied with a job.",
+        "- Possible Bug/Unintended Behavior: Colonists will basically fight to the death when attacked by wolves. It's really hard to get them to move away...",
+
+      ]
+    },
+    {
       "version": "0.31",
       "date": "6/6/2015",
       "log": [
@@ -9,7 +31,7 @@
         "- Added: A really bad loading circle thing because my skills to make a better one are lacking. It's just a colored circle that spins....",
         "- Changed: Main menu music....",
         "- Changed: Trees are a lot easier to click on. This makes anything behind them basically impossible to click on.",
-        "- Bugs: Weird lag when a ton of wolves attack?"
+        "- Bugs: Weird lag when a ton of wolves attack?",
         "- Bugs: The buildings are really hard to click on now. If you hit F3 you can see where to click them. It's near the top left of their picture."
       ]
     },

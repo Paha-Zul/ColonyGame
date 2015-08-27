@@ -21,6 +21,8 @@ public class Stats extends Component{
     private LinkedHashMap<String, Stat> statMap = new LinkedHashMap<>();
     @JsonIgnore
     private ArrayList<RepeatingTimer> timerList = new ArrayList<>();
+    @JsonIgnore
+    private boolean pauseTimers = false;
 
     public Stats() {
         super();
@@ -45,8 +47,9 @@ public class Stats extends Component{
     public void update(float delta) {
         super.update(delta);
 
-        for(Timer timer : timerList)
-            timer.update(delta);
+        if(!this.pauseTimers)
+            for(Timer timer : timerList)
+                timer.update(delta);
     }
 
     /**
@@ -142,6 +145,10 @@ public class Stats extends Component{
         this.statMap.clear();
     }
 
+    public void pauseTimers(boolean val){
+        this.pauseTimers = val;
+    }
+
     @Override
     public void destroy(Entity destroyer) {
         super.destroy(destroyer);
@@ -181,8 +188,9 @@ public class Stats extends Component{
         /**
          * Adds a value to the current value of this Stat.
          * @param value The value to add to the current value.
+         * @return True if the current value equals the max value, false otherwise.
          */
-        public void addToCurrent(float value){
+        public boolean addToCurrent(float value){
             this.current += value; //Add the value.
             //If empty (at or below 0), call the onZero callback and set to 0.
             if(this.current <= 0){
@@ -192,7 +200,10 @@ public class Stats extends Component{
             }else if(this.current >= this.max){
                 if(onFull != null) onFull.callback();
                 this.current = this.max;
+                return true;
             }
+
+            return false;
         }
 
         /**

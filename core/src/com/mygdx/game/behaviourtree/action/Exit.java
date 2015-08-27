@@ -2,13 +2,14 @@ package com.mygdx.game.behaviourtree.action;
 
 import com.mygdx.game.behaviourtree.BlackBoard;
 import com.mygdx.game.behaviourtree.LeafTask;
+import com.mygdx.game.component.collider.Collider;
 
 /**
  * Created by Paha on 7/21/2015.
  * 'Leaves' an Enterable entity.
  */
-public class Leave extends LeafTask{
-    public Leave(String name, BlackBoard blackBoard) {
+public class Exit extends LeafTask{
+    public Exit(String name, BlackBoard blackBoard) {
         super(name, blackBoard);
     }
 
@@ -40,5 +41,7 @@ public class Leave extends LeafTask{
         if(this.blackBoard.enterable != null) this.blackBoard.enterable.leave(this.blackBoard.myManager.getEntityOwner());
         this.blackBoard.myManager.getEntityOwner().getGraphicIdentity().setActive(true);
         this.blackBoard.myManager.getEntityOwner().getTags().addTag("selectable");
+        Collider collider = this.blackBoard.myManager.getEntityOwner().getComponent(Collider.class);
+        if(collider != null) collider.getBody().setActive(true);
     }
 }

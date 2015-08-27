@@ -95,7 +95,7 @@ public class GameScreen implements Screen{
     }
 
     private void generateStart(Vector2 start){
-        int colonistSpawn = 2;
+        int colonistSpawn = 10;
 
         //Add our colony to an empty entity and create a player using the colony.
         Entity empty = new Entity(new Vector2(0,0), 0, 0);

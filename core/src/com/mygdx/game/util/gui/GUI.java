@@ -10,23 +10,25 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.utils.Align;
 import com.mygdx.game.util.GH;
+import com.mygdx.game.util.managers.DataManager;
 import com.mygdx.game.util.worldgeneration.WorldGen;
 import com.sun.istack.internal.NotNull;
 import com.sun.istack.internal.Nullable;
 
 /**
  * Created by Bbent_000 on 12/25/2014.
+ * GUI Stuff!
  */
 public class GUI {
     public static BitmapFont font;
-    public static Texture defaultTexture = new Texture("img/misc/background.png");
+    public static Texture defaultTexture;
 
     private static BitmapFont defaultFont = new BitmapFont();
-    private static Texture defaultNormalButton = new Texture("img/ui/buttons/defaultButton_normal.png");
-    private static Texture defaultMousedButton = new Texture("img/ui/buttons/defaultButton_moused.png");
-    private static Texture defaultClickedButton = new Texture("img/ui/buttons/defaultButton_clicked.png");
+    private static TextureRegion defaultNormalButton;
+    private static TextureRegion defaultMousedButton;
+    private static TextureRegion defaultClickedButton;
 
-    public static GUIStyle defaultGUIStyle = new GUIStyle();
+    public static GUIStyle defaultGUIStyle;
 
     public static final int NONE=0,OVER=1, JUSTDOWN=2, DOWN=3, JUSTUP=4, UP=5;
 
@@ -36,10 +38,20 @@ public class GUI {
     private static TextureRegion whiteTexture;
     private static float boundsWidth = 0;
 
-
     static{
         font = defaultFont;
         whiteTexture = new TextureRegion(WorldGen.whiteTex);
+    }
+
+    /**
+     * Initializes the default resources. Needs to be called somewhere.
+     */
+    public static void init(){
+        GUI.defaultTexture = new Texture("img/misc/background.png");
+        GUI.defaultNormalButton = DataManager.getTextureFromAtlas("defaultButton_normal", "buttons");
+        GUI.defaultMousedButton = DataManager.getTextureFromAtlas("defaultButton_moused", "buttons");
+        GUI.defaultClickedButton = DataManager.getTextureFromAtlas("defaultButton_clicked", "buttons");
+        GUI.defaultGUIStyle = new GUIStyle();
     }
 
     /**
@@ -213,7 +225,7 @@ public class GUI {
         if(style == null)
             style = defaultGUIStyle;
 
-        Texture currTexture = style.normal;
+        TextureRegion currTexture = style.normal;
         if(style.activated) currTexture = style.active;
 
         int state = GUI.getState(rect);
@@ -407,10 +419,10 @@ public class GUI {
     }
 
     public static class GUIStyle {
-        public Texture normal = GUI.defaultNormalButton;
-        public Texture moused = GUI.defaultMousedButton;
-        public Texture clicked = GUI.defaultClickedButton;
-        public Texture active = GUI.defaultClickedButton;
+        public TextureRegion normal;
+        public TextureRegion moused;
+        public TextureRegion clicked;
+        public TextureRegion active;
 
         public BitmapFont font = defaultFont;
         public boolean multiline = false, toggled = false, activated = false, wrap = false;
@@ -419,7 +431,10 @@ public class GUI {
         public TextureRegion background;
 
         public GUIStyle(){
-
+            this.normal = GUI.defaultNormalButton;
+            this.moused = GUI.defaultMousedButton;
+            this.clicked = GUI.defaultClickedButton;
+            this.active = GUI.defaultClickedButton;
         }
 
         public GUIStyle(GUIStyle style) {

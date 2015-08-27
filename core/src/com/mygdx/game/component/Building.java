@@ -38,8 +38,8 @@ public class Building extends Component implements IOwnable, IInteractable{
     }
 
     @Override
-    public void start() {
-        super.start();
+    public void init() {
+        super.init();
 
         //Get the JsonBuilding reference, add the tags, add an inventory if under construction, and set the name.
         for(String tag : this.jBuilding.tags) this.owner.getTags().addTag(tag); //Add each tag that exists.
@@ -48,16 +48,13 @@ public class Building extends Component implements IOwnable, IInteractable{
         if(this.owner.getTags().hasTag("constructing") || this.jBuilding.inventory) this.inventory = this.addComponent(new Inventory());
         this.owner.name = this.jBuilding.displayName; //Set the display name.
 
-        this.load();
+        this.initLoad();
     }
 
     @Override
-    public void save() {
+    public void initLoad() {
+        super.initLoad();
 
-    }
-
-    @Override
-    public void load() {
         boolean isConstructing = this.owner.getTags().hasTag("constructing"); //If the building is under construction
 
         //If we are constructing still on a load OR this building should have an inventory...
@@ -97,7 +94,19 @@ public class Building extends Component implements IOwnable, IInteractable{
             this.owner.getComponents().getIdentity().setSprite(jBuilding.image, jBuilding.spriteSheet, jBuilding.dimensions[0], jBuilding.dimensions[1]);
         else
             this.owner.getComponents().getIdentity().setSprite(jBuilding.image, null);
+    }
 
+    @Override
+    public void start() {
+        super.start();
+    }
+
+    @Override
+    public void save() {
+    }
+
+    @Override
+    public void load() {
     }
 
     @Override

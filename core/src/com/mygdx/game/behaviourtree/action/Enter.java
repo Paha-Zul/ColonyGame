@@ -2,6 +2,7 @@ package com.mygdx.game.behaviourtree.action;
 
 import com.mygdx.game.behaviourtree.BlackBoard;
 import com.mygdx.game.behaviourtree.LeafTask;
+import com.mygdx.game.component.collider.Collider;
 import com.mygdx.game.component.graphic.GraphicIdentity;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.ui.PlayerInterface;
@@ -37,8 +38,12 @@ public class Enter extends LeafTask{
         identity.setActive(false);
         owner.getTags().removeTag("selectable");
         PlayerInterface.getInstance().deselectEntity(owner);
-        this.blackBoard.enterable.enter(owner);
+        Collider collider = this.blackBoard.myManager.getEntityOwner().getComponent(Collider.class);
+        if(collider != null){
+            collider.getBody().setActive(false);
+        }
 
+        this.blackBoard.enterable.enter(owner);
         this.control.finishWithSuccess();
     }
 
