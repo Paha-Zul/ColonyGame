@@ -38,7 +38,6 @@ import com.mygdx.game.util.gui.Button;
 import com.mygdx.game.util.gui.GUI;
 import com.mygdx.game.util.managers.DataManager;
 import com.mygdx.game.util.managers.NotificationManager;
-import com.mygdx.game.util.managers.PlayerManager;
 import com.mygdx.game.util.managers.WindowManager;
 import com.mygdx.game.util.timer.OneShotTimer;
 import com.mygdx.game.util.timer.RepeatingTimer;
@@ -283,7 +282,6 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         int height = Gdx.graphics.getHeight();
         FPSTimer.update(delta);
 
-        this.windowManager.update(this.batch);
         for(Button button : this.buttonList)
             if(button.render(ColonyGame.batch)) break;
 
@@ -293,6 +291,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         this.drawTerrainInfo(this.bottomLeftRect); //Draws information about the moused over terrain piece.
         this.drawGameSpeed(screenW, screenH, batch, this.gameSpeedStyle);
         this.drawCurrentNotifications(screenW, screenH, delta);
+        this.windowManager.update(this.batch);
 
         if(this.drawingProfiler) Profiler.drawDebug(batch, 200, height - 20);
 
@@ -752,6 +751,18 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     }
 
     /**
+     * Deselects all selected profiles and the current selected profile and clears both.
+     */
+    public void clearSelectedProfileList(){
+        for(UnitProfile profile : this.selectedProfileList){
+            profile.entity.getTags().removeTag("selected");
+        }
+
+        this.selectedProfile = null;
+        this.selectedProfileList = new Array<>();
+    }
+
+    /**
      * Sets the selected profile.
      * @param profile The UnitProfile to set as the selected profile.
      */
@@ -832,11 +843,12 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
                     ((Colonist)profile.interactable.getInteractable().getComponent()).setAlert(alert);
             }
 
-        }else if(keycode == Input.Keys.I) { //T - toggle the colonists (if we have a colonist selected) 'alert' mode.
-            this.drawingColony = !this.drawingColony;
-            this.windowManager.addWindowIfNotExistByTarget(ColonyWindow.class, PlayerManager.getPlayer("Player").colony.getEntityOwner(), this);
-        }else if(keycode == Input.Keys.ESCAPE){
-            this.windowManager.removeTopMostWindow();
+        }else if(keycode == Input.Keys.I) { //I - toggle drawing colony inventory.
+            this.windowManager.addWindowIfNotExistByTarget(ColonyWindow.class, null, this);
+
+        }else if(keycode == Input.Keys.ESCAPE){ //ESCAPE - exits windows and such.
+            if(!this.windowManager.removeTopMostWindow()) //If there was nothing to close.
+                this.clearSelectedProfileList();
         }else
             return false;
 

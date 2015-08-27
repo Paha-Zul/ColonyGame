@@ -206,11 +206,13 @@ public class SelectedWindow extends Window{
         StateTree<BehaviourManagerComp.TaskInfo> tree = interactable.getBehManager().getTaskTree();
 
         //TODO Need to make sure multiple selections work since this was changed.
+        Rectangle rect = Rectangle.tmp;
+        rect.set(ordersRect.x, ordersRect.y, ordersRect.width*0.8f, ordersRect.height);
 
         //Set some position variables.
-        float width = (ordersRect.getWidth()/(tree.getCurrentTreeNode().getChildren().size+1));
-        float height = ordersRect.y + 25;
-        float x = ordersRect.x;
+        float width = (rect.getWidth()/(tree.getCurrentTreeNode().getChildren().size+1));
+        float height = rect.y + 25;
+        float x = rect.x;
 
         //Get the children of the current root node. This will display all children buttons of our current selection.
         Array<Tree.TreeNode<BehaviourManagerComp.TaskInfo>> nodeList = tree.getCurrentTreeNode().getChildren();
@@ -262,13 +264,21 @@ public class SelectedWindow extends Window{
     }
 
     /**
-     * Draws the multiple selectedEntity profiles.
+     * Draws the multiple selectedEntity profile buttons for selecting from the list of profiles.
      * @param rect The rectangle to draw the information inside of.
      */
     private void drawMultipleProfiles(SpriteBatch batch, Rectangle rect){
+
         //If there is more than one unit selectedEntity.. display in a group format.
         if(this.playerInterface.getSelectedProfileList().size > 1){
-            Rectangle.tmp.set(rect.getX() + rect.getWidth() - 115, rect.getY() + rect.getHeight() - 20, 50, 20);
+            Rectangle.tmp.set(rect.getX() + rect.getWidth() - 60, rect.getY() + rect.getHeight() - 20, 50, 20);
+
+            //Some things.
+            float buttonWidth = 50, buttonHeight = 20;
+            float spacingX = 5, spacingY = 5;
+            int numY = (int)(rect.getHeight()/(buttonHeight+spacingY));
+            float startX = rect.getX() + rect.getWidth() - buttonWidth - 10;
+            float startY = rect.getY() + spacingY;
 
             //For each profile, draw a button to access each individual entity.
             for(int i=0;i<this.playerInterface.getSelectedProfileList().size;i++) {
@@ -280,15 +290,12 @@ public class SelectedWindow extends Window{
                     continue;
                 }
 
+                //Some math that positions every correctly.
+                Rectangle.tmp.set(startX - (i/numY)*(buttonWidth+spacingX), startY + (i%numY)*(buttonHeight + spacingY), buttonWidth, buttonHeight);
+
                 //Draw the button for the individual profile. If clicked, make it our selected profile.
                 if(GUI.Button(batch, Rectangle.tmp, profile.interactable.getInteractable().getName()) == GUI.UP)
                     this.playerInterface.setSelectedProfile(profile);
-
-                //If we go too far down the screen, move over.
-                Rectangle.tmp.setY(Rectangle.tmp.getY() - 22);
-                if(Rectangle.tmp.y <= rect.getY() + 10)
-                    Rectangle.tmp.set(rect.getX() + rect.getWidth() - 65, rect.getY() + rect.getHeight() - 20, 50, 20);
-
             }
         }
     }

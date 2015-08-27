@@ -43,11 +43,9 @@ public class ColonyWindow extends Window{
         this.active = this.playerInterface.drawingColony;
         super.update(batch);
 
-        if(this.active) {
-            this.drawColonyScreen(batch);
-            //This was for debugging...
-            //GUI.Texture(new TextureRegion(this.playerInterface.blueSquare), batch, this.dragWindowRect);
-        }
+        this.drawColonyScreen(batch);
+        //This was for debugging...
+        //GUI.Texture(new TextureRegion(this.playerInterface.blueSquare), batch, this.dragWindowRect);
 
         return this.mousedState > 0;
     }

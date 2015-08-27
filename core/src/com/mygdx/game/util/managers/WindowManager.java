@@ -3,6 +3,7 @@ package com.mygdx.game.util.managers;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.Array;
+import com.beust.jcommander.internal.Nullable;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.ui.*;
 
@@ -54,12 +55,12 @@ public class WindowManager {
     /**
      * Adds a Window with a target to a stack but will not add a Window that is of the same type and also has the same target.
      * @param clazz The Class type to create.
-     * @param target The Entity target of the window.
+     * @param target The Entity target of the window. Can be null.
      * @param pi The PlayerInterface for the Window to reference.
      * @param <T> T.
      * @return True if the Window was created and added, false otherwise.
      */
-    public <T extends Window> boolean addWindowIfNotExistByTarget(Class<T> clazz, Entity target, PlayerInterface pi){
+    public <T extends Window> boolean addWindowIfNotExistByTarget(Class<T> clazz, @Nullable Entity target, PlayerInterface pi){
         //TODO We want to check for class type AND target. What if I wanted a crafting window and information window open on the same target?
         //Search for any duplicate window. If found, return false.
         for(Window window : this.windowStack)
@@ -85,8 +86,13 @@ public class WindowManager {
     /**
      * Removes the topmost Window of the stack.
      */
-    public void removeTopMostWindow(){
-        if(!this.windowStack.empty()) this.windowStack.pop().destroy();
+    public boolean removeTopMostWindow(){
+        if(!this.windowStack.empty()) {
+            this.windowStack.pop().destroy();
+            return true;
+        }
+
+        return false;
     }
 
     public boolean isWindowStackEmpty(){
