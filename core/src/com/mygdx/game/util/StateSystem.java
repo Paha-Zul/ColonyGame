@@ -111,7 +111,7 @@ public class StateSystem<T>{
 
     public static class State<T>{
         public String stateName;
-        private boolean repeat, repeatLastState;
+        private boolean repeat, repeatLastState, canBeSavedAsLast;
         private T userData;
 
         public State(String stateName, boolean repeat, T userData){
@@ -124,13 +124,33 @@ public class StateSystem<T>{
             return this.userData;
         }
 
+        /**
+         * Set if this state should repeat on ending.
+         * @param val True or false.
+         * @return The State for easy chainging.
+         */
         public State<T> setRepeat(boolean val){
             this.repeat = val;
             return this;
         }
 
+        /**
+         * Set if the last state saved should be repeated.
+         * @param val True or false.
+         * @return The State for easy chaining.
+         */
         public State<T> setRepeatLastState(boolean val){
             this.repeatLastState = val;
+            return this;
+        }
+
+        /**
+         * Set if this State should can be saved to repeat after the current State.
+         * @param val True or false.
+         * @return The State for easy chaining.
+         */
+        public State<T> setCanBeSavedAsLast(boolean val){
+            this.canBeSavedAsLast = val;
             return this;
         }
 
@@ -140,6 +160,10 @@ public class StateSystem<T>{
 
         public boolean getRepeatLastState(){
             return this.repeatLastState;
+        }
+
+        public boolean getCanBeSavedAsLast(){
+            return this.canBeSavedAsLast;
         }
     }
 

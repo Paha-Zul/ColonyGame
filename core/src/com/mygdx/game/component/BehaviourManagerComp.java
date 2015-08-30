@@ -103,7 +103,10 @@ public class BehaviourManagerComp extends Component{
         StateSystem.State<StateSystem.DefineTask> lastState = behaviourStates.getCurrState();
         StateSystem.State<StateSystem.DefineTask> currState = behaviourStates.setCurrState(taskName);
 
-        if(currState.getRepeatLastState()) currState.getUserData().lastState = lastState.stateName;
+        //If the currState should repeat the last state, and the last state is able to be repeated, save it as the last state!
+        if(currState.getRepeatLastState() && lastState.getCanBeSavedAsLast()) currState.getUserData().lastState = lastState.stateName;
+        //Otherwise, set the default state as the last state.
+        else if(currState.getRepeatLastState()) currState.getUserData().lastState = this.behaviourStates.getDefaultState().stateName;
 
         //End the current task.
         if(this.currentBehaviour != null && !this.currentBehaviour.getControl().hasFinished()) {

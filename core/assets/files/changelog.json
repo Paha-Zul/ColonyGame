@@ -7,7 +7,7 @@
         "- Added: Building! Click the 'Build' button in the bottom left to access the building menu (horrible temporary menu). Only a couple buildings at the moment. Hover over them to see their cost. Can't place on other buildings/trees/units.",
         "- Added: Construction! Buildings have to be constructed by colonists. Click on a construction (see-throughish) to see what it needs and how much is done.",
         "- Added: Crafting! The crafting building crafts stuff! Click on a crafting building and then on the huge horrible looking button in the bottom right.",
-        "- Added: Sleeping! You can tell your colonist to sleep or he will sleep when he gets below 20 energy. Any stat degradation is halted while sleeping.",
+        "- Added: Sleeping! You can tell your colonist to sleep or he will sleep when he gets below 20 energy. Any stat degradation is halted while sleeping. Colonists will also resume some tasks (gathering, building, crafting) after sleeping.",
         "- Added: Buildings show how many people are in a building by displaying mini people above the building.",
         "- Added: When colonists are idle, they will return any items/tools they have to the appropriate building.",
         "- Added: Icons! Tried to add icons for most of the items.",

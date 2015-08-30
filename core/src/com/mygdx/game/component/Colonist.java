@@ -155,7 +155,7 @@ public class Colonist extends Component implements IInteractable, IOwnable{
         })); //Subtract water every 10 seconds.
 
         //Subtract energy every so often...
-        stats.addTimer(new RepeatingTimer(0.5f, () -> {
+        stats.addTimer(new RepeatingTimer(3f, () -> {
             energyStat.addToCurrent(-1);
             //If under 20, sleep!
             if (energyStat.getCurrVal() <= 20 && !getBehManager().getBehaviourStates().isCurrState("sleep")) {
@@ -235,16 +235,16 @@ public class Colonist extends Component implements IInteractable, IOwnable{
      */
     private void createBehaviourStates(){
         getBehManager().getBehaviourStates().addState("moveTo", false, new StateSystem.DefineTask("idle", "idle")).setRepeat(false);
-        getBehManager().getBehaviourStates().addState("gather", false, new StateSystem.DefineTask("gather", "idle")).setRepeat(true);
+        getBehManager().getBehaviourStates().addState("gather", false, new StateSystem.DefineTask("gather", "idle")).setRepeat(true).setCanBeSavedAsLast(true);
         getBehManager().getBehaviourStates().addState("explore", false, new StateSystem.DefineTask("explore", "idle")).setRepeat(true);
         getBehManager().getBehaviourStates().addState("consume", false, new StateSystem.DefineTask("idle", "idle")).setRepeat(false).setRepeatLastState(true);
         getBehManager().getBehaviourStates().addState("attackTarget", false, new StateSystem.DefineTask("attackTarget", "idle")).setRepeat(false);
         getBehManager().getBehaviourStates().addState("hunt", false, new StateSystem.DefineTask("hunt", "idle")).setRepeat(true);
         getBehManager().getBehaviourStates().addState("returnTools", false, new StateSystem.DefineTask("idle", "idle")).setRepeat(false);
-        getBehManager().getBehaviourStates().addState("build", false, new StateSystem.DefineTask("build", "idle")).setRepeat(true);
+        getBehManager().getBehaviourStates().addState("build", false, new StateSystem.DefineTask("build", "idle")).setRepeat(true).setCanBeSavedAsLast(true);
         getBehManager().getBehaviourStates().addState("returnItems", false, new StateSystem.DefineTask("idle", "idle")).setRepeat(false);
-        getBehManager().getBehaviourStates().addState("sleep", false, new StateSystem.DefineTask("idle", "idle")).setRepeat(false);
-        getBehManager().getBehaviourStates().addState("craftItem", false, new StateSystem.DefineTask("idle", "idle")).setRepeat(true);
+        getBehManager().getBehaviourStates().addState("sleep", false, new StateSystem.DefineTask("idle", "idle")).setRepeat(false).setRepeatLastState(true);
+        getBehManager().getBehaviourStates().addState("craftItem", false, new StateSystem.DefineTask("idle", "idle")).setRepeat(true).setCanBeSavedAsLast(true);
     }
 
     @JsonIgnore
