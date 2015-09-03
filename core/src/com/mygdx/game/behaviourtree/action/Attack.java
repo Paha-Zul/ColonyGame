@@ -10,9 +10,9 @@ import com.mygdx.game.component.Projectile;
 import com.mygdx.game.component.Transform;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.entity.ProjectileEnt;
-import com.mygdx.game.util.EventSystem;
 import com.mygdx.game.util.GH;
 import com.mygdx.game.util.ListHolder;
+import com.mygdx.game.util.managers.EventSystem;
 import com.mygdx.game.util.managers.SoundManager;
 import com.mygdx.game.util.timer.RepeatingTimer;
 

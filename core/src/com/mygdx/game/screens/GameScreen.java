@@ -26,6 +26,7 @@ import com.mygdx.game.ui.PlayerInterface;
 import com.mygdx.game.ui.UI;
 import com.mygdx.game.util.*;
 import com.mygdx.game.util.managers.DataManager;
+import com.mygdx.game.util.managers.EventSystem;
 import com.mygdx.game.util.managers.NotificationManager;
 import com.mygdx.game.util.managers.PlayerManager;
 import com.mygdx.game.util.worldgeneration.WorldGen;

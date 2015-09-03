@@ -14,6 +14,7 @@ import com.mygdx.game.screens.PreLoadingScreen;
 import com.mygdx.game.ui.PlayerInterface;
 import com.mygdx.game.util.*;
 import com.mygdx.game.util.gui.GUI;
+import com.mygdx.game.util.managers.EventSystem;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;

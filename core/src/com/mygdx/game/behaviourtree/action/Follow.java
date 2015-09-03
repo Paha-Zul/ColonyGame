@@ -6,11 +6,14 @@ import com.mygdx.game.behaviourtree.LeafTask;
 import com.mygdx.game.component.Transform;
 import com.mygdx.game.component.collider.Collider;
 import com.mygdx.game.util.GH;
+import com.mygdx.game.util.Grid;
+import com.mygdx.game.util.Pathfinder;
 
 import java.util.LinkedList;
 
 /**
  * Created by Paha on 4/13/2015.
+ * Follows an Entity, recalculating the path when necessary. When far out, the path does not recalculate as often, but increases the closer the Entity gets to the Entity target.
  */
 public class Follow extends LeafTask{
     private Transform transform;
@@ -35,18 +38,14 @@ public class Follow extends LeafTask{
         if(transform == null) this.transform = this.blackBoard.myManager.getEntityOwner().getTransform();
         if(collider == null) this.collider = this.transform.getComponent(Collider.class);
         this.name = this.transform.getEntityOwner().name;
-        this.path = this.blackBoard.path;
+        this.blackBoard.targetNode = this.blackBoard.colonyGrid.getNode(this.blackBoard.target);
+        this.blackBoard.path = this.path = Pathfinder.GetInstance().findPath(this.blackBoard.myManager.getEntityOwner().getTransform().getPosition(), this.blackBoard.target.getTransform().getPosition());
     }
 
     @Override
     public void update(float delta) {
         super.update(delta);
 
-        //If the path is null or empty, simply set velocity to 0 and return.
-        if(this.path == null || this.path.size() < 1 || (control.callbacks.returnCriteria != null && control.callbacks.returnCriteria.test(this))){
-            this.collider.getBody().setLinearVelocity(0, 0);
-            return;
-        }
 
         //If our fail criteria passes, fail this task.
         if(this.getControl().getCallbacks().failCriteria != null && this.getControl().getCallbacks().failCriteria.test(this)){
@@ -65,12 +64,24 @@ public class Follow extends LeafTask{
         Vector2 currPoint = path.peekLast();
         float nodeX, nodeY, x, y;
         double rot;
+        Grid.Node myNode = this.blackBoard.colonyGrid.getNode(blackBoard.myManager.getEntityOwner());
+        Grid.Node targetNode = this.blackBoard.colonyGrid.getNode(this.blackBoard.target);
+        int disToTarget = Math.abs(myNode.getX() - targetNode.getX()) + Math.abs(myNode.getY() - targetNode.getY());
+        int disFromTargetToTargetNode = Math.abs(targetNode.getX() - this.blackBoard.targetNode.getX()) + Math.abs(targetNode.getY() - this.blackBoard.targetNode.getY());
+
+        //TODO Some magic numbers here.
+        //We want to repath when the target away from it's original path targetNode by about half of our distance to the target. Example:
+        // us to target: 10, target to original path dest: 6, 10/2 = 5 which is <= 6, so repath!
+        if(disToTarget/2 <= disFromTargetToTargetNode) {
+            this.path = this.blackBoard.path = Pathfinder.GetInstance().findPath(this.blackBoard.myManager.getEntityOwner().getTransform().getPosition(), this.blackBoard.target.getTransform().getPosition());
+            this.blackBoard.targetNode = this.blackBoard.colonyGrid.getNode(this.blackBoard.target);
+        }
 
         //If we are still outside our range to move towards the target, move!
-        if(blackBoard.target.getTransform().getPosition().dst(blackBoard.myManager.getEntityOwner().getTransform().getPosition()) >= GH.toMeters(blackBoard.followDis)){
+        if(blackBoard.target.getTransform().getPosition().dst(blackBoard.myManager.getEntityOwner().getTransform().getPosition()) >= GH.toMeters(this.blackBoard.followDis)){
 
-            //If the node of our target that we are following matches ours (we're on the same tile!), direct move to it!
-            if(blackBoard.colonyGrid.getNode(blackBoard.target) == blackBoard.colonyGrid.getNode(blackBoard.myManager.getEntityOwner())){
+            //If we are within a certain distance of our target, direct move to him!
+            if(disToTarget < 3){
                 nodeX = blackBoard.target.getTransform().getPosition().x;
                 nodeY = blackBoard.target.getTransform().getPosition().y;
 
@@ -91,8 +102,10 @@ public class Follow extends LeafTask{
             this.collider.getBody().setLinearVelocity(x, y);
 
         //If we are within the stop range, then don't move!
-        }else
+        }else {
             collider.getBody().setLinearVelocity(0, 0);
+            this.control.finishWithSuccess();
+        }
     }
 
     @Override

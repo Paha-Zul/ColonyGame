@@ -14,20 +14,29 @@
         "- Added: Windows! Pressing I opens the 'inventory' screen where all possible items are shown. The amounts are how many of the item your colony owns. The window is draggable but is really glitchy for this version. Gotta click near the very top.",
         "- Added: Windows! The other draggable window (crafting) is not glitchy. Also you can click anywhere to drag it.",
         "- Added: Windows! You can hit escape to close windows one at a time. It will also deselect anything selected if there are no other windows.",
+        "- Added: Recipes! Use recipe.json to define recipes for buildings/items to build/craft. If something doesn't have a recipe, it will probably crash...",
+        "- Added: More error crap! Trying to convert the error files into the log.txt file which is a single running file that can log any events. Only really reports errors for now, but can be used in the future for things like 'so and so did this task...'.",
         "",
         "- Fixed: No more lag when a pack of wolves attack. I found that the wolves were repathing towards the colonist every frame which could result in up to 2000 repathing requests a second. Holy freaking.",
         "- Fixed: Buildings and resources should be easier to click on.",
         "- Fixed: Bullets that traveled off the map would cause a crash because they checked if they were visible or not (IN THE VOID?!?)",
         "- Fixed: Better display of the list of selected colonists. Moved the behavior buttons slightly over and cleaned up the formatting of the colonist buttons.",
+        "- Fixed: The ModManager to actually work (not that it matters right now)",
+        "- Fixed: Loading stuff! The assets (images,sounds) for the base game and all mods are loaded first, then the config files/json files for the base game and all mods are loaded after.",
         "",
         "- Changed: Colonists will try to navigate around the graphic of a building, but only around the base of resources.",
         "- Changed: Buildings can have 'enter' positions where a colonist will move towards to enter the building.",
+        "- Changed: Buildings can be defined in the buildings.json file. If 'buildable' is true, they will appear in the building list when placing buildings. Make sure to also include a recipe for them in recipes.json!",
         "",
         "- Possible Bug/Unintended Behavior: Colonists may get stuck consuming food/water or may ignore consuming it if they are occupied with a job.",
         "- Possible Bug/Unintended Behavior: Colonists will basically fight to the death when attacked by wolves. It's really hard to get them to move away...",
+        "- Possible Bug/Unintended Behavior: Colonists don't need to use a tool for gathering anything yet, but they will pick up a shovel(stone) or pick(metal) from the equipment shed (if one exists and has tools).",
+        "- Possible Bug/Unintended Behavior: More on above, crafted tools stay in the crafting building and are never transferred to the equipment shed. Not really sure how to handle this. What if you have a crafting building but no shed? WHERE DO THEY GO?!",
+        "- Possible Bug/Unintended Behavior: Boss Wolf pack (the only animals right now) and the event associated with it don't really work together.",
         "",
         "- Bug: The selection box gets stuck if you have a window open and drag from outside the window onto the window. Just redrag and it will go away.",
-        "- Bug: "
+        "- Bug: No windows have an 'exit' button yet. The only way to close them is with escape.",
+        "- Bug: The colony inventory window can't be dragged."
 
       ]
     },
@@ -79,7 +88,7 @@
       "date": "4/28/2015",
       "log": [
         "- Added: Really ugly checkboxes (lower left of this screen) for scripts. If they have an ugly grey box, they are not active. Otherwise, green ugly checkboxes means they are active. When start is clicked, it will start the scripts selected.",
-        "- Added: The script that's being tested adds quick view boxes at the top of the screen for all colonists. Just a silly test and it allowed me to move things here and there to tidy up a bit."
+        "- Added: The script that's being tested adds quick view boxes at the top of the screen for all colonists. Just a silly test and it allowed me to move things here and there to tidy up a bit.",
         "- Bug: Colonists sometimes will either get stuck trying to find a place to explore, or will outright refuse to do it.",
         "- Bug: Probably a few hundred crashes."
       ]
@@ -144,7 +153,7 @@
         "- Added: Colonists will attack with the mysterious black circle if they are more than 15 units (arbitrary number...), otherwise, both units fighting will stand still in a ferocious and exciting staring contest until one dies...",
         "- Added: You can see contents of each research",
         "- Added: A message will appear saying what items were collected.",
-        "- Bugs: Probably a ton..."
+        "- Bugs: Probably a ton...",
         "- Technical: Set up things for better gathering system."
       ]
     },

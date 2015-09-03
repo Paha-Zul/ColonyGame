@@ -5,10 +5,10 @@ import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.interfaces.IOwnable;
 import com.mygdx.game.util.DataBuilder;
-import com.mygdx.game.util.EventSystem;
 import com.mygdx.game.util.ItemNeeded;
 import com.mygdx.game.util.Logger;
 import com.mygdx.game.util.managers.DataManager;
+import com.mygdx.game.util.managers.EventSystem;
 
 import java.util.Iterator;
 import java.util.LinkedList;

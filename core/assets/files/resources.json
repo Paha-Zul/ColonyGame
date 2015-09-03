@@ -34,7 +34,8 @@
     "gatherTime": 7,
     "skill": "lumberjack",
     "skillRequired": false,
-    "skillIncrease": 10
+    "skillIncrease": 10,
+    "soundGroup": "axe_chop"
   },
   {
     "resourceName": "blackspruce",
@@ -45,7 +46,8 @@
     "itemChances": [1],
     "dir": "img/Interactable/BlackSpruce",
     "gatherTime": 3,
-    "skill": "lumberjack"
+    "skill": "lumberjack",
+    "soundGroup": "axe_chop"
   },
   {
     "resourceName": "whitespruce",
@@ -56,7 +58,8 @@
     "itemChances": [1],
     "dir": "img/Interactable/WhiteSpruce",
     "gatherTime": 10,
-    "skill": "lumberjack"
+    "skill": "lumberjack",
+    "soundGroup": "axe_chop"
   },
   {
     "resourceName": "bunchberry",
@@ -67,7 +70,8 @@
     "itemChances": [1, 1],
     "img": ["Canadian Bunchberry"],
     "gatherTime": 3,
-    "skill": "foraging"
+    "skill": "foraging",
+    "soundGroup": "plant_rustle"
   },
   {
     "resourceName": "cloudberry",
@@ -78,7 +82,8 @@
     "itemChances": [1, 1],
     "img": ["Cloudberry"],
     "gatherTime": 3,
-    "skill": "foraging"
+    "skill": "foraging",
+    "soundGroup": "plant_rustle"
   },
   {
     "resourceName": "cranberry",
@@ -89,7 +94,8 @@
     "itemChances": [1, 1],
     "img": ["Cranberry"],
     "gatherTime": 3,
-    "skill": "foraging"
+    "skill": "foraging",
+    "soundGroup": "plant_rustle"
   },
   {
     "resourceName": "lingonberry",
@@ -100,7 +106,8 @@
     "itemChances": [1, 1],
     "img": ["Lingonberry"],
     "gatherTime": 3,
-    "skill": "foraging"
+    "skill": "foraging",
+    "soundGroup": "plant_rustle"
   },
   {
     "resourceName": "partridgeberry",
@@ -111,7 +118,8 @@
     "itemChances": [1, 1],
     "img": ["Partridge Berry"],
     "gatherTime": 3,
-    "skill": "foraging"
+    "skill": "foraging",
+    "soundGroup": "plant_rustle"
   },
   {
     "resourceName": "elderberry",
@@ -122,7 +130,8 @@
     "itemChances": [1, 1],
     "img": ["Elderberry"],
     "gatherTime": 3,
-    "skill": "foraging"
+    "skill": "foraging",
+    "soundGroup": "plant_rustle"
   },
   {
     "resourceName": "huckleberry",
@@ -133,7 +142,8 @@
     "itemChances": [1, 1],
     "img": ["Huckleberry"],
     "gatherTime": 3,
-    "skill": "foraging"
+    "skill": "foraging",
+    "soundGroup": "plant_rustle"
   },
   {
     "resourceName": "squirrelCarcass",

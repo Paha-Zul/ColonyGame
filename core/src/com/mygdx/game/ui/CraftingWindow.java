@@ -16,9 +16,9 @@ import com.mygdx.game.ColonyGame;
 import com.mygdx.game.component.CraftingStation;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.util.DataBuilder;
-import com.mygdx.game.util.EventSystem;
 import com.mygdx.game.util.GH;
 import com.mygdx.game.util.managers.DataManager;
+import com.mygdx.game.util.managers.EventSystem;
 
 import java.text.DecimalFormat;
 import java.util.LinkedList;

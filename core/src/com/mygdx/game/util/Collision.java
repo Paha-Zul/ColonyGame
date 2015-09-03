@@ -4,6 +4,7 @@ package com.mygdx.game.util;
 import com.badlogic.gdx.physics.box2d.*;
 import com.mygdx.game.component.collider.Collider;
 import com.mygdx.game.entity.Entity;
+import com.mygdx.game.util.managers.EventSystem;
 
 /**
  * Created by Paha on 3/26/2015.

@@ -1,4 +1,4 @@
-package com.mygdx.game.util;
+package com.mygdx.game.util.managers;
 
 import com.mygdx.game.entity.Entity;
 import com.sun.istack.internal.NotNull;

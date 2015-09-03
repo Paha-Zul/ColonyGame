@@ -376,7 +376,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
                     BehaviourManagerComp comp = this.currentEvent.eventTarget.getComponent(BehaviourManagerComp.class);
                     if(comp == null) return;
                     comp.getBlackBoard().target = this.currentEvent.eventTargetOther;
-                    comp.changeTaskImmediate(this.currentEvent.behaviours[i]);
+                    comp.changeTaskImmediate(this.currentEvent.behaviours[i], true);
                     this.gameSpeed = 1f; //Reset game speed
                     this.paused = false; //Unpause
                     this.currentEvent = null;

@@ -61,6 +61,8 @@ public abstract class TaskDecorator extends Task
     public void end()
     {
         //TODO Probably should be careful here. This will call the callbacks.
+        if(this.control.hasFailed())
+            this.task.getControl().finishWithFailure();
         this.task.getControl().safeEnd();
     }
 

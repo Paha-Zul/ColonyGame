@@ -9,8 +9,8 @@ import com.mygdx.game.interfaces.Functional;
 import com.mygdx.game.interfaces.IInteractable;
 import com.mygdx.game.util.Constants;
 import com.mygdx.game.util.DataBuilder;
-import com.mygdx.game.util.EventSystem;
 import com.mygdx.game.util.managers.DataManager;
+import com.mygdx.game.util.managers.EventSystem;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
 

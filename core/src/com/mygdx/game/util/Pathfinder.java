@@ -15,6 +15,7 @@ public class Pathfinder {
     private static Pathfinder instance = null;
     private LinkedList<FindPathInfo> queue = new LinkedList<>();
     private long lastTick = 0;
+    private final int numPathsPerTick = 10;
 
     public Pathfinder(){
 
@@ -26,27 +27,42 @@ public class Pathfinder {
      */
     public void update(long tick){
         if(queue.size() > 0 && tick != this.lastTick){
-            this.lastTick = tick;
-            FindPathInfo fp = this.queue.pop();
-            if(fp.startNode != null && fp.endNode != null)
-                fp.consumer.accept(this.findPath(fp.startNode, fp.endNode));
-            else if(fp.startPos != null && fp.endPos != null)
-                fp.consumer.accept(this.findPath(fp.startPos, fp.endPos));
-            else{
-                GH.writeErrorMessage("The pathfinding requested was null in both nodes and positions. What happened?", true);
+            for(int i=0; i<this.numPathsPerTick && queue.size() > 0; i++) {
+                FindPathInfo fp = this.queue.pop();
+                if (fp.startNode != null && fp.endNode != null)
+                    fp.consumer.accept(this.findPath(fp.startNode, fp.endNode));
+                else if (fp.startPos != null && fp.endPos != null)
+                    fp.consumer.accept(this.findPath(fp.startPos, fp.endPos));
+                else {
+                    Logger.log(Logger.ERROR, "The pathfinding request was null in both nodes and positions. What happened?", true);
+                }
             }
         }
+
+        this.lastTick = tick;
     }
 
-    public void findPath(Grid.Node startNode, Grid.Node targetNode, Consumer<LinkedList<Vector2>> consumer){
-        this.queue.add(new FindPathInfo(null, null, startNode, targetNode, consumer));
+    /**
+     * Finds a path from the startNode to the targetNode.
+     * @param startNode The start Node.
+     * @param targetNode The target Node.
+     * @param callback The callback to execute when the path is found. The parameter to this is the path that was found.
+     */
+    public void findPath(Grid.Node startNode, Grid.Node targetNode, Consumer<LinkedList<Vector2>> callback){
+        this.queue.add(new FindPathInfo(null, null, startNode, targetNode, callback));
     }
 
-    public void findPath(Vector2 start, Vector2 end, Consumer<LinkedList<Vector2>> consumer){
-        this.queue.add(new FindPathInfo(start, end, null, null, consumer));
+    /**
+     * Finds a path from a start position to an end position.
+     * @param start The start position.
+     * @param end The end position.
+     * @param callback The callback to execute when the path is found. The parameter to this is the path that was found.
+     */
+    public void findPath(Vector2 start, Vector2 end, Consumer<LinkedList<Vector2>> callback){
+        this.queue.add(new FindPathInfo(start, end, null, null, callback));
     }
 
-    private LinkedList<Vector2> findPath(Grid.Node startNode, Grid.Node targetNode){
+    public LinkedList<Vector2> findPath(Grid.Node startNode, Grid.Node targetNode){
         boolean found = false;
         Grid.PathNode target = null;
 
@@ -125,7 +141,7 @@ public class Pathfinder {
         return path;
     }
 
-    private LinkedList<Vector2> findPath(Vector2 start, Vector2 end){
+    public LinkedList<Vector2> findPath(Vector2 start, Vector2 end){
         boolean found = false;
         Grid.PathNode target = null;
         Grid.Node startNode = ColonyGame.worldGrid.getNode(start);

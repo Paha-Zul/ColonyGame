@@ -1,7 +1,6 @@
 package com.mygdx.game.behaviourtree;
 
 import com.badlogic.gdx.math.Vector2;
-import com.mygdx.game.ColonyGame;
 import com.mygdx.game.behaviourtree.action.*;
 import com.mygdx.game.behaviourtree.composite.Selector;
 import com.mygdx.game.behaviourtree.composite.Sequence;
@@ -12,7 +11,10 @@ import com.mygdx.game.behaviourtree.decorator.RepeatUntilCondition;
 import com.mygdx.game.behaviourtree.decorator.RepeatUntilFailure;
 import com.mygdx.game.component.*;
 import com.mygdx.game.entity.Entity;
-import com.mygdx.game.util.*;
+import com.mygdx.game.util.Constants;
+import com.mygdx.game.util.FloatingText;
+import com.mygdx.game.util.Grid;
+import com.mygdx.game.util.ItemNeeded;
 
 /**
  * Created by Paha on 4/11/2015.
@@ -343,7 +345,7 @@ public class PrebuiltTasks {
         Sequence buildSeq = new Sequence("Build", blackboard);
         FindPath fpToBuilding = new FindPath("FindPathBuilding", blackboard);
         MoveTo mtBuilding = new MoveTo("MoveToBuilding", blackboard);
-        TransferInventory transferToBuilding = new TransferInventory("TransferToBuilding", blackboard);
+        TransferItemsFromMeToTarget transferToBuilding = new TransferItemsFromMeToTarget("Transferring", blackboard);
         Construct construct = new Construct("Constructing", blackboard);
 
         //The main selector between constructing and idling
@@ -387,15 +389,6 @@ public class PrebuiltTasks {
             for(ItemNeeded needed : task.blackBoard.constructable.getItemsNeeded()) //Copy the result
                 task.blackBoard.itemTransfer.itemsToTransfer.add(new ItemNeeded(needed.itemName, needed.amountNeeded));
 
-        };
-
-        //Set the to and from inventories.
-        getItemsForConstSeq.control.callbacks.finishCallback = task -> {
-            task.blackBoard.target = task.blackBoard.constructable.getEntityOwner();
-            if(task.blackBoard.target != null) {
-                task.blackBoard.itemTransfer.fromInventory = task.blackBoard.myManager.getEntityOwner().getComponent(Inventory.class);
-                task.blackBoard.itemTransfer.toInventory = task.blackBoard.target.getComponent(Inventory.class);
-            }
         };
 
         //Set the target and reset the targetNode for pathing.
@@ -577,61 +570,20 @@ public class PrebuiltTasks {
     public static Task attackTarget(BlackBoard blackBoard, BehaviourManagerComp behComp){
         /**
          *  Sequence
-         *      repeatUntilCondition:
-         *          Sequence:
-         *              find path to target
-         *              move to target
+         *      follow
          *      attack target
          */
         Sequence mainSeq = new Sequence("Attack Target", blackBoard);
-        Sequence getPathAndMoveSeq = new Sequence("Moving to attack", blackBoard);
-        RepeatUntilCondition mainRepeat = new RepeatUntilCondition("attackTarget", blackBoard, getPathAndMoveSeq);
-
-        FindPath fp = new FindPath("Finding path", blackBoard);
-        Follow mt = new Follow("Following", blackBoard);
+        Follow follow = new Follow("Following", blackBoard);
         Attack attack = new Attack("Attacking Target", blackBoard);
 
-        //Make sure the targetNode is null. That way the target is used for pathfinding.
-        getPathAndMoveSeq.control.callbacks.startCallback  = task -> task.blackBoard.targetNode = null;
-
-        //Make sure the target is not null.
-        mainRepeat.getControl().callbacks.checkCriteria = task -> task.getBlackboard().target != null && task.blackBoard.target.getTags().hasTag("alive");
-
-        //This is essential. We must fail the task if the target is no longer alive or is invalid.
-        mainRepeat.getControl().callbacks.failCriteria = task -> {
-            Task tsk = (Task)task;
-            return tsk.blackBoard.target == null || !tsk.blackBoard.target.isValid() || !tsk.blackBoard.target.getTags().hasTag("alive");
+        mainSeq.control.callbacks.startCallback = task -> {
+            task.blackBoard.targetNode = null;
+            task.blackBoard.followDis = 5; //TODO Test number
         };
-
-        //To succeed this repeat job, the target must be null, not valid, or not alive.
-        mainRepeat.getControl().callbacks.successCriteria = task -> {
-            Task tsk = (Task)task;
-            //If the attack range is greater than the distance between the two, we are in range!
-            return tsk.blackBoard.attackRange >= tsk.blackBoard.myManager.getEntityOwner().getTransform().getPosition().dst(tsk.blackBoard.target.getTransform().getPosition());
-        };
-
-        //If the target has moved away from it's last square AND the move job is still active (why repath if not moving?), fail the parallel job.
-        mt.getControl().callbacks.failCriteria = tsk -> {
-            Task task = (Task)tsk;
-            return task.getBlackboard().targetNode != ColonyGame.worldGrid.getNode((task.getBlackboard().target));
-        };
-
-        //If we are within range of the target, succeed the MoveTo task.
-        mt.getControl().callbacks.successCriteria = tsk -> {
-            Task task = (Task)tsk;
-            float dis = task.getBlackboard().target.getTransform().getPosition().dst(task.getBlackboard().myManager.getEntityOwner().getTransform().getPosition());
-            return dis <= GH.toMeters(task.getBlackboard().attackRange);
-        };
-
-        //If our target is null or dead, might as well not find a path...
-        fp.control.callbacks.checkCriteria = task -> task.blackBoard.target != null && task.blackBoard.target.getTags().hasTag("alive");
 
         //Add the main repeat.
-        mainSeq.control.addTask(mainRepeat);
-
-        //The find path and move to tasks to run in parallel.
-        getPathAndMoveSeq.control.addTask(fp);
-        getPathAndMoveSeq.control.addTask(mt);
+        mainSeq.control.addTask(follow);
 
         //The attack task after we have got within range!
         mainSeq.control.addTask(attack);
@@ -753,13 +705,15 @@ public class PrebuiltTasks {
     }
 
     public static Task returnToBase(BlackBoard blackBoard, BehaviourManagerComp behComp){
-        Sequence seq = new Sequence("returnToBase", blackBoard);
-        FindClosestEntity fc = new FindClosestEntity("findingBase", blackBoard);
+        Sequence seq = new Sequence("Returning to base", blackBoard);
+        GetBuildingFromColony getBuilding = new GetBuildingFromColony("Getting main building", blackBoard);
 
-        //Make sure it's a building we find.
-        fc.control.callbacks.successCriteria = ent -> ((Entity)ent).getTags().hasTag("alive");
+        seq.control.callbacks.startCallback = task -> {
+            task.blackBoard.tagsToSearch = new String[]{"main"};
+            task.blackBoard.targetNode = null;
+        };
 
-        seq.control.addTask(fc);
+        seq.control.addTask(getBuilding);
         seq.control.addTask(moveTo(blackBoard, behComp));
 
         return seq;

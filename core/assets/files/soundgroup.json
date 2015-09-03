@@ -1,0 +1,17 @@
+[
+  {
+    "name": "plant_rustle",
+    "baseName": "plant_rustle",
+    "amount": 4
+  },
+  {
+    "name": "axe_chop",
+    "baseName": "axe_chop",
+    "amount": 6
+  },
+  {
+    "name": "hammer",
+    "baseName": "hammer",
+    "amount": 4
+  }
+]

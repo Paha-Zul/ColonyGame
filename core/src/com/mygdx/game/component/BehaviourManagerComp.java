@@ -8,9 +8,9 @@ import com.mygdx.game.behaviourtree.PrebuiltTasks;
 import com.mygdx.game.behaviourtree.Task;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.interfaces.Functional;
-import com.mygdx.game.util.EventSystem;
 import com.mygdx.game.util.StateSystem;
 import com.mygdx.game.util.StateTree;
+import com.mygdx.game.util.managers.EventSystem;
 import com.mygdx.game.util.timer.OneShotTimer;
 import com.mygdx.game.util.timer.Timer;
 import org.codehaus.jackson.annotate.JsonIgnore;
@@ -30,6 +30,8 @@ public class BehaviourManagerComp extends Component{
     private Task currentBehaviour;
     @JsonProperty
     private String nextBehaviour;
+    @JsonProperty
+    private boolean unchangeable = false;
     @JsonIgnore
     private Stats stats;
     @JsonIgnore
@@ -100,6 +102,12 @@ public class BehaviourManagerComp extends Component{
     }
 
     public void changeTaskImmediate(String taskName){
+        this.changeTaskImmediate(taskName, false);
+    }
+
+    public void changeTaskImmediate(String taskName, boolean unchangeable){
+        if(this.unchangeable) return; //Don't do anything if the task is unchangeable!
+
         StateSystem.State<StateSystem.DefineTask> lastState = behaviourStates.getCurrState();
         StateSystem.State<StateSystem.DefineTask> currState = behaviourStates.setCurrState(taskName);
 
@@ -120,6 +128,8 @@ public class BehaviourManagerComp extends Component{
         this.currentBehaviour.getControl().reset();
         if(!this.currentBehaviour.check()) this.currentBehaviour.getControl().finishWithFailure();
         else this.currentBehaviour.getControl().safeStart();
+
+        this.unchangeable = unchangeable;
 
         //Set the next behaviour.
         //this.nextBehaviour = task;
@@ -150,6 +160,9 @@ public class BehaviourManagerComp extends Component{
 
                 //If the next behaviour is empty, do something based on the state.
                 }else {
+                    //Reset the unchangeable state.
+                    this.unchangeable = false;
+
                     //Get the default state as the next state for now, and get the current state.
                     StateSystem.State<StateSystem.DefineTask> nextState;
                     StateSystem.State<StateSystem.DefineTask> currState = behaviourStates.getCurrState();

@@ -181,7 +181,6 @@ public class SelectedWindow extends Window{
         GUI.Label("currState: "+interactable.getBehManager().getBehaviourStates().getCurrState().stateName, batch, rect.x, rect.y + 50, rect.width, rect.height - 50, this.playerInterface.UIStyle);
 
         //If it's a humanoid that we can control, draw some order buttons and its current path.
-        if(this.playerInterface.getSelectedProfile().interactable.interType.equals("humanoid")){
             GUI.Label("Orders", batch, this.ordersTopRect, this.playerInterface.UIStyle);
 
             //GUI.Texture(ordersRect, ColonyGame.assetManager.get("menuButton_normal", Texture.class), this.batch);
@@ -198,7 +197,6 @@ public class SelectedWindow extends Window{
                 batch.setProjectionMatrix(ColonyGame.UICamera.combined);
 
             }
-        }
     }
 
     //Draws the buttons for each selectedEntity colonist that we have control of.

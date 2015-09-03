@@ -4,7 +4,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.interfaces.IDelayedDestroyable;
 import com.mygdx.game.interfaces.ISaveable;
-import com.mygdx.game.util.EventSystem;
+import com.mygdx.game.util.managers.EventSystem;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
