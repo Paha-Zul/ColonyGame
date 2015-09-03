@@ -85,19 +85,14 @@ public class PlacingConstructionWindow extends Window{
                         previewWindow = new com.badlogic.gdx.scenes.scene2d.ui.Window("", new com.badlogic.gdx.scenes.scene2d.ui.Window.WindowStyle(playerInterface.UIStyle.font, Color.BLACK, listBackground));
                         playerInterface.stage.addActor(previewWindow);
                         playerInterface.makePreviewTable(DataManager.getData(building.name, DataBuilder.JsonRecipe.class), previewWindow);
-                        previewWindow.setPosition(x, y);
-                        System.out.println("entered");
+                        previewWindow.setPosition(GH.getFixedScreenMouseCoords().x, GH.getFixedScreenMouseCoords().y);
                         super.enter(event, x, y, pointer, fromActor);
                     }
 
+                    //On exist, let's destroy the preview window.
                     @Override
                     public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
-                        if(previewWindow != null) {
-                            previewWindow.clear();
-                            previewWindow.remove();
-                            previewWindow = null;
-                        }
-                        System.out.println("exited");
+                        clearPreviewWindow();
                         super.exit(event, x, y, pointer, toActor);
                     }
 
@@ -107,7 +102,6 @@ public class PlacingConstructionWindow extends Window{
                         //to get stuck on the screen, so remove it here.
                         clearPreviewWindow();
                         placeManager.setPlacingConstruction(building);
-                        System.out.println("up");
                         super.touchUp(event, x, y, pointer, button);
                     }
 
@@ -130,8 +124,8 @@ public class PlacingConstructionWindow extends Window{
         TextureRegion region = DataManager.getTextureFromAtlas(building.image, building.spriteSheet);
         this.buildingImage = new Image(new TextureRegionDrawable(region));
         this.buildingImage.setSize(building.dimensions[0], building.dimensions[1]);
-        this.buildingImage.addAction(Actions.alpha(0.5f));
         this.playerInterface.stage.addActor(this.buildingImage);
+        this.buildingImage.addAction(Actions.alpha(0.5f)); //TODO This doesn't work?
 
         //On touch up, let's try to place the building. Make sure it's a valid spot. Then create the entity, add it to the game,
         //and add it to the colony.

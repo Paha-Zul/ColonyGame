@@ -3,6 +3,7 @@ package com.mygdx.game.util.managers;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.mygdx.game.ColonyGame;
 import com.mygdx.game.util.GH;
 
 /**
@@ -20,9 +21,14 @@ public class SoundManager {
      * @param falloffMax The distance at which no sound is heard.
      */
     public static void play(Sound sound, Vector2 soundPos, Vector2 lookPos, float falloffStart, float falloffMax){
-        float dis = soundPos.dst(lookPos);
         falloffStart = GH.toMeters(falloffStart);
         falloffMax = GH.toMeters(falloffMax);
+
+        //The effect of the zoom...
+        float zoomMult = (1 - GH.bound(1, 0, 2-ColonyGame.camera.zoom))*falloffMax;
+
+        //The distance with zoom factored in.
+        float dis = soundPos.dst(lookPos) - (2/ColonyGame.camera.zoom) + zoomMult;
         if(dis <= falloffStart)
             sound.play(1f);
         else if(dis <= falloffMax){

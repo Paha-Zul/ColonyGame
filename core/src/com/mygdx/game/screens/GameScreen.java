@@ -171,12 +171,12 @@ public class GameScreen implements Screen{
         colonyEnt.getComponent(Constructable.class).setComplete();
 
         //Spawns the Equipment building.
-        BuildingEntity equipEnt = new BuildingEntity(new Vector2(start.x - 5, start.y - 5), 0, "workshop", 10);
-        equipEnt.getTags().addTag("constructing");
-        ListHolder.addEntity(equipEnt);
-        Building equipBuilding = equipEnt.getComponent(Building.class);
-        colony.addOwnedToColony(equipBuilding);
-        equipBuilding.getComponent(Constructable.class).setComplete();
+//        BuildingEntity equipEnt = new BuildingEntity(new Vector2(start.x - 5, start.y - 5), 0, "workshop", 10);
+//        equipEnt.getTags().addTag("constructing");
+//        ListHolder.addEntity(equipEnt);
+//        Building equipBuilding = equipEnt.getComponent(Building.class);
+//        colony.addOwnedToColony(equipBuilding);
+//        equipBuilding.getComponent(Constructable.class).setComplete();
 
         //Destroys resources in an area around the Colony Entity.
         radius = 8;

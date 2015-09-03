@@ -1,7 +1,5 @@
 package com.mygdx.game.behaviourtree.action;
 
-import com.badlogic.gdx.audio.Sound;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.behaviourtree.BlackBoard;
@@ -28,9 +26,7 @@ public class Gather extends LeafTask{
     private Resource resource;
     private Timer gatherTimer;
     private Timer soundTimer;
-
-    private static Sound[] chopTreeSounds = new Sound[]{ColonyGame.assetManager.get("axechop1", Sound.class), ColonyGame.assetManager.get("axechop2", Sound.class), ColonyGame.assetManager.get("axechop3", Sound.class),
-            ColonyGame.assetManager.get("axechop4", Sound.class)  , ColonyGame.assetManager.get("axechop5", Sound.class), ColonyGame.assetManager.get("axechop6", Sound.class)};
+    private DataBuilder.JsonSoundGroup sounds;
 
     public Gather(String name, BlackBoard blackBoard) {
         super(name, blackBoard);
@@ -45,6 +41,7 @@ public class Gather extends LeafTask{
     public void start() {
         super.start();
 
+
         //If the 'myInventory' field is null of the blackboard, get it from the blackboard's owner.
         if(this.blackBoard.myInventory == null)
             this.blackBoard.myInventory = this.blackBoard.myManager.getEntityOwner().getComponent(Inventory.class);
@@ -56,11 +53,15 @@ public class Gather extends LeafTask{
             return;
         }
 
-        //Not used currently...
-        this.soundTimer = new RepeatingTimer(0.5f, ()->{
-            SoundManager.play(chopTreeSounds[MathUtils.random(chopTreeSounds.length - 1)], this.blackBoard.myManager.getEntityOwner().getTransform().getPosition(),
-                    new Vector2(ColonyGame.camera.position.x, ColonyGame.camera.position.y), 200, 1000);
-        });
+        this.sounds = DataManager.getData(this.resource.getResRef().soundGroup, DataBuilder.JsonSoundGroup.class);
+
+        //If the resource has gather sounds, make the timer!
+        if(this.sounds != null) {
+            this.soundTimer = new RepeatingTimer(1f, () -> {
+                SoundManager.play(this.sounds.getRandomSound(), this.blackBoard.myManager.getEntityOwner().getTransform().getPosition(),
+                        new Vector2(ColonyGame.camera.position.x, ColonyGame.camera.position.y), 200, 1000);
+            });
+        }
 
         //Gather after the amount of time needed.
         this.gatherTimer = new RepeatingTimer(resource.getGatherTick(), ()->{
@@ -131,6 +132,7 @@ public class Gather extends LeafTask{
 
         //this.soundTimer.update(delta);
         this.gatherTimer.update(delta);
+        if(this.soundTimer != null) this.soundTimer.update(delta);
     }
 
     @Override

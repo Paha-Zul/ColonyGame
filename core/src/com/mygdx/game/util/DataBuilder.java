@@ -8,6 +8,7 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter;
@@ -48,6 +49,7 @@ public class DataBuilder implements IDestroyable{
     private final String eventsFilePath = "/events.json";
     private final String recipesFilePath = "/recipes.json";
     private final String buildingsFilePath = "/buildings.json";
+    private final String soundGroupPath = "/soundgroup.json";
     private final String prefabFilePath = "/prefabs.json";
     private final String miscPath = "/misc.json";
 
@@ -135,6 +137,17 @@ public class DataBuilder implements IDestroyable{
         TextureAtlas atlas = new TextureAtlas(Gdx.files.internal("atlas/icons.atlas"));
 
         String path = fileHandle.path();
+
+        //Build sound groups.
+        buildJson(Gdx.files.internal(path + filePath + soundGroupPath), JsonSoundGroup[].class, soundGroupList -> {
+            for(JsonSoundGroup group : soundGroupList) {
+                group.sounds = new Sound[group.amount];
+                for (int i = 0; i < group.amount; i++)
+                    group.sounds[i] = assetManager.get(group.baseName+"_"+(i+1), Sound.class);
+
+                DataManager.addData(group.name, group, JsonSoundGroup.class);
+            }
+        });
 
         //Build misc Json file
         buildJson(Gdx.files.internal(path + filePath + miscPath), JsonMisc.class, value -> DataManager.addData("misc", value, JsonMisc.class));
@@ -235,6 +248,7 @@ public class DataBuilder implements IDestroyable{
         String path = fileHandle.path();
         if(!path.isEmpty()) path += "/";
 
+        //Loads images, sounds, atlas
         buildFilesInDir(Gdx.files.internal(path + this.imgPath), Texture.class, param, new String[]{"png"});
         buildFilesInDir(Gdx.files.internal(path + this.soundPath), Sound.class, null, new String[]{"ogg"});
         buildFilesInDir(Gdx.files.internal(path + this.atlasPath), TextureAtlas.class, null, new String[]{"atlas"});
@@ -429,6 +443,7 @@ public class DataBuilder implements IDestroyable{
         json.setIgnoreUnknownFields(true);
         json.setOutputType(JsonWriter.OutputType.json);
 
+        //Loads the value from Json and then calls the consumer on it.
         T value = json.fromJson(cls, fileHandle);
         if(value != null && doWithResult != null) doWithResult.accept(value);
 
@@ -681,7 +696,7 @@ public class DataBuilder implements IDestroyable{
     }
 
     public static class JsonResource{
-        public String resourceName, displayName, resourceType, description, dir, skill, tool;
+        public String resourceName, displayName, resourceType, description, dir, skill, tool, soundGroup;
         public String[] img, allimgwith, itemNames;
         public int[][] itemAmounts;
         public int[] itemChances;
@@ -749,6 +764,17 @@ public class DataBuilder implements IDestroyable{
 
     public static class JsonMisc{
         public String mainMenuMusic;
+    }
+
+    public static class JsonSoundGroup{
+        public String name;
+        public String baseName;
+        public int amount;
+        public Sound[] sounds;
+
+        public Sound getRandomSound(){
+            return this.sounds[MathUtils.random(sounds.length-1)];
+        }
     }
 
     /**

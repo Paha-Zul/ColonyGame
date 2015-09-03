@@ -32,7 +32,7 @@
         "- Possible Bug/Unintended Behavior: Colonists will basically fight to the death when attacked by wolves. It's really hard to get them to move away...",
         "- Possible Bug/Unintended Behavior: Colonists don't need to use a tool for gathering anything yet, but they will pick up a shovel(stone) or pick(metal) from the equipment shed (if one exists and has tools).",
         "- Possible Bug/Unintended Behavior: More on above, crafted tools stay in the crafting building and are never transferred to the equipment shed. Not really sure how to handle this. What if you have a crafting building but no shed? WHERE DO THEY GO?!",
-        "- Possible Bug/Unintended Behavior: Boss Wolf pack (the only animals right now) and the event associated with it don't really work together.",
+        "- Possible Bug/Unintended Behavior: Boss Wolf pack (the only animals right now) and the event associated with it are glitchy",
         "",
         "- Bug: The selection box gets stuck if you have a window open and drag from outside the window onto the window. Just redrag and it will go away.",
         "- Bug: No windows have an 'exit' button yet. The only way to close them is with escape.",

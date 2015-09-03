@@ -138,6 +138,19 @@ public class GH {
         return value*Constants.SCALE;
     }
 
+    /**
+     * Bounds a value.
+     * @param min The minimum the value can be.
+     * @param max The maximum the value can be.
+     * @param value The actual value.
+     * @return The min, max, or value if within the bounds.
+     */
+    public static float bound(float max, float min, float value){
+        if(value <= min) return min;
+        if(value >= max) return max;
+        return value;
+    }
+
 
 
 }
