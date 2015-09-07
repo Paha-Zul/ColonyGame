@@ -9,6 +9,7 @@ import java.io.*;
  */
 public class Logger {
     public static final int NORMAL=0, WARNING=1, ERROR=2;
+    public static boolean logBehaviour = true;
 
     private static PrintWriter writer;
 

@@ -229,8 +229,8 @@ public class Entity implements IDelayedDestroyable, ISaveable{
 				if (this.newComponentList.size > 0) {
 					Array<Component> newCompCopy = new Array<>(this.newComponentList); //Make a copy.
                     this.newComponentList = new Array<>(); //Clear this before we call init() in case we add more components during init().
-					newCompCopy.forEach(Component::init); //Init all new comps.
-					newCompCopy.forEach(Component::start); //Start all new comps.
+					newCompCopy.forEach(component -> {if(!component.isInitiated()) component.init();}); //Init all new comps that haven't already been init'd.
+					newCompCopy.forEach(component -> {if(!component.isStarted()) component.start();}); //Start all new comps that haven't already been started.
 				}
 
 				Array<Component> activeCompCopy = new Array<>(this.activeComponentList);

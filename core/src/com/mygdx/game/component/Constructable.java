@@ -124,10 +124,20 @@ public class Constructable extends Component{
 
     /**
      * Gets the remaining items needed and the amounts to finish this construction.
-     * @return An object that holds an item name and an amount needed. This list is reused.
+     * @return A list of ItemNeeded that holds an item name and an amount needed. This list is reused.
      */
     public final Array<ItemNeeded> getItemsNeeded(){
         return this.itemsNeededList;
+    }
+
+    /**
+     * @return A Copy of the ItemNeeed array.
+     */
+    public final Array<ItemNeeded> getItemsNeededCopy(){
+        Array<ItemNeeded> list = new Array<>();
+        for(ItemNeeded needed : this.itemsNeededList)
+            list.add(new ItemNeeded(needed.itemName, needed.amountNeeded));
+        return list;
     }
 
     /**

@@ -47,6 +47,8 @@ public class Inventory extends Component implements IOwnable {
     public Inventory() {
         this.reserveMap = new TLongObjectHashMap<>(10, 0.75f);
         this.onTheWayMap = new TLongObjectHashMap<>(10, 0.75f);
+
+        this.setActive(false);
     }
 
     @Override
@@ -262,6 +264,7 @@ public class Inventory extends Component implements IOwnable {
      */
     private void addItemToInventory(DataBuilder.JsonItem itemRef, int amount, int maxAmount){
         if(itemRef == null || amount <= 0) return; //If the item ref is null, give up.
+
         //Try to get the map of items for the item type. If null, make a new one and put in the map.
         HashMap<String, InventoryItem> itemMap = this.inventory.get(itemRef.getItemType());
         if(itemMap == null){

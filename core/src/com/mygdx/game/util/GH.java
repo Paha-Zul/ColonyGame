@@ -4,6 +4,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
+import com.mygdx.game.component.Component;
+import com.mygdx.game.entity.Entity;
 
 import java.io.File;
 import java.io.Serializable;
@@ -149,6 +151,14 @@ public class GH {
         if(value <= min) return min;
         if(value >= max) return max;
         return value;
+    }
+
+    public static boolean isValid(Entity entity){
+        return entity != null && entity.isValid();
+    }
+
+    public static boolean isValid(Component component){
+        return component != null && component.getEntityOwner() != null && component.getEntityOwner().isValid();
     }
 
 

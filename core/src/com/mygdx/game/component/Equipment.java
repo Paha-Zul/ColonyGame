@@ -62,6 +62,9 @@ public class Equipment extends Component{
         return this.tools.size() > 0;
     }
 
+    /**
+     * @return A list of the names of tools in this Equipment component.
+     */
     @JsonProperty("toolNames")
     public String[] getToolNames(){
         Array<String> toolNames = new Array<>();
