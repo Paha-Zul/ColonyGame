@@ -47,7 +47,7 @@ public class GraphicIdentity extends Component {
         //the image would draw the right size, but the offset from the width and height being unaffected causes real problems whenever the image
         //is not centered.
         if(getSprite() == null) return;
-        this.configureSprite(this.getSprite());
+        //this.configureSprite(this.getSprite());
 
         this.load();
     }
