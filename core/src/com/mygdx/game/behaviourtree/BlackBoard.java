@@ -77,6 +77,7 @@ public class BlackBoard{
     public static class ItemTransfer{
         public boolean takingReserved;  //If we are taking from a reserve
         public boolean reserveToTake;   //If we should be reserving the item to take.
+        public boolean transferAll;
 
         public Array<String> itemTypesToIgnore;
         public Array<ItemNeeded> itemsToTransfer;
@@ -85,7 +86,7 @@ public class BlackBoard{
         public Inventory fromInventory;
 
         public void reset(){
-            this.takingReserved = false;
+            this.takingReserved = this.transferAll = this.reserveToTake = false;
 
             this.itemsToTransfer = new Array<>();
 

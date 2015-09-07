@@ -14,7 +14,6 @@ import com.mygdx.game.entity.Entity;
 import com.mygdx.game.util.Constants;
 import com.mygdx.game.util.FloatingText;
 import com.mygdx.game.util.Grid;
-import com.mygdx.game.util.ItemNeeded;
 
 /**
  * Created by Paha on 4/11/2015.
@@ -67,7 +66,7 @@ public class PrebuiltTasks {
 
         //All this should be under a repeat.
         Sequence innerGatherSeq = new Sequence("Gathering", blackBoard);
-        RepeatUntilCondition repeatGather = new RepeatUntilCondition("Repeat", blackBoard, innerGatherSeq);
+        RepeatUntilCondition repeatGatherSequence = new RepeatUntilCondition("Repeat", blackBoard, innerGatherSeq);
         FindResource fr = new FindResource("Finding resource", blackBoard);
         ReserveResource rr = new ReserveResource("Reserving", blackBoard); //Reserve it separately from the find resource, since find resource is on a thread. This avoids data races.
         FindPath fpResource = new FindPath("Finding Path to Resource", blackBoard);
@@ -81,7 +80,9 @@ public class PrebuiltTasks {
         sequence.control.addTask(getTools(blackBoard, behComp));
 
         //Add the repeat gather task to the main sequence, and then the rest to the inner sequence under repeat.
-        sequence.control.addTask(repeatGather);
+        sequence.control.addTask(repeatGatherSequence);
+        sequence.control.addTask(returnItems(blackBoard, behComp));
+
         innerGatherSeq.control.addTask(fr);
         innerGatherSeq.control.addTask(rr);
         innerGatherSeq.control.addTask(fpResource);
@@ -91,8 +92,7 @@ public class PrebuiltTasks {
         //If we are not actually set to find any resources, just fail the task!
         gatherOrExplore.control.callbacks.checkCriteria = task -> !task.blackBoard.resourceTypeTags.isEmpty();
 
-        //Add these to the main sequence.
-        sequence.control.addTask(returnItems(blackBoard, behComp));
+
 
         //Reset some values.
         sequence.control.callbacks.startCallback = task -> {
@@ -100,11 +100,11 @@ public class PrebuiltTasks {
         };
 
         //If we failed during the find resource stage, that means we need to explore. Fail the repeat task so we don't repeat!
-        fr.control.callbacks.failureCallback = task -> repeatGather.getControl().finishWithFailure();
+        fr.control.callbacks.failureCallback = task -> repeatGatherSequence.getControl().finishWithFailure();
 
         //Check if we can still add more items that we are looking for. Return true if we can't (to end the repeat)
         //and false to keep repeating.
-        repeatGather.getControl().callbacks.successCriteria = tsk -> {
+        repeatGatherSequence.getControl().callbacks.successCriteria = tsk -> {
             Task task = (Task)tsk;
             Inventory inv = task.blackBoard.myInventory;
             //Get a list of the items we are searching for. If we can hold more, keep searching for what we need.
@@ -136,7 +136,7 @@ public class PrebuiltTasks {
         GetBuildingFromColony findStorage = new GetBuildingFromColony("Finding storage.", blackBoard);
         FindPath findPathToStorage = new FindPath("Finding Path to Storage", blackBoard);
         MoveTo moveToStorage = new MoveTo("Moving to Storage", blackBoard);
-        TransferInventory transferItems = new TransferInventory("Transferring Resources", blackBoard);
+        TransferItemsFromMeToTarget transferItems = new TransferItemsFromMeToTarget("Transferring Resources", blackBoard);
 
         ((ParentTaskController)sequence.getControl()).addTask(findPath);
         ((ParentTaskController)sequence.getControl()).addTask(move);
@@ -146,24 +146,9 @@ public class PrebuiltTasks {
         ((ParentTaskController)sequence.getControl()).addTask(moveToStorage);
         ((ParentTaskController)sequence.getControl()).addTask(transferItems);
 
-        //Make sure we have a target resource and it is either unowned or owned by us.
-        sequence.control.callbacks.checkCriteria = task -> {
-            if(task.blackBoard.targetResource == null) task.blackBoard.targetResource = task.blackBoard.target.getComponent(Resource.class);
-            return task.blackBoard.targetResource != null && (task.blackBoard.targetResource.getTaken() == null || task.blackBoard.targetResource.getTaken() == task.blackBoard.myManager.getEntityOwner());
-        };
-
         //Set the 'fromInventory' field and set the resource as taken by us!
         sequence.getControl().callbacks.startCallback = task -> {
-            task.blackBoard.itemTransfer.fromInventory = task.blackBoard.myManager.getEntityOwner().getComponent(Inventory.class);
-            task.blackBoard.targetResource.setTaken(blackBoard.myManager.getEntityOwner());
             task.blackBoard.tagsToSearch = new String[]{"building", "storage"};
-        };
-
-        //When finding a path to the resource, make sure it's actually a resource and we are the ones that have claimed it!
-        findPath.getControl().callbacks.checkCriteria = task -> {
-            Resource res = task.blackBoard.targetResource; //Get the target resource from the blackboard.
-            if(res == null) task.blackBoard.targetResource = res = task.blackBoard.target.getComponent(Resource.class); //If null, try to get it from the target.
-            return res != null && task.getBlackboard().targetResource.getTaken() == task.getBlackboard().myManager.getEntityOwner(); //Return true if not null and we are the ones that took it. False otherwise.
         };
 
         return sequence;
@@ -187,19 +172,14 @@ public class PrebuiltTasks {
         CheckAndReserve checkShed = new CheckAndReserve("CheckingReserving", blackBoard);
         FindPath fpToShed = new FindPath("PathToShed", blackBoard);
         MoveTo mtShed = new MoveTo("Moving", blackBoard);
-        TransferInventory transferTools = new TransferInventory("Transferring", blackBoard);
+        TransferItemsFromTargetToMe transferTools = new TransferItemsFromTargetToMe("Transferring", blackBoard);
 
+        //Reset some values when we start. Reset the itemTransfer, and make sure we are taking reserved items.
         seq.control.callbacks.startCallback = task -> {
             task.blackBoard.itemTransfer.reset();
             task.blackBoard.itemTransfer.takingReserved = true;
             task.blackBoard.targetNode = null;
             task.blackBoard.tagsToSearch = new String[]{"building", "equipment"};
-        };
-
-        //When we find the shed, assign the to and from inventory.
-        findShed.control.callbacks.successCallback = task -> {
-            task.blackBoard.itemTransfer.toInventory = task.blackBoard.myManager.getEntityOwner().getComponent(Inventory.class);
-            task.blackBoard.itemTransfer.fromInventory = task.blackBoard.target.getComponent(Inventory.class);
         };
 
         seq.control.addTask(get);
@@ -226,11 +206,13 @@ public class PrebuiltTasks {
          */
 
         Sequence seq = new Sequence("Returning tools", blackBoard);
+        GetToolsInInventory getToolsInInventory = new GetToolsInInventory("Getting list of tools", blackBoard);
         GetBuildingFromColony findShed = new GetBuildingFromColony("Finding tool shed", blackBoard);
         FindPath fpToShed = new FindPath("PathToShed", blackBoard);
         MoveTo mtShed = new MoveTo("Moving", blackBoard);
-        TransferInventory transferTools = new TransferInventory("Transferring", blackBoard);
+        TransferItemsFromMeToTarget transferTools = new TransferItemsFromMeToTarget("Transferring", blackBoard);
 
+        seq.control.addTask(getToolsInInventory);
         seq.control.addTask(findShed);
         seq.control.addTask(fpToShed);
         seq.control.addTask(mtShed);
@@ -241,25 +223,6 @@ public class PrebuiltTasks {
             task.blackBoard.itemTransfer.reset();
             task.blackBoard.tagsToSearch = new String[]{"building", "equipment"};
             task.blackBoard.targetNode = null;
-        };
-
-        //When this finishes remove any on the way stuff
-        seq.control.callbacks.finishCallback = task -> {
-            for(ItemNeeded item : task.blackBoard.itemTransfer.itemsToTransfer)
-                task.blackBoard.itemTransfer.toInventory.removeOnTheWay(item.itemName, task.blackBoard.myManager.getEntityOwner().getID());
-        };
-
-        //When we are successful in finding the shed, set the inventories.
-        findShed.control.callbacks.successCallback = task -> {
-            task.blackBoard.itemTransfer.toInventory = task.blackBoard.target.getComponent(Inventory.class);
-            task.blackBoard.itemTransfer.fromInventory = task.blackBoard.myManager.getEntityOwner().getComponent(Inventory.class);
-
-            String[] toolNames = task.blackBoard.myManager.getComponent(Equipment.class).getToolNames();
-            for (String toolName : toolNames) {
-                task.blackBoard.itemTransfer.itemsToTransfer.add(new ItemNeeded(toolName, 1));
-                //TODO Don't leave this as is.
-                task.blackBoard.itemTransfer.toInventory.addOnTheWay(toolName, 1, task.blackBoard.myManager.getEntityOwner().getID());
-            }
         };
 
         return seq;
@@ -279,7 +242,7 @@ public class PrebuiltTasks {
         GetBuildingFromColony getStorage = new GetBuildingFromColony("Getting building", blackBoard);
         FindPath fpStorage = new FindPath("Finding path", blackBoard);
         MoveTo mtStorage = new MoveTo("Moving to storage", blackBoard);
-        TransferInventory transfer = new TransferInventory("Transferring", blackBoard);
+        TransferItemsFromMeToTarget transfer = new TransferItemsFromMeToTarget("Transferring", blackBoard);
 
         mainSeq.control.addTask(getStorage);
         mainSeq.control.addTask(fpStorage);
@@ -293,8 +256,7 @@ public class PrebuiltTasks {
 
         getStorage.control.callbacks.successCallback = task -> {
             task.blackBoard.itemTransfer.reset();
-            task.blackBoard.itemTransfer.fromInventory = task.blackBoard.myManager.getComponent(Inventory.class); //Get from me
-            task.blackBoard.itemTransfer.toInventory = task.blackBoard.target.getComponent(Inventory.class); //Get from target.
+            task.blackBoard.itemTransfer.transferAll = true;
             task.blackBoard.itemTransfer.itemTypesToIgnore.add("tool"); //Ignore tools.
         };
 
@@ -332,17 +294,19 @@ public class PrebuiltTasks {
         Sequence constructionSeq = new Sequence("BuildSeq", blackboard);
         GetConstruction getConstruction = new GetConstruction("GettingConstruction", blackboard);
 
-        //This is where we possible get items for the construction.
+        //This is where we possible get items for the construction. Optional branch
         Sequence getItemsForConstSeq = new Sequence("GetItemSeq", blackboard);
         AlwaysTrue getItemsSeqTrue = new AlwaysTrue("AlwaysTrue", blackboard, getItemsForConstSeq);
+        GetItemsForConstructable getItems = new GetItemsForConstructable("Getting item list", blackboard);
         FindStorageWithItem findItem = new FindStorageWithItem("FindStorageWithItem", blackboard);
         CheckAndReserve reserve = new CheckAndReserve("CheckAndReserve", blackboard);
         FindPath fpToStorage = new FindPath("PathToStorage", blackboard);
         MoveTo mtStorage = new MoveTo("MoveToStorage", blackboard);
-        TransferInventory transferItems = new TransferInventory("Transferring", blackboard);
+        TransferItemsFromTargetToMe transferItems = new TransferItemsFromTargetToMe("Transferring", blackboard);
 
         //This is where we build
         Sequence buildSeq = new Sequence("Build", blackboard);
+        GetTargetFromConstructable getTarget = new GetTargetFromConstructable("Getting target", blackboard);
         FindPath fpToBuilding = new FindPath("FindPathBuilding", blackboard);
         MoveTo mtBuilding = new MoveTo("MoveToBuilding", blackboard);
         TransferItemsFromMeToTarget transferToBuilding = new TransferItemsFromMeToTarget("Transferring", blackboard);
@@ -359,6 +323,7 @@ public class PrebuiltTasks {
 
         //Get items sequence
         //Find a storage with any of the items we need.
+        getItemsForConstSeq.control.addTask(getItems);
         getItemsForConstSeq.control.addTask(findItem);
         getItemsForConstSeq.control.addTask(reserve);
         getItemsForConstSeq.control.addTask(fpToStorage);
@@ -366,6 +331,7 @@ public class PrebuiltTasks {
         getItemsForConstSeq.control.addTask(transferItems);
 
         //Build sequence
+        buildSeq.control.addTask(getTarget);
         buildSeq.control.addTask(fpToBuilding);
         buildSeq.control.addTask(mtBuilding);
         buildSeq.control.addTask(transferToBuilding);
@@ -377,34 +343,17 @@ public class PrebuiltTasks {
             task.blackBoard.targetNode = null;
         };
 
-        //First, we need to get a building under construction. Then, we need to get a list of items. Then we need to find a inventory
-        //building with any of the items we need.
-        getConstruction.control.callbacks.successCallback = task -> {
-            //reset and set some values.
+        mainSelector.control.callbacks.startCallback = task -> {
             task.blackBoard.itemTransfer.reset();
             task.blackBoard.itemTransfer.takingReserved = true;
-
-            //Get the constructable and get the items to transfer.
-            task.blackBoard.constructable = task.blackBoard.target.getComponent(Constructable.class);
-            for(ItemNeeded needed : task.blackBoard.constructable.getItemsNeeded()) //Copy the result
-                task.blackBoard.itemTransfer.itemsToTransfer.add(new ItemNeeded(needed.itemName, needed.amountNeeded));
-
+            task.blackBoard.targetNode = null;
         };
+
 
         //Set the target and reset the targetNode for pathing.
         buildSeq.control.callbacks.startCallback = task -> {
             task.blackBoard.itemTransfer.takingReserved = false;
-            task.blackBoard.target = task.blackBoard.constructable.getEntityOwner();
             task.blackBoard.targetNode = null;
-        };
-
-        //Make sure the building either has materials or we have the materials.
-        buildSeq.control.callbacks.checkCriteria = task -> {
-            for(ItemNeeded item : task.blackBoard.itemTransfer.itemsToTransfer){
-                if(task.blackBoard.itemTransfer.toInventory.hasItem(item.itemName) || task.blackBoard.itemTransfer.fromInventory.hasItem(item.itemName))
-                    return true;
-            }
-            return false;
         };
 
         return mainSelector;
@@ -614,7 +563,12 @@ public class PrebuiltTasks {
         FindClosestEntity fc = new FindClosestEntity("Finding base", blackBoard);
         FindPath fpBase = new FindPath("Finding path to base", blackBoard);
         MoveTo mtBase = new MoveTo("Moving to base", blackBoard);
-        TransferInventory tr = new TransferInventory("Transferring resources", blackBoard);
+        TransferItemsFromMeToTarget tr = new TransferItemsFromMeToTarget("Transferring resources", blackBoard);
+
+        seq.control.callbacks.startCallback = task -> {
+            task.blackBoard.itemTransfer.reset();
+            task.blackBoard.itemTransfer.transferAll = true;
+        };
 
         //We need to tell this fct what can pass as a valid tile.
         fct.getControl().callbacks.successCriteria = nd -> {

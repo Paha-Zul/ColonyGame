@@ -4,6 +4,7 @@ import com.mygdx.game.behaviourtree.BlackBoard;
 import com.mygdx.game.behaviourtree.LeafTask;
 import com.mygdx.game.component.Building;
 import com.mygdx.game.component.Colonist;
+import com.mygdx.game.component.Constructable;
 
 /**
  * Created by Paha on 6/22/2015.
@@ -26,6 +27,7 @@ public class GetConstruction extends LeafTask{
         Building building = colonist.getColony().getOwnedFromColony(Building.class, b -> b.getEntityOwner().getTags().hasTag("constructing"));
         if(building != null) {
             this.blackBoard.target = building.getEntityOwner();
+            this.blackBoard.constructable = building.getComponent(Constructable.class);
             if (this.blackBoard.target == null) this.control.finishWithFailure();
             else this.control.finishWithSuccess();
         }else

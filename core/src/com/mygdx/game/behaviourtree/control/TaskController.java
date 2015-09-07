@@ -2,6 +2,7 @@ package com.mygdx.game.behaviourtree.control;
 
 import com.mygdx.game.behaviourtree.Task;
 import com.mygdx.game.util.Callbacks;
+import com.mygdx.game.util.Logger;
 
 /**
  * Created by Bbent_000 on 12/31/2014.
@@ -23,6 +24,10 @@ public class TaskController {
         this.finished = true;
         this.failed = true;
         this.running = false;
+
+        if(Logger.logBehaviour)
+            Logger.log(Logger.NORMAL, "Entity with name "+this.task.getBlackboard().myManager.getEntityOwner().name+" and id "+this.task.getBlackboard().myManager.getEntityOwner().getID()+" has finished task "
+                + this.task.getName()+" with failure.");
     }
 
     /**
@@ -32,6 +37,10 @@ public class TaskController {
         this.finished = true;
         this.running = false;
         this.failed = false;
+
+        if(Logger.logBehaviour)
+            Logger.log(Logger.NORMAL, "Entity with name "+this.task.getBlackboard().myManager.getEntityOwner().name+" and id "+this.task.getBlackboard().myManager.getEntityOwner().getID()+" has finished task "
+        + this.task.getName()+" with success.");
     }
 
     /**
