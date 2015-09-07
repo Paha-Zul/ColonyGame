@@ -307,6 +307,7 @@ public class PrebuiltTasks {
         //This is where we build
         Sequence buildSeq = new Sequence("Build", blackboard);
         GetTargetFromConstructable getTarget = new GetTargetFromConstructable("Getting target", blackboard);
+        CheckTargetOrMeHasAnyItems checkHasItem = new CheckTargetOrMeHasAnyItems("Checking if me or target has item", blackboard);
         FindPath fpToBuilding = new FindPath("FindPathBuilding", blackboard);
         MoveTo mtBuilding = new MoveTo("MoveToBuilding", blackboard);
         TransferItemsFromMeToTarget transferToBuilding = new TransferItemsFromMeToTarget("Transferring", blackboard);
@@ -332,6 +333,7 @@ public class PrebuiltTasks {
 
         //Build sequence
         buildSeq.control.addTask(getTarget);
+        buildSeq.control.addTask(checkHasItem);
         buildSeq.control.addTask(fpToBuilding);
         buildSeq.control.addTask(mtBuilding);
         buildSeq.control.addTask(transferToBuilding);
