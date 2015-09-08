@@ -20,6 +20,7 @@ public class ParentTaskController extends TaskController{
     @Override
     public void reset() {
         super.reset();
+        this.task.getControl().safeEnd();
 
         for(Task task : this.subTasks)
             task.getControl().reset();

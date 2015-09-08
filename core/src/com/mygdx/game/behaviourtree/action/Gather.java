@@ -41,9 +41,8 @@ public class Gather extends LeafTask{
     public void start() {
         super.start();
 
-
         //If the 'myInventory' field is null of the blackboard, get it from the blackboard's owner.
-        if(this.blackBoard.myInventory == null)
+       if(this.blackBoard.myInventory == null)
             this.blackBoard.myInventory = this.blackBoard.myManager.getEntityOwner().getComponent(Inventory.class);
 
         //If we can't get a resource component from the target, end this with failure.
@@ -138,6 +137,8 @@ public class Gather extends LeafTask{
     @Override
     public void end() {
         super.end();
+        this.gatherTimer = null;
+        this.soundTimer = null;
         if(this.blackBoard.targetResource != null && this.blackBoard.targetResource.isTakenBy(this.blackBoard.myManager.getEntityOwner()))
             this.blackBoard.targetResource.setTaken(null);
     }

@@ -52,6 +52,7 @@ public class TaskController {
         this.failed = false;
         this.started = false;
         this.finished = false;
+        this.task.getControl().safeEnd();
     }
 
     /**

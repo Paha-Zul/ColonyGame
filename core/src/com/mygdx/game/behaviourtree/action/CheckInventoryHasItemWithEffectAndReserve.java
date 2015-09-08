@@ -55,9 +55,11 @@ public class CheckInventoryHasItemWithEffectAndReserve extends LeafTask {
     public void end() {
         super.end();
 
-        //Unreserve all the items.
-        for(Inventory.InventoryItem item : this.blackBoard.itemTransfer.fromInventory.getItemList()){
-            this.blackBoard.itemTransfer.fromInventory.unReserveItem(item.itemRef.getItemName(), this.blackBoard.myManager.getEntityOwner().getID());
+        //Unreserve all the items that we may have taken from fromInventory.
+        if(this.blackBoard.itemTransfer.fromInventory != null) {
+            for (Inventory.InventoryItem item : this.blackBoard.itemTransfer.fromInventory.getItemList()) {
+                this.blackBoard.itemTransfer.fromInventory.unReserveItem(item.itemRef.getItemName(), this.blackBoard.myManager.getEntityOwner().getID());
+            }
         }
     }
 }
