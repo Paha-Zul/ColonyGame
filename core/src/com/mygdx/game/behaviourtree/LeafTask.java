@@ -1,6 +1,7 @@
 package com.mygdx.game.behaviourtree;
 
 import com.mygdx.game.behaviourtree.control.TaskController;
+import com.mygdx.game.util.Logger;
 
 /**
  * A LeafTask which extends the Task class. This task is designed for tasks that do not operate on any children
@@ -21,7 +22,9 @@ public class LeafTask extends Task{
     }
 
     @Override
-    public void start() {}
+    public void start() {
+        if(Logger.logBehaviour) Logger.log(Logger.NORMAL, "Starting behaviour "+this.getName());
+    }
 
     @Override
     public void update(float delta) {}
