@@ -1,0 +1,9 @@
+[
+	{
+	  "name": "bow",
+	  "displayName": "Bow",
+	  "weaponType": "bow",
+	  "ammunition": "arrow",
+	  "reloadTime": 10
+	}
+]
