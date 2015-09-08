@@ -97,8 +97,10 @@ public class Colony extends Component implements IInteractable {
     @SuppressWarnings("unchecked")
     @JsonIgnore
     public <T extends Component> T getOwnedFromColony(Class<T> cls, Predicate<T> predicate){
-        for(Component comp : ownedMap.get(cls)){
-            if(predicate.test((T)comp)) return (T)comp;
+        Array<Component> list = ownedMap.get(cls);
+        if(list != null) {
+            for (Component comp : ownedMap.get(cls))
+                if (predicate.test((T) comp)) return (T) comp;
         }
 
         return null;
