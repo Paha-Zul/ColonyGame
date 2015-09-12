@@ -3,9 +3,9 @@ package com.mygdx.game.util.managers;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.Array;
-import com.beust.jcommander.internal.Nullable;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.ui.*;
+import com.sun.istack.internal.Nullable;
 
 import java.util.Iterator;
 import java.util.Stack;

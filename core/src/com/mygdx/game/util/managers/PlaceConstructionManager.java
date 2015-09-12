@@ -3,10 +3,10 @@ package com.mygdx.game.util.managers;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.QueryCallback;
 import com.badlogic.gdx.physics.box2d.World;
-import com.beust.jcommander.internal.Nullable;
 import com.mygdx.game.ui.PlacingConstructionWindow;
 import com.mygdx.game.util.DataBuilder;
 import com.mygdx.game.util.GH;
+import com.sun.istack.internal.Nullable;
 
 /**
  * Created by Paha on 8/24/2015.
