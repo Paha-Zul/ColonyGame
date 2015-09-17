@@ -57,7 +57,6 @@ public class ParentTaskController extends TaskController{
         this.subTasks.forEach(task -> {
             //TODO Maybe not do task.end if the task is finished, because it has already ended?
             if(!task.getControl().finished){
-                task.getControl().finishWithFailure();
                 task.getControl().safeEnd();
             }
         });

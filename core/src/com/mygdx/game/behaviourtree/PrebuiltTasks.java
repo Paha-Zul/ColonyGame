@@ -290,27 +290,27 @@ public class PrebuiltTasks {
          * TODO is cleared, but not all items are transferred. Make sure we only remove from the inventory what we need to. Maybe... can't reproduce it.
         */
 
-        Selector mainSelector = new Selector("Build", blackboard);
-        Sequence constructionSeq = new Sequence("BuildSeq", blackboard);
-        GetConstruction getConstruction = new GetConstruction("GettingConstruction", blackboard);
+        Selector mainSelector = new Selector("Build or Idle", blackboard);
+        Sequence constructionSeq = new Sequence("Building Sequence", blackboard);
+        GetConstruction getConstruction = new GetConstruction("Getting Construction", blackboard);
 
         //This is where we possible get items for the construction. Optional branch
-        Sequence getItemsForConstSeq = new Sequence("GetItemSeq", blackboard);
-        AlwaysTrue getItemsSeqTrue = new AlwaysTrue("AlwaysTrue", blackboard, getItemsForConstSeq);
-        GetItemsForConstructable getItems = new GetItemsForConstructable("Getting item list", blackboard);
-        FindStorageWithItem findItem = new FindStorageWithItem("FindStorageWithItem", blackboard);
-        CheckAndReserve reserve = new CheckAndReserve("CheckAndReserve", blackboard);
-        FindPath fpToStorage = new FindPath("PathToStorage", blackboard);
-        MoveTo mtStorage = new MoveTo("MoveToStorage", blackboard);
-        TransferItemsFromTargetToMe transferItems = new TransferItemsFromTargetToMe("Transferring", blackboard);
+        Sequence getItemsForConstSeq = new Sequence("Get Items Sequence", blackboard);
+        AlwaysTrue getItemsSeqTrue = new AlwaysTrue("Return True", blackboard, getItemsForConstSeq);
+        GetItemsForConstructable getItems = new GetItemsForConstructable("Getting item list for construction", blackboard);
+        FindStorageWithItem findItem = new FindStorageWithItem("Finding storage with items", blackboard);
+        CheckAndReserve reserve = new CheckAndReserve("Check and reserve items", blackboard);
+        FindPath fpToStorage = new FindPath("Find path to storage", blackboard);
+        MoveTo mtStorage = new MoveTo("Move to storage", blackboard);
+        TransferItemsFromTargetToMe transferItems = new TransferItemsFromTargetToMe("Transfer items from me to construction", blackboard);
 
         //This is where we build
-        Sequence buildSeq = new Sequence("Build", blackboard);
-        GetTargetFromConstructable getTarget = new GetTargetFromConstructable("Getting target", blackboard);
+        Sequence buildSeq = new Sequence("Build construction sequence", blackboard);
+        GetTargetFromConstructable getTarget = new GetTargetFromConstructable("Getting target from construction", blackboard);
         CheckTargetOrMeHasAnyItems checkHasItem = new CheckTargetOrMeHasAnyItems("Checking if me or target has item", blackboard);
-        FindPath fpToBuilding = new FindPath("FindPathBuilding", blackboard);
-        MoveTo mtBuilding = new MoveTo("MoveToBuilding", blackboard);
-        TransferItemsFromMeToTarget transferToBuilding = new TransferItemsFromMeToTarget("Transferring", blackboard);
+        FindPath fpToBuilding = new FindPath("Finding path to construction", blackboard);
+        MoveTo mtBuilding = new MoveTo("Moving to construction", blackboard);
+        TransferItemsFromMeToTarget transferToBuilding = new TransferItemsFromMeToTarget("Transferring items to construction", blackboard);
         Construct construct = new Construct("Constructing", blackboard);
 
         //The main selector between constructing and idling

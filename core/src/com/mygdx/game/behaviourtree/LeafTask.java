@@ -23,7 +23,7 @@ public class LeafTask extends Task{
 
     @Override
     public void start() {
-        if(Logger.logBehaviour) Logger.log(Logger.NORMAL, "Starting behaviour "+this.getName());
+
     }
 
     @Override

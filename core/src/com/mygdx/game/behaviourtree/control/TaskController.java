@@ -26,8 +26,8 @@ public class TaskController {
         this.running = false;
 
         if(Logger.logBehaviour)
-            Logger.log(Logger.NORMAL, "Entity with name "+this.task.getBlackboard().myManager.getEntityOwner().name+" and id "+this.task.getBlackboard().myManager.getEntityOwner().getID()+" has finished task "
-                + this.task.getName()+" with failure.");
+            Logger.log(Logger.NORMAL, "Entity ["+this.task.getBlackboard().myManager.getEntityOwner().name+","+this.task.getBlackboard().myManager.getEntityOwner().getID()+"] has finished task "
+                    + this.task.getName()+" with failure.");
     }
 
     /**
@@ -39,7 +39,7 @@ public class TaskController {
         this.failed = false;
 
         if(Logger.logBehaviour)
-            Logger.log(Logger.NORMAL, "Entity with name "+this.task.getBlackboard().myManager.getEntityOwner().name+" and id "+this.task.getBlackboard().myManager.getEntityOwner().getID()+" has finished task "
+            Logger.log(Logger.NORMAL, "Entity ["+this.task.getBlackboard().myManager.getEntityOwner().name+","+this.task.getBlackboard().myManager.getEntityOwner().getID()+"] has finished task "
         + this.task.getName()+" with success.");
     }
 
@@ -64,6 +64,10 @@ public class TaskController {
 
         this.started = true;
         this.task.start();
+
+        if(Logger.logBehaviour)
+            Logger.log(Logger.NORMAL, "Entity ["+this.task.getBlackboard().myManager.getEntityOwner().name+","+this.task.getBlackboard().myManager.getEntityOwner().getID()
+                    +"] has started task " + this.task.getName());
     }
 
     /**
