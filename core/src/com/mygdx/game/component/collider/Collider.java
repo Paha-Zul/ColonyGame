@@ -2,13 +2,13 @@ package com.mygdx.game.component.collider;
 
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mygdx.game.component.Component;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.interfaces.IScalable;
 import com.mygdx.game.util.Constants;
 import com.mygdx.game.util.Tags;
-import org.codehaus.jackson.annotate.JsonIgnore;
-import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
  * Created by Paha on 1/9/2015.
@@ -28,28 +28,20 @@ public class Collider extends Component implements IScalable{
     }
 
     @Override
-    public void init() {
-        super.init();
-    }
-
-    @Override
-    public void start() {
-        super.start();
-        load();
-    }
-
-    @Override
+    @JsonIgnore
     public void save() {
 
     }
 
     @Override
+    @JsonIgnore
     public void initLoad() {
         super.initLoad();
 
     }
 
     @Override
+    @JsonIgnore
     public void load() {
         //TODO Under Construction! Apparently changing active state locks everything up.
 
@@ -68,23 +60,37 @@ public class Collider extends Component implements IScalable{
     }
 
     @Override
+    @JsonIgnore
+    public void init() {
+        super.init();
+    }
+
+    @Override
+    @JsonIgnore
+    public void start() {
+        super.start();
+        load();
+    }
+
+    @Override
+    @JsonIgnore
     public void update(float delta) {
         super.update(delta);
         this.owner.getTransform().setPosition(this.body.getPosition().x, this.body.getPosition().y);
     }
 
+    @Override
     @JsonIgnore
-    public void setWorld(World world){
-        this.world = world;
+    public void destroy(Entity destroyer) {
+        super.destroy(destroyer);
+
+        this.body.destroyFixture(this.fixture);
+        this.world.destroyBody(this.body);
     }
 
     @JsonIgnore
-    public void setBody(BodyDef bodyDef){
-        if(this.body != null) world.destroyBody(this.body);
-
-        this.body = world.createBody(bodyDef);
-        ColliderInfo bodyInfo = new ColliderInfo(owner);
-        this.body.setUserData(bodyInfo);
+    public void setWorld(World world){
+        this.world = world;
     }
 
     @JsonIgnore
@@ -97,31 +103,37 @@ public class Collider extends Component implements IScalable{
         this.fixture.setUserData(fixtureInfo);
     }
 
+    @JsonIgnore
     public void setBodyPosition(Vector2 position, float angle){
         this.setBodyPosition(position.x, position.y, angle);
     }
 
+    @JsonIgnore
     public void setBodyPosition(float x, float y, float angle){
         this.body.setTransform(x, y, angle);
     }
 
+    @JsonIgnore
     public Body getBody(){
         return this.body;
     }
 
+    @JsonIgnore
+    public void setBody(BodyDef bodyDef){
+        if(this.body != null) world.destroyBody(this.body);
+
+        this.body = world.createBody(bodyDef);
+        ColliderInfo bodyInfo = new ColliderInfo(owner);
+        this.body.setUserData(bodyInfo);
+    }
+
+    @JsonIgnore
     public Fixture getMainFixture(){
         return this.fixture;
     }
 
     @Override
-    public void destroy(Entity destroyer) {
-        super.destroy(destroyer);
-
-        this.body.destroyFixture(this.fixture);
-        this.world.destroyBody(this.body);
-    }
-
-    @Override
+    @JsonIgnore
     public void scale(float scale) {
         this.fixture.getShape().setRadius(this.originalRadius*scale);
     }

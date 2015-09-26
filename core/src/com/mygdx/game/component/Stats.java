@@ -1,13 +1,13 @@
 package com.mygdx.game.component;
 
 import com.badlogic.gdx.graphics.Color;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.interfaces.Functional;
 import com.mygdx.game.util.timer.RepeatingTimer;
 import com.mygdx.game.util.timer.Timer;
 import com.sun.istack.internal.NotNull;
-import org.codehaus.jackson.annotate.JsonIgnore;
-import org.codehaus.jackson.annotate.JsonProperty;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -18,9 +18,9 @@ import java.util.LinkedHashMap;
  */
 public class Stats extends Component{
     @JsonIgnore
-    private LinkedHashMap<String, Stat> statMap = new LinkedHashMap<>();
+    private LinkedHashMap<String, Stat> statMap;
     @JsonIgnore
-    private ArrayList<RepeatingTimer> timerList = new ArrayList<>();
+    private ArrayList<RepeatingTimer> timerList;
     @JsonIgnore
     private boolean pauseTimers = false;
 
@@ -29,18 +29,32 @@ public class Stats extends Component{
     }
 
     @Override
-    public void start() {
-        super.start();
-    }
-
-    @Override
     public void save() {
 
     }
 
     @Override
+    public void initLoad() {
+        if(this.statMap == null) this.statMap = new LinkedHashMap<>();
+        if(this.timerList == null) this.timerList = new ArrayList<>();
+        super.initLoad();
+    }
+
+    @Override
     public void load() {
         super.load();
+    }
+
+    @Override
+    public void init() {
+        super.init();
+
+        this.initLoad();
+    }
+
+    @Override
+    public void start() {
+        super.start();
     }
 
     @Override
@@ -50,6 +64,13 @@ public class Stats extends Component{
         if(!this.pauseTimers)
             for(Timer timer : timerList)
                 timer.update(delta);
+    }
+
+    @Override
+    public void destroy(Entity destroyer) {
+        super.destroy(destroyer);
+        statMap=null;
+        timerList=null;
     }
 
     /**
@@ -73,7 +94,7 @@ public class Stats extends Component{
      * @param name The compName of the Stat.
      * @param initCurrValue The initial current value to start.
      * @param initMaxValue THe initial maximum value to start.
-     * @return The Stat that was created.
+     * @return The Stat that was added.
      */
     public Stat addStat(String name, float initCurrValue, float initMaxValue){
         return this.addStat(name, null, initCurrValue, initMaxValue);
@@ -86,7 +107,7 @@ public class Stats extends Component{
      * @param effect The effect to put on this Stat.
      * @param initCurrValue The initial current value to start.
      * @param initMaxValue THe initial maximum value to start.
-     * @return The Stat that was created.
+     * @return The Stat that was added.
      */
     public Stat addStat(String name, String effect, float initCurrValue, float initMaxValue){
         Stat stat = new Stat(name, initCurrValue, initMaxValue);
@@ -137,6 +158,7 @@ public class Stats extends Component{
      */
     @JsonProperty("statList")
     private final void setStatList(ArrayList<Stat> list){
+        if(this.statMap == null) this.statMap = new LinkedHashMap<>();
         for(Stat stat : list)
             this.statMap.put(stat.name, stat);
     }
@@ -147,13 +169,6 @@ public class Stats extends Component{
 
     public void pauseTimers(boolean val){
         this.pauseTimers = val;
-    }
-
-    @Override
-    public void destroy(Entity destroyer) {
-        super.destroy(destroyer);
-        statMap=null;
-        timerList=null;
     }
 
     public static class Stat{

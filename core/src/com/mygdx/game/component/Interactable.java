@@ -1,10 +1,10 @@
 package com.mygdx.game.component;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.interfaces.IDelayedDestroyable;
 import com.mygdx.game.interfaces.IInteractable;
-import org.codehaus.jackson.annotate.JsonIgnore;
-import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
  * Created by Paha on 1/10/2015.
@@ -21,14 +21,6 @@ public class Interactable extends Component{
     }
 
     @Override
-    public void start() {
-        super.start();
-
-        load();
-    }
-
-
-    @Override
     public void save() {
 
     }
@@ -39,8 +31,21 @@ public class Interactable extends Component{
     }
 
     @Override
+    public void start() {
+        super.start();
+
+        load();
+    }
+
+    @Override
     public void update(float delta) {
         super.update(delta);
+    }
+
+    @Override
+    public void destroy(Entity destroyer) {
+        super.destroy(destroyer);
+        this.interType = null;
     }
 
     public void setInterType(String interType) {
@@ -66,11 +71,5 @@ public class Interactable extends Component{
             interactable = null;
 
         return this.interactable;
-    }
-
-    @Override
-    public void destroy(Entity destroyer) {
-        super.destroy(destroyer);
-        this.interType = null;
     }
 }

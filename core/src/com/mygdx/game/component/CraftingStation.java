@@ -36,25 +36,12 @@ public class CraftingStation extends Component implements IOwnable{
     }
 
     @Override
-    public void created(Entity owner) {
-        super.created(owner);
+    public void added(Entity owner) {
+        super.added(owner);
 
         this.availableJobs = new LinkedList<>();
         this.inProgressJobs = new LinkedList<>();
         this.stalledJobs = new LinkedList<>();
-    }
-
-    @Override
-    public void init() {
-        super.init();
-
-    }
-
-    @Override
-    public void start() {
-        super.start();
-
-        this.load();
     }
 
     @Override
@@ -76,8 +63,26 @@ public class CraftingStation extends Component implements IOwnable{
     }
 
     @Override
+    public void init() {
+        super.init();
+
+    }
+
+    @Override
+    public void start() {
+        super.start();
+
+        this.load();
+    }
+
+    @Override
     public void update(float delta) {
         super.update(delta);
+    }
+
+    @Override
+    public void destroy(Entity destroyer) {
+        super.destroy(destroyer);
     }
 
     /**
@@ -108,14 +113,6 @@ public class CraftingStation extends Component implements IOwnable{
      */
     public boolean hasStalledJob(){
         return !this.stalledJobs.isEmpty();
-    }
-
-    /**
-     * Sets the items that this CraftingStation can craft.
-     * @param craftingList The String array of item names.
-     */
-    public void setCraftingList(String[] craftingList){
-        this.craftingList = craftingList;
     }
 
     /**
@@ -229,6 +226,14 @@ public class CraftingStation extends Component implements IOwnable{
     }
 
     /**
+     * Sets the items that this CraftingStation can craft.
+     * @param craftingList The String array of item names.
+     */
+    public void setCraftingList(String[] craftingList){
+        this.craftingList = craftingList;
+    }
+
+    /**
      * @return The available jobs list.
      */
     public LinkedList<CraftingJob> getAvailableList(){
@@ -254,11 +259,6 @@ public class CraftingStation extends Component implements IOwnable{
      */
     public Inventory getInventory(){
         return this.inventory;
-    }
-
-    @Override
-    public void destroy(Entity destroyer) {
-        super.destroy(destroyer);
     }
 
     @Override

@@ -1,5 +1,7 @@
 package com.mygdx.game.component;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.interfaces.IInteractable;
 import com.mygdx.game.interfaces.IOwnable;
@@ -8,8 +10,6 @@ import com.mygdx.game.util.Logger;
 import com.mygdx.game.util.managers.DataManager;
 import com.mygdx.game.util.timer.RepeatingTimer;
 import com.mygdx.game.util.timer.Timer;
-import org.codehaus.jackson.annotate.JsonIgnore;
-import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
  * Created by Paha on 5/19/2015.
@@ -38,22 +38,13 @@ public class Building extends Component implements IOwnable, IInteractable{
     }
 
     @Override
-    public void init() {
-        super.init();
-
-        //Get the JsonBuilding reference, add the tags, add an inventory if under construction, and set the name.
-        for(String tag : this.jBuilding.tags) this.owner.getTags().addTag(tag); //Add each tag that exists.
-
-        //Add an inventory if under construction OR if the building is supposed to have one...
-        if(this.owner.getTags().hasTag("constructing") || this.jBuilding.inventory) this.inventory = this.addComponent(new Inventory());
-        this.owner.name = this.jBuilding.displayName; //Set the display name.
-
-        this.initLoad();
+    public void save() {
     }
 
     @Override
     public void initLoad() {
         super.initLoad();
+        if(this.jBuilding == null) this.jBuilding = DataManager.getData(this.buildingName, DataBuilder.JsonBuilding.class);
 
         boolean isConstructing = this.owner.getTags().hasTag("constructing"); //If the building is under construction
 
@@ -97,16 +88,26 @@ public class Building extends Component implements IOwnable, IInteractable{
     }
 
     @Override
+    public void load() {
+    }
+
+    @Override
+    public void init() {
+        super.init();
+
+        //Get the JsonBuilding reference, add the tags, add an inventory if under construction, and set the name.
+        for(String tag : this.jBuilding.tags) this.owner.getTags().addTag(tag); //Add each tag that exists.
+
+        //Add an inventory if under construction OR if the building is supposed to have one...
+        if(this.owner.getTags().hasTag("constructing") || this.jBuilding.inventory) this.inventory = this.addComponent(new Inventory());
+        this.owner.name = this.jBuilding.displayName; //Set the display name.
+
+        this.initLoad();
+    }
+
+    @Override
     public void start() {
         super.start();
-    }
-
-    @Override
-    public void save() {
-    }
-
-    @Override
-    public void load() {
     }
 
     @Override
@@ -136,15 +137,10 @@ public class Building extends Component implements IOwnable, IInteractable{
         }
     }
 
-    /**
-     * Sets the building name, which will also set the buildingRef.
-     * @param name The name of the building.
-     * @return The Building for easy chaning.
-     */
-    public Building setBuildingName(String name){
-        this.buildingName = name;
-        this.jBuilding = DataManager.getData(name, DataBuilder.JsonBuilding.class);
-        return this;
+    @Override
+    @JsonIgnore
+    public void destroy(Entity destroyer) {
+        super.destroy(destroyer);
     }
 
     /**
@@ -152,22 +148,32 @@ public class Building extends Component implements IOwnable, IInteractable{
      * @param buildingRef The JsonBuilding to be the reference.
      * @return The Building for eash chaining.
      */
+    @JsonIgnore
     public Building setBuildingRef(DataBuilder.JsonBuilding buildingRef){
         this.jBuilding = buildingRef;
         this.buildingName = buildingRef.name;
         return this;
     }
 
+    @JsonIgnore
     public String getBuildingName(){
         return this.buildingName;
     }
 
-    @Override
-    public void destroy(Entity destroyer) {
-        super.destroy(destroyer);
+    /**
+     * Sets the building name, which will also set the buildingRef.
+     * @param name The name of the building.
+     * @return The Building for easy chaning.
+     */
+    @JsonIgnore
+    public Building setBuildingName(String name){
+        this.buildingName = name;
+        this.jBuilding = DataManager.getData(name, DataBuilder.JsonBuilding.class);
+        return this;
     }
 
     @Override
+    @JsonIgnore
     public void addedToColony(Colony colony) {
         this.colonyOwner = colony;
     }
@@ -221,16 +227,19 @@ public class Building extends Component implements IOwnable, IInteractable{
     }
 
     @Override
+    @JsonIgnore
     public CraftingStation getCraftingStation() {
         return this.craftingStation;
     }
 
     @Override
+    @JsonIgnore
     public Building getBuilding() {
         return this;
     }
 
     @Override
+    @JsonIgnore
     public Enterable getEnterable() {
         return this.enterable;
     }

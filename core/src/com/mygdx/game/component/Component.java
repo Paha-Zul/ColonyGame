@@ -1,27 +1,27 @@
 package com.mygdx.game.component;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.interfaces.IDelayedDestroyable;
 import com.mygdx.game.interfaces.ISaveable;
 import com.mygdx.game.util.managers.EventSystem;
-import org.codehaus.jackson.annotate.JsonIgnore;
-import org.codehaus.jackson.annotate.JsonProperty;
-import org.codehaus.jackson.annotate.JsonTypeInfo;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.WRAPPER_OBJECT, property = "@class")
 public abstract class Component implements IDelayedDestroyable, ISaveable {
+    public static long currID = (long)(-Long.MAX_VALUE*0.5);
     @JsonProperty
 	protected String compName;
-    @JsonProperty
-    private boolean active = true, destroyed = false, setToDestroy = false;
     @JsonIgnore
 	protected Entity owner;
     @JsonProperty
 	protected boolean initiated = false, started = false;
     @JsonProperty
 	protected long compID;
-    public static long currID = (long)(-Long.MAX_VALUE*0.5);
+    @JsonProperty
+    private boolean active = true, destroyed = false, setToDestroy = false;
 
 	public Component() {
 		this.compID = currID++;
@@ -29,30 +29,19 @@ public abstract class Component implements IDelayedDestroyable, ISaveable {
 	}
 
     /**
-     * Called as soon as the Component has been created. Use this to either interact with the Entity owner
+     * Called as soon as the Component has been added. Use this to either interact with the Entity owner
      * or perform any task that does not rely on fields or other Components.
      * @param owner The Entity owner of this Component.
      */
-	public void created(Entity owner){
+	public void added(Entity owner){
 		this.owner = owner;
 		EventSystem.notifyGameEvent("component_created", this.getClass(), this);
 	}
 
-	/**
-     * Called after created() but before start(). Use this to interact with any fields that may have been set on this Component
-     * but not other Components on the Entity.
-     */
-	public void init(){
-		this.initiated = true;
-	}
+	@Override
+	public void addedLoad() {
 
-	/**
-	 * The start of this Component. This is where other Components of the owner can be accessed and stored as a reference.
-	 */
-	public void start(){
-		this.started = true;
-        EventSystem.notifyGameEvent("component_started", this.getClass(), this);
-    }
+	}
 
 	@Override
 	public void save() {
@@ -68,6 +57,22 @@ public abstract class Component implements IDelayedDestroyable, ISaveable {
 	public void load() {
 
 	}
+
+	/**
+     * Called after added() but before start(). Use this to interact with any fields that may have been set on this Component
+     * but not other Components on the Entity.
+     */
+	public void init(){
+		this.initiated = true;
+	}
+
+	/**
+	 * The start of this Component. This is where other Components of the owner can be accessed and stored as a reference.
+	 */
+	public void start(){
+		this.started = true;
+        EventSystem.notifyGameEvent("component_started", this.getClass(), this);
+    }
 
 	/**
 	 * Called every frame.
@@ -121,6 +126,24 @@ public abstract class Component implements IDelayedDestroyable, ISaveable {
 		return this.owner.getComponent(c);
 	}
 
+	public void setOwner(Entity owner){
+		this.owner = owner;
+	}
+
+	@JsonIgnore
+	public String getCompName(){
+		return this.compName;
+	}
+
+	/**
+	 * If this Component is active or not.
+	 * @return True if the Component is active, false if not.
+	 */
+    @JsonIgnore
+	public final boolean isActive() {
+		return this.active;
+	}
+
 	/**
 	 * Sets this component to active or inactive.
 	 * @param val A boolean indicating active or inactive.
@@ -139,35 +162,12 @@ public abstract class Component implements IDelayedDestroyable, ISaveable {
         this.active = val;
     }
 
-	public void setOwner(Entity owner){
-		this.owner = owner;
-	}
-
-	/**
-	 * If this Component is active or not.
-	 * @return True if the Component is active, false if not.
-	 */
     @JsonIgnore
-	public boolean isActive() {
-		return this.active;
-	}
-
-    @JsonIgnore
-    public String getCompName(){
-        return this.compName;
-    }
-
-    @JsonIgnore
-    public boolean isInitiated() {
+    public final boolean isInitiated() {
         return initiated;
     }
 
-    @JsonIgnore
-    public boolean isSetToDestroy() {
-        return setToDestroy;
-    }
-
-	public boolean isStarted(){
+	public final boolean isStarted(){
 		return started;
 	}
 
@@ -181,20 +181,9 @@ public abstract class Component implements IDelayedDestroyable, ISaveable {
 	}
 
 	@Override
-    @JsonIgnore
-	public boolean isSetToBeDestroyed() {
-		return this.setToDestroy;
-	}
-
-	@Override
 	public void setToDestroy() {
 		this.setToDestroy = true;
 	}
-
-    @JsonIgnore
-    public long getCompID(){
-        return this.compID;
-    }
 
 	@Override
 	public void destroy(Entity destroyer) {
@@ -206,9 +195,20 @@ public abstract class Component implements IDelayedDestroyable, ISaveable {
 
     @Override
     @JsonIgnore
-	public boolean isDestroyed(){
+	public final boolean isDestroyed(){
 		return this.destroyed;
 	}
+
+	@Override
+	@JsonIgnore
+	public final boolean isSetToBeDestroyed() {
+		return this.setToDestroy;
+	}
+
+    @JsonIgnore
+    public long getCompID(){
+        return this.compID;
+    }
 
     @JsonIgnore
 	public boolean isValid(){

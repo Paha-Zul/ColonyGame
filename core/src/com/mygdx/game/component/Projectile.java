@@ -1,12 +1,12 @@
 package com.mygdx.game.component;
 
 import com.badlogic.gdx.math.MathUtils;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mygdx.game.component.collider.Collider;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.util.timer.OneShotTimer;
 import com.mygdx.game.util.timer.Timer;
-import org.codehaus.jackson.annotate.JsonIgnore;
-import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
  * Created by Bbent_000 on 11/29/2014.
@@ -28,12 +28,6 @@ public class Projectile extends Component{
 	}
 
 	@Override
-	public void start() {
-		super.start();
-        load();
-	}
-
-	@Override
 	public void save() {
 
 	}
@@ -43,6 +37,12 @@ public class Projectile extends Component{
         this.owner.getTransform().setScale(0.25f);
         this.coll = this.getComponent(Collider.class);
         this.lifetimeTimer = new OneShotTimer(this.lifetime, this.owner::setToDestroy);
+	}
+
+	@Override
+	public void start() {
+		super.start();
+        load();
 	}
 
 	@Override

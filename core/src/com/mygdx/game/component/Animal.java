@@ -2,6 +2,8 @@ package com.mygdx.game.component;
 
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.Fixture;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mygdx.game.behaviourtree.BlackBoard;
 import com.mygdx.game.component.collider.Collider;
 import com.mygdx.game.entity.Entity;
@@ -11,8 +13,6 @@ import com.mygdx.game.util.Constants;
 import com.mygdx.game.util.DataBuilder;
 import com.mygdx.game.util.managers.DataManager;
 import com.mygdx.game.util.managers.EventSystem;
-import org.codehaus.jackson.annotate.JsonIgnore;
-import org.codehaus.jackson.annotate.JsonProperty;
 
 import java.util.LinkedList;
 import java.util.function.Consumer;
@@ -37,16 +37,60 @@ public class Animal extends Component implements IInteractable{
     private LinkedList<Entity> attackList = new LinkedList<>();
     @JsonIgnore
     private Fixture attackSensor;
+    //The Consumer function to call when I collide with something.
+    @JsonIgnore
+    private Consumer<Object[]> onCollideStart = args -> {
+        Fixture me = (Fixture)args[0];
+        Fixture other = (Fixture)args[1];
+
+        Collider.ColliderInfo otherInfo = (Collider.ColliderInfo) other.getUserData();
+        Collider.ColliderInfo myInfo = (Collider.ColliderInfo) me.getUserData();
+
+        //If it is not a detector, the other is a bullet, hurt me! and kill the bullet!
+        if (!myInfo.tags.hasTag(Constants.COLLIDER_DETECTOR) && otherInfo.owner.getTags().hasTag("projectile")) {
+            this.getComponent(Stats.class).getStat("health").addToCurrent(-20);
+
+            //If not aggressive, flee. Otherwise, attack!
+            if(!animalRef.aggressive) behComp.changeTaskImmediate("fleeTarget");
+            else attackTarget(otherInfo.owner.getComponent(Projectile.class).projOwner);
+            otherInfo.owner.setToDestroy();
+
+        //If I am a detector and the other is a colonist, we must attack it!
+        }else if (myInfo.tags.hasTag(Constants.COLLIDER_DETECTOR) && otherInfo.tags.hasTag("entity") && otherInfo.owner.getTags().hasTag("colonist") && animalRef.aggressive) {
+            if(otherInfo.owner.getTags().hasTag("alive")) attackList.add(otherInfo.owner);
+        }
+    };
+    //The Consumer function to call when I stop colliding with something.
+    @JsonIgnore
+    private Consumer<Object[]> onCollideEnd = args -> {
+        Fixture me = (Fixture) args[0];
+        Fixture other = (Fixture) args[1]; //Get the other entity.
+
+        Collider.ColliderInfo otherInfo = (Collider.ColliderInfo) other.getUserData();
+        Collider.ColliderInfo myInfo = (Collider.ColliderInfo) me.getUserData();
+
+        if (myInfo.tags.hasTag(Constants.COLLIDER_DETECTOR) && otherInfo.owner.getTags().hasTag("colonist")) {
+            attackList.remove(otherInfo.owner);
+        }
+    };
+    //The Consume function to call when I take damage.
+    @JsonIgnore
+    private Consumer<Object[]> onDamage = args -> {
+        Entity other = (Entity) args[0];
+        float damage = (float) args[1];
+
+        Stats.Stat stat = stats.getStat("health");
+        if (stat == null) return;
+        stat.addToCurrent(damage);
+    };
 
     public Animal() {
         super();
     }
 
     @Override
-    public void start() {
-        super.start();
+    public void save() {
 
-        load();
     }
 
     @Override
@@ -82,29 +126,10 @@ public class Animal extends Component implements IInteractable{
     }
 
     @Override
-    public void save() {
+    public void start() {
+        super.start();
 
-    }
-
-    //Adds a circle sensor to this animal.
-    public void addCircleSensor(){
-        CircleShape circle = new CircleShape();
-        circle.setRadius(10f);
-        attackSensor = collider.getBody().createFixture(circle, 1f);
-        attackSensor.setSensor(true);
-        Collider.ColliderInfo fixtureInfo = new Collider.ColliderInfo(this.owner);
-        fixtureInfo.tags.addTag(Constants.COLLIDER_DETECTOR);
-        attackSensor.setUserData(fixtureInfo);
-        circle.dispose();
-    }
-
-    private void makeBehaviourStuff(){
-        this.behComp.getBehaviourStates().addState("attackTarget").setRepeat(false);
-
-        BlackBoard bb = this.getBehManager().getBlackBoard();
-        bb.idleDistance = 3;
-        bb.baseIdleTime = 0.3f;
-        bb.randomIdleTime = 1f;
+        load();
     }
 
     @Override
@@ -131,6 +156,30 @@ public class Animal extends Component implements IInteractable{
         //Attack single or group attack.
         if(this.group != null) groupAttack(behComp.getBlackBoard().target);
         else this.behComp.changeTaskImmediate("attackTarget");
+    }
+
+    private void groupAttack(Entity target){
+        if(group.getLeader() == null) return;
+
+        //Let's get the leader of the group and set his target as our target and change the task to attacking it.
+        BehaviourManagerComp leaderComp = group.getLeader().getComponent(BehaviourManagerComp.class);
+        leaderComp.getBlackBoard().target = target;
+        leaderComp.changeTaskImmediate("attackTarget");
+        EventSystem.notifyEntityEvent(target, "attacking_group", this.group);
+
+        //Then, tell each unit in the group to attack our target.
+        this.group.getGroupList().forEach(ent ->{
+            System.out.println("Group member attacking");
+            BehaviourManagerComp entComp = ent.getComponent(BehaviourManagerComp.class);
+            entComp.getBlackBoard().target = target;
+            entComp.changeTaskImmediate("attackTarget");
+        });
+    }
+
+    @Override
+    public void destroy(Entity destroyer) {
+        super.destroy(destroyer);
+        if(attackSensor != null) this.collider.getBody().destroyFixture(attackSensor);
     }
 
     //The callback to be called when I die!
@@ -162,71 +211,25 @@ public class Animal extends Component implements IInteractable{
         };
     }
 
-    //The Consumer function to call when I collide with something.
-    @JsonIgnore
-    private Consumer<Object[]> onCollideStart = args -> {
-        Fixture me = (Fixture)args[0];
-        Fixture other = (Fixture)args[1];
+    //Adds a circle sensor to this animal.
+    public void addCircleSensor(){
+        CircleShape circle = new CircleShape();
+        circle.setRadius(10f);
+        attackSensor = collider.getBody().createFixture(circle, 1f);
+        attackSensor.setSensor(true);
+        Collider.ColliderInfo fixtureInfo = new Collider.ColliderInfo(this.owner);
+        fixtureInfo.tags.addTag(Constants.COLLIDER_DETECTOR);
+        attackSensor.setUserData(fixtureInfo);
+        circle.dispose();
+    }
 
-        Collider.ColliderInfo otherInfo = (Collider.ColliderInfo) other.getUserData();
-        Collider.ColliderInfo myInfo = (Collider.ColliderInfo) me.getUserData();
+    private void makeBehaviourStuff(){
+        this.behComp.getBehaviourStates().addState("attackTarget").setRepeat(false);
 
-        //If it is not a detector, the other is a bullet, hurt me! and kill the bullet!
-        if (!myInfo.tags.hasTag(Constants.COLLIDER_DETECTOR) && otherInfo.owner.getTags().hasTag("projectile")) {
-            this.getComponent(Stats.class).getStat("health").addToCurrent(-20);
-
-            //If not aggressive, flee. Otherwise, attack!
-            if(!animalRef.aggressive) behComp.changeTaskImmediate("fleeTarget");
-            else attackTarget(otherInfo.owner.getComponent(Projectile.class).projOwner);
-            otherInfo.owner.setToDestroy();
-
-        //If I am a detector and the other is a colonist, we must attack it!
-        }else if (myInfo.tags.hasTag(Constants.COLLIDER_DETECTOR) && otherInfo.tags.hasTag("entity") && otherInfo.owner.getTags().hasTag("colonist") && animalRef.aggressive) {
-            if(otherInfo.owner.getTags().hasTag("alive")) attackList.add(otherInfo.owner);
-        }
-    };
-
-    //The Consumer function to call when I stop colliding with something.
-    @JsonIgnore
-    private Consumer<Object[]> onCollideEnd = args -> {
-        Fixture me = (Fixture) args[0];
-        Fixture other = (Fixture) args[1]; //Get the other entity.
-
-        Collider.ColliderInfo otherInfo = (Collider.ColliderInfo) other.getUserData();
-        Collider.ColliderInfo myInfo = (Collider.ColliderInfo) me.getUserData();
-
-        if (myInfo.tags.hasTag(Constants.COLLIDER_DETECTOR) && otherInfo.owner.getTags().hasTag("colonist")) {
-            attackList.remove(otherInfo.owner);
-        }
-    };
-
-    //The Consume function to call when I take damage.
-    @JsonIgnore
-    private Consumer<Object[]> onDamage = args -> {
-        Entity other = (Entity) args[0];
-        float damage = (float) args[1];
-
-        Stats.Stat stat = stats.getStat("health");
-        if (stat == null) return;
-        stat.addToCurrent(damage);
-    };
-
-    private void groupAttack(Entity target){
-        if(group.getLeader() == null) return;
-
-        //Let's get the leader of the group and set his target as our target and change the task to attacking it.
-        BehaviourManagerComp leaderComp = group.getLeader().getComponent(BehaviourManagerComp.class);
-        leaderComp.getBlackBoard().target = target;
-        leaderComp.changeTaskImmediate("attackTarget");
-        EventSystem.notifyEntityEvent(target, "attacking_group", this.group);
-
-        //Then, tell each unit in the group to attack our target.
-        this.group.getGroupList().forEach(ent ->{
-            System.out.println("Group member attacking");
-            BehaviourManagerComp entComp = ent.getComponent(BehaviourManagerComp.class);
-            entComp.getBlackBoard().target = target;
-            entComp.changeTaskImmediate("attackTarget");
-        });
+        BlackBoard bb = this.getBehManager().getBlackBoard();
+        bb.idleDistance = 3;
+        bb.baseIdleTime = 0.3f;
+        bb.randomIdleTime = 1f;
     }
 
     @JsonIgnore
@@ -241,14 +244,14 @@ public class Animal extends Component implements IInteractable{
     }
 
     @JsonIgnore
-    public void setAnimalRef(DataBuilder.JsonAnimal animalRef){
-        this.animalRef = animalRef;
-        this.animalRefName = animalRef.name;
+    public DataBuilder.JsonAnimal getAnimalRef() {
+        return animalRef;
     }
 
     @JsonIgnore
-    public DataBuilder.JsonAnimal getAnimalRef() {
-        return animalRef;
+    public void setAnimalRef(DataBuilder.JsonAnimal animalRef){
+        this.animalRef = animalRef;
+        this.animalRefName = animalRef.name;
     }
 
     @Override
@@ -306,11 +309,5 @@ public class Animal extends Component implements IInteractable{
     @Override
     public Enterable getEnterable() {
         return null;
-    }
-
-    @Override
-    public void destroy(Entity destroyer) {
-        super.destroy(destroyer);
-        if(attackSensor != null) this.collider.getBody().destroyFixture(attackSensor);
     }
 }

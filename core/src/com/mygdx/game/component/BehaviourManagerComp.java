@@ -2,6 +2,8 @@ package com.mygdx.game.component;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.behaviourtree.BlackBoard;
 import com.mygdx.game.behaviourtree.PrebuiltTasks;
@@ -13,8 +15,6 @@ import com.mygdx.game.util.StateTree;
 import com.mygdx.game.util.managers.EventSystem;
 import com.mygdx.game.util.timer.OneShotTimer;
 import com.mygdx.game.util.timer.Timer;
-import org.codehaus.jackson.annotate.JsonIgnore;
-import org.codehaus.jackson.annotate.JsonProperty;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,29 +25,7 @@ import java.util.function.BiFunction;
  */
 public class BehaviourManagerComp extends Component{
     @JsonIgnore
-    private BlackBoard blackBoard;
-    @JsonIgnore
-    private Task currentBehaviour;
-    @JsonProperty
-    private String nextBehaviour;
-    @JsonProperty
-    private boolean unchangeable = false;
-    @JsonIgnore
-    private Stats stats;
-    @JsonIgnore
-    private ArrayList<Line> lineList = new ArrayList<>();
-    @JsonIgnore
-    private Timer feedTimer = new OneShotTimer(5f, null);
-    @JsonIgnore
-    private StateTree<TaskInfo> taskTree = new StateTree<>("taskTree", "root");
-    @JsonIgnore
-    private StateSystem<StateSystem.DefineTask> behaviourStates = new StateSystem<>();
-    @JsonIgnore
     private static HashMap<String, BiFunction<BlackBoard, BehaviourManagerComp, Task>> taskMap = new HashMap<>();
-
-    public BehaviourManagerComp() {
-
-    }
 
     static{
         BehaviourManagerComp.addTaskToMap("moveTo", PrebuiltTasks::moveTo);
@@ -66,10 +44,36 @@ public class BehaviourManagerComp extends Component{
         BehaviourManagerComp.addTaskToMap("craftItem", PrebuiltTasks::craftItem);
     }
 
+    @JsonIgnore
+    private BlackBoard blackBoard;
+    @JsonIgnore
+    private Task currentBehaviour;
+    @JsonProperty
+    private String nextBehaviour;
+    @JsonProperty
+    private boolean unchangeable = false;
+    @JsonIgnore
+    private Stats stats;
+    @JsonIgnore
+    private ArrayList<Line> lineList = new ArrayList<>();
+    @JsonIgnore
+    private Timer feedTimer = new OneShotTimer(5f, null);
+    @JsonIgnore
+    private StateTree<TaskInfo> taskTree = new StateTree<>("taskTree", "root");
+    @JsonIgnore
+    private StateSystem<StateSystem.DefineTask> behaviourStates = new StateSystem<>();
+
+    public BehaviourManagerComp() {
+
+    }
+
+    public static void addTaskToMap(String name, BiFunction<BlackBoard, BehaviourManagerComp, Task> taskFunction){
+        taskMap.put(name, taskFunction);
+    }
+
     @Override
-    public void init() {
-        super.init();
-        initLoad();
+    public void save() {
+
     }
 
     @Override
@@ -91,54 +95,15 @@ public class BehaviourManagerComp extends Component{
     }
 
     @Override
-    public void save() {
-
+    public void init() {
+        super.init();
+        initLoad();
     }
 
     @Override
     public void start() {
         super.start();
         load();
-    }
-
-    public void changeTaskImmediate(String taskName){
-        this.changeTaskImmediate(taskName, false);
-    }
-
-    public void changeTaskImmediate(String taskName, boolean unchangeable){
-        if(this.unchangeable) return; //Don't do anything if the task is unchangeable!
-
-        StateSystem.State<StateSystem.DefineTask> lastState = behaviourStates.getCurrState();
-        StateSystem.State<StateSystem.DefineTask> currState = behaviourStates.setCurrState(taskName);
-
-        //If the currState should repeat the last state, and the last state is able to be repeated, save it as the last state!
-        if(currState.getRepeatLastState() && lastState.getCanBeSavedAsLast()) currState.getUserData().lastState = lastState.stateName;
-        //Otherwise, set the default state as the last state.
-        else if(currState.getRepeatLastState()) currState.getUserData().lastState = this.behaviourStates.getDefaultState().stateName;
-
-        //End the current task.
-        if(this.currentBehaviour != null && !this.currentBehaviour.getControl().hasFinished()) {
-            this.currentBehaviour.getControl().finishWithFailure();
-            this.currentBehaviour.getControl().safeEnd();
-        }
-
-        //Gets the new task from the task map, resets it (in case its being reused), checks and start.
-        Task task = taskMap.get(taskName).apply(this.blackBoard, this);
-        this.currentBehaviour = task;
-        this.currentBehaviour.getControl().reset();
-        if(!this.currentBehaviour.check()) this.currentBehaviour.getControl().finishWithFailure();
-        else this.currentBehaviour.getControl().safeStart();
-
-        this.unchangeable = unchangeable;
-
-        //Set the next behaviour.
-        //this.nextBehaviour = task;
-
-        EventSystem.notifyEntityEvent(this.getEntityOwner(), "task_started", task);
-    }
-
-    public void changeTaskQueued(String taskName){
-        this.nextBehaviour = taskName;
     }
 
     @Override
@@ -188,6 +153,61 @@ public class BehaviourManagerComp extends Component{
         //If our behaviour is null, set the next behaviour to the default behaviour.
         } else
             this.changeTaskImmediate(behaviourStates.getDefaultState().stateName);
+    }
+
+    public void changeTaskImmediate(String taskName){
+        this.changeTaskImmediate(taskName, false);
+    }
+
+    public void changeTaskImmediate(String taskName, boolean unchangeable){
+        if(this.unchangeable) return; //Don't do anything if the task is unchangeable!
+
+        StateSystem.State<StateSystem.DefineTask> lastState = behaviourStates.getCurrState();
+        StateSystem.State<StateSystem.DefineTask> currState = behaviourStates.setCurrState(taskName);
+
+        //If the currState should repeat the last state, and the last state is able to be repeated, save it as the last state!
+        if(currState.getRepeatLastState() && lastState.getCanBeSavedAsLast()) currState.getUserData().lastState = lastState.stateName;
+        //Otherwise, set the default state as the last state.
+        else if(currState.getRepeatLastState()) currState.getUserData().lastState = this.behaviourStates.getDefaultState().stateName;
+
+        //End the current task.
+        if(this.currentBehaviour != null && !this.currentBehaviour.getControl().hasFinished()) {
+            this.currentBehaviour.getControl().finishWithFailure();
+            this.currentBehaviour.getControl().safeEnd();
+        }
+
+        //Gets the new task from the task map, resets it (in case its being reused), checks and start.
+        Task task = taskMap.get(taskName).apply(this.blackBoard, this);
+        this.currentBehaviour = task;
+        this.currentBehaviour.getControl().reset();
+        if(!this.currentBehaviour.check()) this.currentBehaviour.getControl().finishWithFailure();
+        else this.currentBehaviour.getControl().safeStart();
+
+        this.unchangeable = unchangeable;
+
+        //Set the next behaviour.
+        //this.nextBehaviour = task;
+
+        EventSystem.notifyEntityEvent(this.getEntityOwner(), "task_started", task);
+    }
+
+    @Override
+    public void destroy(Entity destroyer) {
+        if(this.currentBehaviour != null) {
+            this.currentBehaviour.getControl().finishWithFailure();
+            this.currentBehaviour.getControl().safeEnd();
+            this.currentBehaviour = null;
+        }
+        super.destroy(destroyer);
+    }
+
+    @JsonIgnore
+    public StateSystem<StateSystem.DefineTask> getBehaviourStates(){
+        return behaviourStates;
+    }
+
+    public void changeTaskQueued(String taskName){
+        this.nextBehaviour = taskName;
     }
 
     @JsonIgnore
@@ -279,29 +299,6 @@ public class BehaviourManagerComp extends Component{
         return this.taskTree;
     }
 
-    @JsonIgnore
-    public StateSystem<StateSystem.DefineTask> getBehaviourStates(){
-        return behaviourStates;
-    }
-
-    public static void addTaskToMap(String name, BiFunction<BlackBoard, BehaviourManagerComp, Task> taskFunction){
-        taskMap.put(name, taskFunction);
-    }
-
-    @Override
-    public void destroy(Entity destroyer) {
-        if(this.currentBehaviour != null) {
-            this.currentBehaviour.getControl().finishWithFailure();
-            this.currentBehaviour.getControl().safeEnd();
-            this.currentBehaviour = null;
-        }
-        super.destroy(destroyer);
-    }
-
-    public class Line{
-        public float startX, startY, width, height, rotation;
-    }
-
     /**
      * A class used for the userData of the Tree class.
      */
@@ -318,5 +315,9 @@ public class BehaviourManagerComp extends Component{
         public void doCallback(){
             if(callback!=null) callback.callback();
         }
+    }
+
+    public class Line{
+        public float startX, startY, width, height, rotation;
     }
 }

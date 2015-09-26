@@ -1,11 +1,11 @@
 package com.mygdx.game.component;
 
 import com.badlogic.gdx.utils.Array;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mygdx.game.util.DataBuilder;
 import com.mygdx.game.util.managers.DataManager;
 import com.mygdx.game.util.managers.EventSystem;
-import org.codehaus.jackson.annotate.JsonIgnore;
-import org.codehaus.jackson.annotate.JsonProperty;
 
 import java.util.HashMap;
 

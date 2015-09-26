@@ -1,9 +1,9 @@
 package com.mygdx.game.util;
 
 import com.badlogic.gdx.utils.Array;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import gnu.trove.list.array.TIntArrayList;
-import org.codehaus.jackson.annotate.JsonIgnore;
-import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
  * Created by Paha on 4/8/2015.
@@ -31,6 +31,12 @@ public class Tags {
         this.tagMask |= (1 << tag); //OR the tag to the mask.
     }
 
+    public void addTags(String... tags){
+        for(String tag : tags){
+            this.addTag(tag);
+        }
+    }
+
     /**
      * Adds a tag to this Entity.
      * @param tag The tag to add.
@@ -39,12 +45,6 @@ public class Tags {
     public void addTag(String tag){
         int intTag = StringTable.StringToInt(type, tag);
         this.tagMask |= (1 << intTag); //OR the tag to the mask.
-    }
-
-    public void addTags(String... tags){
-        for(String tag : tags){
-            this.addTag(tag);
-        }
     }
 
     /**
@@ -183,21 +183,6 @@ public class Tags {
     }
 
     /**
-     * Gets the tags as an integer array from this Tags object.
-     * @return An integer array containing the integer tags.
-     */
-    @JsonIgnore
-    public String[] getTagsAsString(){
-        Array<String> tagList = new Array<>(String.class);
-        for(int i=0;i<33;i++){
-            if(((tagMask >> i) & 1) == 1)
-                tagList.add(StringTable.IntToString(type, i));
-        }
-
-        return tagList.toArray();
-    }
-
-    /**
      * Gets the tag mask as an integer.
      * @return An int which is the tag mask.
      */
@@ -221,5 +206,20 @@ public class Tags {
         for(String tag : getTagsAsString())
             tags+=tag+",";
         return tags;
+    }
+
+    /**
+     * Gets the tags as an integer array from this Tags object.
+     * @return An integer array containing the integer tags.
+     */
+    @JsonIgnore
+    public String[] getTagsAsString(){
+        Array<String> tagList = new Array<>(String.class);
+        for(int i=0;i<33;i++){
+            if(((tagMask >> i) & 1) == 1)
+                tagList.add(StringTable.IntToString(type, i));
+        }
+
+        return tagList.toArray();
     }
 }

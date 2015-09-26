@@ -6,6 +6,8 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.component.Component;
 import com.mygdx.game.component.Effects;
@@ -14,8 +16,6 @@ import com.mygdx.game.entity.Entity;
 import com.mygdx.game.util.Constants;
 import com.mygdx.game.util.GH;
 import com.mygdx.game.util.Grid;
-import org.codehaus.jackson.annotate.JsonIgnore;
-import org.codehaus.jackson.annotate.JsonProperty;
 
 public class GraphicIdentity extends Component {
     @JsonProperty("textureName")
@@ -40,18 +40,6 @@ public class GraphicIdentity extends Component {
         this.anchor = new Vector2(0.5f, 0.5f);
     }
 
-	@Override
-	public void start() {
-        super.start();
-        //This is initially needed for getting the sprite to be the right size. If we simply scaled it using this method, then
-        //the image would draw the right size, but the offset from the width and height being unaffected causes real problems whenever the image
-        //is not centered.
-        if(getSprite() == null) return;
-        //this.configureSprite(this.getSprite());
-
-        this.load();
-    }
-
     @Override
     public void save() {
 
@@ -68,6 +56,18 @@ public class GraphicIdentity extends Component {
         super.load();
         this.effects = this.getComponent(Effects.class);
         this.enterable = this.getComponent(Enterable.class);
+    }
+
+	@Override
+	public void start() {
+        super.start();
+        //This is initially needed for getting the sprite to be the right size. If we simply scaled it using this method, then
+        //the image would draw the right size, but the offset from the width and height being unaffected causes real problems whenever the image
+        //is not centered.
+        if(getSprite() == null) return;
+        //this.configureSprite(this.getSprite());
+
+        this.load();
     }
 
     @Override
@@ -117,11 +117,34 @@ public class GraphicIdentity extends Component {
         }
     }
 
+    @JsonIgnore
     public boolean isWithinBounds(){
         Vector2 pos = this.owner.getTransform().getPosition(); //Cache the owner's position.
         return ColonyGame.camera.frustum.boundsInFrustum(pos.x, pos.y, 0, getSprite().getWidth(), getSprite().getHeight(), 0);
     }
 
+    private void changeVisibility(int visibility){
+        if(this.currVisibility == visibility)
+            return;
+
+        this.currVisibility = visibility;
+        if(this.currVisibility == Constants.VISIBILITY_EXPLORED)
+            this.getSprite().setColor(Constants.COLOR_EXPLORED);
+        else if(this.currVisibility == Constants.VISIBILITY_VISIBLE)
+            this.getSprite().setColor(Constants.COLOR_VISIBILE);
+    }
+
+    @JsonIgnore
+    public Sprite getSprite() {
+        return this.sprite;
+    }
+
+    @JsonIgnore
+    public void setSprite(Sprite sprite) {
+        this.sprite = sprite;
+    }
+
+    @JsonIgnore
     public void setSprite(String textureName, String atlasName){
         this.setSprite(textureName, atlasName, -1, -1);
     }
@@ -131,6 +154,7 @@ public class GraphicIdentity extends Component {
      * @param textureName The name of the texture.
      * @param atlasName The name of the atlas (if applicable) where the texture is.
      */
+    @JsonIgnore
     public void setSprite(String textureName, String atlasName, int width, int height){
         if(textureName == null) return;
         this.spriteTextureName = textureName;
@@ -156,24 +180,13 @@ public class GraphicIdentity extends Component {
         this.configureSprite(this.getSprite(), width, height);
     }
 
-    public void configureSprite(){
-        this.configureSprite(this.sprite, -1, -1);
-    }
-
-    /**
-     * Call this method when a change to the sprite occurs (change in size, texture, etc...). This will adjust the size/dimensions and such.
-     * @param sprite The Sprite to configure.
-     */
-    protected void configureSprite(Sprite sprite){
-        this.configureSprite(sprite, -1, -1);
-    }
-
     /**
      * Call this method when a change to the sprite occurs (change in size, texture, etc...). This will adjust the size/dimensions and such.
      * @param sprite The sprite to configure
      * @param width The width to make the sprite.
      * @param height The height to make the sprite.
      */
+    @JsonIgnore
     protected void configureSprite(Sprite sprite, float width, float height){
         if(sprite == null) return;
 
@@ -189,6 +202,20 @@ public class GraphicIdentity extends Component {
         sprite.setPosition(pos.x - (sprite.getWidth()*this.anchor.x), pos.y - (sprite.getHeight()*this.anchor.y));
     }
 
+    @JsonIgnore
+    public void configureSprite(){
+        this.configureSprite(this.sprite, -1, -1);
+    }
+
+    /**
+     * Call this method when a change to the sprite occurs (change in size, texture, etc...). This will adjust the size/dimensions and such.
+     * @param sprite The Sprite to configure.
+     */
+    @JsonIgnore
+    protected void configureSprite(Sprite sprite){
+        this.configureSprite(sprite, -1, -1);
+    }
+
     /**
      * Sets the anchor of this graphic identity. The values need to be between 0 and 1 (inclusive).
      * @param x The anchor point for the X position.
@@ -202,6 +229,7 @@ public class GraphicIdentity extends Component {
             this.anchor.set(x, y);
     }
 
+    @JsonIgnore
     public Vector2 getAnchor(){
         return this.anchor;
     }
@@ -209,25 +237,5 @@ public class GraphicIdentity extends Component {
     @JsonIgnore
     public String getSpriteTextureName(String name){
         return this.spriteTextureName;
-    }
-
-    private void changeVisibility(int visibility){
-        if(this.currVisibility == visibility)
-            return;
-
-        this.currVisibility = visibility;
-        if(this.currVisibility == Constants.VISIBILITY_EXPLORED)
-            this.getSprite().setColor(Constants.COLOR_EXPLORED);
-        else if(this.currVisibility == Constants.VISIBILITY_VISIBLE)
-            this.getSprite().setColor(Constants.COLOR_VISIBILE);
-    }
-
-    @JsonIgnore
-    public void setSprite(Sprite sprite) {
-        this.sprite = sprite;
-    }
-
-    public Sprite getSprite() {
-        return this.sprite;
     }
 }

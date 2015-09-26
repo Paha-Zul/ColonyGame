@@ -21,30 +21,8 @@ import java.util.LinkedList;
  * Created by Bbent_000 on 12/24/2014.
  */
 public class WorldGen {
-    //Some default values that can be modified globally.
-    private int tileSize = 25;
-    public float treeScale = 0.8f;
-    public float freq = 5;
-    public float percentageDone = 0;
     public static Texture whiteTex;
-    private TextureAtlas terrainAtlas;
-    private int currX = 0, currY = 0;
-    private int numTrees = 0;
-
-    private ColonyGame game;
     private static WorldGen instance;
-
-    private int currDone = 0;
-    private int currIndex = 0;
-    private int lastIndex = -1;
-
-    //Variables for performing breadth first resource spawning;
-    private LinkedList<Grid.Node> openList = new LinkedList<>();
-    private HashMap<Integer, Grid.Node> visitedMap = new HashMap<>(1000);
-    private int[] startIndex;
-    private Vector2 center = new Vector2();
-    private boolean started = false;
-    private String noiseMapName = "";
 
     static{
         //Generate a white square (pixel).
@@ -56,6 +34,26 @@ public class WorldGen {
         pixmap.dispose();
     }
 
+    public float treeScale = 0.8f;
+    public float freq = 5;
+    public float percentageDone = 0;
+    //Some default values that can be modified globally.
+    private int tileSize = 25;
+    private TextureAtlas terrainAtlas;
+    private int currX = 0, currY = 0;
+    private int numTrees = 0;
+    private ColonyGame game;
+    private int currDone = 0;
+    private int currIndex = 0;
+    private int lastIndex = -1;
+    //Variables for performing breadth first resource spawning;
+    private LinkedList<Grid.Node> openList = new LinkedList<>();
+    private HashMap<Integer, Grid.Node> visitedMap = new HashMap<>(1000);
+    private int[] startIndex;
+    private Vector2 center = new Vector2();
+    private boolean started = false;
+    private String noiseMapName = "";
+
     public static Texture makeTexture(Color color){
         Pixmap pixmap = new Pixmap(1,1, Pixmap.Format.RGBA4444);
         pixmap.setColor(color);
@@ -64,6 +62,11 @@ public class WorldGen {
         pixmap.dispose();
 
         return texture;
+    }
+
+    public static WorldGen getInstance(){
+        if(instance == null) instance = new WorldGen();
+        return instance;
     }
 
     /**
@@ -174,6 +177,21 @@ public class WorldGen {
     }
 
     /**
+     * Returns a JsonTile object for the specified 'height' parameter. Throws an Exception if a tile cannot be found at the height parameter.
+     * @param tileList The JsonTile array to search through.
+     * @param height The height of the desired tile.
+     * @return A JsonTile if on was found at the desired height.
+     */
+    private DataBuilder.JsonTile getTileAtHeight(DataBuilder.JsonTile[] tileList, float height){
+        for (DataBuilder.JsonTile tile : tileList) {
+            if (height >= tile.height[0] && height <= tile.height[1])
+                return tile;
+        }
+
+        return null;
+    }
+
+    /**
      * This function will generate resources for the world. The world will be scanned over for each
      * noise map the exists. So if we have 3 noise maps (normal, water, mountains), the world will be scanned 3 times.
      * Each scan will get each node, get the terrain tile (if not null), check the tile list from a structure made from 'tiles.json' file,
@@ -271,23 +289,8 @@ public class WorldGen {
     }
 
     /**
-     * Returns a JsonTile object for the specified 'height' parameter. Throws an Exception if a tile cannot be found at the height parameter.
-     * @param tileList The JsonTile array to search through.
-     * @param height The height of the desired tile.
-     * @return A JsonTile if on was found at the desired height.
-     */
-    private DataBuilder.JsonTile getTileAtHeight(DataBuilder.JsonTile[] tileList, float height){
-        for (DataBuilder.JsonTile tile : tileList) {
-            if (height >= tile.height[0] && height <= tile.height[1])
-                return tile;
-        }
-
-        return null;
-    }
-
-    /**
      * Retrieves a resource from the DataBuilder's tileList using the 'value' value passed in. If a resource is found at that chance, a
-     * Resource is created and returned.
+     * Resource is added and returned.
      * @param tile The JsonTile to search through. The 'resources' and 'resourcesChance' will be searched through.
      * @param value The value of the resource. This
      * @return A ResourceComponent if the 'value' parameter was between a resource's chance to spawn. If no valid resource was found, returns null.
@@ -332,11 +335,6 @@ public class WorldGen {
 //
 //        treeList.clear();
 //        treeList = null;
-    }
-
-    public static WorldGen getInstance(){
-        if(instance == null) instance = new WorldGen();
-        return instance;
     }
 }
 

@@ -45,7 +45,7 @@ public class WindowManager {
     /**
      * Adds a window to the self managing list. Each window in this list is added once and depends on it's update() method to
      * activate/deactive itself. It is never removed from the list. These are for windows like the ColonyWindow that never change and only
-     * are created to display one particular target (the colony).
+     * are added to display one particular target (the colony).
      * @param window The Window to add.
      */
     public void addWindowToSelfManagingList(Window window){
@@ -58,7 +58,7 @@ public class WindowManager {
      * @param target The Entity target of the window. Can be null.
      * @param pi The PlayerInterface for the Window to reference.
      * @param <T> T.
-     * @return True if the Window was created and added, false otherwise.
+     * @return True if the Window was added and added, false otherwise.
      */
     public <T extends Window> boolean addWindowIfNotExistByTarget(Class<T> clazz, @Nullable Entity target, PlayerInterface pi){
         //TODO We want to check for class type AND target. What if I wanted a crafting window and information window open on the same target?

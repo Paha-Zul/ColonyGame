@@ -21,29 +21,12 @@ public class Tree<T> {
      * Adds a node to the Tree.
      * @param parent The parent compName of the node to add the node to.
      * @param newNodeName The new node's compName.
-     * @return The TreeNode that was created to add to the tree, or null if the parent was not found.
+     * @return The TreeNode that was added to add to the tree, or null if the parent was not found.
      */
     public TreeNode<T> addNode(String parent, String newNodeName){
         TreeNode<T> parentNode = getNode(node -> node.nodeName.equals(parent));
         if(parentNode == null) return null;
         return parentNode.addChild(new TreeNode<>(newNodeName));
-    }
-
-    /**
-     * Adds multiple new nodes to the tree.
-     * @param parent The compName of the parent node to add the new nodes to.
-     * @param nodeNames The names of the new nodes to add.
-     * @return This Tree object.
-     */
-    public TreeNode<T>[] addNode(String parent, String... nodeNames){
-        TreeNode<T> parentNode = getNode(node -> node.nodeName.equals(parent));
-        if(parentNode == null) return null;
-
-        Array<TreeNode> nodeList = new Array<>();
-        for(String name : nodeNames)
-            nodeList.add(parentNode.addChild(new TreeNode<>(name)));
-
-        return nodeList.toArray(TreeNode.class);
     }
 
     /**
@@ -69,6 +52,23 @@ public class Tree<T> {
         }
 
         return null;
+    }
+
+    /**
+     * Adds multiple new nodes to the tree.
+     * @param parent The compName of the parent node to add the new nodes to.
+     * @param nodeNames The names of the new nodes to add.
+     * @return This Tree object.
+     */
+    public TreeNode<T>[] addNode(String parent, String... nodeNames){
+        TreeNode<T> parentNode = getNode(node -> node.nodeName.equals(parent));
+        if(parentNode == null) return null;
+
+        Array<TreeNode> nodeList = new Array<>();
+        for(String name : nodeNames)
+            nodeList.add(parentNode.addChild(new TreeNode<>(name)));
+
+        return nodeList.toArray(TreeNode.class);
     }
 
     @Override

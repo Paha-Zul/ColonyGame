@@ -12,13 +12,13 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.interfaces.IDestroyable;
 import com.mygdx.game.util.managers.DataManager;
 import com.mygdx.game.util.managers.GameEventManager;
 import com.mygdx.game.util.managers.ScriptManager;
 import com.mygdx.game.util.worldgeneration.WorldGen;
-import org.codehaus.jackson.annotate.JsonIgnore;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,6 +29,11 @@ import java.util.function.Consumer;
  * Created by Paha on 2/19/2015.
  */
 public class DataBuilder implements IDestroyable{
+    public static HashMap<String, JsonTileGroup> tileGroupsMap = new HashMap<>();
+    public static JsonChangeLog changelog;
+    public static JsonWorld worldData;
+    public static Array<Mod> enabledMods = new Array<>();
+    private static HashMap<String, Mod> modTable = new HashMap<>();
     private final String filePath = "/files";
     private final String itemPath = "/items.json";
     private final String toolPath = "/tools.json";
@@ -52,15 +57,126 @@ public class DataBuilder implements IDestroyable{
     private final String soundGroupPath = "/soundgroup.json";
     private final String prefabFilePath = "/prefabs.json";
     private final String miscPath = "/misc.json";
+    Consumer<JsonResource[]> buildResources = value -> {
+        for(JsonResource jRes : value){
 
+            //TODO This might not be done right. What if jRes.dir is null and we aren't using a dir?
+            //If the dir field is not null, we have a directory to pull images from.
+            if(jRes.dir != null){
+                ArrayList<String> list = new ArrayList<>();
+
+                //If we have the field 'allimgwith', loop through all of them and get the images from the dir.
+                if(jRes.allimgwith != null && jRes.allimgwith.length != 0){
+                    for(String base : jRes.allimgwith)
+                        getFileNamesFromDir(Gdx.files.internal(jRes.dir), list, base);
+
+                    //Otherwise, just load all from the dir.
+                }else
+                    this.getFileNamesFromDir(Gdx.files.internal(jRes.dir), list);
+
+                //Set the img array as the list.
+                jRes.img = list.toArray(new String[list.size()]);
+                if(jRes.img.length == 0 && !jRes.noimg) GH.writeErrorMessage("No images loaded for "+jRes.resourceName+". Check that the directory "+jRes.dir+" has files and they are named correctly.");
+
+                list.clear();
+            }
+
+            //If the amounts for the items is null, write an error.
+            if(jRes.itemAmounts == null)
+                GH.writeErrorMessage("No item amounts for the resource: "+jRes.resourceName, true);
+
+            //Build the itemAmounts array
+            int[][] amounts = new int[jRes.itemAmounts.length][2];
+            for(int i=0;i<jRes.itemAmounts.length;i++) {
+                amounts[i][0] = jRes.itemAmounts[i][0];
+                amounts[i][1] = jRes.itemAmounts[i][1];
+            }
+
+            //TODO This only accepts one tool name per item. What if two?
+            //Add a this resource as a link on all the items this resource has. Also, cache what tool they take.
+            for(String itemName : jRes.itemNames){
+                JsonItem item = DataManager.getData(itemName, JsonItem.class);
+                item.inResources.add(jRes);
+                String toolName = jRes.tool == null ? "" : jRes.tool; //If null, empty, otherwise, the name.
+
+                if(!item.possibleTools.contains(toolName, false))
+                    item.possibleTools.add(toolName);
+            }
+
+            DataManager.addData(jRes.resourceName, jRes, JsonResource.class);
+        }
+    };
+    @JsonIgnore
+    Consumer<JsonTileGroup[]> buildTiles = value -> {
+        //For each group of tiles
+        for (JsonTileGroup group : value) {
+            //If the group of tiles is auto layered...
+            if(group.autoLayered && group.dir != null){
+                ArrayList<FolderStructure> list = this.listFoldersWithRanks(Gdx.files.internal(group.dir)); //Build the folder structure.
+                ArrayList<JsonTile> tileList = new ArrayList<>(); //a list.
+                for(int i=0;i<list.size();i++){
+                    FolderStructure struct = list.get(i);
+                    JsonTile tile = new JsonTile();
+                    tile.img = struct.img; //Set the images.
+                    tile.height = new float[]{-1 + i*(2f/list.size()), -1 + (i+1)*(2f/list.size())}; //Set the heights
+                    tileList.add(tile);
+                }
+                group.tiles = tileList.toArray(new JsonTile[tileList.size()]);
+
+                //Otherwise, for each tile we check if we have a 'dir' to get images from. If so, get images from the directory. Otherwise, they listed the images manually.
+            }else {
+                //For each tile.
+                for (JsonTile tile : group.tiles) {
+                    //If the dir field was assigned.
+                    if (tile.dir != null) {
+                        //Loop over each file in the dir and grab it. We use this for our img list instead.
+                        ArrayList<String> fileNames = new ArrayList<>();
+                        this.getFileNamesFromDir(Gdx.files.internal(tile.dir), fileNames);
+                        tile.img = fileNames.toArray(new String[fileNames.size()]);
+                        tile.tileNames = tile.img; //Assign the tileNames the same as the img firstNames.
+                        if (tile.img.length == 0)
+                            GH.writeErrorMessage("No files in folder '" + tile.dir + "'");
+                    }
+
+                    //Throw an error message if we have no images/files for this tile.
+                    if(tile.img == null || tile.img.length <= 0)
+                        GH.writeErrorMessage("No files were generated for "+tile.tileNames[0]+". Either there are no files in the directory specified or no files manually listed in tiles.json");
+                }
+
+                //Throw an error if something went wrong with the tile groups.
+                if(group.tiles == null || group.tiles.length <= 0)
+                    GH.writeErrorMessage("Something is wrong with group "+group.noiseMap+" in tiles.json");
+            }
+
+            tileGroupsMap.put(group.noiseMap, group);
+        }
+    };
+    @JsonIgnore
+    Consumer<JsonWorld> compileWorldGen = world -> {
+        for(NoiseMap map : world.noiseMaps) {
+            world.noiseMapHashMap.put(map.rank, map);
+            //If the seed is null or empty, generate one. Otherwise, use the seed from worldgen.json.
+            if(map.seed == null || map.seed.isEmpty()) map.noiseSeed = (long)(Math.random()*Long.MAX_VALUE);
+            else{
+                //Goes over each character and adds to the seed.
+                for(int i=0;i<map.seed.length();i++){
+                    char ch = map.seed.charAt(i);
+                    map.noiseSeed = (map.noiseSeed + (long)ch*1000000000000000000l)%Long.MAX_VALUE;
+                }
+            }
+        }
+
+        WorldGen.getInstance().treeScale = world.treeScale;
+        WorldGen.getInstance().freq = world.noiseMapHashMap.get(0).freq;
+        Constants.GRID_SQUARESIZE = world.tileSize;
+        Constants.GRID_WIDTH = world.worldWidth;
+        Constants.GRID_HEIGHT = world.worldHeight;
+        Constants.WORLDGEN_GENERATESPEED = world.worldGenSpeed;
+        Constants.WORLDGEN_RESOURCEGENERATESPEED = world.resourceGenerateSpeed;
+
+        worldData = world;
+    };
     private EasyAssetManager assetManager;
-
-    public static HashMap<String, JsonTileGroup> tileGroupsMap = new HashMap<>();
-    public static JsonChangeLog changelog;
-    public static JsonWorld worldData;
-
-    private static HashMap<String, Mod> modTable = new HashMap<>();
-    public static Array<Mod> enabledMods = new Array<>();
 
     public DataBuilder(EasyAssetManager assetManager){
         this.assetManager = assetManager;
@@ -450,128 +566,6 @@ public class DataBuilder implements IDestroyable{
         return value;
     }
 
-    Consumer<JsonResource[]> buildResources = value -> {
-        for(JsonResource jRes : value){
-
-            //TODO This might not be done right. What if jRes.dir is null and we aren't using a dir?
-            //If the dir field is not null, we have a directory to pull images from.
-            if(jRes.dir != null){
-                ArrayList<String> list = new ArrayList<>();
-
-                //If we have the field 'allimgwith', loop through all of them and get the images from the dir.
-                if(jRes.allimgwith != null && jRes.allimgwith.length != 0){
-                    for(String base : jRes.allimgwith)
-                        getFileNamesFromDir(Gdx.files.internal(jRes.dir), list, base);
-
-                    //Otherwise, just load all from the dir.
-                }else
-                    this.getFileNamesFromDir(Gdx.files.internal(jRes.dir), list);
-
-                //Set the img array as the list.
-                jRes.img = list.toArray(new String[list.size()]);
-                if(jRes.img.length == 0 && !jRes.noimg) GH.writeErrorMessage("No images loaded for "+jRes.resourceName+". Check that the directory "+jRes.dir+" has files and they are named correctly.");
-
-                list.clear();
-            }
-
-            //If the amounts for the items is null, write an error.
-            if(jRes.itemAmounts == null)
-                GH.writeErrorMessage("No item amounts for the resource: "+jRes.resourceName, true);
-
-            //Build the itemAmounts array
-            int[][] amounts = new int[jRes.itemAmounts.length][2];
-            for(int i=0;i<jRes.itemAmounts.length;i++) {
-                amounts[i][0] = jRes.itemAmounts[i][0];
-                amounts[i][1] = jRes.itemAmounts[i][1];
-            }
-
-            //TODO This only accepts one tool name per item. What if two?
-            //Add a this resource as a link on all the items this resource has. Also, cache what tool they take.
-            for(String itemName : jRes.itemNames){
-                JsonItem item = DataManager.getData(itemName, JsonItem.class);
-                item.inResources.add(jRes);
-                String toolName = jRes.tool == null ? "" : jRes.tool; //If null, empty, otherwise, the name.
-
-                if(!item.possibleTools.contains(toolName, false))
-                    item.possibleTools.add(toolName);
-            }
-
-            DataManager.addData(jRes.resourceName, jRes, JsonResource.class);
-        }
-    };
-
-    @JsonIgnore
-    Consumer<JsonTileGroup[]> buildTiles = value -> {
-        //For each group of tiles
-        for (JsonTileGroup group : value) {
-            //If the group of tiles is auto layered...
-            if(group.autoLayered && group.dir != null){
-                ArrayList<FolderStructure> list = this.listFoldersWithRanks(Gdx.files.internal(group.dir)); //Build the folder structure.
-                ArrayList<JsonTile> tileList = new ArrayList<>(); //a list.
-                for(int i=0;i<list.size();i++){
-                    FolderStructure struct = list.get(i);
-                    JsonTile tile = new JsonTile();
-                    tile.img = struct.img; //Set the images.
-                    tile.height = new float[]{-1 + i*(2f/list.size()), -1 + (i+1)*(2f/list.size())}; //Set the heights
-                    tileList.add(tile);
-                }
-                group.tiles = tileList.toArray(new JsonTile[tileList.size()]);
-
-                //Otherwise, for each tile we check if we have a 'dir' to get images from. If so, get images from the directory. Otherwise, they listed the images manually.
-            }else {
-                //For each tile.
-                for (JsonTile tile : group.tiles) {
-                    //If the dir field was assigned.
-                    if (tile.dir != null) {
-                        //Loop over each file in the dir and grab it. We use this for our img list instead.
-                        ArrayList<String> fileNames = new ArrayList<>();
-                        this.getFileNamesFromDir(Gdx.files.internal(tile.dir), fileNames);
-                        tile.img = fileNames.toArray(new String[fileNames.size()]);
-                        tile.tileNames = tile.img; //Assign the tileNames the same as the img firstNames.
-                        if (tile.img.length == 0)
-                            GH.writeErrorMessage("No files in folder '" + tile.dir + "'");
-                    }
-
-                    //Throw an error message if we have no images/files for this tile.
-                    if(tile.img == null || tile.img.length <= 0)
-                        GH.writeErrorMessage("No files were generated for "+tile.tileNames[0]+". Either there are no files in the directory specified or no files manually listed in tiles.json");
-                }
-
-                //Throw an error if something went wrong with the tile groups.
-                if(group.tiles == null || group.tiles.length <= 0)
-                    GH.writeErrorMessage("Something is wrong with group "+group.noiseMap+" in tiles.json");
-            }
-
-            tileGroupsMap.put(group.noiseMap, group);
-        }
-    };
-
-    @JsonIgnore
-    Consumer<JsonWorld> compileWorldGen = world -> {
-        for(NoiseMap map : world.noiseMaps) {
-            world.noiseMapHashMap.put(map.rank, map);
-            //If the seed is null or empty, generate one. Otherwise, use the seed from worldgen.json.
-            if(map.seed == null || map.seed.isEmpty()) map.noiseSeed = (long)(Math.random()*Long.MAX_VALUE);
-            else{
-                //Goes over each character and adds to the seed.
-                for(int i=0;i<map.seed.length();i++){
-                    char ch = map.seed.charAt(i);
-                    map.noiseSeed = (map.noiseSeed + (long)ch*1000000000000000000l)%Long.MAX_VALUE;
-                }
-            }
-        }
-
-        WorldGen.getInstance().treeScale = world.treeScale;
-        WorldGen.getInstance().freq = world.noiseMapHashMap.get(0).freq;
-        Constants.GRID_SQUARESIZE = world.tileSize;
-        Constants.GRID_WIDTH = world.worldWidth;
-        Constants.GRID_HEIGHT = world.worldHeight;
-        Constants.WORLDGEN_GENERATESPEED = world.worldGenSpeed;
-        Constants.WORLDGEN_RESOURCEGENERATESPEED = world.resourceGenerateSpeed;
-
-        worldData = world;
-    };
-
     //Starts the calculations...
     private void calculateMaterials(JsonRecipe recipe, Array<ItemNeeded> materials, Array<ItemNeeded> raw){
         HashMap<String, Integer> materialMap = new HashMap<>(10);
@@ -632,18 +626,27 @@ public class DataBuilder implements IDestroyable{
         map.put(itemRef.getItemName(), _amount); //Put it back into the hashmap.
     }
 
+    @Override
+    public void destroy() {
+
+    }
+
+    @Override
+    public boolean isDestroyed() {
+        return false;
+    }
+
     public static class JsonItem{
         public static HashMap<String, Array<String>> categoryMap = new HashMap<>();
         public static Array<String> allItems = new Array<>();
 
         public Array<JsonResource> inResources = new Array<>(); //A link to the resources this item is in.
         public Array<String> possibleTools = new Array<>();
-
+        public String icon;
+        public TextureRegion iconTexture;
         protected String itemName, displayName, category, itemType, description, img;
         protected String[] effects;
         protected int[] strengths;
-        public String icon;
-        public TextureRegion iconTexture;
 
         public String getItemName() {
             return itemName;
@@ -819,21 +822,6 @@ public class DataBuilder implements IDestroyable{
         public String name, version, description;
     }
 
-    private static class Mod{
-        public String modName, path;
-        public boolean enabled = false;
-        public ModInfo modInfo;
-    }
-
-    public static class JsonPlayerEvent{
-        public String eventName, eventDisplayName;
-        public String[] eventDescription, choices, behaviours;
-        public boolean focusOnEvent, pauseGame;
-
-        //Not anything read in, but used for passing data.
-        public Entity eventTarget, eventTargetOther;
-    }
-
     /*
     public static class JsonPrefab{
         public String name, entityName; //The name to store it by, and the entity name.
@@ -866,13 +854,18 @@ public class DataBuilder implements IDestroyable{
     }
     */
 
-    @Override
-    public void destroy() {
-
+    private static class Mod{
+        public String modName, path;
+        public boolean enabled = false;
+        public ModInfo modInfo;
     }
 
-    @Override
-    public boolean isDestroyed() {
-        return false;
+    public static class JsonPlayerEvent{
+        public String eventName, eventDisplayName;
+        public String[] eventDescription, choices, behaviours;
+        public boolean focusOnEvent, pauseGame;
+
+        //Not anything read in, but used for passing data.
+        public Entity eventTarget, eventTargetOther;
     }
 }

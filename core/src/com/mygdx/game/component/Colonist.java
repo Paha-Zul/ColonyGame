@@ -4,6 +4,8 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.behaviourtree.Task;
 import com.mygdx.game.component.collider.Collider;
@@ -21,8 +23,6 @@ import com.mygdx.game.util.managers.EventSystem;
 import com.mygdx.game.util.managers.GameEventManager;
 import com.mygdx.game.util.timer.RepeatingTimer;
 import com.mygdx.game.util.timer.Timer;
-import org.codehaus.jackson.annotate.JsonIgnore;
-import org.codehaus.jackson.annotate.JsonProperty;
 
 import java.util.LinkedList;
 import java.util.function.Consumer;
@@ -56,43 +56,121 @@ public class Colonist extends Component implements IInteractable, IOwnable{
     @JsonIgnore
     private Functional.Callback deathCallback = null;
 
+    //The onDamage event when this colonist takes damage.
+    @JsonIgnore
+    private Consumer<Object[]> onDamage = args -> {
+        Entity entity = (Entity) args[0];
+        float amount = (float) args[1];
+
+        Stats.Stat health = this.stats.getStat("health");
+        if (health == null) return;
+
+        health.addToCurrent(amount);
+        if(this.manager != null) {
+            this.manager.getBlackBoard().target = entity;
+            this.manager.changeTaskImmediate("attackTarget");
+        }
+    };
+
+    //The callback for when our health is 0.
+    @JsonIgnore
+    private Functional.Callback onZero = () -> {
+        this.deathCallback = () -> {
+            this.owner.getTags().removeTags("alive", "alert", "selected");
+            this.owner.getTransform().setRotation(90f);
+            this.owner.destroyComponent(BehaviourManagerComp.class);
+            this.manager = null;
+            this.collider.getBody().destroyFixture(this.fixture); //TODO THIS PROBABLY WILL BREAK IT!
+            this.stats.clearTimers();
+            GridComponent gridComp = this.getComponent(GridComponent.class);
+            gridComp.setActive(false);
+            ColonyGame.worldGrid.removeViewer(gridComp);
+            this.setActive(false); //Disable the update tick. We won't be active for now...
+        };
+    };
+
+    //The function for when a "attack" signal is sent to this colonist.
+    @JsonIgnore
+    private Consumer<Object[]> onAttackingEvent = args -> {
+        Group attackingGroup = (Group)args[0];
+        if(attackingGroup.getLeader().getTags().hasTag("boss")) {
+            GameEventManager.GameEvent event = GameEventManager.getGameEvent("bossencounter");
+            if(!event.triggered) {
+                event.playerEvent.eventTarget = this.getEntityOwner();
+                event.playerEvent.eventTargetOther = attackingGroup.getLeader();
+                PlayerInterface.getInstance().newPlayerEvent(event.playerEvent);
+                event.triggered = true;
+            }
+        }
+    };
+
+    @JsonIgnore
+    private Consumer<Object[]> onBeingAttacked = args -> {
+        Entity other = (Entity)args[0];
+        attackList.add(other);
+        Consumer<Entity> callForHelp = ent -> {
+            if(ent.getTags().hasTags("colonist", "alive")){
+                Colonist col = ent.getComponent(Colonist.class);
+                if(col.getColony() == this.getColony()){
+                    col.getBehManager().getBlackBoard().target = other;
+                    if(!col.getBehManager().getBehaviourStates().getCurrState().stateName.equals("attackTarget"))
+                        col.getBehManager().changeTaskImmediate("attackTarget");
+                }
+            }
+        };
+
+        ColonyGame.worldGrid.performOnEntityInRadius(callForHelp , null, 20, ColonyGame.worldGrid.getIndex(this.owner));
+    };
+
+    //When one of our fixtures collides with something.
+    @JsonIgnore
+    private Consumer<Object[]> onCollideStart = args -> {
+        Fixture myFixture = (Fixture)args[0];
+        Fixture otherFixture = (Fixture)args[1];
+
+        Collider.ColliderInfo myInfo = (Collider.ColliderInfo)myFixture.getUserData();
+        Collider.ColliderInfo otherInfo = (Collider.ColliderInfo)otherFixture.getUserData();
+
+        //If a body (not a sensor) is hitting our 'attack_sensor' fixture and it's an animal
+        if(myInfo.tags.hasTag("attack_sensor") && otherInfo.tags.hasTag("entity") && otherInfo.owner.getTags().hasTag("animal")){
+            Animal animal = otherInfo.owner.getComponent(Animal.class);
+            if(animal == null) return;
+            if(animal.getAnimalRef().aggressive)
+                attackList.add(otherInfo.owner);
+        }
+    };
+
+    //When one of our fixtures collides with something.
+    @JsonIgnore
+    private Consumer<Object[]> onCollideEnd = args -> {
+        Fixture myFixture = (Fixture)args[0];
+        Fixture otherFixture = (Fixture)args[1];
+
+        Collider.ColliderInfo myInfo = (Collider.ColliderInfo)myFixture.getUserData();
+        Collider.ColliderInfo otherInfo = (Collider.ColliderInfo)otherFixture.getUserData();
+
+        //If a (entity) fixture is hitting our 'attack_sensor' fixture and it's an animal
+        if(myInfo.tags.hasTag("attack_sensor") && otherInfo.owner.getTags().hasTag("animal") && otherInfo.tags.hasTag("entity")){
+            Animal animal = otherInfo.owner.getComponent(Animal.class);
+            if(animal == null) return;
+            if(animal.getAnimalRef().aggressive)
+                attackList.remove(otherInfo.owner);
+        }
+    };
+
     public Colonist() {
         super();
     }
 
     @Override
-    public void start() {
-        load();
-        this.createStats();
-        super.start();
-    }
-
-    @JsonIgnore
-    //Creates a range sensor for when we get a ranged weapon.
-    private void createRangeSensor(){
-        if(this.collider == null || this.collider.getBody() == null || this.collider.getBody() == null) return;
-        CircleShape shape = new CircleShape();
-        shape.setRadius(0f);
-        FixtureDef fixtureDef = new FixtureDef();
-        fixtureDef.isSensor = true;
-        fixtureDef.shape = shape;
-        this.fixture = this.collider.getBody().createFixture(fixtureDef);
-        Collider.ColliderInfo info = new Collider.ColliderInfo(this.owner);
-        info.tags.addTag("attack_sensor");
-        this.fixture.setUserData(info);
-        shape.dispose();
-    }
-
-    @JsonIgnore
-    @Override
     public void save() {
 
     }
 
-    @JsonIgnore
     @Override
     public void load() {
         super.load();
+
         this.inventory = this.getComponent(Inventory.class);
         this.inventory.setMaxAmount(10);
         this.stats = this.getComponent(Stats.class);
@@ -112,6 +190,64 @@ public class Colonist extends Component implements IInteractable, IOwnable{
         this.createBehaviourStates();
         this.createRangeSensor();
         this.createEffects();
+    }
+
+    @Override
+    public void start() {
+        load();
+        this.createStats();
+        super.start();
+    }
+
+    @Override
+    public void update(float delta) {
+        super.update(delta);
+
+        if(alert && this.attackList.size() > 0){
+            Entity ent = this.attackList.peek();
+            if(!ent.getTags().hasTag("alive"))
+                this.attackList.removeFirst();
+            else{
+                this.getBehManager().getBlackBoard().target = ent;
+                if(!this.getBehManager().getBehaviourStates().getCurrState().stateName.equals("attackTarget"))
+                    this.getBehManager().changeTaskImmediate("attackTarget");
+            }
+        }else if(this.getBehManager().getBehaviourStates().isCurrState("idle") && !this.inventory.isEmpty()){
+            //TODO Since tools are in the inventory, we can ignore them while transferring but this will try to run every update.
+            if(!this.inventory.hasItemTypeOnly("tool")){
+                this.getBehManager().changeTaskImmediate("returnItems");
+            }else if(this.equipment.hasTools()){
+                this.getBehManager().changeTaskImmediate("returnTools");
+            }
+        }
+
+        effects.testAndSetEffect("starving", this.stats);
+        effects.testAndSetEffect("dehydrated", this.stats);
+
+        //If the callback for death is ready, call it and reset it.
+        if(this.deathCallback != null) {
+            this.deathCallback.callback();
+            this.deathCallback = null;
+        }
+    }
+
+    @Override
+    public void setToDestroy() {
+        super.setToDestroy();
+    }
+
+    @Override
+    public void destroy(Entity destroyer) {
+        super.destroy(destroyer);
+
+        this.stats = null;
+        this.colony = null;
+        this.inventory = null;
+        this.manager = null;
+        this.effects = null;
+        this.equipment = null;
+        this.collider = null;
+        this.deathCallback = null;
     }
 
     @JsonIgnore
@@ -248,6 +384,22 @@ public class Colonist extends Component implements IInteractable, IOwnable{
     }
 
     @JsonIgnore
+    //Creates a range sensor for when we get a ranged weapon.
+    private void createRangeSensor(){
+        if(this.collider == null || this.collider.getBody() == null || this.collider.getBody() == null) return;
+        CircleShape shape = new CircleShape();
+        shape.setRadius(0f);
+        FixtureDef fixtureDef = new FixtureDef();
+        fixtureDef.isSensor = true;
+        fixtureDef.shape = shape;
+        this.fixture = this.collider.getBody().createFixture(fixtureDef);
+        Collider.ColliderInfo info = new Collider.ColliderInfo(this.owner);
+        info.tags.addTag("attack_sensor");
+        this.fixture.setUserData(info);
+        shape.dispose();
+    }
+
+    @JsonIgnore
     private void createEffects(){
         this.effects.addNewEffect("starving", "Starving", "starvation_effect", (Stats stats) -> stats.getStat("food").getCurrVal() <= 0);
         this.effects.addNewEffect("dehydrated", "Dehydrated", "dehydration_effect", (Stats stats) -> stats.getStat("water").getCurrVal() <= 0);
@@ -255,36 +407,22 @@ public class Colonist extends Component implements IInteractable, IOwnable{
     }
 
     @JsonIgnore
-    @Override
-    public void update(float delta) {
-        super.update(delta);
+    public Colony getColony() {
+        return colony;
+    }
 
-        if(alert && this.attackList.size() > 0){
-            Entity ent = this.attackList.peek();
-            if(!ent.getTags().hasTag("alive"))
-                this.attackList.removeFirst();
-            else{
-                this.getBehManager().getBlackBoard().target = ent;
-                if(!this.getBehManager().getBehaviourStates().getCurrState().stateName.equals("attackTarget"))
-                    this.getBehManager().changeTaskImmediate("attackTarget");
-            }
-        }else if(this.getBehManager().getBehaviourStates().isCurrState("idle") && !this.inventory.isEmpty()){
-            //TODO Since tools are in the inventory, we can ignore them while transferring but this will try to run every update.
-            if(!this.inventory.hasItemTypeOnly("tool")){
-                this.getBehManager().changeTaskImmediate("returnItems");
-            }else if(this.equipment.hasTools()){
-                this.getBehManager().changeTaskImmediate("returnTools");
-            }
-        }
+    @JsonIgnore
+    public void setColony(Colony colony) {
+        this.colony = colony;
+    }
 
-        effects.testAndSetEffect("starving", this.stats);
-        effects.testAndSetEffect("dehydrated", this.stats);
-
-        //If the callback for death is ready, call it and reset it.
-        if(this.deathCallback != null) {
-            this.deathCallback.callback();
-            this.deathCallback = null;
-        }
+    @JsonIgnore
+    /**
+     * Toggles the attack range sensor on this colonist.
+     * @return True if alert was set to true, false if alert was set to false.
+     */
+    public boolean toggleRangeSensor(){
+        return this.setAlert(!this.alert);
     }
 
     @JsonIgnore
@@ -304,126 +442,15 @@ public class Colonist extends Component implements IInteractable, IOwnable{
     }
 
     @JsonIgnore
-    /**
-     * Toggles the attack range sensor on this colonist.
-     * @return True if alert was set to true, false if alert was set to false.
-     */
-    public boolean toggleRangeSensor(){
-        return this.setAlert(!this.alert);
-    }
-
-    //The onDamage event when this colonist takes damage.
-    @JsonIgnore
-    private Consumer<Object[]> onDamage = args -> {
-        Entity entity = (Entity) args[0];
-        float amount = (float) args[1];
-
-        Stats.Stat health = this.stats.getStat("health");
-        if (health == null) return;
-
-        health.addToCurrent(amount);
-        if(this.manager != null) {
-            this.manager.getBlackBoard().target = entity;
-            this.manager.changeTaskImmediate("attackTarget");
-        }
-    };
-
-    //The callback for when our health is 0.
-    @JsonIgnore
-    private Functional.Callback onZero = () -> {
-        this.deathCallback = () -> {
-            this.owner.getTags().removeTags("alive", "alert", "selected");
-            this.owner.getTransform().setRotation(90f);
-            this.owner.destroyComponent(BehaviourManagerComp.class);
-            this.manager = null;
-            this.collider.getBody().destroyFixture(this.fixture); //TODO THIS PROBABLY WILL BREAK IT!
-            this.stats.clearTimers();
-            GridComponent gridComp = this.getComponent(GridComponent.class);
-            gridComp.setActive(false);
-            ColonyGame.worldGrid.removeViewer(gridComp);
-            this.setActive(false); //Disable the update tick. We won't be active for now...
-        };
-    };
-
-    //The function for when a "attack" signal is sent to this colonist.
-    @JsonIgnore
-    private Consumer<Object[]> onAttackingEvent = args -> {
-        Group attackingGroup = (Group)args[0];
-        if(attackingGroup.getLeader().getTags().hasTag("boss")) {
-            GameEventManager.GameEvent event = GameEventManager.getGameEvent("bossencounter");
-            if(!event.triggered) {
-                event.playerEvent.eventTarget = this.getEntityOwner();
-                event.playerEvent.eventTargetOther = attackingGroup.getLeader();
-                PlayerInterface.getInstance().newPlayerEvent(event.playerEvent);
-                event.triggered = true;
-            }
-        }
-    };
-
-    @JsonIgnore
-    private Consumer<Object[]> onBeingAttacked = args -> {
-        Entity other = (Entity)args[0];
-        attackList.add(other);
-        Consumer<Entity> callForHelp = ent -> {
-            if(ent.getTags().hasTags("colonist", "alive")){
-                Colonist col = ent.getComponent(Colonist.class);
-                if(col.getColony() == this.getColony()){
-                    col.getBehManager().getBlackBoard().target = other;
-                    if(!col.getBehManager().getBehaviourStates().getCurrState().stateName.equals("attackTarget"))
-                        col.getBehManager().changeTaskImmediate("attackTarget");
-                }
-            }
-        };
-
-        ColonyGame.worldGrid.performOnEntityInRadius(callForHelp , null, 20, ColonyGame.worldGrid.getIndex(this.owner));
-    };
-
-    //When one of our fixtures collides with something.
-    @JsonIgnore
-    private Consumer<Object[]> onCollideStart = args -> {
-        Fixture myFixture = (Fixture)args[0];
-        Fixture otherFixture = (Fixture)args[1];
-
-        Collider.ColliderInfo myInfo = (Collider.ColliderInfo)myFixture.getUserData();
-        Collider.ColliderInfo otherInfo = (Collider.ColliderInfo)otherFixture.getUserData();
-
-        //If a body (not a sensor) is hitting our 'attack_sensor' fixture and it's an animal
-        if(myInfo.tags.hasTag("attack_sensor") && otherInfo.tags.hasTag("entity") && otherInfo.owner.getTags().hasTag("animal")){
-            Animal animal = otherInfo.owner.getComponent(Animal.class);
-            if(animal == null) return;
-            if(animal.getAnimalRef().aggressive)
-                attackList.add(otherInfo.owner);
-        }
-    };
-
-    //When one of our fixtures collides with something.
-    @JsonIgnore
-    private Consumer<Object[]> onCollideEnd = args -> {
-        Fixture myFixture = (Fixture)args[0];
-        Fixture otherFixture = (Fixture)args[1];
-
-        Collider.ColliderInfo myInfo = (Collider.ColliderInfo)myFixture.getUserData();
-        Collider.ColliderInfo otherInfo = (Collider.ColliderInfo)otherFixture.getUserData();
-
-        //If a (entity) fixture is hitting our 'attack_sensor' fixture and it's an animal
-        if(myInfo.tags.hasTag("attack_sensor") && otherInfo.owner.getTags().hasTag("animal") && otherInfo.tags.hasTag("entity")){
-            Animal animal = otherInfo.owner.getComponent(Animal.class);
-            if(animal == null) return;
-            if(animal.getAnimalRef().aggressive)
-                attackList.remove(otherInfo.owner);
-        }
-    };
-
-    @JsonIgnore
-    public void setColony(Colony colony) {
-        this.colony = colony;
-    }
-
-    @JsonIgnore
     public void setName(String firstName, String lastName) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.getEntityOwner().name = firstName;
+    }
+
+    @JsonProperty("firstName")
+    public String getFirstName() {
+        return firstName;
     }
 
     @JsonProperty("firstName")
@@ -432,85 +459,54 @@ public class Colonist extends Component implements IInteractable, IOwnable{
     }
 
     @JsonProperty("lastName")
-    public void setLastName(String lastName){
-        this.lastName = lastName;
-    }
-
-    @JsonIgnore
-    public Colony getColony() {
-        return colony;
-    }
-
-    @Override
-    @JsonIgnore
-    public String getName() {
-        return this.firstName;
-    }
-
-    @JsonProperty("firstName")
-    public String getFirstName() {
-        return firstName;
-    }
-
-    @JsonProperty("lastName")
     public String getLastName() {
         return lastName;
     }
 
-    @JsonIgnore
+    @JsonProperty("lastName")
+    public void setLastName(String lastName){
+        this.lastName = lastName;
+    }
+
     public Effects getEffects(){
         return this.effects;
     }
 
-    @JsonProperty
     public boolean isAlert() {
         return alert;
     }
 
     @Override
-    @JsonIgnore
     public Inventory getInventory(){
         return this.inventory;
     }
 
     @Override
-    @JsonIgnore
     public Stats getStats(){
         return this.stats;
     }
 
     @Override
-    @JsonIgnore
     public String getStatsText() {
         return null;
     }
 
     @Override
-    @JsonIgnore
+    public String getName() {
+        return this.firstName;
+    }
+
+    @Override
     public BehaviourManagerComp getBehManager() {
         return this.manager;
     }
 
     @Override
-    @JsonIgnore
-    public void addedToColony(Colony colony) {
-        this.colony = colony;
-    }
-
-    @Override
-    @JsonIgnore
-    public Colony getOwningColony() {
-        return this.colony;
-    }
-
-    @Override
-    @JsonIgnore
     public Component getComponent() {
         return this;
     }
 
     @Override
-    @JsonIgnore
     public Constructable getConstructable() {
         return null;
     }
@@ -531,8 +527,12 @@ public class Colonist extends Component implements IInteractable, IOwnable{
     }
 
     @Override
-    @JsonIgnore
-    public void destroy(Entity destroyer) {
-        super.destroy(destroyer);
+    public void addedToColony(Colony colony) {
+        this.colony = colony;
+    }
+
+    @Override
+    public Colony getOwningColony() {
+        return this.colony;
     }
 }

@@ -3,9 +3,9 @@ package com.mygdx.game.component;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mygdx.game.ColonyGame;
-import org.codehaus.jackson.annotate.JsonIgnore;
-import org.codehaus.jackson.annotate.JsonProperty;
 
 import java.util.HashMap;
 import java.util.function.Predicate;
@@ -20,18 +20,6 @@ public class Effects extends Component{
     private Array<Effect> activeEffects = new Array<>();
 
     @Override
-    public void init() {
-        super.init();
-
-        this.setActive(false);
-    }
-
-    @Override
-    public void start() {
-        super.start();
-    }
-
-    @Override
     public void save() {
         super.save();
     }
@@ -44,6 +32,18 @@ public class Effects extends Component{
     @Override
     public void load() {
         super.load();
+    }
+
+    @Override
+    public void init() {
+        super.init();
+
+        this.setActive(false);
+    }
+
+    @Override
+    public void start() {
+        super.start();
     }
 
     /**
@@ -105,11 +105,11 @@ public class Effects extends Component{
 
     public static class Effect<T>{
         @JsonProperty
-        private String name;
-        @JsonProperty
         String displayName;
         @JsonProperty
         String imgName;
+        @JsonProperty
+        private String name;
         @JsonIgnore
         private Predicate<T> predicate;
         @JsonProperty
@@ -131,13 +131,13 @@ public class Effects extends Component{
         }
 
         @JsonIgnore
-        public void setActive(boolean active){
-            this.active = active;
+        public boolean isActive(){
+            return this.active;
         }
 
         @JsonIgnore
-        public boolean isActive(){
-            return this.active;
+        public void setActive(boolean active){
+            this.active = active;
         }
 
         @JsonIgnore

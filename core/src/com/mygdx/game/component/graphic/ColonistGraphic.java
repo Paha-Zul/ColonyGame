@@ -5,9 +5,9 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.component.Colonist;
-import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  * Created by Paha on 5/24/2015.

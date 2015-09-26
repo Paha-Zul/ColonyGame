@@ -2,10 +2,10 @@ package com.mygdx.game.component;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.interfaces.IDelayedDestroyable;
-import org.codehaus.jackson.annotate.JsonIgnore;
-import org.codehaus.jackson.annotate.JsonProperty;
 
 import java.util.ArrayList;
 
@@ -38,11 +38,21 @@ public class Transform extends Component implements IDelayedDestroyable {
         this.setRotation(rotation);
 	}
 
-    @Override
-    public void start() {
-        super.start();
+	public static float normalizeAngle(float angle)
+	{
+		float newAngle = angle;
+		while (newAngle < 0) newAngle += 360;
+		while (newAngle >= 360) newAngle -= 360;
+		return newAngle;
+	}
 
-    }
+	public static float normalizeAngleRadians(float angle)
+	{
+		float newAngle = angle;
+		while (newAngle < 0) newAngle += MathUtils.PI2;
+		while (newAngle >= MathUtils.PI2) newAngle -= MathUtils.PI2;
+		return newAngle;
+	}
 
     @Override
     public void save() {
@@ -51,6 +61,12 @@ public class Transform extends Component implements IDelayedDestroyable {
 
     @Override
     public void load() {
+
+    }
+
+    @Override
+    public void start() {
+        super.start();
 
     }
 
@@ -71,6 +87,71 @@ public class Transform extends Component implements IDelayedDestroyable {
 		}
 	}
 
+	/**
+	 * Gets the saveContainer rotation of this Transform.
+	 * @return A float which is the saveContainer rotation of this Transform.
+	 */
+    @JsonIgnore
+	public float getRotation(){
+		return this.worldRotation;
+	}
+
+	/**
+	 * Gets the local position of the transform.
+	 * @return A Vector2 holding the local X and Y coordinate of the transform.
+	 */
+    @JsonIgnore
+	public Vector2 getPosition(){
+		return this.worldPosition;
+	}
+
+	/**
+	 * Sets the saveContainer position of the transform. This will update the local position of the transform.
+	 * @param pos A Vector2 holding the new saveContainer position.
+	 */
+    @JsonIgnore
+	public Transform setPosition(Vector2 pos){
+		setPosition(pos.x, pos.y);
+		return this;
+	}
+
+	/**
+	 * Sets the position of the transform using X and Y float coordinates.
+	 * @param x A float which is the X coordinate.
+	 * @param y A float which is the Y coordinate.
+	 */
+    @JsonIgnore
+	public void setPosition(float x, float y){
+		this.worldPosition.x = x;
+		this.worldPosition.y = y;
+	}
+
+	/**
+	 * Sets the saveContainer rotation of this transform. This will update the local rotation of the transform.
+	 * @param rot A float which is the new saveContainer rotation.
+	 */
+    @JsonIgnore
+	public Transform setRotation(float rot){
+		this.worldRotation = this.normalizeAngle(rot);
+
+		if(this.parent == null)
+			this.localRotation = this.worldRotation; //If the parent is null, assign the local the same as the global.
+		else {
+			this.localRotation = Transform.normalizeAngle(this.worldRotation - this.parent.worldRotation);
+		}
+		return this;
+	}
+
+	@Override
+	public void destroy(Entity destroyer) {
+		this.parent = null;
+		this.worldPosition = null;
+		this.localPosition = null;
+		this.owner = null;
+		this.children.clear();
+		//this.children = null;
+	}
+
     @JsonIgnore
 	public void setParent(Transform futureParent){
 		futureParent.addChild(this);
@@ -80,7 +161,7 @@ public class Transform extends Component implements IDelayedDestroyable {
 	}
 
 	/**
-	 * Adds a child to this transform. Will update the local position and rotation of the 
+	 * Adds a child to this transform. Will update the local position and rotation of the
 	 * child Entity being added.
 	 * @param child The Entity being added as a child to this transform.
 	 */
@@ -102,91 +183,13 @@ public class Transform extends Component implements IDelayedDestroyable {
 	}
 
 	/**
-	 * Adds a child to this transform and sets the child's position as the relative position to the parent passed in.
-	 * @param child The child Entity to add as a child.
-	 * @param relative The relative position to the parent that the child should be put at.
-	 */
-	public void addChild(Transform child, Vector2 relative){
-		Vector2 thisPos = new Vector2(this.worldPosition.x, this.worldPosition.y); //Get the current entity's position.
-		child.setPosition(thisPos.x + relative.x, thisPos.y + relative.y); //Set the child's position.
-		Vector2 childPos = new Vector2(child.getPosition().x, child.getPosition().y); //Cache the child's position.
-
-		float rot = MathUtils.atan2(childPos.y - thisPos.y, childPos.x - thisPos.x)*MathUtils.radDeg;
-		rot = Transform.normalizeAngle(rot);
-
-		child.rotationOffset = rot - this.worldRotation;
-		child.distFromParent = thisPos.dst(childPos);
-
-		this.children.add(child); //Add the child to this transform
-		child.parent = this; //Make the child's parent this entity.
-
-		child.setLocalPosition(thisPos.x - childPos.x, thisPos.y - childPos.y);
-		child.localScale = child.worldScale/this.getScale();
-
-	}
-
-	/**
-	 * Removes a child from this transform. The local position and rotation will be updated.
-	 * @param child The Entity child being removed from this transform.
-	 * @throws Exception If the child doesn't exist.
-	 */
-	public void removeChild(Transform child){
-		for(int i=this.children.size()-1;i>=0;i--)
-			if(child == this.children.get(i)){
-				Transform tempChild = this.children.remove(i); //Removes it from the child list.
-				tempChild.parent = null; //Sets the parent to null.
-//				tempChild.transform.setPosition(tempChild.transform.getPosition()); //Reset position.
-//				tempChild.transform.setRotation(tempChild.transform.getRotation()); //Reset rotation.
-
-				return;
-			}
-
-		try {
-			throw new Exception("Child doesn't exist under this parent");
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-    @JsonIgnore
-	public ArrayList<Transform> getChildren(){
-		return this.children;
-	}
-
-	/**
-	 * Gets the local position of the transform.
-	 * @return A Vector2 holding the local X and Y coordinate of the transform.
+	 * Sets the local position of the transform using X and Y float coordinates
+	 * @param x A float which is the X Coordinate.
+	 * @param y A float which is the Y Coordinate.
 	 */
     @JsonIgnore
-	public Vector2 getPosition(){
-		return this.worldPosition;
-	}
-
-	/**
-	 * Gets the local position relative to this Transform's parent
-	 * @return A Vector2 which is the local X and Y of this Transform relative to its parent.
-	 */
-    @JsonIgnore
-	public Vector2 getLocalPosition(){
-		return this.localPosition;
-	}
-
-	/**
-	 * Gets the saveContainer rotation of this Transform.
-	 * @return A float which is the saveContainer rotation of this Transform.
-	 */
-    @JsonIgnore
-	public float getRotation(){
-		return this.worldRotation;
-	}
-
-	/**
-	 * Gets the local rotation of this Transform.
-	 * @return A float which is the relative rotation of this Transform in relation to its parent.
-	 */
-    @JsonIgnore
-	public float getLocalRotation(){
-		return this.localRotation;
+	public void setLocalPosition(float x, float y){
+		this.localPosition.set(x,y);
 	}
 
 	/**
@@ -196,15 +199,6 @@ public class Transform extends Component implements IDelayedDestroyable {
     @JsonIgnore
 	public float getScale(){
 		return this.worldScale;
-	}
-
-	/**
-	 * Gets the local scale of this Transform.
-	 * @return A float which is the local scale of this Transform
-	 */
-    @JsonIgnore
-	public float getLocalScale(){
-		return this.localScale;
 	}
 
 	/**
@@ -234,6 +228,62 @@ public class Transform extends Component implements IDelayedDestroyable {
 	}
 
 	/**
+	 * Adds a child to this transform and sets the child's position as the relative position to the parent passed in.
+	 * @param child The child Entity to add as a child.
+	 * @param relative The relative position to the parent that the child should be put at.
+	 */
+	public void addChild(Transform child, Vector2 relative){
+		Vector2 thisPos = new Vector2(this.worldPosition.x, this.worldPosition.y); //Get the current entity's position.
+		child.setPosition(thisPos.x + relative.x, thisPos.y + relative.y); //Set the child's position.
+		Vector2 childPos = new Vector2(child.getPosition().x, child.getPosition().y); //Cache the child's position.
+
+		float rot = MathUtils.atan2(childPos.y - thisPos.y, childPos.x - thisPos.x)*MathUtils.radDeg;
+		rot = Transform.normalizeAngle(rot);
+
+		child.rotationOffset = rot - this.worldRotation;
+		child.distFromParent = thisPos.dst(childPos);
+
+		this.children.add(child); //Add the child to this transform
+		child.parent = this; //Make the child's parent this entity.
+
+		child.setLocalPosition(thisPos.x - childPos.x, thisPos.y - childPos.y);
+		child.localScale = child.worldScale/this.getScale();
+
+	}
+
+    @JsonIgnore
+	public ArrayList<Transform> getChildren(){
+		return this.children;
+	}
+
+	/**
+	 * Gets the local position relative to this Transform's parent
+	 * @return A Vector2 which is the local X and Y of this Transform relative to its parent.
+	 */
+    @JsonIgnore
+	public Vector2 getLocalPosition(){
+		return this.localPosition;
+	}
+
+	/**
+	 * Gets the local rotation of this Transform.
+	 * @return A float which is the relative rotation of this Transform in relation to its parent.
+	 */
+    @JsonIgnore
+	public float getLocalRotation(){
+		return this.localRotation;
+	}
+
+	/**
+	 * Gets the local scale of this Transform.
+	 * @return A float which is the local scale of this Transform
+	 */
+    @JsonIgnore
+	public float getLocalScale(){
+		return this.localScale;
+	}
+
+	/**
 	 * Sets the local scale of this Transform. If this Transform has no parent, it also sets the saveContainer scale.
 	 * @param scale The value to use as the local scale of this Transform.
 	 */
@@ -256,53 +306,6 @@ public class Transform extends Component implements IDelayedDestroyable {
 			child.setScale(scale);
 	}
 
-	/**
-	 * Sets the saveContainer position of the transform. This will update the local position of the transform.
-	 * @param pos A Vector2 holding the new saveContainer position.
-	 */
-    @JsonIgnore
-	public Transform setPosition(Vector2 pos){
-		setPosition(pos.x, pos.y);
-		return this;
-	}
-
-	/**
-	 * Sets the position of the transform using X and Y float coordinates.
-	 * @param x A float which is the X coordinate.
-	 * @param y A float which is the Y coordinate.
-	 */
-    @JsonIgnore
-	public void setPosition(float x, float y){
-		this.worldPosition.x = x;
-		this.worldPosition.y = y;
-	}
-
-	/**
-	 * Sets the local position of the transform using X and Y float coordinates
-	 * @param x A float which is the X Coordinate.
-	 * @param y A float which is the Y Coordinate.
-	 */
-    @JsonIgnore
-	public void setLocalPosition(float x, float y){
-		this.localPosition.set(x,y);
-	}
-
-	/**
-	 * Sets the saveContainer rotation of this transform. This will update the local rotation of the transform.
-	 * @param rot A float which is the new saveContainer rotation.
-	 */
-    @JsonIgnore
-	public Transform setRotation(float rot){
-		this.worldRotation = this.normalizeAngle(rot);
-
-		if(this.parent == null)
-			this.localRotation = this.worldRotation; //If the parent is null, assign the local the same as the global.
-		else {
-			this.localRotation = Transform.normalizeAngle(this.worldRotation - this.parent.worldRotation);
-		}
-		return this;
-	}
-
 	public void rotate(float rot){
 		this.setRotation(this.worldRotation + rot);
 	}
@@ -312,37 +315,34 @@ public class Transform extends Component implements IDelayedDestroyable {
 	}
 
 	/**
+	 * Removes a child from this transform. The local position and rotation will be updated.
+	 * @param child The Entity child being removed from this transform.
+	 * @throws Exception If the child doesn't exist.
+	 */
+	public void removeChild(Transform child){
+		for(int i=this.children.size()-1;i>=0;i--)
+			if(child == this.children.get(i)){
+				Transform tempChild = this.children.remove(i); //Removes it from the child list.
+				tempChild.parent = null; //Sets the parent to null.
+//				tempChild.transform.setPosition(tempChild.transform.getPosition()); //Reset position.
+//				tempChild.transform.setRotation(tempChild.transform.getRotation()); //Reset rotation.
+
+				return;
+			}
+
+		try {
+			throw new Exception("Child doesn't exist under this parent");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
 	 * Adds the X and Y value passed in to the saveContainer position, effectively moving the Entity.
 	 * @param x The X value to move.
 	 * @param y The Y value to move.
 	 */
 	public void translate(float x, float y){
 		this.setPosition(this.worldPosition.x + x, this.worldPosition.y + y);
-	}
-
-	public static float normalizeAngle(float angle)
-	{
-		float newAngle = angle;
-		while (newAngle < 0) newAngle += 360;
-		while (newAngle >= 360) newAngle -= 360;
-		return newAngle;
-	}
-
-	public static float normalizeAngleRadians(float angle)
-	{
-		float newAngle = angle;
-		while (newAngle < 0) newAngle += MathUtils.PI2;
-		while (newAngle >= MathUtils.PI2) newAngle -= MathUtils.PI2;
-		return newAngle;
-	}
-
-	@Override
-	public void destroy(Entity destroyer) {
-		this.parent = null;
-		this.worldPosition = null;
-		this.localPosition = null;
-		this.owner = null;
-		this.children.clear();
-		//this.children = null;
 	}
 }

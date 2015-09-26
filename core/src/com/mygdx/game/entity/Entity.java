@@ -3,6 +3,9 @@ package com.mygdx.game.entity;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.mygdx.game.component.Component;
 import com.mygdx.game.component.Transform;
 import com.mygdx.game.component.graphic.GraphicIdentity;
@@ -11,9 +14,6 @@ import com.mygdx.game.interfaces.ISaveable;
 import com.mygdx.game.interfaces.IScalable;
 import com.mygdx.game.util.Tags;
 import com.mygdx.game.util.managers.EventSystem;
-import org.codehaus.jackson.annotate.JsonIgnore;
-import org.codehaus.jackson.annotate.JsonProperty;
-import org.codehaus.jackson.annotate.JsonTypeInfo;
 
 import java.util.function.Consumer;
 
@@ -23,8 +23,6 @@ import java.util.function.Consumer;
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.WRAPPER_OBJECT, property = "@class")
 public class Entity implements IDelayedDestroyable, ISaveable{
-    @JsonProperty
-    protected long ID;
     @JsonIgnore
     protected static long counterID = (long)(-Long.MAX_VALUE*0.5);
     @JsonProperty
@@ -33,6 +31,8 @@ public class Entity implements IDelayedDestroyable, ISaveable{
 	public int drawLevel = 0;
     @JsonProperty
 	public boolean active = true;
+    @JsonProperty
+    protected long ID;
     @JsonProperty
     protected Tags tags = new Tags("entity");
     @JsonIgnore
@@ -59,6 +59,11 @@ public class Entity implements IDelayedDestroyable, ISaveable{
 		this.drawLevel = drawLevel;
 	}
 
+	private void getNewID(){
+		this.ID = counterID++;
+		if(this.ID == 0) this.ID = counterID++;
+	}
+
 	/**
 	 * Creates an Entity without a GraphicIdentity, but allows for a variable amount of components to be immediately added.
 	 * @param position The initial position of the Entity
@@ -74,14 +79,14 @@ public class Entity implements IDelayedDestroyable, ISaveable{
 		this.drawLevel = drawLevel;
 	}
 
-	private void getNewID(){
-		this.ID = counterID++;
-		if(this.ID == 0) this.ID = counterID++;
-	}
-
 	public void start(){
 		EventSystem.notifyGameEvent("entity_created", this);
 	}
+
+    @Override
+    public void addedLoad() {
+
+    }
 
     @Override
     public void save() {
@@ -125,13 +130,13 @@ public class Entity implements IDelayedDestroyable, ISaveable{
     }
 
     @JsonIgnore
-    public Components getComponents(){
-        return this.components;
+    public GraphicIdentity getGraphicIdentity(){
+        return this.getComponents().getIdentity();
     }
 
     @JsonIgnore
-    public GraphicIdentity getGraphicIdentity(){
-        return this.getComponents().getIdentity();
+    public Components getComponents(){
+        return this.components;
     }
 
     @JsonIgnore
@@ -165,6 +170,12 @@ public class Entity implements IDelayedDestroyable, ISaveable{
     }
 
 	/**
+	 * @return True if this Entity is valid (not destroyed or set to be destroyed), false otherwise.
+	 */
+    @JsonIgnore
+	public boolean isValid(){
+		return !this.destroyed && !this.isSetToBeDestroyed();
+	}	/**
 	 * @return True if this Entity has been destroyed, false otherwise.
 	 */
 	@Override
@@ -173,38 +184,12 @@ public class Entity implements IDelayedDestroyable, ISaveable{
 		return this.destroyed;
 	}
 
-	/**
-	 * @return True if this Entity is valid (not destroyed or set to be destroyed), false otherwise.
-	 */
-    @JsonIgnore
-	public boolean isValid(){
-		return !this.destroyed && !this.isSetToBeDestroyed();
-	}
-
-	@Override
-    @JsonIgnore
-	public boolean isSetToBeDestroyed() {
-		return this.setToDestroy;
-	}
-
 	@Override
 	public void setToDestroy() {
 		this.setToDestroy = true;
 	}
 
-	@Override
-	public void destroy(Entity destroyer){
-		EventSystem.unregisterEntity(this);
-
-        components.destroy(destroyer);
-
-		//Set destroyed to true.
-		this.destroyed = true;
-	}
-
     public static class Components implements IDelayedDestroyable{
-		private Transform transform;
-        private GraphicIdentity identity;
 		protected Array<Component> newComponentList = new Array<>();
 		protected Array<Component> activeComponentList = new Array<>();
 		protected Array<Component> inactiveComponentList = new Array<>();
@@ -212,6 +197,8 @@ public class Entity implements IDelayedDestroyable, ISaveable{
 		protected Array<Component> destroyComponentList = new Array<>();
 		protected Entity owner;
 		protected boolean setToDestroy, destroyed;
+		private Transform transform;
+        private GraphicIdentity identity;
 
 		public Components(Entity owner){
 			this.owner = owner;
@@ -229,7 +216,7 @@ public class Entity implements IDelayedDestroyable, ISaveable{
 				if (this.newComponentList.size > 0) {
 					Array<Component> newCompCopy = new Array<>(this.newComponentList); //Make a copy.
                     this.newComponentList = new Array<>(); //Clear this before we call init() in case we add more components during init().
-					newCompCopy.forEach(component -> {if(!component.isInitiated()) component.init();}); //Init all new comps that haven't already been init'd.
+					newCompCopy.forEach(component -> {if(!component.isInitiated()) component.init();}); //Init all new comps that haven't already been inited.
 					newCompCopy.forEach(component -> {if(!component.isStarted()) component.start();}); //Start all new comps that haven't already been started.
 				}
 
@@ -243,6 +230,19 @@ public class Entity implements IDelayedDestroyable, ISaveable{
 		}
 
 		/**
+		 *	Destroys and removes a Component from this Entity.
+		 * @param component The Component to destroy and remove.
+		 */
+		private void internalDestroyComponent(Component component){
+			if(component.isActive())
+				this.activeComponentList.removeValue(component, false);
+			else
+				this.inactiveComponentList.removeValue(component, false);
+
+			component.destroy(owner);
+		}
+
+		/**
 		 * Adds a component to this Entity. The Component is immediately added to the Entity but the 'start' method is not called
 		 * until the next update frame for the Entity. This means any values set in the 'start' method are not set in the same frame.
 		 * @param comp The Component to add to this Entity.
@@ -251,7 +251,7 @@ public class Entity implements IDelayedDestroyable, ISaveable{
 		 */
 		public final <T extends Component> T addComponent(T comp){
             if(!comp.isStarted()) {
-				comp.created(this.owner);
+				comp.added(this.owner);
 				this.newComponentList.add(comp); //Add it to the new list for the init() method.
 			}
 			//Add it to the active or inactive list.
@@ -259,27 +259,6 @@ public class Entity implements IDelayedDestroyable, ISaveable{
             else this.inactiveComponentList.add(comp);
 
 			return comp;
-		}
-
-		/**
-		 * Retrieves a Component from this Entity.
-		 * @param c The Component class interType to retrieve.
-		 * @return The Component if it was found, otherwise null.
-		 */
-		@SuppressWarnings("unchecked")
-        @JsonIgnore
-		public final <T extends Component> T getComponent(Class<T> c){
-			for(Component comp : this.inactiveComponentList){
-				if(comp.getClass() == c || comp.getClass().getSuperclass() == c)
-					return (T)comp;
-			}
-
-			for(Component comp : this.activeComponentList){
-				if(comp.getClass() == c || comp.getClass().getSuperclass() == c)
-					return (T)comp;
-			}
-
-			return null;
 		}
 
 		/**
@@ -311,19 +290,6 @@ public class Entity implements IDelayedDestroyable, ISaveable{
 		}
 
 		/**
-		 *	Destroys and removes a Component from this Entity.
-		 * @param component The Component to destroy and remove.
-		 */
-		private void internalDestroyComponent(Component component){
-			if(component.isActive())
-				this.activeComponentList.removeValue(component, false);
-			else
-				this.inactiveComponentList.removeValue(component, false);
-
-			component.destroy(owner);
-		}
-
-		/**
 		 * Removes a Component from this Entity without destroying it.
 		 * @param comp The Component to remove.
 		 * @return True if the Component was removed, false otherwise.
@@ -332,22 +298,27 @@ public class Entity implements IDelayedDestroyable, ISaveable{
 			if(comp.isActive()) return this.activeComponentList.removeValue(comp, true);
 			return this.inactiveComponentList.removeValue(comp, true);
 		}
+
         @JsonIgnore
         public Array<Component> getNewComponentList() {
             return newComponentList;
         }
+
         @JsonIgnore
         public Array<Component> getActiveComponentList() {
             return activeComponentList;
         }
+
         @JsonIgnore
         public Array<Component> getInactiveComponentList() {
             return inactiveComponentList;
         }
+
         @JsonIgnore
         public Array<Component> getScalableComponents() {
             return scalableComponents;
         }
+
         @JsonIgnore
         public Array<Component> getDestroyComponentList() {
             return destroyComponentList;
@@ -376,15 +347,34 @@ public class Entity implements IDelayedDestroyable, ISaveable{
         }
 
         @JsonIgnore
-        public Transform getTransform() {
-            if(this.transform == null) this.transform = getComponent(Transform.class);
-            return transform;
-        }
-
-        @JsonIgnore
         public GraphicIdentity getIdentity() {
             if(this.identity == null) this.identity = getComponent(GraphicIdentity.class);
             return identity;
+        }
+
+		/**
+		 * Retrieves a Component from this Entity.
+		 * @param c The Component class interType to retrieve.
+		 * @return The Component if it was found, otherwise null.
+		 */
+		@SuppressWarnings("unchecked")
+        @JsonIgnore
+		public final <T extends Component> T getComponent(Class<T> c){
+			for(Component comp : this.inactiveComponentList){
+				if(comp.getClass() == c || comp.getClass().getSuperclass() == c)
+					return (T)comp;
+			}
+
+			for(Component comp : this.activeComponentList){
+				if(comp.getClass() == c || comp.getClass().getSuperclass() == c)
+					return (T)comp;
+			}
+
+			return null;
+		}        @JsonIgnore
+        public Transform getTransform() {
+            if(this.transform == null) this.transform = getComponent(Transform.class);
+            return transform;
         }
 
         public final <T extends Component & IScalable> void registerScalable(T scalable){
@@ -408,6 +398,8 @@ public class Entity implements IDelayedDestroyable, ISaveable{
             for(int i=0;i<scalableComponents.size;i++)
                 consumer.accept(scalableComponents.get(i));
 		}
+
+
 
 		@Override
 		public void setToDestroy() {
@@ -459,5 +451,23 @@ public class Entity implements IDelayedDestroyable, ISaveable{
 		public boolean isSetToBeDestroyed() {
 			return this.setToDestroy;
 		}
+	}	@Override
+    @JsonIgnore
+	public boolean isSetToBeDestroyed() {
+		return this.setToDestroy;
 	}
+
+
+
+	@Override
+	public void destroy(Entity destroyer){
+		EventSystem.unregisterEntity(this);
+
+        components.destroy(destroyer);
+
+		//Set destroyed to true.
+		this.destroyed = true;
+	}
+
+
 }

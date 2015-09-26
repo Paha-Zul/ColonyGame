@@ -3,6 +3,8 @@ package com.mygdx.game.component;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mygdx.game.component.collider.BoxCollider;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.interfaces.IInteractable;
@@ -11,13 +13,15 @@ import com.mygdx.game.util.GH;
 import com.mygdx.game.util.StringTable;
 import com.mygdx.game.util.Tags;
 import com.mygdx.game.util.managers.DataManager;
-import org.codehaus.jackson.annotate.JsonIgnore;
-import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
  * Created by Paha on 1/10/2015.
  */
 public class Resource extends Component implements IInteractable{
+    @JsonProperty
+    public Tags effectTags = new Tags("effect");
+    @JsonProperty
+    public Tags resourceTypeTags = new Tags("resource");
     @JsonProperty
     private String resourceName = "default", displayName = "default", resourceType = "default";
     @JsonIgnore
@@ -36,10 +40,6 @@ public class Resource extends Component implements IInteractable{
     private StringBuilder contents = new StringBuilder();
     @JsonIgnore
     private DataBuilder.JsonResource resRef;
-    @JsonProperty
-    public Tags effectTags = new Tags("effect");
-    @JsonProperty
-    public Tags resourceTypeTags = new Tags("resource");
 
     public Resource() {
         super();
@@ -49,11 +49,6 @@ public class Resource extends Component implements IInteractable{
     public void copyResource(Resource resource){
         this.resRef = DataManager.getData(resource.resourceName, DataBuilder.JsonResource.class);
         initItem(resource);
-    }
-
-    public void copyResource(DataBuilder.JsonResource jRes){
-        this.resRef = jRes;
-        initItem(jRes);
     }
 
     //Initializes the item.
@@ -67,19 +62,8 @@ public class Resource extends Component implements IInteractable{
         generateItemInfo(resource.resRef.itemNames, resource.resRef.itemAmounts, resource.resRef.itemChances);
     }
 
-    //Initializes the item.
-    private void initItem(DataBuilder.JsonResource jRes){
-        this.displayName = jRes.displayName;
-        this.resourceType = jRes.resourceType;
-        this.itemNames = new Array<>(jRes.itemNames);
-        this.gatherTime = jRes.gatherTime;
-        this.resourceName = jRes.resourceName;
-
-        generateItemInfo(jRes.itemNames, jRes.itemAmounts, jRes.itemChances);
-    }
-
     /**
-     * Generates the item information about the resource being created, such as the names and item itemAmounts.
+     * Generates the item information about the resource being added, such as the names and item itemAmounts.
      * @param itemNames The String array of item names.
      * @param itemAmounts The 2D int array of itemAmounts for each item compName.
      */
@@ -114,6 +98,32 @@ public class Resource extends Component implements IInteractable{
         this.gatherTick = gatherTime/total;
     }
 
+    public void copyResource(DataBuilder.JsonResource jRes){
+        this.resRef = jRes;
+        initItem(jRes);
+    }
+
+    //Initializes the item.
+    private void initItem(DataBuilder.JsonResource jRes){
+        this.displayName = jRes.displayName;
+        this.resourceType = jRes.resourceType;
+        this.itemNames = new Array<>(jRes.itemNames);
+        this.gatherTime = jRes.gatherTime;
+        this.resourceName = jRes.resourceName;
+
+        generateItemInfo(jRes.itemNames, jRes.itemAmounts, jRes.itemChances);
+    }
+
+    @Override
+    public void save() {
+
+    }
+
+    @Override
+    public void load() {
+
+    }
+
     @Override
     public void init() {
         super.init();
@@ -137,34 +147,13 @@ public class Resource extends Component implements IInteractable{
     }
 
     @Override
-    public void save() {
-
-    }
-
-    @Override
-    public void load() {
-
-    }
-
-    @Override
     public void update(float delta) {
         super.update(delta);
     }
 
-
-    /**
-     * @return True if the resource has resources left, false otherwise. If false, also either destroys the resource or re-initializes it.
-     */
-    private boolean peek(){
-        int size = itemAmounts.size;
-
-        //If it's empty, either destroy it or re-initialize it.
-        if(size == 0 && !DataManager.getData(this.resourceName, DataBuilder.JsonResource.class).infinite)
-            this.owner.setToDestroy();
-        else if(size == 0)
-            this.initItem(this.resRef);
-
-        return size > 0;
+    @Override
+    public void destroy(Entity destroyer) {
+        super.destroy(destroyer);
     }
 
     /**
@@ -211,6 +200,21 @@ public class Resource extends Component implements IInteractable{
 
         //If we could find nothing we could take, return false.
         return false;
+    }
+
+    /**
+     * @return True if the resource has resources left, false otherwise. If false, also either destroys the resource or re-initializes it.
+     */
+    private boolean peek(){
+        int size = itemAmounts.size;
+
+        //If it's empty, either destroy it or re-initialize it.
+        if(size == 0 && !DataManager.getData(this.resourceName, DataBuilder.JsonResource.class).infinite)
+            this.owner.setToDestroy();
+        else if(size == 0)
+            this.initItem(this.resRef);
+
+        return size > 0;
     }
 
     /**
@@ -266,7 +270,6 @@ public class Resource extends Component implements IInteractable{
         }
     }
 
-
     @JsonIgnore
     public DataBuilder.JsonResource getResRef() {
         return resRef;
@@ -275,14 +278,6 @@ public class Resource extends Component implements IInteractable{
     @JsonIgnore
     public String getResourceName(){
         return this.resourceName;
-    }
-
-    /**
-     * @return A String which is the formal display compName of this Resource.
-     */
-    @JsonIgnore
-    public String getDisplayName() {
-        return displayName;
     }
 
     @JsonIgnore
@@ -299,28 +294,21 @@ public class Resource extends Component implements IInteractable{
     }
 
     /**
+     * Sets the gather time for this Resource.
+     * @param gatherTime The amount of time to gather.
+     */
+    @JsonIgnore
+    public void setGatherTime(float gatherTime){
+        this.gatherTime = gatherTime;
+    }
+
+    /**
      * @return The gather tick for this resource. This is the time it takes to gather part of the resource. The gather tick will be an X number of ticks
      * for the gather time, meaning if a resource takes 5 seconds to gather, there could be 5 ticks (one per second) to gather.
      */
     @JsonIgnore
     public float getGatherTick(){
         return this.gatherTick;
-    }
-
-    /**
-     * @return True if this Resource is taken, false otherwise.
-     */
-    @JsonIgnore
-    public boolean isTaken(){
-        return this.taken != null;
-    }
-
-    /**
-     * @return The Entity that has marked this resource as taken, null if not taken.
-     */
-    @JsonIgnore
-    public Entity getTaken(){
-        return this.taken;
     }
 
     /**
@@ -334,6 +322,14 @@ public class Resource extends Component implements IInteractable{
     }
 
     /**
+     * @return The Entity that has marked this resource as taken, null if not taken.
+     */
+    @JsonIgnore
+    public Entity getTaken(){
+        return this.taken;
+    }
+
+    /**
      * Sets this Resource as taken or not taken.
      * @param entity The Entity to take this resource. Null if setting the resource as not taken.
      */
@@ -343,26 +339,12 @@ public class Resource extends Component implements IInteractable{
     }
 
     /**
-     * Sets the gather time for this Resource.
-     * @param gatherTime The amount of time to gather.
-     */
-    @JsonIgnore
-    public void setGatherTime(float gatherTime){
-        this.gatherTime = gatherTime;
-    }
-
-    /**
      * Sets the interType for this Resource.
      * @param resourceType A String denoting the interType.
      */
     @JsonIgnore
     public void setResourceType(String resourceType) {
         this.resourceType = resourceType;
-    }
-
-    @Override
-    public void destroy(Entity destroyer) {
-        super.destroy(destroyer);
     }
 
     @Override
@@ -386,10 +368,26 @@ public class Resource extends Component implements IInteractable{
         return contents.toString() + "\ntaken: "+this.isTaken()+" by: "+takenBy+"\ntags: "+this.resourceTypeTags.toString();
     }
 
+    /**
+     * @return True if this Resource is taken, false otherwise.
+     */
+    @JsonIgnore
+    public boolean isTaken(){
+        return this.taken != null;
+    }
+
     @Override
     @JsonIgnore
     public String getName() {
         return this.getDisplayName();
+    }
+
+    /**
+     * @return A String which is the formal display compName of this Resource.
+     */
+    @JsonIgnore
+    public String getDisplayName() {
+        return displayName;
     }
 
     @Override

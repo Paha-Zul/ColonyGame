@@ -5,18 +5,20 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.Shape;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.component.collider.Collider;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.util.Constants;
 import com.mygdx.game.util.Grid;
-import org.codehaus.jackson.annotate.JsonIgnore;
-import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
  * Created by Paha on 1/17/2015.
  */
 public class GridComponent extends Component{
+    @JsonProperty
+    public int exploreRadius = 3;
     @JsonProperty
     private int gridType;
     @JsonIgnore
@@ -24,12 +26,22 @@ public class GridComponent extends Component{
     @JsonIgnore
     private Grid.GridInstance grid;
     @JsonProperty
-    public int exploreRadius = 3;
-    @JsonProperty
     private boolean addMulti = false;
 
     public GridComponent() {
         super();
+    }
+
+    @Override
+    public void save() {
+
+    }
+
+    @Override
+    public void load() {
+        this.grid = ColonyGame.worldGrid;
+        if(this.gridType == Constants.GRIDSTATIC)
+            this.setActive(false);
     }
 
     @Override
@@ -88,21 +100,16 @@ public class GridComponent extends Component{
     }
 
     @Override
-    public void save() {
-
-    }
-
-    @Override
-    public void load() {
-        this.grid = ColonyGame.worldGrid;
-        if(this.gridType == Constants.GRIDSTATIC)
-            this.setActive(false);
-    }
-
-    @Override
     public void update(float delta) {
         super.update(delta);
         this.currNode = this.grid.checkNode(this.currNode, this.owner, true, exploreRadius);
+    }
+
+    @Override
+    public void destroy(Entity destroyer) {
+        this.currNode.removeEntity(this.owner);
+
+        super.destroy(destroyer);
     }
 
     @JsonIgnore
@@ -132,12 +139,5 @@ public class GridComponent extends Component{
     @JsonIgnore
     public Grid.Node getCurrNode(){
         return this.currNode;
-    }
-
-    @Override
-    public void destroy(Entity destroyer) {
-        this.currNode.removeEntity(this.owner);
-
-        super.destroy(destroyer);
     }
 }

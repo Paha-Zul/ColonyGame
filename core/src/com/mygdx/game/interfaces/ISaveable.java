@@ -5,6 +5,11 @@ package com.mygdx.game.interfaces;
  */
 public interface ISaveable {
     /**
+     * Called when a loaded component is added to its owning Entity or World.
+     */
+    void addedLoad();
+
+    /**
      * Called on the component when it is added to the SaveGameHelper list.
      */
     void save();

@@ -19,21 +19,6 @@ import com.mygdx.game.util.Grid;
  * Created by Paha on 4/11/2015.
  */
 public class PrebuiltTasks {
-    public static Task moveTo(BlackBoard blackBoard, BehaviourManagerComp behComp){
-        //Get the target node/Entity.
-        //Find the path.
-        //Move to the target.
-
-        Sequence sequence = new Sequence("MoveTo", blackBoard);
-        FindPath findPath = new FindPath("FindPath",  blackBoard);
-        MoveTo followPath = new MoveTo("FollowPath",  blackBoard);
-
-        ((ParentTaskController)(sequence.getControl())).addTask(findPath);
-        ((ParentTaskController)(sequence.getControl())).addTask(followPath);
-
-        return sequence;
-    }
-
     public static Task gatherResource(BlackBoard blackBoard, BehaviourManagerComp behComp){
         /**
          *  Selector:
@@ -116,40 +101,39 @@ public class PrebuiltTasks {
         return gatherOrExplore;
     }
 
-    private static Task gatherTarget(BlackBoard blackBoard, BehaviourManagerComp behComo){
+    public static Task exploreUnexplored(BlackBoard blackBoard, BehaviourManagerComp behComp){
         /**
          * Sequence:
-         *  find path to resource
-         *  move to resource
-         *  gather resource
-         *  find path to inventory
-         *  move to inventory
-         *  transfer itemNames to inventory
+         *  find closest unexplored tile
+         *  get path to tile
+         *  move to tile
          */
 
-        Sequence sequence = new Sequence("gatherTarget", blackBoard);
+        //Reset these. Left over assignments from other jobs will cause the explore behaviour to simply move to the wrong area.
+        blackBoard.target = null;
+        blackBoard.targetNode = null;
 
-        //Create all the job objects we need...
-        FindPath findPath = new FindPath("Finding Path to Resource", blackBoard);
-        MoveTo move = new MoveTo("Moving to Resource", blackBoard);
-        Gather gather = new Gather("Gathering Resource", blackBoard);
-        GetBuildingFromColony findStorage = new GetBuildingFromColony("Finding storage.", blackBoard);
-        FindPath findPathToStorage = new FindPath("Finding Path to Storage", blackBoard);
-        MoveTo moveToStorage = new MoveTo("Moving to Storage", blackBoard);
-        TransferItemsFromMeToTarget transferItems = new TransferItemsFromMeToTarget("Transferring Resources", blackBoard);
+        Sequence sequence = new Sequence("exploreUnexplored", blackBoard);
 
-        ((ParentTaskController)sequence.getControl()).addTask(findPath);
-        ((ParentTaskController)sequence.getControl()).addTask(move);
-        ((ParentTaskController)sequence.getControl()).addTask(gather);
-        ((ParentTaskController)sequence.getControl()).addTask(findStorage);
-        ((ParentTaskController)sequence.getControl()).addTask(findPathToStorage);
-        ((ParentTaskController)sequence.getControl()).addTask(moveToStorage);
-        ((ParentTaskController)sequence.getControl()).addTask(transferItems);
+        FindClosestUnexplored findClosestUnexplored = new FindClosestUnexplored("Finding Closest Unexplored Location", blackBoard);
+        FindPath findPathToUnexplored = new FindPath("Finding Path to Unexplored", blackBoard);
+        MoveTo moveToLocation = new MoveTo("Moving to Explore", blackBoard);
 
-        //Set the 'fromInventory' field and set the resource as taken by us!
-        sequence.getControl().callbacks.startCallback = task -> {
-            task.blackBoard.tagsToSearch = new String[]{"building", "storage"};
+        //Make sure we clear our targets and target node first to get a fresh unexplored area.
+        sequence.control.callbacks.startCallback = task -> {
+            task.blackBoard.target = null;
+            task.blackBoard.targetNode = null;
         };
+
+        //Get the main building of the colony as our target to explore around.
+        findClosestUnexplored.control.callbacks.startCallback = task -> {
+            Colonist col = task.blackBoard.myManager.getEntityOwner().getComponent(Colonist.class);
+            task.blackBoard.target = col.getColony().getOwnedFromColony(Building.class, building -> building.getEntityOwner().getTags().hasTag("main")).getEntityOwner();
+        };
+
+        ((ParentTaskController) sequence.getControl()).addTask(findClosestUnexplored);
+        ((ParentTaskController) sequence.getControl()).addTask(findPathToUnexplored);
+        ((ParentTaskController) sequence.getControl()).addTask(moveToLocation);
 
         return sequence;
     }
@@ -194,6 +178,40 @@ public class PrebuiltTasks {
         return alwaysTrue;
     }
 
+    public static Task returnItems(BlackBoard blackBoard, BehaviourManagerComp behComp){
+        /**
+         *  Sequence
+         *      Find inventory
+         *      get path to inventory
+         *      move to inventory
+         *      transfer all items.  (except tools)
+         */
+
+        Sequence mainSeq = new Sequence("Dropping Off", blackBoard);
+        GetBuildingFromColony getStorage = new GetBuildingFromColony("Getting building", blackBoard);
+        FindPath fpStorage = new FindPath("Finding path", blackBoard);
+        MoveTo mtStorage = new MoveTo("Moving to storage", blackBoard);
+        TransferItemsFromMeToTarget transfer = new TransferItemsFromMeToTarget("Transferring", blackBoard);
+
+        mainSeq.control.addTask(getStorage);
+        mainSeq.control.addTask(fpStorage);
+        mainSeq.control.addTask(mtStorage);
+        mainSeq.control.addTask(transfer);
+
+        mainSeq.control.callbacks.startCallback = task -> {
+            task.blackBoard.targetNode = null;
+            task.blackBoard.tagsToSearch = new String[]{"building", "storage"};
+        };
+
+        getStorage.control.callbacks.successCallback = task -> {
+            task.blackBoard.itemTransfer.reset();
+            task.blackBoard.itemTransfer.transferAll = true;
+            task.blackBoard.itemTransfer.itemTypesToIgnore.add("tool"); //Ignore tools.
+        };
+
+        return mainSeq;
+    }
+
     public static Task returnTools(BlackBoard blackBoard, BehaviourManagerComp behComp){
         /**
          *  Sequence:
@@ -227,40 +245,6 @@ public class PrebuiltTasks {
 
         return seq;
 
-    }
-
-    public static Task returnItems(BlackBoard blackBoard, BehaviourManagerComp behComp){
-        /**
-         *  Sequence
-         *      Find inventory
-         *      get path to inventory
-         *      move to inventory
-         *      transfer all items.  (except tools)
-         */
-
-        Sequence mainSeq = new Sequence("Dropping Off", blackBoard);
-        GetBuildingFromColony getStorage = new GetBuildingFromColony("Getting building", blackBoard);
-        FindPath fpStorage = new FindPath("Finding path", blackBoard);
-        MoveTo mtStorage = new MoveTo("Moving to storage", blackBoard);
-        TransferItemsFromMeToTarget transfer = new TransferItemsFromMeToTarget("Transferring", blackBoard);
-
-        mainSeq.control.addTask(getStorage);
-        mainSeq.control.addTask(fpStorage);
-        mainSeq.control.addTask(mtStorage);
-        mainSeq.control.addTask(transfer);
-
-        mainSeq.control.callbacks.startCallback = task -> {
-            task.blackBoard.targetNode = null;
-            task.blackBoard.tagsToSearch = new String[]{"building", "storage"};
-        };
-
-        getStorage.control.callbacks.successCallback = task -> {
-            task.blackBoard.itemTransfer.reset();
-            task.blackBoard.itemTransfer.transferAll = true;
-            task.blackBoard.itemTransfer.itemTypesToIgnore.add("tool"); //Ignore tools.
-        };
-
-        return mainSeq;
     }
 
     public static Task build(BlackBoard blackboard, BehaviourManagerComp behComp){
@@ -361,43 +345,6 @@ public class PrebuiltTasks {
         return mainSelector;
     }
 
-    public static Task exploreUnexplored(BlackBoard blackBoard, BehaviourManagerComp behComp){
-        /**
-         * Sequence:
-         *  find closest unexplored tile
-         *  get path to tile
-         *  move to tile
-         */
-
-        //Reset these. Left over assignments from other jobs will cause the explore behaviour to simply move to the wrong area.
-        blackBoard.target = null;
-        blackBoard.targetNode = null;
-
-        Sequence sequence = new Sequence("exploreUnexplored", blackBoard);
-
-        FindClosestUnexplored findClosestUnexplored = new FindClosestUnexplored("Finding Closest Unexplored Location", blackBoard);
-        FindPath findPathToUnexplored = new FindPath("Finding Path to Unexplored", blackBoard);
-        MoveTo moveToLocation = new MoveTo("Moving to Explore", blackBoard);
-
-        //Make sure we clear our targets and target node first to get a fresh unexplored area.
-        sequence.control.callbacks.startCallback = task -> {
-            task.blackBoard.target = null;
-            task.blackBoard.targetNode = null;
-        };
-
-        //Get the main building of the colony as our target to explore around.
-        findClosestUnexplored.control.callbacks.startCallback = task -> {
-            Colonist col = task.blackBoard.myManager.getEntityOwner().getComponent(Colonist.class);
-            task.blackBoard.target = col.getColony().getOwnedFromColony(Building.class, building -> building.getEntityOwner().getTags().hasTag("main")).getEntityOwner();
-        };
-
-        ((ParentTaskController) sequence.getControl()).addTask(findClosestUnexplored);
-        ((ParentTaskController) sequence.getControl()).addTask(findPathToUnexplored);
-        ((ParentTaskController) sequence.getControl()).addTask(moveToLocation);
-
-        return sequence;
-    }
-
     public static Task idleTask(BlackBoard blackBoard, BehaviourManagerComp behComp){
         /**
          * Sequence:
@@ -466,7 +413,7 @@ public class PrebuiltTasks {
      * Searches for a target, hunts the target, and gathers the resources from it. This Task is composed of the attackTarget and gatherResource Tasks.
      * @param blackBoard The blackboard of this Task.
      * @param behComp THe BehaviourManager that owns this Task.
-     * @return The created Task.
+     * @return The added Task.
      */
     public static Task searchAndHunt(BlackBoard blackBoard, BehaviourManagerComp behComp){
         /**
@@ -516,7 +463,7 @@ public class PrebuiltTasks {
      * Generates the Task for hunting a target. This Task requires that the blackboard has the 'target' parameter set or it will fail.
      * @param blackBoard The blackboard of the Task.
      * @param behComp The BehaviourComponentComp that will own this Task.
-     * @return The created Task.
+     * @return The added Task.
      */
     public static Task attackTarget(BlackBoard blackBoard, BehaviourManagerComp behComp){
         /**
@@ -540,6 +487,44 @@ public class PrebuiltTasks {
         mainSeq.control.addTask(attack);
 
         return mainSeq;
+    }
+
+    private static Task gatherTarget(BlackBoard blackBoard, BehaviourManagerComp behComo){
+        /**
+         * Sequence:
+         *  find path to resource
+         *  move to resource
+         *  gather resource
+         *  find path to inventory
+         *  move to inventory
+         *  transfer itemNames to inventory
+         */
+
+        Sequence sequence = new Sequence("gatherTarget", blackBoard);
+
+        //Create all the job objects we need...
+        FindPath findPath = new FindPath("Finding Path to Resource", blackBoard);
+        MoveTo move = new MoveTo("Moving to Resource", blackBoard);
+        Gather gather = new Gather("Gathering Resource", blackBoard);
+        GetBuildingFromColony findStorage = new GetBuildingFromColony("Finding storage.", blackBoard);
+        FindPath findPathToStorage = new FindPath("Finding Path to Storage", blackBoard);
+        MoveTo moveToStorage = new MoveTo("Moving to Storage", blackBoard);
+        TransferItemsFromMeToTarget transferItems = new TransferItemsFromMeToTarget("Transferring Resources", blackBoard);
+
+        ((ParentTaskController)sequence.getControl()).addTask(findPath);
+        ((ParentTaskController)sequence.getControl()).addTask(move);
+        ((ParentTaskController)sequence.getControl()).addTask(gather);
+        ((ParentTaskController)sequence.getControl()).addTask(findStorage);
+        ((ParentTaskController)sequence.getControl()).addTask(findPathToStorage);
+        ((ParentTaskController)sequence.getControl()).addTask(moveToStorage);
+        ((ParentTaskController)sequence.getControl()).addTask(transferItems);
+
+        //Set the 'fromInventory' field and set the resource as taken by us!
+        sequence.getControl().callbacks.startCallback = task -> {
+            task.blackBoard.tagsToSearch = new String[]{"building", "storage"};
+        };
+
+        return sequence;
     }
 
     public static Task fish(BlackBoard blackBoard, BehaviourManagerComp behComp){
@@ -673,6 +658,21 @@ public class PrebuiltTasks {
         seq.control.addTask(moveTo(blackBoard, behComp));
 
         return seq;
+    }
+
+    public static Task moveTo(BlackBoard blackBoard, BehaviourManagerComp behComp){
+        //Get the target node/Entity.
+        //Find the path.
+        //Move to the target.
+
+        Sequence sequence = new Sequence("MoveTo", blackBoard);
+        FindPath findPath = new FindPath("FindPath",  blackBoard);
+        MoveTo followPath = new MoveTo("FollowPath",  blackBoard);
+
+        ((ParentTaskController)(sequence.getControl())).addTask(findPath);
+        ((ParentTaskController)(sequence.getControl())).addTask(followPath);
+
+        return sequence;
     }
 
     public static Task sleep(BlackBoard blackBoard, BehaviourManagerComp behComp){

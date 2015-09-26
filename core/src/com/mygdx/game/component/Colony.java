@@ -3,14 +3,14 @@ package com.mygdx.game.component;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mygdx.game.entity.BuildingEntity;
 import com.mygdx.game.entity.ColonistEnt;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.interfaces.IInteractable;
 import com.mygdx.game.interfaces.IOwnable;
 import com.mygdx.game.util.DataBuilder;
-import org.codehaus.jackson.annotate.JsonIgnore;
-import org.codehaus.jackson.annotate.JsonProperty;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,28 +23,14 @@ import java.util.function.Predicate;
 public class Colony extends Component implements IInteractable {
     @JsonProperty
     private String colonyName = "Colony";
-    @JsonIgnore
-    private ArrayList<Colonist> colonistList = new ArrayList<>(20);
-    @JsonIgnore
-    private HashMap<Class<? extends Component>, Array<Component>> ownedMap = new HashMap<>();
-    @JsonIgnore
-    private HashMap<String, Inventory.InventoryItem> quickInv = new HashMap<>();
-    @JsonIgnore
+
+    private ArrayList<Colonist> colonistList;
+    private HashMap<Class<? extends Component>, Array<Component>> ownedMap;
+    private HashMap<String, Inventory.InventoryItem> quickInv;
     private Inventory inventory;
 
     public Colony() {
         super();
-    }
-
-    @Override
-    public void start() {
-        super.start();
-        this.owner.name = "emptyColonyObject";
-
-        this.inventory = this.owner.addComponent(new Inventory());
-        this.inventory.setMaxAmount(-1);
-        load();
-
     }
 
     @Override
@@ -53,20 +39,30 @@ public class Colony extends Component implements IInteractable {
     }
 
     @Override
-    public void load() {
+    public void initLoad() {
+        super.initLoad();
+
         this.inventory = this.owner.getComponent(Inventory.class);
+        this.quickInv = new HashMap<>();
+        this.ownedMap = new HashMap<>();
+        this.colonistList = new ArrayList<>(20);
     }
 
-    /**
-     * Makes a new colonist (hiding some ugly stuff) using the start position + a random offset.
-     * @param start The location to center the creation on.
-     * @param offset The offset which is random'd and added to the start (-offset to +offset)
-     * @param textureName The name of the texture to use for the colonist.
-     * @return The newly created colonist!
-     */
-    public Entity makeColonist(Vector2 start, float offset, String textureName){
-        Vector2 newPos = new Vector2(start.x + MathUtils.random()*offset*2 - offset, start.y + MathUtils.random()*offset*2 - offset);
-        return new ColonistEnt(newPos, 0, new String[]{textureName,""}, 10);
+    @Override
+    public void init() {
+        super.init();
+
+        this.initLoad();
+    }
+
+    @Override
+    public void start() {
+        super.start();
+        this.owner.name = "emptyColonyObject";
+        this.inventory = this.owner.addComponent(new Inventory());
+        this.inventory.setMaxAmount(-1);
+        load();
+
     }
 
     @Override
@@ -74,17 +70,26 @@ public class Colony extends Component implements IInteractable {
         super.update(delta);
     }
 
+    @Override
+    public void destroy(Entity destroyer) {
+        super.destroy(destroyer);
+
+        this.inventory = null;
+        this.colonistList = null;
+        this.ownedMap = null;
+        this.quickInv = null;
+    }
+
     /**
-     * Adds a Component to the ownerByColony structure. The Component must also implement the
-     * IOwnable interface.
-     * @param comp The Component to add to this colony.
-     * @param <T> The class type.
+     * Makes a new colonist (hiding some ugly stuff) using the start position + a random offset.
+     * @param start The location to center the creation on.
+     * @param offset The offset which is random'd and added to the start (-offset to +offset)
+     * @param textureName The name of the texture to use for the colonist.
+     * @return The newly added colonist!
      */
-    public <T extends Component & IOwnable> void addOwnedToColony(T comp){
-        Class<? extends Component> cls = comp.getClass();
-        ownedMap.putIfAbsent(cls, new Array<>());
-        ownedMap.get(comp.getClass()).add(comp);
-        comp.addedToColony(this);
+    public Entity makeColonist(Vector2 start, float offset, String textureName){
+        Vector2 newPos = new Vector2(start.x + MathUtils.random()*offset*2 - offset, start.y + MathUtils.random()*offset*2 - offset);
+        return new ColonistEnt(newPos, 0, new String[]{textureName,""}, 10);
     }
 
     /**
@@ -111,11 +116,6 @@ public class Colony extends Component implements IInteractable {
         return ownedMap.get(cls);
     }
 
-    @Override
-    public void destroy(Entity destroyer) {
-        super.destroy(destroyer);
-    }
-
     /**
      * Under construction!!
      * @param position
@@ -124,6 +124,7 @@ public class Colony extends Component implements IInteractable {
      * @param drawLevel
      * @return
      */
+    @JsonIgnore
     public Entity addBuildingEntity(Vector2 position, float rotation, DataBuilder.JsonBuilding buildingRef, int drawLevel){
         //TODO I should do things like this?
         Entity building = new BuildingEntity(position, rotation, buildingRef, drawLevel);
@@ -134,6 +135,7 @@ public class Colony extends Component implements IInteractable {
      * Adds a Colonist to this colony. This will also set the Colonist's Colony when added.
      * @param colonist The Colonist Component to add.
      */
+    @JsonIgnore
     public void addColonist(Colonist colonist){
         this.colonistList.add(colonist);
         colonist.setColony(this);
@@ -141,10 +143,25 @@ public class Colony extends Component implements IInteractable {
     }
 
     /**
+     * Adds a Component to the ownerByColony structure. The Component must also implement the
+     * IOwnable interface.
+     * @param comp The Component to add to this colony.
+     * @param <T> The class type.
+     */
+    @JsonIgnore
+    public <T extends Component & IOwnable> void addOwnedToColony(T comp){
+        Class<? extends Component> cls = comp.getClass();
+        ownedMap.putIfAbsent(cls, new Array<>());
+        ownedMap.get(comp.getClass()).add(comp);
+        comp.addedToColony(this);
+    }
+
+    /**
      * Adds the item to a hashmap for the colony to use.
      * @param itemRef The JsonItem reference.
      * @param amount The amount to add.
      */
+    @JsonIgnore
     public void addItemToGlobal(DataBuilder.JsonItem itemRef, int amount){
         if(amount > 0) this.inventory.addItem(itemRef.getItemName(), amount);
         else if(amount < 0) this.inventory.removeItem(itemRef.getItemName(), -amount);
@@ -207,16 +224,19 @@ public class Colony extends Component implements IInteractable {
     }
 
     @Override
+    @JsonIgnore
     public CraftingStation getCraftingStation() {
         return null;
     }
 
     @Override
+    @JsonIgnore
     public Building getBuilding() {
         return null;
     }
 
     @Override
+    @JsonIgnore
     public Enterable getEnterable() {
         return null;
     }
