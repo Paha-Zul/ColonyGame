@@ -6,6 +6,8 @@ import com.badlogic.gdx.utils.Array;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mygdx.game.ColonyGame;
+import com.mygdx.game.entity.Entity;
+import gnu.trove.map.hash.TLongObjectHashMap;
 
 import java.util.HashMap;
 import java.util.function.Predicate;
@@ -25,13 +27,13 @@ public class Effects extends Component{
     }
 
     @Override
-    public void initLoad() {
-        super.initLoad();
+    public void initLoad(TLongObjectHashMap<Entity> entityMap, TLongObjectHashMap<Component> compMap) {
+        super.initLoad(entityMap, compMap);
     }
 
     @Override
-    public void load() {
-        super.load();
+    public void load(TLongObjectHashMap<Entity> entityMap, TLongObjectHashMap<Component> compMap) {
+        super.load(entityMap, compMap);
     }
 
     @Override

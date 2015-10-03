@@ -67,7 +67,7 @@ public class Inventory extends Component implements IOwnable {
 
     @Override
     @JsonIgnore
-    public void load() {
+    public void load(TLongObjectHashMap<Entity> entityMap, TLongObjectHashMap<Component> compMap) {
 
     }
 
@@ -75,7 +75,7 @@ public class Inventory extends Component implements IOwnable {
     @JsonIgnore
     public void start() {
         super.start();
-        load();
+        load(null, null);
     }
 
     @Override

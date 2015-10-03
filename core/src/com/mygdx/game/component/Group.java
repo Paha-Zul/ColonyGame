@@ -5,6 +5,8 @@ import com.badlogic.gdx.utils.Array;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mygdx.game.entity.Entity;
+import gnu.trove.map.hash.TLongObjectHashMap;
+
 /**
  * Created by Paha on 5/8/2015.
  *
@@ -29,7 +31,7 @@ public class Group extends Component{
     }
 
     @Override
-    public void load() {
+    public void load(TLongObjectHashMap<Entity> entityMap, TLongObjectHashMap<Component> compMap) {
 
     }
 

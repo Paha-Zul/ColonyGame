@@ -7,6 +7,7 @@ import com.mygdx.game.component.*;
 import com.mygdx.game.component.collider.CircleCollider;
 import com.mygdx.game.component.graphic.ColonistGraphic;
 import com.mygdx.game.util.Constants;
+import gnu.trove.map.hash.TLongObjectHashMap;
 
 /**
  * Created by Paha on 1/18/2015.
@@ -35,20 +36,20 @@ public class ColonistEnt extends Entity{
         this.makeCollider();
     }
 
-    @Override
-    public void initLoad() {
-    }
-
-    @Override
-    public void load() {
-        super.load();
-        makeCollider();
-    }
-
     private void makeCollider(){
         CircleCollider collider = getComponent(CircleCollider.class);
         if(collider == null) collider = this.addComponent(new CircleCollider());
         collider.setupBody(BodyDef.BodyType.DynamicBody, ColonyGame.world, this.getTransform().getPosition(), 1, true, true);
 
+    }
+
+    @Override
+    public void initLoad(TLongObjectHashMap<Entity> entityMap, TLongObjectHashMap<Component> compMap) {
+    }
+
+    @Override
+    public void load(TLongObjectHashMap<Entity> entityMap, TLongObjectHashMap<Component> compMap) {
+        super.load(entityMap, compMap);
+        makeCollider();
     }
 }

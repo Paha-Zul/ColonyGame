@@ -1,6 +1,7 @@
 package com.mygdx.game.util.managers;
 
 import com.badlogic.gdx.utils.Array;
+import com.mygdx.game.ColonyGame;
 import com.mygdx.game.component.Colonist;
 import com.mygdx.game.component.Component;
 import com.mygdx.game.component.Inventory;
@@ -22,8 +23,10 @@ public class NotificationManager {
 
     private static Timer updateTimer = new RepeatingTimer(100f, null);
 
-    public static void init(PlayerManager.Player player, float updateTick){
-        NotificationManager.player = player;
+    public static void init(float updateTick){
+        NotificationManager.player = ColonyGame.playerManager.getLocalPlayer();
+
+        //Tests each notification to see if it should turn active/inactive
         updateTimer = new RepeatingTimer(updateTick, () -> {
             for(Notification not : notifications){
                 boolean result = not.test(NotificationManager.player);
@@ -84,10 +87,6 @@ public class NotificationManager {
         }).extendedTooltip = hungerTooltip;
     }
 
-    public static void update(float delta){
-        updateTimer.update(delta);
-    }
-
     public static Notification addNotification(String name, String tooltip, Predicate<PlayerManager.Player> playerPredicate){
         Notification noti = new Notification(name, tooltip, playerPredicate);
         notificationMap.put(name, noti);
@@ -95,8 +94,16 @@ public class NotificationManager {
         return noti;
     }
 
+    public static void update(float delta){
+        updateTimer.update(delta);
+    }
+
     public static Array<Notification> getActiveNotifications(){
         return activeNotifications;
+    }
+
+    public static void setPlayer(PlayerManager.Player player){
+        NotificationManager.player = player;
     }
 
     public static class Notification{

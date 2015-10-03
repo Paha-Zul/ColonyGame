@@ -4,15 +4,16 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Json;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mygdx.game.ColonyGame;
+import com.mygdx.game.component.Colony;
 import com.mygdx.game.component.Component;
 import com.mygdx.game.entity.Entity;
+import com.mygdx.game.util.managers.NotificationManager;
 import gnu.trove.map.hash.TLongObjectHashMap;
 
 import java.io.IOException;
@@ -34,24 +35,24 @@ public class SaveGameHelper {
     }
 
     public static void saveWorld() {
-        Json json = new Json();
-
         //mapper.getSerializationConfig().addMixInAnnotations(Array.class, MixIn.class);
         //mapper.getSerializationConfig().addMixInAnnotations(Vector2.class, MixIn.class);
 
         getJsonEntities();
+        world.playerManager.data = ColonyGame.playerManager.getPlayerManagerData();
 
         FileHandle file = Gdx.files.local("game.sav");
         file.writeString("", false); //Clear the file.
 
         Runnable task = () -> {
             try {
-                writeFile(file, mapper.writerWithDefaultPrettyPrinter().writeValueAsString(world));
+                writeFileEncode(file, mapper.writeValueAsString(world));
                 world.clear();
             } catch (IOException e) {
                 e.printStackTrace();
             }
         };
+
         ColonyGame.threadPool.submit(task);
 
         //writeFile(file, json.toJson(entComps, JsonComponents[].class));
@@ -63,16 +64,20 @@ public class SaveGameHelper {
         for(Array<Entity> list : ListHolder.getEntityList())
             for(Entity ent : list) {
                 world.entities.add(new JsonEntity(ent, ent.getComponents().getComponentIDs()));
-                Collections.addAll(world.allComps, ent.getComponents().getAllComponents());
+                Collections.addAll(world.allComps, ent.getComponents().getAllComponents().toArray(Component.class));
             }
     }
 
-    public static void writeFile(FileHandle file, String s) {
-        //file.writeString(com.badlogic.gdx.utils.Base64Coder.encodeString(s), false);
-        file.writeString(s, true);
-        //file.writeBytes(s.getBytes(Charset.forName("UTF-8")), true);
+    public static void writeFileEncode(FileHandle file, String s) {
+        file.writeString(com.badlogic.gdx.utils.Base64Coder.encodeString(s), false);
+    }
 
-        Vector2 vect;
+    public static void writeFile(FileHandle file, String s) {
+        file.writeString(s, true);
+    }
+
+    public static void writeFile(FileHandle file, byte[] bytes) {
+        file.writeBytes(bytes, false);
     }
 
     public static void loadWorld(){
@@ -82,6 +87,8 @@ public class SaveGameHelper {
     private static void loadWorld(FileHandle file) {
         String save = readFile(file);
         JsonWorld world = new JsonWorld();
+
+        //Clear everything from the world.
         ListHolder.clearEntityList();
 
         try {
@@ -89,37 +96,38 @@ public class SaveGameHelper {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
         //Make the three giant hash maps.
-        System.out.println("Done!");
         for(Component comp : world.allComps) giantCompMap.put(comp.getCompID(), comp);
         for(JsonEntity ent : world.entities) giantEntityMap.put(ent.entity.getID(), ent.entity);
 
-        //Clear everything from the world.
-        System.out.println("Done2!");
-        System.out.println("Done3!");
+        loadManagers();
 
         //Load it all back in (sync as we go!).
         for(JsonEntity ent : world.entities){
-            if(ent.entity.getTags().hasTag("colonist")){
-                System.out.println("colo");
-            }
             //ent.getComponents().transform = (Transform)giantCompMap.get(ent.getTrasnformID());
             //if(ent.getGraphicIdentityID() != 0) ent.getComponents().identity = (GraphicIdentity)giantCompMap.get(ent.getGraphicIdentityID());
             for(long id : ent.compIDs){
                 Component comp = giantCompMap.get(id);
                 comp.setOwner(ent.entity);
-                if(ent.entity == null)
-                    System.out.println("YEA");
                 ent.entity.addComponent(comp);
-                comp.initLoad();
+                comp.addedLoad(giantEntityMap, giantCompMap);
             }
 
-            ent.entity.load(); //Load the entity.
-            ent.entity.getComponents().iterateOverComponents(Component::load); //Load all the components on the Entity.
+            ent.entity.initLoad(giantEntityMap, giantCompMap); //Load the entity.
+            ent.entity.load(giantEntityMap, giantCompMap); //Load the entity.
+
+            ent.entity.getComponents().getAllComponents().forEach(comp -> comp.initLoad(giantEntityMap, giantCompMap)); //Load all the components on the Entity.
+            ent.entity.getComponents().getAllComponents().forEach(comp -> comp.load(giantEntityMap, giantCompMap));
             ListHolder.addEntity(ent.entity);
         }
 
-        System.out.println("Done4!");
+
+
+        world.allComps = null;
+        world.entities = null;
+        giantCompMap = null;
+        giantEntityMap = null;
     }
 
     public static String readFile(FileHandle file) {
@@ -130,6 +138,12 @@ public class SaveGameHelper {
             }
         }
         return "";
+    }
+
+    private static void loadManagers(){
+        ColonyGame.playerManager.init();
+        for(String[] data : world.playerManager.data)
+            NotificationManager.setPlayer(ColonyGame.playerManager.addPlayer(data[0], (Colony) giantCompMap.get(Long.parseLong(data[1]))));
     }
 
     /**
@@ -165,6 +179,8 @@ public class SaveGameHelper {
         public ArrayList<JsonEntity> entities = new ArrayList<>();
         @JsonProperty
         public ArrayList<Component> allComps = new ArrayList<>();
+        @JsonProperty
+        public SaveJsonPlayerManager playerManager = new SaveJsonPlayerManager();
 
         public JsonWorld(){
 
@@ -174,5 +190,10 @@ public class SaveGameHelper {
             entities = new ArrayList<>();
             allComps = new ArrayList<>();
         }
+    }
+
+    private static class SaveJsonPlayerManager{
+        @JsonProperty("playerManagerData")
+        ArrayList<String[]> data = new ArrayList<>();
     }
 }

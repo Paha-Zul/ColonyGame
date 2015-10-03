@@ -15,6 +15,7 @@ import com.mygdx.game.util.StateTree;
 import com.mygdx.game.util.managers.EventSystem;
 import com.mygdx.game.util.timer.OneShotTimer;
 import com.mygdx.game.util.timer.Timer;
+import gnu.trove.map.hash.TLongObjectHashMap;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -77,8 +78,8 @@ public class BehaviourManagerComp extends Component{
     }
 
     @Override
-    public void initLoad() {
-        super.initLoad();
+    public void initLoad(TLongObjectHashMap<Entity> entityMap, TLongObjectHashMap<Component> compMap) {
+        super.initLoad(entityMap, compMap);
 
         this.blackBoard = new BlackBoard();
         this.blackBoard.colonyGrid = ColonyGame.worldGrid;
@@ -86,7 +87,7 @@ public class BehaviourManagerComp extends Component{
     }
 
     @Override
-    public void load() {
+    public void load(TLongObjectHashMap<Entity> entityMap, TLongObjectHashMap<Component> compMap) {
         this.stats = this.owner.getComponent(Stats.class);
         this.blackBoard.myInventory = this.getComponent(Inventory.class);
 
@@ -97,13 +98,13 @@ public class BehaviourManagerComp extends Component{
     @Override
     public void init() {
         super.init();
-        initLoad();
+        initLoad(null, null);
     }
 
     @Override
     public void start() {
         super.start();
-        load();
+        load(null, null);
     }
 
     @Override

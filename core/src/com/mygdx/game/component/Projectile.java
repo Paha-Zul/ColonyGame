@@ -7,6 +7,7 @@ import com.mygdx.game.component.collider.Collider;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.util.timer.OneShotTimer;
 import com.mygdx.game.util.timer.Timer;
+import gnu.trove.map.hash.TLongObjectHashMap;
 
 /**
  * Created by Bbent_000 on 11/29/2014.
@@ -33,7 +34,7 @@ public class Projectile extends Component{
 	}
 
 	@Override
-	public void load() {
+	public void load(TLongObjectHashMap<Entity> entityMap, TLongObjectHashMap<Component> compMap) {
         this.owner.getTransform().setScale(0.25f);
         this.coll = this.getComponent(Collider.class);
         this.lifetimeTimer = new OneShotTimer(this.lifetime, this.owner::setToDestroy);
@@ -42,7 +43,7 @@ public class Projectile extends Component{
 	@Override
 	public void start() {
 		super.start();
-        load();
+        load(null, null);
 	}
 
 	@Override

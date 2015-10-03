@@ -49,7 +49,7 @@ public class FindStorageWithItem extends LeafTask{
         //Get the colonist Component.
         Colonist colonist = this.blackBoard.myManager.getEntityOwner().getComponent(Colonist.class);
         //Search for a building that satisfies the function defined...
-        Building storageWithItem = colonist.getColony().getOwnedFromColony(Building.class, building -> {
+        Building storageWithItem = colonist.getOwningColony().getOwnedFromColony(Building.class, building -> {
             //Let's not steal items from buildings being constructed.
             if(building.getEntityOwner().getTags().hasTag("constructing") || !building.getEntityOwner().getTags().hasTag("storage")) return false;
 

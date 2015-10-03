@@ -25,7 +25,6 @@ import com.mygdx.game.util.GH;
 import com.mygdx.game.util.ListHolder;
 import com.mygdx.game.util.managers.DataManager;
 import com.mygdx.game.util.managers.PlaceConstructionManager;
-import com.mygdx.game.util.managers.PlayerManager;
 
 /**
  * Created by Paha on 8/24/2015.
@@ -79,6 +78,20 @@ public class PlacingConstructionWindow extends Window{
                 //On up, set the building being constructed as the building matching this button (building).
                 button.addListener(new InputListener() {
                     @Override
+                    public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                        return true; //We must return true for the in touchDown for touchUp to be handled by this object.
+                    }
+
+                    @Override
+                    public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                        //We need to clear this here since our mouse will be over the new image under the mouse. This makes the preview window
+                        //to get stuck on the screen, so remove it here.
+                        clearPreviewWindow();
+                        placeManager.setPlacingConstruction(building);
+                        super.touchUp(event, x, y, pointer, button);
+                    }
+
+                    @Override
                     public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
                         clearPreviewWindow();
 
@@ -95,26 +108,23 @@ public class PlacingConstructionWindow extends Window{
                         clearPreviewWindow();
                         super.exit(event, x, y, pointer, toActor);
                     }
-
-                    @Override
-                    public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                        //We need to clear this here since our mouse will be over the new image under the mouse. This makes the preview window
-                        //to get stuck on the screen, so remove it here.
-                        clearPreviewWindow();
-                        placeManager.setPlacingConstruction(building);
-                        super.touchUp(event, x, y, pointer, button);
-                    }
-
-                    @Override
-                    public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                        return true; //We must return true for the in touchDown for touchUp to be handled by this object.
-                    }
                 });
             }
         }
 
         buildingTable.row();
         buildingTable.add().expand().fill();
+    }
+
+    /**
+     * Clears the preview window.
+     */
+    public void clearPreviewWindow(){
+        if(this.previewWindow != null){
+            this.previewWindow.clear();
+            this.previewWindow.remove();
+            this.previewWindow = null;
+        }
     }
 
     public void setBuildingBeingPlaced(DataBuilder.JsonBuilding building){
@@ -138,7 +148,7 @@ public class PlacingConstructionWindow extends Window{
                 worldPosition.set(worldCoords.x, worldCoords.y);
                 if(PlaceConstructionManager.instance().canPlace(ColonyGame.world, worldPosition)) {
                     Entity b = new BuildingEntity(worldPosition, 0, building, 12);
-                    PlayerManager.getPlayer("Player").colony.addOwnedToColony(b.getComponent(Building.class));
+                    ColonyGame.playerManager.getPlayer("Player").colony.addOwnedToColony(b.getComponent(Building.class));
                     ListHolder.addEntity(b);
                 }
                 //Null this out to cancel building after placing.
@@ -146,27 +156,6 @@ public class PlacingConstructionWindow extends Window{
                 super.touchUp(event, x, y, pointer, button);
             }
         });
-    }
-
-    /**
-     * Clears the preview window.
-     */
-    public void clearPreviewWindow(){
-        if(this.previewWindow != null){
-            this.previewWindow.clear();
-            this.previewWindow.remove();
-            this.previewWindow = null;
-        }
-    }
-
-    /**
-     * Clears the building being placed.
-     */
-    public void clearBuildingBeingPlaced(){
-        if(this.buildingImage != null) {
-            this.buildingImage.remove();
-            this.buildingImage = null;
-        }
     }
 
     @Override
@@ -201,11 +190,6 @@ public class PlacingConstructionWindow extends Window{
     }
 
     @Override
-    public void resize(int width, int height) {
-
-    }
-
-    @Override
     public void destroy() {
         super.destroy();
         PlaceConstructionManager.instance().setView(null);
@@ -215,6 +199,21 @@ public class PlacingConstructionWindow extends Window{
         this.buildingWindow.clear();
         this.buildingWindow.remove();
         this.buildingWindow = null;
+
+    }
+
+    /**
+     * Clears the building being placed.
+     */
+    public void clearBuildingBeingPlaced(){
+        if(this.buildingImage != null) {
+            this.buildingImage.remove();
+            this.buildingImage = null;
+        }
+    }
+
+    @Override
+    public void resize(int width, int height) {
 
     }
 }

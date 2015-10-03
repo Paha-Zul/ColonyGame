@@ -13,6 +13,7 @@ import com.mygdx.game.util.Constants;
 import com.mygdx.game.util.DataBuilder;
 import com.mygdx.game.util.managers.DataManager;
 import com.mygdx.game.util.managers.EventSystem;
+import gnu.trove.map.hash.TLongObjectHashMap;
 
 import java.util.LinkedList;
 import java.util.function.Consumer;
@@ -94,7 +95,7 @@ public class Animal extends Component implements IInteractable{
     }
 
     @Override
-    public void load() {
+    public void load(TLongObjectHashMap<Entity> entityMap, TLongObjectHashMap<Component> compMap) {
         if(this.animalRef == null) this.animalRef = DataManager.getData(this.animalRefName, DataBuilder.JsonAnimal.class);
 
         if(animalRef == null) System.out.println("Loading animal with anme: "+this.animalRefName);
@@ -129,7 +130,7 @@ public class Animal extends Component implements IInteractable{
     public void start() {
         super.start();
 
-        load();
+        load(null, null);
     }
 
     @Override

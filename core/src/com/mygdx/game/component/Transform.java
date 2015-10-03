@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.interfaces.IDelayedDestroyable;
+import gnu.trove.map.hash.TLongObjectHashMap;
 
 import java.util.ArrayList;
 
@@ -60,7 +61,7 @@ public class Transform extends Component implements IDelayedDestroyable {
     }
 
     @Override
-    public void load() {
+    public void load(TLongObjectHashMap<Entity> entityMap, TLongObjectHashMap<Component> compMap) {
 
     }
 

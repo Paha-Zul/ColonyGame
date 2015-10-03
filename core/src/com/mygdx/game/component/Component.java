@@ -8,6 +8,7 @@ import com.mygdx.game.entity.Entity;
 import com.mygdx.game.interfaces.IDelayedDestroyable;
 import com.mygdx.game.interfaces.ISaveable;
 import com.mygdx.game.util.managers.EventSystem;
+import gnu.trove.map.hash.TLongObjectHashMap;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.WRAPPER_OBJECT, property = "@class")
 public abstract class Component implements IDelayedDestroyable, ISaveable {
@@ -39,7 +40,7 @@ public abstract class Component implements IDelayedDestroyable, ISaveable {
 	}
 
 	@Override
-	public void addedLoad() {
+	public void addedLoad(TLongObjectHashMap<Entity> entityMap, TLongObjectHashMap<Component> compMap) {
 
 	}
 
@@ -49,12 +50,12 @@ public abstract class Component implements IDelayedDestroyable, ISaveable {
 	}
 
 	@Override
-	public void initLoad() {
+	public void initLoad(TLongObjectHashMap<Entity> entityMap, TLongObjectHashMap<Component> compMap) {
 
 	}
 
 	@Override
-	public void load() {
+	public void load(TLongObjectHashMap<Entity> entityMap, TLongObjectHashMap<Component> compMap) {
 
 	}
 

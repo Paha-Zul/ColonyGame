@@ -3,11 +3,13 @@ package com.mygdx.game.entity;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.mygdx.game.ColonyGame;
+import com.mygdx.game.component.Component;
 import com.mygdx.game.component.GridComponent;
 import com.mygdx.game.component.Interactable;
 import com.mygdx.game.component.collider.BoxCollider;
 import com.mygdx.game.component.graphic.GraphicIdentity;
 import com.mygdx.game.util.Constants;
+import gnu.trove.map.hash.TLongObjectHashMap;
 
 /**
  * Created by Paha on 2/28/2015.
@@ -38,18 +40,7 @@ public class ResourceEnt extends Entity{
             identity.configureSprite();
         }
 
-        this.load();
-    }
-
-    @Override
-    public void initLoad() {
-        super.initLoad();
-    }
-
-    @Override
-    public void load() {
-        super.load();
-        this.makeCollider();
+        this.load(null, null);
     }
 
     private void makeCollider(){
@@ -67,5 +58,16 @@ public class ResourceEnt extends Entity{
                     new Vector2(graphic.getSprite().getX() + graphic.getSprite().getWidth()/2, graphic.getSprite().getY() + graphic.getSprite().getHeight()/2), false, false);
         }
 
+    }
+
+    @Override
+    public void initLoad(TLongObjectHashMap<Entity> entityMap, TLongObjectHashMap<Component> compMap) {
+        super.initLoad(entityMap, compMap);
+    }
+
+    @Override
+    public void load(TLongObjectHashMap<Entity> entityMap, TLongObjectHashMap<Component> compMap) {
+        super.load(entityMap, compMap);
+        this.makeCollider();
     }
 }

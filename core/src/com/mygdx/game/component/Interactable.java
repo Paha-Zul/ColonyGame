@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.interfaces.IDelayedDestroyable;
 import com.mygdx.game.interfaces.IInteractable;
+import gnu.trove.map.hash.TLongObjectHashMap;
 
 /**
  * Created by Paha on 1/10/2015.
@@ -26,7 +27,7 @@ public class Interactable extends Component{
     }
 
     @Override
-    public void load() {
+    public void load(TLongObjectHashMap<Entity> entityMap, TLongObjectHashMap<Component> compMap) {
         this.setInterType(interType);
     }
 
@@ -34,7 +35,7 @@ public class Interactable extends Component{
     public void start() {
         super.start();
 
-        load();
+        load(null, null);
     }
 
     @Override

@@ -12,6 +12,7 @@ import com.mygdx.game.component.collider.Collider;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.util.Constants;
 import com.mygdx.game.util.Grid;
+import gnu.trove.map.hash.TLongObjectHashMap;
 
 /**
  * Created by Paha on 1/17/2015.
@@ -38,7 +39,7 @@ public class GridComponent extends Component{
     }
 
     @Override
-    public void load() {
+    public void load(TLongObjectHashMap<Entity> entityMap, TLongObjectHashMap<Component> compMap) {
         this.grid = ColonyGame.worldGrid;
         if(this.gridType == Constants.GRIDSTATIC)
             this.setActive(false);
@@ -95,7 +96,7 @@ public class GridComponent extends Component{
             this.currNode = this.grid.addToGrid(this.owner, true, bounds);
         }
         this.grid.addViewer(this.currNode, this.exploreRadius);
-        this.load();
+        this.load(null, null);
 
     }
 

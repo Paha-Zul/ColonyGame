@@ -10,6 +10,7 @@ import com.mygdx.game.util.Logger;
 import com.mygdx.game.util.managers.DataManager;
 import com.mygdx.game.util.timer.RepeatingTimer;
 import com.mygdx.game.util.timer.Timer;
+import gnu.trove.map.hash.TLongObjectHashMap;
 
 /**
  * Created by Paha on 5/19/2015.
@@ -42,8 +43,9 @@ public class Building extends Component implements IOwnable, IInteractable{
     }
 
     @Override
-    public void initLoad() {
-        super.initLoad();
+    public void initLoad(TLongObjectHashMap<Entity> entityMap, TLongObjectHashMap<Component> compMap) {
+        super.initLoad(entityMap, compMap);
+        //If jBuilding is null, try to get the jBuilding from our name.
         if(this.jBuilding == null) this.jBuilding = DataManager.getData(this.buildingName, DataBuilder.JsonBuilding.class);
 
         boolean isConstructing = this.owner.getTags().hasTag("constructing"); //If the building is under construction
@@ -88,7 +90,7 @@ public class Building extends Component implements IOwnable, IInteractable{
     }
 
     @Override
-    public void load() {
+    public void load(TLongObjectHashMap<Entity> entityMap, TLongObjectHashMap<Component> compMap) {
     }
 
     @Override
@@ -102,7 +104,7 @@ public class Building extends Component implements IOwnable, IInteractable{
         if(this.owner.getTags().hasTag("constructing") || this.jBuilding.inventory) this.inventory = this.addComponent(new Inventory());
         this.owner.name = this.jBuilding.displayName; //Set the display name.
 
-        this.initLoad();
+        this.initLoad(null, null);
     }
 
     @Override
@@ -138,7 +140,6 @@ public class Building extends Component implements IOwnable, IInteractable{
     }
 
     @Override
-    @JsonIgnore
     public void destroy(Entity destroyer) {
         super.destroy(destroyer);
     }
@@ -148,7 +149,6 @@ public class Building extends Component implements IOwnable, IInteractable{
      * @param buildingRef The JsonBuilding to be the reference.
      * @return The Building for eash chaining.
      */
-    @JsonIgnore
     public Building setBuildingRef(DataBuilder.JsonBuilding buildingRef){
         this.jBuilding = buildingRef;
         this.buildingName = buildingRef.name;

@@ -128,7 +128,7 @@ public class PrebuiltTasks {
         //Get the main building of the colony as our target to explore around.
         findClosestUnexplored.control.callbacks.startCallback = task -> {
             Colonist col = task.blackBoard.myManager.getEntityOwner().getComponent(Colonist.class);
-            task.blackBoard.target = col.getColony().getOwnedFromColony(Building.class, building -> building.getEntityOwner().getTags().hasTag("main")).getEntityOwner();
+            task.blackBoard.target = col.getOwningColony().getOwnedFromColony(Building.class, building -> building.getEntityOwner().getTags().hasTag("main")).getEntityOwner();
         };
 
         ((ParentTaskController) sequence.getControl()).addTask(findClosestUnexplored);
@@ -400,7 +400,7 @@ public class PrebuiltTasks {
             task.blackBoard.targetNode = null; //We don't want this set.
 
             //Get a inventory building from my colony, store the entity as the target, and set the from/to inventory.
-            Building storage = task.blackBoard.myManager.getEntityOwner().getComponent(Colonist.class).getColony().getOwnedFromColony(Building.class, b -> b.getEntityOwner().getTags().hasTag("storage"));
+            Building storage = task.blackBoard.myManager.getEntityOwner().getComponent(Colonist.class).getOwningColony().getOwnedFromColony(Building.class, b -> b.getEntityOwner().getTags().hasTag("storage"));
             task.blackBoard.target = storage.getEntityOwner();
             task.blackBoard.itemTransfer.fromInventory = storage.getComponent(Inventory.class);
             task.blackBoard.itemTransfer.toInventory = blackBoard.myManager.getEntityOwner().getComponent(Inventory.class);

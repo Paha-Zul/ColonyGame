@@ -3,15 +3,13 @@ package com.mygdx.game.entity;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.mygdx.game.ColonyGame;
-import com.mygdx.game.component.Building;
-import com.mygdx.game.component.Constructable;
-import com.mygdx.game.component.GridComponent;
-import com.mygdx.game.component.Interactable;
+import com.mygdx.game.component.*;
 import com.mygdx.game.component.collider.BoxCollider;
 import com.mygdx.game.component.graphic.GraphicIdentity;
 import com.mygdx.game.util.Constants;
 import com.mygdx.game.util.DataBuilder;
 import com.mygdx.game.util.managers.DataManager;
+import gnu.trove.map.hash.TLongObjectHashMap;
 
 /**
  * Created by Paha on 1/18/2015.
@@ -19,6 +17,10 @@ import com.mygdx.game.util.managers.DataManager;
 public class BuildingEntity extends Entity{
     public BuildingEntity(){
 
+    }
+
+    public BuildingEntity(Vector2 position, float rotation, String buildingName, int drawLevel) {
+        this(position, rotation, DataManager.getData(buildingName, DataBuilder.JsonBuilding.class), drawLevel);
     }
 
     public BuildingEntity(Vector2 position, float rotation, DataBuilder.JsonBuilding buildingRef, int drawLevel) {
@@ -35,21 +37,6 @@ public class BuildingEntity extends Entity{
         this.makeCollider();
     }
 
-    public BuildingEntity(Vector2 position, float rotation, String buildingName, int drawLevel) {
-        this(position, rotation, DataManager.getData(buildingName, DataBuilder.JsonBuilding.class), drawLevel);
-    }
-
-    @Override
-    public void initLoad() {
-        super.initLoad();
-    }
-
-    @Override
-    public void load() {
-        super.load();
-        makeCollider();
-    }
-
     private void makeCollider(){
         float hWidth = 1;
         float hHeight = 1;
@@ -63,5 +50,16 @@ public class BuildingEntity extends Entity{
         BoxCollider collider = getComponent(BoxCollider.class);
         if(collider == null) collider = this.addComponent(new BoxCollider());
         collider.setupBody(BodyDef.BodyType.StaticBody, ColonyGame.world, hWidth, hHeight, this.getTransform().getPosition(), false, false);
+    }
+
+    @Override
+    public void initLoad(TLongObjectHashMap<Entity> entityMap, TLongObjectHashMap<Component> compMap) {
+        super.initLoad(entityMap, compMap);
+    }
+
+    @Override
+    public void load(TLongObjectHashMap<Entity> entityMap, TLongObjectHashMap<Component> compMap) {
+        super.load(entityMap, compMap);
+        makeCollider();
     }
 }

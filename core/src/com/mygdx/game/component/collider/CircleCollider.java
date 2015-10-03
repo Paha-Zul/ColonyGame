@@ -20,8 +20,8 @@ public class CircleCollider extends Collider{
     /**
      * Sets up the CircleCollider.
      * @param bodyType The body type of the body (Dynamic, static). Use BodyDef.BodyType.
-     * @param radius
-     * @param isSensor
+     * @param radius The radius of the Circle collider.
+     * @param isSensor If the collider is a sensor or not.
      */
     public void setupBody(BodyDef.BodyType bodyType, World world, Vector2 center, float radius, boolean isSensor, boolean active){
         this.setWorld(world);

@@ -15,6 +15,7 @@ import com.mygdx.game.ui.PlayerInterface;
 import com.mygdx.game.util.*;
 import com.mygdx.game.util.gui.GUI;
 import com.mygdx.game.util.managers.EventSystem;
+import com.mygdx.game.util.managers.PlayerManager;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -25,6 +26,7 @@ public class ColonyGame extends Game {
 	public static OrthographicCamera camera;
 	public static OrthographicCamera UICamera;
 	public static Grid.GridInstance worldGrid;
+	public static PlayerManager playerManager;
 	public static long currTick = 0;
 
 	public static SpriteBatch batch;
@@ -41,13 +43,14 @@ public class ColonyGame extends Game {
 
 	@Override
 	public void create () {
-		batch = new SpriteBatch();
-		renderer = new ShapeRenderer();
-		camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		ColonyGame.batch = new SpriteBatch();
+		ColonyGame.renderer = new ShapeRenderer();
+		ColonyGame.camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		ColonyGame.UICamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-		world = new World(new Vector2(0,0), true);
+		ColonyGame.world = new World(new Vector2(0,0), true);
         ColonyGame.assetManager = new EasyAssetManager();
 		ColonyGame.debugRenderer = new Box2DDebugRenderer(); //Create the Box2D saveContainer.
+		ColonyGame.playerManager = new PlayerManager();
 
 		world.setContactListener(new Collision());
 

@@ -8,6 +8,9 @@ import com.badlogic.gdx.math.Vector2;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.component.Colonist;
+import com.mygdx.game.component.Component;
+import com.mygdx.game.entity.Entity;
+import gnu.trove.map.hash.TLongObjectHashMap;
 
 /**
  * Created by Paha on 5/24/2015.
@@ -21,19 +24,13 @@ public class ColonistGraphic extends GraphicIdentity{
     private Colonist colonist;
 
     @Override
-    public void start() {
-        super.start();
-        load();
-    }
-
-    @Override
     public void save() {
         super.save();
     }
 
     @Override
-    public void load() {
-        super.load();
+    public void load(TLongObjectHashMap<Entity> entityMap, TLongObjectHashMap<Component> compMap) {
+        super.load(entityMap, compMap);
 
         this.alertSprite = new Sprite(ColonyGame.assetManager.get("alertIcon", Texture.class));
         this.selectionSprite = new Sprite(ColonyGame.assetManager.get("selectedCircle", Texture.class));
@@ -41,6 +38,12 @@ public class ColonistGraphic extends GraphicIdentity{
 
         this.configureSprite(this.alertSprite);
         this.configureSprite(this.selectionSprite);
+    }
+
+    @Override
+    public void start() {
+        super.start();
+        load(null, null);
     }
 
     @Override

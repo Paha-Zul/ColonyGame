@@ -13,6 +13,13 @@ import com.mygdx.game.component.graphic.GraphicIdentity;
  */
 public class BoxCollider extends Collider{
 
+    @Override
+    public void init() {
+        super.init();
+
+        this.colliderType = SQUARE_CUSTOM;
+    }
+
     public void setupBody(BodyDef.BodyType bodyType, World world, float hWidth, float hHeight, Vector2 center, boolean isSensor, boolean active){
         this.setWorld(world);
         this.setActive(active);
@@ -20,6 +27,13 @@ public class BoxCollider extends Collider{
         //Get the graphic for the collider size
         GraphicIdentity graphic = this.getComponent(GraphicIdentity.class);
         if(graphic == null || graphic.getSprite() == null) return;
+
+        if(hWidth == -1 || hHeight == -1) {
+            this.colliderType = SQUARE_FITGRAPHIC;
+            hWidth = graphic.getSprite().getWidth()/2;
+            hHeight = graphic.getSprite().getHeight()/2;
+        }
+        else this.colliderType = SQUARE_CUSTOM;
 
         //Make a new body definition
         BodyDef bodyDef = new BodyDef();

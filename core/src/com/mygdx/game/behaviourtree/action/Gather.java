@@ -80,32 +80,12 @@ public class Gather extends LeafTask{
 
     private void endWithSuccess(){
         //This sets up the information for moving and transferring to the colony.
-        Colony targetColony = this.blackBoard.myManager.getEntityOwner().getComponent(Colonist.class).getColony(); //Get the colony.
+        Colony targetColony = this.blackBoard.myManager.getEntityOwner().getComponent(Colonist.class).getOwningColony(); //Get the colony.
         this.blackBoard.targetNode = null; //Set the target node to null to make sure we use the target (not the node)
         this.blackBoard.target = targetColony.getEntityOwner(); //Set the target to the entity owner of the colony.
         this.blackBoard.itemTransfer.toInventory = targetColony.getInventory(); //Set the inventory to the colony's inventory.
 
         this.control.finishWithSuccess();
-    }
-
-    private void createGatherMessage(String[] itemNames, int[] amounts){
-        StringBuilder text = new StringBuilder("+");
-        for(int i=0;i<itemNames.length;i++){
-            DataBuilder.JsonItem ref = DataManager.getData(itemNames[i], DataBuilder.JsonItem.class);
-            text.append(amounts[i]).append(" ").append(ref.getDisplayName());
-            if(i != itemNames.length-1) text.append(", ");
-        }
-
-        if(itemNames.length == 0)
-            text.append("nothing...");
-
-        Vector2 start = new Vector2(this.blackBoard.myManager.getEntityOwner().getTransform().getPosition());
-        start.y += GH.toMeters(40);
-
-        Vector2 end = new Vector2(this.blackBoard.myManager.getEntityOwner().getTransform().getPosition());
-        end.y += GH.toMeters(90);
-
-        new FloatingText(text.toString(), start, end, 2f, 0.8f);
     }
 
     private void createGatherMessage(String itemName, int amount){
@@ -141,5 +121,25 @@ public class Gather extends LeafTask{
         this.soundTimer = null;
         if(this.blackBoard.targetResource != null && this.blackBoard.targetResource.isTakenBy(this.blackBoard.myManager.getEntityOwner()))
             this.blackBoard.targetResource.setTaken(null);
+    }
+
+    private void createGatherMessage(String[] itemNames, int[] amounts){
+        StringBuilder text = new StringBuilder("+");
+        for(int i=0;i<itemNames.length;i++){
+            DataBuilder.JsonItem ref = DataManager.getData(itemNames[i], DataBuilder.JsonItem.class);
+            text.append(amounts[i]).append(" ").append(ref.getDisplayName());
+            if(i != itemNames.length-1) text.append(", ");
+        }
+
+        if(itemNames.length == 0)
+            text.append("nothing...");
+
+        Vector2 start = new Vector2(this.blackBoard.myManager.getEntityOwner().getTransform().getPosition());
+        start.y += GH.toMeters(40);
+
+        Vector2 end = new Vector2(this.blackBoard.myManager.getEntityOwner().getTransform().getPosition());
+        end.y += GH.toMeters(90);
+
+        new FloatingText(text.toString(), start, end, 2f, 0.8f);
     }
 }

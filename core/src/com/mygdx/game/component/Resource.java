@@ -13,6 +13,7 @@ import com.mygdx.game.util.GH;
 import com.mygdx.game.util.StringTable;
 import com.mygdx.game.util.Tags;
 import com.mygdx.game.util.managers.DataManager;
+import gnu.trove.map.hash.TLongObjectHashMap;
 
 /**
  * Created by Paha on 1/10/2015.
@@ -120,7 +121,13 @@ public class Resource extends Component implements IInteractable{
     }
 
     @Override
-    public void load() {
+    public void initLoad(TLongObjectHashMap<Entity> entityMap, TLongObjectHashMap<Component> compMap) {
+        super.initLoad(entityMap, compMap);
+
+    }
+
+    @Override
+    public void load(TLongObjectHashMap<Entity> entityMap, TLongObjectHashMap<Component> compMap) {
 
     }
 
@@ -330,15 +337,6 @@ public class Resource extends Component implements IInteractable{
     }
 
     /**
-     * Sets this Resource as taken or not taken.
-     * @param entity The Entity to take this resource. Null if setting the resource as not taken.
-     */
-    @JsonIgnore
-    public void setTaken(Entity entity){
-        this.taken = entity;
-    }
-
-    /**
      * Sets the interType for this Resource.
      * @param resourceType A String denoting the interType.
      */
@@ -374,6 +372,15 @@ public class Resource extends Component implements IInteractable{
     @JsonIgnore
     public boolean isTaken(){
         return this.taken != null;
+    }
+
+    /**
+     * Sets this Resource as taken or not taken.
+     * @param entity The Entity to take this resource. Null if setting the resource as not taken.
+     */
+    @JsonIgnore
+    public void setTaken(Entity entity){
+        this.taken = entity;
     }
 
     @Override

@@ -8,6 +8,7 @@ import com.mygdx.game.interfaces.Functional;
 import com.mygdx.game.util.timer.RepeatingTimer;
 import com.mygdx.game.util.timer.Timer;
 import com.sun.istack.internal.NotNull;
+import gnu.trove.map.hash.TLongObjectHashMap;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -34,22 +35,22 @@ public class Stats extends Component{
     }
 
     @Override
-    public void initLoad() {
+    public void initLoad(TLongObjectHashMap<Entity> entityMap, TLongObjectHashMap<Component> compMap) {
         if(this.statMap == null) this.statMap = new LinkedHashMap<>();
         if(this.timerList == null) this.timerList = new ArrayList<>();
-        super.initLoad();
+        super.initLoad(entityMap, compMap);
     }
 
     @Override
-    public void load() {
-        super.load();
+    public void load(TLongObjectHashMap<Entity> entityMap, TLongObjectHashMap<Component> compMap) {
+        super.load(entityMap, compMap);
     }
 
     @Override
     public void init() {
         super.init();
 
-        this.initLoad();
+        this.initLoad(null, null);
     }
 
     @Override

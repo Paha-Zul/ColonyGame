@@ -16,11 +16,10 @@ import com.mygdx.game.entity.Entity;
 import com.mygdx.game.util.Constants;
 import com.mygdx.game.util.GH;
 import com.mygdx.game.util.Grid;
+import gnu.trove.map.hash.TLongObjectHashMap;
 
 public class GraphicIdentity extends Component {
-    @JsonProperty("textureName")
     public String spriteTextureName = "";
-    @JsonProperty("atlasName")
     public String atlasName = "";
     @JsonIgnore
     private Sprite sprite;
@@ -46,14 +45,14 @@ public class GraphicIdentity extends Component {
     }
 
     @Override
-    public void initLoad() {
-        super.initLoad();
+    public void initLoad(TLongObjectHashMap<Entity> entityMap, TLongObjectHashMap<Component> compMap) {
+        super.initLoad(entityMap, compMap);
         setSprite(this.spriteTextureName, this.atlasName);
     }
 
     @Override
-    public void load() {
-        super.load();
+    public void load(TLongObjectHashMap<Entity> entityMap, TLongObjectHashMap<Component> compMap) {
+        super.load(entityMap, compMap);
         this.effects = this.getComponent(Effects.class);
         this.enterable = this.getComponent(Enterable.class);
     }
@@ -67,7 +66,7 @@ public class GraphicIdentity extends Component {
         if(getSprite() == null) return;
         //this.configureSprite(this.getSprite());
 
-        this.load();
+        this.load(null, null);
     }
 
     @Override
@@ -117,7 +116,6 @@ public class GraphicIdentity extends Component {
         }
     }
 
-    @JsonIgnore
     public boolean isWithinBounds(){
         Vector2 pos = this.owner.getTransform().getPosition(); //Cache the owner's position.
         return ColonyGame.camera.frustum.boundsInFrustum(pos.x, pos.y, 0, getSprite().getWidth(), getSprite().getHeight(), 0);
@@ -134,17 +132,6 @@ public class GraphicIdentity extends Component {
             this.getSprite().setColor(Constants.COLOR_VISIBILE);
     }
 
-    @JsonIgnore
-    public Sprite getSprite() {
-        return this.sprite;
-    }
-
-    @JsonIgnore
-    public void setSprite(Sprite sprite) {
-        this.sprite = sprite;
-    }
-
-    @JsonIgnore
     public void setSprite(String textureName, String atlasName){
         this.setSprite(textureName, atlasName, -1, -1);
     }
@@ -156,13 +143,14 @@ public class GraphicIdentity extends Component {
      */
     @JsonIgnore
     public void setSprite(String textureName, String atlasName, int width, int height){
-        if(textureName == null) return;
+        if(textureName == null || textureName.equals("")) return;
         this.spriteTextureName = textureName;
 
         //If the atlas name is applicable, get the texture atlas from the asset manager and then get the texture by name.
         if(atlasName != null && !atlasName.isEmpty()) {
             this.atlasName = atlasName;
             TextureRegion region = ColonyGame.assetManager.get(atlasName, TextureAtlas.class).findRegion(textureName);
+
             if(region == null)
                 GH.writeErrorMessage("TextureRegion is null when creating sprite in GraphicIdentity. Texture: "+textureName+", atlasName: "+atlasName+". Does it exist?");
 
@@ -178,6 +166,14 @@ public class GraphicIdentity extends Component {
         }
 
         this.configureSprite(this.getSprite(), width, height);
+    }
+
+    public Sprite getSprite() {
+        return this.sprite;
+    }
+
+    public void setSprite(Sprite sprite) {
+        this.sprite = sprite;
     }
 
     /**
@@ -197,9 +193,24 @@ public class GraphicIdentity extends Component {
             sprite.setSize(GH.toMeters(width), GH.toMeters(height));
             sprite.setOrigin(sprite.getWidth() * this.anchor.x, sprite.getHeight() * this.anchor.y);
         }
+    }
 
-        Vector2 pos = this.owner.getTransform().getPosition();
-        sprite.setPosition(pos.x - (sprite.getWidth()*this.anchor.x), pos.y - (sprite.getHeight()*this.anchor.y));
+    @JsonProperty("sprite")
+    public void setSprite(String[] args){
+        String name = args[0];
+        String atlas = args[1];
+        int width = Integer.parseInt(args[2]);
+        int height = Integer.parseInt(args[3]);
+        this.setSprite(name, atlas, width, height);
+    }
+
+    @JsonProperty("sprite")
+    private String[] getSpriteData(){
+        String[] data;
+        if(this.sprite == null) data = new String[]{"", "", "-1", "-1"};
+        else data = new String[]{this.spriteTextureName, this.atlasName, ""+(int)GH.toReal(this.sprite.getWidth()), ""+(int)GH.toReal(this.sprite.getHeight())};
+
+        return data;
     }
 
     @JsonIgnore

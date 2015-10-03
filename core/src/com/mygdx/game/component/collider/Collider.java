@@ -9,11 +9,14 @@ import com.mygdx.game.entity.Entity;
 import com.mygdx.game.interfaces.IScalable;
 import com.mygdx.game.util.Constants;
 import com.mygdx.game.util.Tags;
+import gnu.trove.map.hash.TLongObjectHashMap;
 
 /**
  * Created by Paha on 1/9/2015.
  */
-public class Collider extends Component implements IScalable{
+public abstract class Collider extends Component implements IScalable{
+    public static final int CIRCLE = 0, SQUARE_CUSTOM = 1, SQUARE_FITGRAPHIC = 2;
+
     @JsonIgnore
     protected Body body;
     @JsonIgnore
@@ -21,28 +24,26 @@ public class Collider extends Component implements IScalable{
     @JsonIgnore
     protected World world;
     @JsonProperty
-    protected float originalRadius;
+    protected float originalRadius=-1;
+    @JsonProperty
+    protected int colliderType;
 
     public Collider(){
 
     }
 
     @Override
-    @JsonIgnore
     public void save() {
 
     }
 
     @Override
-    @JsonIgnore
-    public void initLoad() {
-        super.initLoad();
-
+    public void initLoad(TLongObjectHashMap<Entity> entityMap, TLongObjectHashMap<Component> compMap) {
+        super.initLoad(entityMap, compMap);
     }
 
     @Override
-    @JsonIgnore
-    public void load() {
+    public void load(TLongObjectHashMap<Entity> entityMap, TLongObjectHashMap<Component> compMap) {
         //TODO Under Construction! Apparently changing active state locks everything up.
 
         if(this.body == null) return;
@@ -60,27 +61,23 @@ public class Collider extends Component implements IScalable{
     }
 
     @Override
-    @JsonIgnore
     public void init() {
         super.init();
     }
 
     @Override
-    @JsonIgnore
     public void start() {
         super.start();
-        load();
+        load(null, null);
     }
 
     @Override
-    @JsonIgnore
     public void update(float delta) {
         super.update(delta);
         this.owner.getTransform().setPosition(this.body.getPosition().x, this.body.getPosition().y);
     }
 
     @Override
-    @JsonIgnore
     public void destroy(Entity destroyer) {
         super.destroy(destroyer);
 
@@ -88,12 +85,10 @@ public class Collider extends Component implements IScalable{
         this.world.destroyBody(this.body);
     }
 
-    @JsonIgnore
     public void setWorld(World world){
         this.world = world;
     }
 
-    @JsonIgnore
     public void setFixture(FixtureDef def){
         if(this.fixture != null) this.body.destroyFixture(this.fixture);
         this.fixture = this.body.createFixture(def);
@@ -103,22 +98,18 @@ public class Collider extends Component implements IScalable{
         this.fixture.setUserData(fixtureInfo);
     }
 
-    @JsonIgnore
     public void setBodyPosition(Vector2 position, float angle){
         this.setBodyPosition(position.x, position.y, angle);
     }
 
-    @JsonIgnore
     public void setBodyPosition(float x, float y, float angle){
         this.body.setTransform(x, y, angle);
     }
 
-    @JsonIgnore
     public Body getBody(){
         return this.body;
     }
 
-    @JsonIgnore
     public void setBody(BodyDef bodyDef){
         if(this.body != null) world.destroyBody(this.body);
 
@@ -127,13 +118,11 @@ public class Collider extends Component implements IScalable{
         this.body.setUserData(bodyInfo);
     }
 
-    @JsonIgnore
     public Fixture getMainFixture(){
         return this.fixture;
     }
 
     @Override
-    @JsonIgnore
     public void scale(float scale) {
         this.fixture.getShape().setRadius(this.originalRadius*scale);
     }

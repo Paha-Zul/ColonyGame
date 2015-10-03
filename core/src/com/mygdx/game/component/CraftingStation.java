@@ -9,6 +9,7 @@ import com.mygdx.game.util.ItemNeeded;
 import com.mygdx.game.util.Logger;
 import com.mygdx.game.util.managers.DataManager;
 import com.mygdx.game.util.managers.EventSystem;
+import gnu.trove.map.hash.TLongObjectHashMap;
 
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -50,13 +51,13 @@ public class CraftingStation extends Component implements IOwnable{
     }
 
     @Override
-    public void initLoad() {
-        super.initLoad();
+    public void initLoad(TLongObjectHashMap<Entity> entityMap, TLongObjectHashMap<Component> compMap) {
+        super.initLoad(entityMap, compMap);
     }
 
     @Override
-    public void load() {
-        super.load();
+    public void load(TLongObjectHashMap<Entity> entityMap, TLongObjectHashMap<Component> compMap) {
+        super.load(entityMap, compMap);
 
         this.inventory = this.getComponent(Inventory.class);
         if(this.inventory == null) Logger.log(Logger.ERROR, "CraftingStation on Entity "+this.owner.name+" does not have an inventory and probably should. Get ready for a crash!", true);
@@ -72,7 +73,7 @@ public class CraftingStation extends Component implements IOwnable{
     public void start() {
         super.start();
 
-        this.load();
+        this.load(null, null);
     }
 
     @Override

@@ -31,7 +31,7 @@ public class GetBuildingFromColony extends LeafTask{
 
         //Get the colonist and use to get a building from its colony.
         Colonist col = this.blackBoard.myManager.getEntityOwner().getComponent(Colonist.class);
-        Building building = col.getColony().getOwnedFromColony(Building.class, b -> b.getEntityOwner().getTags().hasTags(this.blackBoard.tagsToSearch)
+        Building building = col.getOwningColony().getOwnedFromColony(Building.class, b -> b.getEntityOwner().getTags().hasTags(this.blackBoard.tagsToSearch)
                 && (this.control.callbacks.successCriteria == null || this.control.callbacks.successCriteria.test(b)));
 
         //If the building is not null, set it as the target and finish with success.

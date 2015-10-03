@@ -3,7 +3,6 @@ package com.mygdx.game.component;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mygdx.game.entity.BuildingEntity;
 import com.mygdx.game.entity.ColonistEnt;
@@ -11,6 +10,7 @@ import com.mygdx.game.entity.Entity;
 import com.mygdx.game.interfaces.IInteractable;
 import com.mygdx.game.interfaces.IOwnable;
 import com.mygdx.game.util.DataBuilder;
+import gnu.trove.map.hash.TLongObjectHashMap;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,7 +24,7 @@ public class Colony extends Component implements IInteractable {
     @JsonProperty
     private String colonyName = "Colony";
 
-    private ArrayList<Colonist> colonistList;
+    private ArrayList<Long> ownedCompIDs;
     private HashMap<Class<? extends Component>, Array<Component>> ownedMap;
     private HashMap<String, Inventory.InventoryItem> quickInv;
     private Inventory inventory;
@@ -34,25 +34,44 @@ public class Colony extends Component implements IInteractable {
     }
 
     @Override
+    public void added(Entity owner) {
+        super.added(owner);
+
+        this.addedLoad(null, null);
+    }
+
+    @Override
+    public void addedLoad(TLongObjectHashMap<Entity> entityMap, TLongObjectHashMap<Component> compMap) {
+        super.addedLoad(entityMap, compMap);
+
+        this.inventory = this.owner.getComponent(Inventory.class);
+        this.quickInv = new HashMap<>();
+        this.ownedMap = new HashMap<>();
+    }
+
+    @Override
     public void save() {
 
     }
 
     @Override
-    public void initLoad() {
-        super.initLoad();
+    public void initLoad(TLongObjectHashMap<Entity> entityMap, TLongObjectHashMap<Component> compMap) {
+        super.initLoad(entityMap, compMap);
 
-        this.inventory = this.owner.getComponent(Inventory.class);
-        this.quickInv = new HashMap<>();
-        this.ownedMap = new HashMap<>();
-        this.colonistList = new ArrayList<>(20);
+        if(compMap != null){
+            for(Long ID : this.ownedCompIDs) {
+                Component comp = compMap.get(ID);
+                this.unsafeAddOwnedToColony(comp);
+            }
+            this.ownedCompIDs = null;
+        }
     }
 
     @Override
     public void init() {
         super.init();
 
-        this.initLoad();
+        this.initLoad(null, null);
     }
 
     @Override
@@ -61,8 +80,7 @@ public class Colony extends Component implements IInteractable {
         this.owner.name = "emptyColonyObject";
         this.inventory = this.owner.addComponent(new Inventory());
         this.inventory.setMaxAmount(-1);
-        load();
-
+        load(null, null);
     }
 
     @Override
@@ -75,9 +93,24 @@ public class Colony extends Component implements IInteractable {
         super.destroy(destroyer);
 
         this.inventory = null;
-        this.colonistList = null;
         this.ownedMap = null;
         this.quickInv = null;
+    }
+
+    /**
+     * Used internally to add components to the colony when loading a saved game.
+     * @param comp The Component.
+     * @param <T> The type of the object, Component being the upper bound.
+     */
+    private <T extends Component> void unsafeAddOwnedToColony(T comp){
+        Class<? extends Component> cls = comp.getClass();
+        Array<Component> list = ownedMap.get(cls);
+        if(list == null){
+            list = new Array<>();
+            this.ownedMap.put(cls, list);
+        }
+        list.add(comp);
+        ((IOwnable)comp).addedToColony(this);
     }
 
     /**
@@ -100,7 +133,6 @@ public class Colony extends Component implements IInteractable {
      * @return The Component that matches the predicate, if any. Otherwise, null if no match was found.
      */
     @SuppressWarnings("unchecked")
-    @JsonIgnore
     public <T extends Component> T getOwnedFromColony(Class<T> cls, Predicate<T> predicate){
         Array<Component> list = ownedMap.get(cls);
         if(list != null) {
@@ -111,7 +143,6 @@ public class Colony extends Component implements IInteractable {
         return null;
     }
 
-    @JsonIgnore
     public <T extends Component> Array<Component> getOwnedListFromColony(Class<T> cls){
         return ownedMap.get(cls);
     }
@@ -124,7 +155,6 @@ public class Colony extends Component implements IInteractable {
      * @param drawLevel
      * @return
      */
-    @JsonIgnore
     public Entity addBuildingEntity(Vector2 position, float rotation, DataBuilder.JsonBuilding buildingRef, int drawLevel){
         //TODO I should do things like this?
         Entity building = new BuildingEntity(position, rotation, buildingRef, drawLevel);
@@ -135,10 +165,7 @@ public class Colony extends Component implements IInteractable {
      * Adds a Colonist to this colony. This will also set the Colonist's Colony when added.
      * @param colonist The Colonist Component to add.
      */
-    @JsonIgnore
     public void addColonist(Colonist colonist){
-        this.colonistList.add(colonist);
-        colonist.setColony(this);
         this.addOwnedToColony(colonist);
     }
 
@@ -148,95 +175,92 @@ public class Colony extends Component implements IInteractable {
      * @param comp The Component to add to this colony.
      * @param <T> The class type.
      */
-    @JsonIgnore
     public <T extends Component & IOwnable> void addOwnedToColony(T comp){
         Class<? extends Component> cls = comp.getClass();
-        ownedMap.putIfAbsent(cls, new Array<>());
-        ownedMap.get(comp.getClass()).add(comp);
+        Array<Component> list = ownedMap.get(cls);
+        if(list == null){
+            list = new Array<>();
+            this.ownedMap.put(cls, list);
+        }
+        list.add(comp);
         comp.addedToColony(this);
     }
 
     /**
-     * Adds the item to a hashmap for the colony to use.
+     * Adds the item to a hashmap for the colony to use. May crash if used wrongly
      * @param itemRef The JsonItem reference.
      * @param amount The amount to add.
      */
-    @JsonIgnore
     public void addItemToGlobal(DataBuilder.JsonItem itemRef, int amount){
         if(amount > 0) this.inventory.addItem(itemRef.getItemName(), amount);
         else if(amount < 0) this.inventory.removeItem(itemRef.getItemName(), -amount);
     }
 
-    @JsonIgnore
+    @JsonProperty("ownedComps")
+    private Array<Long> getOwnedComps(){
+        Array<Long> compIDs = new Array<>();
+        for(Array<Component> list : this.ownedMap.values())
+            for(Component comp : list)
+                compIDs.add(comp.getCompID());
+
+        return compIDs;
+    }
+
+    @JsonProperty("ownedComps")
+    private void setOwnedComps(ArrayList<Long> compIDs){
+        this.ownedCompIDs = compIDs;
+    }
+
     public final HashMap<String, Inventory.InventoryItem> getGlobalInv(){
         return quickInv;
     }
 
-    /**
-     * Gets the number of colonists this Colony has.
-     * @return An integer which is the number of colonists.
-     */
-    @JsonIgnore
-    public int getNumColonists(){
-        return this.colonistList.size();
-    }
-
     @Override
-    @JsonIgnore
     public Inventory getInventory(){
         return this.inventory;
     }
 
     @Override
-    @JsonIgnore
     public Stats getStats() {
         return null;
     }
 
     @Override
-    @JsonIgnore
     public String getStatsText() {
         return null;
     }
 
     @Override
-    @JsonIgnore
     public String getName() {
         return null;
     }
 
     @Override
-    @JsonIgnore
     public BehaviourManagerComp getBehManager() {
         return null;
     }
 
     @Override
-    @JsonIgnore
     public Component getComponent() {
         return this;
     }
 
     @Override
-    @JsonIgnore
     public Constructable getConstructable() {
         return null;
     }
 
     @Override
-    @JsonIgnore
     public CraftingStation getCraftingStation() {
         return null;
     }
 
     @Override
-    @JsonIgnore
     public Building getBuilding() {
         return null;
     }
 
     @Override
-    @JsonIgnore
     public Enterable getEnterable() {
         return null;
     }

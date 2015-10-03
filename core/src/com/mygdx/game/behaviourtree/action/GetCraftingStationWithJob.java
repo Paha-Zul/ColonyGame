@@ -28,7 +28,7 @@ public class GetCraftingStationWithJob extends LeafTask{
     public void update(float delta) {
         super.update(delta);
 
-        Colony colony = this.blackBoard.myManager.getEntityOwner().getComponent(Colonist.class).getColony();
+        Colony colony = this.blackBoard.myManager.getEntityOwner().getComponent(Colonist.class).getOwningColony();
         CraftingStation craftingStation = colony.getOwnedFromColony(CraftingStation.class, CraftingStation::hasAvailableJob);
 
         //If we couldn't get a crafting station, fail this task.

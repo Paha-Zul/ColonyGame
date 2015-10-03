@@ -1,9 +1,11 @@
 package com.mygdx.game.component;
 
 import com.badlogic.gdx.utils.Array;
+import com.mygdx.game.entity.Entity;
 import com.mygdx.game.util.DataBuilder;
 import com.mygdx.game.util.ItemNeeded;
 import com.mygdx.game.util.managers.DataManager;
+import gnu.trove.map.hash.TLongObjectHashMap;
 
 import java.util.HashMap;
 
@@ -20,6 +22,24 @@ public class Constructable extends Component{
 
     public Constructable(){
         this.setActive(false);
+    }
+
+    @Override
+    public void save() {
+        super.save();
+    }
+
+    @Override
+    public void initLoad(TLongObjectHashMap<Entity> entityMap, TLongObjectHashMap<Component> compMap) {
+        super.initLoad(entityMap, compMap);
+    }
+
+    @Override
+    public void load(TLongObjectHashMap<Entity> entityMap, TLongObjectHashMap<Component> compMap) {
+        super.load(entityMap, compMap);
+
+        this.inventory = this.getComponent(Inventory.class);
+        this.calculateItemsNeeded();
     }
 
     @Override
@@ -41,25 +61,14 @@ public class Constructable extends Component{
                 this.addItemRequirement(recipe.items[i], amount);
             }
         }
-        this.load();
+        this.load(null, null);
     }
 
-    @Override
-    public void save() {
-        super.save();
-    }
-
-    @Override
-    public void initLoad() {
-        super.initLoad();
-    }
-
-    @Override
-    public void load() {
-        super.load();
-
-        this.inventory = this.getComponent(Inventory.class);
-        this.calculateItemsNeeded();
+    /**
+     * @return True if complete, false otherwise.
+     */
+    public boolean isComplete(){
+        return this.complete;
     }
 
     /**
@@ -72,6 +81,28 @@ public class Constructable extends Component{
         this.itemsNeededMap.put(itemName, new ConstructableItemAmounts(itemName, itemAmount));
         this.totalItemsNeeded+=itemAmount;
         return this;
+    }
+
+    /**
+     * Recalculates the items needed for this constructable. Stores it in the itemsNeededList (reused).
+     */
+    private void calculateItemsNeeded(){
+        this.itemsNeededList = new Array<>();
+        for(String item : itemsNeededMap.keySet()){
+            int amountNeeded = itemAmountNeeded(item);
+            if(amountNeeded > 0) //Only add if we actually need some.
+                this.itemsNeededList.add(new ItemNeeded(item, amountNeeded));
+        }
+    }
+
+    /**
+     * Gets the amount needed of an item by the name of 'itemName' to fulfill the need for that item. This includes the item in the inventory if it exists.
+     * @param itemName The name of the item.
+     * @return A positive number if the constructable requires more of the item. 0 or negative means none needed or an overflow respectively.
+     */
+    public int itemAmountNeeded(String itemName){
+        ConstructableItemAmounts amounts = itemsNeededMap.get(itemName);
+        return amounts.amountNeeded - amounts.amountFulfilled - this.inventory.getItemAmount(itemName, true);
     }
 
     /**
@@ -111,15 +142,13 @@ public class Constructable extends Component{
     }
 
     /**
-     * Recalculates the items needed for this constructable. Stores it in the itemsNeededList (reused).
+     * Sets this Constructable to complete.
      */
-    private void calculateItemsNeeded(){
-        this.itemsNeededList = new Array<>();
-        for(String item : itemsNeededMap.keySet()){
-            int amountNeeded = itemAmountNeeded(item);
-            if(amountNeeded > 0) //Only add if we actually need some.
-                this.itemsNeededList.add(new ItemNeeded(item, amountNeeded));
-        }
+    public void setComplete(){
+        this.owner.getGraphicIdentity().getSprite().setAlpha(1f);
+        this.complete = true;
+        this.getEntityOwner().removeComponent(this);
+        this.getEntityOwner().getTags().removeTag("constructing");
     }
 
     /**
@@ -141,37 +170,10 @@ public class Constructable extends Component{
     }
 
     /**
-     * Gets the amount needed of an item by the name of 'itemName' to fulfill the need for that item. This includes the item in the inventory if it exists.
-     * @param itemName The name of the item.
-     * @return A positive number if the constructable requires more of the item. 0 or negative means none needed or an overflow respectively.
-     */
-    public int itemAmountNeeded(String itemName){
-        ConstructableItemAmounts amounts = itemsNeededMap.get(itemName);
-        return amounts.amountNeeded - amounts.amountFulfilled - this.inventory.getItemAmount(itemName, true);
-    }
-
-    /**
      * @return A value between 0 and 1.
      */
     public float getPercentageDone(){
         return (float)this.totalItemsSupplied/(float)this.totalItemsNeeded;
-    }
-
-    /**
-     * @return True if complete, false otherwise.
-     */
-    public boolean isComplete(){
-        return this.complete;
-    }
-
-    /**
-     * Sets this Constructable to complete.
-     */
-    public void setComplete(){
-        this.owner.getGraphicIdentity().getSprite().setAlpha(1f);
-        this.complete = true;
-        this.getEntityOwner().removeComponent(this);
-        this.getEntityOwner().getTags().removeTag("constructing");
     }
 
     /**

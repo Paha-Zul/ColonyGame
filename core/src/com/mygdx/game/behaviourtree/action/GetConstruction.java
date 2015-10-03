@@ -24,7 +24,7 @@ public class GetConstruction extends LeafTask{
         super.start();
 
         Colonist colonist = this.blackBoard.myManager.getEntityOwner().getComponent(Colonist.class);
-        Building building = colonist.getColony().getOwnedFromColony(Building.class, b -> b.getEntityOwner().getTags().hasTag("constructing"));
+        Building building = colonist.getOwningColony().getOwnedFromColony(Building.class, b -> b.getEntityOwner().getTags().hasTag("constructing"));
         if(building != null) {
             this.blackBoard.target = building.getEntityOwner();
             this.blackBoard.constructable = building.getComponent(Constructable.class);

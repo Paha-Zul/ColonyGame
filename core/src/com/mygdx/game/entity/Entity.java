@@ -14,6 +14,7 @@ import com.mygdx.game.interfaces.ISaveable;
 import com.mygdx.game.interfaces.IScalable;
 import com.mygdx.game.util.Tags;
 import com.mygdx.game.util.managers.EventSystem;
+import gnu.trove.map.hash.TLongObjectHashMap;
 
 import java.util.function.Consumer;
 
@@ -84,7 +85,7 @@ public class Entity implements IDelayedDestroyable, ISaveable{
 	}
 
     @Override
-    public void addedLoad() {
+    public void addedLoad(TLongObjectHashMap<Entity> entityMap, TLongObjectHashMap<Component> compMap) {
 
     }
 
@@ -94,12 +95,12 @@ public class Entity implements IDelayedDestroyable, ISaveable{
     }
 
     @Override
-    public void initLoad() {
+    public void initLoad(TLongObjectHashMap<Entity> entityMap, TLongObjectHashMap<Component> compMap) {
 
     }
 
     @Override
-    public void load() {
+    public void load(TLongObjectHashMap<Entity> entityMap, TLongObjectHashMap<Component> compMap) {
 
     }
 
@@ -175,7 +176,11 @@ public class Entity implements IDelayedDestroyable, ISaveable{
     @JsonIgnore
 	public boolean isValid(){
 		return !this.destroyed && !this.isSetToBeDestroyed();
-	}	/**
+	}
+	@Override
+	public void setToDestroy() {
+		this.setToDestroy = true;
+	}/**
 	 * @return True if this Entity has been destroyed, false otherwise.
 	 */
 	@Override
@@ -184,12 +189,7 @@ public class Entity implements IDelayedDestroyable, ISaveable{
 		return this.destroyed;
 	}
 
-	@Override
-	public void setToDestroy() {
-		this.setToDestroy = true;
-	}
-
-    public static class Components implements IDelayedDestroyable{
+public static class Components implements IDelayedDestroyable{
 		protected Array<Component> newComponentList = new Array<>();
 		protected Array<Component> activeComponentList = new Array<>();
 		protected Array<Component> inactiveComponentList = new Array<>();
@@ -336,14 +336,14 @@ public class Entity implements IDelayedDestroyable, ISaveable{
         }
 
         @JsonIgnore
-        public Component[] getAllComponents(){
+        public Array<Component> getAllComponents(){
             Array<Component> comps = new Array<>();
             for(Component comp : activeComponentList) comps.add(comp);
             for(Component comp : inactiveComponentList) comps.add(comp);
             for(Component comp : newComponentList) comps.add(comp);
             for(Component comp : destroyComponentList) comps.add(comp);
 
-            return comps.toArray(Component.class);
+            return comps;
         }
 
         @JsonIgnore
@@ -371,14 +371,13 @@ public class Entity implements IDelayedDestroyable, ISaveable{
 			}
 
 			return null;
-		}        @JsonIgnore
+		}
+        public final <T extends Component & IScalable> void registerScalable(T scalable){
+			this.scalableComponents.add(scalable);
+        }@JsonIgnore
         public Transform getTransform() {
             if(this.transform == null) this.transform = getComponent(Transform.class);
             return transform;
-        }
-
-        public final <T extends Component & IScalable> void registerScalable(T scalable){
-			this.scalableComponents.add(scalable);
         }
 
         public final void scaleComponents(float scale){
@@ -398,6 +397,8 @@ public class Entity implements IDelayedDestroyable, ISaveable{
             for(int i=0;i<scalableComponents.size;i++)
                 consumer.accept(scalableComponents.get(i));
 		}
+
+
 
 
 
@@ -451,7 +452,9 @@ public class Entity implements IDelayedDestroyable, ISaveable{
 		public boolean isSetToBeDestroyed() {
 			return this.setToDestroy;
 		}
-	}	@Override
+	}
+
+    	@Override
     @JsonIgnore
 	public boolean isSetToBeDestroyed() {
 		return this.setToDestroy;

@@ -9,6 +9,7 @@ import com.mygdx.game.component.graphic.GraphicIdentity;
 import com.mygdx.game.util.Constants;
 import com.mygdx.game.util.DataBuilder;
 import com.mygdx.game.util.managers.DataManager;
+import gnu.trove.map.hash.TLongObjectHashMap;
 
 /**
  * Created by Paha on 2/26/2015.
@@ -17,6 +18,10 @@ public class AnimalEnt extends Entity{
 
     public AnimalEnt(){
 
+    }
+
+    public AnimalEnt(String animalName, Vector2 position, float rotation, String[] graphicName, int drawLevel) {
+        this(DataManager.getData(animalName, DataBuilder.JsonAnimal.class), position, rotation, graphicName, drawLevel);
     }
 
     public AnimalEnt(DataBuilder.JsonAnimal animalRef, Vector2 position, float rotation, String[] graphicName, int drawLevel) {
@@ -36,27 +41,23 @@ public class AnimalEnt extends Entity{
 
     }
 
-    public AnimalEnt(String animalName, Vector2 position, float rotation, String[] graphicName, int drawLevel) {
-        this(DataManager.getData(animalName, DataBuilder.JsonAnimal.class), position, rotation, graphicName, drawLevel);
-    }
-
-    @Override
-    public void initLoad() {
-        super.initLoad();
-    }
-
-    @Override
-    public void load() {
-        super.load();
-        makeCollider();
-    }
-
     private void makeCollider(){
 
         CircleCollider collider = getComponent(CircleCollider.class);
         if(collider == null) collider = this.addComponent(new CircleCollider());
         collider.setupBody(BodyDef.BodyType.DynamicBody, ColonyGame.world, this.getTransform().getPosition(), 1, true, true);
 
+    }
+
+    @Override
+    public void initLoad(TLongObjectHashMap<Entity> entityMap, TLongObjectHashMap<Component> compMap) {
+        super.initLoad(entityMap, compMap);
+    }
+
+    @Override
+    public void load(TLongObjectHashMap<Entity> entityMap, TLongObjectHashMap<Component> compMap) {
+        super.load(entityMap, compMap);
+        makeCollider();
     }
 
 }
