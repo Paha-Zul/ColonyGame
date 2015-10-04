@@ -6,6 +6,7 @@ import com.mygdx.game.ColonyGame;
 import com.mygdx.game.component.Component;
 import com.mygdx.game.component.GridComponent;
 import com.mygdx.game.component.Interactable;
+import com.mygdx.game.component.Resource;
 import com.mygdx.game.component.collider.BoxCollider;
 import com.mygdx.game.component.graphic.GraphicIdentity;
 import com.mygdx.game.util.Constants;
@@ -25,17 +26,19 @@ public class ResourceEnt extends Entity{
         this.getTags().addTags("resource", "selectable");
         this.name = "Resource";
 
-        this.addComponent(new GraphicIdentity()).setSprite(graphicName[0], graphicName[1]);
+        GraphicIdentity identity = this.addComponent(new GraphicIdentity());
+        this.addComponent(new Resource());
+        GridComponent gridComp = this.addComponent(new GridComponent());
         Interactable inter = this.addComponent(new Interactable());
+
         inter.setInterType("resource");
 
-        GridComponent gridComp = this.addComponent(new GridComponent());
         gridComp.setGridType(Constants.GRIDACTIVE);
         gridComp.setGrid(ColonyGame.worldGrid);
         gridComp.setExploreRadius(-1);
 
-        GraphicIdentity identity = this.getComponent(GraphicIdentity.class);
         if(identity != null) {
+            identity.setSprite(graphicName[0], graphicName[1]);
             identity.setAnchor(0.5f, 0.05f);
             identity.configureSprite();
         }

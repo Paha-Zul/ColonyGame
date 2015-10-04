@@ -17,6 +17,8 @@ import gnu.trove.map.hash.TLongObjectHashMap;
 
 /**
  * Created by Paha on 1/10/2015.
+ * This class holds a reference to the JsonResource object as well as copying its values. The values (like the name and number of resources) so that
+ * the Resource values can be modified, which in the JsonResource they cannot.
  */
 public class Resource extends Component implements IInteractable{
     @JsonProperty

@@ -43,6 +43,18 @@ public class ListHolder {
 		entityList.forEach((e) -> perform.perform(e));
 	}
 
+	public static void clearEntityList(){
+		for(Array<Entity> list : entityList)
+			for(Entity ent : list) {
+				ent.destroy(ent);
+			}
+
+		//We do this to allow all the Entities to be removed. Since every Entity is being removed, no Entity will do
+		//a logic tick.
+		ListHolder.update(0f);
+		entityList = new Array<>();
+	}
+
     /**
      * Updates the main list in the ListHolder.
      * @param delta The time between frames.
@@ -84,15 +96,6 @@ public class ListHolder {
 
 			newList.clear();
 		}
-	}
-
-	public static void clearEntityList(){
-		for(Array<Entity> list : entityList)
-			for(Entity ent : list) {
-				ent.destroy(ent);
-			}
-
-		entityList = new Array<>();
 	}
 
     /**

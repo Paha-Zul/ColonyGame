@@ -41,9 +41,6 @@ public class Entity implements IDelayedDestroyable, ISaveable{
     @JsonProperty
     protected boolean destroyed=false, setToDestroy=false;
 
-    @JsonProperty
-    private long transformID, identityID;
-
     public Entity(){
 
     }
@@ -180,15 +177,7 @@ public class Entity implements IDelayedDestroyable, ISaveable{
 	@Override
 	public void setToDestroy() {
 		this.setToDestroy = true;
-	}/**
-	 * @return True if this Entity has been destroyed, false otherwise.
-	 */
-	@Override
-    @JsonIgnore
-	public boolean isDestroyed(){
-		return this.destroyed;
 	}
-
 public static class Components implements IDelayedDestroyable{
 		protected Array<Component> newComponentList = new Array<>();
 		protected Array<Component> activeComponentList = new Array<>();
@@ -374,16 +363,15 @@ public static class Components implements IDelayedDestroyable{
 		}
         public final <T extends Component & IScalable> void registerScalable(T scalable){
 			this.scalableComponents.add(scalable);
-        }@JsonIgnore
+        }
+        public final void scaleComponents(float scale){
+			for(Component scalable : this.scalableComponents)
+                ((IScalable)scalable).scale(scale);
+		}@JsonIgnore
         public Transform getTransform() {
             if(this.transform == null) this.transform = getComponent(Transform.class);
             return transform;
         }
-
-        public final void scaleComponents(float scale){
-			for(Component scalable : this.scalableComponents)
-                ((IScalable)scalable).scale(scale);
-		}
 
 		public void iterateOverComponents(Consumer<Component> consumer){
 			for(int i=0;i<activeComponentList.size;i++)
@@ -397,6 +385,8 @@ public static class Components implements IDelayedDestroyable{
             for(int i=0;i<scalableComponents.size;i++)
                 consumer.accept(scalableComponents.get(i));
 		}
+
+
 
 
 
@@ -452,7 +442,16 @@ public static class Components implements IDelayedDestroyable{
 		public boolean isSetToBeDestroyed() {
 			return this.setToDestroy;
 		}
+	}/**
+	 * @return True if this Entity has been destroyed, false otherwise.
+	 */
+	@Override
+    @JsonIgnore
+	public boolean isDestroyed(){
+		return this.destroyed;
 	}
+
+
 
     	@Override
     @JsonIgnore

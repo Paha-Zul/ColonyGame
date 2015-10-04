@@ -21,21 +21,16 @@ import gnu.trove.map.hash.TLongObjectHashMap;
 public class GraphicIdentity extends Component {
     public String spriteTextureName = "";
     public String atlasName = "";
-    @JsonIgnore
     private Sprite sprite;
-    @JsonIgnore
     private Effects effects;
-    @JsonIgnore
     private Enterable enterable;
     @JsonProperty
     private Vector2 anchor;
-
     @JsonProperty
     private int currVisibility=0;
 
     public GraphicIdentity(){
         this.setActive(true);
-
         this.anchor = new Vector2(0.5f, 0.5f);
     }
 
@@ -47,7 +42,13 @@ public class GraphicIdentity extends Component {
     @Override
     public void initLoad(TLongObjectHashMap<Entity> entityMap, TLongObjectHashMap<Component> compMap) {
         super.initLoad(entityMap, compMap);
-        setSprite(this.spriteTextureName, this.atlasName);
+
+        if(this.sprite != null) {
+            Vector2 pos = this.owner.getTransform().getPosition();
+            this.sprite.setPosition(pos.x - (getSprite().getWidth() * this.anchor.x), pos.y - (getSprite().getHeight() * this.anchor.y));
+        }
+
+        if(this.getSprite() == null) setSprite(this.spriteTextureName, this.atlasName);
     }
 
     @Override
@@ -57,15 +58,16 @@ public class GraphicIdentity extends Component {
         this.enterable = this.getComponent(Enterable.class);
     }
 
+    @Override
+    public void init() {
+        super.init();
+        this.initLoad(null, null);
+    }
+
 	@Override
 	public void start() {
         super.start();
-        //This is initially needed for getting the sprite to be the right size. If we simply scaled it using this method, then
-        //the image would draw the right size, but the offset from the width and height being unaffected causes real problems whenever the image
-        //is not centered.
         if(getSprite() == null) return;
-        //this.configureSprite(this.getSprite());
-
         this.load(null, null);
     }
 
@@ -132,6 +134,10 @@ public class GraphicIdentity extends Component {
             this.getSprite().setColor(Constants.COLOR_VISIBILE);
     }
 
+    public Sprite getSprite() {
+        return this.sprite;
+    }
+
     public void setSprite(String textureName, String atlasName){
         this.setSprite(textureName, atlasName, -1, -1);
     }
@@ -168,10 +174,6 @@ public class GraphicIdentity extends Component {
         this.configureSprite(this.getSprite(), width, height);
     }
 
-    public Sprite getSprite() {
-        return this.sprite;
-    }
-
     public void setSprite(Sprite sprite) {
         this.sprite = sprite;
     }
@@ -201,7 +203,20 @@ public class GraphicIdentity extends Component {
         String atlas = args[1];
         int width = Integer.parseInt(args[2]);
         int height = Integer.parseInt(args[3]);
+
         this.setSprite(name, atlas, width, height);
+    }
+
+    public void configureSprite(){
+        this.configureSprite(this.sprite, -1, -1);
+    }
+
+    /**
+     * Call this method when a change to the sprite occurs (change in size, texture, etc...). This will adjust the size/dimensions and such.
+     * @param sprite The Sprite to configure.
+     */
+    protected void configureSprite(Sprite sprite){
+        this.configureSprite(sprite, -1, -1);
     }
 
     @JsonProperty("sprite")
@@ -211,20 +226,6 @@ public class GraphicIdentity extends Component {
         else data = new String[]{this.spriteTextureName, this.atlasName, ""+(int)GH.toReal(this.sprite.getWidth()), ""+(int)GH.toReal(this.sprite.getHeight())};
 
         return data;
-    }
-
-    @JsonIgnore
-    public void configureSprite(){
-        this.configureSprite(this.sprite, -1, -1);
-    }
-
-    /**
-     * Call this method when a change to the sprite occurs (change in size, texture, etc...). This will adjust the size/dimensions and such.
-     * @param sprite The Sprite to configure.
-     */
-    @JsonIgnore
-    protected void configureSprite(Sprite sprite){
-        this.configureSprite(sprite, -1, -1);
     }
 
     /**

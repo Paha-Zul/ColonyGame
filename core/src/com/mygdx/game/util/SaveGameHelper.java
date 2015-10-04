@@ -46,7 +46,7 @@ public class SaveGameHelper {
 
         Runnable task = () -> {
             try {
-                writeFileEncode(file, mapper.writeValueAsString(world));
+                writeFile(file, mapper.writerWithDefaultPrettyPrinter().writeValueAsString(world));
                 world.clear();
             } catch (IOException e) {
                 e.printStackTrace();
@@ -68,12 +68,12 @@ public class SaveGameHelper {
             }
     }
 
-    public static void writeFileEncode(FileHandle file, String s) {
-        file.writeString(com.badlogic.gdx.utils.Base64Coder.encodeString(s), false);
-    }
-
     public static void writeFile(FileHandle file, String s) {
         file.writeString(s, true);
+    }
+
+    public static void writeFileEncode(FileHandle file, String s) {
+        file.writeString(com.badlogic.gdx.utils.Base64Coder.encodeString(s), false);
     }
 
     public static void writeFile(FileHandle file, byte[] bytes) {

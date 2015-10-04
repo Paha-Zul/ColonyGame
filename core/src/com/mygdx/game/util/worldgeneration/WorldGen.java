@@ -268,9 +268,6 @@ public class WorldGen {
         if(jRes == null)
             return;
 
-        //Create a new resource from the JsonResource.
-        Resource res = new Resource();
-        res.copyResource(jRes);
 
         //Get the atlas so we can get the image from it.
         TextureAtlas interactableAtlas = ColonyGame.assetManager.get("interactables", TextureAtlas.class); //Get the atlas
@@ -282,9 +279,12 @@ public class WorldGen {
 
         //Create the resource and stuff.
         ResourceEnt resEnt = new ResourceEnt(centerPos, 0, new String[]{textureName, atlasName}, 11);
-        resEnt.addComponent(res);
-        resEnt.getTransform().setScale(treeScale);
+        //Get the Resource component and set its name and copy the jRes resource.
+        Resource res = resEnt.getComponent(Resource.class);
         resEnt.name = res.getDisplayName();
+        res.copyResource(jRes);
+
+        resEnt.getTransform().setScale(treeScale);
         ListHolder.addEntity(resEnt);
     }
 

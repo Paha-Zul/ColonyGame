@@ -5,6 +5,7 @@ import com.badlogic.gdx.physics.box2d.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mygdx.game.component.Component;
+import com.mygdx.game.component.graphic.GraphicIdentity;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.interfaces.IScalable;
 import com.mygdx.game.util.Constants;
@@ -58,6 +59,12 @@ public abstract class Collider extends Component implements IScalable{
         this.body.setActive(true);
         //this.owner.getComponents().registerScalable(this);
         //this.body.setActive(false);
+
+        GraphicIdentity identity = this.owner.getGraphicIdentity();
+        if(identity != null){
+            this.body.setTransform(identity.getSprite().getX() + identity.getSprite().getWidth()/2, identity.getSprite().getY()+identity.getSprite().getHeight()/2, 0);
+        }else
+            this.body.setTransform(this.owner.getTransform().getPosition(), 0);
     }
 
     @Override

@@ -24,11 +24,11 @@ public class BoxCollider extends Collider{
         this.setWorld(world);
         this.setActive(active);
 
-        //Get the graphic for the collider size
-        GraphicIdentity graphic = this.getComponent(GraphicIdentity.class);
-        if(graphic == null || graphic.getSprite() == null) return;
-
         if(hWidth == -1 || hHeight == -1) {
+            //Get the graphic for the collider size
+            GraphicIdentity graphic = this.getComponent(GraphicIdentity.class);
+            if(graphic == null || graphic.getSprite() == null) return;
+
             this.colliderType = SQUARE_FITGRAPHIC;
             hWidth = graphic.getSprite().getWidth()/2;
             hHeight = graphic.getSprite().getHeight()/2;

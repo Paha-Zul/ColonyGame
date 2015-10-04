@@ -99,9 +99,8 @@ public class Transform extends Component implements IDelayedDestroyable {
 
 	/**
 	 * Gets the local position of the transform.
-	 * @return A Vector2 holding the local X and Y coordinate of the transform.
+	 * @return A Vector2 holding the world X and Y coordinate of the transform.
 	 */
-    @JsonIgnore
 	public Vector2 getPosition(){
 		return this.worldPosition;
 	}
