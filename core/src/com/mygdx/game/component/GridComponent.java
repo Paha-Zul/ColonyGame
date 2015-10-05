@@ -43,16 +43,7 @@ public class GridComponent extends Component{
         this.grid = ColonyGame.worldGrid;
         if(this.gridType == Constants.GRIDSTATIC)
             this.setActive(false);
-    }
 
-    @Override
-    public void init() {
-        super.init();
-    }
-
-    @Override
-    public void start() {
-        super.start();
         //Gets a node to start.
         this.grid = ColonyGame.worldGrid;
         if(!addMulti) this.currNode = this.grid.addToGrid(this.owner);
@@ -96,8 +87,18 @@ public class GridComponent extends Component{
             this.currNode = this.grid.addToGrid(this.owner, true, bounds);
         }
         this.grid.addViewer(this.currNode, this.exploreRadius);
-        this.load(null, null);
+    }
 
+    @Override
+    public void init() {
+        super.init();
+    }
+
+    @Override
+    public void start() {
+        super.start();
+
+        this.load(null, null);
     }
 
     @Override

@@ -52,12 +52,12 @@ public class AnimalEnt extends Entity{
     @Override
     public void initLoad(TLongObjectHashMap<Entity> entityMap, TLongObjectHashMap<Component> compMap) {
         super.initLoad(entityMap, compMap);
+        this.makeCollider();
     }
 
     @Override
     public void load(TLongObjectHashMap<Entity> entityMap, TLongObjectHashMap<Component> compMap) {
         super.load(entityMap, compMap);
-        makeCollider();
     }
 
 }

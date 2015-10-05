@@ -124,10 +124,7 @@ public class Stats extends Component{
      */
     @JsonIgnore
     public Stat getStat(String name){
-        if(this.statMap.containsKey(name))
-            return this.statMap.get(name);
-
-        return null;
+        return this.statMap.get(name);
     }
 
     /**

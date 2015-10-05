@@ -73,6 +73,20 @@ public class BehaviourManagerComp extends Component{
     }
 
     @Override
+    public void added(Entity owner) {
+        super.added(owner);
+        this.addedLoad(null, null);
+    }
+
+    @Override
+    public void addedLoad(TLongObjectHashMap<Entity> entityMap, TLongObjectHashMap<Component> compMap) {
+        super.addedLoad(entityMap, compMap);
+        this.blackBoard = new BlackBoard();
+        this.blackBoard.colonyGrid = ColonyGame.worldGrid;
+        this.blackBoard.myManager = this;
+    }
+
+    @Override
     public void save() {
 
     }
@@ -81,9 +95,6 @@ public class BehaviourManagerComp extends Component{
     public void initLoad(TLongObjectHashMap<Entity> entityMap, TLongObjectHashMap<Component> compMap) {
         super.initLoad(entityMap, compMap);
 
-        this.blackBoard = new BlackBoard();
-        this.blackBoard.colonyGrid = ColonyGame.worldGrid;
-        this.blackBoard.myManager = this;
     }
 
     @Override

@@ -1,10 +1,8 @@
 package com.mygdx.game.entity;
 
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.component.*;
-import com.mygdx.game.component.collider.CircleCollider;
 import com.mygdx.game.component.graphic.ColonistGraphic;
 import com.mygdx.game.util.Constants;
 import gnu.trove.map.hash.TLongObjectHashMap;
@@ -32,24 +30,15 @@ public class ColonistEnt extends Entity{
         this.addComponent(new Equipment());
         this.addComponent(new BehaviourManagerComp());
         this.addComponent(new Effects());
-
-        this.makeCollider();
-    }
-
-    private void makeCollider(){
-        CircleCollider collider = getComponent(CircleCollider.class);
-        if(collider == null) collider = this.addComponent(new CircleCollider());
-        collider.setupBody(BodyDef.BodyType.DynamicBody, ColonyGame.world, this.getTransform().getPosition(), 1, true, true);
-
     }
 
     @Override
     public void initLoad(TLongObjectHashMap<Entity> entityMap, TLongObjectHashMap<Component> compMap) {
+        super.initLoad(entityMap, compMap);
     }
 
     @Override
     public void load(TLongObjectHashMap<Entity> entityMap, TLongObjectHashMap<Component> compMap) {
         super.load(entityMap, compMap);
-        makeCollider();
     }
 }

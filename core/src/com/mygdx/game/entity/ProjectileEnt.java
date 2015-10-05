@@ -35,6 +35,7 @@ public class ProjectileEnt extends Entity{
     @Override
     public void initLoad(TLongObjectHashMap<Entity> entityMap, TLongObjectHashMap<Component> compMap) {
         super.initLoad(entityMap, compMap);
+        this.makeCollider();
     }
 
     @Override

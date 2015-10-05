@@ -232,8 +232,8 @@ public static class Components implements IDelayedDestroyable{
 		}
 
 		/**
-		 * Adds a component to this Entity. The Component is immediately added to the Entity but the 'start' method is not called
-		 * until the next update frame for the Entity. This means any values set in the 'start' method are not set in the same frame.
+		 * Adds a component to this Entity. The Component has added(Entity owner) immediately called and is put into a newComponent list. On the next tick, all new Components
+		 * have init() called and then start() in that order.
 		 * @param comp The Component to add to this Entity.
 		 * @param <T> The Component class interType of the component being added.
 		 * @return The Component that was added.
@@ -367,12 +367,7 @@ public static class Components implements IDelayedDestroyable{
         public final void scaleComponents(float scale){
 			for(Component scalable : this.scalableComponents)
                 ((IScalable)scalable).scale(scale);
-		}@JsonIgnore
-        public Transform getTransform() {
-            if(this.transform == null) this.transform = getComponent(Transform.class);
-            return transform;
-        }
-
+		}
 		public void iterateOverComponents(Consumer<Component> consumer){
 			for(int i=0;i<activeComponentList.size;i++)
                 consumer.accept(activeComponentList.get(i));
@@ -384,7 +379,13 @@ public static class Components implements IDelayedDestroyable{
                 consumer.accept(destroyComponentList.get(i));
             for(int i=0;i<scalableComponents.size;i++)
                 consumer.accept(scalableComponents.get(i));
-		}
+		}@JsonIgnore
+        public Transform getTransform() {
+            if(this.transform == null) this.transform = getComponent(Transform.class);
+            return transform;
+        }
+
+
 
 
 

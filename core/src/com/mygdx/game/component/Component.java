@@ -31,7 +31,8 @@ public abstract class Component implements IDelayedDestroyable, ISaveable {
 
     /**
      * Called as soon as the Component has been added. Use this to either interact with the Entity owner
-     * or perform any task that does not rely on fields or other Components.
+     * or perform any task that does not rely on fields or other Components. Init is called after (after all Components during that tick have been added,
+	 * and init is called on all new components at once), then start (immediately after the init batch).
      * @param owner The Entity owner of this Component.
      */
 	public void added(Entity owner){
@@ -60,15 +61,15 @@ public abstract class Component implements IDelayedDestroyable, ISaveable {
 	}
 
 	/**
-     * Called after added() but before start(). Use this to interact with any fields that may have been set on this Component
-     * but not other Components on the Entity.
+     * Called after added() but before the start() batch. Use this to interact with any fields that may have been set on this Component
+     * but not other Components on the Entity. This is called on all new components of the Entity at the same time. Afterwards, start is called.
      */
 	public void init(){
 		this.initiated = true;
 	}
 
 	/**
-	 * The start of this Component. This is where other Components of the owner can be accessed and stored as a reference.
+	 * The start of this Component. This is where other Components of the owner can be accessed and stored as a reference. Called after all new components have been added() and init().
 	 */
 	public void start(){
 		this.started = true;

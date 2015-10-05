@@ -46,23 +46,6 @@ public class ResourceEnt extends Entity{
         this.load(null, null);
     }
 
-    private void makeCollider(){
-        //Get the graphic for the collider size
-        GraphicIdentity graphic = this.getComponent(GraphicIdentity.class);
-        if(graphic == null || graphic.getSprite() == null) return;
-
-        //Try to get the collider. If null, make a new one!
-        BoxCollider collider = getComponent(BoxCollider.class);
-        if(collider == null){
-            collider = new BoxCollider();
-            collider.setActive(false);
-            collider = this.addComponent(collider);
-            collider.setupBody(BodyDef.BodyType.StaticBody, ColonyGame.world, graphic.getSprite().getWidth()/4, graphic.getSprite().getHeight()/2,
-                    new Vector2(graphic.getSprite().getX() + graphic.getSprite().getWidth()/2, graphic.getSprite().getY() + graphic.getSprite().getHeight()/2), false, false);
-        }
-
-    }
-
     @Override
     public void initLoad(TLongObjectHashMap<Entity> entityMap, TLongObjectHashMap<Component> compMap) {
         super.initLoad(entityMap, compMap);
@@ -71,6 +54,5 @@ public class ResourceEnt extends Entity{
     @Override
     public void load(TLongObjectHashMap<Entity> entityMap, TLongObjectHashMap<Component> compMap) {
         super.load(entityMap, compMap);
-        this.makeCollider();
     }
 }

@@ -1,6 +1,7 @@
 package com.mygdx.game.component;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
@@ -8,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.behaviourtree.Task;
+import com.mygdx.game.component.collider.CircleCollider;
 import com.mygdx.game.component.collider.Collider;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.interfaces.Functional;
@@ -169,22 +171,29 @@ public class Colonist extends Component implements IInteractable, IOwnable{
     }
 
     @Override
+    public void initLoad(TLongObjectHashMap<Entity> entityMap, TLongObjectHashMap<Component> compMap) {
+        super.initLoad(entityMap, compMap);
+        this.setupColonist(); //Set up things about the colonist.
+    }
+
+    @Override
     public void load(TLongObjectHashMap<Entity> entityMap, TLongObjectHashMap<Component> compMap) {
         super.load(entityMap, compMap);
-
-        this.setupColonist();
+        this.configureStats(); //Configure the stats.
+        this.makeCollider(); //Make the collider.
     }
 
     @Override
     public void init() {
         super.init();
+        this.initLoad(null, null);
     }
 
     @Override
     public void start() {
-        this.load(null, null);
-        this.createStats();
         super.start();
+        this.createStats(); //Create the stats.
+        this.load(null, null);
     }
 
     @Override
@@ -240,72 +249,9 @@ public class Colonist extends Component implements IInteractable, IOwnable{
     }
 
     /**
-     * Creates the stats for this colonist.
+     * Sets up the colonist, grabbing needed components, adding events to the event system, and calling
+     * createBehaviourButtons(), createBehaviourStates(), createRangeSensor(), createEffects().
      */
-    private void createStats(){
-        //Create these 4 stats.
-        Stats.Stat healthStat = stats.addStat("health", 100, 100);
-        Stats.Stat foodStat = stats.addStat("food", 5, 100);
-        Stats.Stat waterStat = stats.addStat("water", 1, 100);
-        Stats.Stat energyStat = stats.addStat("energy", 100, 100);
-
-        healthStat.color = Color.GREEN;
-        foodStat.color = Color.RED;
-        waterStat.color = Color.CYAN;
-        energyStat.color = Color.YELLOW;
-
-        foodStat.effect = "feed";
-        waterStat.effect = "thirst";
-
-        //Add some timers.
-        //Subtract food every 5 seconds and try to eat when it's too low.
-        stats.addTimer(new RepeatingTimer(5f, () -> {
-            foodStat.addToCurrent(-1);
-            //If under 20, try to eat.
-            if(foodStat.getCurrVal() <= 20 && !getBehManager().getBehaviourStates().isCurrState("consume")) {
-                getBehManager().getBlackBoard().itemEffect = "feed";
-                getBehManager().getBlackBoard().itemEffectAmount = 1;
-                getBehManager().changeTaskQueued("consume");
-            }
-        }));
-
-        //Subtract water every 10 seconds and try to drink when it's too low.
-        stats.addTimer(new RepeatingTimer(10f, () -> {
-            waterStat.addToCurrent(-1);
-            //If under 20, try to drink.
-            if (waterStat.getCurrVal() <= 20 && !getBehManager().getBehaviourStates().isCurrState("consume")) {
-                getBehManager().getBlackBoard().itemEffect = "thirst";
-                getBehManager().getBlackBoard().itemEffectAmount = 1;
-                getBehManager().changeTaskQueued("consume");
-            }
-        })); //Subtract water every 10 seconds.
-
-        //Subtract energy every so often...
-        stats.addTimer(new RepeatingTimer(3f, () -> {
-            energyStat.addToCurrent(-1);
-            //If under 20, sleep!
-            if (energyStat.getCurrVal() <= 20 && !getBehManager().getBehaviourStates().isCurrState("sleep")) {
-                getBehManager().changeTaskQueued("sleep");
-            }
-        })); //Subtract energy
-
-        //If food or water is 0, subtract health.
-        Timer timer = stats.addTimer(new RepeatingTimer(5f, null));
-        timer.setCallback(() -> {
-            //If out of food OR water, degrade health.
-            if (stats.getStat("food").getCurrVal() <= 0 || stats.getStat("water").getCurrVal() <= 0) {
-                stats.getStat("health").addToCurrent(-1);
-                timer.setLength(5f);
-                //If we have both food AND water, improve health.
-            } else if (stats.getStat("food").getCurrVal() > 0 && stats.getStat("water").getCurrVal() > 0) {
-                stats.getStat("health").addToCurrent(1);
-                timer.setLength(10f);
-            }
-        });
-
-        healthStat.onZero = onZero;
-    }
-
     private void setupColonist(){
         this.inventory = this.getComponent(Inventory.class);
         this.inventory.setMaxAmount(10);
@@ -418,6 +364,91 @@ public class Colonist extends Component implements IInteractable, IOwnable{
         this.effects.addNewEffect("starving", "Starving", "starvation_effect", (Stats stats) -> stats.getStat("food").getCurrVal() <= 0);
         this.effects.addNewEffect("dehydrated", "Dehydrated", "dehydration_effect", (Stats stats) -> stats.getStat("water").getCurrVal() <= 0);
         this.effects.addNewEffect("sleepy", "Sleepy", "sleepy_effect", (Stats stats) -> stats.getStat("energy").getCurrVal() <= 20);
+    }
+
+    private void makeCollider(){
+        CircleCollider collider = getComponent(CircleCollider.class);
+        if(collider == null) collider = this.addComponent(new CircleCollider());
+        collider.setupBody(BodyDef.BodyType.DynamicBody, ColonyGame.world, this.owner.getTransform().getPosition(), 1, true, true);
+    }
+
+    /**
+     * Creates the stats for this colonist. Also calls configureStats()
+     */
+    private void createStats(){
+        //Create these 4 stats.
+        Stats.Stat healthStat = stats.addStat("health", 100, 100);
+        Stats.Stat foodStat = stats.addStat("food", 5, 100);
+        Stats.Stat waterStat = stats.addStat("water", 1, 100);
+        Stats.Stat energyStat = stats.addStat("energy", 100, 100);
+
+        this.configureStats();
+    }
+
+    /**
+     * Configures the stats for the Colonist, things like colors, effects, and timers.
+     */
+    private void configureStats(){
+        Stats.Stat healthStat = stats.getStat("health");
+        Stats.Stat foodStat = stats.getStat("food");
+        Stats.Stat waterStat = stats.getStat("water");
+        Stats.Stat energyStat = stats.getStat("energy");
+
+        healthStat.color = Color.GREEN;
+        foodStat.color = Color.RED;
+        waterStat.color = Color.CYAN;
+        energyStat.color = Color.YELLOW;
+
+        foodStat.effect = "feed";
+        waterStat.effect = "thirst";
+
+        //Add some timers.
+        //Subtract food every 5 seconds and try to eat when it's too low.
+        stats.addTimer(new RepeatingTimer(5f, () -> {
+            foodStat.addToCurrent(-1);
+            //If under 20, try to eat.
+            if(foodStat.getCurrVal() <= 20 && !getBehManager().getBehaviourStates().isCurrState("consume")) {
+                getBehManager().getBlackBoard().itemEffect = "feed";
+                getBehManager().getBlackBoard().itemEffectAmount = 1;
+                getBehManager().changeTaskQueued("consume");
+            }
+        }));
+
+        //Subtract water every 10 seconds and try to drink when it's too low.
+        stats.addTimer(new RepeatingTimer(10f, () -> {
+            waterStat.addToCurrent(-1);
+            //If under 20, try to drink.
+            if (waterStat.getCurrVal() <= 20 && !getBehManager().getBehaviourStates().isCurrState("consume")) {
+                getBehManager().getBlackBoard().itemEffect = "thirst";
+                getBehManager().getBlackBoard().itemEffectAmount = 1;
+                getBehManager().changeTaskQueued("consume");
+            }
+        })); //Subtract water every 10 seconds.
+
+        //Subtract energy every so often...
+        stats.addTimer(new RepeatingTimer(3f, () -> {
+            energyStat.addToCurrent(-1);
+            //If under 20, sleep!
+            if (energyStat.getCurrVal() <= 20 && !getBehManager().getBehaviourStates().isCurrState("sleep")) {
+                getBehManager().changeTaskQueued("sleep");
+            }
+        })); //Subtract energy
+
+        //If food or water is 0, subtract health.
+        Timer timer = stats.addTimer(new RepeatingTimer(5f, null));
+        timer.setCallback(() -> {
+            //If out of food OR water, degrade health.
+            if (stats.getStat("food").getCurrVal() <= 0 || stats.getStat("water").getCurrVal() <= 0) {
+                stats.getStat("health").addToCurrent(-1);
+                timer.setLength(5f);
+                //If we have both food AND water, improve health.
+            } else if (stats.getStat("food").getCurrVal() > 0 && stats.getStat("water").getCurrVal() > 0) {
+                stats.getStat("health").addToCurrent(1);
+                timer.setLength(10f);
+            }
+        });
+
+        healthStat.onZero = onZero;
     }
 
     @JsonIgnore
