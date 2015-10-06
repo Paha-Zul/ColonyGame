@@ -26,33 +26,30 @@ import java.util.ArrayList;
  * A Window to display information about the selected entities.
  */
 public class SelectedWindow extends Window{
-    private Rectangle uiBackgroundTopRect = new Rectangle(); //What is this?
-    private Rectangle infoTopRect = new Rectangle();
-    private Rectangle statusTopRect = new Rectangle();
-    private Rectangle tabsTopRect = new Rectangle();
-    private Rectangle ordersTopRect = new Rectangle();
-
-    private Rectangle uiBackgroundBaseRect = new Rectangle(); //What is this?
-    private Rectangle infoRect = new Rectangle();
-    private Rectangle statusRect = new Rectangle();
-    private Rectangle tabsRect = new Rectangle();
-    private Rectangle ordersRect = new Rectangle();
-    private Rectangle orderButtonRect = new Rectangle();
-
     private final float mainHeight = 0.12f;
     private final float topHeight = 0.03f;
     private final float infoWidth = 0.13f;
     private final float statusWidth = 0.135f;
     private final float tabsWidth = 0.262f;
     private final float ordersWidth = 0.479f;
-
+    private Rectangle uiBackgroundTopRect = new Rectangle(); //What is this?
+    private Rectangle infoTopRect = new Rectangle();
+    private Rectangle statusTopRect = new Rectangle();
+    private Rectangle tabsTopRect = new Rectangle();
+    private Rectangle ordersTopRect = new Rectangle();
+    private Rectangle uiBackgroundBaseRect = new Rectangle(); //What is this?
+    private Rectangle infoRect = new Rectangle();
+    private Rectangle statusRect = new Rectangle();
+    private Rectangle tabsRect = new Rectangle();
+    private Rectangle ordersRect = new Rectangle();
+    private Rectangle orderButtonRect = new Rectangle();
     private TextureRegion UIBackgroundBase, UIBackgroundTop;
 
     public SelectedWindow(PlayerInterface playerInterface) {
         super(playerInterface, null);
 
-        this.UIBackgroundBase = new TextureRegion(ColonyGame.assetManager.get("UIBackground_base", Texture.class));
-        this.UIBackgroundTop = new TextureRegion(ColonyGame.assetManager.get("UIBackground_top", Texture.class));
+        this.UIBackgroundBase = new TextureRegion(ColonyGame.instance.assetManager.get("UIBackground_base", Texture.class));
+        this.UIBackgroundTop = new TextureRegion(ColonyGame.instance.assetManager.get("UIBackground_top", Texture.class));
     }
 
     @Override
@@ -75,6 +72,43 @@ public class SelectedWindow extends Window{
 
             this.drawMultipleProfiles(batch, this.ordersRect);
             this.drawSelected(batch);
+        }
+    }
+
+    /**
+     * Draws the multiple selectedEntity profile buttons for selecting from the list of profiles.
+     * @param rect The rectangle to draw the information inside of.
+     */
+    private void drawMultipleProfiles(SpriteBatch batch, Rectangle rect){
+
+        //If there is more than one unit selectedEntity.. display in a group format.
+        if(this.playerInterface.getSelectedProfileList().size > 1){
+            Rectangle.tmp.set(rect.getX() + rect.getWidth() - 60, rect.getY() + rect.getHeight() - 20, 50, 20);
+
+            //Some things.
+            float buttonWidth = 50, buttonHeight = 20;
+            float spacingX = 5, spacingY = 5;
+            int numY = (int)(rect.getHeight()/(buttonHeight+spacingY));
+            float startX = rect.getX() + rect.getWidth() - buttonWidth - 10;
+            float startY = rect.getY() + spacingY;
+
+            //For each profile, draw a button to access each individual entity.
+            for(int i=0;i<this.playerInterface.getSelectedProfileList().size;i++) {
+                PlayerInterface.UnitProfile profile = this.playerInterface.getSelectedProfileList().get(i);
+                if(!profile.entity.getTags().hasTag("alive")){
+                    profile.entity.getTags().removeTag("selected");
+                    this.playerInterface.getSelectedProfileList().removeIndex(i);
+                    i--;
+                    continue;
+                }
+
+                //Some math that positions every correctly.
+                Rectangle.tmp.set(startX - (i/numY)*(buttonWidth+spacingX), startY + (i%numY)*(buttonHeight + spacingY), buttonWidth, buttonHeight);
+
+                //Draw the button for the individual profile. If clicked, make it our selected profile.
+                if(GUI.Button(batch, Rectangle.tmp, profile.interactable.getInteractable().getName()) == GUI.UP)
+                    this.playerInterface.setSelectedProfile(profile);
+            }
         }
     }
 
@@ -106,7 +140,7 @@ public class SelectedWindow extends Window{
             if(innerInter.getStats() != null){
                 GUI.Label("Stats", batch, this.statusTopRect, this.playerInterface.UIStyle);
 
-                //GUI.Texture(statusRect, ColonyGame.assetManager.get("menuButton_normal", Texture.class), this.batch);
+                //GUI.Texture(statusRect, ColonyGame.instance.assetManager.get("menuButton_normal", Texture.class), this.batch);
                 Stats stats = innerInter.getStats();
                 Rectangle rect = this.statusRect;
 
@@ -142,7 +176,7 @@ public class SelectedWindow extends Window{
 
             //If it has an inventory, draw the inventory...
             if(innerInter.getInventory() != null){
-                //GUI.Texture(tabsRect, ColonyGame.assetManager.get("menuButton_normal", Texture.class), this.batch);
+                //GUI.Texture(tabsRect, ColonyGame.instance.assetManager.get("menuButton_normal", Texture.class), this.batch);
                 GUI.Label("Inventory", batch, this.tabsTopRect, this.playerInterface.UIStyle);
                 this.playerInterface.drawInventory(innerInter.getInventory(), this.tabsRect);
             }
@@ -183,18 +217,18 @@ public class SelectedWindow extends Window{
         //If it's a humanoid that we can control, draw some order buttons and its current path.
             GUI.Label("Orders", batch, this.ordersTopRect, this.playerInterface.UIStyle);
 
-            //GUI.Texture(ordersRect, ColonyGame.assetManager.get("menuButton_normal", Texture.class), this.batch);
+            //GUI.Texture(ordersRect, ColonyGame.instance.assetManager.get("menuButton_normal", Texture.class), this.batch);
             if(interactable.getBehManager() != null) {
                 this.drawBehaviourButtons(batch, interactable);
 
                 //Set to saveContainer camera and draw the path lines.
-                batch.setProjectionMatrix(ColonyGame.camera.combined);
+                batch.setProjectionMatrix(ColonyGame.instance.camera.combined);
                 BehaviourManagerComp.Line[] lines = interactable.getBehManager().getLines();
                 for(BehaviourManagerComp.Line line : lines)
                     batch.draw(this.playerInterface.blueSquare, line.startX, line.startY, 0, 0, line.width, 0.1f, 1, 1, line.rotation, 0, 0, this.playerInterface.blueSquare.getWidth(), this.playerInterface.blueSquare.getHeight(), false, false);
 
                 //Set back to UI camera.
-                batch.setProjectionMatrix(ColonyGame.UICamera.combined);
+                batch.setProjectionMatrix(ColonyGame.instance.UICamera.combined);
 
             }
     }
@@ -257,43 +291,6 @@ public class SelectedWindow extends Window{
                 if (tmpNode.hasChildren()) {
                     tree.setCurrentTreeNode(tmpNode);
                 }
-            }
-        }
-    }
-
-    /**
-     * Draws the multiple selectedEntity profile buttons for selecting from the list of profiles.
-     * @param rect The rectangle to draw the information inside of.
-     */
-    private void drawMultipleProfiles(SpriteBatch batch, Rectangle rect){
-
-        //If there is more than one unit selectedEntity.. display in a group format.
-        if(this.playerInterface.getSelectedProfileList().size > 1){
-            Rectangle.tmp.set(rect.getX() + rect.getWidth() - 60, rect.getY() + rect.getHeight() - 20, 50, 20);
-
-            //Some things.
-            float buttonWidth = 50, buttonHeight = 20;
-            float spacingX = 5, spacingY = 5;
-            int numY = (int)(rect.getHeight()/(buttonHeight+spacingY));
-            float startX = rect.getX() + rect.getWidth() - buttonWidth - 10;
-            float startY = rect.getY() + spacingY;
-
-            //For each profile, draw a button to access each individual entity.
-            for(int i=0;i<this.playerInterface.getSelectedProfileList().size;i++) {
-                PlayerInterface.UnitProfile profile = this.playerInterface.getSelectedProfileList().get(i);
-                if(!profile.entity.getTags().hasTag("alive")){
-                    profile.entity.getTags().removeTag("selected");
-                    this.playerInterface.getSelectedProfileList().removeIndex(i);
-                    i--;
-                    continue;
-                }
-
-                //Some math that positions every correctly.
-                Rectangle.tmp.set(startX - (i/numY)*(buttonWidth+spacingX), startY + (i%numY)*(buttonHeight + spacingY), buttonWidth, buttonHeight);
-
-                //Draw the button for the individual profile. If clicked, make it our selected profile.
-                if(GUI.Button(batch, Rectangle.tmp, profile.interactable.getInteractable().getName()) == GUI.UP)
-                    this.playerInterface.setSelectedProfile(profile);
             }
         }
     }

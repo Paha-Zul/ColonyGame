@@ -36,8 +36,8 @@ public class Grid {
     }
 
     public static class GridInstance {
-        private int numCols, numRows, squareSize;
         public int padding = 3;
+        private int numCols, numRows, squareSize;
         private Node[][] grid;
         private VisibilityTile[][] visibilityMap;
 
@@ -56,14 +56,6 @@ public class Grid {
             }
 
             this.visibilityMap = new VisibilityTile[numCols][numRows];
-        }
-
-        /**
-         * Uses a functional interface(lambda/anonymous function) to perform on the grid.
-         * @param perform The Functional interface/lambda/anonymous function to execute.
-         */
-        public void perform(Functional.Perform perform) {
-            perform.perform(this.grid);
         }
 
         /**
@@ -88,6 +80,34 @@ public class Grid {
         }
 
         /**
+         * @return The total width (num of X tiles across) of this Grid.
+         */
+        public int getWidth() {
+            return this.numCols;
+        }
+
+        /**
+         * @return Gets the height (total Y tiles) of this Grid.
+         */
+        public int getHeight() {
+            return this.numRows;
+        }
+
+        /**
+         * Gets a Node by a X and Y index.
+         * @param x The X (x) index to get the Node at.
+         * @param y The Y (y) index to get the Node at.
+         * @return The Node if the index was valid, null otherwise.
+         */
+        public Node getNode(int x, int y) {
+            //If the index is not in bounds, return null.
+            if (x < 0 || x >= this.grid.length || y < 0 || y >= this.grid[x].length)
+                return null;
+
+            return this.grid[x][y];
+        }
+
+        /**
          * Performs a Predicate function on Nodes within the radius from the start index. If any Predicate test returns true, the function returns.
          * @param radius The radius of the search.
          * @param startIndex The start index.
@@ -98,24 +118,6 @@ public class Grid {
 
             for(int x = ranges[0]; x <= ranges[1]; x++){
                 for(int y = ranges[2]; y <= ranges[3]; y++){
-                    Node node = getNode(x, y);
-                    if(node == null) continue; //If null, continue
-                    if(nodePredicate.test(node))
-                        return true;
-                }
-            }
-
-            return false;
-        }
-
-        public boolean performOnNodeInArea(int[] area, Predicate<Node> nodePredicate){
-            int startX = area[0] < 0 ? 0 : area[0];
-            int endX = area[1] >= this.getWidth() ? this.getWidth()-1 : area[1];
-            int startY = area[2] < 0 ? 0 : area[2];
-            int endY = area[3] >= this.getHeight() ? this.getHeight()-1 : area[3];
-
-            for(int x = startX; x <= endX; x++){
-                for(int y = startY; y <= endY; y++){
                     Node node = getNode(x, y);
                     if(node == null) continue; //If null, continue
                     if(nodePredicate.test(node))
@@ -176,17 +178,6 @@ public class Grid {
         }
 
         /**
-         * Adds an Entity to the grid, using it's position to find the Node.
-         * @param entity The Entity to add.
-         * @return The Node that the Entity was added to.
-         */
-        public Node addToGrid(Entity entity){
-            Node node = this.getNode(entity);
-            node.addEntity(entity);
-            return node;
-        }
-
-        /**
          * Adds an Entity to the grid. Uses the position of the Entity for the node to return, but may add this Entity to multiple nodes
          * using the bounds parameter.
          * @param entity The Entity to add/
@@ -210,6 +201,54 @@ public class Grid {
         }
 
         /**
+         * @return The square size of this Grid.
+         */
+        public float getSquareSize() {
+            return GH.toMeters(this.squareSize);
+        }
+
+        public boolean performOnNodeInArea(int[] area, Predicate<Node> nodePredicate){
+            int startX = area[0] < 0 ? 0 : area[0];
+            int endX = area[1] >= this.getWidth() ? this.getWidth()-1 : area[1];
+            int startY = area[2] < 0 ? 0 : area[2];
+            int endY = area[3] >= this.getHeight() ? this.getHeight()-1 : area[3];
+
+            for(int x = startX; x <= endX; x++){
+                for(int y = startY; y <= endY; y++){
+                    Node node = getNode(x, y);
+                    if(node == null) continue; //If null, continue
+                    if(nodePredicate.test(node))
+                        return true;
+                }
+            }
+
+            return false;
+        }
+
+        /**
+         * Adds an Entity to the grid, using it's position to find the Node.
+         * @param entity The Entity to add.
+         * @return The Node that the Entity was added to.
+         */
+        public Node addToGrid(Entity entity){
+            Node node = this.getNode(entity);
+            node.addEntity(entity);
+            return node;
+        }
+
+        /**
+         * Gets the Node at the Entity's location.
+         * @param entity The Entity to use for a location.
+         * @return A Node at the Entity's location.
+         */
+        public Node getNode(@NotNull Entity entity) {
+            if(entity.getTransform() == null)
+                return null;
+
+            return this.getNode((int) (entity.getTransform().getPosition().x / this.getSquareSize()), (int) (entity.getTransform().getPosition().y / this.getSquareSize()));
+        }
+
+        /**
          * Adds a viewer to the VisibilityTiles within the Node's position plus radius.
          * @param startingNode The starting Node to begin at.
          * @param exploreRadius The radius to add viewers.
@@ -229,6 +268,10 @@ public class Grid {
                     visMap[x][y].addViewer();
                 }
             }
+        }
+
+        public final VisibilityTile[][] getVisibilityMap(){
+            return this.visibilityMap;
         }
 
         public void removeViewer(GridComponent gridComp){
@@ -336,23 +379,12 @@ public class Grid {
         }
 
         /**
-         * Gets the grid array of this Grid.
-         * @return the Node[][] array of this Grid.
+         * Gets the index from the Vector2 position passed in.
+         * @param position The Vector2 position to get an index of.
+         * @return An integer array containing 2 values, the X and Y index.
          */
-        public Node[][] getGrid() {
-            return this.grid;
-        }
-
-        /**
-         * Gets the Node at the Entity's location.
-         * @param entity The Entity to use for a location.
-         * @return A Node at the Entity's location.
-         */
-        public Node getNode(@NotNull Entity entity) {
-            if(entity.getTransform() == null)
-                return null;
-
-            return this.getNode((int) (entity.getTransform().getPosition().x / this.getSquareSize()), (int) (entity.getTransform().getPosition().y / this.getSquareSize()));
+        public int[] getIndex(Vector2 position) {
+            return getIndex(position.x, position.y);
         }
 
         /**
@@ -365,17 +397,29 @@ public class Grid {
         }
 
         /**
-         * Gets a Node by a X and Y index.
-         * @param x The X (x) index to get the Node at.
-         * @param y The Y (y) index to get the Node at.
-         * @return The Node if the index was valid, null otherwise.
+         * Uses a functional interface(lambda/anonymous function) to perform on the grid.
+         * @param perform The Functional interface/lambda/anonymous function to execute.
          */
-        public Node getNode(int x, int y) {
-            //If the index is not in bounds, return null.
-            if (x < 0 || x >= this.grid.length || y < 0 || y >= this.grid[x].length)
-                return null;
+        public void perform(Functional.Perform perform) {
+            perform.perform(this.grid);
+        }
 
-            return this.grid[x][y];
+        /**
+         * Gets the index of a float X and Y value.
+         * @param x The X position.
+         * @param y The Y position.
+         * @return The index of the position.
+         */
+        public int[] getIndex(float x, float y) {
+            return new int[]{(int) (x / getSquareSize()), (int) (y / getSquareSize())};
+        }
+
+        /**
+         * Gets the grid array of this Grid.
+         * @return the Node[][] array of this Grid.
+         */
+        public Node[][] getGrid() {
+            return this.grid;
         }
 
         /**
@@ -438,29 +482,8 @@ public class Grid {
             return dir;
         }
 
-        /**
-         * @return The total width (num of X tiles across) of this Grid.
-         */
-        public int getWidth() {
-            return this.numCols;
-        }
-
-        /**
-         * @return Gets the height (total Y tiles) of this Grid.
-         */
-        public int getHeight() {
-            return this.numRows;
-        }
-
         public int getOriginalSquareSize(){
             return this.squareSize;
-        }
-
-        /**
-         * @return The square size of this Grid.
-         */
-        public float getSquareSize() {
-            return GH.toMeters(this.squareSize);
         }
 
         /**
@@ -472,32 +495,9 @@ public class Grid {
             return getIndex(entity.getTransform().getPosition());
         }
 
-        /**
-         * Gets the index from the Vector2 position passed in.
-         * @param position The Vector2 position to get an index of.
-         * @return An integer array containing 2 values, the X and Y index.
-         */
-        public int[] getIndex(Vector2 position) {
-            return getIndex(position.x, position.y);
-        }
-
-        /**
-         * Gets the index of a float X and Y value.
-         * @param x The X position.
-         * @param y The Y position.
-         * @return The index of the position.
-         */
-        public int[] getIndex(float x, float y) {
-            return new int[]{(int) (x / getSquareSize()), (int) (y / getSquareSize())};
-        }
-
-        public final VisibilityTile[][] getVisibilityMap(){
-            return this.visibilityMap;
-        }
-
         public void debugDraw() {
             ShapeRenderer renderer = new ShapeRenderer();
-            renderer.setProjectionMatrix(ColonyGame.camera.combined);
+            renderer.setProjectionMatrix(ColonyGame.instance.camera.combined);
 
             renderer.begin(ShapeRenderer.ShapeType.Line);
             renderer.setColor(Color.GREEN);
@@ -552,6 +552,18 @@ public class Grid {
             return getEntFunc.getEnt(entList);
         }
 
+        public TerrainTile getTerrainTile(){
+            return this.terrainTile;
+        }
+
+        public void setTerrainTile(TerrainTile terrainTile){
+            this.terrainTile = terrainTile;
+        }
+
+        public int getNumNodesAway(Node otherNode){
+            return Math.abs(this.getX() - otherNode.getX()) + Math.abs(this.getY() - otherNode.getY());
+        }
+
         /**
          * Gets the X index of this Node. Not the real location.
          * @return An integer which is the X's index on the map.
@@ -566,18 +578,6 @@ public class Grid {
          */
         public int getY(){
             return this.y;
-        }
-
-        public void setTerrainTile(TerrainTile terrainTile){
-            this.terrainTile = terrainTile;
-        }
-
-        public TerrainTile getTerrainTile(){
-            return this.terrainTile;
-        }
-
-        public int getNumNodesAway(Node otherNode){
-            return Math.abs(this.getX() - otherNode.getX()) + Math.abs(this.getY() - otherNode.getY());
         }
 
         /**
@@ -611,14 +611,14 @@ public class Grid {
         public PathNode parentNode;
         public Node node;
 
-        public PathNode(int x, int y) {
-            this.x = x;
-            this.y = y;
-        }
-
         public PathNode(Node node) {
             this(node.x, node.y);
             this.node = node;
+        }
+
+        public PathNode(int x, int y) {
+            this.x = x;
+            this.y = y;
         }
 
         public float getF(){
@@ -715,6 +715,10 @@ public class Grid {
             this.changeVisibility(Constants.VISIBILITY_VISIBLE);
         }
 
+        public void changeVisibility(int visibility){
+            this.visibility = visibility;
+        }
+
         /**
          * Removes a viewer from this tile. If it reaches 0, the terrain is set to explored and not visibile.
          */
@@ -726,10 +730,6 @@ public class Grid {
 
         public int getVisibility() {
             return visibility;
-        }
-
-        public void changeVisibility(int visibility){
-            this.visibility = visibility;
         }
 
         public int getCurrViewers() {

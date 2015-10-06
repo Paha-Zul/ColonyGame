@@ -39,7 +39,7 @@ public class FindClosestEntity extends LeafTask{
     }
 
     private void getClosestResource(){
-        Grid.GridInstance grid = ColonyGame.worldGrid;
+        Grid.GridInstance grid = ColonyGame.instance.worldGrid;
         Grid.Node[][] gridMap = grid.getGrid();
         Functional.Callback getClosestResource = () -> {
             Grid.Node currNode = this.blackBoard.colonyGrid.getNode(this.blackBoard.myManager.getEntityOwner()); //Get the nod we are standing on.
@@ -102,7 +102,7 @@ public class FindClosestEntity extends LeafTask{
             this.done = true;
         };
 
-        ColonyGame.threadPool.submit(new CallbackRunnable(getClosestResource));
+        ColonyGame.instance.threadPool.submit(new CallbackRunnable(getClosestResource));
     }
 
     @Override

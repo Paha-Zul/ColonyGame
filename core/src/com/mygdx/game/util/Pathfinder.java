@@ -13,12 +13,19 @@ import java.util.function.Consumer;
  */
 public class Pathfinder {
     private static Pathfinder instance = null;
+    private final int numPathsPerTick = 10;
     private LinkedList<FindPathInfo> queue = new LinkedList<>();
     private long lastTick = 0;
-    private final int numPathsPerTick = 10;
 
     public Pathfinder(){
 
+    }
+
+    public static Pathfinder GetInstance(){
+        if(Pathfinder.instance == null)
+            Pathfinder.instance = new Pathfinder();
+
+        return Pathfinder.instance;
     }
 
     /**
@@ -40,26 +47,6 @@ public class Pathfinder {
         }
 
         this.lastTick = tick;
-    }
-
-    /**
-     * Finds a path from the startNode to the targetNode.
-     * @param startNode The start Node.
-     * @param targetNode The target Node.
-     * @param callback The callback to execute when the path is found. The parameter to this is the path that was found.
-     */
-    public void findPath(Grid.Node startNode, Grid.Node targetNode, Consumer<LinkedList<Vector2>> callback){
-        this.queue.add(new FindPathInfo(null, null, startNode, targetNode, callback));
-    }
-
-    /**
-     * Finds a path from a start position to an end position.
-     * @param start The start position.
-     * @param end The end position.
-     * @param callback The callback to execute when the path is found. The parameter to this is the path that was found.
-     */
-    public void findPath(Vector2 start, Vector2 end, Consumer<LinkedList<Vector2>> callback){
-        this.queue.add(new FindPathInfo(start, end, null, null, callback));
     }
 
     public LinkedList<Vector2> findPath(Grid.Node startNode, Grid.Node targetNode){
@@ -94,7 +81,7 @@ public class Pathfinder {
 
             //Add the currNode to the visited map and get its neighbors
             visitedMap.put(currNode.node, currNode.node);
-            Grid.Node[] neighbors = ColonyGame.worldGrid.getNeighbors8(currNode.node);
+            Grid.Node[] neighbors = ColonyGame.instance.worldGrid.getNeighbors8(currNode.node);
 
             //Add all the (valid) neighbors to the openList.
             for (Grid.Node neighbor : neighbors) {
@@ -105,14 +92,14 @@ public class Pathfinder {
                 Grid.PathNode neighborNode = new Grid.PathNode(neighbor);
 
                 //Set this neighbors values and add it to the openList.
-                int[] dir = ColonyGame.worldGrid.getDirection(neighborNode.node, currNode.node);
+                int[] dir = ColonyGame.instance.worldGrid.getDirection(neighborNode.node, currNode.node);
                 if (dir[0] == 0 || dir[1] == 0) //This is straight, not diagonal.
                     neighborNode.G = currNode.G + 10;
                 else
                     neighborNode.G = currNode.G + 14; //Diagonal.
 
                 //Get the TerrainTile and check if the tile is to be avoided.
-                Grid.TerrainTile tile = ColonyGame.worldGrid.getNode(neighborNode.x, neighborNode.y).getTerrainTile();
+                Grid.TerrainTile tile = ColonyGame.instance.worldGrid.getNode(neighborNode.x, neighborNode.y).getTerrainTile();
                 if (neighborNode.hasEnts() || (tile != null && tile.tileRef.avoid))
                     neighborNode.B = 500;
 
@@ -128,7 +115,7 @@ public class Pathfinder {
             currNode = openList.poll();
         }
 
-        float squareSize = ColonyGame.worldGrid.getSquareSize();
+        float squareSize = ColonyGame.instance.worldGrid.getSquareSize();
         //If a path was found, record the path.
         if(found) {
             currNode = target;
@@ -144,8 +131,8 @@ public class Pathfinder {
     public LinkedList<Vector2> findPath(Vector2 start, Vector2 end){
         boolean found = false;
         Grid.PathNode target = null;
-        Grid.Node startNode = ColonyGame.worldGrid.getNode(start);
-        Grid.Node targetNode = ColonyGame.worldGrid.getNode(end);
+        Grid.Node startNode = ColonyGame.instance.worldGrid.getNode(start);
+        Grid.Node targetNode = ColonyGame.instance.worldGrid.getNode(end);
 
         //If our targetNode is still null somehow, fail and return.
         if(startNode == null) {
@@ -175,7 +162,7 @@ public class Pathfinder {
 
             //Add the currNode to the visited map and get its neighbors
             visitedMap.put(currNode.node, currNode.node);
-            Grid.Node[] neighbors = ColonyGame.worldGrid.getNeighbors8(currNode.node);
+            Grid.Node[] neighbors = ColonyGame.instance.worldGrid.getNeighbors8(currNode.node);
 
             //Add all the (valid) neighbors to the openList.
             for (Grid.Node neighbor : neighbors) {
@@ -186,14 +173,14 @@ public class Pathfinder {
                 Grid.PathNode neighborNode = new Grid.PathNode(neighbor);
 
                 //Set this neighbors values and add it to the openList.
-                int[] dir = ColonyGame.worldGrid.getDirection(neighborNode.node, currNode.node);
+                int[] dir = ColonyGame.instance.worldGrid.getDirection(neighborNode.node, currNode.node);
                 if (dir[0] == 0 || dir[1] == 0) //This is straight, not diagonal.
                     neighborNode.G = currNode.G + 10;
                 else
                     neighborNode.G = currNode.G + 14; //Diagonal.
 
                 //Get the TerrainTile and check if the tile is to be avoided.
-                Grid.TerrainTile tile = ColonyGame.worldGrid.getNode(neighborNode.x, neighborNode.y).getTerrainTile();
+                Grid.TerrainTile tile = ColonyGame.instance.worldGrid.getNode(neighborNode.x, neighborNode.y).getTerrainTile();
                 if (neighborNode.hasEnts() || (tile != null && tile.tileRef.avoid))
                     neighborNode.B = 500;
 
@@ -209,7 +196,7 @@ public class Pathfinder {
             currNode = openList.poll();
         }
 
-        float squareSize = ColonyGame.worldGrid.getSquareSize();
+        float squareSize = ColonyGame.instance.worldGrid.getSquareSize();
         //If a path was found, record the path.
         if(found) {
             boolean first = true;
@@ -229,11 +216,24 @@ public class Pathfinder {
         return path;
     }
 
-    public static Pathfinder GetInstance(){
-        if(Pathfinder.instance == null)
-            Pathfinder.instance = new Pathfinder();
+    /**
+     * Finds a path from the startNode to the targetNode.
+     * @param startNode The start Node.
+     * @param targetNode The target Node.
+     * @param callback The callback to execute when the path is found. The parameter to this is the path that was found.
+     */
+    public void findPath(Grid.Node startNode, Grid.Node targetNode, Consumer<LinkedList<Vector2>> callback){
+        this.queue.add(new FindPathInfo(null, null, startNode, targetNode, callback));
+    }
 
-        return Pathfinder.instance;
+    /**
+     * Finds a path from a start position to an end position.
+     * @param start The start position.
+     * @param end The end position.
+     * @param callback The callback to execute when the path is found. The parameter to this is the path that was found.
+     */
+    public void findPath(Vector2 start, Vector2 end, Consumer<LinkedList<Vector2>> callback){
+        this.queue.add(new FindPathInfo(start, end, null, null, callback));
     }
 
     private class FindPathInfo{

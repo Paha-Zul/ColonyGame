@@ -28,7 +28,7 @@ public class FindClosestTile extends LeafTask{
         this.blackBoard.targetNode = null;
 
         Entity target = this.blackBoard.myManager.getEntityOwner();
-        Grid.Node[][] grid = ColonyGame.worldGrid.getGrid();
+        Grid.Node[][] grid = ColonyGame.instance.worldGrid.getGrid();
 
         Functional.Callback findClosestUnexplored = () -> {
             int radius = 0; //Start off with 0 radius.
@@ -79,7 +79,7 @@ public class FindClosestTile extends LeafTask{
                 this.control.finishWithSuccess();
         };
 
-        ColonyGame.threadPool.submit(new CallbackRunnable(findClosestUnexplored));
+        ColonyGame.instance.threadPool.submit(new CallbackRunnable(findClosestUnexplored));
     }
 
     @Override

@@ -82,7 +82,7 @@ public class BehaviourManagerComp extends Component{
     public void addedLoad(TLongObjectHashMap<Entity> entityMap, TLongObjectHashMap<Component> compMap) {
         super.addedLoad(entityMap, compMap);
         this.blackBoard = new BlackBoard();
-        this.blackBoard.colonyGrid = ColonyGame.worldGrid;
+        this.blackBoard.colonyGrid = ColonyGame.instance.worldGrid;
         this.blackBoard.myManager = this;
     }
 

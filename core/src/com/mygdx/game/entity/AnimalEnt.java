@@ -35,7 +35,7 @@ public class AnimalEnt extends Entity{
         this.addComponent(new Animal()).setAnimalRef(animalRef);            //Add the animal
         this.addComponent(new Stats());                                     //Add the stats.
         this.addComponent(new Interactable()).setInterType("animal");
-        this.addComponent(new GridComponent()).setGridType(Constants.GRIDACTIVE).setGrid(ColonyGame.worldGrid).setExploreRadius(-1);
+        this.addComponent(new GridComponent()).setGridType(Constants.GRIDACTIVE).setGrid(ColonyGame.instance.worldGrid).setExploreRadius(-1);
 
         this.makeCollider();
 
@@ -45,7 +45,7 @@ public class AnimalEnt extends Entity{
 
         CircleCollider collider = getComponent(CircleCollider.class);
         if(collider == null) collider = this.addComponent(new CircleCollider());
-        collider.setupBody(BodyDef.BodyType.DynamicBody, ColonyGame.world, this.getTransform().getPosition(), 1, true, true);
+        collider.setupBody(BodyDef.BodyType.DynamicBody, ColonyGame.instance.world, this.getTransform().getPosition(), 1, true, true);
 
     }
 

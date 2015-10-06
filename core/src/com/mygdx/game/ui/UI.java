@@ -1,9 +1,9 @@
 package com.mygdx.game.ui;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.mygdx.game.ColonyGame;
 import com.mygdx.game.interfaces.IDestroyable;
 import com.mygdx.game.interfaces.IGUI;
-import com.mygdx.game.util.ListHolder;
 
 /**
  * Created by Paha on 1/13/2015.
@@ -19,12 +19,12 @@ public abstract class UI implements IGUI, IDestroyable{
     }
 
     @Override
-    public void render(float delta, SpriteBatch batch) {
+    public void addToList() {
+        ColonyGame.instance.listHolder.addGUI(this);
     }
 
     @Override
-    public void addToList() {
-        ListHolder.addGUI(this);
+    public void render(float delta, SpriteBatch batch) {
     }
 
     @Override

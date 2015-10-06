@@ -11,7 +11,10 @@ import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.component.Resource;
 import com.mygdx.game.entity.ResourceEnt;
-import com.mygdx.game.util.*;
+import com.mygdx.game.util.Constants;
+import com.mygdx.game.util.DataBuilder;
+import com.mygdx.game.util.GH;
+import com.mygdx.game.util.Grid;
 import com.mygdx.game.util.managers.DataManager;
 
 import java.util.HashMap;
@@ -82,12 +85,12 @@ public class WorldGen {
      * @return True when finished, false otherwise.
      */
     public boolean generateWorld(){
-        int maxAmount = ColonyGame.worldGrid.getWidth()*ColonyGame.worldGrid.getHeight() * DataBuilder.worldData.noiseMapHashMap.size();
+        int maxAmount = ColonyGame.instance.worldGrid.getWidth()*ColonyGame.instance.worldGrid.getHeight() * DataBuilder.worldData.noiseMapHashMap.size();
         int stepsLeft = Constants.WORLDGEN_GENERATESPEED;
         boolean done = true; //Flag for completion.
 
         HashMap<String, DataBuilder.JsonTileGroup> tileGroupsMap = DataBuilder.tileGroupsMap;
-        Grid.GridInstance grid = ColonyGame.worldGrid;
+        Grid.GridInstance grid = ColonyGame.instance.worldGrid;
 
         //This will loop until everything is done.
         while(this.currDone < maxAmount && stepsLeft > 0) {
@@ -203,7 +206,7 @@ public class WorldGen {
      */
     public boolean generateResources(Vector2 startPos, int blockRadius, int step){
         boolean done = false;
-        Grid.GridInstance grid = ColonyGame.worldGrid;
+        Grid.GridInstance grid = ColonyGame.instance.worldGrid;
 
         //Partially executes a breadth first search.
         for (int i = 0; i < step; i++) {
@@ -270,7 +273,7 @@ public class WorldGen {
 
 
         //Get the atlas so we can get the image from it.
-        TextureAtlas interactableAtlas = ColonyGame.assetManager.get("interactables", TextureAtlas.class); //Get the atlas
+        TextureAtlas interactableAtlas = ColonyGame.instance.assetManager.get("interactables", TextureAtlas.class); //Get the atlas
         String textureName = null;
         String atlasName = "interactables";
         if(jRes.img != null && jRes.img.length > 0) {
@@ -281,11 +284,11 @@ public class WorldGen {
         ResourceEnt resEnt = new ResourceEnt(centerPos, 0, new String[]{textureName, atlasName}, 11);
         //Get the Resource component and set its name and copy the jRes resource.
         Resource res = resEnt.getComponent(Resource.class);
-        resEnt.name = res.getDisplayName();
         res.copyResource(jRes);
+        resEnt.name = res.getDisplayName();
 
         resEnt.getTransform().setScale(treeScale);
-        ListHolder.addEntity(resEnt);
+        ColonyGame.instance.listHolder.addEntity(resEnt);
     }
 
     /**

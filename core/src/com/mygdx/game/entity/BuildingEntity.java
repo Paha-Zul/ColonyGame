@@ -29,7 +29,7 @@ public class BuildingEntity extends Entity{
         this.tags.addTags("building", "selectable", "constructing");
 
         this.addComponent(new GraphicIdentity()).setSprite(buildingRef.image, buildingRef.spriteSheet, buildingRef.dimensions[0], buildingRef.dimensions[1]);
-        this.addComponent(new GridComponent()).setGridType(Constants.GRIDSTATIC).setGrid(ColonyGame.worldGrid).setExploreRadius(8).setAddMulti(true);
+        this.addComponent(new GridComponent()).setGridType(Constants.GRIDSTATIC).setGrid(ColonyGame.instance.worldGrid).setExploreRadius(8).setAddMulti(true);
         this.addComponent(new Building()).setBuildingRef(buildingRef);
         this.addComponent(new Interactable()).setInterType("building");
         this.addComponent(new Constructable());
@@ -49,7 +49,7 @@ public class BuildingEntity extends Entity{
 
         BoxCollider collider = getComponent(BoxCollider.class);
         if(collider == null) collider = this.addComponent(new BoxCollider());
-        collider.setupBody(BodyDef.BodyType.StaticBody, ColonyGame.world, hWidth, hHeight, this.getTransform().getPosition(), false, false);
+        collider.setupBody(BodyDef.BodyType.StaticBody, ColonyGame.instance.world, hWidth, hHeight, this.getTransform().getPosition(), false, false);
     }
 
     @Override

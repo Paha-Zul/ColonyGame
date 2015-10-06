@@ -16,11 +16,11 @@ import java.util.HashMap;
 
 /**
  * Created by Paha on 1/18/2015.
+ * An inventory of items.
  */
 public class Inventory extends Component implements IOwnable {
     @JsonProperty
     public String lasAddedItem = "";
-    @JsonIgnore
     private Colony colony;
     @JsonProperty
     private String allowedTypes = "all";
@@ -34,11 +34,9 @@ public class Inventory extends Component implements IOwnable {
     private int currTotalItems = 0;
     @JsonProperty
     private int maxAmount = 10;
-    @JsonIgnore
-    private HashMap<String, HashMap<String, InventoryItem>> inventory = new HashMap<>(20);
+    private HashMap<String, HashMap<String, InventoryItem>> inventory;
 
     //So basically a hashMap -> lists that hold item links.
-    @JsonIgnore
     private TLongObjectHashMap<Array<ItemLink>> reserveMap, onTheWayMap;
 
     /**
@@ -52,38 +50,34 @@ public class Inventory extends Component implements IOwnable {
     }
 
     @Override
-    @JsonIgnore
     public void added(Entity owner) {
         super.added(owner);
+
         Building building = this.getComponent(Building.class);
         if (building != null) this.colony = building.getOwningColony();
     }
 
     @Override
-    @JsonIgnore
     public void save() {
 
     }
 
     @Override
-    @JsonIgnore
     public void load(TLongObjectHashMap<Entity> entityMap, TLongObjectHashMap<Component> compMap) {
-
+        if(this.inventory == null) this.inventory = new HashMap<>(20);
     }
 
     @Override
-    @JsonIgnore
     public void start() {
         super.start();
         load(null, null);
     }
 
     @Override
-    @JsonIgnore
     public void destroy(Entity destroyer) {
         super.destroy(destroyer);
 
-        this.inventory.clear();
+        this.inventory = null;
         this.allowedTypes = null;
     }
 
@@ -93,7 +87,6 @@ public class Inventory extends Component implements IOwnable {
      * @param itemName The compName of the Item to add
      * @return True if it can be added, false otherwise.
      */
-    @JsonIgnore
     public boolean canAddItem(String itemName) {
         return this.canAddItem(itemName, 1);
     }
@@ -248,8 +241,8 @@ public class Inventory extends Component implements IOwnable {
      * @param maxAmount The max amount that this item can stack to.
      */
     @JsonIgnore
-    private void addItemToInventory(DataBuilder.JsonItem itemRef, int amount, int maxAmount){
-        if(itemRef == null || amount <= 0) return; //If the item ref is null, give up.
+    private InventoryItem addItemToInventory(DataBuilder.JsonItem itemRef, int amount, int maxAmount){
+        if(itemRef == null || amount <= 0) return null; //If the item ref is null, give up.
 
         //Try to get the map of items for the item type. If null, make a new one and put in the map.
         HashMap<String, InventoryItem> itemMap = this.inventory.get(itemRef.getItemType());
@@ -272,6 +265,8 @@ public class Inventory extends Component implements IOwnable {
         this.lasAddedItem = itemRef.getItemName();
         if (colony != null) colony.addItemToGlobal(itemRef, amount);
         EventSystem.notifyEntityEvent(this.owner, "added_item", itemRef, amount);
+
+        return item;
     }
 
     /**
@@ -371,7 +366,6 @@ public class Inventory extends Component implements IOwnable {
      * @param amount   The amount to remove from the inventory.
      * @return The amount of the item removed from the Inventory.
      */
-    @JsonIgnore
     public int removeItem(String itemName, int amount) {
         return this.removeItem(itemName, amount, 0);
     }
@@ -379,7 +373,6 @@ public class Inventory extends Component implements IOwnable {
     /**
      * Clears the inventory.
      */
-    @JsonIgnore
     public void clearInventory() {
         this.inventory.clear();
     }
@@ -389,7 +382,6 @@ public class Inventory extends Component implements IOwnable {
      * @param itemType The type of item to get a list of.
      * @return An array of items of the 'itemType'. Could be 0 if the type doesn't exist or there are no items of the type.
      */
-    @JsonIgnore
     public final InventoryItem[] getItemsOfTypeList(String itemType){
         HashMap<String, InventoryItem> map = this.inventory.get(itemType);
         if(map == null) return new InventoryItem[0];
@@ -400,7 +392,6 @@ public class Inventory extends Component implements IOwnable {
      * Gets a list of the inventory.
      * @return An ArrayList containing the InventoryItems of the inventory.
      */
-    @JsonIgnore
     public final ArrayList<InventoryItem> getItemList() {
         ArrayList<InventoryItem> list = new ArrayList<>();
         for(HashMap<String, InventoryItem> itemMap : this.inventory.values())
@@ -408,7 +399,6 @@ public class Inventory extends Component implements IOwnable {
         return list;
     }
 
-    @JsonIgnore
     public int getCurrTotalItems() {
         return this.currTotalItems;
     }
@@ -418,7 +408,6 @@ public class Inventory extends Component implements IOwnable {
      * @param itemName The name of the item to get an amount of.
      * @return The amount of the item in the inventory. 0 if the item does not exist.
      */
-    @JsonIgnore
     public int getItemAmount(String itemName) {
         return this.getItemAmount(itemName, false);
     }
@@ -429,7 +418,6 @@ public class Inventory extends Component implements IOwnable {
      * @param includeOnTheWay If the result should include items that are planned to arrive.
      * @return The amount of the item in the inventory. 0 if the item does not exist.
      */
-    @JsonIgnore
     public int getItemAmount(String itemName, boolean includeOnTheWay) {
         DataBuilder.JsonItem itemRef = DataManager.getData(itemName, DataBuilder.JsonItem.class);
         HashMap<String, InventoryItem> itemMap = this.inventory.get(itemRef.getItemType());
@@ -479,9 +467,37 @@ public class Inventory extends Component implements IOwnable {
      * Sets the max amount per item.
      * @param maxAmount The max amount per item.
      */
-    @JsonIgnore
     public void setMaxAmount(int maxAmount) {
         this.maxAmount = maxAmount;
+    }
+
+    /**
+     * Used only for saving.
+     * @return An array of String arrays, indicating amount, max amount, reserved, onTheWay.
+     */
+    @JsonProperty("itemList")
+    private ArrayList<String[]> getItemListForSaving(){
+        ArrayList<String[]> list = new ArrayList<>();
+        //Loops through each item and record its data.
+        for(HashMap<String, InventoryItem> itemMap : this.inventory.values())
+            for(InventoryItem item : itemMap.values())
+                list.add(new String[]{item.itemRef.getItemName(), ""+item.getAmount(), ""+item.getMaxAmount(), ""+item.getReserved(), ""+item.getOnTheWay()});
+
+        return list;
+    }
+
+    /**
+     * Used only for loading.
+     * @param itemList The list of items.
+     */
+    @JsonProperty("itemList")
+    private void setItemListForLoading(ArrayList<String[]> itemList){
+        if(this.inventory == null) this.inventory = new HashMap<>(20);
+        for(String[] data : itemList) {
+            InventoryItem item = this.addItemToInventory(DataManager.getData(data[0], DataBuilder.JsonItem.class), Integer.parseInt(data[1]), Integer.parseInt(data[2]));
+            item.reserve(Integer.parseInt(data[3]));
+            item.addOnTheWay(Integer.parseInt(data[4]));
+        }
     }
 
     /**
@@ -489,7 +505,6 @@ public class Inventory extends Component implements IOwnable {
      * @param itemType The type of the item.
      * @return True if the only type in the inventory, false otherwise.
      */
-    @JsonIgnore
     public boolean hasItemTypeOnly(String itemType){
         return this.inventory.size() == 1 && this.inventory.containsKey(itemType);
     }
@@ -499,7 +514,6 @@ public class Inventory extends Component implements IOwnable {
      * @param itemName The name of the item.
      * @return True if the item exists in this Inventory, false otherwise.
      */
-    @JsonIgnore
     public boolean hasItem(String itemName) {
         return this.inventory.containsKey(itemName);
     }
@@ -508,10 +522,11 @@ public class Inventory extends Component implements IOwnable {
      * Checks if this inventory has no items.
      * @return True if empty, false otherwise.
      */
-    @JsonIgnore
     public boolean isEmpty() {
         return this.inventory.size() == 0;
     }
+
+
 
     @Override
     public void addedToColony(Colony colony) {
@@ -519,7 +534,6 @@ public class Inventory extends Component implements IOwnable {
     }
 
     @Override
-    @JsonIgnore
     public Colony getOwningColony() {
         return this.colony;
     }
@@ -612,6 +626,27 @@ public class Inventory extends Component implements IOwnable {
         }
 
         /**
+         * @return The maximum amount that this item can stack to.
+         */
+        public int getMaxAmount() {
+            return this.maxAmount == -1 ? Integer.MAX_VALUE : this.maxAmount;
+        }
+
+        /**
+         * @return The amount reserved of this item.
+         */
+        public int getReserved() {
+            return this.reserved;
+        }
+
+        /**
+         * @return The total amount that is on the way to the inventory that owns this item.
+         */
+        public int getOnTheWay(){
+            return this.onTheWay;
+        }
+
+        /**
          * Checks if an amount can be added to this item.
          * @param amount The amount to add.
          * @return True if possible, false otherwise.
@@ -656,27 +691,6 @@ public class Inventory extends Component implements IOwnable {
             //Add the amount and return how much we added.
             this.amount -= amountToRemove;
             return amountToRemove;
-        }
-
-        /**
-         * @return The maximum amount that this item can stack to.
-         */
-        public int getMaxAmount() {
-            return this.maxAmount == -1 ? Integer.MAX_VALUE : this.maxAmount;
-        }
-
-        /**
-         * @return The amount reserved of this item.
-         */
-        public int getReserved() {
-            return this.reserved;
-        }
-
-        /**
-         * @return The total amount that is on the way to the inventory that owns this item.
-         */
-        public int getOnTheWay(){
-            return this.onTheWay;
         }
     }
 

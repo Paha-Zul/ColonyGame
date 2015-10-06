@@ -27,7 +27,6 @@ import com.mygdx.game.ui.UI;
 import com.mygdx.game.util.*;
 import com.mygdx.game.util.managers.DataManager;
 import com.mygdx.game.util.managers.EventSystem;
-import com.mygdx.game.util.managers.NotificationManager;
 import com.mygdx.game.util.managers.PlayerManager;
 import com.mygdx.game.util.worldgeneration.WorldGen;
 
@@ -52,11 +51,11 @@ public class GameScreen implements Screen{
 
     public GameScreen(final ColonyGame game){
         //Server.start(1337); //Start the server
-        this.grid = ColonyGame.worldGrid;
+        this.grid = ColonyGame.instance.worldGrid;
 
         //Store spritebatch and shaperenderer.
-        this.batch = ColonyGame.batch;
-        this.shapeRenderer = ColonyGame.renderer;
+        this.batch = ColonyGame.instance.batch;
+        this.shapeRenderer = ColonyGame.instance.renderer;
         this.game = game;
     }
 
@@ -69,10 +68,10 @@ public class GameScreen implements Screen{
 
         //Generate the trees if it hasn't been done already.
         if(!generatedTrees) {
-            generatedTrees = WorldGen.getInstance().generateResources(new Vector2((ColonyGame.worldGrid.getWidth() - 1) * ColonyGame.worldGrid.getSquareSize(),
-                    (ColonyGame.worldGrid.getHeight() - 1) * ColonyGame.worldGrid.getSquareSize()), 0, Constants.WORLDGEN_RESOURCEGENERATESPEED);
+            generatedTrees = WorldGen.getInstance().generateResources(new Vector2((ColonyGame.instance.worldGrid.getWidth() - 1) * ColonyGame.instance.worldGrid.getSquareSize(),
+                    (ColonyGame.instance.worldGrid.getHeight() - 1) * ColonyGame.instance.worldGrid.getSquareSize()), 0, Constants.WORLDGEN_RESOURCEGENERATESPEED);
             if(generatedTrees){
-                startLocation.set((ColonyGame.worldGrid.getWidth()/2)*ColonyGame.worldGrid.getSquareSize(), (ColonyGame.worldGrid.getHeight()/2)*ColonyGame.worldGrid.getSquareSize());
+                startLocation.set((ColonyGame.instance.worldGrid.getWidth()/2)*ColonyGame.instance.worldGrid.getSquareSize(), (ColonyGame.instance.worldGrid.getHeight()/2)*ColonyGame.instance.worldGrid.getSquareSize());
                 generateStart(startLocation);
                 this.spawnAnimals();
             }
@@ -87,9 +86,9 @@ public class GameScreen implements Screen{
         //Updates all the entities.
         this.updateEntities(delta);
         //Updates the Notification manager.
-        NotificationManager.update(delta);
+        ColonyGame.instance.notificationManager.update(delta);
         //Updates the pathfinder.
-        Pathfinder.GetInstance().update(ColonyGame.currTick);
+        Pathfinder.GetInstance().update(ColonyGame.instance.currTick);
     }
 
     private void generateStart(Vector2 start){
@@ -97,16 +96,16 @@ public class GameScreen implements Screen{
 
         //Add our colony to an empty entity and create a player using the colony.
         Entity empty = new Entity(new Vector2(0,0), 0, 0);
-        ListHolder.addEntity(empty);
+        ColonyGame.instance.listHolder.addEntity(empty);
         Colony colony = empty.addComponent(new Colony());
-        PlayerManager.Player player = ColonyGame.playerManager.addPlayer("Player", colony);
+        PlayerManager.Player player = ColonyGame.instance.playerManager.addPlayer("Player", colony);
 
-        NotificationManager.init(1f);
+        ColonyGame.instance.notificationManager.init();
 
         //Find a suitable place to spawn our Colony
         int radius = 0, areaToSearch = 5;
         boolean placed = false;
-        Grid.GridInstance grid = ColonyGame.worldGrid;
+        Grid.GridInstance grid = ColonyGame.instance.worldGrid;
         int[] index = grid.getIndex(start);
 
         /**
@@ -161,8 +160,8 @@ public class GameScreen implements Screen{
 
         //Spawns the Colony Entity and centers the camera on it.
         BuildingEntity colonyEnt = new BuildingEntity(start, 0, "colony_building", 10);
-        ListHolder.addEntity(colonyEnt);
-        ColonyGame.camera.position.set(colonyEnt.getTransform().getPosition().x, colonyEnt.getTransform().getPosition().y, 0);
+        ColonyGame.instance.listHolder.addEntity(colonyEnt);
+        ColonyGame.instance.camera.position.set(colonyEnt.getTransform().getPosition().x, colonyEnt.getTransform().getPosition().y, 0);
         Building colonyBuilding = colonyEnt.getComponent(Building.class);
         colony.addOwnedToColony(colonyBuilding);
         colonyEnt.getComponent(Constructable.class).setComplete();
@@ -170,7 +169,7 @@ public class GameScreen implements Screen{
         //Spawns the Equipment building.
 //        BuildingEntity equipEnt = new BuildingEntity(new Vector2(start.x - 5, start.y - 5), 0, "workshop", 10);
 //        equipEnt.getTags().addTag("constructing");
-//        ListHolder.addEntity(equipEnt);
+//        ColonyGame.instance.listHolder.addEntity(equipEnt);
 //        Building equipBuilding = equipEnt.getComponent(Building.class);
 //        colony.addOwnedToColony(equipBuilding);
 //        equipBuilding.getComponent(Constructable.class).setComplete();
@@ -193,7 +192,7 @@ public class GameScreen implements Screen{
             Colonist col = c.getComponent(Colonist.class);
             col.setName(GameScreen.firstNames[MathUtils.random(GameScreen.firstNames.length - 1)], GameScreen.lastNames[MathUtils.random(GameScreen.lastNames.length - 1)]);
             colony.addColonist(col);
-            ListHolder.addEntity(c);
+            ColonyGame.instance.listHolder.addEntity(c);
         }
     }
 
@@ -208,7 +207,7 @@ public class GameScreen implements Screen{
         for(int i=0;i<squirrelSpawn;i++) {
             Vector2 pos = new Vector2(20 + MathUtils.random(grid.getWidth()-40)*grid.getSquareSize(), 20 + MathUtils.random(grid.getHeight()-40)*grid.getSquareSize());
             Entity animal = new AnimalEnt("squirrel", pos, 0, new String[]{"squirrel", atlasName}, 11);
-            ListHolder.addEntity(animal);
+            ColonyGame.instance.listHolder.addEntity(animal);
         }
 
         //Spawn some angry wolf packs.
@@ -218,7 +217,7 @@ public class GameScreen implements Screen{
             AnimalEnt wolfLeader = new AnimalEnt("wolf", pos, 0, new String[]{"wolf", atlasName}, 11);
             wolfLeader.getGraphicIdentity().setSprite("wolf", "interactables");
             group.setLeader(wolfLeader);
-            ListHolder.addEntity(wolfLeader);
+            ColonyGame.instance.listHolder.addEntity(wolfLeader);
 
             DataBuilder.JsonAnimal animal = wolfLeader.getComponent(Animal.class).getAnimalRef();
             int amount = (int)(animal.packAmount[0] + Math.random()*(animal.packAmount[1] - animal.packAmount[0]));
@@ -228,7 +227,7 @@ public class GameScreen implements Screen{
                 wolf.getGraphicIdentity().setSprite("wolf", "interactables");
                 wolf.addComponent(group);
                 group.addEntityToGroup(wolf);
-                ListHolder.addEntity(wolf);
+                ColonyGame.instance.listHolder.addEntity(wolf);
             }
         }
 
@@ -242,7 +241,7 @@ public class GameScreen implements Screen{
             group.setLeader(bossWolf);
             bossWolf.getTransform().setScale(2f);
             bossWolf.addComponent(group);
-            ListHolder.addEntity(bossWolf);
+            ColonyGame.instance.listHolder.addEntity(bossWolf);
 
             int amount = (int) (bossWolfRef.packAmount[0] + Math.random() * (bossWolfRef.packAmount[1] - bossWolfRef.packAmount[0]));
             for (int j = 0; j < amount; j++) {
@@ -253,7 +252,7 @@ public class GameScreen implements Screen{
                 wolf.getGraphicIdentity().setSprite(childWolf.img, "interactables");
                 wolf.addComponent(group);
                 group.addEntityToGroup(wolf);
-                ListHolder.addEntity(wolf);
+                ColonyGame.instance.listHolder.addEntity(wolf);
             }
         }
     }
@@ -261,30 +260,30 @@ public class GameScreen implements Screen{
     //Renders the map
     private void renderMap(){
 
-        if(ColonyGame.worldGrid == null) return;
+        if(ColonyGame.instance.worldGrid == null) return;
         //if(!PlayerInterface.active || !PlayerInterface.getInstance().renderWorld) return;
 
-        batch.setProjectionMatrix(ColonyGame.camera.combined);
+        batch.setProjectionMatrix(ColonyGame.instance.camera.combined);
         batch.begin();
         int off = 5;
 
-        float squareSize = ColonyGame.worldGrid.getSquareSize();
-        int halfWidth = (int)((ColonyGame.camera.viewportWidth*ColonyGame.camera.zoom)/2f);
-        int halfHeight = (int)((ColonyGame.camera.viewportHeight*ColonyGame.camera.zoom)/2f);
-        int xc = (int)ColonyGame.camera.position.x;
-        int yc = (int)ColonyGame.camera.position.y;
+        float squareSize = ColonyGame.instance.worldGrid.getSquareSize();
+        int halfWidth = (int)((ColonyGame.instance.camera.viewportWidth*ColonyGame.instance.camera.zoom)/2f);
+        int halfHeight = (int)((ColonyGame.instance.camera.viewportHeight*ColonyGame.instance.camera.zoom)/2f);
+        int xc = (int)ColonyGame.instance.camera.position.x;
+        int yc = (int)ColonyGame.instance.camera.position.y;
 
         int startX = ((xc - halfWidth)/squareSize) - off >= 0 ? (int)((xc - halfWidth)/squareSize) - off : 0;
-        int endX = ((xc + halfWidth)/squareSize) + off < ColonyGame.worldGrid.getWidth() ? (int)((xc + halfWidth)/squareSize) + off : ColonyGame.worldGrid.getWidth()-1;
+        int endX = ((xc + halfWidth)/squareSize) + off < ColonyGame.instance.worldGrid.getWidth() ? (int)((xc + halfWidth)/squareSize) + off : ColonyGame.instance.worldGrid.getWidth()-1;
         int startY = ((yc - halfHeight)/squareSize) - off >= 0 ? (int)((yc - halfHeight)/squareSize) - off : 0;
-        int endY = ((yc + halfHeight)/squareSize) + off < ColonyGame.worldGrid.getHeight() ? (int)((yc + halfHeight)/squareSize) + off : ColonyGame.worldGrid.getHeight()-1;
+        int endY = ((yc + halfHeight)/squareSize) + off < ColonyGame.instance.worldGrid.getHeight() ? (int)((yc + halfHeight)/squareSize) + off : ColonyGame.instance.worldGrid.getHeight()-1;
 
         //Loop over the array
         for(int x=startX;x<=endX;x++) {
             for (int y = startY; y <= endY; y++) {
-                Grid.TerrainTile tile = ColonyGame.worldGrid.getNode(x, y).getTerrainTile();
+                Grid.TerrainTile tile = ColonyGame.instance.worldGrid.getNode(x, y).getTerrainTile();
                 if(tile == null) continue;
-                tile.changeVisibility(ColonyGame.worldGrid.getVisibilityMap()[x][y].getVisibility());
+                tile.changeVisibility(ColonyGame.instance.worldGrid.getVisibilityMap()[x][y].getVisibility());
                 tile.terrainSprite.draw(batch);
             }
         }
@@ -293,32 +292,32 @@ public class GameScreen implements Screen{
     }
 
     private void updateEntities(float delta){
-        batch.setProjectionMatrix(ColonyGame.camera.combined);
+        batch.setProjectionMatrix(ColonyGame.instance.camera.combined);
         batch.setColor(Color.WHITE); //Set the color back to white.
         batch.begin();
 
-        ListHolder.update(delta);
-        ListHolder.updateFloatingTexts(delta, batch);
+        ColonyGame.instance.listHolder.update(delta);
+        ColonyGame.instance.listHolder.updateFloatingTexts(delta, batch);
 
         //Update and render events
         EventSystem.notifyGameEvent("update", delta);
         EventSystem.notifyGameEvent("render", delta, batch);
 
         //Step the Box2D simulation.
-        ColonyGame.world.step(1f / 60f, 8, 3);
+        ColonyGame.instance.world.step(1f / 60f, 8, 3);
         batch.end();
     }
 
     @Override
     public void resize(int width, int height) {
-        Vector3 pos = new Vector3(ColonyGame.camera.position);
+        Vector3 pos = new Vector3(ColonyGame.instance.camera.position);
         Gdx.graphics.setDisplayMode(width, height, false);
-        ColonyGame.camera.setToOrtho(false, GH.toMeters(width), GH.toMeters(height));
-        ColonyGame.UICamera.setToOrtho(false, width, height);
-        ColonyGame.camera.position.set(pos);
+        ColonyGame.instance.camera.setToOrtho(false, GH.toMeters(width), GH.toMeters(height));
+        ColonyGame.instance.UICamera.setToOrtho(false, width, height);
+        ColonyGame.instance.camera.position.set(pos);
 
         //Resizes all the GUI elements of the game (hopefully!)
-        Array<UI> list = ListHolder.getGUIList();
+        Array<UI> list = ColonyGame.instance.listHolder.getGUIList();
         for(int i=0;i< list.size;i++)
             list.get(i).resize(width, height);
     }
@@ -348,7 +347,7 @@ public class GameScreen implements Screen{
         //TODO Almost works, but is strangely stretched
 
         TextureRegion region = new TextureRegion();
-        Grid.GridInstance grid = ColonyGame.worldGrid;
+        Grid.GridInstance grid = ColonyGame.instance.worldGrid;
         int squareSize = grid.getOriginalSquareSize()/scale; //The grid square size altered by the scale.
         int imageSize = 256/scale; //The total size of the image we want to generate.
         int regionSize = imageSize/squareSize; //The size of the region which is the image size divided by the size of the squares. so 256/32 = 8
@@ -357,7 +356,7 @@ public class GameScreen implements Screen{
 
         int currX = 0, currY = 0; //Some counters.
 
-        TextureAtlas terrainAtlas = ColonyGame.assetManager.get("terrain", TextureAtlas.class); //Get the terrain atlas.
+        TextureAtlas terrainAtlas = ColonyGame.instance.assetManager.get("terrain", TextureAtlas.class); //Get the terrain atlas.
         SpriteBatch batch = new SpriteBatch();
         batch.begin();
 
@@ -413,7 +412,7 @@ public class GameScreen implements Screen{
     private void drawMap(){
         if(PlayerInterface.getInstance().renderWorld) return;
 
-        batch.setProjectionMatrix(ColonyGame.camera.combined);
+        batch.setProjectionMatrix(ColonyGame.instance.camera.combined);
         batch.begin();
         double area = 256;
         float size = (float)area;

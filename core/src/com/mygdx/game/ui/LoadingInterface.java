@@ -7,7 +7,6 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.mygdx.game.ColonyGame;
-import com.mygdx.game.util.ListHolder;
 import com.mygdx.game.util.gui.GUI;
 import com.mygdx.game.util.worldgeneration.WorldGen;
 
@@ -28,13 +27,18 @@ public class LoadingInterface extends UI{
         this.batch = batch;
 
         this.whiteTexture = new TextureRegion(WorldGen.whiteTex);
-        this.outline = new TextureRegion(ColonyGame.assetManager.get("LoadingBarOutline", Texture.class));
-        this.bar = new TextureRegion(ColonyGame.assetManager.get("LoadingBar", Texture.class));
+        this.outline = new TextureRegion(ColonyGame.instance.assetManager.get("LoadingBarOutline", Texture.class));
+        this.bar = new TextureRegion(ColonyGame.instance.assetManager.get("LoadingBar", Texture.class));
 
         this.loadingBar.set(Gdx.graphics.getWidth()/2 - width/2, Gdx.graphics.getHeight()/2 + height/2, width, height);
         this.square.set(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
         this.addToList();
+    }
+
+    @Override
+    public void addToList() {
+        ColonyGame.instance.listHolder.addGUI(this);
     }
 
     @Override
@@ -56,20 +60,6 @@ public class LoadingInterface extends UI{
             this.destroy();
     }
 
-    public void setDone(){
-        done = true;
-    }
-
-    @Override
-    public void resize(int width, int height) {
-        this.loadingBar.set(Gdx.graphics.getWidth()/2 - this.width/2, Gdx.graphics.getHeight()/2 + this.height/2, this.width, this.height);
-    }
-
-    @Override
-    public void addToList() {
-        ListHolder.addGUI(this);
-    }
-
     @Override
     public void destroy() {
         super.destroy();
@@ -79,6 +69,15 @@ public class LoadingInterface extends UI{
         square = null;
         outline = null;
         bar = null;
+    }
+
+    public void setDone(){
+        done = true;
+    }
+
+    @Override
+    public void resize(int width, int height) {
+        this.loadingBar.set(Gdx.graphics.getWidth()/2 - this.width/2, Gdx.graphics.getHeight()/2 + this.height/2, this.width, this.height);
     }
 
 }

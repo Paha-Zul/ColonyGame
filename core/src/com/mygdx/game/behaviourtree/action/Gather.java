@@ -58,7 +58,7 @@ public class Gather extends LeafTask{
         if(this.sounds != null) {
             this.soundTimer = new RepeatingTimer(1f, () -> {
                 SoundManager.play(this.sounds.getRandomSound(), this.blackBoard.myManager.getEntityOwner().getTransform().getPosition(),
-                        new Vector2(ColonyGame.camera.position.x, ColonyGame.camera.position.y), 200, 1000);
+                        new Vector2(ColonyGame.instance.camera.position.x, ColonyGame.instance.camera.position.y), 200, 1000);
             });
         }
 

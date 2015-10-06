@@ -25,10 +25,10 @@ public class SoundManager {
         falloffMax = GH.toMeters(falloffMax);
 
         //The effect of the zoom...
-        float zoomMult = (1 - GH.bound(1, 0, 2-ColonyGame.camera.zoom))*falloffMax;
+        float zoomMult = (1 - GH.bound(1, 0, 2-ColonyGame.instance.camera.zoom))*falloffMax;
 
         //The distance with zoom factored in.
-        float dis = soundPos.dst(lookPos) - (2/ColonyGame.camera.zoom) + zoomMult;
+        float dis = soundPos.dst(lookPos) - (2/ColonyGame.instance.camera.zoom) + zoomMult;
         if(dis <= falloffStart)
             sound.play(1f);
         else if(dis <= falloffMax){

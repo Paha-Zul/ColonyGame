@@ -10,13 +10,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mygdx.game.ColonyGame;
-import com.mygdx.game.component.Colony;
 import com.mygdx.game.component.Component;
 import com.mygdx.game.entity.Entity;
-import com.mygdx.game.util.managers.NotificationManager;
+import com.mygdx.game.interfaces.ISaveable;
 import gnu.trove.map.hash.TLongObjectHashMap;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -38,12 +38,14 @@ public class SaveGameHelper {
         //mapper.getSerializationConfig().addMixInAnnotations(Array.class, MixIn.class);
         //mapper.getSerializationConfig().addMixInAnnotations(Vector2.class, MixIn.class);
 
+        //Get all the entities.
         getJsonEntities();
-        world.playerManager.data = ColonyGame.playerManager.getPlayerManagerData();
+        saveManagers();
 
         FileHandle file = Gdx.files.local("game.sav");
         file.writeString("", false); //Clear the file.
 
+        //Submit a task and write all the data to a file.
         Runnable task = () -> {
             try {
                 writeFile(file, mapper.writerWithDefaultPrettyPrinter().writeValueAsString(world));
@@ -53,7 +55,7 @@ public class SaveGameHelper {
             }
         };
 
-        ColonyGame.threadPool.submit(task);
+        ColonyGame.instance.threadPool.submit(task);
 
         //writeFile(file, json.toJson(entComps, JsonComponents[].class));
         //writeFile(file, json.toJson(allComps, Component[].class));
@@ -61,11 +63,15 @@ public class SaveGameHelper {
 
     private static void getJsonEntities(){
         world.clear();
-        for(Array<Entity> list : ListHolder.getEntityList())
+        for(Array<Entity> list : ColonyGame.instance.listHolder.getEntityList())
             for(Entity ent : list) {
                 world.entities.add(new JsonEntity(ent, ent.getComponents().getComponentIDs()));
                 Collections.addAll(world.allComps, ent.getComponents().getAllComponents().toArray(Component.class));
             }
+    }
+
+    private static void saveManagers(){
+        world.colonyGame = ColonyGame.instance;
     }
 
     public static void writeFile(FileHandle file, String s) {
@@ -86,10 +92,9 @@ public class SaveGameHelper {
 
     private static void loadWorld(FileHandle file) {
         String save = readFile(file);
-        JsonWorld world = new JsonWorld();
 
         //Clear everything from the world.
-        ListHolder.clearEntityList();
+        ColonyGame.instance.listHolder.clearEntityList();
 
         try {
             world = mapper.readValue(file.file(), JsonWorld.class);
@@ -119,15 +124,15 @@ public class SaveGameHelper {
 
             ent.entity.getComponents().getAllComponents().forEach(comp -> comp.initLoad(giantEntityMap, giantCompMap)); //Load all the components on the Entity.
             ent.entity.getComponents().getAllComponents().forEach(comp -> comp.load(giantEntityMap, giantCompMap));
-            ListHolder.addEntity(ent.entity);
+            ColonyGame.instance.listHolder.addEntity(ent.entity);
         }
 
 
-
-        world.allComps = null;
-        world.entities = null;
-        giantCompMap = null;
-        giantEntityMap = null;
+        //Clear the collections
+        world.allComps = new ArrayList<>();
+        world.entities = new ArrayList<>();
+        giantCompMap = new TLongObjectHashMap<>();
+        giantEntityMap = new TLongObjectHashMap<>();
     }
 
     public static String readFile(FileHandle file) {
@@ -140,10 +145,41 @@ public class SaveGameHelper {
         return "";
     }
 
+    /**
+     * Loads all the managers. Modify as such.
+     */
     private static void loadManagers(){
-        ColonyGame.playerManager.init();
-        for(String[] data : world.playerManager.data)
-            NotificationManager.setPlayer(ColonyGame.playerManager.addPlayer(data[0], (Colony) giantCompMap.get(Long.parseLong(data[1]))));
+        ColonyGame.instance.notificationManager.destroy();
+        ColonyGame.instance.playerManager.destroy();
+
+        ColonyGame.instance.playerManager = world.colonyGame.playerManager;
+
+        ColonyGame.instance.playerManager.initLoad(giantEntityMap, giantCompMap);
+        ColonyGame.instance.notificationManager.initLoad(giantEntityMap, giantCompMap);
+
+        ColonyGame.instance.playerManager.load(giantEntityMap, giantCompMap);
+        ColonyGame.instance.notificationManager.load(giantEntityMap, giantCompMap);
+    }
+
+
+    /**
+     * Such
+     * @param POJO
+     * @param instance
+     */
+    private static void copyDataToPOJO(Object POJO, Object instance){
+        //Get all the fields o the POJO class.
+        Field[] fields = POJO.getClass().getFields();
+
+        try {
+            //For each field of the POJO class, get the value from the instance field and set the POJO field.
+            for(Field field : fields){
+                Field instanceField = instance.getClass().getField(field.getName());
+                field.set(POJO, instanceField.get(instanceField));
+            }
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -176,11 +212,14 @@ public class SaveGameHelper {
 
     private static class JsonWorld{
         @JsonProperty
+        public ColonyGame colonyGame;
+        @JsonProperty
+        public ArrayList<ISaveable> saveables = new ArrayList<>();
+        @JsonProperty
         public ArrayList<JsonEntity> entities = new ArrayList<>();
         @JsonProperty
         public ArrayList<Component> allComps = new ArrayList<>();
-        @JsonProperty
-        public SaveJsonPlayerManager playerManager = new SaveJsonPlayerManager();
+
 
         public JsonWorld(){
 
@@ -189,11 +228,17 @@ public class SaveGameHelper {
         public void clear(){
             entities = new ArrayList<>();
             allComps = new ArrayList<>();
+            saveables = new ArrayList<>();
+            colonyGame = null;
         }
     }
 
     private static class SaveJsonPlayerManager{
         @JsonProperty("playerManagerData")
         ArrayList<String[]> data = new ArrayList<>();
+    }
+
+    private static class PlayerManagerPOJO{
+
     }
 }

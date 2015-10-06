@@ -32,8 +32,8 @@ public class ColonistGraphic extends GraphicIdentity{
     public void load(TLongObjectHashMap<Entity> entityMap, TLongObjectHashMap<Component> compMap) {
         super.load(entityMap, compMap);
 
-        this.alertSprite = new Sprite(ColonyGame.assetManager.get("alertIcon", Texture.class));
-        this.selectionSprite = new Sprite(ColonyGame.assetManager.get("selectedCircle", Texture.class));
+        this.alertSprite = new Sprite(ColonyGame.instance.assetManager.get("alertIcon", Texture.class));
+        this.selectionSprite = new Sprite(ColonyGame.instance.assetManager.get("selectedCircle", Texture.class));
         this.selectionSprite.setColor(Color.BLUE);
 
         this.configureSprite(this.alertSprite);
@@ -56,7 +56,7 @@ public class ColonistGraphic extends GraphicIdentity{
 
     private void drawSelectionSprite(SpriteBatch batch, Vector2 ownerPos){
         if(this.owner.getTags().hasTag("selected")) {
-            if (!ColonyGame.camera.frustum.boundsInFrustum(ownerPos.x, ownerPos.y, 0, this.selectionSprite.getWidth(), this.selectionSprite.getHeight(), 0))
+            if (!ColonyGame.instance.camera.frustum.boundsInFrustum(ownerPos.x, ownerPos.y, 0, this.selectionSprite.getWidth(), this.selectionSprite.getHeight(), 0))
                 return;
 
             this.selectionSprite.setPosition(ownerPos.x - (selectionSprite.getWidth() / 2), ownerPos.y - (selectionSprite.getHeight() / 2));
@@ -68,7 +68,7 @@ public class ColonistGraphic extends GraphicIdentity{
 
     private void drawAlertSprite(SpriteBatch batch, Vector2 ownerPos){
         if(this.owner.getTags().hasTag("alert")) {
-            if (!ColonyGame.camera.frustum.boundsInFrustum(ownerPos.x, ownerPos.y, 0, this.alertSprite.getWidth(), this.alertSprite.getHeight(), 0))
+            if (!ColonyGame.instance.camera.frustum.boundsInFrustum(ownerPos.x, ownerPos.y, 0, this.alertSprite.getWidth(), this.alertSprite.getHeight(), 0))
                 return;
 
             this.alertSprite.setPosition(ownerPos.x - (alertSprite.getWidth() / 2), ownerPos.y + getSprite().getHeight() / 2);

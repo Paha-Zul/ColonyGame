@@ -22,7 +22,6 @@ import com.mygdx.game.entity.BuildingEntity;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.util.DataBuilder;
 import com.mygdx.game.util.GH;
-import com.mygdx.game.util.ListHolder;
 import com.mygdx.game.util.managers.DataManager;
 import com.mygdx.game.util.managers.PlaceConstructionManager;
 
@@ -49,7 +48,7 @@ public class PlacingConstructionWindow extends Window{
         this.worldPosition = new Vector2();
         this.placeManager = PlaceConstructionManager.instance();
 
-        this.listBackground = new TextureRegionDrawable(new TextureRegion(ColonyGame.assetManager.get("craftingWindowBackground", Texture.class)));
+        this.listBackground = new TextureRegionDrawable(new TextureRegion(ColonyGame.instance.assetManager.get("craftingWindowBackground", Texture.class)));
 
         this.buildingWindow = new com.badlogic.gdx.scenes.scene2d.ui.Window("", new com.badlogic.gdx.scenes.scene2d.ui.Window.WindowStyle(this.playerInterface.UIStyle.font, Color.BLACK, listBackground));
         this.buildingWindow.setBounds(0,0,100,500);
@@ -144,12 +143,12 @@ public class PlacingConstructionWindow extends Window{
         this.buildingImage.addCaptureListener(new ClickListener() {
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                Vector3 worldCoords = ColonyGame.camera.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
+                Vector3 worldCoords = ColonyGame.instance.camera.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
                 worldPosition.set(worldCoords.x, worldCoords.y);
-                if(PlaceConstructionManager.instance().canPlace(ColonyGame.world, worldPosition)) {
+                if(PlaceConstructionManager.instance().canPlace(ColonyGame.instance.world, worldPosition)) {
                     Entity b = new BuildingEntity(worldPosition, 0, building, 12);
-                    ColonyGame.playerManager.getPlayer("Player").colony.addOwnedToColony(b.getComponent(Building.class));
-                    ListHolder.addEntity(b);
+                    ColonyGame.instance.playerManager.getPlayer("Player").colony.addOwnedToColony(b.getComponent(Building.class));
+                    ColonyGame.instance.listHolder.addEntity(b);
                 }
                 //Null this out to cancel building after placing.
                 placeManager.setPlacingConstruction(null);
@@ -162,10 +161,10 @@ public class PlacingConstructionWindow extends Window{
     public boolean update(SpriteBatch batch) {
         Vector2 mouseCoords = GH.getFixedScreenMouseCoords();
         if(this.buildingImage != null){
-            //batch.setProjectionMatrix(ColonyGame.camera.projection);
-            Vector3 worldCoords = ColonyGame.camera.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
+            //batch.setProjectionMatrix(ColonyGame.instance.camera.projection);
+            Vector3 worldCoords = ColonyGame.instance.camera.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
             worldPosition.set(worldCoords.x, worldCoords.y);
-            float scale = ColonyGame.camera.zoom;
+            float scale = ColonyGame.instance.camera.zoom;
 
             //Set the size and position of the image.
             this.buildingImage.setSize(this.placeManager.getBuildingBeingPlaced().dimensions[0]*(1f/scale), this.placeManager.getBuildingBeingPlaced().dimensions[1]*(1f/scale));
@@ -173,13 +172,13 @@ public class PlacingConstructionWindow extends Window{
             this.buildingImage.setPosition(buildingImagePosition.x, buildingImagePosition.y);
 
             //Change color to red if can't place, white if can.
-            if(!PlaceConstructionManager.instance().canPlace(ColonyGame.world, worldPosition))
+            if(!PlaceConstructionManager.instance().canPlace(ColonyGame.instance.world, worldPosition))
                 this.buildingImage.setColor(Color.RED);
             else
                 this.buildingImage.setColor(Color.WHITE);
 
             //this.buildingImage.setScale(1f/scale);
-            //batch.setProjectionMatrix(ColonyGame.UICamera.projection);
+            //batch.setProjectionMatrix(ColonyGame.instance.UICamera.projection);
         }
 
         if(this.previewWindow != null){

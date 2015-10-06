@@ -87,7 +87,7 @@ public class Colonist extends Component implements IInteractable, IOwnable{
             this.stats.clearTimers();
             GridComponent gridComp = this.getComponent(GridComponent.class);
             gridComp.setActive(false);
-            ColonyGame.worldGrid.removeViewer(gridComp);
+            ColonyGame.instance.worldGrid.removeViewer(gridComp);
             this.setActive(false); //Disable the update tick. We won't be active for now...
         };
     };
@@ -122,7 +122,7 @@ public class Colonist extends Component implements IInteractable, IOwnable{
             }
         };
 
-        ColonyGame.worldGrid.performOnEntityInRadius(callForHelp , null, 20, ColonyGame.worldGrid.getIndex(this.owner));
+        ColonyGame.instance.worldGrid.performOnEntityInRadius(callForHelp , null, 20, ColonyGame.instance.worldGrid.getIndex(this.owner));
     };
 
     //When one of our fixtures collides with something.
@@ -369,7 +369,7 @@ public class Colonist extends Component implements IInteractable, IOwnable{
     private void makeCollider(){
         CircleCollider collider = getComponent(CircleCollider.class);
         if(collider == null) collider = this.addComponent(new CircleCollider());
-        collider.setupBody(BodyDef.BodyType.DynamicBody, ColonyGame.world, this.owner.getTransform().getPosition(), 1, true, true);
+        collider.setupBody(BodyDef.BodyType.DynamicBody, ColonyGame.instance.world, this.owner.getTransform().getPosition(), 1, true, true);
     }
 
     /**

@@ -27,7 +27,7 @@ public class PreLoadingScreen implements Screen{
     @Override
     public void show() {
         //Load the assets first.
-        builder = new DataBuilder(ColonyGame.assetManager);
+        builder = new DataBuilder(ColonyGame.instance.assetManager);
         builder.loadAllAssets();
         this.loading = new Texture(Gdx.files.internal("img/misc/loading.png"), true);
         this.loading.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
@@ -37,25 +37,25 @@ public class PreLoadingScreen implements Screen{
     public void render(float delta) {
         int midX = Gdx.graphics.getWidth()/2, midY = Gdx.graphics.getHeight()/2;
 
-        ColonyGame.batch.setProjectionMatrix(ColonyGame.UICamera.combined);
-        ColonyGame.batch.begin();
+        ColonyGame.instance.batch.setProjectionMatrix(ColonyGame.instance.UICamera.combined);
+        ColonyGame.instance.batch.begin();
         //Draw loading circle.
-        ColonyGame.batch.draw(loading, midX - 64, midY - 64, 64, 64, 128, 128, 1, 1, rotation, 0, 0, 128, 128, false, false);
+        ColonyGame.instance.batch.draw(loading, midX - 64, midY - 64, 64, 64, 128, 128, 1, 1, rotation, 0, 0, 128, 128, false, false);
         rotation += rotationSpeed;
-        ColonyGame.batch.end();
+        ColonyGame.instance.batch.end();
 
         //When the assets are done being loaded, load all the config/Json files and change the screen.
         if(builder.update()) {
             builder.loadAllFiles();
             GUI.init();
-            ColonyGame.worldGrid = Grid.newGridInstance("grid", Constants.GRID_WIDTH, Constants.GRID_HEIGHT, Constants.GRID_SQUARESIZE);
+            ColonyGame.instance.worldGrid = Grid.newGridInstance("grid", Constants.GRID_WIDTH, Constants.GRID_HEIGHT, Constants.GRID_SQUARESIZE);
             this.game.setScreen(new MainMenuScreen(this.game));
         }
     }
 
     @Override
     public void resize(int width, int height) {
-        ColonyGame.UICamera.setToOrtho(false, width, height);
+        ColonyGame.instance.UICamera.setToOrtho(false, width, height);
     }
 
     @Override

@@ -1,13 +1,11 @@
 package com.mygdx.game.entity;
 
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.component.Component;
 import com.mygdx.game.component.GridComponent;
 import com.mygdx.game.component.Interactable;
 import com.mygdx.game.component.Resource;
-import com.mygdx.game.component.collider.BoxCollider;
 import com.mygdx.game.component.graphic.GraphicIdentity;
 import com.mygdx.game.util.Constants;
 import gnu.trove.map.hash.TLongObjectHashMap;
@@ -34,7 +32,7 @@ public class ResourceEnt extends Entity{
         inter.setInterType("resource");
 
         gridComp.setGridType(Constants.GRIDACTIVE);
-        gridComp.setGrid(ColonyGame.worldGrid);
+        gridComp.setGrid(ColonyGame.instance.worldGrid);
         gridComp.setExploreRadius(-1);
 
         if(identity != null) {

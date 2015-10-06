@@ -18,6 +18,8 @@ import com.mygdx.game.util.Tags;
 import com.mygdx.game.util.managers.DataManager;
 import gnu.trove.map.hash.TLongObjectHashMap;
 
+import java.util.ArrayList;
+
 /**
  * Created by Paha on 1/10/2015.
  * This class holds a reference to the JsonResource object as well as copying its values. The values (like the name and number of resources) so that
@@ -29,18 +31,17 @@ public class Resource extends Component implements IInteractable{
     @JsonProperty
     public Tags resourceTypeTags = new Tags("resource");
     @JsonProperty
-    private String resourceName = "default", displayName = "default", resourceType = "default";
-    @JsonProperty
     private int itemIndex = 0;
     @JsonProperty
     private float gatherTime = 1f;
     @JsonProperty
     private float gatherTick = 1f;
+
     private volatile Entity taken = null;
-    private StringBuilder contents;
-    private DataBuilder.JsonResource resRef;
-    private Array<String> itemNames;
-    private Array<Integer> itemAmounts;
+    private StringBuilder contentsToDisplay; //Builds the string to display the contents
+    private Array<String> itemNames; //The names
+    private Array<Integer> itemAmounts; //The amounts
+    private DataBuilder.JsonResource resRef; //The reference resource
 
     public Resource() {
         super();
@@ -48,20 +49,8 @@ public class Resource extends Component implements IInteractable{
     }
 
     public void copyResource(Resource resource){
-        this.resRef = DataManager.getData(resource.resourceName, DataBuilder.JsonResource.class);
-        initItem(resource);
-    }
-
-    //Initializes the item.
-    private void initItem(Resource resource){
-        this.resRef = resource.getResRef();
-        this.displayName = resource.displayName;
-        this.resourceType = resource.resourceType;
-        this.itemNames = new Array<>(resource.itemNames);
-        this.gatherTime = resource.gatherTime;
-        this.resourceName = resource.resourceName;
-
-        generateItemInfo(resource.resRef.itemNames, resource.resRef.itemAmounts, resource.resRef.itemChances);
+        this.resRef = DataManager.getData(resource.getResRef().resourceName, DataBuilder.JsonResource.class);
+        initResource(resource);
     }
 
     /**
@@ -69,6 +58,17 @@ public class Resource extends Component implements IInteractable{
      */
     public DataBuilder.JsonResource getResRef() {
         return this.resRef;
+    }
+
+    /**
+     * Initializes the resource.
+     * @param resource The resource to copy and initialize from.
+     */
+    private void initResource(Resource resource){
+        this.resRef = resource.getResRef();
+        this.gatherTime = resource.gatherTime;
+
+        generateItemInfo(resource.resRef.itemNames, resource.resRef.itemAmounts, resource.resRef.itemChances);
     }
 
     /**
@@ -92,7 +92,7 @@ public class Resource extends Component implements IInteractable{
                 amounts.add(amount); //Adds the item amount to this resource.
                 names.add(itemNames[i]); //Adds the item compName to this resource.
                 DataBuilder.JsonItem itemRef = DataManager.getData(itemNames[i], DataBuilder.JsonItem.class); //Get the itemRef
-                if(itemRef == null) GH.writeErrorMessage("There is no item named "+itemNames[i]+" for resource "+this.displayName+". Check the resource.json and items.json files and make sure resource/item pairs match.", true);
+                if(itemRef == null) GH.writeErrorMessage("There is no item named "+itemNames[i]+" for resource "+this.resRef.displayName+". Check the resource.json and items.json files and make sure resource/item pairs match.", true);
                 resourceTypeTags.addTag(itemRef.getItemType()); //Adds the type to the resource type tags.
 
                 //For every item effect, add the effect to the effectTags.
@@ -110,19 +110,23 @@ public class Resource extends Component implements IInteractable{
         this.gatherTick = gatherTime/total;
     }
 
-    public void copyResource(DataBuilder.JsonResource jRes){
+    private void initResourceLight(DataBuilder.JsonResource jRes){
         this.resRef = jRes;
-        initItem(jRes);
+        this.gatherTime = jRes.gatherTime;
     }
 
-    //Initializes the item.
-    private void initItem(DataBuilder.JsonResource jRes){
+    public void copyResource(DataBuilder.JsonResource jRes){
         this.resRef = jRes;
-        this.displayName = jRes.displayName;
-        this.resourceType = jRes.resourceType;
-        this.itemNames = new Array<>(jRes.itemNames);
+        initResource(jRes);
+    }
+
+    /**
+     * Initializes the resource.
+     * @param jRes The JsonResource to initialize from.
+     */
+    private void initResource(DataBuilder.JsonResource jRes){
+        this.resRef = jRes;
         this.gatherTime = jRes.gatherTime;
-        this.resourceName = jRes.resourceName;
 
         generateItemInfo(jRes.itemNames, jRes.itemAmounts, jRes.itemChances);
     }
@@ -142,7 +146,7 @@ public class Resource extends Component implements IInteractable{
     public void load(TLongObjectHashMap<Entity> entityMap, TLongObjectHashMap<Component> compMap) {
         super.load(entityMap, compMap);
 
-        contents = new StringBuilder();
+        contentsToDisplay = new StringBuilder();
     }
 
     @Override
@@ -162,10 +166,10 @@ public class Resource extends Component implements IInteractable{
             collider = new BoxCollider();
             collider.setActive(false);
             collider = this.addComponent(collider);
-            collider.setupBody(BodyDef.BodyType.StaticBody, ColonyGame.world, graphic.getSprite().getWidth()/4, graphic.getSprite().getHeight()/2,
+            collider.setupBody(BodyDef.BodyType.StaticBody, ColonyGame.instance.world, graphic.getSprite().getWidth()/4, graphic.getSprite().getHeight()/2,
                     new Vector2(graphic.getSprite().getX() + graphic.getSprite().getWidth()/2, graphic.getSprite().getY() + graphic.getSprite().getHeight()/2), false, false);
         }else if(collider.getBody() == null) {
-            collider.setupBody(BodyDef.BodyType.StaticBody, ColonyGame.world, graphic.getSprite().getWidth() / 4, graphic.getSprite().getHeight() / 2,
+            collider.setupBody(BodyDef.BodyType.StaticBody, ColonyGame.instance.world, graphic.getSprite().getWidth() / 4, graphic.getSprite().getHeight() / 2,
                     new Vector2(graphic.getSprite().getX() + graphic.getSprite().getWidth() / 2, graphic.getSprite().getY() + graphic.getSprite().getHeight() / 2), false, false);
         }
     }
@@ -174,7 +178,7 @@ public class Resource extends Component implements IInteractable{
     public void start() {
         super.start();
 
-        owner.name = this.displayName;
+        owner.name = this.resRef.displayName;
 
         if(resRef.resourceType.equals("water")) {
             owner.active = false;
@@ -250,10 +254,10 @@ public class Resource extends Component implements IInteractable{
         int size = itemAmounts.size;
 
         //If it's empty, either destroy it or re-initialize it.
-        if(size == 0 && !DataManager.getData(this.resourceName, DataBuilder.JsonResource.class).infinite)
+        if(size == 0 && !this.resRef.infinite)
             this.owner.setToDestroy();
         else if(size == 0)
-            this.initItem(this.resRef);
+            this.initResource(this.resRef);
 
         return size > 0;
     }
@@ -312,27 +316,57 @@ public class Resource extends Component implements IInteractable{
     }
 
     /**
-     * @return The name of the JsonResource that this resource mimics.
+     * Only used for saving.
+     * @return A list of items and amounts (name, amount).
      */
-    @JsonProperty("resourceRef")
-    public String getResRefName(){
+    @JsonProperty("resourceItems")
+    private Array<String[]> getResItems(){
+        Array<String[]> list = new Array<>(5);
+
+        for(int i=0;i<this.itemNames.size;i++)
+            list.add(new String[]{this.itemNames.get(i), ""+this.itemAmounts.get(i)});
+
+        return list;
+    }
+
+        /**
+         * Only used for saving.
+         * @return The name of the JsonResource that this resource mimics.
+         */
+        @JsonProperty("resourceRef")
+        private String getResRefName(){
         return this.resRef.resourceName;
     }
 
     /**
-     * Uses the resRefName to initialize the resource.
+     * Uses the resRefName to initialize the resource. Only used for loading.
      * @param resRefName The name of the JsonResource reference.
      */
     @JsonProperty("resourceRef")
-    public void setResRefName(String resRefName){
-        this.initItem(DataManager.getData(resRefName, DataBuilder.JsonResource.class));
+    private void setResRefName(String resRefName){
+        this.resRef = DataManager.getData(resRefName, DataBuilder.JsonResource.class);
+    }
+
+    /**
+     * Only used for loading
+     * @param resourceItems The items to load into the resource.
+     */
+    @JsonProperty("resourceItems")
+    private void setResourceItems(ArrayList<String[]> resourceItems){
+        this.itemNames = new Array<>();
+        this.itemAmounts = new Array<>();
+
+        for(String[] item : resourceItems){
+            this.itemNames.add(item[0]);
+            this.itemAmounts.add(Integer.parseInt(item[1]));
+        }
     }
 
     /**
      * @return The name of this resource.
      */
     public String getResourceName(){
-        return this.resourceName;
+        return this.resRef.resourceName;
     }
 
     /**
@@ -386,7 +420,7 @@ public class Resource extends Component implements IInteractable{
      * @param resourceType A String denoting the interType.
      */
     public void setResourceType(String resourceType) {
-        this.resourceType = resourceType;
+        this.resRef.resourceType = resourceType;
     }
 
     @Override
@@ -402,11 +436,11 @@ public class Resource extends Component implements IInteractable{
     @Override
     public String getStatsText() {
         String takenBy = this.taken == null ? "null" : this.taken.getComponent(Colonist.class).getName();
-        contents.setLength(0);
+        contentsToDisplay.setLength(0);
         for(int i=0;i<itemNames.size;i++)
-            contents.append(itemAmounts.get(i)).append(" ").append(itemNames.get(i)).append(System.lineSeparator());
+            contentsToDisplay.append(itemAmounts.get(i)).append(" ").append(itemNames.get(i)).append(System.lineSeparator());
 
-        return contents.toString() + "\ntaken: "+this.isTaken()+" by: "+takenBy+"\ntags: "+this.resourceTypeTags.toString();
+        return contentsToDisplay.toString() + "\ntaken: "+this.isTaken()+" by: "+takenBy+"\ntags: "+this.resourceTypeTags.toString();
     }
 
     /**
@@ -434,9 +468,8 @@ public class Resource extends Component implements IInteractable{
     /**
      * @return A String which is the formal display compName of this Resource.
      */
-    
     public String getDisplayName() {
-        return displayName;
+        return this.resRef.displayName;
     }
 
     @Override

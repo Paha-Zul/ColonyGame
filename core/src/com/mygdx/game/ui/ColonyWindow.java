@@ -39,9 +39,9 @@ public class ColonyWindow extends Window{
         super(playerInterface, target);
 
         this.colonyWindowStyle = new GUI.GUIStyle();
-        this.colonyScreenBackground = new TextureRegion(ColonyGame.assetManager.get("eventWindowBackground", Texture.class));
-        this.darkBackground = new TextureRegion(ColonyGame.assetManager.get("darkBackground", Texture.class));
-        this.textBackground = new TextureRegion(ColonyGame.assetManager.get("plainBackground", Texture.class));
+        this.colonyScreenBackground = new TextureRegion(ColonyGame.instance.assetManager.get("eventWindowBackground", Texture.class));
+        this.darkBackground = new TextureRegion(ColonyGame.instance.assetManager.get("darkBackground", Texture.class));
+        this.textBackground = new TextureRegion(ColonyGame.instance.assetManager.get("plainBackground", Texture.class));
         this.draggable = true;
 
         com.badlogic.gdx.scenes.scene2d.ui.Window.WindowStyle style = new com.badlogic.gdx.scenes.scene2d.ui.Window.WindowStyle(this.playerInterface.UIStyle.font, Color.BLACK, new TextureRegionDrawable(this.colonyScreenBackground));

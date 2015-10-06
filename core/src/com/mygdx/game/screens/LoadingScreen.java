@@ -7,7 +7,6 @@ import com.mygdx.game.ColonyGame;
 import com.mygdx.game.ui.LoadingInterface;
 import com.mygdx.game.ui.PlayerInterface;
 import com.mygdx.game.ui.UI;
-import com.mygdx.game.util.ListHolder;
 import com.mygdx.game.util.worldgeneration.WorldGen;
 
 /**
@@ -26,7 +25,7 @@ public class LoadingScreen implements Screen {
     @Override
     public void show() {
         WorldGen.getInstance().init(game);
-        loadingInterface = new LoadingInterface(ColonyGame.batch);
+        loadingInterface = new LoadingInterface(ColonyGame.instance.batch);
     }
 
     @Override
@@ -44,11 +43,11 @@ public class LoadingScreen implements Screen {
     @Override
     public void resize(int width, int height) {
         Gdx.graphics.setDisplayMode(width, height, false);
-        ColonyGame.camera.setToOrtho(false, width, height);
-        ColonyGame.UICamera.setToOrtho(false, width, height);
+        ColonyGame.instance.camera.setToOrtho(false, width, height);
+        ColonyGame.instance.UICamera.setToOrtho(false, width, height);
 
         //Resizes all the GUI elements of the game (hopefully!)
-        Array<UI> list = ListHolder.getGUIList();
+        Array<UI> list = ColonyGame.instance.listHolder.getGUIList();
         for(int i=0;i< list.size;i++){
             list.get(i).resize(width, height);
         }

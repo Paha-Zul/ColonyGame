@@ -51,33 +51,33 @@ import java.util.ArrayList;
  * The PlayerInterface handles all the GUI rendering to the screen to display information for the player.
  */
 public class PlayerInterface extends UI implements IGUI, InputProcessor {
-    public boolean paused = false;
+    private static final float camMoveSpeed = 100f;
+    private static final float camZoomSpeed = 5f;
     public static boolean active = false;
+    private static PlayerInterface playerInterface;
+    public boolean paused = false;
     public float gameSpeed = 1;
-
+    public boolean renderWorld = true;
+    public GUI.GUIStyle UIStyle;
+    public Texture blueSquare;
+    public Stage stage;
+    /**
+     * Stuff for drawing colony
+     */
+    public boolean drawingColony = false;
     private TextureRegion background;
     private World world;
     private WindowManager windowManager;
-
     private Array<Button> buttonList;
-
     private boolean drawingInfo = false;
     private boolean drawingProfiler = false;
     private boolean mouseDown = false;
     private boolean dragging = false;
     private boolean drawGrid = false;
-    public boolean renderWorld = true;
-
     private Rectangle buttonRect = new Rectangle();
-
     private float FPS = 0;
-
-    private static final float camMoveSpeed = 100f;
-    private static final float camZoomSpeed = 5f;
-
     private Rectangle bottomLeftRect = new Rectangle();
     private Rectangle selectionBox = new Rectangle();
-
     private GUI.GUIStyle gatherStyle;
     private GUI.GUIStyle exploreStyle;
     private GUI.GUIStyle huntStyle;
@@ -86,40 +86,18 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     private GUI.GUIStyle gameSpeedStyle;
     private GUI.GUIStyle notificationStyle;
     private GUI.GUIStyle mousedOverNotiStyle;
-    public GUI.GUIStyle UIStyle;
     private Timer FPSTimer;
-
     private Vector2 testPoint = new Vector2(); //A reusable vector
     private boolean newlySelected = false; //If we have selected a new entity, this will stop the left click from getting rid of it.
     private UnitProfile selectedProfile = null; //The currently selected UnitProfile.
     private Array<UnitProfile> selectedProfileList = new Array<>(); //The list of selected UnitProfiles.
-
     private Color gray = new Color(Color.BLACK);
-    public Texture blueSquare;
-    private static PlayerInterface playerInterface;
-
     private DataBuilder.JsonPlayerEvent currentEvent;
     private GUI.GUIStyle eventDescStyle, eventTitleStyle;
-
     private TextureRegion whiteTexture;
     private NotificationManager.Notification mousedOverNotification = null;
-
     private boolean extendedTooltip;
     private Timer extendedTooltipTimer = new OneShotTimer(2f, () -> extendedTooltip = true);
-
-    public Stage stage;
-
-    /**
-     * Stuff for drawing colony
-     */
-    public boolean drawingColony = false;
-
-    private void loadHuntButtonStyle(){
-        huntStyle.normal = DataManager.getTextureFromAtlas("huntbutton_normal", "buttons");
-        huntStyle.moused = DataManager.getTextureFromAtlas("huntbutton_moused", "buttons");
-        huntStyle.clicked = DataManager.getTextureFromAtlas("huntbutton_clicked", "buttons");
-    }
-
     //For selecting a single unit.
     private QueryCallback callback = fixture -> {
         Collider.ColliderInfo info = (Collider.ColliderInfo)fixture.getUserData();
@@ -130,7 +108,6 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
         return true;
     };
-
     //For selecting many units
     private QueryCallback selectionCallback = fixture -> {
         Collider.ColliderInfo selectedInfo = (Collider.ColliderInfo)fixture.getUserData();
@@ -165,14 +142,14 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         this.buttonList = new Array<>();
 
         this.eventDescStyle = new GUI.GUIStyle();
-        eventDescStyle.background = new TextureRegion(ColonyGame.assetManager.get("eventWindowDescriptionBackground", Texture.class));
+        eventDescStyle.background = new TextureRegion(ColonyGame.instance.assetManager.get("eventWindowDescriptionBackground", Texture.class));
 
         this.eventTitleStyle = new GUI.GUIStyle();
-        this.eventTitleStyle.background = new TextureRegion(ColonyGame.assetManager.get("eventWindowTitleBackground", Texture.class));
+        this.eventTitleStyle.background = new TextureRegion(ColonyGame.instance.assetManager.get("eventWindowTitleBackground", Texture.class));
 
-        this.blueSquare = ColonyGame.assetManager.get("blueSquare", Texture.class);
+        this.blueSquare = ColonyGame.instance.assetManager.get("blueSquare", Texture.class);
 
-        this.background = new TextureRegion(ColonyGame.assetManager.get("background", Texture.class));
+        this.background = new TextureRegion(ColonyGame.instance.assetManager.get("background", Texture.class));
 
         this.buttonRect.set(0, Gdx.graphics.getHeight() - 100, 200, 100);
 
@@ -212,8 +189,8 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
         DataManager.addData("blankStyle", blankStyle, GUI.GUIStyle.class);
 
-        gameSpeedStyle.background = new TextureRegion(ColonyGame.assetManager.get("eventWindowBackground", Texture.class));
-        notificationStyle.background = new TextureRegion(ColonyGame.assetManager.get("notificationIcon", Texture.class));
+        gameSpeedStyle.background = new TextureRegion(ColonyGame.instance.assetManager.get("eventWindowBackground", Texture.class));
+        notificationStyle.background = new TextureRegion(ColonyGame.instance.assetManager.get("notificationIcon", Texture.class));
         notificationStyle.font = DataManager.getData("changelogFont", BitmapFont.class);
 
         gatherStyle.font.setColor(new Color(126f / 255f, 75f / 255f, 27f / 255f, 1));
@@ -221,13 +198,13 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         huntStyle.font.setColor(126f / 255f, 75f / 255f, 27f / 255f, 1);
 
         //Multiplex the stage and this interface.
-        this.stage = new Stage(new ScreenViewport(ColonyGame.UICamera));
+        this.stage = new Stage(new ScreenViewport(ColonyGame.instance.UICamera));
         InputMultiplexer multiplexer = new InputMultiplexer();
         multiplexer.addProcessor(this.stage);
         multiplexer.addProcessor(this);
         Gdx.input.setInputProcessor(multiplexer);
 
-        ColonyGame.camera.zoom = 1.5f;
+        ColonyGame.instance.camera.zoom = 1.5f;
 
         this.windowManager = new WindowManager();
         this.windowManager.addWindowToSelfManagingList(new SelectedWindow(this));
@@ -235,25 +212,10 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         this.makeBuildButton();
     }
 
-    private void makeBuildButton(){
-        TextureRegionDrawable up = new TextureRegionDrawable(DataManager.getTextureFromAtlas("defaultButton_normal", "buttons"));
-        TextureRegionDrawable over = new TextureRegionDrawable(DataManager.getTextureFromAtlas("defaultButton_moused", "buttons"));
-        TextureRegionDrawable down = new TextureRegionDrawable(DataManager.getTextureFromAtlas("defaultButton_clicked", "buttons"));
-
-        TextButton.TextButtonStyle style = new TextButton.TextButtonStyle(up, down, up, this.UIStyle.font);
-        style.over = style.checkedOver = over;
-
-        TextButton button = new TextButton("Build", style);
-        button.setPosition(0,0);
-        this.stage.addActor(button);
-
-        button.addListener(new InputListener(){
-            @Override
-            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                windowManager.addWindowIfNotExistByTarget(PlacingConstructionWindow.class, null, PlayerInterface.getInstance());
-                return true;
-            }
-        });
+    private void loadHuntButtonStyle(){
+        huntStyle.normal = DataManager.getTextureFromAtlas("huntbutton_normal", "buttons");
+        huntStyle.moused = DataManager.getTextureFromAtlas("huntbutton_moused", "buttons");
+        huntStyle.clicked = DataManager.getTextureFromAtlas("huntbutton_clicked", "buttons");
     }
 
     private void generateFonts(){
@@ -271,141 +233,30 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         DataManager.addData("UIFont", topFont, BitmapFont.class);
     }
 
-    @Override
-    public void render(float delta, SpriteBatch batch) {
-        super.render(delta, batch);
-        int screenW = Gdx.graphics.getWidth(), screenH = Gdx.graphics.getHeight();
+    private void makeBuildButton(){
+        TextureRegionDrawable up = new TextureRegionDrawable(DataManager.getTextureFromAtlas("defaultButton_normal", "buttons"));
+        TextureRegionDrawable over = new TextureRegionDrawable(DataManager.getTextureFromAtlas("defaultButton_moused", "buttons"));
+        TextureRegionDrawable down = new TextureRegionDrawable(DataManager.getTextureFromAtlas("defaultButton_clicked", "buttons"));
 
-        batch.setProjectionMatrix(ColonyGame.UICamera.combined);
-        GUI.font.setColor(Color.WHITE);
+        TextButton.TextButtonStyle style = new TextButton.TextButtonStyle(up, down, up, this.UIStyle.font);
+        style.over = style.checkedOver = over;
 
-        int height = Gdx.graphics.getHeight();
-        FPSTimer.update(delta);
+        TextButton button = new TextButton("Build", style);
+        button.setPosition(0,0);
+        this.stage.addActor(button);
 
-        for(Button button : this.buttonList)
-            if(button.render(ColonyGame.batch)) break;
-
-        this.moveCamera(); //Move the camera
-        this.drawSelectionBox(); //Draws the selection box.
-        this.drawDebugInfo(height); //Draws some debug information.
-        this.drawTerrainInfo(this.bottomLeftRect); //Draws information about the moused over terrain piece.
-        this.drawGameSpeed(screenW, screenH, batch, this.gameSpeedStyle);
-        this.drawCurrentNotifications(screenW, screenH, delta);
-        this.windowManager.update(this.batch);
-
-        if(this.drawingProfiler) Profiler.drawDebug(batch, 200, height - 20);
-
-        //Draw the grid squares if enabled.
-        if(drawGrid) {
-            ColonyGame.worldGrid.debugDraw();
-            drawBox2DDebug();
-        }
-
-        drawCurrentEvent(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-
-        batch.end();
-        batch.begin();
-        stage.act(delta);
-        stage.draw();
-        batch.end();
-        batch.begin();
-    }
-
-    private void drawCurrentNotifications(int width, int height, float delta){
-        Array<NotificationManager.Notification> list = NotificationManager.getActiveNotifications();
-        float x = width - 80f, y = height*0.4f;
-        float labelW = 50f, labelH = 50f;
-        NotificationManager.Notification newlyMousedOver = null; //This is like a flag.
-
-        notificationStyle.wrap = true;
-        for(int i=0;i<list.size;i++){
-            NotificationManager.Notification notification = list.get(i);
-
-            //GUI.Texture(whiteTexture, batch, x, y, labelW, labelH);
-            if(GUI.Label(notification.name, this.batch, x, y, labelW, labelH, notificationStyle) > 0){
-                newlyMousedOver = notification; //Set the flag(ish) variable.
-
-                mousedOverNotiStyle.wrap = true;
-                String toolTip = extendedTooltip ? notification.extendedTooltip : notification.quickTooltip;
-                GUI.Label(toolTip, batch, Gdx.input.getX() - 250, height - Gdx.input.getY() - 50, 200, 100, mousedOverNotiStyle);
+        button.addListener(new InputListener() {
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                windowManager.addWindowIfNotExistByTarget(PlacingConstructionWindow.class, null, PlayerInterface.getInstance());
+                return true;
             }
-            y += labelH + 10f;
-        }
-
-        //If we are still moused over the same notification, increase the timer.
-        if(this.mousedOverNotification != null && this.mousedOverNotification == newlyMousedOver) extendedTooltipTimer.update(delta);
-        else {
-            this.extendedTooltip = false;
-            extendedTooltipTimer.restart();
-        }
-        this.mousedOverNotification = newlyMousedOver;
+        });
     }
 
-    /**
-     * Draws the current event that is being presented to the player while the game is paused.
-     * @param width The width of the game screen. This will be use to calculate the event window widht.
-     * @param height The height of the game screen. Used to calculate the event window height.
-     */
-    private void drawCurrentEvent(int width, int height){
-        if(this.currentEvent != null){
-            float windowWidth = width/3.2f, windowHeight = height/2.7f;
-            float windowX = width/2 - windowWidth/2, windowY = height/2 - windowHeight/2;
-
-            float titleWidth = windowWidth*0.4f, titleHeight = windowHeight*0.1f;
-            float titleX = windowX+ windowWidth*0.05f, titleY = windowY + windowHeight - titleHeight - windowHeight*0.03f;
-
-            float descWidth = windowWidth*0.9f, descHeight = windowHeight*0.6f;
-            float descX = windowX + windowWidth*0.05f, descY = windowY + windowHeight*0.25f;
-
-            GUI.Texture(new TextureRegion(ColonyGame.assetManager.get("eventWindowBackground", Texture.class)), this.batch, windowX, windowY, windowWidth, windowHeight);
-
-            eventDescStyle.padding(10);
-            eventDescStyle.multiline = true;
-            eventDescStyle.wrap = true;
-            eventDescStyle.alignment = Align.topLeft;
-            GUI.Label(this.currentEvent.eventDisplayName, this.batch, titleX, titleY, titleWidth, titleHeight, eventTitleStyle);
-            GUI.Label(GH.generateEventDescription(this.currentEvent), this.batch, descX, descY, descWidth, descHeight, eventDescStyle);
-
-            float buttonWidth = windowWidth*0.3f, buttonHeight = 75;
-            float spacing = (windowWidth - this.currentEvent.choices.length*buttonWidth)/(this.currentEvent.choices.length+1);
-            blankStyle.wrap = true;
-
-            for(int i=0;i<this.currentEvent.choices.length;i++){
-                String choice = this.currentEvent.choices[i];
-                if(GUI.Button(this.batch, choice, windowX + (i+1)*spacing + i*buttonWidth, windowY + windowHeight*0.01f, buttonWidth, buttonHeight, blankStyle) == GUI.JUSTUP){
-                    BehaviourManagerComp comp = this.currentEvent.eventTarget.getComponent(BehaviourManagerComp.class);
-                    if(comp == null) return;
-                    comp.getBlackBoard().target = this.currentEvent.eventTargetOther;
-                    comp.changeTaskImmediate(this.currentEvent.behaviours[i], true);
-                    this.gameSpeed = 1f; //Reset game speed
-                    this.paused = false; //Unpause
-                    this.currentEvent = null;
-                    return;
-                }
-            }
-        }
-    }
-
-    /**
-     * Draws the selection box if the user is dragging a selection box.
-     */
-    private void drawSelectionBox(){
-        if(mouseDown) {
-            //Get the start point.
-            Vector3 pos = new Vector3(selectionBox.x, selectionBox.y, 0);
-            Vector3 start = ColonyGame.camera.project(new Vector3(pos.x, pos.y, 0));
-
-            //Get the end point.
-            pos.set(selectionBox.x + selectionBox.getWidth(), selectionBox.y + selectionBox.getHeight(), 0);
-            Vector3 end = ColonyGame.camera.project(new Vector3(pos.x, pos.y, 0));
-            gray.a = 0.5f;
-
-            //Save the color from the batch, apply the gray, draw the texture (with color), and reset the original color.
-            Color saved = this.batch.getColor();
-            this.batch.setColor(gray);
-            this.batch.draw(WorldGen.whiteTex, start.x, start.y, end.x - start.x, end.y - start.y);
-            this.batch.setColor(saved);
-        }
+    public static PlayerInterface getInstance(){
+        if(playerInterface == null) playerInterface = new PlayerInterface(ColonyGame.instance.batch, ColonyGame.instance.world);
+        return playerInterface;
     }
 
     /**
@@ -427,54 +278,6 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
         if(this.selectedProfile == null && this.selectedProfileList.size > 0)
             this.selectedProfile = this.selectedProfileList.get(0);
-    }
-
-    /**
-     * Moves the camera when keys are pressed.
-     */
-    private void moveCamera(){
-        if(Gdx.input.isKeyPressed(Input.Keys.W))
-            ColonyGame.camera.translate(0, Gdx.graphics.getDeltaTime()*camMoveSpeed);
-        if(Gdx.input.isKeyPressed(Input.Keys.S))
-            ColonyGame.camera.translate(0, -Gdx.graphics.getDeltaTime()*camMoveSpeed);
-        if(Gdx.input.isKeyPressed(Input.Keys.A))
-            ColonyGame.camera.translate(-Gdx.graphics.getDeltaTime()*camMoveSpeed, 0);
-        if(Gdx.input.isKeyPressed(Input.Keys.D))
-            ColonyGame.camera.translate(Gdx.graphics.getDeltaTime()*camMoveSpeed, 0);
-    }
-
-    /**
-     * Draws info (like FPS) on the screen.
-     * @param height The height of the screen.
-     */
-    private void drawDebugInfo(int height){
-        if(this.drawingInfo) {
-            GUI.Text("FPS: " + FPS, this.batch, 0, height - 20);
-            GUI.Text("Zoom: " + ColonyGame.camera.zoom, this.batch, 0, height - 40);
-            GUI.Text("Resolution: " + Gdx.graphics.getDesktopDisplayMode().width + "X" + Gdx.graphics.getDesktopDisplayMode().height, this.batch, 0, height - 60);
-            GUI.Text("NumTrees: " + WorldGen.getInstance().numTrees(), this.batch, 0, height - 80);
-            GUI.Text("NumTiles: " + ColonyGame.worldGrid.getWidth()*ColonyGame.worldGrid.getHeight(), this.batch, 0, height - 100);
-            GUI.Text("NumGridCols(X): " + ColonyGame.worldGrid.getWidth(), this.batch, 0, height - 120);
-            GUI.Text("NumGridRows(Y): " + ColonyGame.worldGrid.getHeight(), this.batch, 0, height - 140);
-        }
-    }
-
-    /**
-     * Gets the terrain tile and displays its information.
-     * @param rect The rectangle to draw the terrain info in.
-     */
-    private void drawTerrainInfo(Rectangle rect){
-        OrthographicCamera camera = ColonyGame.camera;
-        Vector3 mouseCoords = camera.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
-        Grid.GridInstance grid = ColonyGame.worldGrid;
-
-        GUI.Texture(this.background, this.batch, rect);
-        int index[] = grid.getIndex(mouseCoords.x, mouseCoords.y);
-        Grid.Node node = grid.getNode(index);
-        if(node == null) return;
-        Grid.TerrainTile tile = grid.getNode(index).getTerrainTile();
-        if(tile == null) return;
-        GUI.Label(tile.tileRef.category, this.batch, rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight());
     }
 
     /**
@@ -603,21 +406,6 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     }
 
     /**
-     * Draws the game speed window.
-     * @param screenW The screen width.
-     * @param screenH The screen height.
-     * @param batch The SpriteBatch to draw with.
-     * @param style The GUIStyle to use.
-     */
-    private void drawGameSpeed(int screenW, int screenH, SpriteBatch batch, GUI.GUIStyle style){
-        style.alignment = Align.center;
-        String text;
-        if(paused) text = "PAUSED";
-        else text = "x"+gameSpeed+" speed";
-        GUI.Label(text, batch, screenW - 100, screenH - 50, 100, 50, style);
-    }
-
-    /**
      * Draws a bar for a current and maximum value.
      * @param text The text to put as a label for the bar.
      * @param x The x location to start at.
@@ -648,83 +436,6 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     }
 
     /**
-     * The start of the dragging.
-     * @param x The X location.
-     * @param y The Y location.
-     */
-    private void startDragging(float x, float y){
-        selectionBox.set(x, y, 0, 0);
-        this.dragging = true;
-    }
-
-    /**
-     * Active dragging.
-     * @param x The current X location.
-     * @param y The current Y location.
-     */
-    private void drag(float x, float y){
-        selectionBox.set(selectionBox.x, selectionBox.y, x - selectionBox.x, y - selectionBox.y);
-    }
-
-    /**
-     * When the mouse button is released and dragging stops.
-     * @param x The X location.
-     * @param y The Y location.
-     */
-    private void finishDragging(float x, float y){
-        //Set the final selection box.
-        selectionBox.set(selectionBox.x, selectionBox.y, x - selectionBox.x, y - selectionBox.y);
-
-        //For easier understanding, we get the center and use half widths to get the bounds.
-        Vector2 center = new Vector2();
-        selectionBox.getCenter(center);
-        float halfWidth = Math.abs(selectionBox.getWidth()/2);
-        float halfHeight = Math.abs(selectionBox.getHeight()/2);
-        selectionBox.set(center.x - halfWidth, center.y - halfHeight, center.x + halfWidth, center.y + halfHeight);
-
-        //Query the saveContainer and set dragging to false.
-        this.world.QueryAABB(this.selectionCallback, selectionBox.x, selectionBox.y, selectionBox.getWidth(), selectionBox.getHeight());
-        this.dragging = false;
-    }
-
-    /**
-     * If the GUI is moused over or not.
-     * @return True if moused over, false otherwise.
-     */
-    public boolean isOnUI(){
-        return this.checkMousedOver();
-    }
-
-    /**
-     * Checks if the GUI is moused over or not.
-     */
-    private boolean checkMousedOver(){
-        return this.windowManager.isMousedOver();
-    }
-
-
-
-    //Reveals the entire map by adding a viewer to every tile.
-    private void revealMap(){
-        Grid.GridInstance grid = ColonyGame.worldGrid;
-        Grid.VisibilityTile[][] visMap = grid.getVisibilityMap();
-        for (Grid.VisibilityTile[] aVisMap : visMap) {
-            for (Grid.VisibilityTile anAVisMap : aVisMap) {
-                anAVisMap.addViewer();
-            }
-        }
-    }
-
-    //Draws the box2D debug.
-    private void drawBox2DDebug(){
-        this.batch.end();
-        this.batch.begin();
-        ColonyGame.debugRenderer.render(ColonyGame.world, ColonyGame.camera.combined);
-        this.batch.end();
-        this.batch.begin();
-    }
-
-    /**
      * Triggers a new Event for the player. THis will pause the game and set the current event to the event passed in. It will also focus the
      * camera on the event.eventTarget if event.focusOnEvent is set to true.
      * @param playerEvent The PlayerEvent to set as the current event.
@@ -732,7 +443,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     public void newPlayerEvent(DataBuilder.JsonPlayerEvent playerEvent){
         this.paused = playerEvent.pauseGame;
         this.currentEvent = playerEvent;
-        if(playerEvent.focusOnEvent) ColonyGame.camera.position.set(playerEvent.eventTarget.getTransform().getPosition().x, playerEvent.eventTarget.getTransform().getPosition().y, 0);
+        if(playerEvent.focusOnEvent) ColonyGame.instance.camera.position.set(playerEvent.eventTarget.getTransform().getPosition().x, playerEvent.eventTarget.getTransform().getPosition().y, 0);
     }
 
     /**
@@ -750,16 +461,8 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         return this.selectedProfile;
     }
 
-    /**
-     * Deselects all selected profiles and the current selected profile and clears both.
-     */
-    public void clearSelectedProfileList(){
-        for(UnitProfile profile : this.selectedProfileList){
-            profile.entity.getTags().removeTag("selected");
-        }
-
-        this.selectedProfile = null;
-        this.selectedProfileList = new Array<>();
+    public UnitProfile getSelectedProfile(){
+        return this.selectedProfile;
     }
 
     /**
@@ -770,30 +473,12 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         this.selectedProfile = profile;
     }
 
-    public UnitProfile getSelectedProfile(){
-        return this.selectedProfile;
-    }
-
     public Array<UnitProfile> getSelectedProfileList(){
         return this.selectedProfileList;
     }
 
     public WindowManager getWindowManager(){
         return this.windowManager;
-    }
-
-    public static PlayerInterface getInstance(){
-        if(playerInterface == null) playerInterface = new PlayerInterface(ColonyGame.batch, ColonyGame.world);
-        return playerInterface;
-    }
-
-    @Override
-    public void destroy() {
-        super.destroy();
-        this.batch = null;
-        selectedProfile = null;
-        this.world = null;
-        this.buttonRect = null;
     }
 
     @Override
@@ -808,7 +493,225 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
     @Override
     public void addToList() {
-        ListHolder.addGUI(this);
+        ColonyGame.instance.listHolder.addGUI(this);
+    }
+
+    @Override
+    public void render(float delta, SpriteBatch batch) {
+        super.render(delta, batch);
+        int screenW = Gdx.graphics.getWidth(), screenH = Gdx.graphics.getHeight();
+
+        batch.setProjectionMatrix(ColonyGame.instance.UICamera.combined);
+        GUI.font.setColor(Color.WHITE);
+
+        int height = Gdx.graphics.getHeight();
+        FPSTimer.update(delta);
+
+        for(Button button : this.buttonList)
+            if(button.render(ColonyGame.instance.batch)) break;
+
+        this.moveCamera(); //Move the camera
+        this.drawSelectionBox(); //Draws the selection box.
+        this.drawDebugInfo(height); //Draws some debug information.
+        this.drawTerrainInfo(this.bottomLeftRect); //Draws information about the moused over terrain piece.
+        this.drawGameSpeed(screenW, screenH, batch, this.gameSpeedStyle);
+        this.drawCurrentNotifications(screenW, screenH, delta);
+        this.windowManager.update(this.batch);
+
+        if(this.drawingProfiler) Profiler.drawDebug(batch, 200, height - 20);
+
+        //Draw the grid squares if enabled.
+        if(drawGrid) {
+            ColonyGame.instance.worldGrid.debugDraw();
+            drawBox2DDebug();
+        }
+
+        drawCurrentEvent(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+
+        batch.end();
+        batch.begin();
+        stage.act(delta);
+        stage.draw();
+        batch.end();
+        batch.begin();
+    }
+
+    /**
+     * Moves the camera when keys are pressed.
+     */
+    private void moveCamera(){
+        if(Gdx.input.isKeyPressed(Input.Keys.W))
+            ColonyGame.instance.camera.translate(0, Gdx.graphics.getDeltaTime()*camMoveSpeed);
+        if(Gdx.input.isKeyPressed(Input.Keys.S))
+            ColonyGame.instance.camera.translate(0, -Gdx.graphics.getDeltaTime()*camMoveSpeed);
+        if(Gdx.input.isKeyPressed(Input.Keys.A))
+            ColonyGame.instance.camera.translate(-Gdx.graphics.getDeltaTime()*camMoveSpeed, 0);
+        if(Gdx.input.isKeyPressed(Input.Keys.D))
+            ColonyGame.instance.camera.translate(Gdx.graphics.getDeltaTime()*camMoveSpeed, 0);
+    }
+
+    /**
+     * Draws the selection box if the user is dragging a selection box.
+     */
+    private void drawSelectionBox(){
+        if(mouseDown) {
+            //Get the start point.
+            Vector3 pos = new Vector3(selectionBox.x, selectionBox.y, 0);
+            Vector3 start = ColonyGame.instance.camera.project(new Vector3(pos.x, pos.y, 0));
+
+            //Get the end point.
+            pos.set(selectionBox.x + selectionBox.getWidth(), selectionBox.y + selectionBox.getHeight(), 0);
+            Vector3 end = ColonyGame.instance.camera.project(new Vector3(pos.x, pos.y, 0));
+            gray.a = 0.5f;
+
+            //Save the color from the batch, apply the gray, draw the texture (with color), and reset the original color.
+            Color saved = this.batch.getColor();
+            this.batch.setColor(gray);
+            this.batch.draw(WorldGen.whiteTex, start.x, start.y, end.x - start.x, end.y - start.y);
+            this.batch.setColor(saved);
+        }
+    }
+
+    /**
+     * Draws info (like FPS) on the screen.
+     * @param height The height of the screen.
+     */
+    private void drawDebugInfo(int height){
+        if(this.drawingInfo) {
+            GUI.Text("FPS: " + FPS, this.batch, 0, height - 20);
+            GUI.Text("Zoom: " + ColonyGame.instance.camera.zoom, this.batch, 0, height - 40);
+            GUI.Text("Resolution: " + Gdx.graphics.getDesktopDisplayMode().width + "X" + Gdx.graphics.getDesktopDisplayMode().height, this.batch, 0, height - 60);
+            GUI.Text("NumTrees: " + WorldGen.getInstance().numTrees(), this.batch, 0, height - 80);
+            GUI.Text("NumTiles: " + ColonyGame.instance.worldGrid.getWidth()*ColonyGame.instance.worldGrid.getHeight(), this.batch, 0, height - 100);
+            GUI.Text("NumGridCols(X): " + ColonyGame.instance.worldGrid.getWidth(), this.batch, 0, height - 120);
+            GUI.Text("NumGridRows(Y): " + ColonyGame.instance.worldGrid.getHeight(), this.batch, 0, height - 140);
+        }
+    }
+
+    /**
+     * Gets the terrain tile and displays its information.
+     * @param rect The rectangle to draw the terrain info in.
+     */
+    private void drawTerrainInfo(Rectangle rect){
+        OrthographicCamera camera = ColonyGame.instance.camera;
+        Vector3 mouseCoords = camera.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
+        Grid.GridInstance grid = ColonyGame.instance.worldGrid;
+
+        GUI.Texture(this.background, this.batch, rect);
+        int index[] = grid.getIndex(mouseCoords.x, mouseCoords.y);
+        Grid.Node node = grid.getNode(index);
+        if(node == null) return;
+        Grid.TerrainTile tile = grid.getNode(index).getTerrainTile();
+        if(tile == null) return;
+        GUI.Label(tile.tileRef.category, this.batch, rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight());
+    }
+
+    /**
+     * Draws the game speed window.
+     * @param screenW The screen width.
+     * @param screenH The screen height.
+     * @param batch The SpriteBatch to draw with.
+     * @param style The GUIStyle to use.
+     */
+    private void drawGameSpeed(int screenW, int screenH, SpriteBatch batch, GUI.GUIStyle style){
+        style.alignment = Align.center;
+        String text;
+        if(paused) text = "PAUSED";
+        else text = "x"+gameSpeed+" speed";
+        GUI.Label(text, batch, screenW - 100, screenH - 50, 100, 50, style);
+    }
+
+    private void drawCurrentNotifications(int width, int height, float delta){
+        Array<NotificationManager.Notification> list = ColonyGame.instance.notificationManager.getActiveNotifications();
+        float x = width - 80f, y = height*0.4f;
+        float labelW = 50f, labelH = 50f;
+        NotificationManager.Notification newlyMousedOver = null; //This is like a flag.
+
+        notificationStyle.wrap = true;
+        for(int i=0;i<list.size;i++){
+            NotificationManager.Notification notification = list.get(i);
+
+            //GUI.Texture(whiteTexture, batch, x, y, labelW, labelH);
+            if(GUI.Label(notification.name, this.batch, x, y, labelW, labelH, notificationStyle) > 0){
+                newlyMousedOver = notification; //Set the flag(ish) variable.
+
+                mousedOverNotiStyle.wrap = true;
+                String toolTip = extendedTooltip ? notification.extendedTooltip : notification.quickTooltip;
+                GUI.Label(toolTip, batch, Gdx.input.getX() - 250, height - Gdx.input.getY() - 50, 200, 100, mousedOverNotiStyle);
+            }
+            y += labelH + 10f;
+        }
+
+        //If we are still moused over the same notification, increase the timer.
+        if(this.mousedOverNotification != null && this.mousedOverNotification == newlyMousedOver) extendedTooltipTimer.update(delta);
+        else {
+            this.extendedTooltip = false;
+            extendedTooltipTimer.restart();
+        }
+        this.mousedOverNotification = newlyMousedOver;
+    }
+
+    //Draws the box2D debug.
+    private void drawBox2DDebug(){
+        this.batch.end();
+        this.batch.begin();
+        ColonyGame.instance.debugRenderer.render(ColonyGame.instance.world, ColonyGame.instance.camera.combined);
+        this.batch.end();
+        this.batch.begin();
+    }
+
+    /**
+     * Draws the current event that is being presented to the player while the game is paused.
+     * @param width The width of the game screen. This will be use to calculate the event window widht.
+     * @param height The height of the game screen. Used to calculate the event window height.
+     */
+    private void drawCurrentEvent(int width, int height){
+        if(this.currentEvent != null){
+            float windowWidth = width/3.2f, windowHeight = height/2.7f;
+            float windowX = width/2 - windowWidth/2, windowY = height/2 - windowHeight/2;
+
+            float titleWidth = windowWidth*0.4f, titleHeight = windowHeight*0.1f;
+            float titleX = windowX+ windowWidth*0.05f, titleY = windowY + windowHeight - titleHeight - windowHeight*0.03f;
+
+            float descWidth = windowWidth*0.9f, descHeight = windowHeight*0.6f;
+            float descX = windowX + windowWidth*0.05f, descY = windowY + windowHeight*0.25f;
+
+            GUI.Texture(new TextureRegion(ColonyGame.instance.assetManager.get("eventWindowBackground", Texture.class)), this.batch, windowX, windowY, windowWidth, windowHeight);
+
+            eventDescStyle.padding(10);
+            eventDescStyle.multiline = true;
+            eventDescStyle.wrap = true;
+            eventDescStyle.alignment = Align.topLeft;
+            GUI.Label(this.currentEvent.eventDisplayName, this.batch, titleX, titleY, titleWidth, titleHeight, eventTitleStyle);
+            GUI.Label(GH.generateEventDescription(this.currentEvent), this.batch, descX, descY, descWidth, descHeight, eventDescStyle);
+
+            float buttonWidth = windowWidth*0.3f, buttonHeight = 75;
+            float spacing = (windowWidth - this.currentEvent.choices.length*buttonWidth)/(this.currentEvent.choices.length+1);
+            blankStyle.wrap = true;
+
+            for(int i=0;i<this.currentEvent.choices.length;i++){
+                String choice = this.currentEvent.choices[i];
+                if(GUI.Button(this.batch, choice, windowX + (i+1)*spacing + i*buttonWidth, windowY + windowHeight*0.01f, buttonWidth, buttonHeight, blankStyle) == GUI.JUSTUP){
+                    BehaviourManagerComp comp = this.currentEvent.eventTarget.getComponent(BehaviourManagerComp.class);
+                    if(comp == null) return;
+                    comp.getBlackBoard().target = this.currentEvent.eventTargetOther;
+                    comp.changeTaskImmediate(this.currentEvent.behaviours[i], true);
+                    this.gameSpeed = 1f; //Reset game speed
+                    this.paused = false; //Unpause
+                    this.currentEvent = null;
+                    return;
+                }
+            }
+        }
+    }
+
+    @Override
+    public void destroy() {
+        super.destroy();
+        this.batch = null;
+        selectedProfile = null;
+        this.world = null;
+        this.buttonRect = null;
     }
 
     @Override
@@ -855,6 +758,29 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         return true;
     }
 
+    //Reveals the entire map by adding a viewer to every tile.
+    private void revealMap(){
+        Grid.GridInstance grid = ColonyGame.instance.worldGrid;
+        Grid.VisibilityTile[][] visMap = grid.getVisibilityMap();
+        for (Grid.VisibilityTile[] aVisMap : visMap) {
+            for (Grid.VisibilityTile anAVisMap : aVisMap) {
+                anAVisMap.addViewer();
+            }
+        }
+    }
+
+    /**
+     * Deselects all selected profiles and the current selected profile and clears both.
+     */
+    public void clearSelectedProfileList(){
+        for(UnitProfile profile : this.selectedProfileList){
+            profile.entity.getTags().removeTag("selected");
+        }
+
+        this.selectedProfile = null;
+        this.selectedProfileList = new Array<>();
+    }
+
     @Override
     public boolean keyUp(int keycode) {
         return false;
@@ -870,11 +796,36 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         if(button == Input.Buttons.LEFT) {
             if(!this.isOnUI()) {
                 this.mouseDown = true;
-                Vector3 worldCoords = ColonyGame.camera.unproject(new Vector3(screenX, screenY, 0));
+                Vector3 worldCoords = ColonyGame.instance.camera.unproject(new Vector3(screenX, screenY, 0));
                 startDragging(worldCoords.x, worldCoords.y);
             }
         }
         return false;
+    }
+
+    /**
+     * If the GUI is moused over or not.
+     * @return True if moused over, false otherwise.
+     */
+    public boolean isOnUI(){
+        return this.checkMousedOver();
+    }
+
+    /**
+     * The start of the dragging.
+     * @param x The X location.
+     * @param y The Y location.
+     */
+    private void startDragging(float x, float y){
+        selectionBox.set(x, y, 0, 0);
+        this.dragging = true;
+    }
+
+    /**
+     * Checks if the GUI is moused over or not.
+     */
+    private boolean checkMousedOver(){
+        return this.windowManager.isMousedOver();
     }
 
     @Override
@@ -884,7 +835,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
             return false;
 
         this.mouseDown = false;
-        Vector3 worldCoords = ColonyGame.camera.unproject(new Vector3(screenX, screenY, 0));
+        Vector3 worldCoords = ColonyGame.instance.camera.unproject(new Vector3(screenX, screenY, 0));
 
         if(button == Input.Buttons.LEFT){
             this.selectedProfileList.forEach(profile -> profile.entity.getTags().removeTag("selected"));
@@ -922,14 +873,44 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         return false;
     }
 
+    /**
+     * When the mouse button is released and dragging stops.
+     * @param x The X location.
+     * @param y The Y location.
+     */
+    private void finishDragging(float x, float y){
+        //Set the final selection box.
+        selectionBox.set(selectionBox.x, selectionBox.y, x - selectionBox.x, y - selectionBox.y);
+
+        //For easier understanding, we get the center and use half widths to get the bounds.
+        Vector2 center = new Vector2();
+        selectionBox.getCenter(center);
+        float halfWidth = Math.abs(selectionBox.getWidth()/2);
+        float halfHeight = Math.abs(selectionBox.getHeight()/2);
+        selectionBox.set(center.x - halfWidth, center.y - halfHeight, center.x + halfWidth, center.y + halfHeight);
+
+        //Query the saveContainer and set dragging to false.
+        this.world.QueryAABB(this.selectionCallback, selectionBox.x, selectionBox.y, selectionBox.getWidth(), selectionBox.getHeight());
+        this.dragging = false;
+    }
+
     @Override
     public boolean touchDragged(int screenX, int screenY, int pointer) {
         if(mouseDown) {
-            Vector3 worldCoords = ColonyGame.camera.unproject(new Vector3(screenX, screenY, 0));
+            Vector3 worldCoords = ColonyGame.instance.camera.unproject(new Vector3(screenX, screenY, 0));
             drag(worldCoords.x, worldCoords.y);
         }
 
         return false;
+    }
+
+    /**
+     * Active dragging.
+     * @param x The current X location.
+     * @param y The current Y location.
+     */
+    private void drag(float x, float y){
+        selectionBox.set(selectionBox.x, selectionBox.y, x - selectionBox.x, y - selectionBox.y);
     }
 
     @Override
@@ -939,8 +920,8 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
     @Override
     public boolean scrolled(int amount) {
-        ColonyGame.camera.zoom += amount*Gdx.graphics.getDeltaTime()*camZoomSpeed;
-        if(ColonyGame.camera.zoom < 0) ColonyGame.camera.zoom = 0;
+        ColonyGame.instance.camera.zoom += amount*Gdx.graphics.getDeltaTime()*camZoomSpeed;
+        if(ColonyGame.instance.camera.zoom < 0) ColonyGame.instance.camera.zoom = 0;
         return false;
     }
 

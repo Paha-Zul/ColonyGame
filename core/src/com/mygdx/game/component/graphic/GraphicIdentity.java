@@ -76,7 +76,7 @@ public class GraphicIdentity extends Component {
         super.render(delta, batch);
 
         if(getSprite() != null) {
-            Grid.GridInstance grid = ColonyGame.worldGrid;
+            Grid.GridInstance grid = ColonyGame.instance.worldGrid;
             Vector2 pos = this.owner.getTransform().getPosition(); //Cache the owner's position.
 
             if (!isWithinBounds()) return;
@@ -111,7 +111,7 @@ public class GraphicIdentity extends Component {
                 float startX = pos.x - num*(size/2);
                 float startY = pos.y + sprite.getHeight()/2;
                 for(Entity entity : this.enterable.getOccupants()){
-                    batch.draw(ColonyGame.assetManager.get("colonist", Texture.class), startX, startY, size, size);
+                    batch.draw(ColonyGame.instance.assetManager.get("colonist", Texture.class), startX, startY, size, size);
                     startX+=size;
                 }
             }
@@ -120,7 +120,7 @@ public class GraphicIdentity extends Component {
 
     public boolean isWithinBounds(){
         Vector2 pos = this.owner.getTransform().getPosition(); //Cache the owner's position.
-        return ColonyGame.camera.frustum.boundsInFrustum(pos.x, pos.y, 0, getSprite().getWidth(), getSprite().getHeight(), 0);
+        return ColonyGame.instance.camera.frustum.boundsInFrustum(pos.x, pos.y, 0, getSprite().getWidth(), getSprite().getHeight(), 0);
     }
 
     private void changeVisibility(int visibility){
@@ -155,7 +155,7 @@ public class GraphicIdentity extends Component {
         //If the atlas name is applicable, get the texture atlas from the asset manager and then get the texture by name.
         if(atlasName != null && !atlasName.isEmpty()) {
             this.atlasName = atlasName;
-            TextureRegion region = ColonyGame.assetManager.get(atlasName, TextureAtlas.class).findRegion(textureName);
+            TextureRegion region = ColonyGame.instance.assetManager.get(atlasName, TextureAtlas.class).findRegion(textureName);
 
             if(region == null)
                 GH.writeErrorMessage("TextureRegion is null when creating sprite in GraphicIdentity. Texture: "+textureName+", atlasName: "+atlasName+". Does it exist?");
@@ -165,7 +165,7 @@ public class GraphicIdentity extends Component {
 
         //If no atlas is used, get it normally.
         }else {
-            Texture texture = ColonyGame.assetManager.get(textureName, Texture.class);
+            Texture texture = ColonyGame.instance.assetManager.get(textureName, Texture.class);
             if(texture == null) return;
             if (this.getSprite() == null) this.setSprite(new Sprite(texture));
             else this.getSprite().setTexture(texture);

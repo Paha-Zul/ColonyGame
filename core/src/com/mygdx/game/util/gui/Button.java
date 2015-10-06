@@ -32,14 +32,14 @@ public class Button {
         this.textureAtlasName = textureAtlasName;
 
         if(this.imageName == null){
-            this.normalImage = new TextureRegion(ColonyGame.assetManager.get("defaultButton", Texture.class));
-            this.overImage = new TextureRegion(ColonyGame.assetManager.get("defaultButton_moused", Texture.class));
-            this.downImage = new TextureRegion(ColonyGame.assetManager.get("defaultButton_clicked", Texture.class));
+            this.normalImage = new TextureRegion(ColonyGame.instance.assetManager.get("defaultButton", Texture.class));
+            this.overImage = new TextureRegion(ColonyGame.instance.assetManager.get("defaultButton_moused", Texture.class));
+            this.downImage = new TextureRegion(ColonyGame.instance.assetManager.get("defaultButton_clicked", Texture.class));
         }else{
             if(this.textureAtlasName == null){
-                this.normalImage = new TextureRegion(ColonyGame.assetManager.get(imageName, Texture.class));
+                this.normalImage = new TextureRegion(ColonyGame.instance.assetManager.get(imageName, Texture.class));
             }else{
-                this.atlas = ColonyGame.assetManager.get(textureAtlasName, TextureAtlas.class);
+                this.atlas = ColonyGame.instance.assetManager.get(textureAtlasName, TextureAtlas.class);
                 this.normalImage = this.atlas.findRegion(this.imageName);
             }
         }

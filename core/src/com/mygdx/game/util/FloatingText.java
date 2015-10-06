@@ -13,21 +13,23 @@ import com.mygdx.game.util.gui.GUI;
  * Created by Paha on 2/10/2015.
  */
 public class FloatingText implements IDestroyable{
-    private Vector2 startPos, currPos, endPos;
-
-    private String text;
-
-    private double diff, counter;
-    private float percent, fadingDiff, fadePercent;
-    private TextureRegion image;
-
-    private boolean destroyed = false;
     private static GUI.GUIStyle style;
-
-    private Color color = new Color(1, 1, 1, 1);
 
     static{
         style = new GUI.GUIStyle();
+    }
+
+    private Vector2 startPos, currPos, endPos;
+    private String text;
+    private double diff, counter;
+    private float percent, fadingDiff, fadePercent;
+    private TextureRegion image;
+    private boolean destroyed = false;
+    private Color color = new Color(1, 1, 1, 1);
+
+    public FloatingText(TextureRegion image, String text, Vector2 start, Vector2 end, float time, float fadePercent){
+        this(text, start, end, time, fadePercent);
+        this.image = image;
     }
 
     /**
@@ -50,12 +52,7 @@ public class FloatingText implements IDestroyable{
         this.fadePercent = fadePercent;
         this.fadingDiff = 1 - fadePercent;
 
-        ListHolder.addFloatingText(this);
-    }
-
-    public FloatingText(TextureRegion image, String text, Vector2 start, Vector2 end, float time, float fadePercent){
-        this(text, start, end, time, fadePercent);
-        this.image = image;
+        ColonyGame.instance.listHolder.addFloatingText(this);
     }
 
     public void update(float delta){
@@ -72,20 +69,6 @@ public class FloatingText implements IDestroyable{
         }
     }
 
-    public void render(float delta, SpriteBatch batch){
-        if(this.percent >= this.fadePercent){
-            float percent = 1 - ((this.percent - this.fadePercent)/this.fadingDiff);
-            color.set(1, 1, 1, percent);
-        }else{
-            color.set(1, 1, 1, 1);
-        }
-
-        style.font.setColor(color);
-        batch.setProjectionMatrix(ColonyGame.UICamera.combined);
-        Vector3 pos = ColonyGame.camera.project(new Vector3(currPos.x, currPos.y, 0));
-        GUI.Text(this.text, batch, pos.x, pos.y, true, style);
-    }
-
     @Override
     public void destroy() {
 
@@ -95,5 +78,19 @@ public class FloatingText implements IDestroyable{
     @Override
     public boolean isDestroyed() {
         return this.destroyed;
+    }
+
+    public void render(float delta, SpriteBatch batch){
+        if(this.percent >= this.fadePercent){
+            float percent = 1 - ((this.percent - this.fadePercent)/this.fadingDiff);
+            color.set(1, 1, 1, percent);
+        }else{
+            color.set(1, 1, 1, 1);
+        }
+
+        style.font.setColor(color);
+        batch.setProjectionMatrix(ColonyGame.instance.UICamera.combined);
+        Vector3 pos = ColonyGame.instance.camera.project(new Vector3(currPos.x, currPos.y, 0));
+        GUI.Text(this.text, batch, pos.x, pos.y, true, style);
     }
 }

@@ -15,7 +15,7 @@ public class CallbackRunnable implements Runnable{
 
     @Override
     public void run() {
-        if(ColonyGame.closed) return;
+        if(ColonyGame.instance.closed) return;
         this.callback.callback();
     }
 }

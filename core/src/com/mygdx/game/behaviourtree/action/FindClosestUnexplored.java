@@ -29,7 +29,7 @@ public class FindClosestUnexplored extends LeafTask{
         if(this.blackBoard.target == null)
             this.blackBoard.target = this.blackBoard.myManager.getEntityOwner();
 
-        Grid.GridInstance grid = ColonyGame.worldGrid;
+        Grid.GridInstance grid = ColonyGame.instance.worldGrid;
         Grid.Node[][] gridMap = grid.getGrid();
         Functional.Callback findClosestUnexplored = () -> {
             int radius = 0;
@@ -96,7 +96,7 @@ public class FindClosestUnexplored extends LeafTask{
 
         };
 
-        ColonyGame.threadPool.submit(new CallbackRunnable(findClosestUnexplored));
+        ColonyGame.instance.threadPool.submit(new CallbackRunnable(findClosestUnexplored));
     }
 
     @Override

@@ -29,7 +29,7 @@ public class FindResource extends LeafTask {
     public void start() {
         super.start();
 
-        Grid.GridInstance grid = ColonyGame.worldGrid;
+        Grid.GridInstance grid = ColonyGame.instance.worldGrid;
         Grid.Node[][] gridMap = grid.getGrid();
         Functional.Callback getClosestResource = () -> {
             Grid.Node currNode = this.blackBoard.colonyGrid.getNode(this.blackBoard.myManager.getEntityOwner()); //Get the nod we are standing on.
@@ -100,7 +100,7 @@ public class FindResource extends LeafTask {
             this.done = true;
         };
 
-        ColonyGame.threadPool.submit(new CallbackRunnable(getClosestResource));
+        ColonyGame.instance.threadPool.submit(new CallbackRunnable(getClosestResource));
     }
 
     @Override

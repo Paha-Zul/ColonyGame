@@ -19,7 +19,6 @@ import com.mygdx.game.ColonyGame;
 import com.mygdx.game.interfaces.IScript;
 import com.mygdx.game.screens.LoadingScreen;
 import com.mygdx.game.util.DataBuilder;
-import com.mygdx.game.util.ListHolder;
 import com.mygdx.game.util.gui.GUI;
 import com.mygdx.game.util.managers.DataManager;
 import com.mygdx.game.util.managers.ScriptManager;
@@ -31,15 +30,12 @@ import com.mygdx.game.util.worldgeneration.WorldGen;
 public class MainMenuInterface extends UI{
     public static Texture mainMenuTexture;
     public static Music music;
-
+    Rectangle[] buttonRects = new Rectangle[5];
     private GUI.GUIStyle startButtonStyle = new GUI.GUIStyle();
     private GUI.GUIStyle quitButtonStyle = new GUI.GUIStyle();
     private GUI.GUIStyle blank1Style = new GUI.GUIStyle();
     private GUI.GUIStyle blank2Style = new GUI.GUIStyle();
     private GUI.GUIStyle blank3Style = new GUI.GUIStyle();
-
-    Rectangle[] buttonRects = new Rectangle[5];
-
     private TextureRegion titleTexture;
     private BitmapFont titleFont;
     private GUI.GUIStyle changeLogStyle = new GUI.GUIStyle();
@@ -56,10 +52,10 @@ public class MainMenuInterface extends UI{
         super(batch);
         this.game = game;
 
-        titleTexture = new TextureRegion(ColonyGame.assetManager.get("Auroris", Texture.class));
+        titleTexture = new TextureRegion(ColonyGame.instance.assetManager.get("Auroris", Texture.class));
         music = Gdx.audio.newMusic(Gdx.files.internal(DataManager.getData("misc", DataBuilder.JsonMisc.class).mainMenuMusic));
         titleFont = new BitmapFont(Gdx.files.internal("fonts/titlefont.fnt"));
-        mainMenuTexture = ColonyGame.assetManager.get("Space2", Texture.class);
+        mainMenuTexture = ColonyGame.instance.assetManager.get("Space2", Texture.class);
 
         //Set the states for the start button
         startButtonStyle.normal = DataManager.getTextureFromAtlas("startbutton_normal", "buttons");
@@ -96,7 +92,7 @@ public class MainMenuInterface extends UI{
         generator.dispose();
 
         //Create a new stage and configure it!
-        stage = new Stage(new ScreenViewport(ColonyGame.UICamera), this.batch);
+        stage = new Stage(new ScreenViewport(ColonyGame.instance.UICamera), this.batch);
         //stage.setDebugAll(true);
         Gdx.input.setInputProcessor(stage);
 
@@ -180,6 +176,11 @@ public class MainMenuInterface extends UI{
     }
 
     @Override
+    public void addToList() {
+        ColonyGame.instance.listHolder.addGUI(this);
+    }
+
+    @Override
     public void render(float delta, SpriteBatch batch) {
         super.render(delta, batch);
 
@@ -251,11 +252,6 @@ public class MainMenuInterface extends UI{
             Rectangle rect = buttonRects[i];
             rect.set(width/2 - 115, height - height*0.2f - 75*(i+1), 250, 60);
         }
-    }
-
-    @Override
-    public void addToList() {
-        ListHolder.addGUI(this);
     }
 
 

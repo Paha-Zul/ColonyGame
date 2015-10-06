@@ -124,7 +124,7 @@ public class Effects extends Component{
             this.displayName = displayName;
             this.imgName = imgName;
             this.predicate = predicate;
-            this.icon = new TextureRegion(ColonyGame.assetManager.get(imgName, Texture.class));
+            this.icon = new TextureRegion(ColonyGame.instance.assetManager.get(imgName, Texture.class));
         }
 
         @JsonIgnore

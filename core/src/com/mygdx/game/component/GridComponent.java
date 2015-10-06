@@ -40,12 +40,12 @@ public class GridComponent extends Component{
 
     @Override
     public void load(TLongObjectHashMap<Entity> entityMap, TLongObjectHashMap<Component> compMap) {
-        this.grid = ColonyGame.worldGrid;
+        this.grid = ColonyGame.instance.worldGrid;
         if(this.gridType == Constants.GRIDSTATIC)
             this.setActive(false);
 
         //Gets a node to start.
-        this.grid = ColonyGame.worldGrid;
+        this.grid = ColonyGame.instance.worldGrid;
         if(!addMulti) this.currNode = this.grid.addToGrid(this.owner);
         else{
             Rectangle bounds = new Rectangle();

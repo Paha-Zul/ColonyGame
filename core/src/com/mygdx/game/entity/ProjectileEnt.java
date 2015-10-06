@@ -29,7 +29,7 @@ public class ProjectileEnt extends Entity{
     private void makeCollider(){
         CircleCollider collider = getComponent(CircleCollider.class);
         if(collider == null) collider = this.addComponent(new CircleCollider());
-        collider.setupBody(BodyDef.BodyType.DynamicBody, ColonyGame.world, this.getTransform().getPosition(), 1, true, true);
+        collider.setupBody(BodyDef.BodyType.DynamicBody, ColonyGame.instance.world, this.getTransform().getPosition(), 1, true, true);
     }
 
     @Override

@@ -46,7 +46,7 @@ public class FindPath extends LeafTask {
 
         Pathfinder.GetInstance().findPath(new Vector2(startNode.getXCenter(), startNode.getYCenter()), target, path -> {
             this.blackBoard.path = path;
-            this.blackBoard.targetNode = ColonyGame.worldGrid.getNode(target);
+            this.blackBoard.targetNode = ColonyGame.instance.worldGrid.getNode(target);
             this.control.finishWithSuccess();
         });
     }

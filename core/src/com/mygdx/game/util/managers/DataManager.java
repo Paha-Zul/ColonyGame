@@ -57,7 +57,7 @@ public class DataManager {
      * @return The TextureRegion from the Atlas if the Atlas was found and the TextureRegion was found in the Atlas. Null otherwise.
      */
     public static TextureRegion getTextureFromAtlas(String dataName, String atlasName){
-        TextureAtlas atlas = ColonyGame.assetManager.get(atlasName, TextureAtlas.class);
+        TextureAtlas atlas = ColonyGame.instance.assetManager.get(atlasName, TextureAtlas.class);
         if(atlas == null) return null;
         return atlas.findRegion(dataName);
     }

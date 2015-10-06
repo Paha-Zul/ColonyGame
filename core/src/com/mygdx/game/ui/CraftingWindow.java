@@ -55,14 +55,14 @@ public class CraftingWindow extends Window{
     public CraftingWindow(PlayerInterface playerInterface, Entity target) {
         super(playerInterface, target);
 
-        this.craftBackground = new TextureRegion(ColonyGame.assetManager.get("craftingWindowBackground", Texture.class));
-        this.selectBackground = new TextureRegion(ColonyGame.assetManager.get("craftingWindowSelectionBackground", Texture.class));
-        this.infoBackground = new TextureRegion(ColonyGame.assetManager.get("craftingWindowInfoBackground", Texture.class));
-        this.stalledBackground = new TextureRegion(ColonyGame.assetManager.get("stalledJobsBackground", Texture.class));
-        this.openBackground = new TextureRegion(ColonyGame.assetManager.get("openJobsBackground", Texture.class));
+        this.craftBackground = new TextureRegion(ColonyGame.instance.assetManager.get("craftingWindowBackground", Texture.class));
+        this.selectBackground = new TextureRegion(ColonyGame.instance.assetManager.get("craftingWindowSelectionBackground", Texture.class));
+        this.infoBackground = new TextureRegion(ColonyGame.instance.assetManager.get("craftingWindowInfoBackground", Texture.class));
+        this.stalledBackground = new TextureRegion(ColonyGame.instance.assetManager.get("stalledJobsBackground", Texture.class));
+        this.openBackground = new TextureRegion(ColonyGame.instance.assetManager.get("openJobsBackground", Texture.class));
 
-        this.selectionTexture = new TextureRegionDrawable(new TextureRegion(ColonyGame.assetManager.get("selection", Texture.class)));
-        this.exitTexture = new TextureRegionDrawable(new TextureRegion(ColonyGame.assetManager.get("exit", Texture.class)));
+        this.selectionTexture = new TextureRegionDrawable(new TextureRegion(ColonyGame.instance.assetManager.get("selection", Texture.class)));
+        this.exitTexture = new TextureRegionDrawable(new TextureRegion(ColonyGame.instance.assetManager.get("exit", Texture.class)));
 
         this.craftingStation = this.target.getComponent(CraftingStation.class);
         this.offset = new Vector2();
@@ -72,6 +72,10 @@ public class CraftingWindow extends Window{
         this.craftingWindow.addListener(new ClickListener() {
 
             @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                offset.set(GH.getFixedScreenMouseCoords().x - craftingWindow.getX(), GH.getFixedScreenMouseCoords().y - craftingWindow.getY());
+                return super.touchDown(event, x, y, pointer, button);
+            }            @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
                 super.touchUp(event, x, y, pointer, button);
                 if(!justSelected && !craftButtonPressed && selectedItem != null) {
@@ -84,11 +88,7 @@ public class CraftingWindow extends Window{
                 }
             }
 
-            @Override
-            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                offset.set(GH.getFixedScreenMouseCoords().x - craftingWindow.getX(), GH.getFixedScreenMouseCoords().y - craftingWindow.getY());
-                return super.touchDown(event, x, y, pointer, button);
-            }
+
 
             @Override
             public void touchDragged(InputEvent event, float x, float y, int pointer) {
@@ -222,6 +222,31 @@ public class CraftingWindow extends Window{
         this.playerInterface.stage.setDebugAll(true);
     }
 
+    private void makeCraftButton(){
+        TextureRegionDrawable up = new TextureRegionDrawable(DataManager.getTextureFromAtlas("defaultButton_normal", "buttons"));
+        TextureRegionDrawable over = new TextureRegionDrawable(DataManager.getTextureFromAtlas("defaultButton_moused", "buttons"));
+        TextureRegionDrawable down = new TextureRegionDrawable(DataManager.getTextureFromAtlas("defaultButton_clicked", "buttons"));
+
+        TextButton.TextButtonStyle buttonStyle = new TextButton.TextButtonStyle(up, down, up, this.playerInterface.UIStyle.font);
+        buttonStyle.over = over;
+        buttonStyle.checkedOver = over;
+
+        this.craftButton = new TextButton("Craft", buttonStyle);
+        this.craftingWindowTable.add(this.craftButton).right().bottom();
+
+        this.craftButton.addListener(new ClickListener(){
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                if(selectedItem != null) {
+                    craftingStation.addCraftingJob(selectedItem.getItemName(), 1);
+                    buildAvailableList();
+                    craftButtonPressed = true;
+                }
+                super.touchUp(event, x, y, pointer, button);
+            }
+        });
+    }
+
     /**
      * Builds/Rebuilds the available jobs list.
      */
@@ -280,31 +305,6 @@ public class CraftingWindow extends Window{
         }
     }
 
-    private void makeCraftButton(){
-        TextureRegionDrawable up = new TextureRegionDrawable(DataManager.getTextureFromAtlas("defaultButton_normal", "buttons"));
-        TextureRegionDrawable over = new TextureRegionDrawable(DataManager.getTextureFromAtlas("defaultButton_moused", "buttons"));
-        TextureRegionDrawable down = new TextureRegionDrawable(DataManager.getTextureFromAtlas("defaultButton_clicked", "buttons"));
-
-        TextButton.TextButtonStyle buttonStyle = new TextButton.TextButtonStyle(up, down, up, this.playerInterface.UIStyle.font);
-        buttonStyle.over = over;
-        buttonStyle.checkedOver = over;
-
-        this.craftButton = new TextButton("Craft", buttonStyle);
-        this.craftingWindowTable.add(this.craftButton).right().bottom();
-
-        this.craftButton.addListener(new ClickListener(){
-            @Override
-            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                if(selectedItem != null) {
-                    craftingStation.addCraftingJob(selectedItem.getItemName(), 1);
-                    buildAvailableList();
-                    craftButtonPressed = true;
-                }
-                super.touchUp(event, x, y, pointer, button);
-            }
-        });
-    }
-
     @Override
     public boolean update(SpriteBatch batch) {
         if(this.active) {
@@ -325,14 +325,14 @@ public class CraftingWindow extends Window{
     }
 
     @Override
-    public void resize(int width, int height) {
-
-    }
-
-    @Override
     public void destroy() {
         this.craftingWindow.remove();
         EventSystem.unregisterEventFunction(this.target, "crafting_job_switched", this.function);
         super.destroy();
+    }
+
+    @Override
+    public void resize(int width, int height) {
+
     }
 }
