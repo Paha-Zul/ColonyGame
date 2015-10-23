@@ -13,7 +13,7 @@ import com.mygdx.game.interfaces.IDelayedDestroyable;
 import com.mygdx.game.interfaces.ISaveable;
 import com.mygdx.game.interfaces.IScalable;
 import com.mygdx.game.util.Tags;
-import com.mygdx.game.util.managers.EventSystem;
+import com.mygdx.game.util.managers.MessageEventSystem;
 import gnu.trove.map.hash.TLongObjectHashMap;
 
 import java.util.function.Consumer;
@@ -78,7 +78,7 @@ public class Entity implements IDelayedDestroyable, ISaveable{
 	}
 
 	public void start(){
-		EventSystem.notifyGameEvent("entity_created", this);
+		MessageEventSystem.notifyGameEvent("entity_created", this);
 	}
 
     @Override
@@ -464,7 +464,7 @@ public static class Components implements IDelayedDestroyable{
 
 	@Override
 	public void destroy(Entity destroyer){
-		EventSystem.unregisterEntity(this);
+		MessageEventSystem.unregisterEntity(this);
 
         components.destroy(destroyer);
 

@@ -8,7 +8,7 @@ import com.mygdx.game.interfaces.IOwnable;
 import com.mygdx.game.util.DataBuilder;
 import com.mygdx.game.util.Logger;
 import com.mygdx.game.util.managers.DataManager;
-import com.mygdx.game.util.managers.EventSystem;
+import com.mygdx.game.util.managers.MessageEventSystem;
 import gnu.trove.map.hash.TLongObjectHashMap;
 
 import java.util.ArrayList;
@@ -264,7 +264,7 @@ public class Inventory extends Component implements IOwnable {
         this.currTotalItems += amount;
         this.lasAddedItem = itemRef.getItemName();
         if (colony != null) colony.addItemToGlobal(itemRef, amount);
-        EventSystem.notifyEntityEvent(this.owner, "added_item", itemRef, amount);
+        MessageEventSystem.notifyEntityEvent(this.owner, "added_item", itemRef, amount);
 
         return item;
     }
@@ -354,7 +354,7 @@ public class Inventory extends Component implements IOwnable {
 
         //Removed the amount from the colony if possible and fire an event.
         if (this.colony != null) colony.addItemToGlobal(itemRef, -removed);
-        EventSystem.notifyEntityEvent(this.owner, "removed_item", itemRef, amountToRemove);
+        MessageEventSystem.notifyEntityEvent(this.owner, "removed_item", itemRef, amountToRemove);
 
         return removed;
     }

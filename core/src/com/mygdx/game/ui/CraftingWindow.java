@@ -18,7 +18,7 @@ import com.mygdx.game.entity.Entity;
 import com.mygdx.game.util.DataBuilder;
 import com.mygdx.game.util.GH;
 import com.mygdx.game.util.managers.DataManager;
-import com.mygdx.game.util.managers.EventSystem;
+import com.mygdx.game.util.managers.MessageEventSystem;
 
 import java.text.DecimalFormat;
 import java.util.LinkedList;
@@ -205,16 +205,16 @@ public class CraftingWindow extends Window{
         this.buildCraftingList();
 
         //TODO Really inefficient, but using for fast prototyping.
-        this.function = EventSystem.onEntityEvent(this.target, "crafting_job_switched", (args) -> {
-            String from = (String)args[0];
-            String to = (String)args[1];
+        this.function = MessageEventSystem.onEntityEvent(this.target, "crafting_job_switched", (args) -> {
+            String from = (String) args[0];
+            String to = (String) args[1];
 
-            if(from.equals("available") && to.equals("inProgress")){
+            if (from.equals("available") && to.equals("inProgress")) {
                 this.buildAvailableList();
                 this.buildInProgressList();
-            }else if(from.equals("inProgress")){
+            } else if (from.equals("inProgress")) {
                 this.buildInProgressList();
-                if(to.equals("stalled"))
+                if (to.equals("stalled"))
                     this.buildStalledList();
             }
         });
@@ -327,7 +327,7 @@ public class CraftingWindow extends Window{
     @Override
     public void destroy() {
         this.craftingWindow.remove();
-        EventSystem.unregisterEventFunction(this.target, "crafting_job_switched", this.function);
+        MessageEventSystem.unregisterEventFunction(this.target, "crafting_job_switched", this.function);
         super.destroy();
     }
 

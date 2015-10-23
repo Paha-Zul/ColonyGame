@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mygdx.game.util.DataBuilder;
 import com.mygdx.game.util.managers.DataManager;
-import com.mygdx.game.util.managers.EventSystem;
+import com.mygdx.game.util.managers.MessageEventSystem;
 
 import java.util.HashMap;
 
@@ -29,25 +29,25 @@ public class Equipment extends Component{
 
         //When an item is added to the inventory of this Component's Entity owner, check if it's a tool.
         //If so, add it to our tools.
-        EventSystem.onEntityEvent(this.owner, "added_item", (args) -> {
-            DataBuilder.JsonItem item = (DataBuilder.JsonItem)args[0];
-            int amt = (int)args[1];
+        MessageEventSystem.onEntityEvent(this.owner, "added_item", (args) -> {
+            DataBuilder.JsonItem item = (DataBuilder.JsonItem) args[0];
+            int amt = (int) args[1];
 
             //Cast to a tool and add it.
-            if(item.getItemType().equals("tool")){
-                DataBuilder.JsonTool tool = (DataBuilder.JsonTool)item;
+            if (item.getItemType().equals("tool")) {
+                DataBuilder.JsonTool tool = (DataBuilder.JsonTool) item;
                 tools.put(tool.getItemName(), tool);
             }
         });
 
         //When an item is added to the inventory of this Component's Entity owner, check if it's a tool.
         //If so, add it to our tools.
-        EventSystem.onEntityEvent(this.owner, "removed_item", (args) -> {
-            DataBuilder.JsonItem item = (DataBuilder.JsonItem)args[0];
-            int amt = (int)args[1];
+        MessageEventSystem.onEntityEvent(this.owner, "removed_item", (args) -> {
+            DataBuilder.JsonItem item = (DataBuilder.JsonItem) args[0];
+            int amt = (int) args[1];
 
             //Remove the tool.
-            if(item.getItemType().equals("tool"))
+            if (item.getItemType().equals("tool"))
                 tools.remove(item.getItemName());
         });
 

@@ -151,14 +151,18 @@ public class DataBuilder implements IDestroyable{
             tileGroupsMap.put(group.noiseMap, group);
         }
     };
-    @JsonIgnore
+
+    //Generates the worldGen json file.
     Consumer<JsonWorld> compileWorldGen = world -> {
         for(NoiseMap map : world.noiseMaps) {
             world.noiseMapHashMap.put(map.rank, map);
+
             //If the seed is null or empty, generate one. Otherwise, use the seed from worldgen.json.
             if(map.seed == null || map.seed.isEmpty()) map.noiseSeed = (long)(Math.random()*Long.MAX_VALUE);
             else{
-                //Goes over each character and adds to the seed.
+
+                //TODO should probably improve this...
+                //Loops over each character and adds it to the seed to change it.
                 for(int i=0;i<map.seed.length();i++){
                     char ch = map.seed.charAt(i);
                     map.noiseSeed = (map.noiseSeed + (long)ch*1000000000000000000l)%Long.MAX_VALUE;
@@ -166,8 +170,7 @@ public class DataBuilder implements IDestroyable{
             }
         }
 
-        WorldGen.getInstance().treeScale = world.treeScale;
-        WorldGen.getInstance().freq = world.noiseMapHashMap.get(0).freq;
+        WorldGen.getInstance().treeScale = world.treeScale; //Sets the tree scale.
         Constants.GRID_SQUARESIZE = world.tileSize;
         Constants.GRID_WIDTH = world.worldWidth;
         Constants.GRID_HEIGHT = world.worldHeight;
@@ -729,14 +732,15 @@ public class DataBuilder implements IDestroyable{
         public int worldWidth, worldHeight, worldGenSpeed, resourceGenerateSpeed;
         public float treeScale=0;
         public NoiseMap[] noiseMaps;
-        public HashMap<Integer, NoiseMap> noiseMapHashMap = new HashMap<>(); //A hasmap that stores NoiseMaps by ranks.
+        public HashMap<Integer, NoiseMap> noiseMapHashMap = new HashMap<>(); //A hashmap that stores NoiseMaps by ranks.
     }
 
     public static class NoiseMap{
-        public long noiseSeed;
-        public int rank;
-        public String name, seed;
-        public float freq;
+        public long noiseSeed; //The actual number seed.
+        public int rank; //The rank of the noise map
+        public String name; //The name of the noise map
+        public String seed; //The string seed of the noise map (ex: icantypeaseed), translated later into the 'noiseSeed' which is a number.
+        public float freq; //The frequency of the noise map.
     }
 
     public static class JsonChangeLog{
@@ -860,9 +864,12 @@ public class DataBuilder implements IDestroyable{
         public ModInfo modInfo;
     }
 
+    /**
+     * Holds data from the events.json file.
+     */
     public static class JsonPlayerEvent{
         public String eventName, eventDisplayName;
-        public String[] eventDescription, choices, behaviours;
+        public String[] eventDescription, choices, behaviours, actionNames;
         public boolean focusOnEvent, pauseGame;
 
         //Not anything read in, but used for passing data.

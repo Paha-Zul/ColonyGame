@@ -18,7 +18,7 @@ import com.mygdx.game.screens.PreLoadingScreen;
 import com.mygdx.game.ui.PlayerInterface;
 import com.mygdx.game.util.*;
 import com.mygdx.game.util.gui.GUI;
-import com.mygdx.game.util.managers.EventSystem;
+import com.mygdx.game.util.managers.MessageEventSystem;
 import com.mygdx.game.util.managers.NotificationManager;
 import com.mygdx.game.util.managers.PlayerManager;
 import gnu.trove.map.hash.TLongObjectHashMap;
@@ -75,6 +75,11 @@ public class ColonyGame extends Game implements ISaveable{
 @Override
 	public void save() {
 
+	}
+	@Override
+	public void initLoad(TLongObjectHashMap<Entity> entityMap, TLongObjectHashMap<Component> compMap) {
+		playerManager.initLoad(entityMap, compMap);
+		notificationManager.initLoad(entityMap, compMap);
 	}@Override
 	public void render () {
 		this.currTick++;
@@ -101,27 +106,20 @@ public class ColonyGame extends Game implements ISaveable{
 			//Update the camera.
 			camera.update();
 		}catch(Exception e){
-			e.printStackTrace();
-			Logger.log(Logger.ERROR, "Game closing due to error");
-			Logger.close();
-            e.printStackTrace(Logger.getPrintWriter());
-            GH.writeErrorMessage(e);
-            this.dispose();
-            Gdx.app.exit();
+			this.shutdown(e);
 		}
 
     }
 
 	@Override
-	public void initLoad(TLongObjectHashMap<Entity> entityMap, TLongObjectHashMap<Component> compMap) {
-		playerManager.initLoad(entityMap, compMap);
-		notificationManager.initLoad(entityMap, compMap);
-	}
-@Override
 	public void load(TLongObjectHashMap<Entity> entityMap, TLongObjectHashMap<Component> compMap) {
 		playerManager.load(entityMap, compMap);
 		notificationManager.load(entityMap, compMap);
-	}private void updateVarious(float delta){
+	}
+
+
+
+	private void updateVarious(float delta){
 		Profiler.update(delta);
 		GUI.update();
 	}
@@ -130,8 +128,18 @@ public class ColonyGame extends Game implements ISaveable{
 		//Draw GUI stuff.
 		batch.setProjectionMatrix(UICamera.combined);
 		listHolder.updateGUI(delta, batch);
-        EventSystem.notifyGameEvent("render_GUI", delta, batch);
+        MessageEventSystem.notifyGameEvent("render_GUI", delta, batch);
     }
+
+	public void shutdown(Exception e){
+		e.printStackTrace();
+		Logger.log(Logger.ERROR, "Game closing due to error");
+		Logger.close();
+		e.printStackTrace(Logger.getPrintWriter());
+		GH.writeErrorMessage(e);
+		this.dispose();
+		Gdx.app.exit();
+	}
 
 	    @Override
     public void dispose() {

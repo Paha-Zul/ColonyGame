@@ -12,7 +12,7 @@ import com.mygdx.game.interfaces.IInteractable;
 import com.mygdx.game.util.Constants;
 import com.mygdx.game.util.DataBuilder;
 import com.mygdx.game.util.managers.DataManager;
-import com.mygdx.game.util.managers.EventSystem;
+import com.mygdx.game.util.managers.MessageEventSystem;
 import gnu.trove.map.hash.TLongObjectHashMap;
 
 import java.util.LinkedList;
@@ -116,9 +116,9 @@ public class Animal extends Component implements IInteractable{
         this.behComp.getBlackBoard().attackRange = 15f;
         this.behComp.getBlackBoard().moveSpeed = 250f;
 
-        EventSystem.onEntityEvent(this.owner, "collide_start", onCollideStart);
-        EventSystem.onEntityEvent(this.owner, "collide_end", onCollideEnd);
-        EventSystem.onEntityEvent(this.owner, "damage", onDamage);
+        MessageEventSystem.onEntityEvent(this.owner, "collide_start", onCollideStart);
+        MessageEventSystem.onEntityEvent(this.owner, "collide_end", onCollideEnd);
+        MessageEventSystem.onEntityEvent(this.owner, "damage", onDamage);
 
         if(animalRef.aggressive) addCircleSensor();
         this.group = this.getComponent(Group.class);
@@ -142,7 +142,7 @@ public class Animal extends Component implements IInteractable{
         if(attackList.size() > 0 && !validTarget) {
             Entity target = attackList.poll(); //Get the next target off of the list.
             attackTarget(target);
-            EventSystem.notifyEntityEvent(target, "attacking", this.owner);
+            MessageEventSystem.notifyEntityEvent(target, "attacking", this.owner);
         }
     }
 
@@ -166,7 +166,7 @@ public class Animal extends Component implements IInteractable{
         BehaviourManagerComp leaderComp = group.getLeader().getComponent(BehaviourManagerComp.class);
         leaderComp.getBlackBoard().target = target;
         leaderComp.changeTaskImmediate("attackTarget");
-        EventSystem.notifyEntityEvent(target, "attacking_group", this.group);
+        MessageEventSystem.notifyEntityEvent(target, "attacking_group", this.group);
 
         //Then, tell each unit in the group to attack our target.
         this.group.getGroupList().forEach(ent ->{
@@ -195,7 +195,7 @@ public class Animal extends Component implements IInteractable{
 
             //Otherwise, prepare to be a resource!
             else {
-                EventSystem.unregisterEntity(this.owner); //Unregister for events.
+                MessageEventSystem.unregisterEntity(this.owner); //Unregister for events.
                 this.owner.getTransform().setRotation(180); //Flip me over
                 this.collider.getBody().setLinearVelocity(0, 0); //0 velocity!
                 this.owner.getTags().clearTags(); //Clear all tags

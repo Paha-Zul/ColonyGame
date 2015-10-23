@@ -26,7 +26,7 @@ import com.mygdx.game.ui.PlayerInterface;
 import com.mygdx.game.ui.UI;
 import com.mygdx.game.util.*;
 import com.mygdx.game.util.managers.DataManager;
-import com.mygdx.game.util.managers.EventSystem;
+import com.mygdx.game.util.managers.MessageEventSystem;
 import com.mygdx.game.util.managers.PlayerManager;
 import com.mygdx.game.util.worldgeneration.WorldGen;
 
@@ -40,12 +40,12 @@ public class GameScreen implements Screen{
     public static String[] firstNames = {"Bobby","Sally","Jimmy","Bradley","Willy","Tommy","Brian",
             "Doug","Ben","Jacob","Sammy","Jason","David","Sarah","Betty","Tom","James"};
     public static String[] lastNames = {"Poopers"};
+    public static boolean generatedNewGameStuff = false; //We only want this to change once per game life.
     private SpriteBatch batch;
     private ShapeRenderer shapeRenderer;
     private ColonyGame game;
     private Grid.GridInstance grid;
     private boolean paused = false;
-    private boolean generatedTrees = false;
     private Vector2 startLocation = new Vector2();
     private TextureRegion[][] map;
 
@@ -66,13 +66,14 @@ public class GameScreen implements Screen{
 
     public void render(float delta){
 
-        //Generate the trees if it hasn't been done already.
-        if(!generatedTrees) {
-            generatedTrees = WorldGen.getInstance().generateResources(new Vector2((ColonyGame.instance.worldGrid.getWidth() - 1) * ColonyGame.instance.worldGrid.getSquareSize(),
+        //Generate stuff for a new game if not done already.
+        if(!generatedNewGameStuff) {
+            generatedNewGameStuff = WorldGen.getInstance().generateResources(new Vector2((ColonyGame.instance.worldGrid.getWidth() - 1) * ColonyGame.instance.worldGrid.getSquareSize(),
                     (ColonyGame.instance.worldGrid.getHeight() - 1) * ColonyGame.instance.worldGrid.getSquareSize()), 0, Constants.WORLDGEN_RESOURCEGENERATESPEED);
-            if(generatedTrees){
-                startLocation.set((ColonyGame.instance.worldGrid.getWidth()/2)*ColonyGame.instance.worldGrid.getSquareSize(), (ColonyGame.instance.worldGrid.getHeight()/2)*ColonyGame.instance.worldGrid.getSquareSize());
-                generateStart(startLocation);
+
+            if(generatedNewGameStuff){
+                this.startLocation.set((ColonyGame.instance.worldGrid.getWidth()/2)*ColonyGame.instance.worldGrid.getSquareSize(), (ColonyGame.instance.worldGrid.getHeight()/2)*ColonyGame.instance.worldGrid.getSquareSize());
+                this.generateStart(this.startLocation);
                 this.spawnAnimals();
             }
         }
@@ -300,8 +301,8 @@ public class GameScreen implements Screen{
         ColonyGame.instance.listHolder.updateFloatingTexts(delta, batch);
 
         //Update and render events
-        EventSystem.notifyGameEvent("update", delta);
-        EventSystem.notifyGameEvent("render", delta, batch);
+        MessageEventSystem.notifyGameEvent("update", delta);
+        MessageEventSystem.notifyGameEvent("render", delta, batch);
 
         //Step the Box2D simulation.
         ColonyGame.instance.world.step(1f / 60f, 8, 3);

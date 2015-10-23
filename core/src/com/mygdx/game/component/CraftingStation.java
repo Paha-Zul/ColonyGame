@@ -8,7 +8,7 @@ import com.mygdx.game.util.DataBuilder;
 import com.mygdx.game.util.ItemNeeded;
 import com.mygdx.game.util.Logger;
 import com.mygdx.game.util.managers.DataManager;
-import com.mygdx.game.util.managers.EventSystem;
+import com.mygdx.game.util.managers.MessageEventSystem;
 import gnu.trove.map.hash.TLongObjectHashMap;
 
 import java.util.Iterator;
@@ -128,7 +128,7 @@ public class CraftingStation extends Component implements IOwnable{
             CraftingJob j = iter.next();
             if(j.id == id){
                 iter.remove();
-                EventSystem.notifyEntityEvent(this.owner, "crafting_job_switched", "inProgress", "finished", j);
+                MessageEventSystem.notifyEntityEvent(this.owner, "crafting_job_switched", "inProgress", "finished", j);
                 return true; //Found and removed!! Return true!
             }
         }
@@ -148,7 +148,7 @@ public class CraftingStation extends Component implements IOwnable{
 
         if(job == null) return null;
         this.inProgressJobs.add(job);
-        EventSystem.notifyEntityEvent(this.owner, "crafting_job_switched", "available", "inProgress", job);
+        MessageEventSystem.notifyEntityEvent(this.owner, "crafting_job_switched", "available", "inProgress", job);
 
         return job;
     }
@@ -173,7 +173,7 @@ public class CraftingStation extends Component implements IOwnable{
 
         if(job == null) return false;
         this.stalledJobs.add(job);
-        EventSystem.notifyEntityEvent(this.owner, "crafting_job_switched", "inProgress", "stalled", job);
+        MessageEventSystem.notifyEntityEvent(this.owner, "crafting_job_switched", "inProgress", "stalled", job);
         return true;
     }
 

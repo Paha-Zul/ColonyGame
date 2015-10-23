@@ -23,6 +23,7 @@ public class MainMenuScreen implements Screen {
     @Override
     public void show() {
         new MainMenuInterface(ColonyGame.instance.batch, this.game);
+        GameScreen.generatedNewGameStuff = false;
     }
 
     @Override

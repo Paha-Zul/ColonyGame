@@ -12,7 +12,7 @@ import com.mygdx.game.entity.Entity;
 import com.mygdx.game.interfaces.Functional;
 import com.mygdx.game.util.StateSystem;
 import com.mygdx.game.util.StateTree;
-import com.mygdx.game.util.managers.EventSystem;
+import com.mygdx.game.util.managers.MessageEventSystem;
 import com.mygdx.game.util.timer.OneShotTimer;
 import com.mygdx.game.util.timer.Timer;
 import gnu.trove.map.hash.TLongObjectHashMap;
@@ -200,7 +200,7 @@ public class BehaviourManagerComp extends Component{
         //Set the next behaviour.
         //this.nextBehaviour = task;
 
-        EventSystem.notifyEntityEvent(this.getEntityOwner(), "task_started", task);
+        MessageEventSystem.notifyEntityEvent(this.getEntityOwner(), "task_started", task);
     }
 
     @Override

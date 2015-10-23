@@ -4,7 +4,7 @@ package com.mygdx.game.util;
 import com.badlogic.gdx.physics.box2d.*;
 import com.mygdx.game.component.collider.Collider;
 import com.mygdx.game.entity.Entity;
-import com.mygdx.game.util.managers.EventSystem;
+import com.mygdx.game.util.managers.MessageEventSystem;
 
 /**
  * Created by Paha on 3/26/2015.
@@ -19,8 +19,8 @@ public class Collision implements ContactListener {
         Entity firstEntity = ((Collider.ColliderInfo)first.getUserData()).owner;
         Entity otherEntity = ((Collider.ColliderInfo)other.getUserData()).owner;
 
-        EventSystem.notifyEntityEvent(firstEntity, "collide_start", first, other);
-        EventSystem.notifyEntityEvent(otherEntity, "collide_start", other, first);
+        MessageEventSystem.notifyEntityEvent(firstEntity, "collide_start", first, other);
+        MessageEventSystem.notifyEntityEvent(otherEntity, "collide_start", other, first);
     }
 
     @Override
@@ -31,8 +31,8 @@ public class Collision implements ContactListener {
         Entity firstEntity = ((Collider.ColliderInfo)first.getUserData()).owner;
         Entity otherEntity = ((Collider.ColliderInfo)other.getUserData()).owner;
 
-        EventSystem.notifyEntityEvent(firstEntity, "collide_end", first, other);
-        EventSystem.notifyEntityEvent(otherEntity, "collide_end", other, first);
+        MessageEventSystem.notifyEntityEvent(firstEntity, "collide_end", first, other);
+        MessageEventSystem.notifyEntityEvent(otherEntity, "collide_end", other, first);
     }
 
     @Override

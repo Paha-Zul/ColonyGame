@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.interfaces.IDelayedDestroyable;
 import com.mygdx.game.interfaces.ISaveable;
-import com.mygdx.game.util.managers.EventSystem;
+import com.mygdx.game.util.managers.MessageEventSystem;
 import gnu.trove.map.hash.TLongObjectHashMap;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.WRAPPER_OBJECT, property = "@class")
@@ -37,7 +37,7 @@ public abstract class Component implements IDelayedDestroyable, ISaveable {
      */
 	public void added(Entity owner){
 		this.owner = owner;
-		EventSystem.notifyGameEvent("component_created", this.getClass(), this);
+		MessageEventSystem.notifyGameEvent("component_created", this.getClass(), this);
 	}
 
 	@Override
@@ -73,7 +73,7 @@ public abstract class Component implements IDelayedDestroyable, ISaveable {
 	 */
 	public void start(){
 		this.started = true;
-        EventSystem.notifyGameEvent("component_started", this.getClass(), this);
+        MessageEventSystem.notifyGameEvent("component_started", this.getClass(), this);
     }
 
 	/**

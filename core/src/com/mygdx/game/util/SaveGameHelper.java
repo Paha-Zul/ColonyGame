@@ -13,6 +13,7 @@ import com.mygdx.game.ColonyGame;
 import com.mygdx.game.component.Component;
 import com.mygdx.game.entity.Entity;
 import com.mygdx.game.interfaces.ISaveable;
+import com.mygdx.game.util.worldgeneration.WorldGen;
 import gnu.trove.map.hash.TLongObjectHashMap;
 
 import java.io.IOException;
@@ -71,6 +72,7 @@ public class SaveGameHelper {
     }
 
     private static void saveManagers(){
+        world.worldGen = WorldGen.getInstance();
         world.colonyGame = ColonyGame.instance;
     }
 
@@ -151,6 +153,7 @@ public class SaveGameHelper {
     private static void loadManagers(){
         ColonyGame.instance.notificationManager.destroy();
         ColonyGame.instance.playerManager.destroy();
+        ColonyGame.instance.worldGrid.destroyAndRecycle();
 
         ColonyGame.instance.playerManager = world.colonyGame.playerManager;
 
@@ -159,6 +162,14 @@ public class SaveGameHelper {
 
         ColonyGame.instance.playerManager.load(giantEntityMap, giantCompMap);
         ColonyGame.instance.notificationManager.load(giantEntityMap, giantCompMap);
+
+        ColonyGame.instance.worldGrid.createGrid(Constants.GRID_WIDTH, Constants.GRID_HEIGHT, Constants.GRID_SQUARESIZE);
+        WorldGen.getInstance().init(ColonyGame.instance);
+
+        boolean flag = false;
+        while(!flag){
+            flag = WorldGen.getInstance().generateWorld();
+        }
     }
 
 
@@ -211,6 +222,8 @@ public class SaveGameHelper {
     }
 
     private static class JsonWorld{
+        @JsonProperty
+        public WorldGen worldGen;
         @JsonProperty
         public ColonyGame colonyGame;
         @JsonProperty

@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mygdx.game.ColonyGame;
 import com.mygdx.game.component.Resource;
 import com.mygdx.game.entity.ResourceEnt;
@@ -22,6 +23,7 @@ import java.util.LinkedList;
 
 /**
  * Created by Bbent_000 on 12/24/2014.
+ * Generates the world.
  */
 public class WorldGen {
     public static Texture whiteTex;
@@ -38,17 +40,17 @@ public class WorldGen {
     }
 
     public float treeScale = 0.8f;
-    public float freq = 5;
     public float percentageDone = 0;
-    //Some default values that can be modified globally.
-    private int tileSize = 25;
     private TextureAtlas terrainAtlas;
+    //Some default values that can be modified globally.
+    private ColonyGame game;
+    private int tileSize = 25;
     private int currX = 0, currY = 0;
     private int numTrees = 0;
-    private ColonyGame game;
     private int currDone = 0;
     private int currIndex = 0;
     private int lastIndex = -1;
+
     //Variables for performing breadth first resource spawning;
     private LinkedList<Grid.Node> openList = new LinkedList<>();
     private HashMap<Integer, Grid.Node> visitedMap = new HashMap<>(1000);
@@ -67,6 +69,9 @@ public class WorldGen {
         return texture;
     }
 
+    /**
+     * @return The instance of the WorldGen.
+     */
     public static WorldGen getInstance(){
         if(instance == null) instance = new WorldGen();
         return instance;
@@ -77,7 +82,8 @@ public class WorldGen {
      */
     public void init(ColonyGame game){
         this.game = game;
-        terrainAtlas = new TextureAtlas(Gdx.files.internal("atlas/terrain.atlas"));
+        this.terrainAtlas = new TextureAtlas(Gdx.files.internal("atlas/terrain.atlas"));
+        this.currDone = this.currIndex = this.currX = this.currY = 0;
     }
 
     /**
@@ -94,7 +100,7 @@ public class WorldGen {
 
         //This will loop until everything is done.
         while(this.currDone < maxAmount && stepsLeft > 0) {
-            freq = DataBuilder.worldData.noiseMapHashMap.get(this.currIndex).freq; //Get the frequency of the current noise map.
+            float freq = DataBuilder.worldData.noiseMapHashMap.get(this.currIndex).freq; //Get the frequency of the current noise map.
             String noiseMapName = DataBuilder.worldData.noiseMapHashMap.get(this.currIndex).name; //Get the compName of the current noise map.
 
             //If the index has changed, we need to increment and get the next noise level.
@@ -106,14 +112,13 @@ public class WorldGen {
             //Loop for a certain amount of steps. This is done for each noise level. Resets after each one.
             while (stepsLeft > 0 && currX < grid.getWidth()) {
                 if (!(currX < grid.padding || currX >= grid.getWidth() - grid.padding || currY < grid.padding || currY >= grid.getHeight() - grid.padding)) {
+                    done = false; //Set done to false signifying that we are not finished yet.
 
                     //Get the info about the tile.
                     double noiseValue = SimplexNoise.noise((double) currX / freq, (double) currY / freq); //Generate the noise for this tile.
                     Vector2 position = new Vector2(currX * grid.getSquareSize(), currY * grid.getSquareSize()); //Set the position.
                     Sprite terrainSprite; //Prepare the sprite object.
                     float rotation = 0; //The rotation of the tile.
-
-                    done = false; //Set done to false signifying that we are not finished yet.
 
                     //Gets the jTile as the noise height.
                     DataBuilder.JsonTile jtile = this.getTileAtHeight(tileGroupsMap.get(noiseMapName).tiles, (float) noiseValue);
@@ -174,6 +179,7 @@ public class WorldGen {
         if(done){
             currIndex = 0;
             currX = currY = 0;
+            currDone = 0;
         }
 
         return done;
@@ -236,7 +242,7 @@ public class WorldGen {
 
                 //Set the center Vector2 and spawn the tree using the center position.
                 center.set(currNode.getX()*grid.getSquareSize() +  grid.getSquareSize() * 0.5f, currNode.getY()*grid.getSquareSize() +  grid.getSquareSize() * 0.5f);
-                spawnResource(getTileAtHeight(DataBuilder.tileGroupsMap.get(noiseMapName).tiles, (float) currNode.getTerrainTile().noiseValue), center, currNode.getTerrainTile());
+                this.spawnResource(getTileAtHeight(DataBuilder.tileGroupsMap.get(noiseMapName).tiles, (float) currNode.getTerrainTile().noiseValue), center, currNode.getTerrainTile());
             }
 
             //If there are no more nodes in openList, but we still have noise maps to go, continue again!
@@ -246,7 +252,6 @@ public class WorldGen {
                 this.visitedMap = new HashMap<>();
                 this.started = false;
                 this.currIndex++;
-                continue;
 
             //Otherwise, we are completely finished.
             }else if(openList.size() == 0){
@@ -261,7 +266,12 @@ public class WorldGen {
         return done;
     }
 
-    //Spawns a tree.
+    /**
+     * Spawns a resource.
+     * @param jtile The JsonTile to reference.
+     * @param centerPos The center position of the resource.
+     * @param currTile The TerrainTile to spawn the
+     */
     private void spawnResource(DataBuilder.JsonTile jtile, Vector2 centerPos, Grid.TerrainTile currTile){
         if(jtile == null || currTile == null || !currTile.tileRef.category.equals(jtile.category))
             return;
@@ -308,6 +318,45 @@ public class WorldGen {
         }
 
         return null;
+    }
+
+    /**
+     * Used for saving
+     * @return A String[][] object with data to save the WorldGen with.
+     */
+    @JsonProperty("worldData")
+    private String[][] getWorldData(){
+        String[][] data = new String[DataBuilder.worldData.noiseMaps.length][4];
+
+        for(int i=0; i < DataBuilder.worldData.noiseMaps.length; i++){
+            DataBuilder.NoiseMap noiseMap = DataBuilder.worldData.noiseMaps[i];
+            data[i][0] = noiseMap.name;
+            data[i][1] = ""+noiseMap.noiseSeed;
+            data[i][2] = ""+noiseMap.freq;
+            data[i][3] = ""+noiseMap.rank;
+        }
+
+        return data;
+    }
+
+    /**
+     * Used only for loading.
+     * @param data A String[][] object to load values for the WorldGen from.
+     */
+    @JsonProperty("worldData")
+    private void setWorldData(String[][] data){
+        DataBuilder.worldData.noiseMaps = new DataBuilder.NoiseMap[data.length];
+        DataBuilder.worldData.noiseMapHashMap = new HashMap<>(data.length);
+
+        for(int i=0; i < data.length; i++){
+            DataBuilder.NoiseMap noiseMap = DataBuilder.worldData.noiseMaps[i] = new DataBuilder.NoiseMap();
+            noiseMap.name = data[i][0];
+            noiseMap.noiseSeed = Long.parseLong(data[i][1]);
+            noiseMap.freq = Float.parseFloat(data[i][2]);
+            noiseMap.rank = Integer.parseInt(data[i][3]);
+
+            DataBuilder.worldData.noiseMapHashMap.put(i, noiseMap);
+        }
     }
 
     public int numTrees(){

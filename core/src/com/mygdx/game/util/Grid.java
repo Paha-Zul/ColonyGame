@@ -15,15 +15,19 @@ import com.mygdx.game.util.gui.GUI;
 import com.sun.istack.internal.NotNull;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /**
  * Created by Paha on 1/17/2015.
+ * Controls the Grid!
  */
 public class Grid {
     private static HashMap<String, GridInstance> gridMap = new HashMap<>();
+    private static LinkedList<Node> recycleNodeList = new LinkedList<>();
 
     public static GridInstance newGridInstance(String name, int width, int height, int squareSize){
         GridInstance instance = new GridInstance(width, height, squareSize);
@@ -42,6 +46,10 @@ public class Grid {
         private VisibilityTile[][] visibilityMap;
 
         public GridInstance(int width, int height, int squareSize) {
+            this.createGrid(width, height, squareSize);
+        }
+
+        public void createGrid(int width, int height, int squareSize){
             //Set some values.
             this.numCols = width / squareSize + 1;
             this.numRows = height / squareSize + 1;
@@ -51,7 +59,13 @@ public class Grid {
             this.grid = new Node[this.numCols][this.numRows];
             for (int col = 0; col < grid.length; col++) {
                 for (int row = 0; row < grid[col].length; row++) {
-                    this.grid[col][row] = new Grid.Node(col, row, this);
+
+                    //If we have a Node that we can recycle, get it!
+                    if(Grid.recycleNodeList.size() > 0) {
+                        this.grid[col][row] = Grid.recycleNodeList.pop();
+                        this.grid[col][row].setValues(col, row, this);
+                    }else
+                        this.grid[col][row] = new Grid.Node(col, row, this);
                 }
             }
 
@@ -196,8 +210,8 @@ public class Grid {
                     return false;
                 });
             }
-            Node node = this.addToGrid(entity);
-            return node;
+
+            return this.addToGrid(entity);
         }
 
         /**
@@ -502,9 +516,8 @@ public class Grid {
             renderer.begin(ShapeRenderer.ShapeType.Line);
             renderer.setColor(Color.GREEN);
 
-            for (int col = 0; col < grid.length; col++) {
-                for (int row = 0; row < grid[col].length; row++) {
-                    Node node = grid[col][row];
+            for (Node[] aGrid : grid) {
+                for (Node node : aGrid) {
                     renderer.rect(node.getX() * getSquareSize(), node.getY() * getSquareSize(), getSquareSize(), getSquareSize());
                 }
             }
@@ -519,6 +532,19 @@ public class Grid {
                 }
             }
         }
+
+        //Destroys and recycles all Nodes of this Grid Instance.
+        public void destroyAndRecycle(){
+            for (Node[] aGrid : this.grid)
+                Collections.addAll(Grid.recycleNodeList, aGrid);
+            this.grid = null;
+        }
+
+        //public int[][]
+
+        public void destroy(){
+            this.grid = null;
+        }
     }
 
     /**
@@ -531,6 +557,16 @@ public class Grid {
         private GridInstance gridOwner;
 
         public Node(int x, int y, GridInstance gridOwner){
+            this.setValues(x, y, gridOwner);
+        }
+
+        /**
+         * Sets the values of this Node.
+         * @param x The X index of this Node in the grid.
+         * @param y The Y index of this Node is the grid.
+         * @param gridOwner The GridInstance owner of this Node.
+         */
+        public void setValues(int x, int y, GridInstance gridOwner){
             this.x = x;
             this.y = y;
             this.gridOwner = gridOwner;
@@ -594,6 +630,13 @@ public class Grid {
          */
         public float getYCenter(){
             return this.y * gridOwner.getSquareSize() + gridOwner.getSquareSize()/2;
+        }
+
+        public void reset(){
+            this.x = this.y = -1;
+            entList = new ArrayList<>();
+            this.terrainTile = null;
+            this.gridOwner = null;
         }
 
         @Override
