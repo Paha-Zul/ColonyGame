@@ -21,8 +21,8 @@ import com.mygdx.game.util.StateTree;
 import com.mygdx.game.util.Tree;
 import com.mygdx.game.util.gui.GUI;
 import com.mygdx.game.util.managers.DataManager;
-import com.mygdx.game.util.managers.EventSystem;
 import com.mygdx.game.util.managers.GameEventManager;
+import com.mygdx.game.util.managers.MessageEventSystem;
 import com.mygdx.game.util.timer.RepeatingTimer;
 import com.mygdx.game.util.timer.Timer;
 import gnu.trove.map.hash.TLongObjectHashMap;
@@ -96,15 +96,8 @@ public class Colonist extends Component implements IInteractable, IOwnable{
     @JsonIgnore
     private Consumer<Object[]> onAttackingEvent = args -> {
         Group attackingGroup = (Group)args[0];
-        if(attackingGroup.getLeader().getTags().hasTag("boss")) {
-            GameEventManager.GameEvent event = GameEventManager.getGameEvent("bossencounter");
-            if(!event.triggered) {
-                event.playerEvent.eventTarget = this.getEntityOwner();
-                event.playerEvent.eventTargetOther = attackingGroup.getLeader();
-                PlayerInterface.getInstance().newPlayerEvent(event.playerEvent);
-                event.triggered = true;
-            }
-        }
+        if(attackingGroup.getLeader().getTags().hasTag("boss"))
+            PlayerInterface.getInstance().newPlayerEvent(GameEventManager.triggerGameEvent("bossencounter", this.getEntityOwner(), attackingGroup.getLeader()).playerEvent);
     };
 
     @JsonIgnore
@@ -262,11 +255,11 @@ public class Colonist extends Component implements IInteractable, IOwnable{
         this.equipment = this.getComponent(Equipment.class);
         this.effects = this.getComponent(Effects.class);
 
-        EventSystem.onEntityEvent(this.owner, "damage", onDamage);
-        EventSystem.onEntityEvent(this.owner, "attacking_group", onAttackingEvent);
-        EventSystem.onEntityEvent(this.owner, "collide_start", onCollideStart);
-        EventSystem.onEntityEvent(this.owner, "collide_end", onCollideEnd);
-        EventSystem.onEntityEvent(this.owner, "attacking", onBeingAttacked);
+        MessageEventSystem.onEntityEvent(this.owner, "damage", onDamage);
+        MessageEventSystem.onEntityEvent(this.owner, "attacking_group", onAttackingEvent);
+        MessageEventSystem.onEntityEvent(this.owner, "collide_start", onCollideStart);
+        MessageEventSystem.onEntityEvent(this.owner, "collide_end", onCollideEnd);
+        MessageEventSystem.onEntityEvent(this.owner, "attacking", onBeingAttacked);
 
         this.createBehaviourButtons();
         this.createBehaviourStates();
@@ -319,7 +312,7 @@ public class Colonist extends Component implements IInteractable, IOwnable{
         taskInfo.callback = taskTree::moveUp;
         back.userData = taskInfo;
 
-        EventSystem.onEntityEvent(this.owner, "task_started", args -> {
+        MessageEventSystem.onEntityEvent(this.owner, "task_started", args -> {
             Task task = (Task) args[0];
             if (task.getName().equals("exploreUnexplored"))
                 task.getBlackboard().target = this.getOwningColony().getEntityOwner();

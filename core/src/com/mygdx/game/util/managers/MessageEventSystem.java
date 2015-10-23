@@ -9,30 +9,21 @@ import java.util.function.Consumer;
 
 /**
  * Created by Paha on 3/26/2015.
+ * Handles linking messages to function calls for easy communication for events (like adding an item to an inventory).
  */
-public class EventSystem {
+public class MessageEventSystem {
+    private static final int gameEventID = 0;
     //A map of maps of lists of consumer interfaces.
     private static HashMap<Long, HashMap<String, ArrayList<java.util.function.Consumer<Object[]>>>> entityMap = new HashMap<>();
 
-    private static final int gameEventID = 0;
-
     /**
-     * Adds a function to the EventSystem.
+     * Adds a function to the MessageEventSystem.
      * @param entity The Entity to use for its ID. This will direct the call to the correct Entity.
      * @param eventName The event name, ie: "collidestart" to indicate which event to call.
      * @param function The Consumer function to be called on an event.
      */
     public static Consumer<Object[]> onEntityEvent(Entity entity, String eventName, java.util.function.Consumer<Object[]> function){
         return registerEvent(entity.getID(), eventName, function);
-    }
-
-    /**
-     * Adds a function to the EventSystem for a game event.
-     * @param eventName The name of the event.
-     * @param function THe Consumer function to be called on an event.
-     */
-    public static Consumer<Object[]> onGameEvent(String eventName, java.util.function.Consumer<Object[]> function){
-        return registerEvent(gameEventID, eventName, function);
     }
 
     /**
@@ -63,6 +54,15 @@ public class EventSystem {
     }
 
     /**
+     * Adds a function to the MessageEventSystem for a game event.
+     * @param eventName The name of the event.
+     * @param function THe Consumer function to be called on an event.
+     */
+    public static Consumer<Object[]> onGameEvent(String eventName, java.util.function.Consumer<Object[]> function){
+        return registerEvent(gameEventID, eventName, function);
+    }
+
+    /**
      * Removes an Event from the system.
      * @param entity The Entity to call the event on.
      * @param handlerName The compName of the Event/Handler.
@@ -85,7 +85,7 @@ public class EventSystem {
 
     /**
      * Removes an Entity from the event system, effectively clearing all events linked to the Entity.
-     * @param entity The Entity to remove from the EventSystem.
+     * @param entity The Entity to remove from the MessageEventSystem.
      */
     public static void unregisterEntity(Entity entity){
         if(entityMap.get(entity.getID()) != null)
