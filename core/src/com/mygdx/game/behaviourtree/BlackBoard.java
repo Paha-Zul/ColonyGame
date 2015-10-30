@@ -15,6 +15,8 @@ import java.util.LinkedList;
  * Created by Bbent_000 on 12/31/2014.
  */
 public class BlackBoard{
+    //Transferring variables
+    public final ItemTransfer itemTransfer = new ItemTransfer();
     public Grid.GridInstance colonyGrid;
     public Grid.Node targetNode;
     public Entity target; //TODO Maybe we should get rid of target? Or at least make the pathfinding not use target... it results in tons of hard to find bugs when targetNode is still set and it uses that instead of the intended target.
@@ -22,13 +24,8 @@ public class BlackBoard{
     public LinkedList<Vector2> path;
     public Resource targetResource;
     public CraftingStation targetCraftingStation;
-
     //Related to gathering resources
     public Tags resourceTypeTags = new Tags("resource");
-
-    //Transferring variables
-    public final ItemTransfer itemTransfer = new ItemTransfer();
-
     //Consuming task stuff
     public String itemEffect;
     public int itemEffectAmount;
@@ -47,6 +44,7 @@ public class BlackBoard{
     public float disBeforeRepath = 5f;
     public float attackDamage = 10f;
     public Timer attackTimer = null;
+    public LinkedList<Entity> attackList = new LinkedList<>();
 
     //Sleep
     public float timeToSleep = 5f;

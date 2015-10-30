@@ -1,5 +1,7 @@
 [
   {
+    "type": "encounter",
+    "sides": 1,
     "eventName": "bossencounter",
     "eventDisplayName": "Boss Encounter!",
     "eventDescription": [
@@ -11,11 +13,40 @@
       "I need to run to the base and get help!",
       "Maybe I can lose them in the surroundings!"
     ],
-    "behaviours": [
-      "attackTarget",
-      "returnToBase",
-      "fleeTarget"
+    "tooltips": [
+      "The colonist will stand his ground and fight off the beasts until either him or the beasts are dead. He'll receive a hero's bonus if he survives. Lowest chance of survival.",
+      "The colonist will try to run back to the base and gather more people to help him fight off the beasts . He may (50% chance) be branded as a coward for doing such a thing in the face of danger! Highest chance of survival.",
+      "The colonist will run around randomly trying to lose the beasts in the surroundings. No negative or positive bonuses, and has about 50% chance of survival."
     ],
+    "behaviours": [
+      ["defendPosition"],
+      ["returnToBase"],
+      ["fleeEnemies"]
+    ],
+    "focusOnEvent": true,
+    "pauseGame": true
+  },
+  {
+    "type": "neutral",
+    "sides": 2,
+    "eventName": "crazylumberjacks",
+    "eventDisplayName": "Crazy Lumberjacks!",
+    "eventDescription": [
+      "It looks like %lie have gone crazy! They want to chop every tree down in the area and won't take no for an answer! On the upside, I guess we'll have plenty of lumber.",
+    ],
+    "choices": [
+      "Let them chop till they drop!",
+      "Order them to ignore their crazy whims!"
+    ],
+    "tooltips": [
+      "The affected colonists will chop trees until they drop from exhaustion. You can't change their behaviour and they will ignore any dangers to keep chopping.",
+      "Ordering them to stop has a 50% chance to make them go mad. This will cause them to attack anything around them, including your own colonists."
+    ],
+    "behaviours": [
+      ["attackTarget"],
+      ["turnHostile"]
+    ],
+    "randRanges": [[2,2], [0,0]],
     "focusOnEvent": true,
     "pauseGame": true
   }

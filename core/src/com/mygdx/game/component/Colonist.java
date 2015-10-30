@@ -53,8 +53,6 @@ public class Colonist extends Component implements IInteractable, IOwnable{
     @JsonProperty
     private boolean alert = false;
     @JsonIgnore
-    private LinkedList<Entity> attackList = new LinkedList<>();
-    @JsonIgnore
     private Fixture fixture;
     @JsonIgnore
     private Functional.Callback deathCallback = null;
@@ -97,13 +95,13 @@ public class Colonist extends Component implements IInteractable, IOwnable{
     private Consumer<Object[]> onAttackingEvent = args -> {
         Group attackingGroup = (Group)args[0];
         if(attackingGroup.getLeader().getTags().hasTag("boss"))
-            PlayerInterface.getInstance().newPlayerEvent(GameEventManager.triggerGameEvent("bossencounter", this.getEntityOwner(), attackingGroup.getLeader()).playerEvent);
+            PlayerInterface.getInstance().newPlayerEvent(GameEventManager.triggerGameEvent("bossencounter", this.getEntityOwner(), attackingGroup.getLeader()));
     };
 
     @JsonIgnore
     private Consumer<Object[]> onBeingAttacked = args -> {
         Entity other = (Entity)args[0];
-        attackList.add(other);
+        this.manager.getBlackBoard().attackList.add(other);
         Consumer<Entity> callForHelp = ent -> {
             if(ent.getTags().hasTags("colonist", "alive")){
                 Colonist col = ent.getComponent(Colonist.class);
@@ -132,7 +130,7 @@ public class Colonist extends Component implements IInteractable, IOwnable{
             Animal animal = otherInfo.owner.getComponent(Animal.class);
             if(animal == null) return;
             if(animal.getAnimalRef().aggressive)
-                attackList.add(otherInfo.owner);
+                this.manager.getBlackBoard().attackList.add(otherInfo.owner);
         }
     };
 
@@ -150,7 +148,7 @@ public class Colonist extends Component implements IInteractable, IOwnable{
             Animal animal = otherInfo.owner.getComponent(Animal.class);
             if(animal == null) return;
             if(animal.getAnimalRef().aggressive)
-                attackList.remove(otherInfo.owner);
+                this.manager.getBlackBoard().attackList.remove(otherInfo.owner);
         }
     };
 
@@ -194,10 +192,10 @@ public class Colonist extends Component implements IInteractable, IOwnable{
         super.update(delta);
 
         //If alert and we have something in the attack list and we are not attacking already, let's attack.
-        if(alert && this.attackList.size() > 0){
-            Entity ent = this.attackList.peek();
+        if(alert && this.manager.getBlackBoard().attackList.size() > 0){
+            Entity ent = this.manager.getBlackBoard().attackList.peek();
             if(!ent.getTags().hasTag("alive"))
-                this.attackList.removeFirst();
+                this.manager.getBlackBoard().attackList.removeFirst();
             else{
                 this.getBehManager().getBlackBoard().target = ent;
                 if(!this.getBehManager().getBehaviourStates().getCurrState().stateName.equals("attackTarget"))
@@ -457,7 +455,7 @@ public class Colonist extends Component implements IInteractable, IOwnable{
     public boolean setAlert(boolean alert){
         //If alert is active and we are setting it to not active.
         if(this.alert && !alert) {
-            this.attackList = new LinkedList<>();
+            this.manager.getBlackBoard().attackList = new LinkedList<>();
             this.fixture.getShape().setRadius(0);
             this.owner.getTags().removeTag("alert");
         //If alert is not active and we are setting it to active.

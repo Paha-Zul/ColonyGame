@@ -527,6 +527,16 @@ public class PrebuiltTasks {
         return sequence;
     }
 
+    public static Task defendArea(BlackBoard blackBoard, BehaviourManagerComp behComp){
+        /**
+         *  Parallel
+         *      Get closest valid target to attack
+         *      Attack target
+         */
+
+        return null;
+    }
+
     public static Task fish(BlackBoard blackBoard, BehaviourManagerComp behComp){
         /**
          * Find a fishing spot.
