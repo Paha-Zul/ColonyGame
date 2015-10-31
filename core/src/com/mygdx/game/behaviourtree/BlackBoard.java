@@ -24,8 +24,10 @@ public class BlackBoard{
     public LinkedList<Vector2> path;
     public Resource targetResource;
     public CraftingStation targetCraftingStation;
+
     //Related to gathering resources
     public Tags resourceTypeTags = new Tags("resource");
+
     //Consuming task stuff
     public String itemEffect;
     public int itemEffectAmount;
@@ -63,6 +65,9 @@ public class BlackBoard{
     //Getting stuff from colony
     public Class<?> clazzType;
     public String[] tagsToSearch;
+
+    //Sleeping
+    public int sleepThreshold = 20; //Default is 20
 
     public BlackBoard() {
 

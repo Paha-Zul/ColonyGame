@@ -37,6 +37,7 @@ import com.mygdx.game.util.*;
 import com.mygdx.game.util.gui.Button;
 import com.mygdx.game.util.gui.GUI;
 import com.mygdx.game.util.managers.DataManager;
+import com.mygdx.game.util.managers.GameEventManager;
 import com.mygdx.game.util.managers.NotificationManager;
 import com.mygdx.game.util.managers.WindowManager;
 import com.mygdx.game.util.timer.OneShotTimer;
@@ -45,6 +46,7 @@ import com.mygdx.game.util.timer.Timer;
 import com.mygdx.game.util.worldgeneration.WorldGen;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created by Bbent_000 on 12/25/2014.
@@ -61,9 +63,6 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     public GUI.GUIStyle UIStyle;
     public Texture blueSquare;
     public Stage stage;
-    /**
-     * Stuff for drawing colony
-     */
     public boolean drawingColony = false;
     private TextureRegion background;
     private World world;
@@ -92,12 +91,16 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     private UnitProfile selectedProfile = null; //The currently selected UnitProfile.
     private Array<UnitProfile> selectedProfileList = new Array<>(); //The list of selected UnitProfiles.
     private Color gray = new Color(Color.BLACK);
-    private DataBuilder.JsonPlayerEvent currentEvent;
+    private GameEventManager.GameEvent currentEvent;
     private GUI.GUIStyle eventDescStyle, eventTitleStyle;
     private TextureRegion whiteTexture;
     private NotificationManager.Notification mousedOverNotification = null;
     private boolean extendedTooltip;
     private Timer extendedTooltipTimer = new OneShotTimer(2f, () -> extendedTooltip = true);
+
+    private HashMap<Integer, Array<Functional.Callback>> keyEventMap = new HashMap<>();
+
+
     //For selecting a single unit.
     private QueryCallback callback = fixture -> {
         Collider.ColliderInfo info = (Collider.ColliderInfo)fixture.getUserData();
@@ -438,12 +441,14 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     /**
      * Triggers a new Event for the player. THis will pause the game and set the current event to the event passed in. It will also focus the
      * camera on the event.eventTarget if event.focusOnEvent is set to true.
-     * @param playerEvent The PlayerEvent to set as the current event.
+     * @param gameEvent The GameEvent to set as the current event.
      */
-    public void newPlayerEvent(DataBuilder.JsonPlayerEvent playerEvent){
-        this.paused = playerEvent.pauseGame;
-        this.currentEvent = playerEvent;
-        if(playerEvent.focusOnEvent) ColonyGame.instance.camera.position.set(playerEvent.eventTarget.getTransform().getPosition().x, playerEvent.eventTarget.getTransform().getPosition().y, 0);
+    public void newPlayerEvent(GameEventManager.GameEvent gameEvent){
+        DataBuilder.JsonGameEvent event = gameEvent.gameEventData;
+        this.paused = event.pauseGame;
+        this.currentEvent = gameEvent;
+        if(event.focusOnEvent) ColonyGame.instance.camera.position.set(gameEvent.entityTargetTeams.get(0).get(0).getTransform().getPosition().x,
+                gameEvent.entityTargetTeams.get(0).get(0).getTransform().getPosition().y, 0);
     }
 
     /**
@@ -582,7 +587,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
             GUI.Text("Zoom: " + ColonyGame.instance.camera.zoom, this.batch, 0, height - 40);
             GUI.Text("Resolution: " + Gdx.graphics.getDesktopDisplayMode().width + "X" + Gdx.graphics.getDesktopDisplayMode().height, this.batch, 0, height - 60);
             GUI.Text("NumTrees: " + WorldGen.getInstance().numTrees(), this.batch, 0, height - 80);
-            GUI.Text("NumTiles: " + ColonyGame.instance.worldGrid.getWidth()*ColonyGame.instance.worldGrid.getHeight(), this.batch, 0, height - 100);
+            GUI.Text("NumTiles: " + ColonyGame.instance.worldGrid.getWidth() * ColonyGame.instance.worldGrid.getHeight(), this.batch, 0, height - 100);
             GUI.Text("NumGridCols(X): " + ColonyGame.instance.worldGrid.getWidth(), this.batch, 0, height - 120);
             GUI.Text("NumGridRows(Y): " + ColonyGame.instance.worldGrid.getHeight(), this.batch, 0, height - 140);
         }
@@ -666,6 +671,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
      * @param height The height of the game screen. Used to calculate the event window height.
      */
     private void drawCurrentEvent(int width, int height){
+        //TODO Probably should redo this into a separate event window.
         if(this.currentEvent != null){
             float windowWidth = width/3.2f, windowHeight = height/2.7f;
             float windowX = width/2 - windowWidth/2, windowY = height/2 - windowHeight/2;
@@ -678,24 +684,32 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
 
             GUI.Texture(new TextureRegion(ColonyGame.instance.assetManager.get("eventWindowBackground", Texture.class)), this.batch, windowX, windowY, windowWidth, windowHeight);
 
-            eventDescStyle.padding(10);
-            eventDescStyle.multiline = true;
-            eventDescStyle.wrap = true;
-            eventDescStyle.alignment = Align.topLeft;
-            GUI.Label(this.currentEvent.eventDisplayName, this.batch, titleX, titleY, titleWidth, titleHeight, eventTitleStyle);
-            GUI.Label(GH.generateEventDescription(this.currentEvent), this.batch, descX, descY, descWidth, descHeight, eventDescStyle);
+            this.eventDescStyle.padding(10);
+            this.eventDescStyle.multiline = true;
+            this.eventDescStyle.wrap = true;
+            this.eventDescStyle.alignment = Align.topLeft;
+            GUI.Label(this.currentEvent.gameEventData.eventDisplayName, this.batch, titleX, titleY, titleWidth, titleHeight, eventTitleStyle);
+            GUI.Label(GameEventManager.generateEventDescription(this.currentEvent), this.batch, descX, descY, descWidth, descHeight, eventDescStyle);
 
             float buttonWidth = windowWidth*0.3f, buttonHeight = 75;
-            float spacing = (windowWidth - this.currentEvent.choices.length*buttonWidth)/(this.currentEvent.choices.length+1);
-            blankStyle.wrap = true;
+            float spacing = (windowWidth - this.currentEvent.gameEventData.choices.length*buttonWidth)/(this.currentEvent.gameEventData.choices.length+1);
+            this.blankStyle.wrap = true;
 
-            for(int i=0;i<this.currentEvent.choices.length;i++){
-                String choice = this.currentEvent.choices[i];
+            //Here we display the choices as a button. When clicked, it will trigger some sort of behaviour or action.
+            for(int i=0;i<this.currentEvent.gameEventData.choices.length;i++){
+                String choice = this.currentEvent.gameEventData.choices[i]; //Cache the current choice.
+                String eventType = this.currentEvent.gameEventData.type;
+                int sides = this.currentEvent.gameEventData.sides;
                 if(GUI.Button(this.batch, choice, windowX + (i+1)*spacing + i*buttonWidth, windowY + windowHeight*0.01f, buttonWidth, buttonHeight, blankStyle) == GUI.JUSTUP){
-                    BehaviourManagerComp comp = this.currentEvent.eventTarget.getComponent(BehaviourManagerComp.class);
-                    if(comp == null) return;
-                    comp.getBlackBoard().target = this.currentEvent.eventTargetOther;
-                    comp.changeTaskImmediate(this.currentEvent.behaviours[i], true);
+                    //TODO This area has to be redone to handle different types of events. What if multiple people?
+//                    BehaviourManagerComp comp = this.currentEvent.eventTarget.getComponent(BehaviourManagerComp.class);
+//                    if(comp == null) return;
+//                    comp.getBlackBoard().target = this.currentEvent.eventTargetOther;
+//                    comp.changeTaskImmediate(this.currentEvent.gameEventData.behaviours[i][0], true);
+
+                    //TODO Need to deal with multiple teams
+
+
                     this.gameSpeed = 1f; //Reset game speed
                     this.paused = false; //Unpause
                     this.currentEvent = null;
@@ -714,8 +728,21 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         this.buttonRect = null;
     }
 
+    public void addKeyEvent(int key, Functional.Callback callback){
+        Array<Functional.Callback> list = this.keyEventMap.get(key);
+        if(list == null){
+            list = new Array<>();
+            this.keyEventMap.put(key, list);
+        }
+        list.add(callback);
+    }
+
     @Override
     public boolean keyDown(int keycode) {
+        Array<Functional.Callback> list = keyEventMap.get(keycode);
+        if(list != null)
+            list.forEach(callback -> callback.callback());
+
         if(keycode == Input.Keys.F1) //F1 - draw info
             this.drawingInfo = !this.drawingInfo;
         else if(keycode == Input.Keys.F2) //F2 - draw profiler

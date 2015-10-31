@@ -3,6 +3,7 @@ package com.mygdx.game.util;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.component.Component;
 import com.mygdx.game.entity.Entity;
@@ -99,10 +100,6 @@ public class GH {
         return ranges;
     }
 
-	public static class Message implements Serializable {
-        public String message;
-    }
-
     public static void fixBleeding(TextureRegion region) {
         float x = region.getRegionX();
         float y = region.getRegionY();
@@ -113,24 +110,12 @@ public class GH {
         region.setRegion((x + .5f) * invTexWidth, (y+.5f) * invTexHeight, (x + width - .5f) * invTexWidth, (y + height - .5f) * invTexHeight);
     }
 
-    public static String generateEventDescription(DataBuilder.JsonPlayerEvent event){
-        StringBuilder builder = new StringBuilder();
-        for(String desc : event.eventDescription) builder.append(desc);
-
-        String original = builder.toString();
-        original = original.replace("%et", event.eventTarget.name);
-        original = original.replace("%eot", event.eventTargetOther.name);
-
-        return original;
-    }
-
     /**
      * @return The fixed mouse screen coordinates (don't use this for world coordinates). Uses a reusable Vector2.
      */
     public static Vector2 getFixedScreenMouseCoords(){
         return tmp.set(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY());
     }
-
 
     public static float toMeters(float value){
         return value/Constants.SCALE;
@@ -161,6 +146,26 @@ public class GH {
         return component != null && component.getEntityOwner() != null && component.getEntityOwner().isValid();
     }
 
+    /**
+     * Gets a random range between two numbers.
+     * @param min THe minimum.
+     * @param max The maximum.
+     * @return A random range between (and including) the min and max.
+     */
+    public static int getRandRange(int min, int max){
+        return min + MathUtils.random(max - min);
+    }
 
+    public static boolean tryParseDouble(String value) {
+        try {
+            Double.parseDouble(value);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
 
+	public static class Message implements Serializable {
+        public String message;
+    }
 }

@@ -13,7 +13,6 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.mygdx.game.entity.Entity;
 import com.mygdx.game.interfaces.IDestroyable;
 import com.mygdx.game.util.managers.DataManager;
 import com.mygdx.game.util.managers.GameEventManager;
@@ -344,8 +343,8 @@ public class DataBuilder implements IDestroyable{
         });
 
         //Build player events
-        buildJson(Gdx.files.internal(path + filePath + eventsFilePath), JsonPlayerEvent[].class, value -> {
-            for (JsonPlayerEvent event : value){
+        buildJson(Gdx.files.internal(path + filePath + eventsFilePath), JsonGameEvent[].class, value -> {
+            for (JsonGameEvent event : value){
                 GameEventManager.addGameEvent(event);
             }
         });
@@ -867,12 +866,14 @@ public class DataBuilder implements IDestroyable{
     /**
      * Holds data from the events.json file.
      */
-    public static class JsonPlayerEvent{
-        public String eventName, eventDisplayName;
-        public String[] eventDescription, choices, behaviours, actionNames;
-        public boolean focusOnEvent, pauseGame;
-
-        //Not anything read in, but used for passing data.
-        public Entity eventTarget, eventTargetOther;
+    public static class JsonGameEvent {
+        public String eventName, eventDisplayName, type;
+        public String[] eventDescription, choices, actionNames, tooltips;
+        //Can be a list of behaviours that will be performed. The first index will match the number or choices.
+        //The second index will be however many behaviours that choice will have.
+        public String[][] behaviours, setFields;
+        public boolean focusOnEvent, pauseGame, singleInstanceAtATime;
+        public int[][] randRanges;
+        public int sides;
     }
 }

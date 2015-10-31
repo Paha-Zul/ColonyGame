@@ -1,7 +1,7 @@
 [
   {
     "type": "encounter",
-    "sides": 1,
+    "sides": 2,
     "eventName": "bossencounter",
     "eventDisplayName": "Boss Encounter!",
     "eventDescription": [
@@ -28,7 +28,7 @@
   },
   {
     "type": "neutral",
-    "sides": 2,
+    "sides": 1,
     "eventName": "crazylumberjacks",
     "eventDisplayName": "Crazy Lumberjacks!",
     "eventDescription": [
@@ -46,7 +46,8 @@
       ["attackTarget"],
       ["turnHostile"]
     ],
-    "randRanges": [[2,2], [0,0]],
+    "randRanges": [[5,10]],
+    "setFields": [["sleepThreshold", "-1"]],
     "focusOnEvent": true,
     "pauseGame": true
   }

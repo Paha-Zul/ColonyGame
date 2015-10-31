@@ -1,6 +1,7 @@
 package com.mygdx.game.screens;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
@@ -26,6 +27,7 @@ import com.mygdx.game.ui.PlayerInterface;
 import com.mygdx.game.ui.UI;
 import com.mygdx.game.util.*;
 import com.mygdx.game.util.managers.DataManager;
+import com.mygdx.game.util.managers.GameEventManager;
 import com.mygdx.game.util.managers.MessageEventSystem;
 import com.mygdx.game.util.managers.PlayerManager;
 import com.mygdx.game.util.worldgeneration.WorldGen;
@@ -57,6 +59,9 @@ public class GameScreen implements Screen{
         this.batch = ColonyGame.instance.batch;
         this.shapeRenderer = ColonyGame.instance.renderer;
         this.game = game;
+
+        PlayerInterface.getInstance().addKeyEvent(Input.Keys.E,
+                () -> PlayerInterface.getInstance().newPlayerEvent(GameEventManager.triggerGameEventByComponents("crazylumberjacks", ColonyGame.instance.playerManager.getPlayer("Player").colony.getOwnedListFromColony(Colonist.class))));
     }
 
     @Override
@@ -93,7 +98,7 @@ public class GameScreen implements Screen{
     }
 
     private void generateStart(Vector2 start){
-        int colonistSpawn = 1;
+        int colonistSpawn = 10;
 
         //Add our colony to an empty entity and create a player using the colony.
         Entity empty = new Entity(new Vector2(0,0), 0, 0);

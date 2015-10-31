@@ -419,8 +419,8 @@ public class Colonist extends Component implements IInteractable, IOwnable{
         //Subtract energy every so often...
         stats.addTimer(new RepeatingTimer(3f, () -> {
             energyStat.addToCurrent(-1);
-            //If under 20, sleep!
-            if (energyStat.getCurrVal() <= 20 && !getBehManager().getBehaviourStates().isCurrState("sleep")) {
+            //If under the threshold, sleep!
+            if (energyStat.getCurrVal() <= this.getBehManager().getBlackBoard().sleepThreshold && !this.getBehManager().getBehaviourStates().isCurrState("sleep")) {
                 getBehManager().changeTaskQueued("sleep");
             }
         })); //Subtract energy
@@ -469,8 +469,8 @@ public class Colonist extends Component implements IInteractable, IOwnable{
 
     @JsonIgnore
     public void setName(String firstName, String lastName) {
-        this.firstName = firstName;
-        this.lastName = lastName;
+        this.setFirstName(firstName);
+        this.setLastName(lastName);
         this.getEntityOwner().name = firstName;
     }
 
@@ -482,6 +482,7 @@ public class Colonist extends Component implements IInteractable, IOwnable{
     @JsonProperty("firstName")
     public void setFirstName(String firstName){
         this.firstName = firstName;
+        this.owner.name = this.firstName;
     }
 
     @JsonProperty("lastName")
