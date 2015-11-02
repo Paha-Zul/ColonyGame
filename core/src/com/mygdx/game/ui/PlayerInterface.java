@@ -435,7 +435,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         float newWidth = (currVal/maxVal)*(width-4);
         GUI.Texture(this.whiteTexture, batch, innerX, y + 2, newWidth, height - 4);
 
-        GUI.Label((int)currVal+"/"+(int)maxVal, batch, outerX, y, width, height);
+        GUI.Label((int) currVal + "/" + (int) maxVal, batch, outerX, y, width, height);
     }
 
     /**
@@ -466,6 +466,9 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         return this.selectedProfile;
     }
 
+    /**
+     * @return The UnitProfile that is actively displaying information on the UI.
+     */
     public UnitProfile getSelectedProfile(){
         return this.selectedProfile;
     }
@@ -478,10 +481,16 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
         this.selectedProfile = profile;
     }
 
+    /**
+     * @return A list of selected UnitProfiles which include the Entity and other information.
+     */
     public Array<UnitProfile> getSelectedProfileList(){
         return this.selectedProfileList;
     }
 
+    /**
+     * @return The WindowManager that controls windows.
+     */
     public WindowManager getWindowManager(){
         return this.windowManager;
     }
@@ -695,20 +704,51 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
             float spacing = (windowWidth - this.currentEvent.gameEventData.choices.length*buttonWidth)/(this.currentEvent.gameEventData.choices.length+1);
             this.blankStyle.wrap = true;
 
+            DataBuilder.JsonGameEvent data = this.currentEvent.gameEventData;
+
             //Here we display the choices as a button. When clicked, it will trigger some sort of behaviour or action.
-            for(int i=0;i<this.currentEvent.gameEventData.choices.length;i++){
-                String choice = this.currentEvent.gameEventData.choices[i]; //Cache the current choice.
-                String eventType = this.currentEvent.gameEventData.type;
-                int sides = this.currentEvent.gameEventData.sides;
-                if(GUI.Button(this.batch, choice, windowX + (i+1)*spacing + i*buttonWidth, windowY + windowHeight*0.01f, buttonWidth, buttonHeight, blankStyle) == GUI.JUSTUP){
+            for(int choiceIndex=0; choiceIndex < data.choices.length; choiceIndex++){
+                String choice = data.choices[choiceIndex]; //Cache the current choice.
+                String eventType = data.type;
+                String[][] beh = data.behaviours[choiceIndex]; //TODO Need to deal with multiple behaviours
+                int sides = data.sides;
+
+                if(GUI.Button(this.batch, choice, windowX + (choiceIndex+1)*spacing + choiceIndex*buttonWidth, windowY + windowHeight*0.01f, buttonWidth, buttonHeight, blankStyle) == GUI.JUSTUP){
                     //TODO This area has to be redone to handle different types of events. What if multiple people?
-//                    BehaviourManagerComp comp = this.currentEvent.eventTarget.getComponent(BehaviourManagerComp.class);
-//                    if(comp == null) return;
-//                    comp.getBlackBoard().target = this.currentEvent.eventTargetOther;
-//                    comp.changeTaskImmediate(this.currentEvent.gameEventData.behaviours[i][0], true);
+                    if(eventType.equals("neutral")){
 
-                    //TODO Need to deal with multiple teams
+                        //Set fields if applicable
+                        if(data.setFields != null) {
+                            //If there are fields to be set, set them for each applicable group.
+                            for (int groupIndex = 0; groupIndex < this.currentEvent.entityTargetTeams.size; groupIndex++) {
+                                final String[][] fieldData = data.setFields[choiceIndex][groupIndex];
+                                GameEventManager.setFields(fieldData, this.currentEvent.entityTargetTeams.get(groupIndex));
+                            }
+                        }
 
+                        //Set resource type tags if applicable
+                        if(data.setResourceTypeTags != null) {
+                            for (int groupIndex = 0; groupIndex < this.currentEvent.entityTargetTeams.size; groupIndex++){
+                                final String[] tags = data.setResourceTypeTags[choiceIndex][groupIndex]; //Get the tags for the particular team
+                                this.currentEvent.entityTargetTeams.get(groupIndex).forEach(ent -> {
+                                    BehaviourManagerComp comp = ent.getComponent(BehaviourManagerComp.class);
+                                    comp.getBlackBoard().resourceTypeTags.clearTags();
+                                    comp.getBlackBoard().resourceTypeTags.addTags(tags);
+                                });
+                            }
+                        }
+
+                        //Set the behaviours!
+                        for(int groupIndex=0;groupIndex<this.currentEvent.entityTargetTeams.size;groupIndex++) {
+                            final String behaviour = beh[groupIndex][0];
+                            for(Entity ent : this.currentEvent.entityTargetTeams.get(groupIndex)){
+                                ent.getComponent(BehaviourManagerComp.class).changeTaskImmediate(behaviour, true);
+                            }
+                            System.out.println();
+                        }
+                    }else if(eventType.equals("encounter")){
+
+                    }
 
                     this.gameSpeed = 1f; //Reset game speed
                     this.paused = false; //Unpause
@@ -740,8 +780,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     @Override
     public boolean keyDown(int keycode) {
         Array<Functional.Callback> list = keyEventMap.get(keycode);
-        if(list != null)
-            list.forEach(callback -> callback.callback());
+        if(list != null) list.forEach(callback -> callback.callback());
 
         if(keycode == Input.Keys.F1) //F1 - draw info
             this.drawingInfo = !this.drawingInfo;

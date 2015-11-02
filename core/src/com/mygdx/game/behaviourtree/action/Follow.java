@@ -16,11 +16,10 @@ import java.util.LinkedList;
  * Follows an Entity, recalculating the path when necessary. When far out, the path does not recalculate as often, but increases the closer the Entity gets to the Entity target.
  */
 public class Follow extends LeafTask{
+    private final float completeDst = GH.toMeters(1);
     private Transform transform;
     private LinkedList<Vector2> path;
     private Collider collider;
-
-    private final float completeDst = GH.toMeters(1);
 
     public Follow(String name, BlackBoard blackBoard) {
         super(name, blackBoard);
@@ -28,7 +27,7 @@ public class Follow extends LeafTask{
 
     @Override
     public boolean check() {
-        return super.check() && this.blackBoard.target.isValid() && this.blackBoard.target.getTags().hasTag("alive");
+        return super.check() && GH.isValid(this.blackBoard.target) && this.blackBoard.target.getTags().hasTag("alive");
     }
 
     @Override

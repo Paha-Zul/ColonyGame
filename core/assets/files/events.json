@@ -19,9 +19,15 @@
       "The colonist will run around randomly trying to lose the beasts in the surroundings. No negative or positive bonuses, and has about 50% chance of survival."
     ],
     "behaviours": [
-      ["defendPosition"],
-      ["returnToBase"],
-      ["fleeEnemies"]
+      [
+        ["defendPosition"]
+      ],
+      [
+        ["returnToBase"]
+      ],
+      [
+        ["fleeEnemies"]
+      ]
     ],
     "focusOnEvent": true,
     "pauseGame": true
@@ -32,7 +38,7 @@
     "eventName": "crazylumberjacks",
     "eventDisplayName": "Crazy Lumberjacks!",
     "eventDescription": [
-      "It looks like %lie have gone crazy! They want to chop every tree down in the area and won't take no for an answer! On the upside, I guess we'll have plenty of lumber.",
+      "It looks like %lie0 have gone crazy! They want to chop every tree down in the area and won't take no for an answer! On the upside, I guess we'll have plenty of lumber."
     ],
     "choices": [
       "Let them chop till they drop!",
@@ -43,11 +49,29 @@
       "Ordering them to stop has a 50% chance to make them go mad. This will cause them to attack anything around them, including your own colonists."
     ],
     "behaviours": [
-      ["attackTarget"],
-      ["turnHostile"]
+      [
+        ["gather"]
+      ],
+      [
+        ["turnHostile"]
+      ]
     ],
-    "randRanges": [[5,10]],
-    "setFields": [["sleepThreshold", "-1"]],
+    "randRanges": [[3,7]],
+    "setFields": [
+        [
+          [["sleepThreshold", "int", "-1"]]
+        ],
+        [
+        ]
+      ],
+    "setResourceTypeTags": [
+        [
+          ["wood"]
+        ],
+        [
+
+        ]
+      ],
     "focusOnEvent": true,
     "pauseGame": true
   }

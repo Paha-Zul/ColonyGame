@@ -189,7 +189,10 @@ public class BehaviourManagerComp extends Component{
         }
 
         //Gets the new task from the task map, resets it (in case its being reused), checks and start.
-        Task task = taskMap.get(taskName).apply(this.blackBoard, this);
+        BiFunction<BlackBoard, BehaviourManagerComp, Task> func = taskMap.get(taskName);
+        if(func == null) return;
+
+        Task task = func.apply(this.blackBoard, this);
         this.currentBehaviour = task;
         this.currentBehaviour.getControl().reset();
         if(!this.currentBehaviour.check()) this.currentBehaviour.getControl().finishWithFailure();

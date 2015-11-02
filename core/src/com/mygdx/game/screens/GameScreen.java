@@ -60,8 +60,10 @@ public class GameScreen implements Screen{
         this.shapeRenderer = ColonyGame.instance.renderer;
         this.game = game;
 
+        //Used for testing an event.
         PlayerInterface.getInstance().addKeyEvent(Input.Keys.E,
-                () -> PlayerInterface.getInstance().newPlayerEvent(GameEventManager.triggerGameEventByComponents("crazylumberjacks", ColonyGame.instance.playerManager.getPlayer("Player").colony.getOwnedListFromColony(Colonist.class))));
+                () -> PlayerInterface.getInstance().newPlayerEvent(GameEventManager.triggerGameEventByComponents("crazylumberjacks",
+                        ColonyGame.instance.playerManager.getPlayer("Player").colony.getOwnedListFromColony(Colonist.class))));
     }
 
     @Override

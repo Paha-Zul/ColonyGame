@@ -11,6 +11,8 @@ import com.mygdx.game.util.GH;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by Paha on 5/24/2015.
@@ -123,9 +125,14 @@ public class GameEventManager {
         int randTargetAmount;
 
         if(!event.triggered) {
-
+            //For each side, get some random Entities.
             for(int i=0;i<event.gameEventData.sides;i++){
-                Array<Component> list = componentList[i];
+                Array<Component> list;
+                //If we have more than one list, get the ith list.
+                if(componentList.length > 1) list = componentList[i];
+                else list = componentList[0]; //Otherwise, always get 0 cause we are using one list.
+
+                //If we have a range to random between, then get a random range! Otherwise, use 1.
                 if(event.gameEventData.randRanges.length > i)
                     randTargetAmount = GH.getRandRange(event.gameEventData.randRanges[i][0], event.gameEventData.randRanges[i][1]);
                 else randTargetAmount = 1;
@@ -147,6 +154,7 @@ public class GameEventManager {
      */
     private static <T extends Component> Array<Entity> getRandomEntriesByComponent(int amount, Array<T> list){
         Array<Entity> newList = new Array<>();
+        //TODO What happens if the list is empty?
 
         if(list.size <= amount){
             list.forEach(comp -> newList.add(comp.getEntityOwner()));
@@ -179,9 +187,6 @@ public class GameEventManager {
 
                 //We get some random Entities from a list and add them as a new list.
                 event.entityTargetTeams.add(getRandomEntries(randTargetAmount, singleList));
-                //We set the fields of each new Entity in the list if we have some to set.
-                if(event.gameEventData.setFields != null)
-                    event.entityTargetTeams.get(0).forEach(ent -> setFields(event.gameEventData.setFields, ent.getComponent(BehaviourManagerComp.class).getBlackBoard()));
             }
 
             event.triggered = true;
@@ -190,10 +195,43 @@ public class GameEventManager {
         return event;
     }
 
-    private static void setFields(String[][] variables, BlackBoard blackBoard){
-        for (String[] variable : variables) {
-            String name = variable[0];
-            String value = variable[1];
+    /**
+     * Sets the field data for a particular group.
+     * @param fieldDataList The list of fields and data to set for a particular group.
+     * @param group The group that the fields will be applying to.
+     */
+    public static void setFields(String[][] fieldDataList, Array<Entity> group){
+        //For each Entity in the group, get it's blackboard and apply the variable
+        group.forEach(ent -> {
+            BlackBoard blackBoard = ent.getComponent(BehaviourManagerComp.class).getBlackBoard();
+            //The second dimension is the variable combo, third dimension contains the name and value of the variable.
+            for (String[] fieldData : fieldDataList) {
+                String name = fieldData[0];
+                String type = fieldData[1];
+                String value = fieldData[2];
+
+                try {
+                    Field field = blackBoard.getClass().getDeclaredField(name);//Get the field.
+                    //If we are not setting a string, it must be a number.
+                    if (!type.equals("String")) {
+                        if(type.equals("int")) field.set(blackBoard, Integer.parseInt(value));
+                        if(type.equals("double")) field.set(blackBoard, Double.parseDouble(value));
+                    }
+                    //If we failed the double parse, set it as a string.
+                    else field.set(blackBoard, value);
+
+                } catch (NoSuchFieldException | IllegalAccessException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    public static void setFields(String[][] variableData, BlackBoard blackBoard){
+        //The second dimension is the variable combo, third dimension contains the name and value of the variable.
+        for (String[] variable : variableData) {
+            String name = variable[0]; //Name of the field.
+            String value = variable[1]; //Value of the field.
 
             try {
                 Field field = blackBoard.getClass().getDeclaredField(name);//Get the field.
@@ -201,7 +239,7 @@ public class GameEventManager {
                 //This basically tests if its a number first.
                 if (GH.tryParseDouble(value)) field.set(blackBoard, Double.parseDouble(value));
 
-                //If we failed the double parse, set it as a string.
+                    //If we failed the double parse, set it as a string.
                 else field.set(blackBoard, value);
 
             } catch (NoSuchFieldException | IllegalAccessException e) {
@@ -209,6 +247,7 @@ public class GameEventManager {
             }
         }
     }
+
 
     /**
      * Gets a GameEvent from this manager.
@@ -240,8 +279,19 @@ public class GameEventManager {
         for (String token : tokens) {
             if(token.equals("%et")) token = event.entityTargetTeams.get(0).get(0).name;
             else if(token.equals("%eot")) token = event.entityTargetTeams.get(1).get(0).name;
-            else if(token.equals("%lie")) token = buildListOfNames(event.entityTargetTeams.get(0));
-            else if(token.equals("%lio")) token = buildListOfNames(event.entityTargetTeams.get(1));
+            else if(token.matches("%lie\\d")) {
+                // the pattern we want to search for
+                Pattern p = Pattern.compile("\\d+");
+                Matcher m = p.matcher(token);
+
+                // if we find a match, get the group
+                if (m.find()){
+                    // we're only looking for one group, so get it
+                    String num = m.group(0);
+                    token = buildListOfNames(event.entityTargetTeams.get(Integer.parseInt(num)));
+                }else
+                    token = buildListOfNames(event.entityTargetTeams.get(0));
+            }
 
             builder.append(token).append(" ");
         }
@@ -259,7 +309,8 @@ public class GameEventManager {
 
         StringBuilder listOfTargets = new StringBuilder("");
         int length = list.size;
-        //If multiple in either side...
+
+        //If we have more than 2...
         if(list.size > 2) {
             for (int i = 0; i < length; i++) {
                 Entity target = list.get(i);
@@ -267,9 +318,12 @@ public class GameEventManager {
                 if (i < length - 1) listOfTargets.append(", ");
                 if (i == length - 2) listOfTargets.append("and ");
             }
-            listOfTargets.append(" ");
+
+        //If we have exactly 2...
         }else if(list.size == 2){
            listOfTargets.append(list.get(0).name).append(" and ").append(list.get(1).name);
+
+        //Otherwise we have 1...
         }else{
             listOfTargets.append(list.get(0).name);
         }
