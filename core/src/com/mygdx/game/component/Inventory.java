@@ -53,6 +53,7 @@ public class Inventory extends Component implements IOwnable {
     public void added(Entity owner) {
         super.added(owner);
 
+        this.inventory = new HashMap<>(20);
         Building building = this.getComponent(Building.class);
         if (building != null) this.colony = building.getOwningColony();
     }

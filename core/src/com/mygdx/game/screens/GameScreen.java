@@ -207,7 +207,7 @@ public class GameScreen implements Screen{
     private void spawnAnimals(){
         int wolfPackSpawns = 0;
         int squirrelSpawn = 0;
-        boolean spawnBossWolf = false;
+        boolean spawnBossWolf = true;
 
         String atlasName = "interactables";
 

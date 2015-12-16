@@ -867,11 +867,13 @@ public class DataBuilder implements IDestroyable{
      * Holds data from the events.json file.
      */
     public static class JsonGameEvent {
-        public String eventName, eventDisplayName, type;
+        public String eventName, eventDisplayName, type, eventTarget;
         public String[] eventDescription, choices, actionNames, tooltips;
+
         //Can be a list of behaviours that will be performed. The first index will match the number or choices.
         //The second index will be however many behaviours that choice will have.
         public String[][][] setResourceTypeTags, behaviours;
+
         //First index is for the choice, second index is for the group/team, third index is the list of field data, the fourth index is for name/value.
         public String[][][][] setFields;
         public boolean focusOnEvent, pauseGame, singleInstanceAtATime;

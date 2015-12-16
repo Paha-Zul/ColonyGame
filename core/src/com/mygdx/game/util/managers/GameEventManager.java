@@ -20,13 +20,16 @@ import java.util.regex.Pattern;
  */
 public class GameEventManager {
     private static HashMap<String, GameEvent> eventMap = new HashMap<>(10);
+    private static HashMap<String, GameEvent> eventTargetToEventMap = new HashMap<>();
 
     /**
      * Adds a GameEvent to this manager.
      * @param gameEvent The GameEvent to add.
      */
     public static void addGameEvent(DataBuilder.JsonGameEvent gameEvent){
-        eventMap.put(gameEvent.eventName, new GameEvent(gameEvent));
+        GameEvent newGameEvent = new GameEvent(gameEvent);
+        eventMap.put(gameEvent.eventName, newGameEvent);
+        if(gameEvent.eventTarget != null) eventTargetToEventMap.put(gameEvent.eventTarget, newGameEvent);
     }
 
     /**

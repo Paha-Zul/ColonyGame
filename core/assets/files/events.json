@@ -29,6 +29,7 @@
         ["fleeEnemies"]
       ]
     ],
+    "eventTarget": "Big Bad Wolf",
     "focusOnEvent": true,
     "pauseGame": true
   },

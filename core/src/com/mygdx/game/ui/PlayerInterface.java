@@ -780,7 +780,7 @@ public class PlayerInterface extends UI implements IGUI, InputProcessor {
     @Override
     public boolean keyDown(int keycode) {
         Array<Functional.Callback> list = keyEventMap.get(keycode);
-        if(list != null) list.forEach(callback -> callback.callback());
+        if(list != null) list.forEach(Functional.Callback::callback);
 
         if(keycode == Input.Keys.F1) //F1 - draw info
             this.drawingInfo = !this.drawingInfo;
